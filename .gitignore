@@ -2,6 +2,7 @@ node_modules
 .eslintcache
 .DS_STORE
 .DS_Store
+mprocs.log
 
 # Local Netlify folder
 .netlify
@@ -14,4 +15,3 @@ node_modules
 *.db-journal
 
 .env
-

@@ -9,7 +9,7 @@ pragma solidity >=0.8.24;
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IBrainSystem {
-  function ratlab__createBrain(
+  function ratroom__createBrain(
     uint32 traitA,
     uint32 traitB,
     uint32 traitC,

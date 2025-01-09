@@ -24,8 +24,8 @@ struct BrainData {
 }
 
 library Brain {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "ratlab", name: "Brain", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74627261746c61620000000000000000427261696e0000000000000000000000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "ratroom", name: "Brain", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462726174726f6f6d00000000000000427261696e0000000000000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0010040004040404000000000000000000000000000000000000000000000000);
