@@ -6,5 +6,8 @@ pragma solidity >=0.8.24;
 enum ENTITY_TYPE {
   NONE,
   PLAYER,
-  BRAIN
+  RAT,
+  ROOM,
+  ITEM,
+  TRAIT
 }

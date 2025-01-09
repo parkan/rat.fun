@@ -1,6 +1,10 @@
 enum ENTITY_TYPE {
   NONE,
-  PLAYER
+  PLAYER,
+  RAT,
+  ROOM,
+  ITEM,
+  TRAIT
 }
 
 function getEnumNames<T extends object>(enumObj: T): string[] {

@@ -1,0 +1,14 @@
+// @todo: import enums from external file
+// import { ENTITY_TYPE_ARRAY } from "./enums";
+// const enums = {
+//   ENTITY_TYPE: ENTITY_TYPE_ARRAY
+// }    
+    
+    // Event: {
+    //   key: ["playerId"],
+    //   type: "offchainTable",
+    //   schema: {
+    //     playerId: "bytes32",
+    //     blockNumber: "uint256"
+    //   },
+    // },

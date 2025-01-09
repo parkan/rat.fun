@@ -3,11 +3,11 @@ import { addToSequencer } from "./actionSequencer"
 const NAMESPACE = "ratroom__"
 
 export enum WorldFunctions {
-  CreateBrain = NAMESPACE + "createBrain"
+  Spawn = NAMESPACE + "spawn"
 }
 
 // --- API --------------------------------------------------------------
 
-export function createBrain(traitA: number, traitB: number, traitC: number, traitD: number) {
-  return addToSequencer(WorldFunctions.CreateBrain, [traitA, traitB, traitC, traitD])
+export function spawn() {
+  return addToSequencer(WorldFunctions.Spawn, [])
 }

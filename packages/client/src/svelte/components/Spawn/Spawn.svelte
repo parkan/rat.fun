@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { createBrain } from "@svelte/modules/action"
+  import { createEventDispatcher, onMount } from "svelte"
+  import { spawn } from "@svelte/modules/action"
   import { waitForCompletion } from "@svelte/modules/action/actionSequencer/utils"
   import { playSound } from "@svelte/modules/sound"
-  import { energyAllocation, remainingEnergy } from "./stores"
   import { player } from "@svelte/modules/state/base/stores"
-  import { createEventDispatcher, onMount } from "svelte"
   import { ENTITY_TYPE } from "contracts/enums"
-  import Slider from "./Slider.svelte"
-  import Spinner from "../Spinner/Spinner.svelte"
+
+  import Spinner from "@components/Spinner/Spinner.svelte"
 
   const dispatch = createEventDispatcher()
 
@@ -17,15 +16,10 @@
 
   let busy = false
 
-  async function sendCreateBrain() {
+  async function sendSpawn() {
     playSound("tcm", "blink")
     busy = true
-    const action = createBrain(
-      $energyAllocation[0],
-      $energyAllocation[1],
-      $energyAllocation[2],
-      $energyAllocation[3]
-    )
+    const action = spawn()
     try {
       await waitForCompletion(action)
       done()
@@ -44,17 +38,8 @@
 </script>
 
 <div class="main">
-  <div class="energy-budget" class:available={$remainingEnergy > 0}>
-    FREE ENERGY: {$remainingEnergy}
-  </div>
-  <div class="slider-container">
-    <Slider index={0} />
-    <Slider index={1} />
-    <Slider index={2} />
-    <Slider index={3} />
-  </div>
   <div>
-    <button disabled={busy} on:click={sendCreateBrain}>CREATE BRAIN</button>
+    <button disabled={busy} on:click={sendSpawn}>Adopt rat</button>
   </div>
   {#if busy}
     <Spinner />
@@ -68,16 +53,6 @@
     background: rgb(88, 88, 88);
     color: white;
     width: 100%;
-  }
-
-  .energy-budget {
-    font-size: 48px;
-    margin-bottom: 20px;
-    background: red;
-
-    &.available {
-      background: green;
-    }
   }
 
   button {

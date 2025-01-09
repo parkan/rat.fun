@@ -55,30 +55,41 @@ export const players = derived(entities, $entities => {
   return players
 })
 
+export const rats = derived(entities, $entities => {
+  const rats = {} as Rats
+  Object.entries($entities).forEach(([key, value]) => {
+    console.log('value.entityType', value.entityType)
+    if (value.entityType === ENTITY_TYPE.RAT) {
+      rats[key] = value as Rat
+    }
+  })
+  return rats
+})
+
 // export const gameConfig = derived(entities, $entities => {
 //   return ($entities[GAME_CONFIG_ID] || {}) as GameConfig
 // })
 
-export const playerTransform = writable(false as FalseOrTransform)
+// export const playerTransform = writable(false as FalseOrTransform)
 
-export const playerRemainingCooldown = derived(
-  [player, blockNumber],
-  ([$player, $blockNumber]) => {
-    if (!$player) return 0
-    return Math.max(
-      0,
-      (Number($player.cooldown) ?? 0) + COOLDOWN_PERIOD - Number($blockNumber)
-    )
-  }
-)
+// export const playerRemainingCooldown = derived(
+//   [player, blockNumber],
+//   ([$player, $blockNumber]) => {
+//     if (!$player) return 0
+//     return Math.max(
+//       0,
+//       (Number($player.cooldown) ?? 0) + COOLDOWN_PERIOD - Number($blockNumber)
+//     )
+//   }
+// )
 
-export const actionAllowed = derived(
-  [player, blockNumber],
-  ([$player, $blockNumber]) => {
-    if (!$player) return false
-    return Number($player.cooldown) <= Number($blockNumber)
-  }
-)
+// export const actionAllowed = derived(
+//   [player, blockNumber],
+//   ([$player, $blockNumber]) => {
+//     if (!$player) return false
+//     return Number($player.cooldown) <= Number($blockNumber)
+//   }
+// )
 
-export const feeding = writable(false)
-export const shocking = writable(false)
+// export const feeding = writable(false)
+// export const shocking = writable(false)

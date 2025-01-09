@@ -5,11 +5,15 @@
   import { UIState } from "@svelte/modules/ui/stores"
   import { UI } from "@modules/ui/enums"
 
+  import { rats } from "@modules/state/base/stores"
+
   import Loading from "@components/Loading/Loading.svelte"
   import Spawn from "./components/Spawn/Spawn.svelte"
   import Nest from "@svelte/components/Nest/Nest.svelte"
 
   export let environment: ENVIRONMENT
+
+  $: console.log("$rats", $rats)
 
   const loadedEnvironment = () => {
     UIState.set(UI.SPAWNING)

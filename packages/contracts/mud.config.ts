@@ -1,41 +1,22 @@
 import { defineWorld } from "@latticexyz/world";
 
-// @todo: import enums from external file
-// import { ENTITY_TYPE_ARRAY } from "./enums";
-// const enums = {
-//   ENTITY_TYPE: ENTITY_TYPE_ARRAY
-// }
-
 export default defineWorld({
   namespace: "ratroom",
   enums: {
-    ENTITY_TYPE: ["NONE", "PLAYER", "BRAIN"],
+    ENTITY_TYPE: ["NONE", "PLAYER", "RAT", "ROOM", "ITEM", "TRAIT", ],
   },
   deploy: {
     upgradeableWorldImplementation: true,
   },
   tables: {
-    // Name: "string",
+    Name: "string",
     EntityType: "ENTITY_TYPE",
-    Brain: {
-      key: ["playerId"],
-      schema: {
-        playerId: "bytes32",
-        traitA: "uint32",
-        traitB: "uint32",
-        traitC: "uint32",
-        traitD: "uint32",
-      },
-    },
-    Counter: "uint32"
-    // Event: {
-    //   key: ["playerId"],
-    //   type: "offchainTable",
-    //   schema: {
-    //     playerId: "bytes32",
-    //     blockNumber: "uint256"
-    //   },
-    // },
+    Currency: "uint256",
+    Health: "uint256",
+    Energy: "uint256",
+    Trait: "string",
+    OwnedRat: "bytes32",
+    Owner: "bytes32",
   },
   modules: [
     {

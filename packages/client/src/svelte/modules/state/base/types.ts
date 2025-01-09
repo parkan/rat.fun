@@ -14,20 +14,28 @@ declare global {
     [key: string]: any,
     entityType?: ENTITY_TYPE,
     name?: string,
+    currency?: number,
+    energy?: number,
     health?: number,
-    mass?: number,
-    cooldown?: number,
-    event?: GameEvent
+    trait?: string,
+    ownedRat?: Hex,
+    owner?: Hex,
   }
 
   type Player  = {
     [key: string]: any,
     entityType: ENTITY_TYPE.PLAYER,
-    name?: string,
-    health?: number,
-    mass?: number,
-    cooldown?: number,
-    event?: GameEvent
+    currency: number,
+    ownedRat: Hex,
+  }
+
+  type Rat  = {
+    [key: string]: any,
+    entityType: ENTITY_TYPE.RAT,
+    owner: Hex,
+    health: number,
+    energy: number,
+    trait: string
   }
 
   // * * * * * * * * * * * * * * * * *
@@ -40,5 +48,9 @@ declare global {
 
   type Players = {
     [index: string]: Player
+  }
+
+  type Rats = {
+    [index: string]: Rat
   }
 }

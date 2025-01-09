@@ -1,13 +1,11 @@
 <script lang="ts">
-  import { player } from "@svelte/modules/state/base/stores"
-  import { TRAIT_LABELS } from "../Spawn/stores"
+  import { player, playerId, rats } from "@svelte/modules/state/base/stores"
   import {
     BASE_REALITY_PROMPT,
     BASE_STYLE_GUIDELINES,
     BASE_ROOM_PROMPT,
   } from "./constants"
   import { parseJSONFromContent } from "@modules/utils"
-  import Spinner from "../Spinner/Spinner.svelte"
 
   let busy = false
   let outcome: any
@@ -71,61 +69,23 @@
   }
 </script>
 
-{#if !inRoom && $player?.brain}
-  <!-- STATS -->
-  <div class="nest">
-    <div class="avatar">
-      <img src="/images/rat.jpg" alt="rat" />
-    </div>
-    <div class="brain-stats">
-      <div class="header">THE RAT</div>
-      <div class="trait">
-        <strong>{TRAIT_LABELS[0]}</strong> (intelligence and weakness):
-        <strong>{$player.brain.traitA}</strong>
-      </div>
-      <div class="trait">
-        <strong>{TRAIT_LABELS[1]}</strong> (aggression and idiot-rage):
-        <strong>{$player.brain.traitB}</strong>
-      </div>
-      <div class="trait">
-        <strong>{TRAIT_LABELS[2]}</strong> (fearlessness and carelessness):
-        <strong>{$player.brain.traitC}</strong>
-      </div>
-      <div class="trait">
-        <strong>{TRAIT_LABELS[3]}</strong> (psychic abilities / paranoia):
-        <strong>{$player.brain.traitD}</strong>
-      </div>
-    </div>
+<div class="nest">
+  <div>
+    <strong>PLAYER</strong>
+    <br />id: {$playerId}
+    <br />Currency:{$player.currency}
   </div>
-  <!-- ROOM LIST -->
-  <div class="room-list">
-    <div class="room-item">
-      <button on:click={submit} disabled={busy}>ROOM 1</button>
-      <div class="room-info">
-        <textarea bind:value={roomPrompt}></textarea>
-      </div>
-    </div>
+  <img src="/images/rat.jpg" alt="nest" />
+  <div>
+    <strong>RAT</strong>
+    <br />id: {$player.ownedRat}
+    <br />Trait: {$rats[$player.ownedRat].trait}
+    <br />Health: {$rats[$player.ownedRat].health}
+    <br />Energy: {$rats[$player.ownedRat].energy}
   </div>
-{/if}
+</div>
 
-{#if inRoom}
-  <div class="room">
-    <h1>ROOM 1</h1>
-    <div class="room-info">{roomPrompt}</div>
-    {#if narrative}
-      <div class="narrative">
-        <pre>{narrative}</pre>
-        <div class="outcome">{outcome.isAlive ? "RAT LIVES" : "RAT DIES"}</div>
-      </div>
-      <button on:click={() => (inRoom = false)}>Return to nest</button>
-    {:else}
-      <div class="loader">RAT ENTERING ROOM 1...</div>
-      <Spinner />
-    {/if}
-  </div>
-{/if}
-
-<style>
+<style lang="scss">
   .nest {
     text-align: center;
     padding: 10px;
@@ -133,6 +93,11 @@
     color: white;
     width: 100%;
     font-family: "courier new", monospace;
+
+    img {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
   }
 
   .room {
