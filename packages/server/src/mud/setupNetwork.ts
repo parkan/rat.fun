@@ -50,8 +50,8 @@ export type SetupNetworkReturnType = {
   write$: Observable<ContractWrite>;
 };
 
-export async function setupNetwork(): Promise<SetupNetworkReturnType> {
-  const networkConfig = await getNetworkConfig();
+export async function setupNetwork(privateKey: string): Promise<SetupNetworkReturnType> {
+  const networkConfig = await getNetworkConfig(privateKey);
 
   /*
    * Create a viem public (read only) client

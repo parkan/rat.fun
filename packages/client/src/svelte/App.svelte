@@ -59,7 +59,7 @@
   {/if}
 
   {#if $UIState === UI.READY}
-    <Nest />
+    <Nest {environment} />
   {/if}
 </div>
 

@@ -12,6 +12,7 @@ import { setup } from "./mud/setup";
 dotenv.config();
 
 const PRIVATE_API_KEY = process.env.PRIVATE_ANTHROPIC_API_KEY as string;
+const PRIVATE_ETH_KEY = process.env.PRIVATE_ETH_KEY as string;
 
 const app = express();
 const port = 3131;
@@ -25,7 +26,7 @@ const {
     components,
     systemCalls: { reward, punish },
     network,
-  } = await setup();
+  } = await setup(PRIVATE_ETH_KEY);
 
 // Route to handle OpenAI API requests
 app.post('/api/generate', async (req, res) => {

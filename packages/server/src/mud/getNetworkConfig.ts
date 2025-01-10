@@ -22,7 +22,7 @@ import worlds from "contracts/worlds.json";
 
 import { supportedChains } from "./supportedChains";
 
-export async function getNetworkConfig() {
+export async function getNetworkConfig(privateKey: string) {
   /*
    * The chain ID is the first item available from this list:
    * 1. chainId query parameter
@@ -62,8 +62,9 @@ export async function getNetworkConfig() {
    */
   const initialBlockNumber = world?.blockNumber ?? 0n;
 
+  // Garnet: 0x6b3875c240bcde26fc32b1d23d746a42901956a2ddf11da050593ad6725b18ec
   return {
-    privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    privateKey,
     chainId,
     chain,
     worldAddress,

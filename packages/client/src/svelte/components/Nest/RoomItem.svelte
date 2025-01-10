@@ -2,11 +2,13 @@
   import { player } from "@modules/state/base/stores"
   import { walletNetwork } from "@modules/network"
   import { MESSAGE } from "./constants"
+  import { ENVIRONMENT } from "@mud/enums"
 
   import RoomComponent from "./Room.svelte"
 
   export let room: Room
   export let roomId: string
+  export let environment: ENVIRONMENT
 
   let busy = false
   let outcome: any
@@ -16,8 +18,11 @@
     inRoom = true
     busy = true
     outcome = {}
-    const url = "http://localhost:3131/api/generate"
-    // const url = "https://reality-model-1.mc-infra.com/api/generate"
+    let url = "http://localhost:3131/api/generate"
+
+    if ([ENVIRONMENT.GARNET].includes(environment)) {
+      url = "https://reality-model-1.mc-infra.com/api/generate"
+    }
 
     const signature = await $walletNetwork.walletClient.signMessage({
       message: MESSAGE,
