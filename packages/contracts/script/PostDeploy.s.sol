@@ -15,6 +15,8 @@ import { PuppetModule } from "@latticexyz/world-modules/src/modules/puppet/Puppe
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 
+import { LibRoom, LibInit } from "../src/libraries/Libraries.sol";
+
 contract PostDeploy is Script {
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
@@ -30,25 +32,19 @@ contract PostDeploy is Script {
     // world.installRootModule(new StandardDelegationsModule(), new bytes(0));
     // world.installModule(new PuppetModule(), new bytes(0));
 
-    // // Register public materials
-    // PublicMaterials.init();
+    // If a rat does not make a choice within 10 minutes it is killed and the body removed.
 
-    // // Initialize gameConfig and tutorial levels
-    // // Root namespace owner is admin
-    // LibInit.init(NamespaceOwner.get(ROOT_NAMESPACE_ID));
+    // Initialize gameConfig and tutorial levels
+    // Root namespace owner is admin
+    LibInit.init(NamespaceOwner.get(ROOT_NAMESPACE_ID));
 
-    // // Initialize recipes
-    // LibInitRecipes.init();
-
-    // // Create offer
-    // LibOffer.create(PublicMaterials.BUGS, 100 * ONE_UNIT, 100 * ONE_UNIT); // 100 $BUGS => 100 Bug in depot
-
-    // // Local deployer
-    // address deployerAddress = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-
-    // LibOrder.create(deployerAddress, PublicMaterials.PISS, 50 * ONE_UNIT, false, 0, 120 * ONE_UNIT, 0, 1);
-    // LibOrder.create(deployerAddress, PublicMaterials.BLOOD, 50 * ONE_UNIT, false, 0, 120 * ONE_UNIT, ONE_DAY, 0);
-    // LibOrder.create(deployerAddress, PublicMaterials.BLOOD, 50 * ONE_UNIT, false, 0, 120 * ONE_UNIT, ONE_DAY, 0);
+    // Create test rooms
+    LibRoom.createRoom(
+      "The room has two doors. One doors lead to victory, the other to defeat. Each door has a guardian mouse that needs to be defeated to pass."
+    );
+    LibRoom.createRoom(
+      "The room has one door. There is a puzzle on the floor. If a rat can solve the puzzle the door will open leading to victory."
+    );
 
     vm.stopBroadcast();
   }

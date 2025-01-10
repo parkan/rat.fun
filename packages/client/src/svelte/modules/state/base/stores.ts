@@ -58,12 +58,21 @@ export const players = derived(entities, $entities => {
 export const rats = derived(entities, $entities => {
   const rats = {} as Rats
   Object.entries($entities).forEach(([key, value]) => {
-    console.log('value.entityType', value.entityType)
     if (value.entityType === ENTITY_TYPE.RAT) {
       rats[key] = value as Rat
     }
   })
   return rats
+})
+
+export const rooms = derived(entities, $entities => {
+  const rooms = {} as Rooms
+  Object.entries($entities).forEach(([key, value]) => {
+    if (value.entityType === ENTITY_TYPE.ROOM) {
+      rooms[key] = value as Room
+    }
+  })
+  return rooms
 })
 
 // export const gameConfig = derived(entities, $entities => {

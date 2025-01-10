@@ -9,6 +9,16 @@ export default defineWorld({
     upgradeableWorldImplementation: true,
   },
   tables: {
+    GameConfig: {
+      key: [],
+      schema: {
+        adminAddress: "address",
+        globalRoomIndex: "uint32", 
+      },
+      codegen: {
+        dataStruct: true
+      }
+    },
     Name: "string",
     EntityType: "ENTITY_TYPE",
     Currency: "uint256",
@@ -17,6 +27,8 @@ export default defineWorld({
     Trait: "string",
     OwnedRat: "bytes32",
     Owner: "bytes32",
+    RoomPrompt: "string",
+    RoomIndex: "uint256"
   },
   modules: [
     {

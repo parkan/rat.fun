@@ -20,6 +20,8 @@ declare global {
     trait?: string,
     ownedRat?: Hex,
     owner?: Hex,
+    roomPrompt?: string,
+    roomIndex?: number,
   }
 
   type Player  = {
@@ -38,6 +40,13 @@ declare global {
     trait: string
   }
 
+  type Room = {
+    [key: string]: any,
+    entityType: ENTITY_TYPE.ROOM,
+    roomIndex: number,
+    roomPrompt: string
+  }
+
   // * * * * * * * * * * * * * * * * *
   // GAME PLAY ENTITY TYPES
   // * * * * * * * * * * * * * * * * *
@@ -52,5 +61,9 @@ declare global {
 
   type Rats = {
     [index: string]: Rat
+  }
+
+  type Rooms = {
+    [index: string]: Room
   }
 }

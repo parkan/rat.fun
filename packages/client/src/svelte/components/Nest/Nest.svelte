@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { player, playerId, rats } from "@svelte/modules/state/base/stores"
+  import {
+    player,
+    playerId,
+    rats,
+    rooms,
+  } from "@svelte/modules/state/base/stores"
   import {
     BASE_REALITY_PROMPT,
     BASE_STYLE_GUIDELINES,
@@ -83,6 +88,18 @@
     <br />Health: {$rats[$player.ownedRat].health}
     <br />Energy: {$rats[$player.ownedRat].energy}
   </div>
+
+  <!-- ROOM LIST -->
+  <div class="room-list">
+    {#each Object.values($rooms) as room}
+      <div class="room-item">
+        <button on:click={submit} disabled={busy}>ROOM {room.roomIndex}</button>
+        <div class="room-info">
+          {room.roomPrompt}
+        </div>
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
@@ -143,7 +160,7 @@
     background: rgb(211, 255, 79);
     color: black;
     margin-top: 20px;
-    font-size: 12px;
+    font-size: 16px;
   }
 
   .narrative {
