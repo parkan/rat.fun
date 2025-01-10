@@ -11,15 +11,15 @@
 
 <div class="nest">
   <div class="column first">
-    <div>
+    <div class="stats">
       <strong>PLAYER</strong>
-      <br />id: {$playerId}
+      <!-- <br />id: {$playerId} -->
       <br />Currency:{$player.currency}
     </div>
     <img src="/images/rat.jpg" alt="nest" />
-    <div>
+    <div class="stats">
       <strong>RAT</strong>
-      <br />id: {$player.ownedRat}
+      <!-- <br />id: {$player.ownedRat} -->
       <br />Trait: {$rats[$player.ownedRat].trait}
       <br />Health: {$rats[$player.ownedRat].health}
       <br />Energy: {$rats[$player.ownedRat].energy}
@@ -37,6 +37,18 @@
 </div>
 
 <style lang="scss">
+  strong {
+    font-size: 32px;
+  }
+
+  .stats {
+    margin-bottom: 20px;
+  }
+
+  img {
+    margin-bottom: 20px;
+  }
+
   .column {
     width: 50%;
     height: 100vh;
@@ -51,34 +63,5 @@
     &.second {
       background: red;
     }
-  }
-
-  .room {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgb(60, 60, 60);
-    padding: 20px;
-  }
-
-  button {
-    padding: 40px;
-    font-size: 32px;
-    margin-top: 20px;
-    cursor: pointer;
-  }
-
-  .outcome {
-    font-weight: bold;
-    background: black;
-    color: white;
-    margin-top: 20px;
-  }
-
-  .loader {
-    margin-top: 20px;
-    margin-bottom: 20px;
   }
 </style>

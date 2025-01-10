@@ -1,21 +1,20 @@
 <script lang="ts">
-  import { parseJSONFromContent } from "@modules/utils"
   import { player } from "@modules/state/base/stores"
   import { walletNetwork } from "@modules/network"
   import { MESSAGE } from "./constants"
+
+  import RoomComponent from "./Room.svelte"
 
   export let room: Room
   export let roomId: string
 
   let busy = false
   let outcome: any
-  let narrative = ""
   let inRoom = false
 
   const submit = async () => {
     inRoom = true
     busy = true
-    narrative = ""
     outcome = {}
     const url = "http://localhost:3131/api/generate"
     // const url = "https://reality-model-1.mc-infra.com/api/generate"
@@ -42,20 +41,21 @@
         throw new Error("Network response was not ok")
       }
 
-      const res = await response.json()
-      console.log("res", res)
-      // const data = JSON.parse(res.data)
-      // console.log(data[0])
-      outcome = parseJSONFromContent(res.message.text)
+      outcome = await response.json()
       console.log(outcome)
-      narrative = outcome.narrative
 
       busy = false
     } catch (err) {
-      // console.error(err)
-      outcome = "An error occurred. Please try again."
+      console.log(err)
+      window.alert("An error occurred. Please try again.")
       busy = false
+      inRoom = false
     }
+  }
+
+  const close = () => {
+    inRoom = false
+    busy = false
   }
 </script>
 
@@ -66,13 +66,17 @@
   </div>
 </div>
 
+{#if inRoom}
+  <RoomComponent {outcome} {room} on:close={close} />
+{/if}
+
 <style lang="scss">
   .room-item {
     display: flex;
     width: 100%;
 
     button {
-      width: 50%;
+      width: 200px;
       padding: 40px;
       font-size: 32px;
       margin-top: 20px;

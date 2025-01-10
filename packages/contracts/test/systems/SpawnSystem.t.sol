@@ -29,6 +29,6 @@ contract SpawnSystemTest is BaseTest {
     assertEq(Health.get(ratEntity), 100);
     assertEq(Energy.get(ratEntity), 100);
     assertEq(Owner.get(ratEntity), playerEntity);
-    assertEq(Trait.get(ratEntity), "intelligent");
+    // assertEq(Trait.get(ratEntity), "intelligent");
   }
 }

@@ -45,6 +45,9 @@ contract PostDeploy is Script {
     LibRoom.createRoom(
       "The room has one door. There is a puzzle on the floor. If a rat can solve the puzzle the door will open leading to victory."
     );
+    LibRoom.createRoom(
+      "The room has no doors. The room is radioactive. There is no escape."
+    );
 
     vm.stopBroadcast();
   }

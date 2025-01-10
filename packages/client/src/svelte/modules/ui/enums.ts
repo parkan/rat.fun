@@ -6,9 +6,7 @@ export enum UI {
 }
 
 export enum LOCATION {
-  TOWN,
-  DUNGEON,
-  WAITING,
-  ROLLING,
-  RESULT
+  NONE,
+  NEST,
+  ROOM
 }
