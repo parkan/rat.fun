@@ -5,6 +5,7 @@
   import { UIState } from "@svelte/modules/ui/stores"
   import { UI } from "@modules/ui/enums"
 
+  import { walletNetwork, publicNetwork } from "./modules/network"
   import { rats, rooms } from "@modules/state/base/stores"
 
   import Loading from "@components/Loading/Loading.svelte"
@@ -44,21 +45,23 @@
 
 <svelte:window />
 
-<main>
-  <div class="context-main">
-    {#if $UIState === UI.LOADING}
+<div class="context-main">
+  {#if $UIState === UI.LOADING}
+    <main>
       <Loading {environment} on:done={loadedEnvironment} />
-    {/if}
+    </main>
+  {/if}
 
-    {#if $UIState === UI.SPAWNING}
+  {#if $UIState === UI.SPAWNING}
+    <main>
       <Spawn on:done={spawned} />
-    {/if}
+    </main>
+  {/if}
 
-    {#if $UIState === UI.READY}
-      <Nest />
-    {/if}
-  </div>
-</main>
+  {#if $UIState === UI.READY}
+    <Nest />
+  {/if}
+</div>
 
 <style lang="scss">
   main {
@@ -69,12 +72,12 @@
     align-items: center;
   }
 
-  .context-main {
-    width: 800px;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+  // .context-main {
+  //   width: 800px;
+  //   z-index: 1;
+  //   display: flex;
+  //   flex-direction: column;
+  //   justify-content: center;
+  //   align-items: center;
+  // }
 </style>

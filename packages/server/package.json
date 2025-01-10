@@ -8,25 +8,26 @@
     "dev": "pnpm tsx src/index.ts"
   },
   "dependencies": {
-    "contracts": "workspace:*",
+    "@anthropic-ai/sdk": "^0.33.1",
     "@latticexyz/common": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
-    "@latticexyz/dev-tools": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
     "@latticexyz/recs": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
     "@latticexyz/schema-type": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
     "@latticexyz/store-sync": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
     "@latticexyz/utils": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
     "@latticexyz/world": "2.2.15-74090950d81c6713d981806af5c1197e804b56bf",
-    "rxjs": "^7.8.1",
-    "viem": "2.22.5",
-    "@anthropic-ai/sdk": "^0.33.1",
     "body-parser": "^1.20.3",
+    "contracts": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "ethereumjs-util": "^7.1.5",
+    "express": "^4.21.2",
+    "js-sha3": "^0.9.3",
+    "rxjs": "^7.8.1",
+    "viem": "2.22.5"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
     "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0"
   },
   "engines": {

@@ -8,9 +8,6 @@ procs:
   off-chain-sync:
     cwd: packages/off-chain-sync
     shell: pnpm start
-  reality-model:
-    cwd: packages/reality-model
-    shell: pnpm start
   server:
     cwd: packages/server
     shell: pnpm dev

@@ -7,7 +7,7 @@
  * By default the template just creates a temporary wallet
  * (called a burner wallet).
  */
-import { getBurnerPrivateKey } from "@latticexyz/common";
+// import { getBurnerPrivateKey } from "@latticexyz/common";
 
 /*
  * Import the addresses of the World, possibly on multiple chains,
@@ -23,8 +23,6 @@ import worlds from "contracts/worlds.json";
 import { supportedChains } from "./supportedChains";
 
 export async function getNetworkConfig() {
-  const params = new URLSearchParams(window.location.search);
-
   /*
    * The chain ID is the first item available from this list:
    * 1. chainId query parameter
@@ -33,7 +31,7 @@ export async function getNetworkConfig() {
    *    vite dev server was started or client was built
    * 4. The default, 31337 (anvil)
    */
-  const chainId = Number(params.get("chainId") || params.get("chainid") || import.meta.env.VITE_CHAIN_ID || 31337);
+  const chainId = 31337;
 
   /*
    * Find the chain (unless it isn't in the list of supported chains).
@@ -50,7 +48,7 @@ export async function getNetworkConfig() {
    * provide it as worldAddress in the query string.
    */
   const world = worlds[chain.id.toString()];
-  const worldAddress = params.get("worldAddress") || world?.address;
+  const worldAddress = world?.address;
   if (!worldAddress) {
     throw new Error(`No world address found for chain ${chainId}. Did you run \`mud deploy\`?`);
   }
@@ -62,12 +60,10 @@ export async function getNetworkConfig() {
    * on the URL (as initialBlockNumber) or in the worlds.json
    * file. If neither has it, it starts at the first block, zero.
    */
-  const initialBlockNumber = params.has("initialBlockNumber")
-    ? Number(params.get("initialBlockNumber"))
-    : world?.blockNumber ?? 0n;
+  const initialBlockNumber = world?.blockNumber ?? 0n;
 
   return {
-    privateKey: getBurnerPrivateKey(),
+    privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     chainId,
     chain,
     worldAddress,

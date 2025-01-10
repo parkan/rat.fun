@@ -37,18 +37,20 @@ export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 import { Observable } from "rxjs";
 
-export async function setupNetwork(): Promise<{
+export type SetupNetworkReturnType = {
   world: typeof world;
-  components: ReturnType<typeof syncToRecs>["components"];
+  components: typeof components;
   playerEntity: ReturnType<typeof encodeEntity>;
   publicClient: ReturnType<typeof createPublicClient>;
   walletClient: ReturnType<typeof createWalletClient>;
   latestBlock$: Observable<any>;
   storedBlockLogs$: Observable<any>;
-  waitForTransaction: ReturnType<typeof syncToRecs>["waitForTransaction"];
+  waitForTransaction: typeof waitForTransaction;
   worldContract: ReturnType<typeof getContract>;
   write$: Observable<ContractWrite>;
-}> {
+};
+
+export async function setupNetwork(): Promise<SetupNetworkReturnType> {
   const networkConfig = await getNetworkConfig();
 
   /*
@@ -62,6 +64,8 @@ export async function setupNetwork(): Promise<{
   } as const satisfies ClientConfig;
 
   const publicClient = createPublicClient(clientOptions);
+
+  // console.log('publicClient:', publicClient);
 
   /*
    * Create an observable for contract writes that we can
@@ -81,6 +85,12 @@ export async function setupNetwork(): Promise<{
     .extend(transactionQueue())
     .extend(writeObserver({ onWrite: (write) => write$.next(write) }));
 
+  // console.log('burnerAccount:', burnerAccount);
+  // console.log('burnerWalletClient:', burnerWalletClient);
+
+  // console.log('networkConfig.worldAddress:', networkConfig.worldAddress);
+  // console.log('IWorldAbi:', IWorldAbi);
+
   /*
    * Create an object for communicating with the deployed World.
    */
@@ -98,7 +108,7 @@ export async function setupNetwork(): Promise<{
    */
   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } = await syncToRecs({
     world,
-    config: mudConfig,
+    config: mudConfig.default,
     address: networkConfig.worldAddress as Hex,
     publicClient,
     startBlock: BigInt(networkConfig.initialBlockNumber),

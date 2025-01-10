@@ -2,8 +2,20 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import Anthropic from '@anthropic-ai/sdk';
+import { addressToId, constructMessages, recoverAddress } from './utils';
+
+import { getComponentValueStrict } from "@latticexyz/recs";
+import { setup } from "./mud/setup";
 
 dotenv.config();
+
+const PRIVATE_API_KEY = process.env.PRIVATE_ANTHROPIC_API_KEY as string;
+const MESSAGE = "RATROOM"
+
+const realityPrompt = "You are the manager of a fictional research facility. You will be given information about a room in the facility as well as descriptions of one or multiple rats. It is your job to determine a definite outcome (live/die) for these rats. The rats might interact with each other. Describe the events happening and conclude with the fate of each rat."
+const stylePrompt = "Be very brief and concise. Use style of research protocol. Use dry technical language. Only describe observable events and behaviours. Use present tense describing the events. Do not include any unnecessary information. Do not embellish. Do not speculate on the mental state or motives of the rat."
+const formatPrompt = "Return in json-format with the following properties. narrative: string, isAlive: boolean. Narrative text should be structured as points in the format: [MINUTES:SECONDS]: [EVENT]"
 
 const app = express();
 const port = 3131;
@@ -13,10 +25,82 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const {
+    components,
+    // systemCalls: { increment },
+    network,
+  } = await setup();
 
-app.post('/ping', async (req, res) => {
+// console.log('components', components);
+// console.log('network', network);
+
+// Route to handle OpenAI API requests
+app.post('/api/generate', async (req, res) => {
     try {
-        res.json({ message: "pong" });
+        const {
+            signature,
+            roomId,
+            ratId,
+        } = req.body;
+
+        console.log('signature', signature);
+        console.log('roomId', roomId);
+        console.log('ratId', ratId);
+
+        // TODO: Get signed message from sender
+        // TODO: Verify the signature
+        const sender = addressToId(recoverAddress(signature, MESSAGE));
+
+        console.log('sender', sender);
+
+        const systemPrompt = `${realityPrompt} ${stylePrompt} ${formatPrompt}`;
+
+        const roomEntity = network.world.registerEntity({ id: roomId})
+        const ratEntity = network.world.registerEntity({ id: ratId})
+
+        const { RoomPrompt, Trait, Owner } = components
+
+        // TODO: Verfiy that rat is owned by the sender
+        const ratOwner = getComponentValueStrict(Owner, ratEntity)?.value ?? ""
+        console.log('ratOwner', ratOwner);
+        if (ratOwner !== sender) {
+            return res.status(403).json({ error: 'You are not the owner of the rat.' });
+        }
+
+        const roomPrompt = getComponentValueStrict(RoomPrompt, roomEntity)?.value ?? ""
+        const ratPrompt = getComponentValueStrict(Trait, ratEntity)?.value ?? ""
+
+        console.log('roomPrompt', roomPrompt);
+        console.log('ratPrompt', ratPrompt);
+
+        const messages = constructMessages(
+            roomPrompt,
+            ratPrompt
+        );
+
+        // Adjust messages to match the expected type
+        const formattedMessages = messages.map(msg => {
+            const formattedMessage: any = { role: msg.role, content: msg.content };
+            if (msg.role === 'function') {
+                formattedMessage.name = msg.name;
+            }
+            return formattedMessage;
+        });
+
+        const anthropic = new Anthropic({
+            apiKey: PRIVATE_API_KEY
+        });
+
+        const msg = await anthropic.messages.create({
+            model: "claude-3-5-sonnet-20241022",
+            max_tokens: 1024,
+            messages: formattedMessages,
+            system: systemPrompt
+        });
+
+        console.log(msg);
+
+        res.json({ message: msg.content[0] });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the request.' });
