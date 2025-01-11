@@ -13,6 +13,8 @@ dotenv.config();
 
 const PRIVATE_API_KEY = process.env.PRIVATE_ANTHROPIC_API_KEY as string;
 const PRIVATE_ETH_KEY = process.env.PRIVATE_ETH_KEY as string;
+const CHAIN_ID = Number(process.env.CHAIN_ID) as number;
+
 
 const app = express();
 const port = 3131;
@@ -26,7 +28,7 @@ const {
     components,
     systemCalls: { reward, punish },
     network,
-  } = await setup(PRIVATE_ETH_KEY);
+  } = await setup(PRIVATE_ETH_KEY, CHAIN_ID);
 
 // Route to handle OpenAI API requests
 app.post('/api/generate', async (req, res) => {

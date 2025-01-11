@@ -22,17 +22,7 @@ import worlds from "contracts/worlds.json";
 
 import { supportedChains } from "./supportedChains";
 
-export async function getNetworkConfig(privateKey: string) {
-  /*
-   * The chain ID is the first item available from this list:
-   * 1. chainId query parameter
-   * 2. chainid query parameter
-   * 3. The VITE_CHAIN_ID environment variable set when the
-   *    vite dev server was started or client was built
-   * 4. The default, 31337 (anvil)
-   */
-  const chainId = 31337;
-
+export async function getNetworkConfig(privateKey: string, chainId: number) {
   /*
    * Find the chain (unless it isn't in the list of supported chains).
    */
