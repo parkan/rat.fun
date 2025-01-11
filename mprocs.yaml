@@ -8,6 +8,9 @@ procs:
   off-chain-sync:
     cwd: packages/off-chain-sync
     shell: pnpm start
+  cms:
+    cwd: packages/cms
+    shell: pnpm dev
   server:
     cwd: packages/server
     shell: pnpm dev

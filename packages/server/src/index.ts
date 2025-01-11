@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import Anthropic from '@anthropic-ai/sdk';
 import { addressToId, constructMessages, recoverAddress } from './utils';
-import { MESSAGE, realityPrompt, stylePrompt, formatPrompt } from './constants';
+import { MESSAGE } from './constants';
+import { getWorldPrompts } from './cms';
 
 import { getComponentValueStrict } from "@latticexyz/recs";
 import { setup } from "./mud/setup";
@@ -14,7 +15,6 @@ dotenv.config();
 const PRIVATE_API_KEY = process.env.PRIVATE_ANTHROPIC_API_KEY as string;
 const PRIVATE_ETH_KEY = process.env.PRIVATE_ETH_KEY as string;
 const CHAIN_ID = Number(process.env.CHAIN_ID) as number;
-
 
 const app = express();
 const port = 3131;
@@ -43,13 +43,15 @@ app.post('/api/generate', async (req, res) => {
         console.log('roomId', roomId);
         console.log('ratId', ratId);
 
+        const worldPrompts = await getWorldPrompts();
+        console.log('worldPrompts', worldPrompts);
+        const systemPrompt = `${worldPrompts.realityPrompt} ${worldPrompts.stylePrompt} ${worldPrompts.formatPrompt}`;
+
         // TODO: Get signed message from sender
         // TODO: Verify the signature
         const sender = addressToId(recoverAddress(signature, MESSAGE));
 
         console.log('sender', sender);
-
-        const systemPrompt = `${realityPrompt} ${stylePrompt} ${formatPrompt}`;
 
         const roomEntity = network.world.registerEntity({ id: roomId})
         const ratEntity = network.world.registerEntity({ id: ratId})
