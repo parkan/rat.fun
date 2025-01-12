@@ -12,7 +12,7 @@
 
   const done = () => dispatch("done")
 
-  $: console.log("$player", $player)
+  // $: console.log("$player", $player)
 
   let busy = false
 

@@ -15,6 +15,7 @@
   let inRoom = false
 
   const submit = async () => {
+    const startTime = performance.now()
     inRoom = true
     busy = true
     outcome = {}
@@ -50,6 +51,10 @@
       console.log(outcome)
 
       busy = false
+      const endTime = performance.now()
+      console.log(
+        `Operation took ${(endTime - startTime).toFixed(3)} milliseconds`
+      )
     } catch (err) {
       console.log(err)
       window.alert("An error occurred. Please try again.")

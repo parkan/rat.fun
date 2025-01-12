@@ -47,7 +47,7 @@ export function setupWalletNetwork(publicNetwork: SetupPublicNetworkResult, wall
     client: { public: publicNetwork.publicClient, wallet: walletClient },
   })
 
-  console.log("worldContract", worldContract)
+  // console.log("worldContract", worldContract)
 
   return {
     playerEntity: encodeEntity(

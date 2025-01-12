@@ -55,7 +55,7 @@ app.ws<unknown>("/*", {
         clientId: extendedWs.clientId,
       }
 
-      console.log(clients)
+      // console.log(clients)
 
       // Broadcast the data to all other connected clients
       clients.forEach(client => {

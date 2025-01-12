@@ -13,10 +13,10 @@ const BLOCK_MARGIN = 0
 
 export function initPlayerEventsListener() {
   playerStore.subscribe(player => {
-    console.log("In event listener")
+    // console.log("In event listener")
 
     if (!player?.event) {
-      console.log("No event")
+      // console.log("No event")
       return
     }
 
@@ -32,17 +32,17 @@ export function initPlayerEventsListener() {
       Number(player?.event?.blockNumber ?? 0) <
       Number(get(blockNumber)) - BLOCK_MARGIN
     ) {
-      console.log(
-        "Event is stale...",
-        "Event block:",
-        player.event.blockNumber,
-        "Current block:",
-        get(blockNumber)
-      )
+      // console.log(
+      //   "Event is stale...",
+      //   "Event block:",
+      //   player.event.blockNumber,
+      //   "Current block:",
+      //   get(blockNumber)
+      // )
       return
     }
 
-    console.log("!!!!! New event received", player.event)
+    // console.log("!!!!! New event received", player.event)
 
     newEvent.set(player.event)
     UILocation.set(LOCATION.RESULT)

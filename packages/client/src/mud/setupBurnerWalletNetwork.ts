@@ -48,7 +48,7 @@ export function setupBurnerWalletNetwork(
     account: burnerAccount,
   })
 
-  console.log(networkConfig)
+  // console.log(networkConfig)
 
   if (networkConfig.faucetServiceUrl) {
     setupDrip(
@@ -66,7 +66,7 @@ async function setupDrip(
   faucetServiceUrl: string,
   address: Hex
 ) {
-  console.log("Setup drip")
+  // console.log("Setup drip")
   /*
    * If there is a faucet, request (test) ETH if you have
    * less than 0.01 ETH. Repeat every 20 seconds to ensure you don't

@@ -14,8 +14,8 @@
 
   export let environment: ENVIRONMENT
 
-  $: console.log("$rats", $rats)
-  $: console.log("$rooms", $rooms)
+  // $: console.log("$rats", $rats)
+  // $: console.log("$rooms", $rooms)
 
   const loadedEnvironment = () => {
     UIState.set(UI.SPAWNING)
