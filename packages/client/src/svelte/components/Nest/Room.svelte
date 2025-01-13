@@ -2,7 +2,9 @@
   import { fade } from "svelte/transition"
   import { createEventDispatcher } from "svelte"
 
-  export let outcome: { eventLog: string[]; success: boolean }
+  import Ellipsis from "./Ellipsis.svelte"
+
+  export let outcome: { eventLog: string[]; success: boolean; change: string }
   export let room: Room
 
   const dispatch = createEventDispatcher()
@@ -33,15 +35,13 @@
       class="outcome"
       in:fade={{ duration: 200, delay: 500 * outcome.eventLog.length + 1 }}
     >
-      {#if outcome.success}
-        <div class="success">Success (+50 currency)</div>
-      {:else}
-        <div class="failure">Failure (-50 currency)</div>
-      {/if}
+      <div class="trait">Trait added: {outcome.change}</div>
       <div class="return">
         <button on:click={close}>Return to nest</button>
       </div>
     </div>
+  {:else}
+    <Ellipsis />
   {/if}
 </div>
 
@@ -57,7 +57,7 @@
     color: white;
     z-index: 10000;
     padding: 40px;
-    font-size: 34px;
+    font-size: 24px;
 
     .description {
       font-size: 24px;
@@ -81,6 +81,12 @@
 
     .failure {
       color: red;
+    }
+
+    .trait {
+      background: yellow;
+      color: black;
+      padding: 10px;
     }
 
     button {

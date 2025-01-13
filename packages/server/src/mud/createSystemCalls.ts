@@ -33,29 +33,23 @@ export function createSystemCalls(
   { worldContract, waitForTransaction }: SetupNetworkResult
 ) {
   const reward = async (ratId: string) => {
-    /*
-     * Because IncrementSystem
-     * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
-     * is in the root namespace, `.increment` can be called directly
-     * on the World contract.
-     */
     const tx = await worldContract.write.ratroom__reward([ratId]);
     await waitForTransaction(tx);
   };
 
   const punish = async (ratId: string) => {
-    /*
-     * Because IncrementSystem
-     * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
-     * is in the root namespace, `.increment` can be called directly
-     * on the World contract.
-     */
     const tx = await worldContract.write.ratroom__punish([ratId]);
+    await waitForTransaction(tx);
+  };
+
+  const addTrait = async (ratId: string, newTrait: string ) => {
+    const tx = await worldContract.write.ratroom__addTrait([ratId, newTrait]);
     await waitForTransaction(tx);
   };
 
   return {
     reward,
-    punish
+    punish,
+    addTrait
   };
 }

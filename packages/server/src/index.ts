@@ -1,127 +1,46 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import Anthropic from '@anthropic-ai/sdk';
-import { addressToId, constructMessages, recoverAddress } from './utils';
-import { MESSAGE } from './constants';
-import { getWorldPrompts } from './cms';
+import Fastify from 'fastify'
+import formbody from '@fastify/formbody';
+// import compress from '@fastify/compress';
+import cors from '@fastify/cors';
 
-import { getComponentValueStrict } from "@latticexyz/recs";
-import { setup } from "./mud/setup";
+import test from './routes/test';
+import enterRoom from './routes/enter-room';
 
-dotenv.config();
+const PORT = 3131;
 
-const PRIVATE_API_KEY = process.env.PRIVATE_ANTHROPIC_API_KEY as string;
-const PRIVATE_ETH_KEY = process.env.PRIVATE_ETH_KEY as string;
-const CHAIN_ID = Number(process.env.CHAIN_ID) as number;
+const fastify = Fastify({   logger: {
+    transport: {
+      target: "@fastify/one-line-logger",
+    },
+  },
+ })
 
-const app = express();
-const port = 3131;
+// Register the formbody plugin for application/x-www-form-urlencoded
+fastify.register(formbody);
 
-// Enable CORS
-app.use(cors());
+// Register the compress plugin for response compression
+// fastify.register(compress, {
+//   global: true, // Apply compression globally
+//   encodings: ['gzip', 'deflate'], // Supported encodings
+// });
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// Register the CORS plugin for Cross-Origin Resource Sharing
+fastify.register(cors, {
+  origin: '*', // Allow all origins (restrict for production)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+});
 
-const {
-    components,
-    systemCalls: { reward, punish },
-    network,
-  } = await setup(PRIVATE_ETH_KEY, CHAIN_ID);
+// Register routes
+fastify.register(test)
+fastify.register(enterRoom)
 
-// Route to handle OpenAI API requests
-app.post('/api/generate', async (req, res) => {
+const start = async (port: number) => {
     try {
-        const {
-            signature,
-            roomId,
-            ratId,
-        } = req.body;
-
-        console.log('signature', signature);
-        console.log('roomId', roomId);
-        console.log('ratId', ratId);
-
-        const worldPrompts = await getWorldPrompts();
-        console.log('worldPrompts', worldPrompts);
-        const systemPrompt = `${worldPrompts.realityPrompt} ${worldPrompts.stylePrompt} ${worldPrompts.formatPrompt}`;
-
-        // TODO: Get signed message from sender
-        // TODO: Verify the signature
-        const sender = addressToId(recoverAddress(signature, MESSAGE));
-
-        console.log('sender', sender);
-
-        const roomEntity = network.world.registerEntity({ id: roomId})
-        const ratEntity = network.world.registerEntity({ id: ratId})
-
-        const { RoomPrompt, Trait, Owner } = components
-
-        // TODO: Verfiy that rat is owned by the sender
-        const ratOwner = getComponentValueStrict(Owner, ratEntity)?.value ?? ""
-        console.log('ratOwner', ratOwner);
-        if (ratOwner !== sender) {
-            return res.status(403).json({ error: 'You are not the owner of the rat.' });
-        }
-
-        const roomPrompt = getComponentValueStrict(RoomPrompt, roomEntity)?.value ?? ""
-        const ratPrompt = getComponentValueStrict(Trait, ratEntity)?.value ?? ""
-
-        console.log('roomPrompt', roomPrompt);
-        console.log('ratPrompt', ratPrompt);
-
-        const messages = constructMessages(
-            roomPrompt,
-            ratPrompt
-        );
-
-        // Adjust messages to match the expected type
-        const formattedMessages = messages.map(msg => {
-            const formattedMessage: any = { role: msg.role, content: msg.content };
-            if (msg.role === 'function') {
-                formattedMessage.name = msg.name;
-            }
-            return formattedMessage;
-        });
-
-        const anthropic = new Anthropic({
-            apiKey: PRIVATE_API_KEY
-        });
-
-        const msg = await anthropic.messages.create({
-            model: "claude-3-5-sonnet-20241022",
-            max_tokens: 1024,
-            messages: formattedMessages,
-            system: systemPrompt
-        });
-
-        // Access the text property
-        const rawText = msg.content[0].text;
-
-        // Parse the text into a native object
-        let outcome;
-        try {
-            outcome = JSON.parse(rawText);
-            console.log(outcome);
-        } catch (error) {
-            console.error("Failed to parse JSON:", error);
-            return res.status(403).json({ error: 'Error: Failed to parse JSON' });
-        }
-
-        if(outcome.success) {
-            reward(ratId);
-        } else {
-            punish(ratId);
-        }
-
-        res.json(outcome);
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while processing the request.' });
+        await fastify.listen({ port })
+    } catch (err) {
+        fastify.log.error(err)
+        process.exit(1)
     }
-});
+}
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+start(PORT)

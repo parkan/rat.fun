@@ -3,32 +3,42 @@
   import RoomItem from "./RoomItem.svelte"
   import { ENVIRONMENT } from "@mud/enums"
 
+  import NewRoom from "./NewRoom.svelte"
+
   export let environment: ENVIRONMENT
 </script>
 
 <div class="nest">
   <div class="column first">
     {#if $player}
-      <div class="stats">
+      <!-- <div class="stats">
         <strong>PLAYER</strong>
-        <!-- <br />id: {$playerId} -->
         <br />Currency:{$player.currency ?? 0}
-      </div>
+      </div> -->
       <img src="/images/rat.jpg" alt="nest" />
       <div class="stats">
-        <strong>RAT</strong>
         <!-- <br />id: {$player.ownedRat} -->
-        <br />Trait: {$rats[$player.ownedRat]?.trait ?? 0}
-        <br />Health: {$rats[$player.ownedRat]?.health ?? 0}
-        <br />Energy: {$rats[$player.ownedRat]?.energy ?? 0}
+        <div class="stat-item trait">
+          <strong>Traits:</strong>
+          {$rats[$player.ownedRat]?.trait ?? 0}
+        </div>
+        <div class="stat-item">
+          <strong>Health:</strong>
+          {$rats[$player.ownedRat]?.health ?? 0}
+        </div>
+        <div class="stat-item">
+          <strong>Energy:</strong>
+          {$rats[$player.ownedRat]?.energy ?? 0}
+        </div>
       </div>
     {/if}
   </div>
 
   <div class="column second">
+    <NewRoom />
     <!-- ROOM LIST -->
     <div class="room-list">
-      {#each Object.entries($rooms) as [roomId, room]}
+      {#each Object.entries($rooms).reverse() as [roomId, room]}
         <RoomItem {environment} {roomId} {room} />
       {/each}
     </div>
@@ -36,9 +46,9 @@
 </div>
 
 <style lang="scss">
-  strong {
-    font-size: 32px;
-  }
+  // strong {
+  //   font-size: 32px;
+  // }
 
   .stats {
     margin-bottom: 20px;
@@ -53,7 +63,8 @@
     height: 100vh;
     float: left;
     padding: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 
     &.first {
       background: blue;
@@ -62,5 +73,14 @@
     &.second {
       background: red;
     }
+  }
+
+  .stat-item {
+    margin-bottom: 1em;
+  }
+
+  .trait {
+    background: lightcyan;
+    color: black;
   }
 </style>

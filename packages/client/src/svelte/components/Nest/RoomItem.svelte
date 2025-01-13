@@ -19,10 +19,10 @@
     inRoom = true
     busy = true
     outcome = {}
-    let url = "http://localhost:3131/api/generate"
+    let url = "http://localhost:3131/room/enter"
 
     if ([ENVIRONMENT.GARNET].includes(environment)) {
-      url = "https://reality-model-1.mc-infra.com/api/generate"
+      url = "https://reality-model-1.mc-infra.com/room/enter"
     }
 
     const signature = await $walletNetwork.walletClient.signMessage({
@@ -87,7 +87,7 @@
 
     button {
       width: 200px;
-      padding: 40px;
+      padding: 20px;
       font-size: 32px;
       margin-top: 20px;
       cursor: pointer;

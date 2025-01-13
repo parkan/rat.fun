@@ -45,10 +45,15 @@ contract PostDeploy is Script {
     LibRoom.createRoom(
       "The room has one door. There is a puzzle on the floor. If a rat can solve the puzzle the door will open leading to victory."
     );
+    LibRoom.createRoom("The room has no doors. The room is radioactive. There is no escape.");
+    LibRoom.createRoom("The room has no doors. There is a comfortable bed and relaxing music playing.");
     LibRoom.createRoom(
-      "The room has no doors. The room is radioactive. There is no escape."
+      "The room has a VR head set. The VR head give the experience of running on a thredmill. There is a virtual block of cheese dangling just out of reach. The experience of time is infinite."
     );
-
+    LibRoom.createRoom(
+      "The room has a VR head set. The VR head gives access to all knowledge in the world. The experience of time is infinite."
+    );
+    LibRoom.createRoom("The room has healing energy that will restore the rat to perfect health.");
     vm.stopBroadcast();
   }
 }
