@@ -101,7 +101,7 @@ async function routes (fastify: FastifyInstance, options: object) {
     
             const { RoomPrompt, Trait, Owner } = components;
     
-            // TODO: Verify that rat is owned by the sender
+            // Verify that rat is owned by the sender
             const ratOwner = getComponentValueStrict(Owner, ratEntity)?.value ?? "";
             console.log('ratOwner', ratOwner);
             if (ratOwner !== sender) {
