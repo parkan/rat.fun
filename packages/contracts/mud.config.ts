@@ -21,10 +21,16 @@ export default defineWorld({
     },
     Name: "string",
     EntityType: "ENTITY_TYPE",
-    Currency: "uint256",
+    // Stats
     Health: "uint256",
-    Energy: "uint256",
+    Intelligence: "uint256",
+    Strength: "uint256", 
+    Sanity: "uint256",
+    Luck: "uint256",
+    // Traits / items / afflictions
     Trait: "string",
+    // ...
+    Currency: "uint256",
     OwnedRat: "bytes32",
     Owner: "bytes32",
     RoomPrompt: "string",

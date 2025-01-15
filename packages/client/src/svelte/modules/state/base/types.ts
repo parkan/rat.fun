@@ -15,8 +15,13 @@ declare global {
     entityType?: ENTITY_TYPE,
     name?: string,
     currency?: number,
-    energy?: number,
+    // Stats
     health?: number,
+    intelligence?: number,
+    strength?: number,
+    sanity?: number,
+    luck?: number,
+    // Traits
     trait?: string,
     ownedRat?: Hex,
     owner?: Hex,
@@ -36,7 +41,10 @@ declare global {
     entityType: ENTITY_TYPE.RAT,
     owner: Hex,
     health: number,
-    energy: number,
+    intelligence: number,
+    strength: number,
+    sanity: number,
+    luck: number,
     trait: string
   }
 

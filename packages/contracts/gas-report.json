@@ -3,18 +3,18 @@
     "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
     "test": "testCreateRoom",
     "name": "Create room",
-    "gasUsed": 183675
+    "gasUsed": 222465
   },
   {
     "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
     "test": "testLongRoomPrompt",
     "name": "Create room: long prompt",
-    "gasUsed": 320283
+    "gasUsed": 359031
   },
   {
     "file": "test/systems/SpawnSystem.t.sol:SpawnSystemTest",
     "test": "testSpawn",
     "name": "Spawn",
-    "gasUsed": 371583
+    "gasUsed": 399779
   }
 ]
