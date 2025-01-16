@@ -17,12 +17,12 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/howler": "^2.2.12",
-    "@types/lodash": "^4.17.13",
+    "@types/lodash": "^4.17.14",
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^2.1.8",
     "postprocessing": "^6.36.6",
-    "svelte": "^5.16.0",
-    "vite": "^6.0.6",
+    "svelte": "^5.18.0",
+    "vite": "^6.0.7",
     "vitest": "^2.1.8"
   },
   "dependencies": {
@@ -35,14 +35,14 @@
     "@latticexyz/utils": "2.2.15-9578e45d37630993d5e5063d06d04aa917b53cbd",
     "@latticexyz/world": "2.2.15-9578e45d37630993d5e5063d06d04aa917b53cbd",
     "@sanity/block-content-to-html": "^2.0.0",
-    "@sanity/client": "^6.24.1",
+    "@sanity/client": "^6.24.3",
     "@sanity/image-url": "^1.1.0",
     "@wagmi/core": "2.16.3",
     "howler": "^2.2.4",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.1",
-    "uuid": "^11.0.3",
-    "viem": "2.22.1",
+    "uuid": "^11.0.5",
+    "viem": "2.22.9",
     "wait-port": "^1.1.0"
   }
 }
