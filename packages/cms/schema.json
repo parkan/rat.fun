@@ -693,7 +693,7 @@
     }
   },
   {
-    "name": "worldPrompts",
+    "name": "outcomePrompts",
     "type": "document",
     "attributes": {
       "_id": {
@@ -706,7 +706,7 @@
         "type": "objectAttribute",
         "value": {
           "type": "string",
-          "value": "worldPrompts"
+          "value": "outcomePrompts"
         }
       },
       "_createdAt": {
@@ -734,7 +734,7 @@
         },
         "optional": true
       },
-      "realityPrompt": {
+      "mainPrompt": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
@@ -754,8 +754,66 @@
           "type": "string"
         },
         "optional": true
+      }
+    }
+  },
+  {
+    "name": "eventPrompts",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
       },
-      "outcomeEvaluationPrompt": {
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "eventPrompts"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "title": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "mainPrompt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "stylePrompt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "formatPrompt": {
         "type": "objectAttribute",
         "value": {
           "type": "string"

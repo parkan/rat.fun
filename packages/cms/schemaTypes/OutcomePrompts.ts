@@ -1,7 +1,7 @@
 
 export default {
-    title: 'World prompts',
-    name: 'worldPrompts',
+    title: 'Outcome prompts',
+    name: 'outcomePrompts',
     type: 'document',
     fields: [
         {
@@ -12,8 +12,8 @@ export default {
             validation: (Rule: any) => Rule.required()
         },
         {
-            title: 'Reality prompt',
-            name: 'realityPrompt',
+            title: 'Main prompt',
+            name: 'mainPrompt',
             type: 'text',
         },
         {
@@ -25,11 +25,6 @@ export default {
             title: 'Format prompt',
             description: "Be careful editing this as it will effect the return format.",
             name: 'formatPrompt',
-            type: 'text',
-        },
-        {
-            title: 'Outcome evaluation prompt',
-            name: 'outcomeEvaluationPrompt',
             type: 'text',
         }
     ],

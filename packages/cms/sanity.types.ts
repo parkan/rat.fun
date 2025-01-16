@@ -131,17 +131,28 @@ export type SanityAssetSourceData = {
   url?: string;
 };
 
-export type WorldPrompts = {
+export type OutcomePrompts = {
   _id: string;
-  _type: "worldPrompts";
+  _type: "outcomePrompts";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
   title?: string;
-  realityPrompt?: string;
+  mainPrompt?: string;
   stylePrompt?: string;
   formatPrompt?: string;
-  outcomeEvaluationPrompt?: string;
+};
+
+export type EventPrompts = {
+  _id: string;
+  _type: "eventPrompts";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  mainPrompt?: string;
+  stylePrompt?: string;
+  formatPrompt?: string;
 };
 export declare const internalGroqTypeReferenceTo: unique symbol;
 

@@ -1,5 +1,7 @@
-import WorldPrompts from "./WorldPrompts"
+import EventPrompts from "./EventPrompts"
+import OutcomePrompts from "./OutcomePrompts"
 
 export const schemaTypes = [
-    WorldPrompts
+    EventPrompts,
+    OutcomePrompts
 ]
