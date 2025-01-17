@@ -14,13 +14,15 @@ export function constructEventMessages(
 }
 
 export function constructOutcomeMessages(
-    events: EventsReturnValue,
-    rat: Rat
+    room: Room,
+    rat: Rat,
+    events: EventsReturnValue
 ): MessageParam[] {
     const messages: MessageParam[] = [];
     console.log('rat', rat)
-    messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events.log)}` });
-    messages.push({ role: "user", content: `Rat: ${rat.prompt}` });
+    messages.push({ role: "user", content: `Room: ${room.prompt}` });
+    messages.push({ role: "user", content: `RatTraits: ${JSON.stringify(rat.traits)}` });
     messages.push({ role: "user", content: `RatStats: ${JSON.stringify(rat.stats)}` });
+    messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events.log)}` });
     return messages;
 }

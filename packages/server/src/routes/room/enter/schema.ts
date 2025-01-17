@@ -18,9 +18,16 @@ export const schema =     {
             items: { type: 'string' },
             description: 'An array of events that occurred'
           },
-          newTrait: {
-            type: 'string',
-            description: 'The new trait acquired'
+          traitChanges: {
+            type: 'array',
+            items: { 
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                id: { type: 'string'},
+                name: { type: 'string'},
+              },
+             },
           },
           statChanges: {
             type: 'object',
@@ -31,7 +38,7 @@ export const schema =     {
             },
           }
         },
-        required: ['log', 'newTrait', 'statChanges']
+        required: ['log', 'traitChanges', 'statChanges']
       },
       403: {
         type: 'object',

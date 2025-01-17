@@ -2,12 +2,16 @@ export type EventsReturnValue = {
     log: string[]
 };
 
+export type TraitChange = {
+    type: "add" | "remove",
+    id?: string,
+    name?: string
+}
+
 export type OutcomeReturnValue = {
-    newTrait: string,
+    traitChanges: TraitChange[],
     statChanges: {
         health: number,
         level: number
     }
 }
-
-export type Changes = Record<string, number>;

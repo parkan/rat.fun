@@ -78,7 +78,10 @@ async function routes (fastify: FastifyInstance) {
             }
 
             // Call outcome model
-            const outcomeMessages = constructOutcomeMessages(events, rat);
+            const outcomeMessages = constructOutcomeMessages(room, rat, events);
+
+            console.log('Outcome Messages:', outcomeMessages);
+
             const outcome = await callModel(anthropic, outcomeMessages, outcomeSystemPrompt) as OutcomeReturnValue;
 
             // TODO: better error handling
@@ -88,20 +91,31 @@ async function routes (fastify: FastifyInstance) {
 
             // TODO: Determine wether to add or combine/remove traits
 
-            // Add trait
-            if (outcome.newTrait?.length > 0) {
-                addTrait(ratId, outcome.newTrait);
+            console.log('Outcome:', outcome);
+
+            // Change Traits
+            for( let i = 0; i < outcome.traitChanges.length; i++) {
+                const traitChange = outcome.traitChanges[i];
+                if(traitChange.type === "add") {
+                    if(traitChange.name) {
+                        addTrait(ratId, traitChange.name);
+                    }
+                } else if(traitChange.type === "remove") {
+                    if(traitChange.id) {
+                        removeTrait(ratId, traitChange.id);
+                    }
+                }
             }
 
             // Change stats
             Object.entries(outcome.statChanges).forEach(async ([statName, change]) => {
                 if (change === 0) return;
-                await changeStat(ratId, statName, Math.abs(change), change < 0);
+                changeStat(ratId, statName, Math.abs(change), change < 0);
             });
 
             const returnObject = {
                 log: events.log,
-                newTrait: outcome.newTrait,
+                traitChanges: outcome.traitChanges,
                 statChanges: outcome.statChanges
             }
 
