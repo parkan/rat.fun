@@ -2,10 +2,10 @@
   import { player } from "@modules/state/base/stores"
   import type { ServerReturnValue } from "./types"
   import { walletNetwork } from "@modules/network"
-  import { MESSAGE } from "./constants"
+  import { MESSAGE } from "@components/Nest/constants"
   import { ENVIRONMENT } from "@mud/enums"
 
-  import RoomComponent from "./Room.svelte"
+  import RoomComponent from "@components/Nest/Room.svelte"
 
   export let room: Room
   export let roomId: string
@@ -49,6 +49,7 @@
       }
 
       outcome = (await response.json()) as ServerReturnValue
+
       console.log(outcome)
 
       busy = false

@@ -1,7 +1,3 @@
-export type EventsReturnValue = {
-    log: string[]
-};
-
 export type TraitChange = {
     type: "add" | "remove",
     id?: string,
@@ -15,3 +11,7 @@ export type OutcomeReturnValue = {
         level: number
     }
 }
+
+export type EventsReturnValue = {
+    log: string[]
+};

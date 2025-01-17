@@ -1,14 +1,15 @@
 <script lang="ts">
   import {
     player,
-    rats,
+    playerRat,
+    playerRatTraits,
     rooms,
-    traits,
-  } from "@svelte/modules/state/base/stores"
-  import RoomItem from "./RoomItem.svelte"
+  } from "@modules/state/base/stores"
+
   import { ENVIRONMENT } from "@mud/enums"
 
-  import NewRoom from "./NewRoom.svelte"
+  import RoomItem from "@components/Nest/RoomItem.svelte"
+  import NewRoom from "@components/Nest/NewRoom.svelte"
 
   export let environment: ENVIRONMENT
 </script>
@@ -16,32 +17,27 @@
 <div class="nest">
   <div class="column first">
     {#if $player}
-      <!-- <div class="stats">
-        <strong>PLAYER</strong>
-        <br />Currency:{$player.currency ?? 0}
-      </div> -->
       <img src="/images/rat.jpg" alt="nest" />
       <div class="stats">
-        <!-- <br />id: {$player.ownedRat} -->
         <div class="stat-item trait">
           <strong>Traits:</strong>
-          {#if $rats[$player.ownedRat]?.traits}
-            {#each $rats[$player.ownedRat]?.traits as trait}
-              <div class="trait-item">{$traits[trait]?.name}</div>
+          {#if $playerRatTraits}
+            {#each $playerRatTraits as trait}
+              <div class="trait-item">{trait.name}</div>
             {/each}
           {/if}
         </div>
         <div class="stat-item">
           <strong>Dead:</strong>
-          {$rats[$player.ownedRat]?.dead}
+          {$playerRat?.dead}
         </div>
         <div class="stat-item">
           <strong>Health:</strong>
-          {$rats[$player.ownedRat]?.health ?? 0}
+          {$playerRat?.health ?? 0}
         </div>
         <div class="stat-item">
           <strong>Level:</strong>
-          {$rats[$player.ownedRat]?.level ?? 0}
+          {$playerRat?.level ?? 0}
         </div>
       </div>
     {/if}

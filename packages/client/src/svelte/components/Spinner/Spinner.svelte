@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { playSound } from "@svelte/modules/sound"
-  import { getRandomUint256 } from "@svelte/modules/utils"
+  import { playSound } from "@modules/sound"
+  import { getRandomUint256 } from "@modules/utils"
   import { onDestroy, onMount } from "svelte"
 
   let spinner: BigInt = getRandomUint256()

@@ -6,11 +6,11 @@
 
 import type { Writable } from "svelte/store"
 import { writable, get } from "svelte/store"
-import { publicNetwork, walletNetwork, blockNumber } from "../../network"
+import { publicNetwork, walletNetwork, blockNumber } from "@modules/network"
 // import { toastMessage } from "../../ui/toast"
 // import { parseError } from "@components/Main/Terminal/functions/errors"
 import { v4 as uuid } from "uuid"
-import { clearActionTimer, startActionTimer } from "./timeoutHandler"
+import { clearActionTimer, startActionTimer } from "@modules/action/actionSequencer/timeoutHandler"
 
 // --- TYPES -----------------------------------------------------------------
 

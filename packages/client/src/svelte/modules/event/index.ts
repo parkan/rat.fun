@@ -1,9 +1,9 @@
 import { get, writable } from "svelte/store"
 import type { Writable } from "svelte/store"
-import { player as playerStore } from "@svelte/modules/state/base/stores"
-import { blockNumber } from "@svelte/modules/network"
-import { UILocation } from "@svelte/modules/ui/stores"
-import { LOCATION } from "@svelte/modules/ui/enums"
+import { player as playerStore } from "@modules/state/base/stores"
+import { blockNumber } from "@modules/network"
+import { UILocation } from "@modules/ui/stores"
+import { LOCATION } from "@modules/ui/enums"
 
 export const newEvent: Writable<GameEvent | null> = writable(null)
 

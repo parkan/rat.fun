@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { createRoom } from "@svelte/modules/action"
-  import { waitForCompletion } from "@svelte/modules/action/actionSequencer/utils"
+  import { createRoom } from "@modules/action"
+  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
 
   let busy = false
   let newPrompt: string

@@ -2,6 +2,10 @@ import { ENTITY_TYPE } from "contracts/enums"
 import { Hex } from "viem"
 
 declare global {
+
+  type GameConfig = {
+    adminAddress: string,
+  }
   // * * * * * * * * * * * * * * * * *
   // DEFAULT ENTITY TYPE
   // * * * * * * * * * * * * * * * * *
@@ -11,7 +15,7 @@ declare global {
   }
 
   type Entity = {
-    [key: string]: any,
+    [key: string]: number | ENTITY_TYPE | Hex | boolean | string | string[] | undefined,
     entityType?: ENTITY_TYPE,
     name?: string,
     currency?: number,
@@ -27,14 +31,14 @@ declare global {
   }
 
   type Player  = {
-    [key: string]: any,
+    [key: string]: number | ENTITY_TYPE | Hex,
     entityType: ENTITY_TYPE.PLAYER,
     currency: number,
     ownedRat: Hex,
   }
 
   type Rat  = {
-    [key: string]: any,
+    [key: string]: number | ENTITY_TYPE | Hex | boolean | string[],
     entityType: ENTITY_TYPE.RAT,
     owner: Hex,
     dead: boolean,
@@ -44,14 +48,14 @@ declare global {
   }
 
   type Room = {
-    [key: string]: any,
+    [key: string]: number | ENTITY_TYPE | string,
     entityType: ENTITY_TYPE.ROOM,
     roomIndex: number,
     roomPrompt: string
   }
 
   type Trait = {
-    [key: string]: any,
+    [key: string]: ENTITY_TYPE | string,
     entityType: ENTITY_TYPE.TRAIT,
     name: string
   }

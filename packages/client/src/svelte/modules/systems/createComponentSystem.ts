@@ -1,7 +1,7 @@
 import { get } from "svelte/store"
-import { entities } from "../state/base/stores"
-import { publicNetwork } from "../network"
-import { toCamelCase } from "../utils"
+import { entities } from "@modules/state/base/stores"
+import { publicNetwork } from "@modules/network"
+import { toCamelCase } from "@modules/utils"
 import { ComponentUpdate } from "@latticexyz/recs"
 import { deepEqual } from "@wagmi/core"
 

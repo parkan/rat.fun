@@ -2,6 +2,8 @@ import { defineConfig } from "vite"
 import { svelte } from "@sveltejs/vite-plugin-svelte"
 import path from "path"
 
+console.log('Resolved @server:', path.resolve(__dirname, '../server/src/'));
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [svelte()],
@@ -10,7 +12,9 @@ export default defineConfig({
       '@mud': path.resolve(__dirname, './src/mud'),
       '@svelte': path.resolve(__dirname, './src/svelte'),
       '@components': path.resolve(__dirname, './src/svelte/components'),
-      '@modules': path.resolve(__dirname, './src/svelte/modules/')
+      '@modules': path.resolve(__dirname, './src/svelte/modules/'),
+      '@server': path.resolve(__dirname, '../server/src/'),
+      '@cms': path.resolve(__dirname, '../cms/')
     }
   },
   publicDir: "./src/svelte/public",

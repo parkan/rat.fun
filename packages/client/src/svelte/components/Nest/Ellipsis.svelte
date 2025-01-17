@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte"
+
   let dots = Array.from({ length: 10 }, () => ".")
   let activeIndex = 0
 

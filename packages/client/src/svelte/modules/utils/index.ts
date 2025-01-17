@@ -1,6 +1,6 @@
 import { concat, keccak256 } from "viem"
 import { BLOCKTIME } from "./constants"
-import { ONE_UNIT } from "../ui/constants"
+import { ONE_UNIT } from "@modules/ui/constants"
 
 export function toCamelCase(s: string): string {
   return (

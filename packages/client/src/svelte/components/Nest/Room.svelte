@@ -1,9 +1,14 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { createEventDispatcher } from "svelte"
+  // import type {
+  //   OutcomeReturnValue,
+  //   EventsReturnValue,
+  // } from "../../../../../server/src/modules/llm/types"
+
   import type { ServerReturnValue } from "./types"
 
-  import Ellipsis from "./Ellipsis.svelte"
+  import Ellipsis from "@components/Nest/Ellipsis.svelte"
 
   export let outcome: ServerReturnValue
   export let room: Room
@@ -36,9 +41,6 @@
       class="outcome"
       in:fade={{ duration: 200, delay: 500 * outcome.log.length + 1 }}
     >
-      {#if outcome.newTrait}
-        <div class="trait">Trait added: {outcome.newTrait}</div>
-      {/if}
       <div class="stat-changes">
         {#each Object.entries(outcome.statChanges) as [stat, change]}
           {#if change !== 0}
@@ -85,12 +87,6 @@
 
     .outcome {
       max-width: 800px;
-    }
-
-    .trait {
-      background: yellow;
-      color: black;
-      padding: 10px;
     }
 
     button {

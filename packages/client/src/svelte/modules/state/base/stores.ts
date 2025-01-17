@@ -3,12 +3,13 @@
  *
  */
 import type { FalseOrTransform } from "@modules/off-chain-sync/types"
+import { blockNumber } from "@modules/network"
+
 import { writable, derived } from "svelte/store"
 import { addressToId } from "@modules/utils"
 import { ENTITY_TYPE } from "contracts/enums"
-import { blockNumber } from "@svelte/modules/network"
-import { COOLDOWN_PERIOD } from "./constants"
-// import { GAME_CONFIG_ID } from "@modules/state/base/constants"
+import { filterByEntitytype } from "./utils"
+import { GAME_CONFIG_ID } from "./constants"
 
 // * * * * * * * * * * * * * * * * *
 // DEFAULT ENTITY TYPES
@@ -24,10 +25,10 @@ export const entities = writable({} as Entities)
 // GAME CONFIG ENTITIES
 // * * * * * * * * * * * * * * * * *
 
-// export const gameConfig = derived(
-//   entities,
-//   $entities => ($entities[GAME_CONFIG_ID]?.gameConfig || {}) as GameConfig
-// )
+export const gameConfig = derived(
+  entities,
+  $entities => ($entities[GAME_CONFIG_ID]?.gameConfig || {}) as GameConfig
+)
 
 // * * * * * * * * * * * * * * * * *
 // PLAYER STORES
@@ -45,51 +46,28 @@ export const player = derived(
   ([$entities, $playerId]) => $entities[$playerId] as Player
 )
 
-export const players = derived(entities, $entities => {
-  const players = {} as Players
-  Object.entries($entities).forEach(([key, value]) => {
-    if (value.entityType === ENTITY_TYPE.PLAYER) {
-      players[key] = value as Player
-    }
-  })
-  return players
-})
+// * * * * * * * * * * * * * * * * *
+// GAME ELEMENT STORES
+// * * * * * * * * * * * * * * * * *
 
-export const rats = derived(entities, $entities => {
-  const rats = {} as Rats
-  Object.entries($entities).forEach(([key, value]) => {
-    if (value.entityType === ENTITY_TYPE.RAT) {
-      rats[key] = value as Rat
-    }
-  })
-  return rats
-})
+export const players = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.PLAYER) as Players)
+export const rats = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.RAT) as Rats)
+export const rooms = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.ROOM) as Rooms)
+export const traits = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.TRAIT) as Traits)
 
-export const rooms = derived(entities, $entities => {
-  const rooms = {} as Rooms
-  Object.entries($entities).forEach(([key, value]) => {
-    if (value.entityType === ENTITY_TYPE.ROOM) {
-      rooms[key] = value as Room
-    }
-  })
-  return rooms
-})
+// * * * * * * * * * * * * * * * * *
+// PLAYER RAT STORES
+// * * * * * * * * * * * * * * * * *
 
-export const traits = derived(entities, $entities => {
-  const traits = {} as Traits
-  Object.entries($entities).forEach(([key, value]) => {
-    if (value.entityType === ENTITY_TYPE.TRAIT) {
-      traits[key] = value as Trait
-    }
-  })
-  return traits
-})
+export const playerRat = derived(
+  [player, rats],
+  ([$player, $rats]) => $rats[$player?.ownedRat] as Rat
+)
 
-// export const gameConfig = derived(entities, $entities => {
-//   return ($entities[GAME_CONFIG_ID] || {}) as GameConfig
-// })
-
-// export const playerTransform = writable(false as FalseOrTransform)
+export const playerRatTraits = derived(
+  [playerRat, traits],
+  ([$playerRat, $traits]) => $playerRat?.traits?.map(trait => $traits[trait]) as Trait[]
+)
 
 // export const playerRemainingCooldown = derived(
 //   [player, blockNumber],
@@ -101,14 +79,3 @@ export const traits = derived(entities, $entities => {
 //     )
 //   }
 // )
-
-// export const actionAllowed = derived(
-//   [player, blockNumber],
-//   ([$player, $blockNumber]) => {
-//     if (!$player) return false
-//     return Number($player.cooldown) <= Number($blockNumber)
-//   }
-// )
-
-// export const feeding = writable(false)
-// export const shocking = writable(false)

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte"
-  import { spawn } from "@svelte/modules/action"
-  import { waitForCompletion } from "@svelte/modules/action/actionSequencer/utils"
-  import { playSound } from "@svelte/modules/sound"
-  import { player } from "@svelte/modules/state/base/stores"
+  import { spawn } from "@modules/action"
+  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
+  import { playSound } from "@modules/sound"
+  import { player } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
   import Spinner from "@components/Spinner/Spinner.svelte"

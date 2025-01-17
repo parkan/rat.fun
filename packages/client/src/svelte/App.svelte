@@ -2,14 +2,21 @@
   import { onMount } from "svelte"
   import { ENVIRONMENT } from "@mud/enums"
   import { initSound } from "@modules/sound"
-  import { UIState } from "@svelte/modules/ui/stores"
+  import { UIState } from "@modules/ui/stores"
   import { UI } from "@modules/ui/enums"
 
-  import { rats, rooms, traits, player } from "@modules/state/base/stores"
+  import {
+    rats,
+    rooms,
+    traits,
+    player,
+    playerRat,
+    playerRatTraits,
+  } from "@modules/state/base/stores"
 
   import Loading from "@components/Loading/Loading.svelte"
-  import Spawn from "./components/Spawn/Spawn.svelte"
-  import Nest from "@svelte/components/Nest/Nest.svelte"
+  import Spawn from "@components/Spawn/Spawn.svelte"
+  import Nest from "@components/Nest/Nest.svelte"
 
   export let environment: ENVIRONMENT
 
@@ -17,6 +24,8 @@
   $: console.log("$rooms", $rooms)
   $: console.log("$traits", $traits)
   $: console.log("$player", $player)
+  $: console.log("$playerRat", $playerRat)
+  $: console.log("$playerRatTraits", $playerRatTraits)
 
   const loadedEnvironment = () => {
     UIState.set(UI.SPAWNING)
@@ -72,13 +81,4 @@
     justify-content: center;
     align-items: center;
   }
-
-  // .context-main {
-  //   width: 800px;
-  //   z-index: 1;
-  //   display: flex;
-  //   flex-direction: column;
-  //   justify-content: center;
-  //   align-items: center;
-  // }
 </style>

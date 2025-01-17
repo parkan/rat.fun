@@ -1,5 +1,5 @@
 <script>
-  import Spinner from "@svelte/components/Spinner/Spinner.svelte"
+  import Spinner from "@components/Spinner/Spinner.svelte"
 </script>
 
 <div class="wait">
