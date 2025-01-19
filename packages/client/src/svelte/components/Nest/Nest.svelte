@@ -5,6 +5,8 @@
     playerRatTraits,
     rooms,
   } from "@modules/state/base/stores"
+  import { UI } from "@modules/ui/enums"
+  import { UIState } from "@modules/ui/stores"
 
   import { ENVIRONMENT } from "@mud/enums"
 
@@ -14,6 +16,10 @@
   import LoadOut from "@svelte/components/Nest/LoadOut/LoadOut.svelte"
 
   export let environment: ENVIRONMENT
+
+  function restart() {
+    UIState.set(UI.CREATING_RAT)
+  }
 </script>
 
 <div class="nest">
@@ -32,29 +38,35 @@
         <img class="rat" src="/images/rat.jpg" alt="nest" />
         <img class="stamp" src="/images/dead.png" alt="dead" />
       </div>
-      <div class="stats">
-        <div class="stat-item trait">
-          <strong>Traits:</strong>
-          {#if $playerRatTraits}
-            {#each $playerRatTraits as trait}
-              <div class="trait-item">{trait.name}</div>
-            {/each}
-          {/if}
+      {#if $playerRat.dead}
+        <div class="restart">
+          <button on:click={restart}>Get new rat</button>
         </div>
-        <div class="stat-item">
-          <strong>Dead:</strong>
-          {$playerRat?.dead}
+      {:else}
+        <div class="stats">
+          <div class="stat-item trait">
+            <strong>Traits:</strong>
+            {#if $playerRatTraits}
+              {#each $playerRatTraits as trait}
+                <div class="trait-item">{trait.name}</div>
+              {/each}
+            {/if}
+          </div>
+          <div class="stat-item">
+            <strong>Dead:</strong>
+            {$playerRat?.dead}
+          </div>
+          <div class="stat-item">
+            <strong>Health:</strong>
+            {$playerRat?.health ?? 0}
+          </div>
+          <hr />
+          <!-- LOAD OUT -->
+          <div class="stat-item">
+            <LoadOut />
+          </div>
         </div>
-        <div class="stat-item">
-          <strong>Health:</strong>
-          {$playerRat?.health ?? 0}
-        </div>
-        <hr />
-        <!-- LOAD OUT -->
-        <div class="stat-item">
-          <LoadOut />
-        </div>
-      </div>
+      {/if}
     {/if}
   </div>
 
@@ -143,6 +155,18 @@
 
       .stamp {
         display: block;
+      }
+    }
+  }
+
+  .restart {
+    button {
+      padding: 40px;
+      background: lightgreen;
+      font-size: 32px;
+      cursor: pointer;
+      &:hover {
+        background: green;
       }
     }
   }

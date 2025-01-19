@@ -3,7 +3,7 @@
   import { createRat } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
-  import { playerRat } from "@modules/state/base/stores"
+  import { playerRat, rats } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
   import Spinner from "@components/Spinner/Spinner.svelte"
@@ -29,7 +29,12 @@
   }
 
   onMount(() => {
-    if ($playerRat && $playerRat.entityType === ENTITY_TYPE.RAT) {
+    // If player already has a living rat, continue
+    if (
+      $playerRat &&
+      !$playerRat.dead &&
+      $playerRat.entityType === ENTITY_TYPE.RAT
+    ) {
       done()
     }
   })
