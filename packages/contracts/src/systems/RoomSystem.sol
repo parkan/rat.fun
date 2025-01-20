@@ -8,13 +8,18 @@ import { ROOM_CREATION_COST } from "../constants.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
 contract RoomSystem is System {
-  function createRoom(string memory roomPrompt) public returns (bytes32 roomId) {
-
+  /**
+   * @notice Create a room
+   * @dev Admin can create rooms for free, players must pay
+   * @param _roomPrompt The prompt for the room
+   * @return roomId The id of the new room
+   */
+  function createRoom(string memory _roomPrompt) public returns (bytes32 roomId) {
     // TODO: Limit prompt length
-    
+
     // Admin creates rooms for free
-    if(_msgSender() == GameConfig.getAdminAddress()) {
-      roomId = LibRoom.createRoom(roomPrompt);
+    if (_msgSender() == GameConfig.getAdminAddress()) {
+      roomId = LibRoom.createRoom(_roomPrompt);
     } else {
       bytes32 playerId = LibUtils.addressToEntityKey(_msgSender());
 
@@ -24,18 +29,25 @@ contract RoomSystem is System {
       Balance.set(playerId, Balance.get(playerId) - ROOM_CREATION_COST);
 
       // Create room
-      roomId = LibRoom.createRoom(roomPrompt);
+      roomId = LibRoom.createRoom(_roomPrompt);
     }
   }
 
-  function changeRoomBalance(bytes32 roomId, uint256 change, bool negative) public {
+  /**
+   * @notice Change balance of room
+   * @dev Only admin can call this function
+   * @param _roomId The id of the room
+   * @param _change Amount to change balance by
+   * @param _negative Whether to subtract or add
+   */
+  function changeRoomBalance(bytes32 _roomId, uint256 _change, bool _negative) public {
     require(_msgSender() == GameConfig.getAdminAddress(), "not allowed");
-    require(EntityType.get(roomId) == ENTITY_TYPE.ROOM, "not a room");
+    require(EntityType.get(_roomId) == ENTITY_TYPE.ROOM, "not a room");
 
-      if(negative) {
-        Balance.set(roomId, LibUtils.safeSubtract(Balance.get(roomId), change));
-      } else {
-        Balance.set(roomId, Balance.get(roomId) + change);
-      }
+    if (_negative) {
+      Balance.set(_roomId, LibUtils.safeSubtract(Balance.get(_roomId), _change));
+    } else {
+      Balance.set(_roomId, Balance.get(_roomId) + _change);
+    }
   }
 }

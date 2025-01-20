@@ -5,14 +5,23 @@ import { EntityType, Name } from "../codegen/index.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
 library LibItem {
-    function createItem(string memory name) internal returns (bytes32 itemId) {
-        itemId = getUniqueEntity();
-        EntityType.set(itemId, ENTITY_TYPE.ITEM);
-        Name.set(itemId, name);
-    }
+  /**
+   * @notice Create an item
+   * @param _name Description of item
+   * @return itemId The id of the new item
+   */
+  function createItem(string memory _name) internal returns (bytes32 itemId) {
+    itemId = getUniqueEntity();
+    EntityType.set(itemId, ENTITY_TYPE.ITEM);
+    Name.set(itemId, _name);
+  }
 
-    function destroyItem(bytes32 itemId) internal {
-        EntityType.deleteRecord(itemId);
-        Name.deleteRecord(itemId);
-    }
+  /**
+   * @notice Destroy an item
+   * @param _itemId The id of the item
+   */
+  function destroyItem(bytes32 _itemId) internal {
+    EntityType.deleteRecord(_itemId);
+    Name.deleteRecord(_itemId);
+  }
 }

@@ -71,7 +71,7 @@
   }
 </script>
 
-<div class="room-item" class:disabled={$playerRat?.dead ?? false}>
+<div class="room-item" class:disabled={$playerRat?.dead || room.balance == 0}>
   <button on:click={submit} disabled={busy}>ROOM {room.roomIndex}</button>
   <div class="room-info">
     <div class="prompt">{room.roomPrompt}</div>

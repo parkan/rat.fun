@@ -13,7 +13,7 @@ export default defineWorld({
       key: [],
       schema: {
         adminAddress: "address",
-        globalRoomIndex: "uint32", 
+        globalRoomIndex: "uint32",
       },
       codegen: {
         dataStruct: true
