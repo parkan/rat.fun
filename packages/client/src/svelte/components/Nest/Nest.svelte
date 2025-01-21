@@ -39,7 +39,7 @@
         <img class="rat" src="/images/rat.jpg" alt="nest" />
         <img class="stamp" src="/images/dead.png" alt="dead" />
       </div>
-      {#if $playerRat.dead}
+      {#if $playerRat?.dead}
         <div class="restart">
           <button on:click={restart}>Get new rat</button>
         </div>

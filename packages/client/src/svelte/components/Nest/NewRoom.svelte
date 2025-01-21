@@ -21,7 +21,7 @@
 </script>
 
 <div class="create-room">
-  <textarea rows="5" cols="50" placeholder="Room prompt" bind:value={newPrompt}
+  <textarea rows="5" placeholder="Room prompt" bind:value={newPrompt}
   ></textarea>
   <button disabled={busy || $player.balance < 100} on:click={sendCreateRoom}>
     Create room
@@ -33,6 +33,11 @@
     width: 100%;
     padding: 20px;
     background: lightblue;
+
+    textarea {
+      width: 100%;
+      padding: 5px;
+    }
 
     button {
       width: 200px;

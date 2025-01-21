@@ -43,6 +43,7 @@
     >
       <!-- Changes to health -->
       <div class="stat-changes">
+        <pre>Stat changes</pre>
         {#each Object.entries(outcome.statChanges) as [stat, change]}
           {#if change !== 0}
             <div class="stat-change" class:negative={change < 0}>
@@ -54,12 +55,10 @@
 
       <!-- New items  -->
       <div class="new-items">
-        <div class="new-items">
-          <pre>New items</pre>
-          {#each outcome.newItems as item}
-            <InventoryItem {item} />
-          {/each}
-        </div>
+        <pre>New items</pre>
+        {#each outcome.newItems as item}
+          <InventoryItem {item} />
+        {/each}
       </div>
 
       <!-- Added traits-->
@@ -110,8 +109,9 @@
     background: black;
     color: white;
     z-index: 10000;
-    padding: 40px;
+    padding: 20px;
     font-size: 16px;
+    overflow-y: auto;
 
     .description {
       font-size: 24px;
@@ -159,7 +159,6 @@
   }
 
   pre {
-    font-size: 12px;
     margin-bottom: 10px;
     margin-top: 10px;
     background: white;
@@ -168,6 +167,6 @@
   }
 
   .outcome {
-    font-size: 10px !important;
+    font-size: 14px !important;
   }
 </style>

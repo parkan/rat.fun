@@ -11,3 +11,12 @@
     {/each}
   {/if}
 </div>
+
+<style lang="scss">
+  .traits {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 10px;
+  }
+</style>

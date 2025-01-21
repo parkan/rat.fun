@@ -14,5 +14,6 @@
     border-radius: 5px;
     background: lightsalmon;
     font-size: 14px;
+    color: black;
   }
 </style>

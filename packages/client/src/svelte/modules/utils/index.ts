@@ -321,6 +321,10 @@ export function getRandomUint256(): bigint {
   return randomUint256;
 }
 
+export function getRandomUint32(): number {
+  return Math.floor(Math.random() * 0x100000000);
+}
+
 export function parseJSONFromContent<T = Record<string, unknown>>(content: string): T {
   // Regex to detect a ```json code block
   const regex = /```json([\s\S]*?)```/;
