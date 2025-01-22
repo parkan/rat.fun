@@ -40,6 +40,7 @@ contract PlayerSystemTest is BaseTest {
 
     // Check rat
     assertEq(uint8(EntityType.get(ratId)), uint8(ENTITY_TYPE.RAT));
+    assertEq(Index.get(ratId), 1);
     assertEq(Owner.get(ratId), playerId);
     assertEq(Dead.get(ratId), false);
     assertEq(Health.get(ratId), 100);

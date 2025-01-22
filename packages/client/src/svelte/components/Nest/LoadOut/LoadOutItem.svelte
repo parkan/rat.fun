@@ -24,18 +24,23 @@
 </script>
 
 <button class="item" disabled={busy} on:click={sendRemoveItemFromLoadOut}>
-  {item.name} (${item.value})
+  <div class="text">{item.name} (${item.value})</div>
 </button>
 
 <style lang="scss">
   .item {
     border: none;
-    font-size: 18px;
+    font-size: var(--font-size-normal);
     padding: 10px;
-    background: orangered;
+    background: var(--color-item);
     display: inline-block;
-    border-radius: 5px;
     cursor: pointer;
     margin-right: 10px;
+    text-transform: uppercase;
+
+    .text {
+      position: relative;
+      top: 2px;
+    }
   }
 </style>

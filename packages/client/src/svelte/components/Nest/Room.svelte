@@ -4,7 +4,7 @@
 
   import type { ServerReturnValue } from "./types"
 
-  import Ellipsis from "@components/Nest/Ellipsis.svelte"
+  import Spinner from "@components/Spinner/Spinner.svelte"
   import InventoryItem from "./Inventory/InventoryItem.svelte"
   import TraitItem from "./Traits/TraitItem.svelte"
 
@@ -42,51 +42,70 @@
       in:fade={{ duration: 200, delay: 500 * outcome.log.length + 1 }}
     >
       <!-- Changes to health -->
-      <div class="stat-changes">
-        <pre>Stat changes</pre>
-        {#each Object.entries(outcome.statChanges) as [stat, change]}
-          {#if change !== 0}
-            <div class="stat-change" class:negative={change < 0}>
-              {stat}: {change}
-            </div>
-          {/if}
-        {/each}
+      <div class="outcome-item">
+        <div class="title">__Stat changes</div>
+        {#if !outcome?.statChanges.health || outcome.statChanges.health == 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          <div
+            class="stat-change"
+            class:negative={outcome.statChanges.health < 0}
+          >
+            health: {outcome.statChanges.health}
+          </div>
+        {/if}
       </div>
 
       <!-- New items  -->
-      <div class="new-items">
-        <pre>New items</pre>
-        {#each outcome.newItems as item}
-          <InventoryItem {item} />
-        {/each}
+      <div class="outcome-item">
+        <div class="title">__ New items</div>
+        {#if !outcome.newItems || outcome.newItems.length === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          {#each outcome.newItems as item}
+            <InventoryItem {item} />
+          {/each}
+        {/if}
       </div>
 
       <!-- Added traits-->
-      <div class="added-traits">
-        <pre>Added traits</pre>
-        {#each outcome.traitChanges.filter(tC => tC.type === "add") as trait}
-          <TraitItem {trait} />
-        {/each}
+      <div class="outcome-item">
+        <div class="title">__ Added traits</div>
+        {#if outcome.traitChanges.filter(tC => tC.type === "add").length === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          {#each outcome.traitChanges.filter(tC => tC.type === "add") as trait}
+            <TraitItem {trait} />
+          {/each}
+        {/if}
       </div>
 
       <!-- Removed traits -->
-      <div class="removed-traits">
-        <pre>Removed traits</pre>
-        {#each outcome.traitChanges.filter(tC => tC.type === "remove") as trait}
-          <TraitItem {trait} />
-        {/each}
+      <div class="outcome-item">
+        <div class="title">__ Removed traits</div>
+        {#if outcome.traitChanges.filter(tC => tC.type === "remove").length === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          {#each outcome.traitChanges.filter(tC => tC.type === "remove") as trait}
+            <TraitItem {trait} />
+          {/each}
+        {/if}
       </div>
 
       <!-- $ transferred to player -->
-      <div class="transferred">
-        <pre>Balance transfer to player</pre>
-        <div>${outcome.balanceTransfer}</div>
+      <div class="outcome-item">
+        <div class="title">Balance transfer to player</div>
+        {#if outcome.balanceTransfer === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          <div class="balance">${outcome.balanceTransfer}</div>
+        {/if}
       </div>
 
       <!-- New room balance -->
-      <div class="new-room-balance">
-        <pre>New room balance</pre>
-        <div>{room.balance}</div>
+      <div class="outcome-item">
+        <div class="title">New room balance</div>
+        <div class="balance">${room.balance}</div>
       </div>
 
       <div class="return">
@@ -94,45 +113,47 @@
       </div>
     </div>
   {:else}
-    <Ellipsis />
+    EXPERIMENT IN PROGRESS: <Spinner />
   {/if}
 </div>
 
 <style lang="scss">
   .room {
-    font-family: "courier new", monospace;
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: black;
-    color: white;
+    background: var(--black);
+    color: var(--white);
     z-index: 10000;
     padding: 20px;
-    font-size: 16px;
+    font-size: var(--font-size-normal);
     overflow-y: auto;
 
     .description {
-      font-size: 24px;
+      font-size: var(--font-size-large);
       margin-bottom: 20px;
-      background: yellow;
-      color: black;
+      background: var(--color-alert);
+      color: var(--black);
       max-width: 800px;
+      padding: 10px;
     }
 
     .log {
       margin-bottom: 20px;
+      font-size: var(--font-size-large);
+      line-height: 1.3em;
     }
 
     .outcome {
-      max-width: 800px;
+      max-width: 500px;
     }
 
     button {
-      width: 50%;
-      padding: 40px;
-      font-size: 32px;
+      padding: 10px;
+      font-size: var(--font-size-large);
+      background: var(--color-alert);
       margin-top: 20px;
       cursor: pointer;
     }
@@ -140,33 +161,39 @@
     .stat-change {
       display: inline-block;
       padding: 10px;
-      margin: 10px;
-      background: green;
+      margin-right: 10px;
+      background: var(--color-health);
 
       &.negative {
-        background: red;
+        background: var(--color-death);
       }
     }
   }
 
-  .new-items,
-  .added-traits,
-  .removed-traits,
-  .transferred,
-  .new-room-balance {
-    margin-top: 20px;
-    border-top: 1px solid white;
-  }
-
-  pre {
-    margin-bottom: 10px;
-    margin-top: 10px;
-    background: white;
-    color: black;
-    padding: 2px;
+  .outcome-item {
+    padding-top: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-top: 1px solid var(--color-grey-dark);
   }
 
   .outcome {
-    font-size: 14px !important;
+    font-size: var(--font-size-normal);
+  }
+
+  .empty {
+    color: var(--color-grey-mid);
+  }
+
+  .balance {
+    display: inline-block;
+    padding: 10px;
+    background: var(--color-value);
+    color: var(--black);
+  }
+
+  .title {
+    margin-bottom: 5px;
   }
 </style>

@@ -1,12 +1,13 @@
 <script lang="ts">
   import {
+    playerAddress,
     player,
     playerRat,
-    playerRatTraits,
     rooms,
   } from "@modules/state/base/stores"
   import { UI } from "@modules/ui/enums"
   import { UIState } from "@modules/ui/stores"
+  import { shortenAddress } from "@modules/utils"
 
   import { ENVIRONMENT } from "@mud/enums"
 
@@ -25,44 +26,62 @@
 
 <div class="nest">
   <div class="column first">
+    <!-- PLAYER STATS -->
     {#if $player}
-      <div class="balance">
-        Balance:
-        <strong>${$player?.balance ?? 0}</strong>
-      </div>
-      <!-- INVENTORY -->
-      <div class="stat-item">
-        <Inventory />
-      </div>
-      <hr />
-      <div class="image-container" class:dead={$playerRat?.dead ?? false}>
-        <img class="rat" src="/images/rat.jpg" alt="nest" />
-        <img class="stamp" src="/images/dead.png" alt="dead" />
-      </div>
-      {#if $playerRat?.dead}
-        <div class="restart">
-          <button on:click={restart}>Get new rat</button>
+      <div class="player-stats">
+        <!-- RAT KEEPER ADDRESS -->
+        <div class="stat-item">
+          <div class="inner-wrapper rat-keeper">
+            <div class="label">Rat keeper:</div>
+            <div class="value">{shortenAddress($playerAddress)}</div>
+          </div>
         </div>
-      {:else}
-        <div class="stats">
-          <div class="stat-item trait">
-            <Traits />
+        <!-- RAT KEEPER BALANCE -->
+        <div class="stat-item">
+          <div class="inner-wrapper balance">
+            <div class="label">Balance:</div>
+            <div class="value">${$player?.balance ?? 0}</div>
           </div>
-          <div class="stat-item">
-            <strong>Dead:</strong>
-            {$playerRat?.dead}
+        </div>
+        <!-- INVENTORY -->
+        <div class="stat-item">
+          <Inventory />
+        </div>
+      </div>
+    {/if}
+
+    <!-- RAT STATS -->
+    {#if $playerRat}
+      <div class="rat-stats">
+        <!-- RAT -->
+        <div class="stat-item">
+          <div class="inner-wrapper rat">
+            <div class="label">Rat #{$playerRat.index}</div>
           </div>
-          <div class="stat-item">
-            <strong>Health:</strong>
-            {$playerRat?.health ?? 0}
+        </div>
+        <!-- HEALTH -->
+        <div class="stat-item">
+          <div class="inner-wrapper health">
+            <div class="label">Health:</div>
+            <div class="value">{$playerRat?.health ?? 0}</div>
           </div>
-          <hr />
+        </div>
+        {#if !$playerRat?.dead}
+          <!-- TRAITS -->
+          <Traits />
           <!-- LOAD OUT -->
+          <LoadOut />
+        {:else}
           <div class="stat-item">
-            <LoadOut />
+            <div class="inner-wrapper dead">
+              <div class="label">RAT IS DEAD</div>
+            </div>
           </div>
-        </div>
-      {/if}
+          <div class="restart">
+            <button on:click={restart}>Get new rat</button>
+          </div>
+        {/if}
+      </div>
     {/if}
   </div>
 
@@ -95,36 +114,20 @@
     overflow-y: auto;
 
     &.first {
-      background: blue;
+      border-right: 1px solid var(--white);
     }
-
-    &.second {
-      background: red;
-    }
-  }
-
-  .stat-item {
-    margin-bottom: 1em;
   }
 
   .trait {
     background: lightcyan;
-    color: black;
+    color: var(--black);
     display: flex;
     flex-wrap: wrap;
   }
 
-  .balance {
-    padding: 10px;
-    background: yellow;
-    font-size: 23px;
-    margin-bottom: 20px;
-    color: black;
-  }
-
   .image-container {
-    display: inline-block;
     position: relative;
+    margin-top: 10px;
 
     .stamp {
       width: 400px;
@@ -148,12 +151,59 @@
 
   .restart {
     button {
-      padding: 40px;
-      background: lightgreen;
-      font-size: 32px;
+      padding: 10px;
+      background: var(--color-alert);
+      font-size: var(--font-size-normal);
       cursor: pointer;
-      &:hover {
-        background: green;
+    }
+  }
+
+  .player-stats {
+    border-bottom: 1px solid var(--white);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .rat-stats {
+    border-bottom: 1px solid var(--white);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .stat-item {
+    margin-bottom: 10px;
+
+    .label {
+      margin-right: 0.5em;
+    }
+
+    .inner-wrapper {
+      display: inline-flex;
+      padding: 5px;
+
+      &.balance {
+        background: var(--color-value);
+        color: var(--black);
+      }
+
+      &.rat-keeper {
+        background: var(--color-alert);
+        color: var(--black);
+      }
+
+      &.rat {
+        background: var(--color-alert);
+        color: var(--black);
+      }
+
+      &.health {
+        background: var(--color-health);
+        color: var(--black);
+      }
+
+      &.dead {
+        background: var(--color-death);
+        color: var(--white);
       }
     }
   }

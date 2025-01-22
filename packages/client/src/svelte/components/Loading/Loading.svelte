@@ -18,9 +18,7 @@
   }
 
   onMount(async () => {
-    // console.log("initializing network")
     await initNetwork(environment)
-    // console.log("environment", environment)
   })
 </script>
 

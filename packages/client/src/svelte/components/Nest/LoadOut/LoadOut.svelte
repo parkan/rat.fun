@@ -7,19 +7,28 @@
   import LoadOutItem from "@svelte/components/Nest/LoadOut/LoadOutItem.svelte"
 </script>
 
-{#if $playerRat && $playerRatLoadOut}
-  <div class="load-out">
-    <pre>Load out (click item to dequip)</pre>
-    <div class="content">
+<div class="load-out">
+  <div class="title">__ Load out (click item to dequip)</div>
+  <div class="content">
+    {#if !$playerRatLoadOut || $playerRatLoadOut.length === 0}
+      <div>** EMPTY **</div>
+    {:else}
       {#each $playerRatLoadOut as item, i}
         <LoadOutItem {item} key={$playerRat.loadOut[i]} />
       {/each}
-    </div>
+    {/if}
   </div>
-{/if}
+</div>
 
 <style lang="scss">
-  .content {
-    margin-top: 10px;
+  .load-out {
+    background: var(--color-grey-light);
+    padding: 5px;
+    color: var(--black);
+    margin-bottom: 10px;
+
+    .content {
+      margin-top: 5px;
+    }
   }
 </style>

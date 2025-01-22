@@ -14,6 +14,7 @@ export default defineWorld({
       schema: {
         adminAddress: "address",
         globalRoomIndex: "uint32",
+        globalRatIndex: "uint32"
       },
       codegen: {
         dataStruct: true
@@ -34,7 +35,7 @@ export default defineWorld({
     OwnedRat: "bytes32",
     Owner: "bytes32",
     RoomPrompt: "string",
-    RoomIndex: "uint256"
+    Index: "uint256"
   },
   modules: [
     {

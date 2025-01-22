@@ -24,26 +24,37 @@
   <textarea rows="5" placeholder="Room prompt" bind:value={newPrompt}
   ></textarea>
   <button disabled={busy || $player.balance < 100} on:click={sendCreateRoom}>
-    Create room
+    Create room (Cost: $100)
   </button>
 </div>
 
 <style lang="scss">
   .create-room {
     width: 100%;
-    padding: 20px;
-    background: lightblue;
+    padding: 10px;
+    background: var(--color-grey-mid);
 
     textarea {
       width: 100%;
       padding: 5px;
+      background: var(--color-grey-light);
+      font-family: var(--typewrite-stack);
+      outline-color: var(--color-alert);
+      border-radius: 0;
+      font-size: var(--font-size-normal);
+      border: none;
     }
 
     button {
-      width: 200px;
-      padding: 5px;
-      margin-top: 20px;
+      padding: 10px;
+      margin-top: 10px;
       cursor: pointer;
+      font-size: var(--font-size-normal);
+      background: var(--color-secondary);
+
+      &:active {
+        background: var(--color-alert);
+      }
     }
   }
 </style>

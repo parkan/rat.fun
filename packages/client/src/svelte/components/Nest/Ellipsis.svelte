@@ -18,8 +18,7 @@
 
 <style>
   .ellipsis {
-    font-family: monospace;
-    font-size: 1.5rem;
+    font-size: var(--font-size-normal);
     white-space: pre;
   }
 </style>

@@ -9,6 +9,6 @@ library LibInit {
    */
   function init(address _adminAddress) internal {
     // Set game config
-    GameConfig.set(GameConfigData({ adminAddress: _adminAddress, globalRoomIndex: 0 }));
+    GameConfig.set(GameConfigData({ adminAddress: _adminAddress, globalRoomIndex: 0, globalRatIndex: 0 }));
   }
 }

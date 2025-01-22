@@ -3,19 +3,29 @@
   import InventoryItem from "@components/Nest/Inventory/InventoryItem.svelte"
 </script>
 
-{#if $player && $playerInventory}
+{#if $player}
   <div class="inventory">
-    <pre>Inventory (click item to equip)</pre>
+    <div class="title">__ NEST Inventory (click item to equip)</div>
     <div class="content">
-      {#each $playerInventory as item, i}
-        <InventoryItem {item} key={$player.inventory[i]} />
-      {/each}
+      {#if !$playerInventory || $playerInventory.length === 0}
+        <div>** EMPTY **</div>
+      {:else}
+        {#each $playerInventory as item, i}
+          <InventoryItem {item} key={$player.inventory[i]} />
+        {/each}
+      {/if}
     </div>
   </div>
 {/if}
 
 <style lang="scss">
-  .content {
-    margin-top: 10px;
+  .inventory {
+    background: var(--color-grey-light);
+    padding: 5px;
+    color: var(--black);
+
+    .content {
+      margin-top: 5px;
+    }
   }
 </style>

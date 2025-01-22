@@ -70,7 +70,7 @@
 </script>
 
 <div class="room-item" class:disabled={$playerRat?.dead || room.balance == 0}>
-  <button on:click={submit} disabled={busy}>ROOM {room.roomIndex}</button>
+  <button on:click={submit} disabled={busy}>ROOM #{room.index}</button>
   <div class="room-info">
     <div class="prompt">{room.roomPrompt}</div>
     <div class="balance">Balance: ${room.balance ?? 0}</div>
@@ -92,27 +92,34 @@
     }
 
     button {
+      display: block;
       width: 200px;
       padding: 20px;
-      font-size: 32px;
+      font-size: var(--font-size-large);
       margin-top: 20px;
       cursor: pointer;
+      flex-shrink: 0;
+      background: var(--color-secondary);
+
+      &:active {
+        background: var(--color-alert);
+      }
     }
   }
 
   .room-info {
     padding: 20px;
-    background: rgb(211, 255, 79);
-    color: black;
+    background: var(--color-grey-light);
+    color: var(--black);
     margin-top: 20px;
-    font-size: 16px;
+    font-size: var(--font-size-normal);
   }
 
   .balance {
     padding: 10px;
-    background: purple;
+    background: var(--color-value);
+    color: var(--black);
     display: inline-block;
     margin-top: 10px;
-    color: white;
   }
 </style>

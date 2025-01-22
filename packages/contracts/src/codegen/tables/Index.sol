@@ -16,9 +16,9 @@ import { Schema } from "@latticexyz/store/src/Schema.sol";
 import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/EncodedLengths.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
-library RoomIndex {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "ratroom", name: "RoomIndex", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462726174726f6f6d00000000000000526f6f6d496e64657800000000000000);
+library Index {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "ratroom", name: "Index", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462726174726f6f6d00000000000000496e6465780000000000000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);

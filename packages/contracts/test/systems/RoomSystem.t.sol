@@ -19,8 +19,11 @@ contract RoomSystemTest is BaseTest {
 
     vm.stopPrank();
 
+    console.log(Index.get(roomId));
+
     // Check room
     assertEq(uint8(EntityType.get(roomId)), uint8(ENTITY_TYPE.ROOM));
+    assertEq(Index.get(roomId), 1);
     assertEq(RoomPrompt.get(roomId), "A test room");
     assertEq(Balance.get(roomId), ROOM_CREATION_COST);
   }
@@ -41,7 +44,6 @@ contract RoomSystemTest is BaseTest {
 
   function testCreateRoomUser() public {
     setUp();
-
 
     vm.startPrank(alice);
     bytes32 playerId = world.ratroom__spawn();

@@ -12,8 +12,6 @@
 
   const done = () => dispatch("done")
 
-  // $: console.log("$player", $player)
-
   let busy = false
 
   async function sendSpawn() {
@@ -38,32 +36,56 @@
 </script>
 
 <div class="main">
-  <div>
-    <button disabled={busy} on:click={sendSpawn}>Spawn</button>
-  </div>
-  {#if busy}
-    <Spinner />
-  {/if}
+  <div class="title">RESEARCH FACILITY</div>
+  <button class:busy on:click={sendSpawn}>
+    <span class="button-text">ENTER</span>
+    {#if busy}
+      <div class="spinner"><Spinner /></div>
+    {/if}
+  </button>
 </div>
 
 <style lang="scss">
   .main {
     text-align: center;
-    padding: 10px;
-    background: rgb(88, 88, 88);
-    color: white;
-    width: 40%;
+    padding-inline: 20px;
+    background: var(--color-grey-mid);
+    color: var(--white);
+    width: 50%;
+  }
+
+  .title {
+    font-size: var(--font-size-large);
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   button {
     padding: 20px;
-    margin-top: 20px;
-    font-size: 24px;
+    font-size: var(--font-size-large);
     width: 100%;
-    cursor: pointer;
+    background: var(--color-alert);
+    margin-bottom: 20px;
 
-    &:hover {
-      background: green;
+    .spinner {
+      position: relative;
+      top: 2px;
+      display: none;
+    }
+
+    &.busy {
+      background: var(--color-alert);
+      pointer-events: none;
+      cursor: default;
+      background: var(--color-grey-light);
+
+      .spinner {
+        display: block;
+      }
+
+      .button-text {
+        display: none;
+      }
     }
   }
 </style>

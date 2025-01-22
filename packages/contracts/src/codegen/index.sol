@@ -16,4 +16,4 @@ import { Value } from "./tables/Value.sol";
 import { OwnedRat } from "./tables/OwnedRat.sol";
 import { Owner } from "./tables/Owner.sol";
 import { RoomPrompt } from "./tables/RoomPrompt.sol";
-import { RoomIndex } from "./tables/RoomIndex.sol";
+import { Index } from "./tables/Index.sol";

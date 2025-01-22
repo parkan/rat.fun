@@ -4,19 +4,27 @@
 </script>
 
 <div class="traits">
-  <strong>Traits:</strong>
-  {#if $playerRatTraits}
-    {#each $playerRatTraits as trait}
-      <TraitItem {trait} />
-    {/each}
-  {/if}
+  <div class="title">__ Traits</div>
+  <div class="content">
+    {#if !$playerRatTraits || $playerRatTraits.length === 0}
+      <div>** BLANK **</div>
+    {:else}
+      {#each $playerRatTraits as trait}
+        <TraitItem {trait} />
+      {/each}
+    {/if}
+  </div>
 </div>
 
 <style lang="scss">
   .traits {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    padding: 10px;
+    background: var(--color-grey-light);
+    padding: 5px;
+    color: var(--black);
+    margin-bottom: 10px;
+
+    .content {
+      margin-top: 5px;
+    }
   }
 </style>
