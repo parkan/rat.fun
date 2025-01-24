@@ -8,7 +8,9 @@ export function constructEventMessages(
 ): MessageParam[] {
     const messages: MessageParam[] = [];
     messages.push({ role: "user", content: `Room: ${room.prompt}` });
+    messages.push({ role: "user", content: `RoomBalance: ${room.balance}` });
     messages.push({ role: "user", content: `Rat: ${rat.prompt}` });
+    messages.push({ role: "user", content: `RatBalance: ${rat.balance}` });
     messages.push({ role: "user", content: `RatStats: ${JSON.stringify(rat.stats)}` });
     return messages;
 }
@@ -24,6 +26,6 @@ export function constructOutcomeMessages(
     messages.push({ role: "user", content: `RatTraits: ${JSON.stringify(rat.traits)}` });
     messages.push({ role: "user", content: `RatItems: ${JSON.stringify(rat.loadOut)}` });
     messages.push({ role: "user", content: `RatStats: ${JSON.stringify(rat.stats)}` });
-    messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events.log)}` });
+    messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events)}` });
     return messages;
 }

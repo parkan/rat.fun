@@ -7,221 +7,41 @@ import "../../src/libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../../src/codegen/common.sol";
 
 contract RatSystemTest is BaseTest {
-    function testAddTrait() public {
+    function testCreateRat() public {
         setUp();
 
         vm.startPrank(alice);
-        world.ratroom__spawn();
+
+        bytes32 playerId = world.ratroom__spawn("alice");
+
+        startGasReport("Create rat");
         bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
-        prankAdmin();
-
-        startGasReport("Add trait");
-        bytes32 hungryTraitId = world.ratroom__addTrait(ratId, "hungry", 20);
         endGasReport();
-        
+
         vm.stopPrank();
 
-        assertEq(uint8(EntityType.get(hungryTraitId)), uint8(ENTITY_TYPE.TRAIT));
-        assertTrue(LibUtils.stringEq(Name.get(hungryTraitId), "hungry"));
-        assertEq(Value.get(hungryTraitId), 20);
+        assertEq(OwnedRat.get(playerId), ratId);
 
-        bytes32[] memory traits = Traits.get(ratId);
-        assertEq(traits.length, 1);
-        assertEq(traits[0], hungryTraitId);
-    }
-
-    function testRemoveTrait() public {
-        setUp();
-
-        vm.startPrank(alice);
-        world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
-        prankAdmin();
-
-        bytes32 hungryTraitId = world.ratroom__addTrait(ratId, "hungry", 20);
-
-        assertEq(uint8(EntityType.get(hungryTraitId)), uint8(ENTITY_TYPE.TRAIT));
-        assertTrue(LibUtils.stringEq(Name.get(hungryTraitId), "hungry"));
-        assertEq(Value.get(hungryTraitId), 20);
-
-        startGasReport("Remove trait");
-        world.ratroom__removeTrait(ratId, hungryTraitId);
-        endGasReport();
-        
-        vm.stopPrank();
-
-        assertEq(uint8(EntityType.get(hungryTraitId)), uint8(ENTITY_TYPE.NONE));
-        assertTrue(LibUtils.stringEq(Name.get(hungryTraitId), ""));
-        assertEq(Value.get(hungryTraitId), 0);
-
-        bytes32[] memory traits = Traits.get(ratId);
-        assertEq(traits.length, 0);
-    }
-
-    function testSetHealth() public {
-        setUp();
-
-        vm.startPrank(alice);
-        world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
+        // Check rat
+        assertEq(uint8(EntityType.get(ratId)), uint8(ENTITY_TYPE.RAT));
+        assertEq(Index.get(ratId), 1);
+        assertEq(Balance.get(ratId), 0);
+        assertEq(Owner.get(ratId), playerId);
+        assertEq(Dead.get(ratId), false);
         assertEq(Health.get(ratId), 100);
-
-        prankAdmin();
-        startGasReport("Increase health");
-        world.ratroom__increaseHealth(ratId, 10);
-        endGasReport();
-        vm.stopPrank();
-
-        assertEq(Health.get(ratId), 110);
-
-        prankAdmin();
-        startGasReport("Decrease health");
-        world.ratroom__decreaseHealth(ratId, 20);
-        endGasReport();
-        vm.stopPrank();
-
-        assertEq(Health.get(ratId), 90);
-
-        prankAdmin();
-        world.ratroom__decreaseHealth(ratId, 200);
-        vm.stopPrank();
-
-        assertEq(Health.get(ratId), 0);
-        assertTrue(Dead.get(ratId));
     }
 
-    function testRevertNotAllowed() public {
+    function testRevertAlreadyHasRat() public {
         setUp();
 
         vm.startPrank(alice);
-        world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
+        world.ratroom__spawn("alice");
+
+        world.ratroom__createRat();
+
+        vm.expectRevert("already has rat");
+        world.ratroom__createRat();
+
         vm.stopPrank();
-
-        vm.expectRevert("not allowed");
-        world.ratroom__addTrait(ratId, "hungry", 20);
-
-        vm.expectRevert("not allowed");
-        world.ratroom__removeTrait(ratId, bytes32(0));
-
-        vm.expectRevert("not allowed");
-        world.ratroom__increaseHealth(ratId, 10);
-
-        vm.expectRevert("not allowed");
-        world.ratroom__decreaseHealth(ratId, 10);
     }
-
-    function testAddItemToLoadOut() public {
-        setUp();
-
-        // Spawn player and create rat
-        vm.startPrank(alice);
-        bytes32 playerId = world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
-        // As admin, give player item
-        prankAdmin();
-        bytes32 itemId = world.ratroom__addItemToInventory(playerId, "test item", 20);
-        vm.stopPrank();
-
-        vm.startPrank(alice);
-
-        // As player, add item to load out
-        startGasReport("Add item to load out");
-        world.ratroom__addItemToLoadOut(itemId);
-        endGasReport();
-        
-        vm.stopPrank();
-
-        // Check inventory
-        bytes32[] memory inventory = Inventory.get(playerId);
-        assertEq(inventory.length, 0);
-
-        // Check load out
-        bytes32[] memory loadOut = LoadOut.get(ratId);
-        assertEq(loadOut.length, 1);
-        assertEq(loadOut[0], itemId);
-    }
-
-    function testRemoveItemFromLoadOut() public {
-        setUp();
-
-        // Spawn player and create rat
-        vm.startPrank(alice);
-        bytes32 playerId = world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
-        // As admin, give player item
-        prankAdmin();
-        bytes32 itemId = world.ratroom__addItemToInventory(playerId, "test item", 20);
-        vm.stopPrank();
-
-
-        // As player, add item to load out then remove it
-        vm.startPrank(alice);
-
-        world.ratroom__addItemToLoadOut(itemId);
-
-        startGasReport("Remove item from load out");
-        world.ratroom__removeItemFromLoadOut(itemId);
-        endGasReport();
-
-        vm.stopPrank();
-
-        // Check inventory
-        bytes32[] memory inventory = Inventory.get(playerId);
-        assertEq(inventory.length, 1);
-        assertEq(inventory[0], itemId);
-
-        // Check load out
-        bytes32[] memory loadOut = LoadOut.get(ratId);
-        assertEq(loadOut.length, 0);
-    }
-
-    function testClearLoadOut() public {
-        setUp();
-
-        // Spawn player and create rat
-        vm.startPrank(alice);
-        bytes32 playerId = world.ratroom__spawn();
-        bytes32 ratId = world.ratroom__createRat();
-        vm.stopPrank();
-
-        // As admin, give player two item
-        prankAdmin();
-        bytes32 itemIdOne = world.ratroom__addItemToInventory(playerId, "test item", 20);
-        bytes32 itemIdTwo = world.ratroom__addItemToInventory(playerId, "anoter test item", 20);
-        vm.stopPrank();
-
-        // As player, add the items to load out
-        vm.startPrank(alice);
-        world.ratroom__addItemToLoadOut(itemIdOne);
-        world.ratroom__addItemToLoadOut(itemIdTwo);
-        vm.stopPrank();
-
-        // As admin, clear the load out
-        prankAdmin();
-        startGasReport("Clear load out");
-        world.ratroom__clearLoadOut(ratId, bytes32(0));
-        endGasReport();
-
-        // Check load out
-        bytes32[] memory loadOut = LoadOut.get(ratId);
-        assertEq(loadOut.length, 0);
-
-        // Check room
-        assertEq(Balance.get(bytes32(0)), 40);
-    }
-
-    // - - - - - - - - - -
-    // TODO: test reverts
-    // - - - - - - - - - -
 }

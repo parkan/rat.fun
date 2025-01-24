@@ -11,16 +11,19 @@ export type Room = {
 
 export type Trait = {
     id: string,
-    name: string
+    name: string,
+    value: number
 }
 
 export type Item = {
     id: string,
-    name: string
+    name: string,
+    value: number
 }
 
 export type Rat = {
     prompt: string;
+    balance: number;
     traits: Trait[];
     loadOut: Item[];
     dead: boolean;

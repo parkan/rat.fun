@@ -1,104 +1,116 @@
 [
   {
-    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
-    "test": "testAddItemToInventory",
-    "name": "Add item to inventory",
-    "gasUsed": 227958
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testAddItemToLoadOut",
+    "name": "Add item to load out",
+    "gasUsed": 241398
   },
   {
-    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
-    "test": "testCreateRat",
-    "name": "Create rat",
-    "gasUsed": 277132
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testAddTraitToRat",
+    "name": "Add trait to rat",
+    "gasUsed": 241355
   },
   {
-    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
-    "test": "testRemoveItemFromInventory",
-    "name": "Remove item from inventory",
-    "gasUsed": 28937
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testDecreaseBalance",
+    "name": "Decrease balance",
+    "gasUsed": 31140
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testDecreaseHealth",
+    "name": "Decrease health",
+    "gasUsed": 44885
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testIncreaseBalance",
+    "name": "Increase balance",
+    "gasUsed": 61482
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testIncreaseHealth",
+    "name": "Increase health",
+    "gasUsed": 41585
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testRemoveItemFromLoadOut",
+    "name": "Remove item from load out",
+    "gasUsed": 28983
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testRemoveTraitFromRat",
+    "name": "Remove trait from rat",
+    "gasUsed": 28983
   },
   {
     "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
     "test": "testSpawn",
     "name": "Spawn",
-    "gasUsed": 101156
+    "gasUsed": 161707
   },
   {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testAddItemToLoadOut",
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferBalanceToPlayer",
+    "name": "Transfer balance to rat",
+    "gasUsed": 52086
+  },
+  {
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferBalanceToRat",
+    "name": "Transfer balance to rat",
+    "gasUsed": 71986
+  },
+  {
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferItemToInventory",
     "name": "Add item to load out",
-    "gasUsed": 93033
+    "gasUsed": 241398
+  },
+  {
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferItemToInventory",
+    "name": "Transfer item from load out to inventory",
+    "gasUsed": 95930
+  },
+  {
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferItemToLoadOut",
+    "name": "Add item to load out",
+    "gasUsed": 241398
+  },
+  {
+    "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
+    "test": "testTransferItemToLoadOut",
+    "name": "Transfer item from inventory to load out",
+    "gasUsed": 73952
   },
   {
     "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testAddTrait",
-    "name": "Add trait",
-    "gasUsed": 227971
-  },
-  {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testClearLoadOut",
-    "name": "Clear load out",
-    "gasUsed": 94827
-  },
-  {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testRemoveItemFromLoadOut",
-    "name": "Remove item from load out",
-    "gasUsed": 67006
-  },
-  {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testRemoveTrait",
-    "name": "Remove trait",
-    "gasUsed": 28965
-  },
-  {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testSetHealth",
-    "name": "Increase health",
-    "gasUsed": 31086
-  },
-  {
-    "file": "test/systems/RatSystem.t.sol:RatSystemTest",
-    "test": "testSetHealth",
-    "name": "Decrease health",
-    "gasUsed": 34404
-  },
-  {
-    "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
-    "test": "testChangeRoomBalance",
-    "name": "Increase room balance",
-    "gasUsed": 31059
-  },
-  {
-    "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
-    "test": "testChangeRoomBalance",
-    "name": "Decrease room balance",
-    "gasUsed": 31101
+    "test": "testCreateRat",
+    "name": "Create rat",
+    "gasUsed": 290294
   },
   {
     "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
     "test": "testCreateRoomAdmin",
     "name": "Create room (admin)",
-    "gasUsed": 253718
+    "gasUsed": 253713
   },
   {
     "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
     "test": "testCreateRoomUser",
     "name": "Create room (user)",
-    "gasUsed": 267532
+    "gasUsed": 267527
   },
   {
     "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
     "test": "testLongRoomPromptAdmin",
     "name": "Create room: long prompt",
-    "gasUsed": 390279
-  },
-  {
-    "file": "test/systems/RoomSystem.t.sol:RoomSystemTest",
-    "test": "testTransferBalanceToPlayer",
-    "name": "Transfer balance to player",
-    "gasUsed": 49039
+    "gasUsed": 390280
   }
 ]

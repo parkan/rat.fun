@@ -21,8 +21,8 @@ import { getSenderId } from '@modules/signature';
 // CMS
 import { getSystemPrompts } from '@modules/cms';
 
-// Execute outcomes
-import { addItems, changeTraits, changeStats, transferBalance } from './executeOutcomes';
+// Apply changes to onchain state
+import { changeStats, changeTraits, changeItems, transferBalance } from './executeOutcomes';
 
 dotenv.config();
 
@@ -96,18 +96,17 @@ async function routes (fastify: FastifyInstance) {
             }
 
             // Execute onchain changes based on outcome
-            await changeTraits(systemCalls, outcome, ratId, roomId);
-            await addItems(systemCalls, outcome, playerId, roomId);
             await changeStats(systemCalls, outcome, ratId, roomId);
-            await transferBalance(systemCalls, outcome, playerId, roomId);
-            await systemCalls.clearLoadOut(ratId, roomId);
+            await changeTraits(systemCalls, outcome, ratId, roomId);
+            await changeItems(systemCalls, outcome, ratId, roomId);
+            await transferBalance(systemCalls, outcome, ratId, roomId);
 
             const returnObject = {
-                log: events.log,
-                newItems: outcome.newItems,
-                balanceTransfer: outcome.balanceTransfer,
+                log: events,
+                statChanges: outcome.statChanges,
                 traitChanges: outcome.traitChanges,
-                statChanges: outcome.statChanges
+                itemChanges: outcome.itemChanges,
+                balanceTransfer: outcome.balanceTransfer,
             }
 
             reply.send(returnObject);

@@ -16,7 +16,10 @@ export default defineWorld({
         globalRoomIndex: "uint32",
         globalRatIndex: "uint32",
         roomCreationCost: "uint32",
-        maxRoomPromptLength: "uint32"
+        maxRoomPromptLength: "uint32",
+        maxInventorySize: "uint32",
+        maxLoadOutSize: "uint32",
+        maxTraitsSize: "uint32",
       },
       codegen: {
         dataStruct: true
@@ -42,11 +45,6 @@ export default defineWorld({
   modules: [
     {
       artifactPath: "@latticexyz/world-modules/out/UniqueEntityModule.sol/UniqueEntityModule.json",
-      root: true,
-      args: [],
-    },
-    {
-      artifactPath: "@latticexyz/world-modules/out/Unstable_CallWithSignatureModule.sol/Unstable_CallWithSignatureModule.json",
       root: true,
       args: [],
     }

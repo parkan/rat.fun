@@ -5,9 +5,11 @@
   } from "@svelte/modules/state/base/stores"
 
   import LoadOutItem from "@svelte/components/Nest/LoadOut/LoadOutItem.svelte"
+
+  export let locked = false
 </script>
 
-<div class="load-out">
+<div class="load-out" class:locked>
   <div class="title">__ Load out (click item to dequip)</div>
   <div class="content">
     {#if !$playerRatLoadOut || $playerRatLoadOut.length === 0}
@@ -26,6 +28,10 @@
     padding: 5px;
     color: var(--black);
     margin-bottom: 10px;
+
+    &.locked {
+      pointer-events: none;
+    }
 
     .content {
       margin-top: 5px;

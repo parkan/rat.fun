@@ -15,17 +15,19 @@ export const schema =     {
         properties: {
           log: {
             type: 'array',
-            items: { type: 'string' },
-            description: 'An array of events that occurred'
-          },
-          newItems: {
-            type: 'array',
             items: { 
               type: 'object',
               properties: {
-                name: { type: 'string'},
-                value: { type: 'number'}
+                timestamp: { type: 'string'},
+                event: { type: 'string'}
               },
+            },
+          },
+          statChanges: {
+            type: 'object',
+            description: 'Changes to stats after the operation',
+            properties: {
+              health: { type: 'integer', description: 'Change in health points' }
             },
           },
           traitChanges: {
@@ -40,20 +42,24 @@ export const schema =     {
               },
             },
           },
+          itemChanges: {
+            type: 'array',
+            items: { 
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                id: { type: 'string'},
+                name: { type: 'string'},
+                value: { type: 'number'}
+              },
+            },
+          },
           balanceTransfer: {
             type: 'number',
             description: 'The amount of currency transferred to player'
-          },
-          statChanges: {
-            type: 'object',
-            description: 'Changes to stats after the operation',
-            properties: {
-              health: { type: 'integer', description: 'Change in health points' },
-              level: { type: 'integer', description: 'Change in level points' },
-            },
           }
         },
-        required: ['log', 'traitChanges', 'statChanges', 'newItems', 'balanceTransfer']
+        required: ['log', 'statChanges', 'traitChanges', 'itemChanges', 'balanceTransfer']
       },
       403: {
         type: 'object',

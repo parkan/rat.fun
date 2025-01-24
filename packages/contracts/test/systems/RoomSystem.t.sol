@@ -63,7 +63,7 @@ contract RoomSystemTest is BaseTest {
     setUp();
 
     vm.startPrank(alice);
-    bytes32 playerId = world.ratroom__spawn();
+    bytes32 playerId = world.ratroom__spawn("alice");
 
     assertEq(Balance.get(playerId), 1000);
 
@@ -91,59 +91,5 @@ contract RoomSystemTest is BaseTest {
     world.ratroom__createRoom("A test room");
 
     vm.stopPrank();
-  }
-
-  function testChangeRoomBalance() public {
-    setUp();
-
-    prankAdmin();
-
-    bytes32 roomId = world.ratroom__createRoom("A test room");
-
-    startGasReport("Increase room balance");
-    world.ratroom__increaseRoomBalance(roomId, 10);
-    endGasReport();
-
-    assertEq(Balance.get(roomId), 110);
-
-    startGasReport("Decrease room balance");
-    world.ratroom__decreaseRoomBalance(roomId, 20);
-    endGasReport();
-
-    assertEq(Balance.get(roomId), 90);
-
-    vm.stopPrank();
-  }
-
-  function testRevertNotAllowed() public {
-    setUp();
-
-    vm.startPrank(alice);
-
-    vm.expectRevert("not allowed");
-    world.ratroom__increaseRoomBalance(bytes32(0), 10);
-
-    vm.stopPrank();
-  }
-
-  function testTransferBalanceToPlayer() public {
-    setUp();
-
-    vm.startPrank(alice);
-    bytes32 playerId = world.ratroom__spawn();
-    bytes32 roomId = world.ratroom__createRoom("A test room");
-    vm.stopPrank();
-
-    assertEq(Balance.get(roomId), ROOM_CREATION_COST);
-    assertEq(Balance.get(playerId), 1000 - ROOM_CREATION_COST);
-
-    prankAdmin();
-    startGasReport("Transfer balance to player");
-    world.ratroom__transferBalanceToPlayer(roomId, playerId, 50);
-    endGasReport();
-    vm.stopPrank();
-
-    assertEq(Balance.get(roomId), ROOM_CREATION_COST - 50);
-    assertEq(Balance.get(playerId), (1000 - ROOM_CREATION_COST) + 50);
   }
 }

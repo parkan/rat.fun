@@ -1,24 +1,18 @@
 <script lang="ts">
-  import { addItemToLoadOut } from "@svelte/modules/action"
+  import { transferItemToLoadOut } from "@svelte/modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
-  // import { NewItem } from "@components/Nest/types"
-
-  type NewItem = {
-    name: string
-    value: number
-  }
+  import type { ItemChange } from "../types"
 
   export let key: string = ""
-  export let item: Item | NewItem
+  export let item: Item | ItemChange
 
   let busy = false
 
-  async function sendAddItemToLoadOut() {
-    console.log("sendAddItemToLoadOut", key, item)
+  async function sendTransferItemToLoadOut() {
     playSound("tcm", "selectionEnter")
     busy = true
-    const action = addItemToLoadOut(key)
+    const action = transferItemToLoadOut(key)
     try {
       await waitForCompletion(action)
     } catch (e) {
@@ -29,7 +23,7 @@
   }
 </script>
 
-<button class="item" disabled={busy} on:click={sendAddItemToLoadOut}>
+<button class="item" disabled={busy} on:click={sendTransferItemToLoadOut}>
   <div class="text">{item.name} (${item.value})</div>
 </button>
 
@@ -41,7 +35,8 @@
     background: var(--color-item);
     display: inline-block;
     cursor: pointer;
-    margin-right: 10px;
+    margin-right: 5px;
+    margin-bottom: 5px;
     text-transform: uppercase;
 
     .text {

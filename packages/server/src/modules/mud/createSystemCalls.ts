@@ -30,19 +30,7 @@ export function createSystemCalls(
   { worldContract, waitForTransaction }: SetupNetworkResult
 ) {
 
-  // Traits
-
-  const addTrait = async (ratId: string, newTrait: string, value: number ) => {
-    const tx = await worldContract.write.ratroom__addTrait([ratId, newTrait, value]);
-    await waitForTransaction(tx);
-  };
-
-  const removeTrait = async (ratId: string, traitId: string ) => {
-    const tx = await worldContract.write.ratroom__removeTrait([ratId, traitId]);
-    await waitForTransaction(tx);
-  };
-
-  // Health
+  // ___ Health
 
   const increaseHealth = async (ratId: string, change: number) => {
     const tx = await worldContract.write.ratroom__increaseHealth([ratId, change]);
@@ -53,49 +41,56 @@ export function createSystemCalls(
     const tx = await worldContract.write.ratroom__decreaseHealth([ratId, change]);
     await waitForTransaction(tx);
   }
+  
+  // ___ Traits
 
-  // Room balance
-
-  const increaseRoomBalance = async (roomId: string, change: number) => {
-    const tx = await worldContract.write.ratroom__increaseRoomBalance([roomId, change]);
+  const addTraitToRat = async (ratId: string, newTrait: string, value: number ) => {
+    const tx = await worldContract.write.ratroom__addTraitToRat([ratId, newTrait, value]);
     await waitForTransaction(tx);
   };
 
-  const decreaseRoomBalance = async (roomId: string, change: number) => {
-    const tx = await worldContract.write.ratroom__decreaseRoomBalance([roomId, change]);
+  const removeTraitFromRat = async (ratId: string, traitId: string ) => {
+    const tx = await worldContract.write.ratroom__removeTraitFromRat([ratId, traitId]);
     await waitForTransaction(tx);
   };
 
-  // ...
+  // ___ Items
 
-  const addItemToInventory = async (playerId: string, newTrait: string, value: number ) => {
-    const tx = await worldContract.write.ratroom__addItemToInventory([playerId, newTrait, value]);
+  const addItemToLoadOut = async (ratId: string, newTrait: string, value: number ) => {
+    const tx = await worldContract.write.ratroom__addItemToLoadOut([ratId, newTrait, value]);
     await waitForTransaction(tx);
   };
 
-  const clearLoadOut = async (ratId: string, roomId: string ) => {
-    const tx = await worldContract.write.ratroom__clearLoadOut([ratId, roomId]);
+  const removeItemFromLoadOut = async (ratId: string, itemId: string ) => {
+    console.log("removeItemFromLoadOut", ratId, itemId);
+    const tx = await worldContract.write.ratroom__removeItemFromLoadOut([ratId, itemId]);
+    await waitForTransaction(tx);
+  }
+
+  // ___ Balance
+
+  const increaseBalance = async (id: string, change: number) => {
+    const tx = await worldContract.write.ratroom__increaseBalance([id, change]);
     await waitForTransaction(tx);
   };
 
-  const transferBalanceToPlayer = async (roomId: string, playerId: string, amount: number ) => {
-    const tx = await worldContract.write.ratroom__transferBalanceToPlayer([roomId, playerId, amount]);
+  const decreaseBalance = async (id: string, change: number) => {
+    const tx = await worldContract.write.ratroom__decreaseBalance([id, change]);
     await waitForTransaction(tx);
   };
 
   return {
-    // Traits
-    addTrait,
-    removeTrait,
     // Health
     increaseHealth,
     decreaseHealth,
-    // Room balance
-    increaseRoomBalance,
-    decreaseRoomBalance,
-    // ...
-    addItemToInventory,
-    clearLoadOut,
-    transferBalanceToPlayer
+    // Traits
+    addTraitToRat,
+    removeTraitFromRat,
+    // Items
+    addItemToLoadOut,
+    removeItemFromLoadOut,
+    // Balance
+    increaseBalance,
+    decreaseBalance,
   };
 }

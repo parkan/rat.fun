@@ -54,6 +54,9 @@ contract PostDeploy is Script {
       "The room has a VR head set. The VR head gives access to all knowledge in the world. The experience of time is infinite."
     );
     LibRoom.createRoom("The room has healing energy that will restore the rat to perfect health.");
+    LibRoom.createRoom("The room gives the rat a bag of cheese.");
+    LibRoom.createRoom("The rat can trade a bag of cheese for a jester hat of the same value.");
+    LibRoom.createRoom("The rat is forced to bet it's whole credit balance on a double or nothing game of chance.");
     vm.stopBroadcast();
   }
 }

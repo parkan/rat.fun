@@ -8,6 +8,11 @@
   import { UI } from "@modules/ui/enums"
   import { UIState } from "@modules/ui/stores"
   import { shortenAddress } from "@modules/utils"
+  import {
+    transferBalanceToPlayer,
+    transferBalanceToRat,
+  } from "@modules/action"
+  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
 
   import { ENVIRONMENT } from "@mud/enums"
 
@@ -18,6 +23,32 @@
   import Traits from "@components/Nest/Traits/Traits.svelte"
 
   export let environment: ENVIRONMENT
+
+  let busy = false
+
+  async function sendTransferBalanceToPlayer() {
+    busy = true
+    const action = transferBalanceToPlayer(100)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
+  }
+
+  async function sendTransferBalanceToRat() {
+    busy = true
+    const action = transferBalanceToRat(100)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
+  }
 
   function restart() {
     UIState.set(UI.CREATING_RAT)
@@ -42,6 +73,13 @@
             <div class="label">Balance:</div>
             <div class="value">${$player?.balance ?? 0}</div>
           </div>
+          {#if $player?.balance >= 100}
+            <div class="action">
+              <button disabled={busy} on:click={sendTransferBalanceToRat}>
+                Send $100 to rat balance
+              </button>
+            </div>
+          {/if}
         </div>
         <!-- INVENTORY -->
         <div class="stat-item">
@@ -65,6 +103,20 @@
             <div class="label">Health:</div>
             <div class="value">{$playerRat?.health ?? 0}</div>
           </div>
+        </div>
+        <!-- RAT BALANCE -->
+        <div class="stat-item">
+          <div class="inner-wrapper balance">
+            <div class="label">Balance:</div>
+            <div class="value">${$playerRat?.balance ?? 0}</div>
+          </div>
+          {#if $playerRat?.balance >= 100}
+            <div class="action">
+              <button disabled={busy} on:click={sendTransferBalanceToPlayer}>
+                Send $100 to player balance
+              </button>
+            </div>
+          {/if}
         </div>
         {#if !$playerRat?.dead}
           <!-- TRAITS -->
@@ -172,6 +224,7 @@
 
   .stat-item {
     margin-bottom: 10px;
+    display: flex;
 
     .label {
       margin-right: 0.5em;
@@ -205,6 +258,15 @@
         background: var(--color-death);
         color: var(--white);
       }
+    }
+  }
+
+  .action {
+    button {
+      padding: 5px;
+      color: var(--black);
+      cursor: pointer;
+      margin-left: 20px;
     }
   }
 </style>

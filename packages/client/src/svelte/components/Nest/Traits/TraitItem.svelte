@@ -1,5 +1,7 @@
 <script lang="ts">
-  export let trait: Trait
+  import type { TraitChange } from "../types"
+
+  export let trait: Trait | TraitChange
 </script>
 
 <div class="trait-item">

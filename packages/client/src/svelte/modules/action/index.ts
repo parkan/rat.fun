@@ -5,15 +5,17 @@ const NAMESPACE = "ratroom__"
 export enum WorldFunctions {
   Spawn = NAMESPACE + "spawn",
   CreateRat = NAMESPACE + "createRat",
-  addItemToLoadOut = NAMESPACE + "addItemToLoadOut",
-  removeItemFromLoadOut = NAMESPACE + "removeItemFromLoadOut",
-  CreateRoom = NAMESPACE + "createRoom"
+  CreateRoom = NAMESPACE + "createRoom",
+  transferItemToInventory = NAMESPACE + "transferItemToInventory",
+  transferItemToLoadOut = NAMESPACE + "transferItemToLoadOut",
+  transferBalanceToPlayer = NAMESPACE + "transferBalanceToPlayer",
+  transferBalanceToRat = NAMESPACE + "transferBalanceToRat",
 }
 
 // --- API --------------------------------------------------------------
 
-export function spawn() {
-  return addToSequencer(WorldFunctions.Spawn, [])
+export function spawn(name: string) {
+  return addToSequencer(WorldFunctions.Spawn, [name])
 }
 
 export function createRoom(prompt: string) {
@@ -24,10 +26,18 @@ export function createRat() {
   return addToSequencer(WorldFunctions.CreateRat, [])
 }
 
-export function addItemToLoadOut(itemId: string) {
-  return addToSequencer(WorldFunctions.addItemToLoadOut, [itemId])
+export function transferItemToInventory(itemId: string) {
+  return addToSequencer(WorldFunctions.transferItemToInventory, [itemId])
 }
 
-export function removeItemFromLoadOut(itemId: string) {
-  return addToSequencer(WorldFunctions.removeItemFromLoadOut, [itemId])
+export function transferItemToLoadOut(itemId: string) {
+  return addToSequencer(WorldFunctions.transferItemToLoadOut, [itemId])
+}
+
+export function transferBalanceToPlayer(amount: number) {
+  return addToSequencer(WorldFunctions.transferBalanceToPlayer, [amount])
+}
+
+export function transferBalanceToRat(amount: number) {
+  return addToSequencer(WorldFunctions.transferBalanceToRat, [amount])
 }

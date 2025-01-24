@@ -17,7 +17,7 @@
   async function sendSpawn() {
     playSound("tcm", "blink")
     busy = true
-    const action = spawn()
+    const action = spawn("alice")
     try {
       await waitForCompletion(action)
       done()

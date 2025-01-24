@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 import { GameConfig, GameConfigData } from "../codegen/index.sol";
-import { ROOM_CREATION_COST, MAX_ROOM_PROMPT_LENGTH } from "../constants.sol";
+import { 
+  ROOM_CREATION_COST, 
+  MAX_ROOM_PROMPT_LENGTH,
+  MAX_INVENTORY_SIZE, 
+  MAX_LOADOUT_SIZE, 
+  MAX_TRAITS_SIZE 
+} from "../constants.sol";
 
 library LibInit {
   /**
@@ -16,7 +22,10 @@ library LibInit {
         globalRoomIndex: 0,
         globalRatIndex: 0,
         roomCreationCost: ROOM_CREATION_COST,
-        maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH
+        maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH,
+        maxInventorySize: MAX_INVENTORY_SIZE,
+        maxLoadOutSize: MAX_LOADOUT_SIZE,
+        maxTraitsSize: MAX_TRAITS_SIZE
       })
     );
   }

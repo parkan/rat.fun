@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { removeItemFromLoadOut } from "@svelte/modules/action"
+  import { transferItemToInventory } from "@svelte/modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
 
@@ -8,11 +8,10 @@
 
   let busy = false
 
-  async function sendRemoveItemFromLoadOut() {
-    console.log("sendRemoveItemFromInventory", key, item)
+  async function sendTransferItemToInventory() {
     playSound("tcm", "selectionEnter")
     busy = true
-    const action = removeItemFromLoadOut(key)
+    const action = transferItemToInventory(key)
     try {
       await waitForCompletion(action)
     } catch (e) {
@@ -23,7 +22,7 @@
   }
 </script>
 
-<button class="item" disabled={busy} on:click={sendRemoveItemFromLoadOut}>
+<button class="item" disabled={busy} on:click={sendTransferItemToInventory}>
   <div class="text">{item.name} (${item.value})</div>
 </button>
 
@@ -35,7 +34,8 @@
     background: var(--color-item);
     display: inline-block;
     cursor: pointer;
-    margin-right: 10px;
+    margin-right: 5px;
+    margin-bottom: 5px;
     text-transform: uppercase;
 
     .text {

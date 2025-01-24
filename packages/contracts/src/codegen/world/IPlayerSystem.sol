@@ -9,13 +9,13 @@ pragma solidity >=0.8.24;
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IPlayerSystem {
-  function ratroom__spawn() external returns (bytes32 _playerId);
+  function ratroom__spawn(string memory _name) external returns (bytes32 _playerId);
 
-  function ratroom__addItemToInventory(
-    bytes32 _playerId,
-    string memory _name,
-    int256 _value
-  ) external returns (bytes32 itemId);
+  function ratroom__transferBalanceToRat(uint256 _value) external;
 
-  function ratroom__removeItemFromInventory(bytes32 _playerId, bytes32 _itemId) external;
+  function ratroom__transferBalanceToPlayer(uint256 _value) external;
+
+  function ratroom__transferItemToInventory(bytes32 _itemId) external;
+
+  function ratroom__transferItemToLoadOut(bytes32 _itemId) external;
 }

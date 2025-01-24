@@ -8,8 +8,11 @@ declare global {
     globalRoomIndex: number,
     globalRatIndex: number,
     roomCreationCost: number,
-    maxRoomPromptLength: number
+    maxRoomPromptLength: number,
+    maxInventorySize: number,
+    maxLoadOutSize: number
   }
+  
   // * * * * * * * * * * * * * * * * *
   // DEFAULT ENTITY TYPE
   // * * * * * * * * * * * * * * * * *
@@ -46,6 +49,7 @@ declare global {
   type Rat  = {
     [key: string]: number | ENTITY_TYPE | Hex | boolean | string[],
     entityType: ENTITY_TYPE.RAT,
+    balance: number,
     index: number,
     owner: Hex,
     dead: boolean,

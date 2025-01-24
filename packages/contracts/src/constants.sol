@@ -10,3 +10,6 @@ uint32 constant ONE_DAY = 24 * ONE_HOUR;
 
 uint32 constant ROOM_CREATION_COST = 100;
 uint32 constant MAX_ROOM_PROMPT_LENGTH = 500;
+uint32 constant MAX_INVENTORY_SIZE= 10;
+uint32 constant MAX_LOADOUT_SIZE = 5;
+uint32 constant MAX_TRAITS_SIZE = 10;

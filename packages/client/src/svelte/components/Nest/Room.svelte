@@ -5,11 +5,14 @@
   import type { ServerReturnValue } from "./types"
 
   import Spinner from "@components/Spinner/Spinner.svelte"
-  import InventoryItem from "./Inventory/InventoryItem.svelte"
-  import TraitItem from "./Traits/TraitItem.svelte"
+  import InventoryItem from "@components/Nest/Inventory/InventoryItem.svelte"
+  import TraitItem from "@components/Nest/Traits/TraitItem.svelte"
+  import Log from "@components/Nest/Log/Log.svelte"
 
   export let outcome: ServerReturnValue
   export let room: Room
+
+  let oldRoomBalance = room.balance
 
   $: console.log("outcome", outcome)
 
@@ -27,13 +30,7 @@
   </div>
 
   <!-- LOG -->
-  <div class="log">
-    {#each outcome.log as event, i}
-      <div class="event" in:fade={{ duration: 200, delay: 500 * i }}>
-        {event}
-      </div>
-    {/each}
-  </div>
+  <Log log={outcome.log} />
 
   <!-- OUTCOME -->
   {#if outcome.log?.length ?? 0 > 0}
@@ -53,18 +50,6 @@
           >
             health: {outcome.statChanges.health}
           </div>
-        {/if}
-      </div>
-
-      <!-- New items  -->
-      <div class="outcome-item">
-        <div class="title">__ New items</div>
-        {#if !outcome.newItems || outcome.newItems.length === 0}
-          <div class="empty">** NONE **</div>
-        {:else}
-          {#each outcome.newItems as item}
-            <InventoryItem {item} />
-          {/each}
         {/if}
       </div>
 
@@ -92,7 +77,31 @@
         {/if}
       </div>
 
-      <!-- $ transferred to player -->
+      <!-- Added items-->
+      <div class="outcome-item">
+        <div class="title">__ Added items</div>
+        {#if outcome.itemChanges.filter(iC => iC.type === "add").length === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          {#each outcome.itemChanges.filter(iC => iC.type === "add") as item}
+            <InventoryItem {item} />
+          {/each}
+        {/if}
+      </div>
+
+      <!-- Removed items -->
+      <div class="outcome-item">
+        <div class="title">__ Removed items</div>
+        {#if outcome.itemChanges.filter(iC => iC.type === "remove").length === 0}
+          <div class="empty">** NONE **</div>
+        {:else}
+          {#each outcome.itemChanges.filter(iC => iC.type === "remove") as item}
+            <InventoryItem {item} />
+          {/each}
+        {/if}
+      </div>
+
+      <!-- Balance transferred to player -->
       <div class="outcome-item">
         <div class="title">Balance transfer to player</div>
         {#if outcome.balanceTransfer === 0}
@@ -100,6 +109,12 @@
         {:else}
           <div class="balance">${outcome.balanceTransfer}</div>
         {/if}
+      </div>
+
+      <!-- Old room balance -->
+      <div class="outcome-item">
+        <div class="title">Old room balance</div>
+        <div class="balance">${oldRoomBalance}</div>
       </div>
 
       <!-- New room balance -->
@@ -138,12 +153,6 @@
       color: var(--black);
       max-width: 800px;
       padding: 10px;
-    }
-
-    .log {
-      margin-bottom: 20px;
-      font-size: var(--font-size-large);
-      line-height: 1.3em;
     }
 
     .outcome {
