@@ -21,6 +21,16 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 // import { callModel } from '@modules/llm/deepseek/callModel';
 // const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY as string;
 
+// Heurist
+// import { getLLMClient } from '@modules/llm/heurist';
+// import { callModel } from '@modules/llm/heurist/callModel';
+// const HEURIST_API_KEY = process.env.HEURIST_API_KEY as string;
+
+// Lambda
+// import { getLLMClient } from '@modules/llm/lambda';
+// import { callModel } from '@modules/llm/lambda/callModel';
+// const LAMBDA_API_KEY = process.env.LAMBDA_API_KEY as string;
+
 // MUD
 import { setup } from '@modules/mud/setup';
 import { getOnchainData } from '@modules/mud/getOnchainData';
@@ -48,6 +58,12 @@ const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 
 // Initialize LLM: DeepSeek
 // const llmClient = getLLMClient(DEEPSEEK_API_KEY);
+
+// Initialize LLM: Heurist
+// const llmClient = getLLMClient(HEURIST_API_KEY);
+
+// Initialize LLM: Lambda
+// const llmClient = getLLMClient(LAMBDA_API_KEY);
 
 const opts = { schema };  
 

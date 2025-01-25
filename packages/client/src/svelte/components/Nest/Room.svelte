@@ -101,9 +101,9 @@
         {/if}
       </div>
 
-      <!-- Balance transferred to player -->
+      <!-- Balance transferred to/from rat-->
       <div class="outcome-item">
-        <div class="title">Balance transfer to player</div>
+        <div class="title">Balance transfer to/from rat</div>
         {#if outcome.balanceTransfer === 0}
           <div class="empty">** NONE **</div>
         {:else}
