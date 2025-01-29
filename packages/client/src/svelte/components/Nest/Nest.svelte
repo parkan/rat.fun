@@ -1,13 +1,7 @@
 <script lang="ts">
-  import {
-    playerAddress,
-    player,
-    playerRat,
-    rooms,
-  } from "@modules/state/base/stores"
+  import { player, playerRat, rooms } from "@modules/state/base/stores"
   import { UI } from "@modules/ui/enums"
   import { UIState } from "@modules/ui/stores"
-  import { shortenAddress } from "@modules/utils"
   import {
     transferBalanceToPlayer,
     transferBalanceToRat,
@@ -21,6 +15,7 @@
   import Inventory from "@components/Nest/Inventory/Inventory.svelte"
   import LoadOut from "@components/Nest/LoadOut/LoadOut.svelte"
   import Traits from "@components/Nest/Traits/Traits.svelte"
+  import NestView from "@components/Nest/NestView/NestView.svelte"
 
   export let environment: ENVIRONMENT
 
@@ -123,6 +118,8 @@
           <Traits />
           <!-- LOAD OUT -->
           <LoadOut />
+          <!-- NEST VIEW -->
+          <NestView />
         {:else}
           <div class="stat-item">
             <div class="inner-wrapper dead">
