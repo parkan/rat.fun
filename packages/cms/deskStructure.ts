@@ -1,5 +1,5 @@
 // ICONS
-import { MdList, MdGavel } from "react-icons/md"
+import { MdList, MdGavel, MdAccessAlarm } from "react-icons/md"
 
 export default (S: any) =>
     S.list()
@@ -22,5 +22,14 @@ export default (S: any) =>
                         .id('outcome-prompts')
                         .schemaType("outcomePrompts")
                         .documentId("outcome-prompts")
-            )
+            ),
+            S.listItem()
+            .title("Correction prompts")
+            .icon(MdAccessAlarm)
+            .child(
+                S.editor()
+                    .id('correction-prompts')
+                    .schemaType("correctionPrompts")
+                    .documentId("correction-prompts")
+        )
         ]);

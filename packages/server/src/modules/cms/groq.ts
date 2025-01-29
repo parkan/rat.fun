@@ -4,5 +4,6 @@
  */
 export const queries = {
     eventPrompts: '*[_id == "event-prompts"][0]',
-    outcomePrompts: '*[_id == "outcome-prompts"][0]'
+    outcomePrompts: '*[_id == "outcome-prompts"][0]',
+    correctionPrompts: '*[_id == "correction-prompts"][0]',
 }

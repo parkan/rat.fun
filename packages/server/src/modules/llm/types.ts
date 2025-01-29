@@ -12,11 +12,6 @@ export type ItemChange = {
     id?: string // Only set if type is "remove"
 }
 
-export type LogEntry = {
-    timestamp: string,
-    event: string
-}
-
 export type OutcomeReturnValue = {
     statChanges: {
         health: number
@@ -24,6 +19,11 @@ export type OutcomeReturnValue = {
     traitChanges: TraitChange[],
     itemChanges: ItemChange[],
     balanceTransfer: number
+}
+
+export type LogEntry = {
+    timestamp: string,
+    event: string
 }
 
 export type EventsReturnValue = LogEntry[];

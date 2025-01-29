@@ -131,6 +131,17 @@ export type SanityAssetSourceData = {
   url?: string;
 };
 
+export type CorrectionPrompts = {
+  _id: string;
+  _type: "correctionPrompts";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  prompt?: string;
+  returnFormat?: Code;
+};
+
 export type OutcomePrompts = {
   _id: string;
   _type: "outcomePrompts";

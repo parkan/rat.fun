@@ -1,6 +1,6 @@
 import { MessageParam } from '@anthropic-ai/sdk/resources';
 import { Rat, Room } from '@routes/room/enter/types'
-import { EventsReturnValue } from './types';
+import { EventsReturnValue, OutcomeReturnValue } from './types';
 
 export function constructEventMessages(
     room: Room,
@@ -32,6 +32,18 @@ export function constructOutcomeMessages(
     messages.push({ role: "user", content: `RatItems: ${JSON.stringify(rat.loadOut)}` });
     messages.push({ role: "user", content: `RatStats: ${JSON.stringify(rat.stats)}` });
     messages.push({ role: "user", content: `RatBalance: ${rat.balance}` });
+    // Event log
+    messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events)}` });
+    return messages;
+}
+
+export function constructCorrectionMessages(
+    validatedOutcome: OutcomeReturnValue,
+    events: EventsReturnValue
+): MessageParam[] {
+    const messages: MessageParam[] = [];
+    // Validated outcome
+    messages.push({ role: "user", content: `ValidatedOutcome: ${JSON.stringify(validatedOutcome)}` });
     // Event log
     messages.push({ role: "user", content: `Eventlog: ${JSON.stringify(events)}` });
     return messages;

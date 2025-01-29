@@ -9,7 +9,7 @@ import { EnterRoomBody } from '@routes/room/enter/types';
 
 // LLM
 import { EventsReturnValue, OutcomeReturnValue } from '@modules/llm/types'
-import { constructEventMessages, constructOutcomeMessages } from '@modules/llm/constructMessages';
+import { constructEventMessages, constructOutcomeMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
 
 // Anthropic
 import { getLLMClient } from '@modules/llm/anthropic';
@@ -88,7 +88,7 @@ async function routes (fastify: FastifyInstance) {
             validateOnchainData(playerId, rat, room);
 
             // Get system prompts from CMS
-            const { eventSystemPrompt, outcomeSystemPrompt } = await getSystemPrompts();
+            const { eventSystemPrompt, outcomeSystemPrompt, correctionSystemPrompt } = await getSystemPrompts();
 
             // Call event model
             const eventMessages = constructEventMessages(room, rat);
@@ -105,6 +105,14 @@ async function routes (fastify: FastifyInstance) {
 
             const validatedOutcome = await validateOutcome(outcome, rat, room);
 
+            console.log('events', events);
+
+            // Call correction model
+            const correctionMessages = constructCorrectionMessages(validatedOutcome, events);
+            const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt) as EventsReturnValue;
+
+            console.log('correctedEvents:', correctedEvents);
+
             // Execute onchain changes based on outcome
             await changeStats(systemCalls, validatedOutcome, ratId, roomId);
             await changeTraits(systemCalls, validatedOutcome, ratId, roomId);
@@ -112,7 +120,7 @@ async function routes (fastify: FastifyInstance) {
             await transferBalance(systemCalls, validatedOutcome, ratId, roomId);
 
             const returnObject = {
-                log: events,
+                log: correctedEvents,
                 statChanges: validatedOutcome.statChanges,
                 traitChanges: validatedOutcome.traitChanges,
                 itemChanges: validatedOutcome.itemChanges,
