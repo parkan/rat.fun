@@ -4,7 +4,7 @@ import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueent
 import { EntityType, Name, Value, Traits } from "../codegen/index.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 import { LibUtils } from "./LibUtils.sol";
-import { Item } from "../Structs.sol";
+import { Item } from "../structs.sol";
 
 library LibTrait {
   /**

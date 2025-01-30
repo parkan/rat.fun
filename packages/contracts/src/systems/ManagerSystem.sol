@@ -5,7 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { GameConfig, EntityType, Balance, Dead, Health } from "../codegen/index.sol";
 import { LibManager, LibRat } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
-import { Item } from "../Structs.sol";
+import { Item } from "../structs.sol";
 
 /**
  * @dev Only admin can call these function

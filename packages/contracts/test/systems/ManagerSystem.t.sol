@@ -7,7 +7,7 @@ import { BaseTest } from "../BaseTest.sol";
 import "../../src/codegen/index.sol";
 import "../../src/libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../../src/codegen/common.sol";
-import { Item } from "../../src/Structs.sol";
+import { Item } from "../../src/structs.sol";
 
 contract ManagerSystemTest is BaseTest {
     // * * * *

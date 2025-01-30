@@ -6,7 +6,7 @@ import { ENTITY_TYPE } from "../codegen/common.sol";
 import { LibUtils } from "./LibUtils.sol";
 import { LibItem } from "./LibItem.sol";
 import { LibTrait } from "./LibTrait.sol";
-import { Item } from "../Structs.sol";
+import { Item } from "../structs.sol";
 
 library LibManager {
     /**
