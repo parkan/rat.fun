@@ -20,8 +20,8 @@
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddPositiveItemTooExpensive",
-    "name": "Apply outcome (add positive item too expensive)",
-    "gasUsed": 53280
+    "name": "Apply outcome (add positive item: too expensive)",
+    "gasUsed": 53276
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
