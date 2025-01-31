@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { schema } from '@routes/room/enter/schema';
 import dotenv from 'dotenv';
@@ -120,6 +121,8 @@ async function routes (fastify: FastifyInstance) {
             });
         } catch (error) {
             console.error('Error:', error);
+            // Capture the error in Sentry
+            Sentry.captureException(error);
             reply.status(500).send({ error });
         }
     });
