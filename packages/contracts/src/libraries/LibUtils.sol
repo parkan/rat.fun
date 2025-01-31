@@ -67,6 +67,18 @@ library LibUtils {
   }
 
   /**
+   * @notice Returns the absolute value.
+   * @param x The number to take the absolute value of
+   */
+  function absToUint256(int256 x) internal pure returns (uint256) {
+    // Check if the value is negative
+    if (x < 0) {
+        return uint256(-x);
+    }
+    return uint256(x);
+  }
+
+  /**
    * @notice Converts a signed integer to an unsigned integer.
    * @param _value Value to convert
    */

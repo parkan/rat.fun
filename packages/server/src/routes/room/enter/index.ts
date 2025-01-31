@@ -91,9 +91,13 @@ async function routes (fastify: FastifyInstance) {
             const eventMessages = constructEventMessages(rat, room);
             const events = await callModel(llmClient, eventMessages, eventSystemPrompt) as EventsReturnValue;
 
+            console.log('Events:', events);
+
             // Call outcome model
             const outcomeMessages = constructOutcomeMessages(rat, room, events);
             const outcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as OutcomeReturnValue;
+
+            console.log('Outcome:', outcome);
 
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             const actualOutcome = await systemCalls.applyOutcome(rat, room, outcome);

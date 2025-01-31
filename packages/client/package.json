@@ -21,12 +21,12 @@
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^3.0.4",
     "postprocessing": "^6.36.6",
+    "sass-embedded": "^1.83.4",
     "svelte": "^5.19.3",
     "vite": "^6.0.11",
     "vitest": "^3.0.4"
   },
   "dependencies": {
-    "contracts": "workspace:*",
     "@latticexyz/common": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
     "@latticexyz/dev-tools": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
     "@latticexyz/recs": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
@@ -38,6 +38,7 @@
     "@sanity/client": "^6.25.0",
     "@sanity/image-url": "^1.1.0",
     "@wagmi/core": "2.16.3",
+    "contracts": "workspace:*",
     "howler": "^2.2.4",
     "lodash": "^4.17.21",
     "rxjs": "^7.8.1",

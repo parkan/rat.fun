@@ -29,7 +29,6 @@ function parseReturnMessage(msg: OpenAI.Chat.Completions.ChatCompletion) {
 
     try {
         const returnValue = JSON.parse(rawText);
-        console.log(returnValue);
         return returnValue;
     } catch (error) {
         console.error("Failed to parse JSON:", error);

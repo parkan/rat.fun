@@ -3,37 +3,37 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddNegativeItem",
     "name": "Apply outcome (add negative item)",
-    "gasUsed": 278539
+    "gasUsed": 278538
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddNegativeTrait",
     "name": "Apply outcome (add negative trait)",
-    "gasUsed": 275112
+    "gasUsed": 275111
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddPositiveItem",
     "name": "Apply outcome (add positive item)",
-    "gasUsed": 278410
+    "gasUsed": 278409
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddPositiveItemTooExpensive",
     "name": "Apply outcome (add positive item: too expensive)",
-    "gasUsed": 53276
+    "gasUsed": 53275
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddPositiveTrait",
     "name": "Apply outcome (add positive trait)",
-    "gasUsed": 278370
+    "gasUsed": 278369
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddPositiveTraitTooExpensive",
     "name": "Apply outcome (add positive trait: too expensive)",
-    "gasUsed": 53293
+    "gasUsed": 53292
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
@@ -57,7 +57,7 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeOverReduceHealth",
     "name": "Apply outcome (over-reduce health)",
-    "gasUsed": 99360
+    "gasUsed": 170980
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
@@ -81,25 +81,25 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveNegativeTrait",
     "name": "Apply outcome (remove negative trait)",
-    "gasUsed": 70590
+    "gasUsed": 70578
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveNegativeTraitTooExpensive",
     "name": "Apply outcome (remove negative trait: too expensive)",
-    "gasUsed": 43764
+    "gasUsed": 43763
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemovePositiveItem",
     "name": "Apply outcome (remove positive item)",
-    "gasUsed": 63992
+    "gasUsed": 63980
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemovePositiveTrait",
     "name": "Apply outcome (remove positive trait)",
-    "gasUsed": 67217
+    "gasUsed": 67205
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
@@ -112,6 +112,12 @@
     "test": "testApplyOutcomeTransferToRoom",
     "name": "Apply outcome (transfer to room)",
     "gasUsed": 62735
+  },
+  {
+    "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
+    "test": "testApplyOutcomeValueTransferOnDeath",
+    "name": "Apply outcome (value transfer on death)",
+    "gasUsed": 170569
   },
   {
     "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",

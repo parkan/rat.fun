@@ -13,9 +13,9 @@ export type SystemCalls = ReturnType<typeof createSystemCalls>;
 export function createSystemCalls(network: SetupNetworkResult) {
   const applyOutcome = async (rat: Rat, room: Room, outcome: OutcomeReturnValue) => {
 
-    console.log('outcome:', outcome);
-    console.log('old rat:', rat);
-    console.log('old room:', room);
+    // console.log('outcome:', outcome);
+    // console.log('old rat:', rat);
+    // console.log('old room:', room);
 
     const tx = await network.worldContract.write.ratroom__applyOutcome([
       rat.id, // _ratId
@@ -31,8 +31,8 @@ export function createSystemCalls(network: SetupNetworkResult) {
     await network.waitForTransaction(tx);
 
     const newOnChainData = getOnchainData(network, network.components, room.id, rat.id);
-    console.log('new rat:', newOnChainData.rat);
-    console.log('new room:', newOnChainData.room);
+    // console.log('new rat:', newOnChainData.rat);
+    // console.log('new room:', newOnChainData.room);
 
     return updateOutcome(outcome, rat, newOnChainData.rat);
   }
@@ -44,6 +44,11 @@ export function createSystemCalls(network: SetupNetworkResult) {
 
 function updateOutcome(oldOutcome: OutcomeReturnValue, oldRat: Rat, newRat: Rat): OutcomeReturnValue {
   const newOutcome = oldOutcome;
+
+  console.log('old outcome:', oldOutcome);
+  console.log('old rat:', oldRat);
+  console.log('new rat:', newRat);
+
 
   // - - - - - - - - -
   // HEALTH
@@ -59,7 +64,6 @@ function updateOutcome(oldOutcome: OutcomeReturnValue, oldRat: Rat, newRat: Rat)
 
   // Iterate over traits in new rat and compare with old rat
   for(let i = 0; i < newRat.traits.length; i++) {
-    console.log('new trait:', newRat.traits[i]);
     // If trait is not in old rat, it was added
     if(!oldRat.traits.find(trait => trait.id === newRat.traits[i].id)) {
       newOutcome.traitChanges.push({ 
@@ -71,7 +75,6 @@ function updateOutcome(oldOutcome: OutcomeReturnValue, oldRat: Rat, newRat: Rat)
 
   // Iterate over traits in old rat and compare with new rat
   for(let i = 0; i < oldRat.traits.length; i++) {
-    console.log('old trait:', oldRat.traits[i]);
     // If trait is not in new rat, it was removed
     if(!newRat.traits.find(trait => trait.id === oldRat.traits[i].id)) {
       newOutcome.traitChanges.push({ 
@@ -89,7 +92,6 @@ function updateOutcome(oldOutcome: OutcomeReturnValue, oldRat: Rat, newRat: Rat)
 
   // Iterate over items in new rat and compare with old rat
   for(let i = 0; i < newRat.inventory.length; i++) {
-    console.log('new item:', newRat.inventory[i]);
     // If item is not in old rat, it was added
     if(!oldRat.inventory.find(item => item.id === newRat.inventory[i].id)) {
       newOutcome.itemChanges.push({ 
@@ -101,7 +103,6 @@ function updateOutcome(oldOutcome: OutcomeReturnValue, oldRat: Rat, newRat: Rat)
 
   // Iterate over items in old rat and compare with new rat
   for(let i = 0; i < oldRat.inventory.length; i++) {
-    console.log('old item:', oldRat.inventory[i]);
     // If item is not in new rat, it was removed
     if(!newRat.inventory.find(item => item.id === oldRat.inventory[i].id)) {
       newOutcome.itemChanges.push({ 
