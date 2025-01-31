@@ -18,12 +18,12 @@
     "test-single": "forge clean && tsc --noEmit && mud test --forgeOptions='--match-test testApplyOutcomeValueTransferOnDeath'"
   },
   "dependencies": {
-    "@latticexyz/cli": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "@latticexyz/schema-type": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "@latticexyz/store": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "@latticexyz/world": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "@latticexyz/world-modules": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "@latticexyz/gas-report": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97"
+    "@latticexyz/cli": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "@latticexyz/schema-type": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "@latticexyz/store": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "@latticexyz/world": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "@latticexyz/world-modules": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "@latticexyz/gas-report": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1"
   },
   "devDependencies": {
     "@types/node": "^22.10.10",
@@ -32,7 +32,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.4.2",
     "solhint": "^5.0.4",
-    "solhint-config-mud": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97",
-    "solhint-plugin-mud": "2.2.18-e1db80ad5648a9c77b757cda3930aa134e0f1c97"
+    "solhint-config-mud": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1",
+    "solhint-plugin-mud": "2.2.18-4565714f5e9421cc7b2de56fe51db4434c55f5d1"
   }
 }
