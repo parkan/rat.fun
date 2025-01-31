@@ -1,3 +1,7 @@
+// IMPORTANT: Make sure to import `instrument.js` at the top of your file.
+import "./modules/sentry/instrument.js"
+import * as Sentry from "@sentry/node"
+
 import Fastify from 'fastify'
 import formbody from '@fastify/formbody';
 import cors from '@fastify/cors';
@@ -5,6 +9,7 @@ import cors from '@fastify/cors';
 import { PORT } from '@config';
 
 import ping from '@routes/test/ping';
+import debug from '@routes/test/debug';
 import enter from '@routes/room/enter';
 
 const fastify = Fastify({   logger: {
@@ -13,6 +18,9 @@ const fastify = Fastify({   logger: {
     },
   },
  })
+
+// Monitoring 
+Sentry.setupFastifyErrorHandler(fastify);
 
 // Register plugins
 fastify.register(formbody);
@@ -23,6 +31,7 @@ fastify.register(cors, {
 
 // Register routes
 fastify.register(ping)
+fastify.register(debug)
 fastify.register(enter)
 
 // Start the server
