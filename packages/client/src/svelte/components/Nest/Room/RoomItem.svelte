@@ -74,7 +74,7 @@
     let url = "http://localhost:3131/room/enter-pvp"
 
     if ([ENVIRONMENT.GARNET].includes(environment)) {
-      url = "https://reality-model-1.mc-infra.com/room/enter"
+      url = "https://reality-model-1.mc-infra.com/room/enter-pvp"
     }
 
     const signature = await $walletNetwork.walletClient.signMessage({
@@ -128,6 +128,7 @@
   <div class="room-info" class:pvp={room.roomType === 1}>
     <!-- Prompt -->
     <div class="prompt">{room.roomPrompt}</div>
+
     <!-- Balance -->
     <div class="balance">Balance: ${room.balance ?? 0}</div>
     <!-- Creator -->
@@ -135,6 +136,10 @@
       Creator: {room.owner === $gameConfig.adminId
         ? "Jimmy9"
         : shortenAddress(room.owner)}
+    </div>
+    <!-- Room type -->
+    <div class="creator">
+      Room type: {room.roomType === 0 ? "1p" : "2p"}
     </div>
     <!-- Rat waiting in room  -->
     {#if room.ratInRoom && room.ratInRoom !== EMPTY_CONNECTION}

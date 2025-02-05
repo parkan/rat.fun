@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+export const EMPTY_CONNECTION = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
 import { MESSAGE } from '@config';
 import { EnterRoomBody } from '@routes/room/enter/types';
 
@@ -62,7 +64,7 @@ async function routes (fastify: FastifyInstance) {
             console.log('ratInRoom:', room.ratInRoom);
             // Check if room already has one player
 
-            if(!room.ratInRoom) {
+            if(!room.ratInRoom || room.ratInRoom === EMPTY_CONNECTION) {
                 console.log('no rat in room');
                 console.log('Placing Rat A in room...');
                 console.log('ratA', ratA);
