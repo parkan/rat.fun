@@ -141,10 +141,11 @@
             <div class="value">{$rat?.level ?? 0}</div>
             <div class="action">
               <button
-                disabled={busy || $rat.balance < $gameConfig.levelUpCost}
+                disabled={busy ||
+                  $rat.balance < ($gameConfig?.levelUpCost ?? 100)}
                 on:click={sendLevelUp}
               >
-                Level up (costs {$gameConfig.levelUpCost})
+                Level up (costs {$gameConfig?.levelUpCost ?? 100})
               </button>
             </div>
           </div>
@@ -198,7 +199,7 @@
   <div class="column second">
     <!-- <NewRoom /> -->
     <div class="level">
-      <h2>Level: {$rat.level}</h2>
+      <h2>Level: {$rat?.level ?? 0}</h2>
     </div>
     <!-- ROOM LIST -->
     <div class="room-list">
