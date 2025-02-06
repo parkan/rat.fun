@@ -11,8 +11,9 @@ declare global {
     roomCreationCost: number,
     maxRoomPromptLength: number,
     maxInventorySize: number,
-    maxLoadOutSize: number
-    creatorFee: number
+    maxLoadOutSize: number,
+    creatorFee: number,
+    levelUpCost: number,
   }
   
   // * * * * * * * * * * * * * * * * *
@@ -49,6 +50,7 @@ declare global {
     balance: number,
     ownedRat: Hex,
     inventory: string[],
+    level: number
   }
 
   type Rat  = {

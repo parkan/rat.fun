@@ -1,9 +1,11 @@
+import { ROOM_TYPE } from "contracts/enums"
 import { addToSequencer } from "./actionSequencer"
 
 const NAMESPACE = "ratroom__"
 
 export enum WorldFunctions {
   Spawn = NAMESPACE + "spawn",
+  LevelUp = NAMESPACE + "levelUp",
   CreateRat = NAMESPACE + "createRat",
   CreateRoom = NAMESPACE + "createRoom",
   transferItemToInventory = NAMESPACE + "transferItemToInventory",
@@ -18,8 +20,12 @@ export function spawn(name: string) {
   return addToSequencer(WorldFunctions.Spawn, [name])
 }
 
-export function createRoom(prompt: string) {
-  return addToSequencer(WorldFunctions.CreateRoom, [prompt])
+export function levelUp() {
+  return addToSequencer(WorldFunctions.LevelUp, [])
+}
+
+export function createRoom(prompt: string, roomType: ROOM_TYPE) {
+  return addToSequencer(WorldFunctions.CreateRoom, [prompt, roomType])
 }
 
 export function createRat() {

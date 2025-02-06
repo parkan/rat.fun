@@ -23,27 +23,28 @@ export default defineWorld({
         maxLoadOutSize: "uint32",
         maxTraitsSize: "uint32",
         creatorFee: "uint256",
+        levelUpCost: "uint256",
       },
       codegen: {
         dataStruct: true
       }
     },
-    Name: "string",
+    Name: "string", // Set on player
     EntityType: "ENTITY_TYPE",
     // ...
-    Health: "uint256",
-    Dead: "bool",
+    Health: "uint256", // Set on rat
+    Dead: "bool", // Set on rat
     // ...
-    Traits: "bytes32[]",
-    Inventory: "bytes32[]",
+    Traits: "bytes32[]", // Traits of rat
+    Inventory: "bytes32[]", // Items carried by player and rat
     // ...
-    Level: "uint256",
-    Index: "uint256",
-    Balance: "uint256",
+    Level: "uint256", // Set on room and rat
+    Index: "uint256", // Set on rat and room
+    Balance: "uint256", // Amount of credits. Set on room, rat and player.
     WaitingInRoom: "bytes32", // Set on rat. Id of the room that the rat is waiting in
     Value: "int256", // Value of a trait can be negative
-    OwnedRat: "bytes32",
-    Owner: "bytes32",
+    OwnedRat: "bytes32", // Set on player
+    Owner: "bytes32", // Set on room and rat
     // ...
     RoomPrompt: "string",
     RoomType: "ROOM_TYPE",

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import {
+    gameConfig,
     player,
     rat,
-    rooms,
+    roomsOnRatLevel,
     ratInventory,
     playerInventory,
   } from "@modules/state/base/stores"
@@ -12,6 +13,7 @@
   import {
     transferBalanceToPlayer,
     transferBalanceToRat,
+    levelUp,
   } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { shortenAddress } from "@modules/utils"
@@ -21,7 +23,7 @@
   import { initOffChainSync } from "@modules/off-chain-sync"
 
   import RoomItem from "@components/Nest/Room/RoomItem.svelte"
-  import NewRoom from "@components/Nest/Room/NewRoom.svelte"
+  // import NewRoom from "@components/Nest/Room/NewRoom.svelte"
   import Inventory from "@components/Nest/Inventory/Inventory.svelte"
   import Traits from "@components/Nest/Traits/Traits.svelte"
   import NestView from "@components/Nest/NestView/NestView.svelte"
@@ -46,6 +48,18 @@
   async function sendTransferBalanceToRat() {
     busy = true
     const action = transferBalanceToRat(100)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
+  }
+
+  async function sendLevelUp() {
+    busy = true
+    const action = levelUp()
     try {
       await waitForCompletion(action)
     } catch (e) {
@@ -122,9 +136,17 @@
         {/if}
         <!-- LEVEL-->
         <div class="stat-item">
-          <div class="inner-wrapper">
+          <div class="inner-wrapper rat">
             <div class="label">Level:</div>
             <div class="value">{$rat?.level ?? 0}</div>
+            <div class="action">
+              <button
+                disabled={busy || $rat.balance < $gameConfig.levelUpCost}
+                on:click={sendLevelUp}
+              >
+                Level up (costs {$gameConfig.levelUpCost})
+              </button>
+            </div>
           </div>
         </div>
         <!-- HEALTH -->
@@ -174,10 +196,13 @@
   </div>
 
   <div class="column second">
-    <NewRoom />
+    <!-- <NewRoom /> -->
+    <div class="level">
+      <h2>Level: {$rat.level}</h2>
+    </div>
     <!-- ROOM LIST -->
     <div class="room-list">
-      {#each Object.entries($rooms).reverse() as [roomId, room]}
+      {#each Object.entries($roomsOnRatLevel).reverse() as [roomId, room]}
         <RoomItem {environment} {roomId} {room} />
       {/each}
     </div>

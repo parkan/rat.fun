@@ -43,33 +43,21 @@ contract PostDeploy is Script {
 
     bytes32 adminId = GameConfig.getAdminId();
 
-    // Create test rooms
-    LibRoom.createRoom("There is a second rat in the room. The rats have to fight.", ROOM_TYPE.ONE_PLAYER, adminId);
-    LibRoom.createRoom("The room has a comfortable bed and relaxing music playing.", ROOM_TYPE.ONE_PLAYER, adminId);
-    LibRoom.createRoom(
-      "The room has healing energy that will restore the rat to perfect health.",
-      ROOM_TYPE.ONE_PLAYER,
-      adminId
-    );
-    LibRoom.createRoom("The room gives the rat a bag of cheese.", ROOM_TYPE.ONE_PLAYER, adminId);
-    LibRoom.createRoom(
-      "The rat can trade a bag of cheese for a jester hat of the same value.",
-      ROOM_TYPE.ONE_PLAYER,
-      adminId
-    );
-    LibRoom.createRoom(
-      "The rat is forced to bet it's whole credit balance on a double or nothing game of chance.",
-      ROOM_TYPE.ONE_PLAYER,
-      adminId
-    );
-    LibRoom.createRoom("The room gives the rat a powerful lucky charm.", ROOM_TYPE.ONE_PLAYER, adminId);
-    LibRoom.createRoom("The room is a euthanasia chamber. There is no exit.", ROOM_TYPE.ONE_PLAYER, adminId);
-    LibRoom.createRoom("The neutral room.", ROOM_TYPE.TWO_PLAYER, adminId);
-    LibRoom.createRoom(
-      "The room has is filled with a gas that radically increases rat aggression.",
-      ROOM_TYPE.TWO_PLAYER,
-      adminId
-    );
+    // prettier-ignore
+
+    // Level 1
+    LibRoom.createRoom("There is a second rat in the room. The rats have to fight.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The room has healing energy that will restore the rat to perfect health.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The room gives the rat a bag of cheese.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The rat can trade a bag of cheese for a jester hat of the same value.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The rat can sell a jester hat.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The rat is forced to bet it's whole credit balance on a double or nothing game of chance.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+    LibRoom.createRoom("The room is a euthanasia chamber. There is no exit.", ROOM_TYPE.ONE_PLAYER, adminId, 1);
+
+    // Level 2
+    LibRoom.createRoom("Forced Swim Test", ROOM_TYPE.ONE_PLAYER, adminId, 2);
+    LibRoom.createRoom("Hot dog eating contest", ROOM_TYPE.TWO_PLAYER, adminId, 2);
+    LibRoom.createRoom( "The room is filled with a gas that increases rat aggression.", ROOM_TYPE.TWO_PLAYER, adminId, 2);
 
     vm.stopBroadcast();
   }

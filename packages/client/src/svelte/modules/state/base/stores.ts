@@ -5,7 +5,7 @@
 import { writable, derived } from "svelte/store"
 import { addressToId } from "@modules/utils"
 import { ENTITY_TYPE } from "contracts/enums"
-import { filterByEntitytype } from "./utils"
+import { filterByEntitytype, filterByLevel } from "./utils"
 import { GAME_CONFIG_ID } from "./constants"
 
 // * * * * * * * * * * * * * * * * *
@@ -76,3 +76,5 @@ export const ratInventory = derived(
   [rat, items],
   ([$rat, $items]) => $rat?.inventory?.map(item => $items[item]) as Item[]
 )
+
+export const roomsOnRatLevel = derived([rat, rooms], ([$rat, $rooms]) =>  filterByLevel($rooms, $rat?.level ?? 1) as Rooms)

@@ -14,3 +14,4 @@ uint32 constant MAX_INVENTORY_SIZE= 10;
 uint32 constant MAX_LOADOUT_SIZE = 5;
 uint32 constant MAX_TRAITS_SIZE = 10;
 uint256 constant CREATOR_FEE = 5;
+uint256 constant LEVEL_UP_COST = 100;

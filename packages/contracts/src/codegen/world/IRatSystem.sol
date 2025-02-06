@@ -10,4 +10,6 @@ pragma solidity >=0.8.24;
  */
 interface IRatSystem {
   function ratroom__createRat() external returns (bytes32 ratId);
+
+  function ratroom__levelUp() external;
 }

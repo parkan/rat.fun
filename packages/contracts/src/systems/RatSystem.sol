@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
-import { Owner, OwnedRat, Dead } from "../codegen/index.sol";
+import { Owner, OwnedRat, Dead, Level, Balance } from "../codegen/index.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibUtils, LibRat } from "../libraries/Libraries.sol";
+import { LEVEL_UP_COST } from "../constants.sol";
 
 contract RatSystem is System {
   /**
@@ -22,5 +23,21 @@ contract RatSystem is System {
     // Set ownership
     OwnedRat.set(playerId, ratId);
     Owner.set(ratId, playerId);
+  }
+
+  function levelUp() public {
+    bytes32 playerId = LibUtils.addressToEntityKey(_msgSender());
+    bytes32 ratId = OwnedRat.get(playerId);
+
+    require(ratId != bytes32(0), "no rat");
+
+    uint256 ratBalance = Balance.get(ratId);
+
+    require(ratBalance >= LEVEL_UP_COST, "insufficient balance");
+
+    Balance.set(ratId, ratBalance - LEVEL_UP_COST);
+
+    Level.set(ratId, Level.get(ratId) + 1);
+    Level.set(playerId, Level.get(playerId) + 1);
   }
 }

@@ -27,6 +27,7 @@ struct GameConfigData {
   uint32 maxLoadOutSize;
   uint32 maxTraitsSize;
   uint256 creatorFee;
+  uint256 levelUpCost;
 }
 
 library GameConfig {
@@ -34,12 +35,12 @@ library GameConfig {
   ResourceId constant _tableId = ResourceId.wrap(0x7462726174726f6f6d0000000000000047616d65436f6e666967000000000000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x00700a0014200404040404040420000000000000000000000000000000000000);
+    FieldLayout.wrap(0x00900b0014200404040404040420200000000000000000000000000000000000);
 
   // Hex-encoded key schema of ()
   Schema constant _keySchema = Schema.wrap(0x0000000000000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (address, bytes32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint256)
-  Schema constant _valueSchema = Schema.wrap(0x00700a00615f030303030303031f000000000000000000000000000000000000);
+  // Hex-encoded value schema of (address, bytes32, uint32, uint32, uint32, uint32, uint32, uint32, uint32, uint256, uint256)
+  Schema constant _valueSchema = Schema.wrap(0x00900b00615f030303030303031f1f0000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -54,7 +55,7 @@ library GameConfig {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](10);
+    fieldNames = new string[](11);
     fieldNames[0] = "adminAddress";
     fieldNames[1] = "adminId";
     fieldNames[2] = "globalRoomIndex";
@@ -65,6 +66,7 @@ library GameConfig {
     fieldNames[7] = "maxLoadOutSize";
     fieldNames[8] = "maxTraitsSize";
     fieldNames[9] = "creatorFee";
+    fieldNames[10] = "levelUpCost";
   }
 
   /**
@@ -462,6 +464,44 @@ library GameConfig {
   }
 
   /**
+   * @notice Get levelUpCost.
+   */
+  function getLevelUpCost() internal view returns (uint256 levelUpCost) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 10, _fieldLayout);
+    return (uint256(bytes32(_blob)));
+  }
+
+  /**
+   * @notice Get levelUpCost.
+   */
+  function _getLevelUpCost() internal view returns (uint256 levelUpCost) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 10, _fieldLayout);
+    return (uint256(bytes32(_blob)));
+  }
+
+  /**
+   * @notice Set levelUpCost.
+   */
+  function setLevelUpCost(uint256 levelUpCost) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 10, abi.encodePacked((levelUpCost)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set levelUpCost.
+   */
+  function _setLevelUpCost(uint256 levelUpCost) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 10, abi.encodePacked((levelUpCost)), _fieldLayout);
+  }
+
+  /**
    * @notice Get the full data.
    */
   function get() internal view returns (GameConfigData memory _table) {
@@ -502,7 +542,8 @@ library GameConfig {
     uint32 maxInventorySize,
     uint32 maxLoadOutSize,
     uint32 maxTraitsSize,
-    uint256 creatorFee
+    uint256 creatorFee,
+    uint256 levelUpCost
   ) internal {
     bytes memory _staticData = encodeStatic(
       adminAddress,
@@ -514,7 +555,8 @@ library GameConfig {
       maxInventorySize,
       maxLoadOutSize,
       maxTraitsSize,
-      creatorFee
+      creatorFee,
+      levelUpCost
     );
 
     EncodedLengths _encodedLengths;
@@ -538,7 +580,8 @@ library GameConfig {
     uint32 maxInventorySize,
     uint32 maxLoadOutSize,
     uint32 maxTraitsSize,
-    uint256 creatorFee
+    uint256 creatorFee,
+    uint256 levelUpCost
   ) internal {
     bytes memory _staticData = encodeStatic(
       adminAddress,
@@ -550,7 +593,8 @@ library GameConfig {
       maxInventorySize,
       maxLoadOutSize,
       maxTraitsSize,
-      creatorFee
+      creatorFee,
+      levelUpCost
     );
 
     EncodedLengths _encodedLengths;
@@ -575,7 +619,8 @@ library GameConfig {
       _table.maxInventorySize,
       _table.maxLoadOutSize,
       _table.maxTraitsSize,
-      _table.creatorFee
+      _table.creatorFee,
+      _table.levelUpCost
     );
 
     EncodedLengths _encodedLengths;
@@ -600,7 +645,8 @@ library GameConfig {
       _table.maxInventorySize,
       _table.maxLoadOutSize,
       _table.maxTraitsSize,
-      _table.creatorFee
+      _table.creatorFee,
+      _table.levelUpCost
     );
 
     EncodedLengths _encodedLengths;
@@ -629,7 +675,8 @@ library GameConfig {
       uint32 maxInventorySize,
       uint32 maxLoadOutSize,
       uint32 maxTraitsSize,
-      uint256 creatorFee
+      uint256 creatorFee,
+      uint256 levelUpCost
     )
   {
     adminAddress = (address(Bytes.getBytes20(_blob, 0)));
@@ -651,6 +698,8 @@ library GameConfig {
     maxTraitsSize = (uint32(Bytes.getBytes4(_blob, 76)));
 
     creatorFee = (uint256(Bytes.getBytes32(_blob, 80)));
+
+    levelUpCost = (uint256(Bytes.getBytes32(_blob, 112)));
   }
 
   /**
@@ -674,7 +723,8 @@ library GameConfig {
       _table.maxInventorySize,
       _table.maxLoadOutSize,
       _table.maxTraitsSize,
-      _table.creatorFee
+      _table.creatorFee,
+      _table.levelUpCost
     ) = decodeStatic(_staticData);
   }
 
@@ -710,7 +760,8 @@ library GameConfig {
     uint32 maxInventorySize,
     uint32 maxLoadOutSize,
     uint32 maxTraitsSize,
-    uint256 creatorFee
+    uint256 creatorFee,
+    uint256 levelUpCost
   ) internal pure returns (bytes memory) {
     return
       abi.encodePacked(
@@ -723,7 +774,8 @@ library GameConfig {
         maxInventorySize,
         maxLoadOutSize,
         maxTraitsSize,
-        creatorFee
+        creatorFee,
+        levelUpCost
       );
   }
 
@@ -743,7 +795,8 @@ library GameConfig {
     uint32 maxInventorySize,
     uint32 maxLoadOutSize,
     uint32 maxTraitsSize,
-    uint256 creatorFee
+    uint256 creatorFee,
+    uint256 levelUpCost
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
     bytes memory _staticData = encodeStatic(
       adminAddress,
@@ -755,7 +808,8 @@ library GameConfig {
       maxInventorySize,
       maxLoadOutSize,
       maxTraitsSize,
-      creatorFee
+      creatorFee,
+      levelUpCost
     );
 
     EncodedLengths _encodedLengths;

@@ -7,7 +7,8 @@ import {
   MAX_INVENTORY_SIZE, 
   MAX_LOADOUT_SIZE, 
   MAX_TRAITS_SIZE,
-  CREATOR_FEE
+  CREATOR_FEE,
+  LEVEL_UP_COST
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
 
@@ -29,7 +30,8 @@ library LibInit {
         maxInventorySize: MAX_INVENTORY_SIZE,
         maxLoadOutSize: MAX_LOADOUT_SIZE,
         maxTraitsSize: MAX_TRAITS_SIZE,
-        creatorFee: CREATOR_FEE
+        creatorFee: CREATOR_FEE,
+        levelUpCost: LEVEL_UP_COST
       })
     );
   }

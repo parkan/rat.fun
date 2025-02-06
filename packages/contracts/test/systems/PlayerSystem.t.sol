@@ -21,7 +21,7 @@ contract PlayerSystemTest is BaseTest {
     // Check player
     assertEq(uint8(EntityType.get(playerId)), uint8(ENTITY_TYPE.PLAYER));
     assertEq(Name.get(playerId), "alice");
-    assertEq(Balance.get(playerId), 1000);
+    assertEq(Balance.get(playerId), 0);
   }
 
   function testTransferBalanceToRat() public {
@@ -30,6 +30,8 @@ contract PlayerSystemTest is BaseTest {
     vm.startPrank(alice);
 
     bytes32 playerId = world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(1000);
+
     world.ratroom__createRat();
 
     startGasReport("Transfer balance to rat");
@@ -48,6 +50,8 @@ contract PlayerSystemTest is BaseTest {
     vm.startPrank(alice);
 
     bytes32 playerId = world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(1000);
+    
     world.ratroom__createRat();
 
     world.ratroom__transferBalanceToRat(500);
@@ -69,6 +73,8 @@ contract PlayerSystemTest is BaseTest {
     vm.startPrank(alice);
     
     world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(1000);
+
     world.ratroom__createRat();
 
     vm.expectRevert("insufficient balance");
@@ -162,6 +168,8 @@ contract PlayerSystemTest is BaseTest {
     vm.startPrank(alice);
 
     world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(1000);
+
     world.ratroom__createRat();
 
     vm.expectRevert("item not found");

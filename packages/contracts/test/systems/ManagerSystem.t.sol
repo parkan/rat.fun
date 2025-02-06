@@ -4,7 +4,7 @@ import { console } from "forge-std/console.sol";
 import { BaseTest } from "../BaseTest.sol";
 import "../../src/codegen/index.sol";
 import "../../src/libraries/Libraries.sol";
-import { ENTITY_TYPE } from "../../src/codegen/common.sol";
+import { ENTITY_TYPE, ROOM_TYPE } from "../../src/codegen/common.sol";
 import { Item } from "../../src/structs.sol";
 
 contract ManagerSystemTest is BaseTest {
@@ -36,11 +36,17 @@ contract ManagerSystemTest is BaseTest {
   function testApplyOutcomeEmpty() public {
     setUp();
 
-    // As player
+    // As alice
     vm.startPrank(alice);
     world.ratroom__spawn("alice");
     bytes32 ratId = world.ratroom__createRat();
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    vm.stopPrank();
+
+    // As bob
+    vm.startPrank(bob);
+    world.ratroom__spawn("bob");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -68,7 +74,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -96,7 +103,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -133,7 +141,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -170,7 +179,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -209,7 +219,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     bytes32 bobId = world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Traits to add
@@ -297,7 +308,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -332,7 +344,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -367,7 +380,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -399,7 +413,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -447,7 +462,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
     // Trait to add
     Item[] memory newTraits = new Item[](1);
@@ -494,7 +510,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -564,7 +581,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -599,7 +617,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -636,7 +655,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
     // Item to add
     Item[] memory newItems = new Item[](1);
@@ -667,7 +687,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // Trait to add
@@ -719,7 +740,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     bytes32 bobId = world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -749,7 +771,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -787,7 +810,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin
@@ -824,7 +848,8 @@ contract ManagerSystemTest is BaseTest {
     // As bob
     vm.startPrank(bob);
     world.ratroom__spawn("bob");
-    bytes32 roomId = world.ratroom__createRoom("test room");
+    world.ratroom__givePlayerBalance(1000);
+    bytes32 roomId = world.ratroom__createRoom("test room", ROOM_TYPE.ONE_PLAYER);
     vm.stopPrank();
 
     // As admin

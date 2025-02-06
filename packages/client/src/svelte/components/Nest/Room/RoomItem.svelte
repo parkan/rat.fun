@@ -141,6 +141,10 @@
     <div class="creator">
       Room type: {room.roomType === 0 ? "1p" : "2p"}
     </div>
+    <!-- Room level -->
+    <div class="creator">
+      Level: {room.level}
+    </div>
     <!-- Rat waiting in room  -->
     {#if room.ratInRoom && room.ratInRoom !== EMPTY_CONNECTION}
       <div class="creator">Rat in room: {shortenAddress(room.ratInRoom)}</div>
