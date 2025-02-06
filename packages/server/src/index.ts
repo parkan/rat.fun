@@ -13,7 +13,7 @@ import ping from '@routes/test/ping';
 import debug from '@routes/test/debug';
 import enterPvP from '@routes/room/enter-pvp';
 import enter from '@routes/room/enter';
-import ws from '@routes/websocket';
+import wsConnect from '@routes/ws-connect';
 
 const fastify = Fastify({   logger: {
     transport: {
@@ -38,7 +38,7 @@ fastify.register(ping)
 fastify.register(debug)
 fastify.register(enter)
 fastify.register(enterPvP)
-fastify.register(ws)
+fastify.register(wsConnect)
 
 // Start the server
 const start = async (port: number) => {

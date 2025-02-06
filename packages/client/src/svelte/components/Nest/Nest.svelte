@@ -17,14 +17,15 @@
   import { shortenAddress } from "@modules/utils"
 
   import { ENVIRONMENT } from "@mud/enums"
-  import { EMPTY_CONNECTION } from "@svelte/modules/utils/constants"
-  import { initOffChainSync } from "@svelte/modules/off-chain-sync"
+  import { EMPTY_CONNECTION } from "@modules/utils/constants"
+  import { initOffChainSync } from "@modules/off-chain-sync"
 
-  import RoomItem from "@svelte/components/Nest/Room/RoomItem.svelte"
+  import RoomItem from "@components/Nest/Room/RoomItem.svelte"
   import NewRoom from "@components/Nest/Room/NewRoom.svelte"
   import Inventory from "@components/Nest/Inventory/Inventory.svelte"
   import Traits from "@components/Nest/Traits/Traits.svelte"
   import NestView from "@components/Nest/NestView/NestView.svelte"
+  import ClientStats from "@components/Elements/ClientStats/ClientStats.svelte"
 
   export let environment: ENVIRONMENT
 
@@ -63,6 +64,8 @@
   })
 </script>
 
+<ClientStats />
+
 <div class="nest">
   <div class="column first">
     <!-- PLAYER STATS -->
@@ -71,7 +74,7 @@
         <!-- RAT KEEPER ADDRESS -->
         <div class="stat-item">
           <div class="inner-wrapper rat-keeper">
-            <div class="label">Rat keeper:</div>
+            <div class="label">Operator:</div>
             <div class="value">{$player.name}</div>
           </div>
         </div>

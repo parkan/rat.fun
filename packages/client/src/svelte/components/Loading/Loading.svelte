@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount } from "svelte"
   import { ready, loadingMessage } from "@modules/network"
   import { initNetwork } from "@svelte/initNetwork"
-  import { initEntities } from "@svelte/modules/systems/initEntities"
+  import { initEntities } from "@modules/systems/initEntities"
   import { ENVIRONMENT } from "@mud/enums"
 
   export let environment: ENVIRONMENT

@@ -1,19 +1,6 @@
-export type Client = {
-  id: string
-  address: string
-}
+import { ServerReturnValuePvP } from "@components/Nest/types"
 
-export type ChatMessage = {
-  id: string
-  topic: string
-  world: string
-  timestamp: number
-  address: string
-  message: string
-}
-
-export type MessageObject = {
-  topic: "broadcast" | "chat" | "verifiedClients"
-  data: ChatMessage
-  verifiedClients: Client[]
+export type MessageContent = {
+  topic: "clients__update" | "pvp__outcome" | "pvp__update" | "room__creatorfee"
+  message: ServerReturnValuePvP | string | string[]
 }

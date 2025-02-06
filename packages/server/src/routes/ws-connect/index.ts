@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
-import { schema } from '@routes/websocket/schema';
-import { wsConnections } from './store';
+import { schema } from '@routes/ws-connect/schema';
+import { broadcast, wsConnections } from '@modules/websocket';
 
 // Define the type of the request parameters
 interface WebSocketParams {
@@ -18,15 +18,18 @@ async function routes(fastify: FastifyInstance) {
 
       // Store the WebSocket connection
       wsConnections[ratId] = socket;
+      console.log(`WebSocket connected for Rat ID: ${ratId}`);
+
+      // Broadcast updated client list to all connected clients
+      broadcast("clients__update", Object.keys(wsConnections));
 
       socket.on('close', () => {
         console.log(`WebSocket closed for Rat ID: ${ratId}`);
         delete wsConnections[ratId]; // Clean up connection
-        // TODO: broadcast to all connected clients
+        // Broadcast updated client list to all connected clients
+        broadcast("clients__update", Object.keys(wsConnections));
       });
 
-      console.log(`WebSocket connected for Rat ID: ${ratId}`);
-      // TODO: broadcast to all connected clients
     }
   );
 }

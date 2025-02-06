@@ -3,7 +3,7 @@
 
   import type { ServerReturnValue } from "../types"
 
-  import Spinner from "@components/Spinner/Spinner.svelte"
+  import Spinner from "@components/Elements/Spinner/Spinner.svelte"
   import Log from "@components/Nest/Log/Log.svelte"
   import Outcome from "./Outcome.svelte"
 

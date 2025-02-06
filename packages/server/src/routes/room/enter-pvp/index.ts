@@ -33,7 +33,7 @@ import { getPvPSystemPrompts } from '@modules/cms';
 import { validateInputData } from '@routes/room/enter/validation';
 
 // Websocket
-import { wsConnections } from '@routes/websocket/store';
+import { sendToRat } from '@modules/websocket';
 
 // Initialize LLM: Anthropic
 const llmClient = getLLMClient(ANTHROPIC_API_KEY);
@@ -60,23 +60,23 @@ async function routes (fastify: FastifyInstance) {
             const playerId = getSenderId(signature, MESSAGE);
 
             validateInputData(playerId, ratA, room);
-            
-            console.log('ratInRoom:', room.ratInRoom);
+                        
             // Check if room already has one player
-
             if(!room.ratInRoom || room.ratInRoom === EMPTY_CONNECTION) {
-                console.log('no rat in room');
-                console.log('Placing Rat A in room...');
-                console.log('ratA', ratA);
                 await systemCalls.placeRatInRoom(ratA, room);
+                sendToRat(ratA.id, 'pvp__update', "Waiting for second rat...");
                 return { message: 'Rat entered room' };
             }
 
             // We have two players in room, run the simulation...
             const { rat: ratB } = getOnchainData(await network, components, room.ratInRoom);
 
-            console.log('Rat A:', ratA);
-            console.log('Rat B:', ratB);
+            // At this point:
+            // - ratA is the player that just entered the room
+            // - ratB is the player that was already in the room
+
+            sendToRat(ratB.id, 'pvp__update', `Another rat entered the room: ${ratA.id}`);
+            sendToRat(ratA.id, 'pvp__update', `Another rat is in the room: ${ratB.id}`);
 
             // Get system prompts from CMS
             const { eventSystemPrompt, outcomeSystemPrompt, correctionSystemPrompt } = await getPvPSystemPrompts();
@@ -85,13 +85,9 @@ async function routes (fastify: FastifyInstance) {
             const eventMessages = constructPvPEventMessages(ratA, ratB, room);
             const events = await callModel(llmClient, eventMessages, eventSystemPrompt) as EventsReturnValue;
 
-            // console.log('Events:', events);
-
             // Call outcome model
             const outcomeMessages = constructPvPOutcomeMessages(ratA, ratB, room, events);
             const unvalidatedOutcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as PvPOutcomeReturnValue;
-
-            // console.log('Unvalidated outcome:', unvalidatedOutcome);
 
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             const validatedOutcome = {
@@ -99,14 +95,12 @@ async function routes (fastify: FastifyInstance) {
                 ratB: await systemCalls.applyOutcome(ratB, room, unvalidatedOutcome.ratB)
             }
 
-            // console.log('Validated outcome:', validatedOutcome);
+            // TODO: Send message to creator, if not admin
 
             // The event log might now not reflect the actual outcome.
             // Run it through the LLM again to get the corrected event log.
             const correctionMessages = constructPvPCorrectionMessages(unvalidatedOutcome, validatedOutcome, events);
             const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt) as EventsReturnValue;
-
-            // console.log('Corrected events:', correctedEvents);
 
             const returnValue = {
                 log: correctedEvents,
@@ -114,17 +108,8 @@ async function routes (fastify: FastifyInstance) {
                 ratB: validatedOutcome.ratB
             }
 
-            // console.log(returnValue);
-
-            console.log('Sending outcome to RatA via WebSocket...');
-
-            // Send the outcome to RatB through its WebSocket connection
-            const ratBWebSocket = wsConnections[ratB.id];
-            if (ratBWebSocket) {
-                ratBWebSocket.send(JSON.stringify(returnValue));
-            } else {
-                console.error('No active WebSocket connection for RatA');
-            }
+            console.log('Sending outcome to RatB via WebSocket...');
+            sendToRat(ratB.id, 'pvp__outcome', returnValue);
 
             reply.send(returnValue);
         } catch (error) {

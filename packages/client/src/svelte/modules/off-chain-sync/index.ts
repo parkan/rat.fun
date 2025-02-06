@@ -1,5 +1,6 @@
 import { ENVIRONMENT } from "@mud/enums"
-import { newEvent } from "@modules/off-chain-sync/stores"
+import { clientList, newEvent } from "@modules/off-chain-sync/stores"
+import { MessageContent } from "./types"
 
 let socket: WebSocket
 
@@ -14,62 +15,22 @@ export function initOffChainSync(environment: ENVIRONMENT, ratId: string) {
 
   socket = new WebSocket(url)
 
-  socket.onmessage = message => {
-    // TODO route messages to appropriate handlers
-    console.log("Received message:", message)
-    const outcome = JSON.parse(message.data)
-    console.log("Received outcome:", outcome)
-    newEvent.set(outcome)
+  socket.onmessage =(message: MessageEvent<string>) => {
+    // console.log("Received message:", message)
+    const messageContent = JSON.parse(message.data) as MessageContent
+    // console.log("Received outcome:", messageContent)
+
+    // Update client list when players connect/disconnect
+    if (messageContent.topic === "clients__update") {
+      clientList.set(messageContent.message as string[])
+      return
+    }
+
+    // Pass message to store
+    newEvent.set(messageContent)
   }
 
-  // TODO: Handle socket disconnection
-
-  // TODO: Update client list when players connect/disconnect
-
-  // // Listen for messages
-  // socket.addEventListener("message", (event: { data: string }) => {
-  //   const msgObj = JSON.parse(event.data)
-
-  //   const { topic, message } = msgObj
-
-  //   switch (topic) {
-  //     case "clientId": {
-  //       const { clientId } = JSON.parse(event.data)
-  //       playerClientId.set(clientId)
-  //       console.log("Player client, ", clientId)
-  //       break
-  //     }
-
-  //     case "clientList": {
-  //       clientList.set(msgObj.clients)
-  //       console.log("Clients, ", msgObj.clients)
-  //       break
-  //     }
-
-  //     case "transform": {
-  //       clientTransforms.update(m => {
-  //         m.set(msgObj.clientId, JSON.parse(message))
-
-  //         return m
-  //       })
-
-  //       break
-  //     }
-
-  //     case "location": {
-  //       clientLocations.update(m => {
-  //         m.set(msgObj.clientId, JSON.parse(message))
-
-  //         return m
-  //       })
-
-  //       break
-  //     }
-
-  //     default: {
-  //       console.warn("unhandled message topic: ", topic, msgObj)
-  //       break
-  //     }
-  //   }
-  // })
+  socket.onclose = message => {
+    console.log("Socket closed", message)
+  }
 }

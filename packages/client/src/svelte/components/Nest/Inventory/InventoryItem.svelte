@@ -2,7 +2,7 @@
   import {
     transferItemToLoadOut,
     transferItemToInventory,
-  } from "@svelte/modules/action"
+  } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
   import type { ItemChange } from "../types"

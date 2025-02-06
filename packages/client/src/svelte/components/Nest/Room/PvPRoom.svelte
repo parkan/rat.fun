@@ -1,23 +1,27 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
-  import { player } from "@svelte/modules/state/base/stores"
-  import { newEvent } from "@svelte/modules/off-chain-sync/stores"
+  import { player } from "@modules/state/base/stores"
+  import { newEvent } from "@modules/off-chain-sync/stores"
 
   import type { ServerReturnValuePvP } from "../types"
 
-  import Spinner from "@components/Spinner/Spinner.svelte"
+  import Spinner from "@components/Elements/Spinner/Spinner.svelte"
   import Log from "@components/Nest/Log/Log.svelte"
   import Outcome from "./Outcome.svelte"
 
   export let outcome: ServerReturnValuePvP
   export let room: Room
 
-  $: console.log("outcome", outcome)
-
+  let executionLog: string[] = ["Rat entered room"]
   let oldRoomBalance = room.balance
 
-  $: if ($newEvent?.log) {
-    outcome = $newEvent
+  $: if ($newEvent?.topic === "pvp__outcome") {
+    outcome = $newEvent.message as ServerReturnValuePvP
+    newEvent.set(null)
+  }
+
+  $: if ($newEvent?.topic === "pvp__update") {
+    executionLog = [...executionLog, $newEvent.message as string]
     newEvent.set(null)
   }
 
@@ -56,11 +60,15 @@
     <div class="return">
       <button on:click={close}>Return to nest</button>
     </div>
-  {:else if outcome.message}
-    <p>{outcome.message}.</p>
-    <p>Waiting for second rat: <Spinner /></p>
   {:else}
-    EXPERIMENT IN PROGRESS: <Spinner />
+    <div class="execution-log">
+      {#each executionLog as logEntry}
+        <div>{logEntry}</div>
+      {/each}
+    </div>
+    <div>
+      <Spinner />
+    </div>
   {/if}
 </div>
 

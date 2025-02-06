@@ -6,7 +6,7 @@
   import { rat, player } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
-  import Spinner from "@components/Spinner/Spinner.svelte"
+  import Spinner from "@components/Elements/Spinner/Spinner.svelte"
 
   const dispatch = createEventDispatcher()
 

@@ -9,8 +9,8 @@
 
   import InventoryItem from "@components/Nest/Inventory/InventoryItem.svelte"
   import TraitItem from "@components/Nest/Traits/TraitItem.svelte"
-  import { gameConfig } from "@svelte/modules/state/base/stores"
-  import { shortenAddress } from "@svelte/modules/utils"
+  import { gameConfig } from "@modules/state/base/stores"
+  import { shortenAddress } from "@modules/utils"
 </script>
 
 <div
