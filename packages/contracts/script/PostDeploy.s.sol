@@ -35,8 +35,6 @@ contract PostDeploy is Script {
     // world.installRootModule(new StandardDelegationsModule(), new bytes(0));
     // world.installModule(new PuppetModule(), new bytes(0));
 
-    // If a rat does not make a choice within 10 minutes it is killed and the body removed.
-
     // Initialize gameConfig and tutorial levels
     // Root namespace owner is admin
     LibInit.init(NamespaceOwner.get(ROOT_NAMESPACE_ID));

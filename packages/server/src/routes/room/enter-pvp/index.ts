@@ -19,6 +19,11 @@ import { getLLMClient } from '@modules/llm/anthropic';
 import { callModel } from '@modules/llm/anthropic/callModel';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 
+// Groq
+// import { getLLMClient } from '@modules/llm/groq';
+// import { callModel } from '@modules/llm/groq/callModel';
+// const GROQ_API_KEY = process.env.GROQ_API_KEY as string;
+
 // MUD
 import { getOnchainData } from '@modules/mud/getOnchainData';
 import { components, systemCalls, network } from '@modules/mud/initMud';
@@ -37,6 +42,9 @@ import { sendToRat } from '@modules/websocket';
 
 // Initialize LLM: Anthropic
 const llmClient = getLLMClient(ANTHROPIC_API_KEY);
+
+// Initialize LLM: Groq
+// const llmClient = getLLMClient(GROQ_API_KEY);
 
 const opts = { schema };  
 
@@ -82,25 +90,33 @@ async function routes (fastify: FastifyInstance) {
             const { eventSystemPrompt, outcomeSystemPrompt, correctionSystemPrompt } = await getPvPSystemPrompts();
 
             // Call event model
+            console.time('–– PvP: Event LLM call');
             const eventMessages = constructPvPEventMessages(ratA, ratB, room);
             const events = await callModel(llmClient, eventMessages, eventSystemPrompt) as EventsReturnValue;
+            console.timeEnd('–– PvP: Event LLM call');
 
             // Call outcome model
+            console.time('–– PvP: Outcome LLM call');
             const outcomeMessages = constructPvPOutcomeMessages(ratA, ratB, room, events);
             const unvalidatedOutcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as PvPOutcomeReturnValue;
+            console.timeEnd('–– PvP: Outcome LLM call');
 
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
+            console.time('–– PvP: chain call');
             const validatedOutcome = {
                 ratA: await systemCalls.applyOutcome(ratA, room, unvalidatedOutcome.ratA),
                 ratB: await systemCalls.applyOutcome(ratB, room, unvalidatedOutcome.ratB)
             }
+            console.timeEnd('–– PvP: chain call');
 
             // TODO: Send message to creator, if not admin
 
             // The event log might now not reflect the actual outcome.
             // Run it through the LLM again to get the corrected event log.
+            console.time('–– PvP: Correction LLM call');
             const correctionMessages = constructPvPCorrectionMessages(unvalidatedOutcome, validatedOutcome, events);
             const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt) as EventsReturnValue;
+            console.timeEnd('–– PvP: Correction LLM call');
 
             const returnValue = {
                 log: correctedEvents,
