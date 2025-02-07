@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { GameConfig, EntityType, Balance, Name, OwnedRat, Inventory, Dead, Level } from "../codegen/index.sol";
+import { GameConfig, EntityType, Balance, Name, OwnedRat, Inventory, Dead, Level, LevelList } from "../codegen/index.sol";
 import { LibUtils } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 import { MAX_INVENTORY_SIZE, MAX_LOADOUT_SIZE } from "../constants.sol";
@@ -17,7 +17,7 @@ contract PlayerSystem is System {
     EntityType.set(_playerId, ENTITY_TYPE.PLAYER);
     Name.set(_playerId, _name);
     Balance.set(_playerId, 0);
-    Level.set(_playerId, 1);
+    Level.set(_playerId, LevelList.get()[0]);
   }
 
   /**

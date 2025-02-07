@@ -24,7 +24,7 @@ export const entities = writable({} as Entities)
 
 export const gameConfig = derived(
   entities,
-  $entities => ($entities[GAME_CONFIG_ID]?.gameConfig || {}) as GameConfig
+  $entities => ($entities[GAME_CONFIG_ID] || {}) as GameConfig
 )
 
 // * * * * * * * * * * * * * * * * *
@@ -36,6 +36,7 @@ export const rats = derived(entities, $entities => filterByEntitytype($entities,
 export const rooms = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.ROOM) as Rooms)
 export const traits = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.TRAIT) as Traits)
 export const items = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.ITEM) as Items)
+export const levels = derived(entities, $entities => filterByEntitytype($entities, ENTITY_TYPE.LEVEL) as Levels)
 
 // * * * * * * * * * * * * * * * * *
 // PLAYER STORES
@@ -77,4 +78,9 @@ export const ratInventory = derived(
   ([$rat, $items]) => $rat?.inventory?.map(item => $items[item]) as Item[]
 )
 
-export const roomsOnRatLevel = derived([rat, rooms], ([$rat, $rooms]) =>  filterByLevel($rooms, $rat?.level ?? 1) as Rooms)
+export const ratLevel = derived(
+  [rat, levels],
+  ([$rat, $levels]) => $levels[$rat?.level] as Level
+)
+
+export const roomsOnRatLevel = derived([rat, rooms], ([$rat, $rooms]) =>  filterByLevel($rooms, $rat?.level) as Rooms)

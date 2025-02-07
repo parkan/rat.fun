@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueentity/getUniqueEntity.sol";
-import { EntityType, RoomPrompt, RoomType, Owner, Index, GameConfig, Balance, Level } from "../codegen/index.sol";
+import { EntityType, RoomPrompt, RoomType, Owner, Index, GameConfig, Balance, Level, RoomCreationCost } from "../codegen/index.sol";
 import { ENTITY_TYPE, ROOM_TYPE } from "../codegen/common.sol";
-import { ROOM_CREATION_COST } from "../constants.sol";
 
 library LibRoom {
   /**
@@ -11,14 +10,14 @@ library LibRoom {
    * @param _roomPrompt The prompt for the room
    * @param _roomType The type of the room (one or two player)
    * @param _roomOwner Id of the owner of the room
-   * @param _roomLevel Level of the room
+   * @param _roomLevel Id of the level that the room is on
    * @return roomId The id of the new room
    */
   function createRoom(
     string memory _roomPrompt,
     ROOM_TYPE _roomType,
     bytes32 _roomOwner,
-    uint256 _roomLevel
+    bytes32 _roomLevel
   ) internal returns (bytes32 roomId) {
     roomId = getUniqueEntity();
     EntityType.set(roomId, ENTITY_TYPE.ROOM);
@@ -32,7 +31,7 @@ library LibRoom {
     Owner.set(roomId, _roomOwner);
 
     // Add to room's balance
-    Balance.set(roomId, ROOM_CREATION_COST);
+    Balance.set(roomId, RoomCreationCost.get(_roomLevel));
   }
 
   function destroyRoom(bytes32 _roomId) internal {

@@ -2,13 +2,11 @@
 pragma solidity >=0.8.24;
 import { GameConfig, GameConfigData } from "../codegen/index.sol";
 import { 
-  ROOM_CREATION_COST, 
   MAX_ROOM_PROMPT_LENGTH,
   MAX_INVENTORY_SIZE, 
   MAX_LOADOUT_SIZE, 
   MAX_TRAITS_SIZE,
-  CREATOR_FEE,
-  LEVEL_UP_COST
+  CREATOR_FEE
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
 
@@ -25,13 +23,11 @@ library LibInit {
         adminId: LibUtils.addressToEntityKey(_adminAddress),
         globalRoomIndex: 0,
         globalRatIndex: 0,
-        roomCreationCost: ROOM_CREATION_COST,
         maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH,
         maxInventorySize: MAX_INVENTORY_SIZE,
         maxLoadOutSize: MAX_LOADOUT_SIZE,
         maxTraitsSize: MAX_TRAITS_SIZE,
-        creatorFee: CREATOR_FEE,
-        levelUpCost: LEVEL_UP_COST
+        creatorFee: CREATOR_FEE
       })
     );
   }

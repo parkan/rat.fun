@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
-import { Owner, OwnedRat, Dead, Level, Balance } from "../codegen/index.sol";
+import { Owner, OwnedRat, Dead, Level, LevelUpCost, LevelList, Balance, Index } from "../codegen/index.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibUtils, LibRat } from "../libraries/Libraries.sol";
-import { LEVEL_UP_COST } from "../constants.sol";
 
 contract RatSystem is System {
   /**
@@ -32,12 +31,17 @@ contract RatSystem is System {
     require(ratId != bytes32(0), "no rat");
 
     uint256 ratBalance = Balance.get(ratId);
+    bytes32 ratLevel = Level.get(ratId);
 
-    require(ratBalance >= LEVEL_UP_COST, "insufficient balance");
+    require(ratBalance >= LevelUpCost.get(ratLevel), "insufficient balance");
 
-    Balance.set(ratId, ratBalance - LEVEL_UP_COST);
+    Balance.set(ratId, ratBalance - LevelUpCost.get(ratLevel));
 
-    Level.set(ratId, Level.get(ratId) + 1);
-    Level.set(playerId, Level.get(playerId) + 1);
+    uint256 currentLevelIndex = Index.get(Level.get(ratId));
+    uint256 maxLevelIndex = LevelList.get().length - 1;
+    uint256 nextLevelIndex = currentLevelIndex < maxLevelIndex ? currentLevelIndex + 1 : maxLevelIndex;
+
+    Level.set(ratId, LevelList.get()[nextLevelIndex]);
+    Level.set(playerId, LevelList.get()[nextLevelIndex]);
   }
 }

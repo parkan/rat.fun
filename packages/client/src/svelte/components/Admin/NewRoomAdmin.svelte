@@ -1,16 +1,23 @@
 <script lang="ts">
+  import { gameConfig } from "@modules/state/base/stores"
   import { createRoomAsAdmin } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { ROOM_TYPE } from "contracts/enums"
 
   let busy = false
   let newRoomPrompt: string = ""
-  let newRoomLevel: number = 1
+  let newRoomLevelIndex: number = 1
   let newRoomType: ROOM_TYPE = ROOM_TYPE.ONE_PLAYER // or ROOM_TYPE.TWO_PLAYER
+  let newRoomExtraBalance: number = 0
 
   async function sendCreateRoom() {
     busy = true
-    const action = createRoomAsAdmin(newRoomPrompt, newRoomType, newRoomLevel)
+    const action = createRoomAsAdmin(
+      newRoomPrompt,
+      newRoomType,
+      $gameConfig.levelList[newRoomLevelIndex],
+      newRoomExtraBalance
+    )
     try {
       await waitForCompletion(action)
     } catch (e) {
@@ -32,9 +39,19 @@
     <input
       type="number"
       placeholder="Level"
-      min="1"
-      max="10"
-      bind:value={newRoomLevel}
+      min="0"
+      max="5"
+      bind:value={newRoomLevelIndex}
+    />
+  </div>
+  <!-- EXTRA BALANCE -->
+  <div class="input-group">
+    Extra balance:
+    <input
+      type="number"
+      placeholder="Extra balance"
+      min="0"
+      bind:value={newRoomExtraBalance}
     />
   </div>
   <!-- ROOM TYPE -->

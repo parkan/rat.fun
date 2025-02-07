@@ -58,7 +58,7 @@
   scrollbar-width: none; /* Firefox */
   margin: 0;
   padding: 0;
-  user-select: none;
+  /* user-select: none; */
 }
 
 body {

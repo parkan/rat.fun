@@ -14,6 +14,8 @@ export enum WorldFunctions {
   transferItemToLoadOut = NAMESPACE + "transferItemToLoadOut",
   transferBalanceToPlayer = NAMESPACE + "transferBalanceToPlayer",
   transferBalanceToRat = NAMESPACE + "transferBalanceToRat",
+  updateLevel = NAMESPACE + "updateLevel",
+  addRoomBalance = NAMESPACE + "addRoomBalance",
 }
 
 // --- API --------------------------------------------------------------
@@ -26,16 +28,24 @@ export function levelUp() {
   return addToSequencer(WorldFunctions.LevelUp, [])
 }
 
+export function updateLevel(levelId: string, levelUpCost: number, roomCreationCost: number) {
+  return addToSequencer(WorldFunctions.updateLevel, [levelId, levelUpCost, roomCreationCost])
+}
+
 export function createRoom(prompt: string, roomType: ROOM_TYPE) {
   return addToSequencer(WorldFunctions.CreateRoom, [prompt, roomType])
 }
 
-export function createRoomAsAdmin(prompt: string, roomType: ROOM_TYPE, roomLevel: number) {
-  return addToSequencer(WorldFunctions.CreateRoomAsAdmin, [prompt, roomType, roomLevel])
+export function createRoomAsAdmin(prompt: string, roomType: ROOM_TYPE, levelId: string, extraBalance: number) {
+  return addToSequencer(WorldFunctions.CreateRoomAsAdmin, [prompt, roomType, levelId, extraBalance])
 }
 
 export function destroyRoomAsAdmin(roomId: string) {
   return addToSequencer(WorldFunctions.DestroyRoomAsAdmin, [roomId])
+}
+
+export function addRoomBalance(roomId: string) {
+  return addToSequencer(WorldFunctions.addRoomBalance, [roomId])
 }
 
 export function createRat() {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
-import { GameConfig, Balance, Level } from "../codegen/index.sol";
+import { GameConfig, Balance, Level, RoomCreationCost } from "../codegen/index.sol";
 import { LibRoom, LibUtils } from "../libraries/Libraries.sol";
-import { ROOM_CREATION_COST, MAX_ROOM_PROMPT_LENGTH } from "../constants.sol";
+import { MAX_ROOM_PROMPT_LENGTH } from "../constants.sol";
 import { ENTITY_TYPE, ROOM_TYPE } from "../codegen/common.sol";
 
 contract RoomSystem is System {
@@ -19,10 +19,12 @@ contract RoomSystem is System {
     // TODO: Character count is not accurate due to UTF8 encoding
     require(bytes(_roomPrompt).length > 0, "prompt too short");
     require(bytes(_roomPrompt).length <= MAX_ROOM_PROMPT_LENGTH, "prompt too long");
-    require(Balance.get(playerId) > ROOM_CREATION_COST, "balance too low");
+
+    uint256 roomCreationCost = RoomCreationCost.get(Level.get(playerId));
+    require(Balance.get(playerId) > roomCreationCost, "balance too low");
 
     // Deduct from player's balance
-    Balance.set(playerId, Balance.get(playerId) - ROOM_CREATION_COST);
+    Balance.set(playerId, Balance.get(playerId) - roomCreationCost);
 
     // Create room
     roomId = LibRoom.createRoom(_roomPrompt, _roomType, playerId, Level.get(playerId));

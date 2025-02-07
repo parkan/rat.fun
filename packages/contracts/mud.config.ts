@@ -3,7 +3,7 @@ import { defineWorld } from "@latticexyz/world";
 export default defineWorld({
   namespace: "ratroom",
   enums: {
-    ENTITY_TYPE: ["NONE", "PLAYER", "RAT", "ROOM", "ITEM", "TRAIT", ],
+    ENTITY_TYPE: ["NONE", "PLAYER", "RAT", "ROOM", "ITEM", "TRAIT", "LEVEL" ],
     ROOM_TYPE: ["ONE_PLAYER", "TWO_PLAYER"]
   },
   deploy: {
@@ -17,18 +17,23 @@ export default defineWorld({
         adminId: "bytes32",
         globalRoomIndex: "uint32",
         globalRatIndex: "uint32",
-        roomCreationCost: "uint32",
         maxRoomPromptLength: "uint32",
         maxInventorySize: "uint32",
         maxLoadOutSize: "uint32",
         maxTraitsSize: "uint32",
-        creatorFee: "uint256",
-        levelUpCost: "uint256",
+        creatorFee: "uint256"
       },
       codegen: {
         dataStruct: true
       }
     },
+    LevelList: {
+      key: [],
+      schema: {
+        value: "bytes32[]"
+      }
+    },
+    // ...
     Name: "string", // Set on player
     EntityType: "ENTITY_TYPE",
     // ...
@@ -38,7 +43,7 @@ export default defineWorld({
     Traits: "bytes32[]", // Traits of rat
     Inventory: "bytes32[]", // Items carried by player and rat
     // ...
-    Level: "uint256", // Set on room and rat
+    Level: "bytes32", // Id of level. Set on rat, player and room.
     Index: "uint256", // Set on rat and room
     Balance: "uint256", // Amount of credits. Set on room, rat and player.
     WaitingInRoom: "bytes32", // Set on rat. Id of the room that the rat is waiting in
@@ -48,7 +53,10 @@ export default defineWorld({
     // ...
     RoomPrompt: "string",
     RoomType: "ROOM_TYPE",
-    RatInRoom: "bytes32" // Set on room. Id of rat waiting in room
+    RatInRoom: "bytes32", // Set on room. Id of rat waiting in room
+    // ...
+    RoomCreationCost: "uint256",
+    LevelUpCost: "uint256"
   },
   modules: [
     {

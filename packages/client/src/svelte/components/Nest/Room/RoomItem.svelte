@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { player, rat, gameConfig } from "@modules/state/base/stores"
+  import { player, rat, gameConfig, levels } from "@modules/state/base/stores"
   import type { ServerReturnValue, ServerReturnValuePvP } from "../types"
   import { walletNetwork } from "@modules/network"
   import { MESSAGE } from "@components/Nest/constants"
@@ -133,7 +133,7 @@
     <div class="balance">Balance: ${room.balance ?? 0}</div>
     <!-- Creator -->
     <div class="creator">
-      Creator: {room.owner === $gameConfig.adminId
+      Creator: {room.owner === $gameConfig.gameConfig.adminId
         ? "Jimmy9"
         : shortenAddress(room.owner)}
     </div>
@@ -143,7 +143,7 @@
     </div>
     <!-- Room level -->
     <div class="creator">
-      Level: {room.level}
+      Level: {$levels[room.level]?.index ?? 0}
     </div>
     <!-- Rat waiting in room  -->
     {#if room.ratInRoom && room.ratInRoom !== EMPTY_CONNECTION}

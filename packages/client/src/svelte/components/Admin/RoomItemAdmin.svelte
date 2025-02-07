@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { gameConfig } from "@modules/state/base/stores"
-  import { destroyRoomAsAdmin } from "@modules/action"
+  import { gameConfig, levels } from "@modules/state/base/stores"
+  import { destroyRoomAsAdmin, addRoomBalance } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { shortenAddress } from "@modules/utils"
 
@@ -20,9 +20,21 @@
       busy = false
     }
   }
+
+  async function sendAddRoomBalance() {
+    busy = true
+    const action = addRoomBalance(roomId)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
+  }
 </script>
 
-<div class="room-item">
+<div class:disabled={busy} class="room-item">
   <div class="room-info" class:pvp={room.roomType === 1}>
     <div class="room-title">Room #{room.index}</div>
     <!-- Prompt -->
@@ -32,7 +44,7 @@
     <div class="balance">Balance: ${room.balance ?? 0}</div>
     <!-- Creator -->
     <div class="creator">
-      Creator: {room.owner === $gameConfig.adminId
+      Creator: {room.owner === $gameConfig.gameConfig.adminId
         ? "Jimmy9"
         : shortenAddress(room.owner)}
     </div>
@@ -42,9 +54,10 @@
     </div>
     <!-- Room level -->
     <div class="creator">
-      Level: {room.level}
+      Level: {$levels[room.level]?.index ?? 0}
     </div>
   </div>
+  <button disabled={busy} on:click={sendAddRoomBalance}>Add $100</button>
   <button disabled={busy} on:click={sendDestroyRoom}>Destroy room</button>
 </div>
 
@@ -61,9 +74,9 @@
 
     button {
       display: block;
-      width: 200px;
+      width: 120px;
       padding: 20px;
-      font-size: var(--font-size-large);
+      font-size: var(--font-size-normal);
       cursor: pointer;
       flex-shrink: 0;
       background: var(--color-secondary);

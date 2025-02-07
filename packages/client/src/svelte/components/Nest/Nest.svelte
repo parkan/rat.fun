@@ -4,6 +4,8 @@
     gameConfig,
     player,
     rat,
+    ratLevel,
+    levels,
     roomsOnRatLevel,
     ratInventory,
     playerInventory,
@@ -33,6 +35,9 @@
   export let environment: ENVIRONMENT
 
   let busy = false
+
+  $: console.log("$levels", $levels)
+  $: console.log("$gameConfig.levelList", $gameConfig.levelList)
 
   async function sendTransferBalanceToPlayer() {
     busy = true
@@ -140,14 +145,13 @@
         <div class="stat-item">
           <div class="inner-wrapper rat">
             <div class="label">Level:</div>
-            <div class="value">{$rat?.level ?? 0}</div>
+            <div class="value">{$ratLevel.index ?? 0}</div>
             <div class="action">
               <button
-                disabled={busy ||
-                  $rat.balance < ($gameConfig?.levelUpCost ?? 100)}
+                disabled={busy || $rat.balance < ($ratLevel.levelUpCost ?? 0)}
                 on:click={sendLevelUp}
               >
-                Level up (costs {$gameConfig?.levelUpCost ?? 100})
+                Level up (costs ${$ratLevel.levelUpCost ?? 0})
               </button>
             </div>
           </div>
@@ -200,10 +204,10 @@
 
   <div class="column second">
     <div class="level">
-      <h2>Level: {$rat?.level ?? 0}</h2>
+      <h2>Level: {$ratLevel.index ?? 0}</h2>
     </div>
     <!-- CREATE ROOM-->
-    {#if $rat.level > 1}
+    {#if ($ratLevel.index ?? 0) > 1}
       <NewRoom />
     {/if}
     <!-- ROOM LIST -->

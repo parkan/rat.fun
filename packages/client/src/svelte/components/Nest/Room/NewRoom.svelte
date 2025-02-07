@@ -8,7 +8,8 @@
   let newPrompt: string = ""
 
   $: invalidPromptLength =
-    newPrompt.length < 1 || newPrompt.length > $gameConfig.maxRoomPromptLength
+    newPrompt.length < 1 ||
+    newPrompt.length > $gameConfig.gameConfig.maxRoomPromptLength
 
   async function sendCreateRoom() {
     busy = true
@@ -37,7 +38,7 @@
     </button>
     <!-- PROMPT LENGHT -->
     <div class="prompt-length" class:invalid={invalidPromptLength}>
-      {newPrompt.length} / {$gameConfig.maxRoomPromptLength}
+      {newPrompt.length} / {$gameConfig.gameConfig.maxRoomPromptLength}
     </div>
   </div>
 </div>

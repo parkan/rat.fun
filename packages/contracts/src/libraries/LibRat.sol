@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueentity/getUniqueEntity.sol";
-import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level } from "../codegen/index.sol";
+import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level, LevelList } from "../codegen/index.sol";
 import { LibTrait } from "./LibTrait.sol";
 import { LibItem } from "./LibItem.sol";
 import { LibUtils } from "./LibUtils.sol";
@@ -20,7 +20,7 @@ library LibRat {
     Dead.set(ratId, false);
     Health.set(ratId, 100);
     Balance.set(ratId, 0);
-    Level.set(ratId, 1);
+    Level.set(ratId, LevelList.get()[0]);
 
     uint32 newRatIndex = GameConfig.getGlobalRatIndex() + 1;
     GameConfig.setGlobalRatIndex(newRatIndex);

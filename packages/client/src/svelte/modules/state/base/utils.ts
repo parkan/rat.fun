@@ -11,7 +11,7 @@ export function filterByEntitytype(
   )
 }
 
-export function filterByLevel(rooms: Rooms, level: number): Rooms {
+export function filterByLevel(rooms: Rooms, level: string): Rooms {
   return Object.fromEntries(
     Object.entries(rooms).filter(
       ([, room]) => room.level === level

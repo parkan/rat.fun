@@ -88,10 +88,10 @@
   </div>
 
   <!-- Creator fee payout-->
-  {#if room.owner !== $gameConfig.adminId}
+  {#if room.owner !== $gameConfig.gameConfig.adminId}
     <div class="outcome-item">
       <div class="title">
-        Creator fee (${$gameConfig.creatorFee}) paid to
+        Creator fee (${$gameConfig.gameConfig.creatorFee}) paid to
       </div>
       <div class="creator">{shortenAddress(room.owner)}</div>
     </div>

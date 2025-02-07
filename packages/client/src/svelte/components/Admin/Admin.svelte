@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { rooms } from "@modules/state/base/stores"
+  import { rooms, levels } from "@modules/state/base/stores"
   import NewRoomAdmin from "@components/Admin/NewRoomAdmin.svelte"
   import RoomItemAdmin from "@components/Admin/RoomItemAdmin.svelte"
+  import LevelItemAdmin from "@components/Admin/LevelItemAdmin.svelte"
+  import LevelHeader from "@components/Admin/LevelHeader.svelte"
 
   let adminActive = false
-  let levelFilter: number | null = null
+  let levelFilter: string | null = null
 
   function toggleAdmin() {
     adminActive = !adminActive
@@ -22,10 +24,17 @@
 {#if adminActive}
   <div class="admin">
     <div class="container">
+      <!-- LEVELS  -->
+      <div class="title">LEVELS</div>
+      <div class="level-list">
+        <LevelHeader />
+        {#each Object.entries($levels) as [levelId, level]}
+          <LevelItemAdmin {levelId} {level} />
+        {/each}
+      </div>
       <!-- CREATE ROOM  -->
       <div class="title">Create room</div>
       <NewRoomAdmin />
-
       <!-- TOTAL ROOM COUNT -->
       <div class="total-rooms title">
         Rooms shown: {filteredRooms().length}/{Object.keys($rooms).length}

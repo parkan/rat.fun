@@ -7,4 +7,5 @@ import { LibRat } from "./LibRat.sol";
 import { LibInit } from "./LibInit.sol";
 import { LibTrait } from "./LibTrait.sol";
 import { LibItem } from "./LibItem.sol";
+import { LibLevel } from "./LibLevel.sol";
 import { LibManager } from "./LibManager.sol";

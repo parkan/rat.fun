@@ -3,17 +3,20 @@ import { Hex } from "viem"
 
 declare global {
 
-  type GameConfig = {
+  type GameConfigObject = {
     adminAddress: Hex,
     adminId: Hex,
     globalRoomIndex: number,
     globalRatIndex: number,
-    roomCreationCost: number,
     maxRoomPromptLength: number,
     maxInventorySize: number,
     maxLoadOutSize: number,
     creatorFee: number,
-    levelUpCost: number,
+  }
+
+  type GameConfig = {
+    gameConfig: GameConfigObject
+    levelList: string[]
   }
   
   // * * * * * * * * * * * * * * * * *
@@ -25,11 +28,11 @@ declare global {
   }
 
   type Entity = {
-    [key: string]: number | ENTITY_TYPE | Hex | boolean | string | string[] | undefined,
+    [key: string]: number | ENTITY_TYPE | Hex | boolean | string | string[] | GameConfigObject | undefined,
     entityType?: ENTITY_TYPE,
     name?: string,
     balance?: number,
-    level?: number,
+    level?: Hex,
     value?: number,
     dead?: boolean,
     health?: number,
@@ -42,6 +45,10 @@ declare global {
     ratInRoom?: Hex,
     waitingInRoom?: Hex,
     index?: number,
+    levelUpCost: number,
+    roomCreationCost: number,
+    levelList: string[],
+    gameConfig: GameConfigObject
   }
 
   type Player  = {
@@ -50,7 +57,7 @@ declare global {
     balance: number,
     ownedRat: Hex,
     inventory: string[],
-    level: number
+    level: Hex
   }
 
   type Rat  = {
@@ -58,7 +65,7 @@ declare global {
     entityType: ENTITY_TYPE.RAT,
     index: number,
     balance: number,
-    level: number,
+    level: Hex,
     owner: Hex,
     dead: boolean,
     health: number,
@@ -73,7 +80,7 @@ declare global {
     owner: Hex,
     index: number,
     balance: number,
-    level: number,
+    level: Hex,
     roomPrompt: string,
     roomType: ROOM_TYPE,
     ratInRoom: Hex
@@ -91,6 +98,14 @@ declare global {
     entityType: ENTITY_TYPE.ITEM,
     name: string,
     value: number
+  }
+
+  type Level = {
+    [key: string]: ENTITY_TYPE | number,
+    entityType: ENTITY_TYPE.LEVEL,
+    index: number,
+    levelUpCost: number,
+    roomCreationCost: number
   }
 
   // * * * * * * * * * * * * * * * * *
@@ -119,5 +134,9 @@ declare global {
 
   type Items = {
     [index: string]: Item
+  }
+
+  type Levels = {
+    [index: string]: Level
   }
 }
