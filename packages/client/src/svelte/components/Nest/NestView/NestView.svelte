@@ -1,8 +1,14 @@
 <script lang="ts">
   import { rat } from "@modules/state/base/stores"
+  import Cage from "@components/Cage/Cage.svelte"
+  import Main from "@components/World/Main.svelte"
 </script>
 
-<div class="nest-view">NEST VIEW</div>
+<div class="nest-view">
+  <Main>
+    <Cage />
+  </Main>
+</div>
 
 <style lang="scss">
   .nest-view {
