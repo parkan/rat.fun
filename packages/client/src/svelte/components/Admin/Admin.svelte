@@ -84,6 +84,7 @@
     display: flex;
     justify-content: center;
     padding-top: 40px;
+    z-index: 100;
 
     .container {
       width: 700px;
