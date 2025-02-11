@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte"
   import {
     player,
     rat,
@@ -75,9 +74,10 @@
     UIState.set(UI.CREATING_RAT)
   }
 
-  onMount(() => {
+  // Wait for the player to have a rat before initializing off-chain sync
+  $: if ($player.ownedRat) {
     initOffChainSync(environment, $player.ownedRat)
-  })
+  }
 </script>
 
 <Admin />
