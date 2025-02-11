@@ -204,9 +204,9 @@
       <h2>Level: {$ratLevel?.index ?? 0}</h2>
     </div>
     <!-- CREATE ROOM-->
-    {#if ($ratLevel?.index ?? 0) > 1}
-      <NewRoom />
-    {/if}
+    <!-- {#if ($ratLevel?.index ?? 0) > 1} -->
+    <NewRoom />
+    <!-- {/if} -->
     <!-- ROOM LIST -->
     <div class="room-list">
       {#each Object.entries($roomsOnRatLevel).reverse() as [roomId, room]}

@@ -15,7 +15,7 @@
     "solhint": "solhint --config ./.solhint.json 'src/**/*.sol' --fix",
     "test": "forge clean && tsc --noEmit && mud test",
     "test-verbose": "forge clean && tsc --noEmit && mud test --forgeOptions=' -vvv'",
-    "test-single": "forge clean && tsc --noEmit && mud test --forgeOptions='--match-test testApplyOutcomeValueTransferOnDeath'"
+    "test-single": "forge clean && tsc --noEmit && mud test --forgeOptions='--match-test testCreateRoom'"
   },
   "dependencies": {
     "@latticexyz/cli": "2.2.20-b774ab28b3de6cefcbfce5e1bb6fcb68b9374abf",
