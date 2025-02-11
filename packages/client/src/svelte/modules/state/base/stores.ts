@@ -83,4 +83,16 @@ export const ratLevel = derived(
   ([$rat, $levels]) => $levels[$rat?.level] as Level
 )
 
+export const ratTotalValue = derived([rat, ratInventory, ratTraits], ([$rat, $ratInventory, $ratTraits]) => {
+
+  console.log($rat, $ratInventory, $ratTraits);
+
+  const totalValue = 
+    Number($rat.balance ?? 0) + // Balance
+    Number($rat.health ?? 0) + // Health
+    ($ratInventory?.reduce((acc, item) => acc + (Number(item.value) ?? 0), 0) ?? 0) + // Inventory
+    ($ratTraits?.reduce((acc, trait) => acc + (Number(trait.value) ?? 0), 0) ?? 0) // Traits
+  return totalValue
+})
+
 export const roomsOnRatLevel = derived([rat, rooms], ([$rat, $rooms]) =>  filterByLevel($rooms, $rat?.level) as Rooms)

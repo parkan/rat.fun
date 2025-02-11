@@ -1,13 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import {
-    gameConfig,
     player,
     rat,
     ratLevel,
-    levels,
     roomsOnRatLevel,
     ratInventory,
+    ratTotalValue,
     playerInventory,
   } from "@modules/state/base/stores"
   import { UI } from "@modules/ui/enums"
@@ -173,6 +172,13 @@
               </button>
             </div>
           {/if}
+        </div>
+        <!-- RAT TOTAL VALUE -->
+        <div class="stat-item">
+          <div class="inner-wrapper">
+            <div class="label">Total value:</div>
+            <div class="value">${$ratTotalValue ?? 0}</div>
+          </div>
         </div>
         {#if !$rat?.dead}
           <!-- TRAITS -->
