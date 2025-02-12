@@ -22,8 +22,8 @@
   import { EMPTY_CONNECTION } from "@modules/utils/constants"
   import { initOffChainSync } from "@modules/off-chain-sync"
 
-  import RoomItem from "@components/Nest/Room/RoomItem.svelte"
-  import NewRoom from "@components/Nest/Room/NewRoom.svelte"
+  import RoomItem from "@components/Room/RoomItem.svelte"
+  import NewRoom from "@components/Room/NewRoom.svelte"
   import Inventory from "@components/Nest/Inventory/Inventory.svelte"
   import Traits from "@components/Nest/Traits/Traits.svelte"
   import NestView from "@components/Nest/NestView/NestView.svelte"
@@ -229,14 +229,6 @@
 </div>
 
 <style lang="scss">
-  .stats {
-    margin-bottom: 20px;
-  }
-
-  img {
-    margin-bottom: 20px;
-  }
-
   .column {
     width: 50%;
     height: 100vh;
@@ -248,37 +240,6 @@
 
     &.first {
       border-right: 1px solid var(--white);
-    }
-  }
-
-  .trait {
-    background: lightcyan;
-    color: var(--black);
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .image-container {
-    position: relative;
-    margin-top: 10px;
-
-    .stamp {
-      width: 400px;
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    &.dead {
-      .rat {
-        filter: grayscale(100%);
-      }
-
-      .stamp {
-        display: block;
-      }
     }
   }
 

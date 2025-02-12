@@ -124,8 +124,9 @@ async function routes (fastify: FastifyInstance) {
                 ratB: validatedOutcome.ratB
             }
 
-            console.log('Sending outcome to RatB via WebSocket...');
+            console.log('Sending outcome to Rats via WebSocket...');
             sendToRat(ratB.id, 'pvp__outcome', returnValue);
+            sendToRat(ratA.id, 'pvp__outcome', returnValue);
 
             reply.send(returnValue);
         } catch (error) {
