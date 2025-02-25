@@ -13,9 +13,9 @@ import { EventsReturnValue, OutcomeReturnValue } from '@modules/llm/types'
 import { constructEventMessages, constructOutcomeMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
 
 // Anthropic
-import { getLLMClient } from '@modules/llm/anthropic';
-import { callModel } from '@modules/llm/anthropic/callModel';
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
+// import { getLLMClient } from '@modules/llm/anthropic';
+// import { callModel } from '@modules/llm/anthropic/callModel';
+// const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 
 // DeepSeek
 // import { getLLMClient } from '@modules/llm/deepseek';
@@ -37,6 +37,11 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 // import { callModel } from '@modules/llm/groq/callModel';
 // const GROQ_API_KEY = process.env.GROQ_API_KEY as string;
 
+// Grok
+import { getLLMClient } from '@modules/llm/grok';
+import { callModel } from '@modules/llm/grok/callModel';
+const GROK_API_KEY = process.env.GROK_API_KEY as string;
+
 // MUD
 import { getOnchainData } from '@modules/mud/getOnchainData';
 import { components, systemCalls, network } from '@modules/mud/initMud';
@@ -51,7 +56,7 @@ import { getSystemPrompts } from '@modules/cms';
 import { validateInputData } from './validation';
 
 // Initialize LLM: Anthropic
-const llmClient = getLLMClient(ANTHROPIC_API_KEY);
+// const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 
 // Initialize LLM: DeepSeek
 // const llmClient = getLLMClient(DEEPSEEK_API_KEY);
@@ -64,6 +69,9 @@ const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 
 // Initialize LLM: Groq
 // const llmClient = getLLMClient(GROQ_API_KEY);
+
+// Initialize LLM: Grok
+const llmClient = getLLMClient(GROK_API_KEY);
 
 const opts = { schema };  
 
