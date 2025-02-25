@@ -113,14 +113,10 @@ async function routes (fastify: FastifyInstance) {
             const unvalidatedOutcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as OutcomeReturnValue;
             console.timeEnd('–– Outcome LLM call');
 
-            // console.log('Unvalidated outcome:', unvalidatedOutcome);
-
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             console.time('–– Chain call');
             const validatedOutcome = await systemCalls.applyOutcome(rat, room, unvalidatedOutcome);
             console.timeEnd('–– Chain call');
-
-            // console.log('Validated outcome:', validatedOutcome);
 
             // TODO: Send message to creator, if not admin
 
@@ -131,7 +127,7 @@ async function routes (fastify: FastifyInstance) {
             const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt) as EventsReturnValue;
             console.timeEnd('–– Correction LLM call');
 
-            // console.log('Corrected events:', correctedEvents);
+            console.log('Corrected events:', correctedEvents);
 
             reply.send({
                 log: correctedEvents,

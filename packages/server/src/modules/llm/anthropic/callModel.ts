@@ -14,7 +14,11 @@ export async function callModel(anthropic: Anthropic, messages: MessageParam[], 
 }
 
 function parseReturnMessage(msg: Anthropic.Messages.Message) {
-    const rawText = msg.content[0]?.text ?? "";
+    let rawText = msg.content[0]?.text ?? "";
+
+    // Remove Markdown-style code block indicators
+    rawText = rawText.replace(/^```json\s*/i, "").replace(/```$/, "");
+
     // Parse the text into a native object
     try {
         const returnValue = JSON.parse(rawText);
