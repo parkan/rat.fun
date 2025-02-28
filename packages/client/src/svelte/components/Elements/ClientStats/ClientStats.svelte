@@ -22,11 +22,12 @@
 <style lang="scss">
   .client-stats {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 20px;
+    right: 20px;
     background: blue;
     padding: 10px;
     display: flex;
+    width: 340px;
 
     .round-trip-time {
       margin-left: 10px;

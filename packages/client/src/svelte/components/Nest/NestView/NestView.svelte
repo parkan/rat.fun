@@ -13,10 +13,8 @@
 <style lang="scss">
   .nest-view {
     margin-top: 20px;
-    background: red;
-    width: 100%;
-    max-width: 600px;
-    height: 400px;
+    width: 100vw;
+    height: 100vh;
     line-height: 400px;
     text-align: center;
   }

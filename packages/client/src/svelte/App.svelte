@@ -12,8 +12,7 @@
   import Nest from "@components/Nest/Nest.svelte"
   import Room from "@components/Room/Room.svelte"
   import PvPRoom from "@components/Room/PvPRoom.svelte"
-  // import { EMPTY_CONNECTION } from "@modules/utils/constants"
-  // import { initOffChainSync } from "./modules/off-chain-sync"
+  import Lobby from "@components/Lobby/Lobby.svelte"
 
   export let environment: ENVIRONMENT
 
@@ -28,14 +27,7 @@
   const ratCreated = async () => {
     try {
       UIState.set(UI.READY)
-      // if ($rat.waitingInRoom && $rat.waitingInRoom !== EMPTY_CONNECTION) {
-      //   initOffChainSync(environment, $player.ownedRat)
-      //   console.log($rat.waitingInRoom)
-      //   CurrentRoomId.set($rat.waitingInRoom)
-      //   UILocation.set(LOCATION.PVP_ROOM)
-      // } else {
       UILocation.set(LOCATION.NEST)
-      // }
     } catch (e) {
       console.error(e)
     }
@@ -77,6 +69,9 @@
   {#if $UIState === UI.READY}
     {#if $UILocation === LOCATION.NEST}
       <Nest {environment} />
+    {/if}
+    {#if $UILocation === LOCATION.LOBBY}
+      <Lobby />
     {/if}
     {#if $UILocation === LOCATION.ROOM}
       <Room {environment} roomId={$CurrentRoomId} />

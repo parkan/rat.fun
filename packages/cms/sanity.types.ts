@@ -164,6 +164,17 @@ export type PvpEventPrompts = {
   returnFormat?: Code
 }
 
+export type CombinedPrompts = {
+  _id: string
+  _type: 'combinedPrompts'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  prompt?: string
+  returnFormat?: Code
+}
+
 export type CorrectionPrompts = {
   _id: string
   _type: 'correctionPrompts'
@@ -222,6 +233,7 @@ export type AllSanitySchemaTypes =
   | PvpCorrectionPrompts
   | PvpOutcomePrompts
   | PvpEventPrompts
+  | CombinedPrompts
   | CorrectionPrompts
   | OutcomePrompts
   | EventPrompts

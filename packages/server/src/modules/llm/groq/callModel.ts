@@ -18,10 +18,12 @@ export async function callModel(openai: OpenAI, messages: MessageParam[], system
 function parseReturnMessage(msg: OpenAI.Chat.Completions.ChatCompletion) {
     let rawText = msg.choices[0].message.content ?? "";
 
-    // console.log('rawText', rawText);
+    console.log('rawText', rawText);
 
     // Remove Markdown-style code block indicators
     rawText = rawText.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+
+    console.log('rawText cleaned', rawText);
 
     try {
         const returnValue = JSON.parse(rawText);

@@ -26,11 +26,20 @@ export default (S: any) =>
             S.listItem()
             .title("Correction prompts")
             .icon(MdAccessAlarm)
-            .child(
+            .child( 
                 S.editor()
                     .id('correction-prompts')
                     .schemaType("correctionPrompts")
                     .documentId("correction-prompts")
+            ),
+            S.listItem()
+            .title("Combined prompts")
+            .icon(MdAccessAlarm)
+            .child(
+                S.editor()
+                    .id('combined-prompts')
+                    .schemaType("combinedPrompts")
+                    .documentId("combined-prompts")
             ),
             S.divider(),
             S.listItem()

@@ -3,8 +3,10 @@
   import { createRat } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
-  import { rat, player } from "@modules/state/base/stores"
+  import { rat } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
+  import { generateRatName } from "./index"
+
   import Cage from "@components/Cage/Cage.svelte"
   import Main from "@components/World/Main.svelte"
 
@@ -15,8 +17,7 @@
   const done = () => dispatch("done")
 
   let busy = false
-  let name: string
-  let inputEl: HTMLInputElement
+  let name: string = generateRatName()
 
   async function sendCreateRat() {
     playSound("tcm", "blink")
@@ -41,24 +42,14 @@
 </script>
 
 <div class="main">
-  <div class="title">WELCOME {$player?.name ?? ""}</div>
+  <div class="title">{name}</div>
   <div class="image-container">
     <Main>
-      <Cage cameraPosition={[4, 0, 0]} cameraLookAt={[0, 0.4, -0.5]} />
+      <Cage cameraPosition={[0, 0.2, 2]} cameraLookAt={[0, 0.3, 0]} />
     </Main>
   </div>
-  <div class="form">
-    <input
-      type="text"
-      placeholder="RAT NAME"
-      disabled={busy}
-      bind:this={inputEl}
-      bind:value={name}
-      on:keydown={e => e.key === "Enter" && sendCreateRat()}
-    />
-  </div>
   <button class:disabled={!name} class:busy on:click={sendCreateRat}>
-    <span class="button-text">CREATE A RAT</span>
+    <span class="button-text">DEPLOY RAT</span>
     {#if busy}
       <div class="spinner"><Spinner /></div>
     {/if}
@@ -83,6 +74,7 @@
   .image-container {
     margin-top: 20px;
     margin-bottom: 20px;
+    height: 400px;
   }
 
   button {
@@ -118,19 +110,5 @@
         display: none;
       }
     }
-  }
-
-  input {
-    width: 100%;
-    padding: 10px;
-    font-size: var(--font-size-large);
-    background: var(--color-grey-light);
-    color: var(--black);
-    border: none;
-    margin-bottom: 20px;
-    text-align: center;
-    outline-color: var(--color-alert);
-    font-family: var(--typewriter-stack);
-    text-transform: uppercase;
   }
 </style>

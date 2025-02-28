@@ -9,13 +9,13 @@ import { MESSAGE } from '@config';
 import { EnterRoomBody } from '@routes/room/enter/types';
 
 // LLM
-import { EventsReturnValue, OutcomeReturnValue } from '@modules/llm/types'
-import { constructEventMessages, constructOutcomeMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
+import { EventsReturnValue, CombinedReturnValue } from '@modules/llm/types'
+import { constructEventMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
 
 // Anthropic
-// import { getLLMClient } from '@modules/llm/anthropic';
-// import { callModel } from '@modules/llm/anthropic/callModel';
-// const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
+import { getLLMClient } from '@modules/llm/anthropic';
+import { callModel } from '@modules/llm/anthropic/callModel';
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 
 // DeepSeek
 // import { getLLMClient } from '@modules/llm/deepseek';
@@ -38,9 +38,9 @@ import { constructEventMessages, constructOutcomeMessages, constructCorrectionMe
 // const GROQ_API_KEY = process.env.GROQ_API_KEY as string;
 
 // Grok
-import { getLLMClient } from '@modules/llm/grok';
-import { callModel } from '@modules/llm/grok/callModel';
-const GROK_API_KEY = process.env.GROK_API_KEY as string;
+// import { getLLMClient } from '@modules/llm/grok';
+// import { callModel } from '@modules/llm/grok/callModel';
+// const GROK_API_KEY = process.env.GROK_API_KEY as string;
 
 // MUD
 import { getOnchainData } from '@modules/mud/getOnchainData';
@@ -56,7 +56,7 @@ import { getSystemPrompts } from '@modules/cms';
 import { validateInputData } from './validation';
 
 // Initialize LLM: Anthropic
-// const llmClient = getLLMClient(ANTHROPIC_API_KEY);
+const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 
 // Initialize LLM: DeepSeek
 // const llmClient = getLLMClient(DEEPSEEK_API_KEY);
@@ -71,7 +71,7 @@ import { validateInputData } from './validation';
 // const llmClient = getLLMClient(GROQ_API_KEY);
 
 // Initialize LLM: Grok
-const llmClient = getLLMClient(GROK_API_KEY);
+// const llmClient = getLLMClient(GROK_API_KEY);
 
 const opts = { schema };  
 
@@ -102,36 +102,40 @@ async function routes (fastify: FastifyInstance) {
 
             // Get system prompts from CMS
             console.time('–– CMS call');
-            const { eventSystemPrompt, outcomeSystemPrompt, correctionSystemPrompt } = await getSystemPrompts();
+            const { combinedSystemPrompt, correctionSystemPrompt } = await getSystemPrompts();
             console.timeEnd('–– CMS call');
 
-
             // Call event model
-            console.time('–– Event LLM call');
+            console.time('–– Combined LLM call');
             const eventMessages = constructEventMessages(rat, room);
-            
-            const events = await callModel(llmClient, eventMessages, eventSystemPrompt) as EventsReturnValue;
-            console.timeEnd('–– Event LLM call');
+            const combinedOutcome = await callModel(llmClient, eventMessages, combinedSystemPrompt) as CombinedReturnValue;
+            console.timeEnd('–– Combined LLM call');
 
-            // console.log('Events:', events);
+            console.log('Combined outcome:', combinedOutcome);
 
-            // Call outcome model
-            console.time('–– Outcome LLM call');
-            const outcomeMessages = constructOutcomeMessages(rat, room, events);
-            const unvalidatedOutcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as OutcomeReturnValue;
-            console.timeEnd('–– Outcome LLM call');
+            // console.time('–– Event LLM call');
+            // const events = await callModel(llmClient, eventMessages, eventSystemPrompt) as EventsReturnValue;
+            // console.timeEnd('–– Event LLM call');
+
+            // // Call outcome model
+            // console.time('–– Outcome LLM call');
+            // const outcomeMessages = constructOutcomeMessages(rat, room, events);
+            // const unvalidatedOutcome = await callModel(llmClient, outcomeMessages, outcomeSystemPrompt) as OutcomeReturnValue;
+            // console.timeEnd('–– Outcome LLM call');
 
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             console.time('–– Chain call');
-            const validatedOutcome = await systemCalls.applyOutcome(rat, room, unvalidatedOutcome);
+            const validatedOutcome = await systemCalls.applyOutcome(rat, room, combinedOutcome.outcome);
             console.timeEnd('–– Chain call');
+
+            console.log('Validated outcome:', validatedOutcome);
 
             // TODO: Send message to creator, if not admin
 
             // The event log might now not reflect the actual outcome.
             // Run it through the LLM again to get the corrected event log.
             console.time('–– Correction LLM call');
-            const correctionMessages = constructCorrectionMessages(unvalidatedOutcome, validatedOutcome, events);
+            const correctionMessages = constructCorrectionMessages(combinedOutcome.outcome, validatedOutcome, combinedOutcome.log);
             const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt) as EventsReturnValue;
             console.timeEnd('–– Correction LLM call');
 

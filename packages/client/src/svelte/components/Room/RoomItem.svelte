@@ -89,7 +89,7 @@
     color: var(--black);
     margin-top: 20px;
     font-size: var(--font-size-normal);
-
+    width: 100%;
     &.pvp {
       background: var(--color-alert);
     }

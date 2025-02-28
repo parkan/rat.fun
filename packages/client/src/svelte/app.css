@@ -2,7 +2,7 @@
 
 :root {
   /* Colors */
-  --black: #1b1b1b;
+  --black: #000000;
   --white: #d7d7c3;
   /* --white: #dcdccb; */
 
@@ -20,6 +20,10 @@
   --color-item: rgb(160, 98, 177);
   --color-death: rgb(186, 30, 30);
 
+  --corporate-background: #bebebe;
+  --corporate-foreground: #000000;
+  --corporate-alert: #ffff00;
+  
   /* Sizing */
   --default-padding: 14px;
   --top-bar-height: 40px;
@@ -27,6 +31,7 @@
 
   /* Typography */
   --typewriter-font-stack: "Special Elite", monospace;
+  --corporate-font-stack: "IBM Plex Sans", sans-serif;
   --font-size-label: 8px;
   --font-size-small: 9px;
   --font-size-normal: 18px;
@@ -62,7 +67,7 @@
 }
 
 body {
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   letter-spacing: 0px;
 }
 

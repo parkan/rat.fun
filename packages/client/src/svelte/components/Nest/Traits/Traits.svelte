@@ -22,6 +22,7 @@
     padding: 5px;
     color: var(--black);
     margin-bottom: 10px;
+    display: inline-block;
 
     .content {
       margin-top: 5px;
