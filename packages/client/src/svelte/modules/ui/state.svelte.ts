@@ -55,15 +55,6 @@ export const getUIState = () => {
         return rightPane
       },
     },
-    floors: {
-      set: setFloor,
-      rooms: (level: number) => {
-        return Object.entries(get(rooms)).filter(([_, r]) => r.level === level)
-      },
-      get current() {
-        return floor
-      },
-    },
     rooms: {
       preview: previewRoom,
       back: goBackRoom,
