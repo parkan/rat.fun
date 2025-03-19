@@ -1,25 +1,6 @@
 <script lang="ts">
   import { player } from "@modules/state/base/stores"
-  import { transferBalanceToRat } from "@modules/action"
-  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { getUIState } from "@modules/ui/state.svelte"
-
-  let busy = false
-
-  let { rooms } = getUIState()
-  const { current } = rooms
-
-  async function sendTransferBalanceToRat() {
-    busy = true
-    const action = transferBalanceToRat(100)
-    try {
-      await waitForCompletion(action)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      busy = false
-    }
-  }
 </script>
 
 <!-- PLAYER STATS -->

@@ -1,19 +1,71 @@
 <script lang="ts">
   import { onMount } from "svelte"
+  import { Spring } from "svelte/motion"
   import { gameConfig, ratLevelIndex } from "@modules/state/base/stores"
+
+  const doorProgress = new Spring(1)
+
+  let elevatorIndex = $state(0)
+  let clientHeight = $state(0)
+
+  export const goToLevel = async (num: number) => {
+    await doorProgress.set(0)
+    elevatorIndex = num
+    await new Promise(r => setTimeout(r, 200))
+    await doorProgress.set(1)
+  }
+  $effect(() => {
+    goToLevel($ratLevelIndex)
+  })
 
   onMount(() => {
     console.log("FloorBar component mounted")
   })
 </script>
 
-<div class="floor-bar">
+<svelte:window
+  on:keypress={async e => {
+    switch (e.key) {
+      case "0":
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+        // tempIndex = Number(e.key)
+        if (import.meta.env.DEV) {
+          goToLevel(e.key)
+        }
+        break
+      default:
+        break
+    }
+  }}
+/>
+
+<div class="floor-bar" bind:clientHeight>
+  <div class="elevator">
+    <div
+      style:transform="translateY({elevatorIndex * (clientHeight / 6)}px)"
+      class="elevator-item"
+      style:background-image="url(/images/rat.jpg)"
+    >
+      <div
+        style:transform="translateX(-{doorProgress.current * 100}%)"
+        class="elevator-door-l"
+      />
+      <div
+        style:transform="translateX({doorProgress.current * 100}%)"
+        class="elevator-door-r"
+      />
+      <span>
+        <!-- {elevatorIndex * -1} -->
+      </span>
+    </div>
+  </div>
   {#each $gameConfig.levelList as _, i}
     <div class="floor-item">
       {i * -1}
-      {#if $ratLevelIndex === i}
-        <div class="floor-indicator" />
-      {/if}
     </div>
   {/each}
 </div>
@@ -21,7 +73,7 @@
 <style>
   .floor-bar {
     width: 160px;
-    height: calc(100vh - 81px);
+    height: 100%;
     display: flex;
     flex-direction: column;
     border-right: 1px dashed white;
@@ -43,11 +95,38 @@
     }
   }
 
-  .floor-indicator {
+  .elevator {
     position: absolute;
     inset: 0;
-    background: red;
-    mix-blend-mode: screen;
     z-index: 1;
+  }
+  .elevator-item {
+    background: grey;
+    height: calc(100% / 6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease;
+    overflow: hidden;
+    background-size: cover;
+    background-blend-mode: multiply;
+    border-top: 1px dashed white;
+    border-bottom: 1px dashed white;
+  }
+  .elevator-door-l {
+    left: 0;
+    border-right: 1px solid white;
+  }
+  .elevator-door-r {
+    right: 0;
+    border-left: 1px solid white;
+  }
+
+  .elevator-door-l,
+  .elevator-door-r {
+    width: 50%;
+    position: absolute;
+    height: 100%;
+    background: black;
   }
 </style>

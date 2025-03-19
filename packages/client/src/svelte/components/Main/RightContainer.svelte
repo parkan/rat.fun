@@ -20,6 +20,6 @@
   .right-container {
     width: calc(50% - 80px);
     border-bottom: 1px solid white;
-    height: calc(100% - 60px);
+    height: 100%;
   }
 </style>

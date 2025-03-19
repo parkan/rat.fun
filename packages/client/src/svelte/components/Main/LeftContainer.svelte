@@ -37,8 +37,10 @@
     </div>
   {/if}
   {#if panes.left === enums.LEFT_PANE.YOUR_ROOMS}
-    <div class="create-room">Create room</div>
-    <div class="tab-rooms">Rooms</div>
+    <div class="tab-rooms">
+      <div class="create-room">CREATE ROOM</div>
+      <div class="create-room">ROOMS</div>
+    </div>
   {/if}
 </div>
 
@@ -71,5 +73,11 @@
     padding-inline: 20px;
     height: 100%;
     line-height: 60px;
+  }
+
+  .create-room {
+    border-bottom: 1px solid white;
+    height: 240px;
+    padding: 20px;
   }
 </style>
