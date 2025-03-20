@@ -23,12 +23,8 @@
   }
 
   const ratCreated = async () => {
-    try {
-      UIState.set(UI.READY)
-      UILocation.set(LOCATION.MAIN)
-    } catch (e) {
-      console.error(e)
-    }
+    UIState.set(UI.READY)
+    UILocation.set(LOCATION.MAIN)
   }
 
   events.forEach(e => {

@@ -1,6 +1,5 @@
 import { PANE, LEFT_PANE, RIGHT_PANE } from "./enums"
 import * as uiStores from "@modules/ui/stores"
-import { LOCATION } from "@modules/ui/enums"
 
 // Internal state
 // PANES
@@ -12,10 +11,10 @@ export const getUIState = () => {
   const setPane = (pane: PANE, option: LEFT_PANE | RIGHT_PANE) => {
     console.log("Called setPane", pane, option)
     if (pane === PANE.LEFT) {
-      leftPane = option
+      leftPane = option as LEFT_PANE
     }
     if (pane === PANE.RIGHT) {
-      rightPane = option
+      rightPane = option as RIGHT_PANE
     }
   }
 
@@ -24,12 +23,13 @@ export const getUIState = () => {
   }
 
   const goBackRoom = () => {
+    setPane(PANE.RIGHT, RIGHT_PANE.ROOMS)
     uiStores.CurrentRoomId.set(null)
   }
 
   const goToRoom = (id: string) => {
     uiStores.CurrentRoomId.set(id)
-    uiStores.UILocation.set(LOCATION.ROOM)
+    setPane(PANE.RIGHT, RIGHT_PANE.ROOM_RESULT)
   }
 
   return {

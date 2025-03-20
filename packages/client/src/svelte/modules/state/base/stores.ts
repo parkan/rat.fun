@@ -5,7 +5,7 @@
 import { writable, derived } from "svelte/store"
 import { addressToId } from "@modules/utils"
 import { ENTITY_TYPE } from "contracts/enums"
-import { filterByEntitytype, filterByLevel } from "./utils"
+import { filterByEntitytype, filterByLevel, filterByPlayer } from "./utils"
 import { GAME_CONFIG_ID } from "./constants"
 
 // * * * * * * * * * * * * * * * * *
@@ -72,6 +72,11 @@ export const playerId = derived(playerAddress, $playerAddress =>
 export const player = derived(
   [entities, playerId],
   ([$entities, $playerId]) => $entities[$playerId] as Player
+)
+
+export const playerRooms = derived(
+  [playerId, rooms],
+  ([$playerId, $rooms]) => filterByPlayer($rooms, $playerId) as Rooms
 )
 
 // * * * * * * * * * * * * * * * * *

@@ -23,7 +23,21 @@
   --corporate-background: #bebebe;
   --corporate-foreground: #000000;
   --corporate-alert: #ffff00;
-  
+
+
+  /* * * * * * * * * * * * * *
+  * Layout
+  * * * * * * * * * * * * * */
+
+  /* Layout: Your Rat */
+  --rat-editor-height: 180px;
+  --liquidate-rat-height: 100px;
+  --rat-cam-height: calc(100% - var(--rat-editor-height) - var(--liquidate-rat-height));
+
+  /* Layout: Your Rooms */
+  --create-room-button-height: 100px;
+  --player-room-listing-height: calc(100% - var(--create-room-button-height));
+
   /* Sizing */
   --default-padding: 14px;
   --top-bar-height: 40px;

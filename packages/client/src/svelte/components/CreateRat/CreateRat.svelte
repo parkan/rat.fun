@@ -7,8 +7,8 @@
   import { ENTITY_TYPE } from "contracts/enums"
   import { generateRatName } from "./index"
 
-  import Cage from "@components/Cage/Cage.svelte"
-  import Main from "@components/World/Main.svelte"
+  import Cage from "@components/3D/Cage/Cage.svelte"
+  import Main from "@components/3D/World/Main.svelte"
 
   import Spinner from "@components/Elements/Spinner/Spinner.svelte"
 

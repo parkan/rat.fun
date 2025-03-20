@@ -25,8 +25,8 @@
     "@typescript-eslint/parser": "7.7.1",
     "eslint": "8.57.0",
     "mprocs": "^0.7.2",
-    "shx": "^0.3.4",
-    "typescript": "^5.7.3"
+    "shx": "^0.4.0",
+    "typescript": "^5.8.2"
   },
   "engines": {
     "node": "^20",

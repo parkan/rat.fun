@@ -22,7 +22,7 @@
     "@vitest/coverage-v8": "^3.0.9",
     "postprocessing": "^6.37.1",
     "sass-embedded": "^1.86.0",
-    "svelte": "^5.23.1",
+    "svelte": "^5.23.2",
     "vite": "^6.2.2",
     "vitest": "^3.0.9"
   },
@@ -48,7 +48,7 @@
     "three": "^0.174.0",
     "three-perf": "^1.0.10",
     "uuid": "^11.1.0",
-    "viem": "2.23.12",
+    "viem": "2.23.13",
     "wait-port": "^1.1.0"
   }
 }

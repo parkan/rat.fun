@@ -97,6 +97,7 @@ function getRandomElement<T>(array: T[]): T {
 function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
+
 export function generateRatName() {
   const firstName = getRandomElement(firstNameFragments)
   const lastName = getRandomElement(lastNameFragments)

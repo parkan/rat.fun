@@ -1,4 +1,4 @@
-import { concat, keccak256 } from "viem"
+import { concat, Hex, keccak256 } from "viem"
 import { BLOCKTIME } from "./constants"
 import { ONE_UNIT } from "@modules/ui/constants"
 
@@ -64,10 +64,10 @@ export function removePrivateKeys(
 }
 
 // Unpadded to padded
-export function addressToId(address: string): string {
+export function addressToId(address: string): Hex {
   if (!address) return "0x0"
   // remove '0x' prefix, pad the address with leading zeros up to 64 characters, then add '0x' prefix back
-  return "0x" + address.slice(2).padStart(64, "0").toLowerCase()
+  return "0x" + address.slice(2).padStart(64, "0").toLowerCase() as Hex
 }
 
 // Padded to unpadded
@@ -88,14 +88,14 @@ export function pickByIndex<T>(array: T[], index: number): T {
 
 export function hexToString(hex: string) {
   hex = hex.substring(2) // remove the '0x' part
-  var string = ""
+  let string = ""
 
   while (hex.length % 4 != 0) {
     // we need it to be multiple of 4
     hex = "0" + hex
   }
 
-  for (var i = 0; i < hex.length; i += 4) {
+  for (let i = 0; i < hex.length; i += 4) {
     string += String.fromCharCode(parseInt(hex.substring(i, i + 4), 16)) // get char from ascii code which goes from 0 to 65536
   }
 
@@ -103,8 +103,8 @@ export function hexToString(hex: string) {
 }
 
 export function stringToHex(string: string) {
-  var hex = ""
-  for (var i = 0; i < string.length; i++) {
+  let hex = ""
+  for (let i = 0; i < string.length; i++) {
     hex += ((i == 0 ? "" : "000") + string.charCodeAt(i).toString(16)).slice(-4) // get character ascii code and convert to hexa string, adding necessary 0s
   }
 
@@ -164,20 +164,6 @@ export function deepClone<T>(obj: T): T {
 export function capAtZero(num: number): number {
   // Ensure that the input is not negative
   return Math.max(0, num)
-}
-
-/**
- * Get id for a combination of 2 materials
- * @param a Material id
- * @param b Material id
- */
-export function getMaterialCombinationId(a: MaterialId, b: MaterialId): string {
-  // Always sort the ids in ascending order to make the combination order-agnostic
-  if (a > b) {
-    return keccak256(concat([b, a]))
-  } else {
-    return keccak256(concat([a, b]))
-  }
 }
 
 export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a
@@ -272,7 +258,7 @@ export function displayAmount(amount: bigint | undefined) {
 }
 // Limitation: not usable with timezones
 export const parseISODateTime = (datestring: string) => {
-  var dt = datestring.split(/[: T-]/).map(parseFloat)
+  const dt = datestring.split(/[: T-]/).map(parseFloat)
   const localDate = new Date(
     dt[0],
     dt[1] - 1,
@@ -285,6 +271,7 @@ export const parseISODateTime = (datestring: string) => {
 
   return localDate
 }
+
 export const padWithZero = (value: number) => {
   return value.toString().padStart(2, "0")
 }

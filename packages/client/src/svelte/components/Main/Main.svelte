@@ -1,29 +1,24 @@
 <script lang="ts">
-  import { onMount } from "svelte"
   import { ENVIRONMENT } from "@mud/enums"
 
-  import OperatorBar from "@components/Main/OperatorBar.svelte"
-  import FloorBar from "@components/Main/FloorBar.svelte"
-  import LeftContainer from "@components/Main/LeftContainer.svelte"
-  import RightContainer from "@components/Main/RightContainer.svelte"
+  import OperatorBar from "@components/Main/OperatorBar/OperatorBar.svelte"
+  import FloorBar from "@components/Main/FloorBar/FloorBar.svelte"
+  import LeftContainer from "@components/Main/LeftContainer/LeftContainer.svelte"
+  import RightContainer from "@components/Main/RightContainer/RightContainer.svelte"
 
-  export let environment: ENVIRONMENT | null = null
-
-  onMount(() => {
-    console.log("Main component mounted")
-  })
+  export let environment: ENVIRONMENT
 </script>
 
 <div class="main">
   <OperatorBar />
   <div class="main-area">
-    <LeftContainer />
+    <LeftContainer {environment} />
     <FloorBar />
-    <RightContainer />
+    <RightContainer {environment} />
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .main {
     position: fixed;
     top: 10px;

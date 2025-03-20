@@ -1,0 +1,18 @@
+<script lang="ts">
+  import type { LogEntry } from "@components/Main/RightContainer/RoomResult/types"
+  import LogItem from "@components/Main/RightContainer/RoomResult/Log/LogItem.svelte"
+  export let log: LogEntry[]
+</script>
+
+<div class="log">
+  {#each log as logEntry, i}
+    <LogItem {logEntry} {i} />
+  {/each}
+</div>
+
+<style lang="scss">
+  .log {
+    margin-bottom: 20px;
+    line-height: 1.3em;
+  }
+</style>

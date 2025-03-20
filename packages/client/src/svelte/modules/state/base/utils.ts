@@ -1,3 +1,4 @@
+import { Hex } from "viem"
 import { ENTITY_TYPE } from "./enums"
 
 export function filterByEntitytype(
@@ -16,5 +17,11 @@ export function filterByLevel(rooms: Rooms, level: string): Rooms {
     Object.entries(rooms).filter(
       ([, room]) => room.level === level
     )
+  )
+}
+
+export function filterByPlayer(rooms: Rooms, playerId: Hex): Rooms {
+  return Object.fromEntries(
+    Object.entries(rooms).filter(([, room]) => room.owner === playerId)
   )
 }

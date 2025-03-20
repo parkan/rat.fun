@@ -8,7 +8,7 @@ export enum UI {
 
 export enum LOCATION {
   NONE,
-  MAIN,
+  MAIN
 }
 
 export enum PANE {
@@ -20,9 +20,12 @@ export enum PANE {
 export enum LEFT_PANE {
   YOUR_RAT,
   YOUR_ROOMS,
+  SINGLE_ROOM,
+  CREATE_ROOM
 }
 
 export enum RIGHT_PANE {
   ROOMS,
   SINGLE_ROOM,
+  ROOM_RESULT
 }
