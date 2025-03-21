@@ -5,7 +5,7 @@
 </script>
 
 <div class="log">
-  {#each log as logEntry, i}
+  {#each log as logEntry, i (i)}
     <LogItem {logEntry} {i} />
   {/each}
 </div>

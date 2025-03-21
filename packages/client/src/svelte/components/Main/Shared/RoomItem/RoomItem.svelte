@@ -38,7 +38,7 @@
     text-align: left;
 
     &.disabled {
-      background-color: #666;
+      opacity: 0.5;
     }
 
     &:hover {

@@ -90,24 +90,23 @@ export const waitForCompletion = (
 }
 
 function stringifyBigInts(obj: any): any {
-  if (typeof obj === 'bigint') {
-    return obj.toString();
+  if (typeof obj === "bigint") {
+    return obj.toString()
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => stringifyBigInts(item));
+    return obj.map(item => stringifyBigInts(item))
   }
 
-  if (obj !== null && typeof obj === 'object') {
-    const result: any = {};
+  if (obj !== null && typeof obj === "object") {
+    const result: any = {}
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        result[key] = stringifyBigInts(obj[key]);
+        result[key] = stringifyBigInts(obj[key])
       }
     }
-    return result;
+    return result
   }
 
-  return obj;
+  return obj
 }
-
