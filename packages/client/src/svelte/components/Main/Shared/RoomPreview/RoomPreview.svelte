@@ -70,6 +70,8 @@
 
   .room-prompt {
     padding: var(--default-padding);
+    background: var(--color-alert);
+    margin: var(--default-padding);
   }
 
   .room-recent-events {

@@ -16,10 +16,6 @@
   }
 
   $effect(() => {
-    console.log("$ratLevelIndex", $ratLevelIndex)
-  })
-
-  $effect(() => {
     goToLevel($ratLevelIndex)
   })
 

@@ -55,7 +55,7 @@ contract RatSystemTest is BaseTest {
     vm.startPrank(alice);
 
     bytes32 playerId = world.ratroom__spawn("alice");
-    bytes32 ratId = world.ratroom__createRat("roger");
+    world.ratroom__createRat("roger");
 
     assertEq(Balance.get(playerId), 0);
 
