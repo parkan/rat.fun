@@ -105,8 +105,12 @@ export const ratLevel = derived(
 
 export const ratLevelIndex = derived(
   [gameConfig, rat],
-  ([$gameConfig, $rat]) =>
-    $gameConfig?.levelList?.findIndex(lvl => lvl === $rat.level) || 0
+  ([$gameConfig, $rat]) => {
+    if ($gameConfig?.levelList) {
+      return $gameConfig.levelList.findIndex(lvl => lvl === ($rat?.level ?? 0))
+    }
+    return 0
+  }
 )
 
 /**

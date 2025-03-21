@@ -45,20 +45,20 @@
 </script>
 
 <div class="wrapper">
-  <div class:collapsed={previewing || yours} class="rooms">
-    {#if !yours}
-      <div class="floor-header">
-        <div class="floor-title">Floor {$ratLevelIndex * -1}</div>
-        <div class="floor-stats">
-          {Object.values($roomsOnRatLevel).length} rooms
-        </div>
-        <div class="floor-filter">TODO: filters</div>
-      </div>
-    {:else}
-      <div />
-    {/if}
+  <div class="rooms">
     <div class="floor-content">
       <div class:previewing class="room-listing">
+        {#if !yours}
+          <div class="floor-header">
+            <div class="floor-title">Floor {$ratLevelIndex * -1}</div>
+            <div class="floor-stats">
+              {Object.values($roomsOnRatLevel).length} rooms
+            </div>
+            <div class="floor-filter">TODO: filters</div>
+          </div>
+        {:else}
+          <div />
+        {/if}
         {#each roomsList as [roomId, room]}
           <RoomItem {roomId} {room} {yours} />
         {/each}
@@ -99,7 +99,7 @@
     height: 100%;
     overflow: hidden;
     display: grid;
-    grid-template-rows: 60px 1fr;
+    grid-template-rows: 1fr;
     grid-template-columns: 1fr;
     transition: grid-template-rows 0.1s ease;
 
@@ -128,7 +128,7 @@
     flex-shrink: 0;
     height: 100%;
     inset: 0;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease 0.1s;
   }
 
   .room-preview {

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { player } from "@modules/state/base/stores"
   import { ratTotalValue } from "@modules/state/base/stores"
   import { liquidateRat } from "@svelte/modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
@@ -17,7 +16,7 @@
   const sendLiquidateRat = async () => {
     if (busy) return
     busy = true
-    const action = liquidateRat($player.ownedRat)
+    const action = liquidateRat()
     try {
       liquidationMessage = "Eliminating rat..."
       await waitForCompletion(action)

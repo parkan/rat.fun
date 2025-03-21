@@ -48,7 +48,7 @@
 
   .back-button {
     width: 100%;
-    height: 40px;
+    height: 60px;
     background: transparent;
     border: none;
     color: white;
@@ -70,6 +70,8 @@
 
   .room-prompt {
     padding: var(--default-padding);
+    background: var(--color-alert);
+    margin: var(--default-padding);
   }
 
   .room-recent-events {

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueentity/getUniqueEntity.sol";
-import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level, LevelList, Name, Owner } from "../codegen/index.sol";
+import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level, LevelList, Name, Owner, OwnedRat } from "../codegen/index.sol";
 import { LibTrait } from "./LibTrait.sol";
 import { LibItem } from "./LibItem.sol";
 import { LibUtils } from "./LibUtils.sol";
@@ -55,6 +55,7 @@ library LibRat {
       }
       LibTrait.destroyTrait(traits[i]);
     }
+
     // Remove all traits from rat
     Traits.deleteRecord(_ratId);
 
@@ -84,6 +85,9 @@ library LibRat {
     // * * * *
 
     Balance.set(_roomId, Balance.get(_roomId) + balanceToTransfer);
+
+    bytes32 playerId = Owner.get(_ratId);
+    OwnedRat.deleteRecord(playerId);
   }
 
   /**
