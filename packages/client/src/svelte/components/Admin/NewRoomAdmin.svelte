@@ -9,11 +9,12 @@
   let newRoomExtraBalance: number = 0
 
   async function sendCreateRoom() {
+    if (busy) return
     busy = true
     const action = createRoomAsAdmin(
       "Test room",
       newRoomPrompt,
-      $gameConfig.levelList[newRoomLevelIndex],
+      $gameConfig?.levelList?.[newRoomLevelIndex],
       newRoomExtraBalance
     )
     try {

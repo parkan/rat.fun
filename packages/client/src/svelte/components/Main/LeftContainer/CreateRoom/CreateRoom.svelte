@@ -6,13 +6,16 @@
 
   const { enums, panes } = getUIState()
 
-  let busy = false
-  let newPrompt: string = ""
-  let newName: string = ""
+  let busy = $state(false)
+  let newPrompt: string = $state("")
+  let newName: string = $state("")
 
-  $: invalidPromptLength =
+  let invalidPromptLength = $derived(
     newPrompt.length < 1 ||
-    newPrompt.length > $gameConfig.gameConfig.maxRoomPromptLength
+      newPrompt.length > $gameConfig.gameConfig.maxRoomPromptLength
+  )
+
+  let disabled = $derived(invalidPromptLength || busy || $player.balance < 100)
 
   async function sendCreateRoom() {
     if (busy) return
@@ -20,6 +23,7 @@
     const action = createRoom(newName, newPrompt)
     try {
       await waitForCompletion(action)
+      console.log(action)
     } catch (e) {
       console.error(e)
     } finally {
@@ -37,19 +41,17 @@
 <div class="create-room">
   <div class="form-group">
     <label for="room-name">Room Name</label>
-    <input type="text" id="room-name" bind:value={newName} />
+    <input disabled={busy} type="text" id="room-name" bind:value={newName} />
   </div>
 
   <div class="form-group">
     <label for="room-prompt">Room Prompt</label>
-    <textarea id="room-prompt" rows="5" bind:value={newPrompt}></textarea>
+    <textarea disabled={busy} id="room-prompt" rows="5" bind:value={newPrompt}
+    ></textarea>
   </div>
 
   <div class="actions">
-    <button
-      disabled={invalidPromptLength || busy || $player.balance < 100}
-      on:click={sendCreateRoom}
-    >
+    <button {disabled} on:click={sendCreateRoom}>
       Create room (Cost: $100)
     </button>
   </div>
@@ -84,6 +86,10 @@
       color: black;
       border: none;
       cursor: pointer;
+
+      &[disabled] {
+        background: grey;
+      }
     }
   }
 </style>

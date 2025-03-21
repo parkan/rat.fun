@@ -63,7 +63,7 @@
       </span>
     </div>
   </div>
-  {#each $gameConfig.levelList as _, i}
+  {#each $gameConfig?.levelList || [] as _, i}
     <div class="floor-item">
       {i * -1}
     </div>

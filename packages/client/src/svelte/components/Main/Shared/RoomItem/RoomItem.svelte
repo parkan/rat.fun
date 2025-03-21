@@ -8,6 +8,7 @@
 
 <button
   class="room-listing-item"
+  class:disabled={room.balance <= 0}
   onclick={() =>
     rooms.preview(roomId, yours ? enums.PANE.LEFT : enums.PANE.RIGHT)}
 >
@@ -35,6 +36,10 @@
     width: 100%;
     color: white;
     text-align: left;
+
+    &.disabled {
+      background-color: #666;
+    }
 
     &:hover {
       background-color: #222;

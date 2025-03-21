@@ -2,9 +2,21 @@
   import { player } from "@modules/state/base/stores"
   import { ratTotalValue } from "@modules/state/base/stores"
   import { liquidateRat } from "@svelte/modules/action"
+  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
 
-  const sendLiquidateRat = () => {
-    liquidateRat($player.ownedRat)
+  let busy = $state(false)
+
+  const sendLiquidateRat = async () => {
+    if (busy) return
+    busy = true
+    const action = liquidateRat($player.ownedRat)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
   }
 </script>
 
@@ -15,9 +27,9 @@
       <div class="data-cell-value">${$ratTotalValue}</div>
     </div>
   </div>
-  <div class="action">
-    <button on:click={sendLiquidateRat}>Liquidate Rat</button>
-  </div>
+  <button disabled={busy} onclick={sendLiquidateRat} class="action warning">
+    Liquidate Rat
+  </button>
 </div>
 
 <style lang="scss">
@@ -53,5 +65,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.warning {
+      background: repeating-linear-gradient(
+        45deg,
+        #f0d000,
+        #f0d000 20px,
+        #bda400 20px,
+        #bda400 40px
+      );
+    }
+  }
+
+  button[disabled] {
+    background: grey;
   }
 </style>

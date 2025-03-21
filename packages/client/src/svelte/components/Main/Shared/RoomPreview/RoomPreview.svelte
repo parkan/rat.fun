@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ratTotalValue } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
   import { shortenAddress } from "@modules/utils"
   let { roomId, room, yours } = $props()
@@ -7,10 +8,9 @@
 </script>
 
 <div class="room-preview">
-  <button class="back-button" onclick={rooms.back}>BACK</button>
+  <button class="back-button" onclick={rooms.back}> ← {room.name}</button>
 
   <div class="room-info">
-    <div class="room-name">**{room.name}**</div>
     <div class="room-balance">Balance: ${room.balance}</div>
     <div class="room-creator">Created by:{shortenAddress(room.owner)}</div>
   </div>
@@ -27,7 +27,7 @@
 
   <div class="room-recent-events">RECENT EVENTS</div>
 
-  {#if !yours}
+  {#if !yours && room.balance > 0 && $ratTotalValue > 0}
     <div class="room-enter">
       <button onclick={() => rooms.goto(roomId)}>ENTER</button>
     </div>
