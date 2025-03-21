@@ -8,6 +8,8 @@
   import Loading from "@components/Loading/Loading.svelte"
   import Spawn from "@components/Spawn/Spawn.svelte"
 
+  import { Modal } from "@components/Main/Modal/state.svelte"
+
   import Main from "@components/Main/Main.svelte"
   import { events } from "@modules/herp/index.svelte"
 
@@ -66,6 +68,8 @@
     {/if}
   {/if}
 </div>
+
+<Modal />
 
 <style lang="scss">
   main {

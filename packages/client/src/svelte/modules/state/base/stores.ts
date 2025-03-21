@@ -103,12 +103,15 @@ export const ratLevel = derived(
   ([$rat, $levels]) => $levels[$rat?.level] as Level
 )
 
-export const ratLevelIndex = derived([gameConfig, rat], ([$gameConfig, $rat]) => {
-  if($gameConfig?.levelList) {
-    return $gameConfig.levelList.findIndex(lvl => lvl === ($rat?.level ?? 0))
+export const ratLevelIndex = derived(
+  [gameConfig, rat],
+  ([$gameConfig, $rat]) => {
+    if ($gameConfig?.levelList) {
+      return $gameConfig.levelList.findIndex(lvl => lvl === ($rat?.level ?? 0))
+    }
+    return 0
   }
-  return 0
-})
+)
 
 /**
  * Calculated by adding up the balance, health, inventory value and trait value
