@@ -21,16 +21,64 @@
 
   // Local state
   let currentRoom = $state<string | null>(null)
+  let sortKey = $state("c")
+
+  const entriesChronologically = (a, b) => {
+    return Number(b[1]?.index || 0) - Number(a[1].index || 0)
+  }
+  const entriesByVisit = (a, b) => {
+    const aVisitCount = Number(a[1]?.visitCount || 0)
+    const bVisitCount = Number(b[1]?.visitCount || 0)
+    return bVisitCount - aVisitCount
+  }
+  const entriesByBalance = (a, b) => {
+    return Number(b[1].balance || 0) - Number(a[1].balance || 0)
+  }
+  const entriesByKillRate = (a, b) => {
+    const aVisitCount = Number(a[1]?.visitCount || 0)
+    const aKillCount = Number(a[1]?.killCount || 0)
+    const bVisitCount = Number(b[1]?.visitCount || 0)
+    const bKillCount = Number(b[1]?.killCount || 0)
+
+    const aKillRate = aKillCount / aVisitCount
+    const bKillRate = bKillCount / bVisitCount
+
+    return bKillRate - aKillRate
+  }
+
+  let sortFunction = $state(entriesChronologically)
+
+  const sortBy = key => {
+    sortKey = key
+  }
 
   let roomsList = $derived.by(() => {
+    console.log(sortFunction)
     if (!yours) {
-      return Object.entries($roomsOnRatLevel)
+      return Object.entries($roomsOnRatLevel).sort(sortFunction)
     } else {
-      return Object.entries($playerRooms)
+      return Object.entries($playerRooms).sort(sortFunction)
     }
   })
 
   let previewing = $derived(panes.previewing === pane)
+
+  $effect(() => {
+    switch (sortKey) {
+      case "c":
+        sortFunction = entriesChronologically
+        break
+      case "v":
+        sortFunction = entriesByVisit
+        break
+      case "b":
+        sortFunction = entriesByBalance
+        break
+      case "k":
+        sortFunction = entriesByKillRate
+        break
+    }
+  })
 
   // Update currentroom with a delay to allow animations to play
   $effect(() => {
@@ -54,7 +102,28 @@
             <div class="floor-stats">
               {Object.values($roomsOnRatLevel).length} rooms
             </div>
-            <div class="floor-filter">TODO: filters</div>
+            <div class="floor-filter">
+              <button
+                class:active={sortKey === "c"}
+                class="sort-button"
+                onclick={() => sortBy("c")}>C</button
+              >
+              <button
+                class:active={sortKey === "v"}
+                class="sort-button"
+                onclick={() => sortBy("v")}>V</button
+              >
+              <button
+                class:active={sortKey === "b"}
+                class="sort-button"
+                onclick={() => sortBy("b")}>B</button
+              >
+              <button
+                class:active={sortKey === "k"}
+                class="sort-button"
+                onclick={() => sortBy("k")}>K</button
+              >
+            </div>
           </div>
         {:else}
           <div></div>
@@ -135,6 +204,16 @@
     left: 100%;
   }
 
+  .sort-button {
+    background: white;
+    color: black;
+    border: none;
+    padding: 1ch;
+    &.active {
+      background: black;
+      color: white;
+    }
+  }
   .previewing {
     transform: translateX(-100%);
   }
