@@ -8,7 +8,6 @@
     if (e.target === modalBackground && !modal.config?.noclose) {
       modal.close()
     }
-    console.log(e.target, modalBackground)
   }
 
   $inspect(modal.show)
