@@ -10,7 +10,9 @@ export async function callModel(groq: Groq, messages: MessageParam[], system: st
     const completion = await groq.chat.completions.create({
         messages: combinedMessages,
         response_format: { type: "json_object" }, 
-        model: "llama-3.3-70b-versatile",
+        // model: "llama-3.3-70b-versatile",
+        // model: "qwen-2.5-32b",
+        model:"llama-3.3-70b-specdec",
         temperature: temperature
       });
 
