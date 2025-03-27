@@ -43,12 +43,12 @@ contract PostDeploy is Script {
     // prettier-ignore
 
     // Create levels
-    bytes32 firstLevel = LibLevel.createLevel(0, 100, 100); // Level 0
-    bytes32 secondLevel = LibLevel.createLevel(1, 100, 100); // Level 1
-    LibLevel.createLevel(2, 200, 200); // Level 2
-    LibLevel.createLevel(3, 300, 300); // Level 3
-    LibLevel.createLevel(4, 400, 400); // Level 4
-    LibLevel.createLevel(5, 500, 500); // Level 5
+    bytes32 firstLevel = LibLevel.createLevel(0, 0, 150, 100); // Level 0
+    bytes32 secondLevel = LibLevel.createLevel(1, 150, 250, 100); // Level 1
+    LibLevel.createLevel(2, 250, 350, 100); // Level 2
+    LibLevel.createLevel(3, 350, 450, 100); // Level 3
+    LibLevel.createLevel(4, 450, 550, 100); // Level 4
+    LibLevel.createLevel(5, 550, 650, 100); // Level 5
 
     // Level 1
     LibRoom.createRoom("Fight", "There is a second rat in the room. The rats have to fight.", adminId, firstLevel);
@@ -82,6 +82,7 @@ contract PostDeploy is Script {
       adminId,
       secondLevel
     );
+    LibRoom.createRoom("Steal", "The room takes all of the rats items.", adminId, secondLevel);
 
     vm.stopBroadcast();
   }

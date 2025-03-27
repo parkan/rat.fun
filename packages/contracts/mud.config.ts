@@ -53,8 +53,9 @@ export default defineWorld({
     // ...
     RoomPrompt: "string",
     // ...
-    RoomCreationCost: "uint256",
-    LevelUpCost: "uint256"
+    RoomCreationCost: "uint256", // Set on level
+    LevelMinBalance: "uint256", // Set on level. If rat balance is below this, it will be leveled down.
+    LevelMaxBalance: "uint256" // Set on level. If rat balance is above this, it will be leveled up.
   },
   modules: [
     {

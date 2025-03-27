@@ -42,12 +42,13 @@ declare global {
     owner?: Hex,
     roomPrompt?: string,
     index?: number,
-    levelUpCost: number,
-    roomCreationCost: number,
-    levelList: string[],
-    gameConfig: GameConfigObject,
-    visitCount: number,
-    killCount: number
+    roomCreationCost?: number,
+    levelList?: string[],
+    levelMinBalance?: number,
+    levelMaxBalance?: number,
+    gameConfig?: GameConfigObject,
+    visitCount?: number,
+    killCount?: number
   }
 
   type Player  = {
@@ -105,7 +106,8 @@ declare global {
     [key: string]: ENTITY_TYPE | number,
     entityType: ENTITY_TYPE.LEVEL,
     index: number,
-    levelUpCost: number,
+    levelMinBalance: number,
+    levelMaxBalance: number,
     roomCreationCost: number
   }
 
