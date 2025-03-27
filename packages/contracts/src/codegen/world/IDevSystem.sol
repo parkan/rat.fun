@@ -22,7 +22,12 @@ interface IDevSystem {
 
   function ratroom__destroyRoomAsAdmin(bytes32 _roomId) external;
 
-  function ratroom__updateLevel(bytes32 _levelId, uint256 _levelUpCost, uint256 _roomCreationCost) external;
+  function ratroom__updateLevel(
+    bytes32 _levelId,
+    uint256 _levelMinBalance,
+    uint256 _levelMaxBalance,
+    uint256 _roomCreationCost
+  ) external;
 
   function ratroom__addRoomBalance(bytes32 _roomId) external;
 }

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { GameConfig, EntityType, Balance, Name, OwnedRat, Inventory, Dead, Level, LevelUpCost, RoomCreationCost } from "../codegen/index.sol";
+import { GameConfig, EntityType, Balance, Name, OwnedRat, Inventory, Dead, Level, LevelMinBalance, LevelMaxBalance, RoomCreationCost } from "../codegen/index.sol";
 import { LibUtils, LibRoom } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
@@ -32,8 +32,14 @@ contract DevSystem is System {
     LibRoom.destroyRoom(_roomId);
   }
 
-  function updateLevel(bytes32 _levelId, uint256 _levelUpCost, uint256 _roomCreationCost) public {
-    LevelUpCost.set(_levelId, _levelUpCost);
+  function updateLevel(
+    bytes32 _levelId,
+    uint256 _levelMinBalance,
+    uint256 _levelMaxBalance,
+    uint256 _roomCreationCost
+  ) public {
+    LevelMinBalance.set(_levelId, _levelMinBalance);
+    LevelMaxBalance.set(_levelId, _levelMaxBalance);
     RoomCreationCost.set(_levelId, _roomCreationCost);
   }
 

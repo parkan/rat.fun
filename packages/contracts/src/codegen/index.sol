@@ -22,4 +22,5 @@ import { VisitCount } from "./tables/VisitCount.sol";
 import { KillCount } from "./tables/KillCount.sol";
 import { RoomPrompt } from "./tables/RoomPrompt.sol";
 import { RoomCreationCost } from "./tables/RoomCreationCost.sol";
-import { LevelUpCost } from "./tables/LevelUpCost.sol";
+import { LevelMinBalance } from "./tables/LevelMinBalance.sol";
+import { LevelMaxBalance } from "./tables/LevelMaxBalance.sol";

@@ -51,6 +51,6 @@ export function addRoomBalance(roomId: string) {
   return addToSequencer(WorldFunctions.addRoomBalance, [roomId])
 }
 
-export function updateLevel(levelId: string, levelUpCost: number, roomCreationCost: number) {
-  return addToSequencer(WorldFunctions.updateLevel, [levelId, levelUpCost, roomCreationCost])
+export function updateLevel(levelId: string, levelMinBalance: number, levelMaxBalance: number, roomCreationCost: number) {
+  return addToSequencer(WorldFunctions.updateLevel, [levelId, levelMinBalance, levelMaxBalance, roomCreationCost])
 }

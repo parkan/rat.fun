@@ -152,4 +152,39 @@ library LibRat {
     bytes32 playerId = Owner.get(_ratId);
     Balance.set(playerId, Balance.get(playerId) + balanceToTransfer);
   }
+
+  /**
+   * @notice Get the total value of a rat
+   * @param _ratId The id of the rat
+   * @return totalValue The total value of the rat
+   */
+  function getTotalRatValue(bytes32 _ratId) internal view returns (uint256) {
+    uint256 totalValue = 0;
+
+    // Health
+    totalValue += Health.get(_ratId);
+
+    // Traits
+    bytes32[] memory traits = Traits.get(_ratId);
+    for (uint i = 0; i < traits.length; i++) {
+      int256 traitValue = Value.get(traits[i]);
+      if (traitValue > 0) {
+        totalValue += LibUtils.absToUint256(traitValue);
+      } else {
+        totalValue -= LibUtils.absToUint256(traitValue);
+      }
+    }
+
+    // Items
+    bytes32[] memory items = Inventory.get(_ratId);
+    for (uint i = 0; i < items.length; i++) {
+      // Items are always positive
+      totalValue += LibUtils.absToUint256(Value.get(items[i]));
+    }
+
+    // Balance
+    totalValue += Balance.get(_ratId);
+
+    return totalValue;
+  }
 }

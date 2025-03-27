@@ -96,5 +96,11 @@ contract ManagerSystem is System {
     // * * * * * * * * * * * * *
 
     LibManager.updateBalance(_ratId, _roomId, _balanceTransferToOrFromRat);
+
+    // * * * * * * * * * * * * *
+    // LEVEL CHANGE
+    // * * * * * * * * * * * * *
+
+    LibManager.checkLevelChange(_ratId);
   }
 }

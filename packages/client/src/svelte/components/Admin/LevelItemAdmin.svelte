@@ -5,20 +5,27 @@
   export let level: Level
   export let levelId: string
 
-  let newLevelUpCost = level.levelUpCost
+  let newLevelMinBalance = level.levelMinBalance
+  let newLevelMaxBalance = level.levelMaxBalance
   let newRoomCreationCost = level.roomCreationCost
   let busy = false
 
   async function sendUpdateLevel() {
     busy = true
-    const action = updateLevel(levelId, newLevelUpCost, newRoomCreationCost)
+    const action = updateLevel(
+      levelId,
+      newLevelMinBalance,
+      newLevelMaxBalance,
+      newRoomCreationCost
+    )
     try {
       await waitForCompletion(action)
     } catch (e) {
       console.error(e)
     } finally {
       busy = false
-      newLevelUpCost = level.levelUpCost
+      newLevelMinBalance = level.levelMinBalance
+      newLevelMaxBalance = level.levelMaxBalance
       newRoomCreationCost = level.roomCreationCost
     }
   }
@@ -29,10 +36,15 @@
   <div class="level-item">
     <div class="value alert">{level.index}</div>
   </div>
-  <!-- Level up cost -->
+  <!-- Level min balance -->
   <div class="level-item">
-    <div class="value">{level.levelUpCost}</div>
-    <input type="number" bind:value={newLevelUpCost} />
+    <div class="value">{level.levelMinBalance}</div>
+    <input type="number" bind:value={newLevelMinBalance} />
+  </div>
+  <!-- Level max balance -->
+  <div class="level-item">
+    <div class="value">{level.levelMaxBalance}</div>
+    <input type="number" bind:value={newLevelMaxBalance} />
   </div>
   <!-- Room creation cost -->
   <div class="level-item">
