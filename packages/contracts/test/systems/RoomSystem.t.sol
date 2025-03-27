@@ -32,6 +32,7 @@ contract RoomSystemTest is BaseTest {
     assertEq(Balance.get(roomId), 100);
     assertEq(Owner.get(roomId), playerId);
     assertEq(Level.get(roomId), LevelList.get()[0]);
+    assertEq(CreationBlock.get(roomId), block.number);
   }
 
   function testLongRoomPrompt() public {
