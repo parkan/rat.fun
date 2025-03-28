@@ -28,7 +28,8 @@
     overflow: hidden;
     position: relative;
     background-repeat: repeat-x;
-    background-size: 20px 100%;
+    background-size: 40px 100%;
+    opacity: 0.9;
 
     .progress {
       background: var(--color-alert);
