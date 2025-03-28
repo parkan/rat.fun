@@ -54,7 +54,7 @@
   makeDefault
   position={[6, 2, 6]}
 >
-  <OrbitControls />
+  <!-- <OrbitControls /> -->
   <T.SpotLight
     target={(() => {
       const t = new Object3D()

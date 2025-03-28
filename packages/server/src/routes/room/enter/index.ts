@@ -17,6 +17,11 @@ import { getLLMClient } from '@modules/llm/anthropic';
 import { callModel } from '@modules/llm/anthropic/callModel';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
 
+// Lambda
+// import { getLLMClient } from '@modules/llm/lambda';
+// import { callModel } from '@modules/llm/lambda/callModel';
+// const LAMBDA_API_KEY = process.env.LAMBDA_API_KEY as string;
+
 // Groq
 // import { getLLMClient } from '@modules/llm/groq';
 // import { callModel } from '@modules/llm/groq/callModel';
@@ -40,6 +45,9 @@ const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 
 // Initialize LLM: Groq
 // const llmClient = getLLMClient(GROQ_API_KEY);
+
+// Initialize LLM: Lambda
+// const llmClient = getLLMClient(LAMBDA_API_KEY);
 
 const opts = { schema };  
 
