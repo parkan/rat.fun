@@ -70,6 +70,7 @@
     border-right: 1px solid white;
     background: rgb(126, 126, 126);
     color: white;
+    width: 50%;
 
     &.selected {
       background: white;

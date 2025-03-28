@@ -24,7 +24,6 @@
   --corporate-foreground: #000000;
   --corporate-alert: #ffff00;
 
-
   /* * * * * * * * * * * * * *
   * Layout
   * * * * * * * * * * * * * */
@@ -32,7 +31,11 @@
   /* Layout: Your Rat */
   --rat-editor-height: 180px;
   --liquidate-rat-height: 100px;
-  --rat-cam-height: calc(100% - var(--rat-editor-height) - var(--liquidate-rat-height));
+  --floor-progress-height: 50px;
+  --rat-cam-height: calc(
+    100% - var(--rat-editor-height) - var(--liquidate-rat-height) -
+      var(--floor-progress-height)
+  );
 
   /* Layout: Your Rooms */
   --create-room-button-height: 100px;

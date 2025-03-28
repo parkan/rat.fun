@@ -6,13 +6,10 @@
   import { UI } from "@modules/ui/enums"
   // Tippy CSS
   import "tippy.js/dist/tippy.css"
-
-  import Loading from "@components/Loading/Loading.svelte"
-
   import { Modal } from "@components/Main/Modal/state.svelte"
-
+  // import { events } from "@modules/herp/index.svelte"
+  import Loading from "@components/Loading/Loading.svelte"
   import Main from "@components/Main/Main.svelte"
-  import { events } from "@modules/herp/index.svelte"
 
   let { environment }: { environment: ENVIRONMENT } = $props()
 
@@ -20,16 +17,16 @@
     UIState.set(UI.SPAWNING)
   }
 
-  events.forEach(e => {
-    $effect(() => {
-      console.log("Effect running for ", e.name)
-      let a = e.logic()
-      console.log(a)
-      if (a.condition) {
-        a.callback()
-      }
-    })
-  })
+  // events.forEach(e => {
+  //   $effect(() => {
+  //     console.log("Effect running for ", e.name)
+  //     let a = e.logic()
+  //     console.log(a)
+  //     if (a.condition) {
+  //       a.callback()
+  //     }
+  //   })
+  // })
 
   onMount(async () => {
     // Remove preloader

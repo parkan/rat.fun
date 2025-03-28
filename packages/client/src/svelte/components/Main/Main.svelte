@@ -85,13 +85,13 @@
 
   .main.clone-left {
     pointer-events: none;
-    z-index: 2;
+    z-index: 20;
     clip-path: inset(0 50% 0 0);
     animation: moveLeft 1s ease forwards;
   }
   .main.clone-right {
     pointer-events: none;
-    z-index: 2;
+    z-index: 20;
     clip-path: inset(0 0 0 50%);
     animation: moveRight 1s ease forwards;
   }

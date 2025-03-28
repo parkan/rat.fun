@@ -50,9 +50,9 @@
 
 <T.PerspectiveCamera
   oncreate={r => r.lookAt(0, 0, 0)}
-  fov={80}
+  fov={50}
   makeDefault
-  position={[6, 9, 6]}
+  position={[6, 2, 6]}
 >
   <OrbitControls />
   <T.SpotLight

@@ -4,39 +4,43 @@
   import { shortenAddress } from "@modules/utils"
   let { roomId, room, yours } = $props()
 
+  console.log(roomId, room, yours)
+
   let { rooms } = getUIState()
 </script>
 
-<div class="room-preview">
-  <button class="back-button" onclick={rooms.back}> ← {room.name}</button>
+{#if room}
+  <div class="room-preview">
+    <button class="back-button" onclick={rooms.back}> ← {room.name}</button>
 
-  <div class="room-info">
-    <div class="room-balance">Balance: ${room.balance}</div>
-    <div class="room-creator">Created by:{shortenAddress(room.owner)}</div>
-  </div>
-
-  <div class="room-stats">
-    <div class="room-visitor-count">Visitors: {room.visitCount}</div>
-    <div class="room-player-count">Success rate: 0%</div>
-    <div class="room-player-count">
-      Kill rate: {((Number(room.killCount) || 0) /
-        (Number(room.visitCount) || 1)) *
-        100}%
+    <div class="room-info">
+      <div class="room-balance">Balance: ${room.balance}</div>
+      <div class="room-creator">Created by:{shortenAddress(room.owner)}</div>
     </div>
-  </div>
 
-  <div class="room-prompt">
-    {room.roomPrompt}
-  </div>
-
-  <div class="room-recent-events">TODO: RECENT EVENTS</div>
-
-  {#if !yours && room.balance > 0 && $ratTotalValue > 0}
-    <div class="room-enter">
-      <button onclick={() => rooms.goto(roomId)}>ENTER ROOM</button>
+    <div class="room-stats">
+      <div class="room-visitor-count">Visitors: {room.visitCount}</div>
+      <div class="room-player-count">Success rate: 0%</div>
+      <div class="room-player-count">
+        Kill rate: {((Number(room.killCount) || 0) /
+          (Number(room.visitCount) || 1)) *
+          100}%
+      </div>
     </div>
-  {/if}
-</div>
+
+    <div class="room-prompt">
+      {room.roomPrompt}
+    </div>
+
+    <div class="room-recent-events">TODO: RECENT EVENTS</div>
+
+    {#if room.balance > 0 && $ratTotalValue > 0}
+      <div class="room-enter">
+        <button onclick={() => rooms.goto(roomId)}>ENTER ROOM</button>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 <style lang="scss">
   .room-preview {

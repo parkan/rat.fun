@@ -1,5 +1,6 @@
 <script lang="ts">
   import { player } from "@modules/state/base/stores"
+  import { tippy } from "svelte-tippy"
 </script>
 
 <!-- PLAYER STATS -->
@@ -7,13 +8,25 @@
   <!-- NAME -->
   <div class="operator-bar">
     <div class="stat-item">
-      <div class="inner-wrapper operator">
+      <div
+        use:tippy={{
+          content: `${$player.name}: This is you, an operator of the firm`,
+          placement: "bottom",
+        }}
+        class="inner-wrapper operator"
+      >
         <div class="label">Operator:</div>
         <div class="value">{$player.name}</div>
       </div>
     </div>
     <!-- BALANCE -->
-    <div class="stat-item">
+    <div
+      use:tippy={{
+        content: `This is available funds in your operator wallet, spend wisely`,
+        placement: "bottom",
+      }}
+      class="stat-item"
+    >
       <div class="inner-wrapper balance">
         <div class="label">Balance:</div>
         <div class="value">${$player?.balance ?? 0}</div>

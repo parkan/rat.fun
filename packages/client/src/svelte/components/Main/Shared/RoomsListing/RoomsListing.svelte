@@ -3,6 +3,7 @@
   import RoomPreview from "@svelte/components/Main/Shared/RoomPreview/RoomPreview.svelte"
   import { PANE } from "@modules/ui/enums"
   import {
+    rooms as roomsStore,
     roomsOnRatLevel,
     ratLevelIndex,
     playerRooms,
@@ -104,8 +105,13 @@
         {#if !yours && $ratLevelIndex > -1}
           <div class="floor-header">
             <div class="floor-title">Floor {$ratLevelIndex * -1}</div>
-            <div class="floor-stats">
-              {Object.values($roomsOnRatLevel).length} rooms
+            <div
+              use:tippy={{
+                content: `There are ${Object.values($roomsStore).length} rooms on your floor`,
+              }}
+              class="floor-stats"
+            >
+              {Object.values($roomsStore).length} rooms
             </div>
             <div class="floor-filter">
               <button
@@ -158,7 +164,7 @@
           <RoomPreview
             {yours}
             roomId={currentRoom}
-            room={$roomsOnRatLevel[currentRoom]}
+            room={$roomsStore[currentRoom]}
           />
         {:else}
           <div>ERROR: NO CURRENT ROOM</div>

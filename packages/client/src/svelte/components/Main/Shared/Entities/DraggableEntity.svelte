@@ -1,5 +1,6 @@
 <script lang="ts">
   import { traits, items } from "@svelte/modules/state/base/stores"
+  import { tippy } from "svelte-tippy"
 
   let {
     type,
@@ -27,7 +28,14 @@
 
 {#if itemOrTrait}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <span
+  <div
+    class:dragging
+    use:tippy={{
+      content:
+        type === "item"
+          ? "Item carried by your rat, it can be unequipped"
+          : "Traits can not be unequipped",
+    }}
     ondragstart={() => {
       dragging = true
       onDragStart?.(address, type, itemOrTrait)
@@ -40,7 +48,7 @@
     class="entity {type}"
   >
     {itemOrTrait?.name} (${itemOrTrait?.value})
-  </span>
+  </div>
 {/if}
 
 <style>
@@ -58,5 +66,9 @@
     background-color: orange;
     color: black;
     padding: 10px;
+  }
+
+  .dragging {
+    opacity: 0.4;
   }
 </style>

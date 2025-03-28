@@ -3,6 +3,7 @@
   import { dropItem } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import DraggableEntity from "@components/Main/Shared/Entities/DraggableEntity.svelte"
+  import { tippy } from "svelte-tippy"
 
   const initialState = {
     address: "",
@@ -32,8 +33,7 @@
   const allowDrop = e => e.preventDefault()
 
   const onDrop = async e => {
-    console.log("on drop", dragState)
-
+    e.stopPropagation()
     e.preventDefault()
     if (busy) return
     busy = true
@@ -42,10 +42,7 @@
       let action
       if (dragState.type === "item") {
         action = dropItem(dragState.address)
-      } else {
-        console.log("let go of this trait")
-      }
-      if (action) {
+        // const result = await new Promise(r => setTimeout(r, 2000))
         const result = await waitForCompletion(action)
         console.log(result)
       }
@@ -64,43 +61,54 @@
 
 <div class="rat-editor" class:actions={dragAddress !== ""}>
   <div class="inner">
-    {$rat?.name ?? ""}
+    <div
+      class="name"
+      draggable="false"
+      use:tippy={{ content: "This is your rat's name" }}
+    >
+      {$rat?.name ?? ""}
+    </div>
     <!-- HEALTH -->
-    <span draggable="false" class="health">
+    <div
+      use:tippy={{ content: " Health of your rat, death at 0" }}
+      draggable="false"
+      class="health"
+    >
       {$rat.health} health
-    </span>
+    </div>
     <!-- BALANCE -->
     {#if $rat?.balance}
-      <span draggable="false" class="balance">
+      <div
+        use:tippy={{ content: " Tokens carried by your rat" }}
+        draggable="false"
+        class="balance"
+      >
         ${$rat.balance}
-      </span>
+      </div>
     {/if}
     <!-- TRAITS -->
     {#if $rat?.traits && $rat?.traits?.length > 0}
-      is
+      <div class="word">is</div>
       {#each $rat?.traits ?? [] as trait, i}
-        <DraggableEntity
-          {onDragStart}
-          {onDragEnd}
-          type="trait"
-          address={trait}
-        />
+        <DraggableEntity type="trait" address={trait} />
         {#if i < ($rat?.traits?.length ?? 0) - 2},
         {/if}
         {#if i === ($rat?.traits?.length ?? 0) - 2}
-          and
+          <div class="word">and</div>
         {/if}
       {/each}
     {/if}
     <!-- INVENTORY -->
     {#if $rat?.inventory && $rat?.inventory?.length > 0}
-      has
+      <div class="word">
+        {$rat?.traits && $rat?.traits?.length > 0 ? "and" : ""} has
+      </div>
       {#each $rat?.inventory ?? [] as item, i}
         <DraggableEntity {onDragStart} {onDragEnd} type="item" address={item} />
         {#if i < ($rat?.inventory?.length ?? 0) - 2},
         {/if}
         {#if i === ($rat?.inventory?.length ?? 0) - 2}
-          and&nbsp;
+          <div class="word">and</div>
         {/if}
       {/each}
     {/if}
@@ -108,54 +116,76 @@
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <!-- svelte-ignore element_invalid_self_closing_tag -->
-  <div ondrop={onDrop} ondragover={allowDrop} class="trash" />
+  <div
+    class:open={dragAddress !== ""}
+    ondrop={onDragEnd}
+    ondragover={allowDrop}
+    class="cancel"
+  />
+  <div
+    class:open={dragAddress !== ""}
+    ondrop={onDrop}
+    ondragover={allowDrop}
+    class="trash"
+  />
 </div>
 
 <style lang="scss">
   .rat-editor {
-    display: grid;
     border-bottom: 1px solid white;
     height: var(--rat-editor-height);
-    grid-template-rows: 1fr 0;
-    transition: grid-template-rows 0.2s ease;
     line-height: 2em;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: relative;
 
     &.actions {
       grid-template-rows: 1fr 60px;
     }
   }
 
-  .inner,
-  .trash {
+  .inner {
     padding: var(--default-padding);
     color: white;
     border: none;
-  }
-
-  .trash {
-    background: repeating-linear-gradient(
-      45deg,
-      black,
-      black 20px,
-      #222 20px,
-      #222 40px
-    );
-    overflow: hidden;
+    display: inline-flex;
+    // align-items: center;
+    height: 100%;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: row wrap;
+    row-gap: 4px;
+    column-gap: 4px;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .trait,
   .item,
-  .health {
+  .health,
+  .balance,
+  .name {
     cursor: grab;
     white-space: nowrap;
+    border: 1px solid white;
+    display: block;
+    height: 50px;
+    align-self: flex-start;
+  }
+
+  .word,
+  .name {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    display: block;
   }
 
   .health {
     background-color: var(--color-health);
     color: black;
     padding: 10px;
-    display: inline-block;
+    display: block;
   }
 
   .balance {
@@ -165,10 +195,59 @@
     display: inline-block;
   }
 
+  .cancel,
   .trash {
-    border-top: 1px solid white;
-    width: 100%;
     height: 100%;
+    aspect-ratio: 1;
+    width: 0;
     display: block;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    transition: width 0.2s ease;
+    overflow: hidden;
+
+    &.open {
+      width: 50%;
+    }
+  }
+
+  .trash {
+    animation: warn-lines 1s infinite linear;
+    &.open {
+      border-left: 1px solid white;
+    }
+  }
+
+  .cancel {
+    left: 0;
+    right: auto;
+
+    &.open {
+      // border-right: 1px solid white;
+    }
+  }
+
+  @keyframes warn-lines {
+    0% {
+      background: repeating-linear-gradient(
+        45deg,
+        black,
+        black 20px,
+        #222 20px,
+        #222 40px
+      );
+    }
+    100% {
+      background: repeating-linear-gradient(
+        45deg,
+        #f0d000,
+        #f0d000 20px,
+        #bda400 20px,
+        #bda400 40px
+      );
+    }
   }
 </style>

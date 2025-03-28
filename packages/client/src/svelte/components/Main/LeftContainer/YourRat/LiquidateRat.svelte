@@ -2,6 +2,7 @@
   import { ratTotalValue } from "@modules/state/base/stores"
   import { liquidateRat } from "@svelte/modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
+  import { tippy } from "svelte-tippy"
   import {
     ModalTarget,
     getModalState,
@@ -34,13 +35,19 @@
 </script>
 
 <div class="liquidate-rat">
-  <div class="data-cell">
+  <div
+    use:tippy={{ content: "Total rat value based on rat inventory" }}
+    class="data-cell"
+  >
     <div class="inner">
       <div class="data-cell-label">Rat Value:</div>
       <div class="data-cell-value">${$ratTotalValue}</div>
     </div>
   </div>
   <button
+    use:tippy={{
+      content: "Kill rat to get the value added to your operator wallet",
+    }}
     disabled={busy}
     onclick={() => (confirming = true)}
     class="action warning-mute"
@@ -159,11 +166,13 @@
   }
 
   .liquidate-image {
-    height: 300px;
+    height: 100%;
+    max-height: 440px;
   }
 
   .confirmation {
     .content {
+      height: 100%;
       display: flex;
       flex-flow: column nowrap;
       justify-content: space-between;

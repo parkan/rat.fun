@@ -1,9 +1,8 @@
 <script lang="ts">
-  import Main from "@components/3D/World/Main.svelte"
-  import RatFace from "@components/3D/RatFace/RatFace.svelte"
   import { onMount } from "svelte"
   import { Spring } from "svelte/motion"
   import { gameConfig, ratLevelIndex } from "@modules/state/base/stores"
+  import { tippy } from "svelte-tippy"
 
   const doorProgress = new Spring(1)
 
@@ -52,11 +51,11 @@
       <div
         style:transform="translateY({elevatorIndex * (clientHeight / 6)}px)"
         class="elevator-item"
-        style:background-image="url(/images/rat.jpg)"
       >
-        <Main>
-          <RatFace />
-        </Main>
+        <div
+          class="your-floor"
+          style:background-image="url(/images/rat.jpg)"
+        ></div>
         <div
           style:transform="translateX(-{doorProgress.current * 100}%)"
           class="elevator-door-l"
@@ -71,10 +70,34 @@
       </div>
     {/if}
   </div>
-  {#each $gameConfig?.levelList || [] as _, i}
-    <div class="floor-item">
-      {i * -1}
-    </div>
+  {#each $gameConfig?.levelList || [] as _, i (i)}
+    {#if i < elevatorIndex}
+      <div
+        use:tippy={{
+          content:
+            "Your rat has gone past this floor, lose rat value to access",
+        }}
+        class="floor-item"
+      >
+        {i * -1}
+      </div>
+    {:else if i > elevatorIndex}
+      <div
+        use:tippy={{
+          content: "Not available yet. Gain more rat value for rat to access",
+        }}
+        class="floor-item"
+      >
+        {i * -1}
+      </div>
+    {:else}
+      <div
+        use:tippy={{ content: "Your rat is on this floor" }}
+        class="floor-item"
+      >
+        {i * -1}
+      </div>
+    {/if}
   {/each}
 </div>
 
@@ -103,10 +126,18 @@
     }
   }
 
+  .your-floor {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    filter: grayscale(0.1) contrast(10) brightness(20) invert(0.8);
+  }
+
   .elevator {
     position: absolute;
     inset: 0;
     z-index: 1;
+    pointer-events: none;
   }
 
   .elevator-item {

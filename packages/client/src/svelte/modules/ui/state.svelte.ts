@@ -26,7 +26,7 @@ let route = $state("main")
 // 1.3 More complex objects are also fully reactive once properly initialised
 const transition = $state({
   active: false,
-  progress: new Tween(0, { duration: 1000 }),
+  progress: new Tween(0, { duration: 3000 }),
   to: "main",
 })
 
@@ -71,6 +71,7 @@ export const getUIState = () => {
     // Modifying by using class instance methods
     await transition.progress.set(1)
     transition.active = false
+    transition.progress.set(0)
     route = to
   }
   /** ...Inside your code you would subscribe to both as
@@ -85,19 +86,24 @@ export const getUIState = () => {
    * Here, I am modifying a store as you normally would anyways.
    * When combining stores and $state calls, it can be weird to figure out which is which.
    */
-  const previewRoom = (id: string, pane = PANE.RIGHT) => {
+  const preview = (id: string, pane = PANE.RIGHT) => {
     uiStores.CurrentRoomId.set(id)
     previewingPane = pane
   }
 
-  const goBackRoom = () => {
+  const back = () => {
     setPane(PANE.RIGHT, RIGHT_PANE.ROOMS)
     uiStores.CurrentRoomId.set(null)
     previewingPane = PANE.NONE
-    route = "main"
   }
 
-  const goToRoom = (id: string) => {
+  const close = () => {
+    uiStores.CurrentRoomId.set(null)
+    previewingPane = PANE.NONE
+    transitionTo("main")
+  }
+
+  const goto = (id: string) => {
     uiStores.CurrentRoomId.set(id)
     transitionTo("room")
   }
@@ -138,9 +144,10 @@ export const getUIState = () => {
       },
     },
     rooms: {
-      preview: previewRoom,
-      back: goBackRoom,
-      goto: goToRoom,
+      preview,
+      back,
+      goto,
+      close,
       /** 3.4: :danger: Here we are returning a store.
        *
        * !!!It is a bit of an anti-pattern!!!

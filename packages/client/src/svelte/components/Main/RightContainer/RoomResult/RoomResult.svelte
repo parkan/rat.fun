@@ -41,7 +41,7 @@
   })
 
   function close() {
-    rooms.back()
+    rooms.close()
   }
 
   const processRoom = async () => {
@@ -82,9 +82,11 @@
         <div class="name">
           {room.name}
         </div>
-        <span class="title">
-          {room.roomPrompt}
-        </span>
+        <div class="title">
+          <span>
+            {room.roomPrompt}
+          </span>
+        </div>
       </div>
     </div>
   {:else}
