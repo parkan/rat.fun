@@ -5,6 +5,14 @@ import { EntityType, Index, LevelMinBalance, LevelMaxBalance, RoomCreationCost, 
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
 library LibLevel {
+  /**
+   * @notice Create a level
+   * @param _index The index of the level
+   * @param _levelMinBalance The minimum balance for the level
+   * @param _levelMaxBalance The maximum balance for the level
+   * @param _roomCreationCost The cost to create a room on the level
+   * @return levelId The id of the new level
+   */
   function createLevel(
     uint256 _index,
     uint256 _levelMinBalance,

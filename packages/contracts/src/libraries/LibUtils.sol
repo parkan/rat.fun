@@ -73,7 +73,7 @@ library LibUtils {
   function absToUint256(int256 x) internal pure returns (uint256) {
     // Check if the value is negative
     if (x < 0) {
-        return uint256(-x);
+      return uint256(-x);
     }
     return uint256(x);
   }

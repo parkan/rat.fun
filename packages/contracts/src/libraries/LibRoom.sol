@@ -37,6 +37,10 @@ library LibRoom {
     Balance.set(roomId, RoomCreationCost.get(_roomLevel));
   }
 
+  /**
+   * @notice Destroy a room
+   * @param _roomId The id of the room
+   */
   function destroyRoom(bytes32 _roomId) internal {
     EntityType.deleteRecord(_roomId);
     RoomPrompt.deleteRecord(_roomId);

@@ -112,21 +112,12 @@ async function execute() {
     // Add action to active list
     activeActions.update(activeActions => [action, ...activeActions])
     // Make the call
-    // console.log('get(walletNetwork)', get(walletNetwork))
-    // console.log('get(walletNetwork).worldContract', get(walletNetwork).worldContract)
-    // console.log('get(walletNetwork).worldContract.write', get(walletNetwork).worldContract.write)
-    // console.log('get(walletNetwork).worldContract.estimateGas[action.systemId]([...action.params])', await get(walletNetwork).worldContract.estimateGas[action.systemId]([...action.params]))
-    // console.log('get(walletNetwork).worldContract.simulate[action.systemId]([...action.params])', await get(walletNetwork).worldContract.simulate[action.systemId]([...action.params]))
-    // console.log('get(walletNetwork).worldContract.write[action.systemId]', get(walletNetwork).worldContract.write[action.systemId])
-    // console.log('action.params', action.params)
-    // console.log('get(walletNetwork).walletClient.writeContract', get(walletNetwork).walletClient.writeContract)
-
     const tx = await get(walletNetwork).walletClient.writeContract({
       address: get(walletNetwork).worldContract.address,
       abi: get(walletNetwork).worldContract.abi,
       functionName: action.systemId,
       args: action.params,
-      gas: 569420n,
+      gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
     })
 
     console.log('tx', tx)
