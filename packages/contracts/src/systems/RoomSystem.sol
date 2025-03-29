@@ -17,14 +17,19 @@ contract RoomSystem is System {
   function createRoom(string memory _roomName, string memory _roomPrompt) public returns (bytes32 roomId) {
     bytes32 playerId = LibUtils.addressToEntityKey(_msgSender());
 
-    // TODO: Character count is not accurate due to UTF8 encoding
-    // require(bytes(_roomPrompt).length > 0, "prompt too short");
-    // require(bytes(_roomPrompt).length <= MAX_ROOM_PROMPT_LENGTH, "prompt too long");
-
     // TODO: What level is room created on?
-    uint256 roomCreationCost = RoomCreationCost.get(LevelList.get()[0]);
+    // Currently hardcoded to level 0
+    bytes32 levelId = LevelList.get()[0];
 
-    console.log(roomCreationCost);
+    console.logBytes32(levelId);
+
+    uint256 roomCreationCost = RoomCreationCost.get(levelId);
+
+    console.log("roomCreationCost", roomCreationCost);
+    console.logBytes32(bytes32(roomCreationCost));
+
+    console.log("Balance", Balance.get(playerId));
+    console.logBytes32(bytes32(Balance.get(playerId)));
 
     require(Balance.get(playerId) >= roomCreationCost, "balance too low");
 
@@ -32,6 +37,6 @@ contract RoomSystem is System {
     Balance.set(playerId, Balance.get(playerId) - roomCreationCost);
 
     // Create room
-    roomId = LibRoom.createRoom(_roomName, _roomPrompt, playerId, LevelList.get()[0]);
+    roomId = LibRoom.createRoom(_roomName, _roomPrompt, playerId, levelId);
   }
 }

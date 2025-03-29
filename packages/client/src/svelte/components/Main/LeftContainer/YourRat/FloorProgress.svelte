@@ -11,8 +11,10 @@
   <div class="progress" style:width="{progress * 100}%"></div>
   <div class="info">
     <div>
-      Level progress: {Math.round(
-        (Number($ratTotalValue) / Number($ratLevel.levelMaxBalance)) * 100
+      Floor progress: {Math.round(
+        ((Number($ratTotalValue) - Number($ratLevel.levelMinBalance)) /
+          Number($ratLevel.levelMaxBalance)) *
+          100
       )}%
     </div>
   </div>
