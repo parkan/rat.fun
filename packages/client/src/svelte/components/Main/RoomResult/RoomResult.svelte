@@ -31,6 +31,7 @@
   let animationstarted = $state(false)
   let room = $roomsState[roomId ?? ""]
   let busy = $state(false)
+  let error = $state("")
 
   let entering = $state(true)
   let outcome: ServerReturnValue | undefined = $state(undefined)
@@ -40,44 +41,55 @@
     if (animationstart) animationstarted = true
   })
 
-  function close() {
-    rooms.close()
-  }
-
   const processRoom = async () => {
+    console.time("Process")
     if (!roomId) return
-    const result = enterRoom(
-      environment,
-      $walletNetwork,
-      roomId,
-      $player.ownedRat
-    )
+    try {
+      console.log("start result")
+      const result = enterRoom(
+        environment,
+        $walletNetwork,
+        roomId,
+        $player.ownedRat
+      )
 
-    // Human reading speed is around 20-25 characters per second
-    const waitLength = Math.max(3000, room.roomPrompt.length * (1000 / 20))
+      // Human reading speed is around 20-25 characters per second
+      const waitLength = Math.max(3000, room.roomPrompt.length * (1000 / 20))
 
-    timeout = setTimeout(async () => {
+      await new Promise(resolve => setTimeout(resolve, waitLength))
+
+      try {
+        console.log("start outcome ")
+        outcome = await result // add here just in case the entering transition would be faster
+      } catch (err) {
+        console.log("catch outcome ")
+        throw err
+      }
+    } catch (error) {
+      console.log("catch result")
+      console.error(error)
       entering = false
-      outcome = await result // add here just in case the entering transition would be faster
-    }, waitLength)
+
+      rooms.close()
+    }
   }
 
   $effect(() => {
     if (start && !busy) {
       busy = true
-      // console.log("start")
+      console.log("start")
       processRoom()
     }
   })
 
   onDestroy(() => {
-    if (timeout) clearTimeout(timeout)
+    console.log("on destroy")
   })
 </script>
 
 <div class="room-result">
   {#if entering && animationstarted}
-    <div in:fadeAndScale class="room-meta">
+    <div class="room-meta">
       <div class="inner">
         <div class="name">
           {room.name}
@@ -102,10 +114,18 @@
       <!-- OUTCOME -->
       <Outcome {room} {outcome} {oldRoomBalance} />
       <div class="return">
-        <button onclick={close}>LEAVE ROOM</button>
+        <button onclick={rooms.close}>LEAVE ROOM</button>
       </div>
     {:else if animationstarted}
       EXPERIMENT IN PROGRESS: <Spinner />
+    {/if}
+    {#if error}
+      <div class="error">
+        {error}
+      </div>
+      <div class="return">
+        <button onclick={rooms.close}>LEAVE ROOM</button>
+      </div>
     {/if}
   {/if}
 </div>

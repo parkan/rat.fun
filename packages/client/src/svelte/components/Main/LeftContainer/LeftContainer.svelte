@@ -32,23 +32,18 @@
     </button>
   </div>
 
-  <div
-    class:active-tab={panes.left === enums.LEFT_PANE.YOUR_RAT}
-    class="tab-content"
-  >
-    <YourRat />
-  </div>
-  <div
-    class:active-tab={panes.left === enums.LEFT_PANE.YOUR_ROOMS}
-    class="tab-content"
-  >
-    <YourRooms />
-  </div>
+  {#if panes.left === enums.LEFT_PANE.YOUR_RAT}
+    <div class="tab-content">
+      <YourRat />
+    </div>
+  {/if}
+  {#if panes.left === enums.LEFT_PANE.YOUR_ROOMS}
+    <div class="tab-content">
+      <YourRooms />
+    </div>
+  {/if}
   {#if panes.left === enums.LEFT_PANE.CREATE_ROOM}
-    <div
-      class:active-tab={panes.left === enums.LEFT_PANE.CREATE_ROOM}
-      class="tab-content"
-    >
+    <div class="tab-content">
       <CreateRoom {environment} />
     </div>
   {/if}
@@ -86,10 +81,5 @@
 
   .tab-content {
     height: calc(100% - 60px);
-    display: none;
-  }
-
-  .active-tab {
-    display: block;
   }
 </style>
