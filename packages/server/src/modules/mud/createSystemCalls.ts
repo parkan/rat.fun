@@ -52,12 +52,12 @@ export function createSystemCalls(network: SetupNetworkResult) {
   const createRoom = async (
     playerId: string,
     roomName: string,
-    roomPrompt: string,
+    roomPrompt: string
   ) => {
     const tx = await network.worldContract.write.ratroom__createRoom([
       playerId,
-      roomName, 
-      roomPrompt
+      roomName,
+      roomPrompt,
     ])
 
     await network.waitForTransaction(tx)
@@ -78,6 +78,8 @@ function updateOutcome(
 ): OutcomeReturnValue {
   const newOutcome = oldOutcome
 
+  console.log("newOutcome", newOutcome.statChanges)
+
   // console.log('old outcome:', oldOutcome);
   // console.log('old rat:', oldRat);
   // console.log('new rat:', newRat);
@@ -92,7 +94,9 @@ function updateOutcome(
   // HEALTH
   // - - - - - - - - -
 
-  newOutcome.statChanges.health = newRat.stats.health - oldRat.stats.health
+  if (newOutcome.statChanges.health) {
+    newOutcome.statChanges.health = newRat.stats.health - oldRat.stats.health
+  }
 
   // - - - - - - - - -
   // TRAITS
