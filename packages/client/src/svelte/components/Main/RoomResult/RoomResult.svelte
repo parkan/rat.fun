@@ -2,6 +2,7 @@
   import { onDestroy } from "svelte"
   import type { ServerReturnValue } from "@components/Main/RoomResult/types"
   import { fadeAndScale } from "@modules/ui/transitions"
+  import { fade } from "@modules/ui/transitions"
   import { player, rooms as roomsState } from "@modules/state/base/stores"
   import { enterRoom } from "@components/Main/RoomResult"
   import { ENVIRONMENT } from "@mud/enums"
@@ -54,9 +55,11 @@
       )
 
       // Human reading speed is around 20-25 characters per second
-      const waitLength = Math.max(3000, room.roomPrompt.length * (1000 / 20))
-
+      // const waitLength = Math.max(3000, room.roomPrompt.length * (1000 / 20))
+      const waitLength = 3000
       await new Promise(resolve => setTimeout(resolve, waitLength))
+
+      entering = false
 
       try {
         console.log("start outcome ")
@@ -89,7 +92,7 @@
 
 <div class="room-result">
   {#if entering && animationstarted}
-    <div class="room-meta">
+    <div class="room-meta" in:fadeAndScale out:fade>
       <div class="inner">
         <div class="name">
           {room.name}
@@ -110,7 +113,6 @@
     {#if outcome && (outcome.log?.length ?? 0 > 0)}
       <!-- LOG -->
       <Log result={outcome} />
-
       <!-- OUTCOME -->
       <Outcome {room} {outcome} {oldRoomBalance} />
       <div class="return">
