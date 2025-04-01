@@ -94,8 +94,9 @@ function updateOutcome(
   // HEALTH
   // - - - - - - - - -
 
-  if (newOutcome.statChanges.health) {
-    newOutcome.statChanges.health = newRat.stats.health - oldRat.stats.health
+  if (newOutcome?.healthChanges?.health) {
+    newOutcome?.healthChanges?.health =
+      newRat.stats.health - oldRat.stats.health
   }
 
   // - - - - - - - - -

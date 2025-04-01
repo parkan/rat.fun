@@ -129,7 +129,7 @@ export const getUIState = () => {
   }
 
   const close = () => {
-    // uiStores.CurrentRoomId.set(null)
+    uiStores.CurrentRoomId.set(null)
     previewingPane = PANE.NONE
     navigate("main")
   }
