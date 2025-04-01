@@ -9,18 +9,13 @@ import { MESSAGE } from '@config';
 import { EnterRoomBody } from '@routes/room/enter/types';
 
 // LLM  
-import { CorrectedEventsReturnValue, CombinedReturnValue } from '@modules/llm/types'
+import { EventsReturnValue, OutcomeReturnValue } from '@modules/llm/types'
 import { constructEventMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
 
 // Anthropic
 import { getLLMClient } from '@modules/llm/anthropic';
 import { callModel } from '@modules/llm/anthropic/callModel';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY as string;
-
-// Lambda
-// import { getLLMClient } from '@modules/llm/lambda';
-// import { callModel } from '@modules/llm/lambda/callModel';
-// const LAMBDA_API_KEY = process.env.LAMBDA_API_KEY as string;
 
 // Groq
 // import { getLLMClient } from '@modules/llm/groq';
@@ -46,9 +41,6 @@ const llmClient = getLLMClient(ANTHROPIC_API_KEY);
 // Initialize LLM: Groq
 // const llmClient = getLLMClient(GROQ_API_KEY);
 
-// Initialize LLM: Lambda
-// const llmClient = getLLMClient(LAMBDA_API_KEY);
-
 const opts = { schema };  
 
 async function routes (fastify: FastifyInstance) {
@@ -64,8 +56,6 @@ async function routes (fastify: FastifyInstance) {
             console.time('–– Get on chain data');
             const { room, rat } = getOnchainData(await network, components, ratId, roomId);
             console.timeEnd('–– Get on chain data');
-
-            console.log('Rat:', rat);
 
             if(!room) {
                 throw new Error('Room not found');
@@ -84,36 +74,44 @@ async function routes (fastify: FastifyInstance) {
             // Call event model
             console.time('–– Combined LLM call');
             const eventMessages = constructEventMessages(rat, room);
-            const combinedOutcome = await callModel(llmClient, eventMessages, combinedSystemPrompt) as CombinedReturnValue;
+            const combinedOutcome = await callModel(llmClient, eventMessages, combinedSystemPrompt) as EventsReturnValue;
             console.timeEnd('–– Combined LLM call');
 
             console.log('Combined outcome:', combinedOutcome);
 
-            // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
+            // reply.send({
+            //     log: combinedOutcome.log ?? [],
+            //     healthChanges: combinedOutcome.outcome.healthChanges,
+            //     traitChanges: combinedOutcome.outcome.traitChanges,
+            //     itemChanges: combinedOutcome.outcome.itemChanges,
+            //     balanceTransfers: combinedOutcome.outcome.balanceTransfers,
+            // });
+
+            // // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             console.time('–– Chain call');
             const validatedOutcome = await systemCalls.applyOutcome(rat, room, combinedOutcome.outcome);
             console.timeEnd('–– Chain call');
 
             console.log('Validated outcome:', validatedOutcome);
 
-            // TODO: Send message to creator, if not admin
+            // // TODO: Send message to creator, if not admin
 
-            // The event log might now not reflect the actual outcome.
-            // Run it through the LLM again to get the corrected event log.
-            console.time('–– Correction LLM call');
-            const correctionMessages = constructCorrectionMessages(combinedOutcome.outcome, validatedOutcome, combinedOutcome.log);
-            const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt, 0) as CorrectedEventsReturnValue;
-            console.timeEnd('–– Correction LLM call');
+            // // The event log might now not reflect the actual outcome.
+            // // Run it through the LLM again to get the corrected event log.
+            // console.time('–– Correction LLM call');
+            // const correctionMessages = constructCorrectionMessages(combinedOutcome.outcome, validatedOutcome, combinedOutcome.log);
+            // const correctedEvents = await callModel(llmClient, correctionMessages, correctionSystemPrompt, 0) as EventsReturnValue;
+            // console.timeEnd('–– Correction LLM call');
 
-            console.log('Corrected events:', correctedEvents);
+            // console.log('Corrected events:', correctedEvents);
 
-            reply.send({
-                log: correctedEvents.logEntries ?? [],
-                statChanges: validatedOutcome.statChanges,
-                traitChanges: validatedOutcome.traitChanges,
-                itemChanges: validatedOutcome.itemChanges,
-                balanceTransfer: validatedOutcome.balanceTransfer,
-            });
+            // reply.send({
+            //     log: correctedEvents.logEntries ?? [],
+            //     healthChanges: validatedOutcome.healthChanges,
+            //     traitChanges: validatedOutcome.traitChanges,
+            //     itemChanges: validatedOutcome.itemChanges,
+            //     balanceTransfers: validatedOutcome.balanceTransfers,
+            // });
         } catch (error) {
             console.error('Error:', error);
             // Capture the error in Sentry

@@ -23,11 +23,14 @@ export const schema =     {
               },
             },
           },
-          statChanges: {
-            type: 'object',
-            description: 'Changes to stats after the operation',
-            properties: {
-              health: { type: 'integer', description: 'Change in health points' }
+          healthChanges: {
+            type: 'array',
+            items: { 
+              type: 'object',
+              properties: {
+                logStep: { type: 'number'},
+                amount: { type: 'number'}
+              },
             },
           },
           traitChanges: {
@@ -35,6 +38,7 @@ export const schema =     {
             items: { 
               type: 'object',
               properties: {
+                logStep: { type: 'number'},
                 type: { type: 'string' },
                 id: { type: 'string'},
                 name: { type: 'string'},
@@ -47,6 +51,7 @@ export const schema =     {
             items: { 
               type: 'object',
               properties: {
+                logStep: { type: 'number'},
                 type: { type: 'string' },
                 id: { type: 'string'},
                 name: { type: 'string'},
@@ -54,12 +59,20 @@ export const schema =     {
               },
             },
           },
-          balanceTransfer: {
-            type: 'number',
-            description: 'The amount of currency transferred to player'
+          balanceTransfers: {
+            type: 'array',
+            items: { 
+              type: 'object',
+              properties: {
+                logStep: { type: 'number'},
+                from: { type: 'string'},
+                to: { type: 'string'},
+                amount: { type: 'number'}
+              },
+            },
           }
         },
-        required: ['log', 'statChanges', 'traitChanges', 'itemChanges', 'balanceTransfer']
+        required: ['log', 'healthChanges', 'traitChanges', 'itemChanges', 'balanceTransfers']
       },
       403: {
         type: 'object',
