@@ -89,7 +89,7 @@
 
 <div class="room-result">
   {#if entering && animationstarted}
-    <div in:fadeAndScale class="room-meta">
+    <div class="room-meta">
       <div class="inner">
         <div class="name">
           {room.name}

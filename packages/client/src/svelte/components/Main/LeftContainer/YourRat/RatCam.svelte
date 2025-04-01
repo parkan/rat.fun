@@ -1,11 +1,24 @@
 <script lang="ts">
-  // import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
+  import { Tween } from "svelte/motion"
   import Main from "@components/3D/World/Main.svelte"
   import Box from "@components/3D/Box/Box.svelte"
+
+  let progress = new Tween(0, { duration: 2000 })
+
+  onMount(() => {
+    progress.set(1)
+  })
+
+  onDestroy(() => {
+    progress.set(0)
+  })
 </script>
 
 <div class="rat-cam">
-  <div class="rat-cam-header">RAT CAM</div>
+  <!-- <div class="progress">
+    {progress.current}
+  </div> -->
   <Main>
     <Box></Box>
   </Main>
@@ -19,6 +32,11 @@
     justify-content: center;
     align-items: center;
     position: relative;
+  }
+
+  .progress {
+    position: absolute;
+    z-index: 10;
   }
 
   .image-container {

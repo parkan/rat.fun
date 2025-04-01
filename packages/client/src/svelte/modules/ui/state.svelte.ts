@@ -1,4 +1,5 @@
 import { PANE, LEFT_PANE, RIGHT_PANE } from "./enums"
+import { quadInOut } from "svelte/easing"
 import { Tween } from "svelte/motion"
 import * as uiStores from "@modules/ui/stores"
 
@@ -42,7 +43,7 @@ const transition = $state({
   from: "",
   to: "main",
   type: "none",
-  progress: new Tween(0, { duration: 400 }),
+  progress: new Tween(0, { duration: 400, easing: quadInOut }),
 })
 
 const getTransitionType = (from, to) => {
@@ -99,6 +100,7 @@ export const getUIState = () => {
     transition.active = true
     transition.type = getTransitionType(transition.from, transition.to)
     params = p
+    history.pushState({ to, p }, "")
     // Modifying by using class instance methods
     await transition.progress.set(1)
     transition.active = false
@@ -128,10 +130,10 @@ export const getUIState = () => {
     previewingPane = PANE.NONE
   }
 
-  const close = () => {
-    uiStores.CurrentRoomId.set(null)
+  const close = async () => {
     previewingPane = PANE.NONE
-    navigate("main")
+    await navigate("main")
+    uiStores.CurrentRoomId.set(null)
   }
 
   /** 3.1 Exporting state

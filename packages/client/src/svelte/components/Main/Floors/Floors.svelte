@@ -20,7 +20,7 @@
   })
 </script>
 
-<svelte:window
+<!-- <svelte:window
   onkeypress={async e => {
     switch (e.key) {
       case "0":
@@ -38,7 +38,7 @@
         break
     }
   }}
-/>
+/> -->
 
 <div class="floor-bar" bind:clientHeight>
   <div class="elevator">
