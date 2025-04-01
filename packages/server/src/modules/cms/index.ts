@@ -1,16 +1,20 @@
 import { loadData } from "@modules/cms/sanity";
 import { queries } from "@modules/cms/groq";
-import type { CorrectionPrompts, CombinedPrompts } from "@sanity-types";
+import type { ActivePrompts, Prompt } from "@sanity-types";
+
+type ExpandedActivePrompts = ActivePrompts & {
+    activeEventPrompt: Prompt;
+    activeCorrectionPrompt: Prompt;
+}
 
 export const getSystemPrompts = async () => {
-    const correctionPrompts = await loadData(queries.correctionPrompts, {}) as CorrectionPrompts;
-    const combinedPrompts = await loadData(queries.combinedPrompts, {}) as CombinedPrompts;
+    const activePrompts = await loadData(queries.activePrompts, {}) as ExpandedActivePrompts;
     return {
-        combinedSystemPrompt: combineSystemPrompts(combinedPrompts),
-        correctionSystemPrompt: combineSystemPrompts(correctionPrompts)
+        combinedSystemPrompt: combineSystemPrompts(activePrompts.activeEventPrompt),
+        correctionSystemPrompt: combineSystemPrompts(activePrompts.activeCorrectionPrompt)
     };
 }
 
-function combineSystemPrompts(doc: CombinedPrompts | CorrectionPrompts) {
+function combineSystemPrompts(doc: Prompt) {
     return `Return format: ${doc.returnFormat?.code ?? ""} // ${doc.prompt ?? ""}`; 
 }

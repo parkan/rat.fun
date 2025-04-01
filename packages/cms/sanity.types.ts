@@ -131,9 +131,30 @@ export type SanityAssetSourceData = {
   url?: string
 }
 
-export type CombinedPrompts = {
+export type ActivePrompts = {
   _id: string
-  _type: 'combinedPrompts'
+  _type: 'activePrompts'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  activeEventPrompt?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'prompt'
+  }
+  activeCorrectionPrompt?: {
+    _ref: string
+    _type: 'reference'
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: 'prompt'
+  }
+}
+
+export type Prompt = {
+  _id: string
+  _type: 'prompt'
   _createdAt: string
   _updatedAt: string
   _rev: string
@@ -153,20 +174,9 @@ export type CorrectionPrompts = {
   returnFormat?: Code
 }
 
-export type OutcomePrompts = {
+export type CombinedPrompts = {
   _id: string
-  _type: 'outcomePrompts'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  prompt?: string
-  returnFormat?: Code
-}
-
-export type EventPrompts = {
-  _id: string
-  _type: 'eventPrompts'
+  _type: 'combinedPrompts'
   _createdAt: string
   _updatedAt: string
   _rev: string
@@ -197,10 +207,10 @@ export type AllSanitySchemaTypes =
   | Geopoint
   | Slug
   | SanityAssetSourceData
-  | CombinedPrompts
+  | ActivePrompts
+  | Prompt
   | CorrectionPrompts
-  | OutcomePrompts
-  | EventPrompts
+  | CombinedPrompts
   | Markdown
   | Code
 export declare const internalGroqTypeReferenceTo: unique symbol

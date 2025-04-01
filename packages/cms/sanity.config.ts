@@ -19,7 +19,9 @@ export default defineConfig({
     newDocumentOptions: (prev, { creationContext }) => {
       const { type } = creationContext;
       const DISABLED_TYPES = [
-        'worldPrompts'
+        'activePrompts',
+        'combinedPrompts',
+        'correctionPrompts'
       ];
       if (type === 'global') {
         return prev.filter((template) => !DISABLED_TYPES.includes(template.templateId));

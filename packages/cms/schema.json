@@ -693,7 +693,7 @@
     }
   },
   {
-    "name": "combinedPrompts",
+    "name": "activePrompts",
     "type": "document",
     "attributes": {
       "_id": {
@@ -706,7 +706,111 @@
         "type": "objectAttribute",
         "value": {
           "type": "string",
-          "value": "combinedPrompts"
+          "value": "activePrompts"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "title": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "activeEventPrompt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "_ref": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              }
+            },
+            "_type": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string",
+                "value": "reference"
+              }
+            },
+            "_weak": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "boolean"
+              },
+              "optional": true
+            }
+          },
+          "dereferencesTo": "prompt"
+        },
+        "optional": true
+      },
+      "activeCorrectionPrompt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "_ref": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              }
+            },
+            "_type": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string",
+                "value": "reference"
+              }
+            },
+            "_weak": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "boolean"
+              },
+              "optional": true
+            }
+          },
+          "dereferencesTo": "prompt"
+        },
+        "optional": true
+      }
+    }
+  },
+  {
+    "name": "prompt",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "prompt"
         }
       },
       "_createdAt": {
@@ -811,7 +915,7 @@
     }
   },
   {
-    "name": "outcomePrompts",
+    "name": "combinedPrompts",
     "type": "document",
     "attributes": {
       "_id": {
@@ -824,66 +928,7 @@
         "type": "objectAttribute",
         "value": {
           "type": "string",
-          "value": "outcomePrompts"
-        }
-      },
-      "_createdAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_updatedAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_rev": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "title": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "prompt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "returnFormat": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "code"
-        },
-        "optional": true
-      }
-    }
-  },
-  {
-    "name": "eventPrompts",
-    "type": "document",
-    "attributes": {
-      "_id": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_type": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string",
-          "value": "eventPrompts"
+          "value": "combinedPrompts"
         }
       },
       "_createdAt": {
