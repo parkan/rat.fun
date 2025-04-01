@@ -97,7 +97,7 @@
 
     {#if outcome && (outcome.log?.length ?? 0 > 0)}
       <!-- LOG -->
-      <Log log={outcome.log} />
+      <Log result={outcome} />
 
       <!-- OUTCOME -->
       <Outcome {room} {outcome} {oldRoomBalance} />

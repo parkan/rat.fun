@@ -20,9 +20,9 @@
   <!-- Changes to health -->
   {#if outcome?.healthChange && outcome.healthChange.amount !== 0}
     <div class="outcome-item">
-      <div class="title">__Stat changes</div>
+      <div class="title">__Health changes</div>
       <div class="stat-change" class:negative={outcome.healthChange.amount < 0}>
-        health: {outcome.healthChange}
+        {outcome.healthChange.amount}
       </div>
     </div>
   {/if}
@@ -109,6 +109,7 @@
 <style lang="scss">
   .outcome {
     max-width: 500px;
+    font-size: 10px;
   }
 
   .stat-change {
@@ -128,10 +129,6 @@
     margin-bottom: 5px;
     padding-bottom: 5px;
     border-top: 1px solid var(--color-grey-dark);
-  }
-
-  .outcome {
-    font-size: var(--font-size-normal);
   }
 
   .balance {

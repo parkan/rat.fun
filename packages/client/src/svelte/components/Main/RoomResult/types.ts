@@ -16,6 +16,16 @@ export type ItemChange = {
   id?: string // Is only set if type == "remove"
 }
 
+export type HealthChange = {
+  logStep: number,
+  amount: number
+}
+
+export type BalanceTransfer = {
+  logStep: number,
+  amount: number
+}
+
 export type LogEntry = {
   timestamp: string,
   event: string
@@ -24,14 +34,8 @@ export type LogEntry = {
 export type ServerReturnValue = {
   id: Hex,
   log: LogEntry[]
-  healthChange: {
-    logStep: number,
-    amount: number
-  }
+  healthChange: HealthChange
   traitChanges: TraitChange[]
   itemChanges: ItemChange[]
-  balanceTransfer: {
-    logStep: number,
-    amount: number
-  }
+  balanceTransfer: BalanceTransfer
 }

@@ -84,7 +84,7 @@ export function updateOutcome(
         // If trait is not in new rat, it was removed
         if (!newRat.traits.find(trait => trait.id === oldRat.traits[i].id)) {
             // Get logStep removed trait
-            const logStep = getLogStep(newRat.traits[i].name, oldOutcome.traitChanges)
+            const logStep = getLogStep(oldRat.traits[i].name, oldOutcome.traitChanges)
             newOutcome.traitChanges.push({
                 logStep,
                 type: "remove",

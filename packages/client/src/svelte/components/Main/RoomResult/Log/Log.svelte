@@ -1,11 +1,16 @@
 <script lang="ts">
-  import type { LogEntry } from "@components/Main/RoomResult/types"
+  import type { ServerReturnValue } from "@components/Main/RoomResult/types"
   import LogItem from "@components/Main/RoomResult/Log/LogItem.svelte"
-  export let log: LogEntry[]
+  import { mergeLog } from "./index"
+
+  export let result: ServerReturnValue
+
+  // Merge log events with corresponding outcomes
+  const mergedLog = mergeLog(result)
 </script>
 
 <div class="log">
-  {#each log as logEntry, i (i)}
+  {#each mergedLog as logEntry, i (i)}
     <LogItem {logEntry} {i} />
   {/each}
 </div>
@@ -13,6 +18,5 @@
 <style lang="scss">
   .log {
     margin-bottom: 20px;
-    line-height: 1.3em;
   }
 </style>
