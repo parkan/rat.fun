@@ -1,14 +1,37 @@
 <script lang="ts">
+  import type { MergedLogEntry } from "./types"
   import type { ServerReturnValue } from "@components/Main/RoomResult/types"
-  import LogItem from "@components/Main/RoomResult/Log/LogItem.svelte"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
+  import { playSound } from "@svelte/modules/sound"
 
-  let { result }: { result: ServerReturnValue } = $props()
+  import LogItem from "@components/Main/RoomResult/Log/LogItem.svelte"
+  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+
+  let {
+    result,
+    animationstarted,
+  }: { result: ServerReturnValue | undefined; animationstarted: boolean } =
+    $props()
+
+  // Elements
   let logElement: HTMLDivElement
+  let returnButtonElement: HTMLButtonElement
+
+  import { getUIState } from "@modules/ui/state.svelte"
+  const { rooms } = getUIState()
 
   // Merge log events with corresponding outcomes
-  const mergedLog = mergeLog(result)
+  let mergedLog: MergedLogEntry[] | undefined = $state(undefined)
+  let totalItems: number | undefined = $state(undefined)
+  let receivedTimelines = 0
+
+  $effect(() => {
+    if (result && !mergedLog) {
+      mergedLog = mergeLog(result)
+      totalItems = mergedLog.length
+    }
+  })
 
   // ** Animation **
   // Log has a parent gsap timeline
@@ -21,16 +44,19 @@
     defaults: { duration: 0.5, ease: "power2.out" },
   })
 
-  const totalItems = mergedLog.length
-  let receivedTimelines = 0
-
   function addToTimeline(timeline: ReturnType<typeof gsap.timeline>) {
     logTimeline.add(timeline)
     receivedTimelines++
 
     if (receivedTimelines === totalItems) {
-      console.log("All timelines added, playing")
-      console.log("logTimeline", logTimeline.getChildren())
+      // Add animation for return button
+      gsap.set(returnButtonElement, { opacity: 0 })
+      logTimeline.to(returnButtonElement, {
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      })
+      // All timelines added, play the parent timeline
       logTimeline.play()
     }
   }
@@ -38,12 +64,29 @@
   const restartAnimation = () => {
     logTimeline.restart()
   }
+
+  const sendLeaveRoom = () => {
+    playSound("tcm", "enteredPod")
+    rooms.close()
+  }
 </script>
 
 <div class="log" bind:this={logElement}>
-  {#each mergedLog as logEntry, i (i)}
-    <LogItem {logEntry} onTimeline={addToTimeline} />
-  {/each}
+  {#if mergedLog && mergedLog.length > 0}
+    {#each mergedLog as logEntry, i (i)}
+      <LogItem {logEntry} onTimeline={addToTimeline} />
+    {/each}
+  {:else if animationstarted}
+    EXPERIMENT IN PROGRESS: <Spinner />
+  {/if}
+
+  <button
+    class="return"
+    bind:this={returnButtonElement}
+    onclick={sendLeaveRoom}
+  >
+    LEAVE ROOM
+  </button>
 </div>
 
 <button class="restart-button" onclick={restartAnimation}>Restart</button>
@@ -51,6 +94,24 @@
 <style lang="scss">
   .log {
     margin-bottom: 20px;
+    height: calc(100vh - 240px);
+    padding: 10px;
+    border: 1px solid white;
+    border-top: none;
+    position: relative;
+
+    .return {
+      opacity: 0;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      margin: 0;
+      width: calc(100% - 20px);
+      padding: 10px;
+      background: var(--color-alert);
+      margin-top: 20px;
+      cursor: pointer;
+    }
   }
 
   .restart-button {

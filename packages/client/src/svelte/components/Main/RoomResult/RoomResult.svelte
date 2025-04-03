@@ -1,19 +1,20 @@
 <script lang="ts">
-  import { onDestroy } from "svelte"
   import type { ServerReturnValue } from "@components/Main/RoomResult/types"
-  import { fadeAndScale } from "@modules/ui/transitions"
-  import { fade } from "svelte/transition"
-  import { player, rooms as roomsState } from "@modules/state/base/stores"
+  import {
+    player,
+    rooms as roomsState,
+    rat as ratState,
+  } from "@modules/state/base/stores"
   import { enterRoom } from "@components/Main/RoomResult"
   import { ENVIRONMENT } from "@mud/enums"
   import { walletNetwork } from "@modules/network"
 
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
   import Log from "@components/Main/RoomResult/Log/Log.svelte"
-  import Outcome from "@components/Main/RoomResult/Outcome.svelte"
+  import RoomMeta from "@svelte/components/Main/RoomResult/RoomMeta/RoomMeta.svelte"
+  import RatInfoBox from "@svelte/components/Main/RoomResult/InfoBox/Rat/RatInfoBox.svelte"
+  import RoomInfoBox from "@svelte/components/Main/RoomResult/InfoBox/Room/RoomInfoBox.svelte"
 
   import { getUIState } from "@modules/ui/state.svelte"
-  import { playSound } from "@svelte/modules/sound"
   const { rooms } = getUIState()
 
   let {
@@ -28,15 +29,13 @@
     roomId: string | null
   } = $props()
 
-  let timeout: ReturnType<typeof setTimeout> | null = null
   let animationstarted = $state(false)
-  let room = $roomsState[roomId ?? ""]
+
   let busy = $state(false)
   let error = $state("")
 
   let entering = $state(true)
-  let outcome: ServerReturnValue | undefined = $state(undefined)
-  let oldRoomBalance = room.balance
+  let result: ServerReturnValue | undefined = $state(undefined)
 
   $effect(() => {
     if (animationstart) animationstarted = true
@@ -47,32 +46,27 @@
     if (!roomId) return
     try {
       console.log("start result")
-      const result = enterRoom(
+      const ret = enterRoom(
         environment,
         $walletNetwork,
         roomId,
         $player.ownedRat
       )
 
-      // Human reading speed is around 20-25 characters per second
-      // const waitLength = Math.max(3000, room.roomPrompt.length * (1000 / 20))
-      const waitLength = 3000
-      await new Promise(resolve => setTimeout(resolve, waitLength))
+      await new Promise(resolve => setTimeout(resolve, 4500))
 
       entering = false
 
       try {
         console.log("start outcome ")
-        outcome = await result // add here just in case the entering transition would be faster
+        result = await ret // add here just in case the entering transition would be faster
       } catch (err) {
-        console.log("catch outcome ")
+        console.log("catch outcome error", err)
         throw err
       }
     } catch (error) {
-      console.log("catch result")
-      console.error(error)
+      console.log("catch result error", error)
       entering = false
-
       rooms.close()
     }
   }
@@ -84,54 +78,23 @@
       processRoom()
     }
   })
-
-  onDestroy(() => {
-    console.log("on destroy")
-  })
-
-  const sendLeaveRoom = () => {
-    playSound("tcm", "enteredPod")
-    rooms.close()
-  }
 </script>
 
 <div class="room-result">
   {#if entering && animationstarted}
-    <div class="room-meta" in:fadeAndScale out:fade>
-      <div class="inner">
-        <div class="name">
-          {room.name}
-        </div>
-        <div class="title">
-          <span>
-            {room.roomPrompt}
-          </span>
-        </div>
-      </div>
-    </div>
+    <RoomMeta rat={$ratState} room={$roomsState[roomId ?? ""]} />
   {:else}
-    <!-- DESCRIPTION -->
-    <div class="description">
-      {room.roomPrompt}
+    <!-- INFO BOXES -->
+    <div class="info-boxes">
+      <RatInfoBox />
+      <RoomInfoBox />
     </div>
-
-    {#if outcome && (outcome.log?.length ?? 0 > 0)}
-      <!-- LOG -->
-      <Log result={outcome} />
-      <!-- OUTCOME -->
-      <!-- <Outcome {room} {outcome} {oldRoomBalance} /> -->
-      <div class="return">
-        <button onclick={rooms.close}>LEAVE ROOM</button>
-      </div>
-    {:else if animationstarted}
-      EXPERIMENT IN PROGRESS: <Spinner />
-    {/if}
+    <!-- LOG -->
+    <Log {result} {animationstarted} />
+    <!-- ERROR -->
     {#if error}
       <div class="error">
         {error}
-      </div>
-      <div class="return">
-        <button onclick={sendLeaveRoom}>LEAVE ROOM</button>
       </div>
     {/if}
   {/if}
@@ -143,53 +106,15 @@
     color: var(--white);
     z-index: 10000;
     padding: 20px;
+    padding-bottom: 0;
     font-size: var(--font-size-normal);
     overflow-y: auto;
-
-    .description {
-      margin-bottom: 20px;
-      background: var(--color-alert);
-      color: var(--black);
-      max-width: 800px;
-      padding: 10px;
-    }
   }
 
-  .room-meta {
-    padding: 0;
-    position: absolute;
-    inset: 0;
-    text-align: center;
+  .info-boxes {
     display: flex;
-    height: 100dvh;
-    justify-content: center;
-    align-items: center;
-    background: var(--color-alert);
-    color: black;
-
-    .inner {
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: center;
-      gap: 1rem;
-
-      .name {
-        background: white;
-        color: black;
-        width: auto;
-        display: inline-block;
-      }
-
-      .title {
-        font-size: 5rem;
-      }
-    }
-  }
-
-  button {
-    padding: 10px;
-    background: var(--color-alert);
-    margin-top: 20px;
-    cursor: pointer;
+    justify-content: space-between;
+    width: 100%;
+    height: 200px;
   }
 </style>

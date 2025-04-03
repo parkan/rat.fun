@@ -14,12 +14,19 @@
     rooms.preview(roomId, yours ? enums.PANE.LEFT : enums.PANE.RIGHT)}
 >
   <!-- IMAGE -->
-  <div class="room-image"></div>
+  <div class="room-image">
+    <img src="/images/room.jpg" alt={room.name} />
+  </div>
   <!-- INFO -->
   <div class="room-info">
     <div class="room-name">**{room.name}**</div>
     <div class="room-visitor-count">Visitors: {room.visitCount}</div>
     <div class="room-balance">Balance: ${room.balance}</div>
+    <div class="room-player-count">
+      Kill rate: {((Number(room.killCount) || 0) /
+        (Number(room.visitCount) || 1)) *
+        100}%
+    </div>
   </div>
 </button>
 
@@ -33,7 +40,7 @@
     border-bottom: 1px solid white;
     padding-inline: 20px;
     cursor: pointer;
-    height: 120px;
+    height: 160px;
     width: 100%;
     color: white;
     text-align: left;
@@ -48,10 +55,17 @@
   }
 
   .room-image {
-    height: 80px;
+    height: 100px;
     aspect-ratio: 1/1;
     background-color: rgb(36, 36, 36);
     margin-right: 20px;
+    border: 1px solid white;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
 
   .room-balance {

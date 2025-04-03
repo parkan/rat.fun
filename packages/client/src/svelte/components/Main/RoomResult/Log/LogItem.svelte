@@ -1,6 +1,15 @@
 <script lang="ts">
   import type { MergedLogEntry } from "@components/Main/RoomResult/Log/types"
 
+  import {
+    changeHealth,
+    changeBalance,
+    addItem,
+    removeItem,
+    addTrait,
+    removeTrait,
+  } from "@svelte/components/Main/RoomResult/state.svelte"
+
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import { playSound, randomPitch } from "@svelte/modules/sound"
@@ -39,17 +48,10 @@
         const sound = playSound("tcm", "textLineHit")
         if (sound) sound.play()
       })
-
       timeline.to(timestampElement, {
         opacity: 1,
         duration: 0.3,
         ease: "power2.out",
-      })
-
-      // Log text with sound and typewriter effect
-      timeline.call(() => {
-        const sound = playSound("tcm", "listPrint")
-        if (sound) sound.play()
       })
 
       // Set initial empty text and fade in
@@ -58,20 +60,11 @@
         opacity: 1,
       })
 
-      // // Animate typing text
-      // timeline.to(logTextElement, {
-      //   text: {
-      //     value: logEntry.event,
-      //     delimiter: "", // animate per character
-      //   },
-      //   duration: logEntry.event.length * 0.04, // adjust timing per character
-      //   ease: "none",
-      // })
-
       timeline.call(() => {
         if (logTextElement) logTextElement.textContent = ""
       })
 
+      // Type in text
       const chars = logEntry.event.split("")
       for (let i = 0; i < chars.length; i++) {
         const char = chars[i]
@@ -98,23 +91,121 @@
 
       // Add animation for each outcome element to timeline
       for (let i = 0; i < outcomeElements.length; i++) {
-        const outcome = outcomeElements[i]
+        const outcome = outcomeElements[i] as HTMLDivElement
+        const type = outcome.dataset.type
+        const action = outcome.dataset.action
 
-        // If outcome is negative or remove
-        if (
-          outcome.classList.contains("negative") ||
-          outcome.classList.contains("remove")
-        ) {
-          timeline.call(() => {
-            const sound = playSound("tcm", "acceptOrderFail")
-            if (sound) sound.play()
-          })
-        } else {
-          timeline.call(() => {
-            const sound = playSound("tcm", "acceptOrderSuccessOld")
-            if (sound) sound.play()
-          })
+        console.log(element, type, action)
+
+        // - - - - - -
+        // Health
+        // - - - - - -
+
+        if (type === "health") {
+          // Reduce health
+          if (action === "reduce") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderFail")
+              if (sound) sound.play()
+              changeHealth(Number(outcome.dataset.value))
+            })
+          }
+
+          // Increase health
+          if (action === "increase") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderSuccessOld")
+              if (sound) sound.play()
+              changeHealth(Number(outcome.dataset.value))
+            })
+          }
         }
+
+        // - - - - - -
+        // Balance
+        // - - - - - -
+
+        if (type === "balance") {
+          // Reduce balance
+          if (action === "reduce") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderFail")
+              if (sound) sound.play()
+              changeBalance(Number(outcome.dataset.value))
+            })
+          }
+
+          // Increase balance
+          if (action === "increase") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderSuccessOld")
+              if (sound) sound.play()
+              changeBalance(Number(outcome.dataset.value))
+            })
+          }
+        }
+
+        // - - - - - -
+        // Inventory
+        // - - - - - -
+
+        if (type === "item") {
+          // Add item
+          if (action === "add") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderSuccessOld")
+              if (sound) sound.play()
+              addItem(
+                outcome.dataset.itemId ?? "",
+                Number(outcome.dataset.value)
+              )
+            })
+          }
+
+          // Remove item
+          if (action === "remove") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderFail")
+              if (sound) sound.play()
+              removeItem(
+                outcome.dataset.itemId ?? "",
+                Number(outcome.dataset.value)
+              )
+            })
+          }
+        }
+
+        // - - - - - -
+        // Traits
+        // - - - - - -
+
+        if (type === "trait") {
+          // Add trait
+          if (action === "add") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderSuccessOld")
+              if (sound) sound.play()
+              addTrait(
+                outcome.dataset.traitId ?? "",
+                Number(outcome.dataset.value)
+              )
+            })
+          }
+
+          // Remove trait
+          if (action === "remove") {
+            timeline.call(() => {
+              const sound = playSound("tcm", "acceptOrderFail")
+              if (sound) sound.play()
+              removeTrait(
+                outcome.dataset.traitId ?? "",
+                Number(outcome.dataset.value)
+              )
+            })
+          }
+        }
+
+        // Fade in
         timeline.to(outcome, {
           opacity: 1,
           duration: 0.3,
@@ -140,6 +231,9 @@
     {#if logEntry.healthChange}
       <div
         class="outcome health"
+        data-type="health"
+        data-action={logEntry.healthChange.amount < 0 ? "reduce" : "increase"}
+        data-value={logEntry.healthChange.amount}
         class:negative={logEntry.healthChange.amount < 0}
       >
         <span class="title">Health</span>
@@ -150,6 +244,11 @@
     {#if logEntry.balanceTransfer}
       <div
         class="outcome balance"
+        data-type="balance"
+        data-action={logEntry.balanceTransfer.amount < 0
+          ? "reduce"
+          : "increase"}
+        data-value={logEntry.balanceTransfer.amount}
         class:negative={logEntry.balanceTransfer.amount < 0}
       >
         <span class="title">Balance</span>
@@ -161,18 +260,27 @@
       {#each logEntry.traitChanges as traitChange}
         <div
           class="outcome trait"
+          data-type="trait"
+          data-action={traitChange.type}
+          data-traitId={traitChange.id}
           class:negative={traitChange.value <= 0}
           class:remove={traitChange.type === "remove"}
         >
-          {traitChange.name} ({traitChange.value})
+          {traitChange.name} (${traitChange.value})
         </div>
       {/each}
     {/if}
     <!-- Items -->
     {#if logEntry.itemChanges}
       {#each logEntry.itemChanges as itemChange}
-        <div class="outcome item" class:remove={itemChange.type === "remove"}>
-          {itemChange.name} ({itemChange.value})
+        <div
+          class="outcome item"
+          data-type="item"
+          data-action={itemChange.type}
+          data-itemId={itemChange.id}
+          class:remove={itemChange.type === "remove"}
+        >
+          {itemChange.name} (${itemChange.value})
         </div>
       {/each}
     {/if}
@@ -182,8 +290,7 @@
 <style lang="scss">
   .log-entry {
     display: flex;
-    font-size: 22px;
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
     line-height: 1.4em;
     .timestamp {
       background: var(--color-grey-light);
@@ -194,12 +301,12 @@
     opacity: 0;
     background: var(--color-health);
     color: black;
-    height: 40px;
-    line-height: 40px;
+    height: 30px;
+    line-height: 30px;
     padding-inline: 10px;
     font-size: 12px;
     position: relative;
-    top: -10px;
+    top: -6px;
   }
 
   .health {

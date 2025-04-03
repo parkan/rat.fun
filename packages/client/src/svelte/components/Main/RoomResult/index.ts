@@ -2,7 +2,8 @@ import type { ServerReturnValue } from "@components/Main/RoomResult/types"
 import { SetupWalletNetworkResult } from "@mud/setupWalletNetwork";
 
 import { ENVIRONMENT } from "@mud/enums"
-import { MESSAGE } from "@components/Main/RoomResult/constants"
+
+const MESSAGE = "RATROOM"
 
 export async function enterRoom(
   environment: ENVIRONMENT,

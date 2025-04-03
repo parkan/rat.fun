@@ -10,7 +10,7 @@ const GodotFishEyeShader = {
     time: { value: 1.0 },
     opacity: { value: 1.0 },
     aspect: { value: 0.7 },
-    distortion: { value: 1.0 },
+    distortion: { value: 1.3 },
     radius: { value: 1.07 },
     alpha: { value: 1.0 },
     crop: { value: 0.943 },
