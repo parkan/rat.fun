@@ -1,5 +1,5 @@
 import { ENVIRONMENT } from "@mud/enums"
-import { clientList, newEvent, roundTriptime } from "@modules/off-chain-sync/stores"
+import { clientList, newEvent, roundTriptime, websocketConnected } from "@modules/off-chain-sync/stores"
 import { MessageContent } from "./types"
 
 let socket: WebSocket
@@ -7,24 +7,25 @@ let reconnectAttempts = 0;
 const MAX_RECONNECTION_DELAY = 30000; // Maximum delay of 30 seconds
 let roundTripStart = 0
 
-export function initOffChainSync(environment: ENVIRONMENT, ratId: string) {
-  console.log("Initializing off chain sync", environment, ratId)
+export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
+  console.log("Initializing off chain sync", environment, playerId)
 
-  let url = `ws://localhost:3131/ws/${ratId}`
+  let url = `ws://localhost:3131/ws/${playerId}`
 
   if ([ENVIRONMENT.PYROPE, ENVIRONMENT.GARNET].includes(environment)) {
-    url = `wss://reality-model-1.mc-infra.com/ws/${ratId}`
+    url = `wss://reality-model-1.mc-infra.com/ws/${playerId}`
   }
 
   socket = new WebSocket(url)
 
   socket.onopen = () => {
     console.log('WebSocket connected');
+    websocketConnected.set(true)
     reconnectAttempts = 0; // Reset attempts on successful connection
   };
 
   socket.onmessage =(message: MessageEvent<string>) => {
-    // console.log("Received message:", message)
+    console.log("Received message:", message)
     const messageContent = JSON.parse(message.data) as MessageContent
     // console.log("Received outcome:", messageContent)
 
@@ -46,7 +47,7 @@ export function initOffChainSync(environment: ENVIRONMENT, ratId: string) {
   socket.onclose = message => {
     console.log('WebSocket closed:', message);
     console.log('Reconnecting...');
-    attemptReconnect(environment, ratId);
+    attemptReconnect(environment, playerId);
   }
 
   socket.onerror = (error) => {
@@ -55,13 +56,13 @@ export function initOffChainSync(environment: ENVIRONMENT, ratId: string) {
   };
 }
 
-function attemptReconnect(environment: ENVIRONMENT, ratId: string) {
+function attemptReconnect(environment: ENVIRONMENT, playerId: string) {
   const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECTION_DELAY);
   reconnectAttempts += 1;
 
   setTimeout(() => {
     console.log(`Reconnecting attempt ${reconnectAttempts}...`);
-    initOffChainSync(environment, ratId);
+    initOffChainSync(environment, playerId);
   }, delay);
 }
 

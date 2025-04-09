@@ -188,6 +188,6 @@
   }
 
   button[disabled] {
-    background: grey;
+    background: var(--color-grey-mid);
   }
 </style>

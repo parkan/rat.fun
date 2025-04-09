@@ -1,6 +1,10 @@
 import type { SoundAssets } from "../types.js"
 
 export const tcm: SoundAssets = {
+  alert: {
+    src: "./sounds/tcm/select_hit_01.mp3",
+    volume: 1,
+  },
   dig: {
     src: "./sounds/tcm/dig.wav",
     volume: 0.7,

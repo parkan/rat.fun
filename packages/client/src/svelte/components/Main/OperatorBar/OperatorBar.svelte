@@ -1,72 +1,91 @@
 <script lang="ts">
   import { player } from "@modules/state/base/stores"
   import { tippy } from "svelte-tippy"
+  import Alert from "@components/Main/OperatorBar/Alert/Alert.svelte"
 </script>
 
-<!-- PLAYER STATS -->
-{#if $player}
-  <!-- NAME -->
-  <div class="operator-bar">
-    <div class="stat-item">
+<div class="operator-bar">
+  <!-- PLAYER STATS -->
+  {#if $player}
+    <div class="player-stats">
+      <!-- NAME -->
+      <div class="stat-item">
+        <div
+          use:tippy={{
+            content: `${$player.name}: This is you, an operator of the firm`,
+            placement: "bottom",
+          }}
+          class="inner-wrapper operator"
+        >
+          <div class="label">Operator:</div>
+          <div class="value">{$player.name}</div>
+        </div>
+      </div>
+      <!-- BALANCE -->
       <div
         use:tippy={{
-          content: `${$player.name}: This is you, an operator of the firm`,
+          content: `This is available funds in your operator wallet, spend wisely`,
           placement: "bottom",
         }}
-        class="inner-wrapper operator"
+        class="stat-item"
       >
-        <div class="label">Operator:</div>
-        <div class="value">{$player.name}</div>
+        <div class="inner-wrapper balance">
+          <div class="label">Balance:</div>
+          <div class="value">${$player?.balance ?? 0}</div>
+        </div>
       </div>
     </div>
-    <!-- BALANCE -->
-    <div
-      use:tippy={{
-        content: `This is available funds in your operator wallet, spend wisely`,
-        placement: "bottom",
-      }}
-      class="stat-item"
-    >
-      <div class="inner-wrapper balance">
-        <div class="label">Balance:</div>
-        <div class="value">${$player?.balance ?? 0}</div>
-      </div>
-    </div>
+  {/if}
+  <div class="alert-container">
+    <Alert />
   </div>
-{/if}
+</div>
 
 <style lang="scss">
   .operator-bar {
     width: 100%;
     border-bottom: 1px solid white;
     display: flex;
-    align-items: center;
+    justify-content: space-between;
     height: 60px;
-  }
 
-  .stat-item {
-    display: flex;
-    height: 100%;
-    border-right: 1px solid white;
-    line-height: 60px;
+    .player-stats {
+      display: flex;
+      align-items: center;
+      height: 100%;
 
-    .label {
-      margin-right: 0.5em;
+      .stat-item {
+        display: flex;
+        height: 100%;
+        border-right: 1px solid white;
+        line-height: 60px;
+
+        .label {
+          margin-right: 0.5em;
+        }
+
+        .inner-wrapper {
+          display: inline-flex;
+          padding-inline: 20px;
+
+          &.balance {
+            background: var(--color-value);
+            color: var(--black);
+          }
+
+          &.operator {
+            background: var(--color-alert);
+            color: var(--black);
+          }
+        }
+      }
     }
 
-    .inner-wrapper {
-      display: inline-flex;
-      padding-inline: 20px;
-
-      &.balance {
-        background: var(--color-value);
-        color: var(--black);
-      }
-
-      &.operator {
-        background: var(--color-alert);
-        color: var(--black);
-      }
+    .alert-container {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: calc(50% - 80px);
     }
   }
 </style>

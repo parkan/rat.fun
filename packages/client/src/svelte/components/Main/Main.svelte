@@ -31,8 +31,6 @@
         : 50 - progress * 50 // from 100% to 0%
     }
 
-    // console.log(side, offset)
-
     return `transform: translateX(${offset}%);`
   }
 
@@ -40,8 +38,7 @@
   const { current } = rooms
   let debugTransition = $state(false)
 
-  let { environment }: { environment: ENVIRONMENT; main: HTMLElement } =
-    $props()
+  let { environment }: { environment: ENVIRONMENT } = $props()
 </script>
 
 {#snippet mainSnippet(className = "", transitionStyle = "")}

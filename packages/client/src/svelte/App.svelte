@@ -4,12 +4,16 @@
   import { initSound } from "@modules/sound"
   import { UIState } from "@modules/ui/stores"
   import { UI } from "@modules/ui/enums"
+  import { initOffChainSync } from "@modules/off-chain-sync"
+  import { playerId } from "@modules/state/base/stores"
+  import { websocketConnected } from "@modules/off-chain-sync/stores"
+
   // Tippy CSS
   import "tippy.js/dist/tippy.css"
   import { Modal } from "@components/Main/Modal/state.svelte"
-  // import { events } from "@modules/herp/index.svelte"
   import Loading from "@components/Loading/Loading.svelte"
   import Main from "@components/Main/Main.svelte"
+  import { EMPTY_CONNECTION } from "./modules/utils/constants"
 
   let { environment }: { environment: ENVIRONMENT } = $props()
 
@@ -17,16 +21,13 @@
     UIState.set(UI.SPAWNING)
   }
 
-  // events.forEach(e => {
-  //   $effect(() => {
-  //     console.log("Effect running for ", e.name)
-  //     let a = e.logic()
-  //     console.log(a)
-  //     if (a.condition) {
-  //       a.callback()
-  //     }
-  //   })
-  // })
+  // Init of chain sync when player is ready
+  $effect(() => {
+    if ($playerId && $playerId !== EMPTY_CONNECTION && !$websocketConnected) {
+      console.log("Initializing off-chain sync")
+      initOffChainSync(environment, $playerId)
+    }
+  })
 
   onMount(async () => {
     // Remove preloader

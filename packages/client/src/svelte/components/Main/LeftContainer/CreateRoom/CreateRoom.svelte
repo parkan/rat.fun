@@ -115,7 +115,7 @@
       cursor: pointer;
 
       &[disabled] {
-        background: grey;
+        background: var(--color-grey-mid);
       }
     }
   }

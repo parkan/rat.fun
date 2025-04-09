@@ -1,9 +1,9 @@
 // Store active WebSocket connections
 export const wsConnections: { [ratId: string]: WebSocket } = {};
 
-export function sendToRat(ratId: string, topic: string, message: object | string): void {
-  // console.log("Sending to rat", ratId, topic);
-  // console.log('Object.keys(wsConnections)', Object.keys(wsConnections));
+export function sendToClient(ratId: string, topic: string, message: object | string): void {
+  console.log("Sending to client", ratId, topic);
+  console.log('Object.keys(wsConnections)', Object.keys(wsConnections));
   const ratWebSocket = wsConnections[ratId];
   const messageObject = {topic, message,};
   if (ratWebSocket) {
@@ -15,6 +15,6 @@ export function sendToRat(ratId: string, topic: string, message: object | string
 
 export function broadcast(topic: string, message: object | string): void {
   Object.keys(wsConnections).forEach((ratId) => {
-    sendToRat(ratId, topic, message);
+    sendToClient(ratId, topic, message);
   });
 }

@@ -2,11 +2,14 @@ import * as Sentry from '@sentry/node';
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { schema } from '@routes/room/enter/schema';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 import { MESSAGE } from '@config';
 import { EnterRoomBody } from '@routes/room/enter/types';
+
+// WebSocket
+import { broadcast } from '@modules/websocket';
+import { createMessage } from '@modules/websocket/createMessage';
 
 // LLM  
 import { EventsReturnValue, CorrectionReturnValue } from '@modules/llm/types'
@@ -96,6 +99,10 @@ async function routes (fastify: FastifyInstance) {
             console.timeEnd('–– Correction LLM');
 
             console.log('Corrected events:', correctedEvents);
+
+            // Broadcast alert
+            const {topic, message} = createMessage(rat, room);
+            broadcast(topic, message);
 
             reply.send({
                 log: correctedEvents.log ?? [],

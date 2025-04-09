@@ -68,8 +68,7 @@
     padding-inline: 20px;
     border: none;
     outline: none;
-    border-right: 1px solid white;
-    background: rgb(126, 126, 126);
+    background: var(--color-grey-mid);
     color: white;
     width: 50%;
 

@@ -138,7 +138,6 @@
   }
 
   .elevator-item {
-    background: grey;
     height: calc(100% / 6);
     display: flex;
     justify-content: center;
