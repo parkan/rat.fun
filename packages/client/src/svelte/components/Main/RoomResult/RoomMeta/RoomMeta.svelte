@@ -31,6 +31,7 @@
     console.log("$frozenRat", $frozenRat)
 
     if (!nameElement || !imageContainerElement || !promptElement) {
+      console.error("RoomMeta: Missing elements")
       return
     }
 
@@ -47,22 +48,20 @@
 </script>
 
 <div class="room-meta">
-  {#if $frozenRoom}
-    <div class="inner">
-      <!-- NAME -->
-      <div class="name" bind:this={nameElement}>
-        {$frozenRoom.name}
-      </div>
-      <!-- IMAGE -->
-      <div class="image-container" bind:this={imageContainerElement}>
-        <img src="/images/room3.jpg" alt={$frozenRoom.name} />
-      </div>
-      <!-- PROMPT -->
-      <div class="prompt" bind:this={promptElement}>
-        {$frozenRoom.roomPrompt}
-      </div>
+  <div class="inner">
+    <!-- NAME -->
+    <div class="name" bind:this={nameElement}>
+      {$frozenRoom?.name ?? ""}
     </div>
-  {/if}
+    <!-- IMAGE -->
+    <div class="image-container" bind:this={imageContainerElement}>
+      <img src="/images/room3.jpg" alt={$frozenRoom?.name ?? ""} />
+    </div>
+    <!-- PROMPT -->
+    <div class="prompt" bind:this={promptElement}>
+      {$frozenRoom?.roomPrompt ?? ""}
+    </div>
+  </div>
 </div>
 
 <style lang="scss">

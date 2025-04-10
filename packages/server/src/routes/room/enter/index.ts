@@ -105,9 +105,9 @@ async function routes (fastify: FastifyInstance) {
             reply.send({
                 log: correctedEvents.log ?? [],
                 healthChange: validatedOutcome.healthChange,
-                traitChanges: eventResults.outcome.traitChanges,
-                itemChanges: eventResults.outcome.itemChanges,
-                balanceTransfer: eventResults.outcome.balanceTransfer
+                traitChanges: validatedOutcome.traitChanges,
+                itemChanges: validatedOutcome.itemChanges,
+                balanceTransfer: validatedOutcome.balanceTransfer
             });
 
         } catch (error) {

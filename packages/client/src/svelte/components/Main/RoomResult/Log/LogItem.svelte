@@ -251,8 +251,7 @@
         data-value={logEntry.balanceTransfer.amount}
         class:negative={logEntry.balanceTransfer.amount < 0}
       >
-        <span class="title">Balance</span>
-        <span class="value">{logEntry.balanceTransfer.amount}</span>
+        <span class="value">${logEntry.balanceTransfer.amount}</span>
       </div>
     {/if}
     <!-- Traits -->
