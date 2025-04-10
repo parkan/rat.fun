@@ -6,8 +6,10 @@
 
   import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
 
-  let busy = false
-  let name: string = generateRatName()
+  let busy = $state(false)
+  let done = $state(false)
+
+  const name: string = generateRatName()
 
   async function sendCreateRat() {
     if (busy) return
@@ -19,21 +21,27 @@
     } catch (e) {
       console.error(e)
     } finally {
-      busy = false
+      done = true
     }
   }
 </script>
 
 <div class="main">
-  <div class="image-container">
-    <img src="/images/rat.png" alt="Rat" />
-  </div>
-  <button class:disabled={!name} class:busy onclick={sendCreateRat}>
-    <span class="button-text">DEPLOY NEW RAT ({name})</span>
-    {#if busy}
-      <div class="spinner"><Spinner /></div>
-    {/if}
-  </button>
+  {#if done}
+    <div class="done">
+      <span>Rat deployed. Stand by...</span>
+    </div>
+  {:else}
+    <div class="image-container">
+      <img src="/images/rat.png" alt="Rat" />
+    </div>
+    <button class:disabled={!name} class:busy onclick={sendCreateRat}>
+      <span class="button-text">DEPLOY NEW RAT ({name})</span>
+      {#if busy}
+        <div class="spinner"><Spinner /></div>
+      {/if}
+    </button>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -42,6 +50,13 @@
     padding-inline: 20px;
     color: var(--white);
     width: 100%;
+  }
+
+  .done {
+    margin-top: 20px;
+    text-align: left;
+    padding: 20px;
+    background-color: var(--color-grey-dark);
   }
 
   .image-container {
