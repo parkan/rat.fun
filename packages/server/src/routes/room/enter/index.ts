@@ -89,8 +89,6 @@ async function routes (fastify: FastifyInstance) {
 
             console.log('Validated outcome:', validatedOutcome);
 
-            // TODO: Send message to creator, if not admin
-
             // The event log might now not reflect the actual outcome.
             // Run it through the LLM again to get the corrected event log.
             console.time('–– Correction LLM');

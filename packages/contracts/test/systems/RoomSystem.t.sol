@@ -17,6 +17,7 @@ contract RoomSystemTest is BaseTest {
 
     assertEq(Balance.get(playerId), 1000);
 
+    // As admin
     prankAdmin();
     startGasReport("Create room (user)");
     bytes32 roomId = world.ratroom__createRoom(playerId, "Test room", "A test room");
@@ -66,6 +67,68 @@ contract RoomSystemTest is BaseTest {
     prankAdmin();
     vm.expectRevert("balance too low");
     world.ratroom__createRoom(playerId, "Test room", "A test room");
+    vm.stopPrank();
+  }
+
+  function testCloseRoom() public {
+    setUp();
+
+    vm.startPrank(alice);
+    bytes32 playerId = world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(100);
+    vm.stopPrank();
+
+    // As admin
+    prankAdmin();
+    bytes32 roomId = world.ratroom__createRoom(playerId, "Test room", "A test room");
+    vm.stopPrank();
+
+    // Check player balance (100 = room creation cost)
+    assertEq(Balance.get(playerId), 100 - 100);
+
+    // Check room balance
+    assertEq(Balance.get(roomId), 100);
+
+    // Close room
+    vm.startPrank(alice);
+    startGasReport("Close room");
+    world.ratroom__closeRoom(roomId);
+    endGasReport();
+
+    vm.stopPrank();
+
+    // Check room balance
+    assertEq(Balance.get(roomId), 0);
+
+    // Check player balance
+    assertEq(Balance.get(playerId), 100);
+  }
+
+  function testCloseRoomRevertNotOwner() public {
+    setUp();
+
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratroom__spawn("alice");
+    world.ratroom__givePlayerBalance(100);
+    vm.stopPrank();
+
+    // As bob
+    vm.startPrank(bob);
+    world.ratroom__spawn("bob");
+    vm.stopPrank();
+
+    // As admin
+    prankAdmin();
+    bytes32 roomId = world.ratroom__createRoom(aliceId, "Test room", "A test room");
+    vm.stopPrank();
+
+    // Check room balance
+    assertEq(Balance.get(roomId), 100);
+
+    // Bob tries to close alice's room
+    vm.startPrank(bob);
+    vm.expectRevert("not owner");
+    world.ratroom__closeRoom(roomId);
     vm.stopPrank();
   }
 }

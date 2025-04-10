@@ -7,11 +7,7 @@ export enum WorldFunctions {
   CreateRat = NAMESPACE + "createRat",
   LiquidateRat = NAMESPACE + "liquidateRat",
   DropItem = NAMESPACE + "dropItem",
-  // Admin
-  CreateRoomAsAdmin = NAMESPACE + "createRoomAsAdmin",
-  DestroyRoomAsAdmin = NAMESPACE + "destroyRoomAsAdmin",
-  addRoomBalance = NAMESPACE + "addRoomBalance",
-  updateLevel = NAMESPACE + "updateLevel",
+  CloseRoom = NAMESPACE + "closeRoom"
 }
 
 // --- API --------------------------------------------------------------
@@ -32,20 +28,6 @@ export function dropItem(itemId: string) {
   return addToSequencer(WorldFunctions.DropItem, [itemId])
 }
 
-// Admin
-
-export function createRoomAsAdmin(name: string, prompt: string,levelId: string, extraBalance: number) {
-  return addToSequencer(WorldFunctions.CreateRoomAsAdmin, [name, prompt, levelId, extraBalance])
-}
-
-export function destroyRoomAsAdmin(roomId: string) {
-  return addToSequencer(WorldFunctions.DestroyRoomAsAdmin, [roomId])
-}
-
-export function addRoomBalance(roomId: string) {
-  return addToSequencer(WorldFunctions.addRoomBalance, [roomId])
-}
-
-export function updateLevel(levelId: string, levelMinBalance: number, levelMaxBalance: number, roomCreationCost: number) {
-  return addToSequencer(WorldFunctions.updateLevel, [levelId, levelMinBalance, levelMaxBalance, roomCreationCost])
+export function closeRoom(roomId: string) {
+  return addToSequencer(WorldFunctions.CloseRoom, [roomId])
 }

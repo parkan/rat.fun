@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { GameConfig, Balance, Level, RoomCreationCost, LevelList } from "../codegen/index.sol";
+import { GameConfig, Balance, Level, RoomCreationCost, LevelList, Owner } from "../codegen/index.sol";
 import { LibRoom, LibUtils } from "../libraries/Libraries.sol";
 import { MAX_ROOM_PROMPT_LENGTH } from "../constants.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
@@ -42,5 +42,16 @@ contract RoomSystem is System {
 
     // Create room
     roomId = LibRoom.createRoom(_roomName, _roomPrompt, playerId, levelId);
+  }
+
+  function closeRoom(bytes32 _roomId) public {
+    bytes32 playerId = LibUtils.addressToEntityKey(_msgSender());
+    require(Owner.get(_roomId) == playerId, "not owner");
+
+    // Transfer balance to player
+    Balance.set(playerId, Balance.get(playerId) + Balance.get(_roomId));
+    Balance.set(_roomId, 0);
+
+    // TODO: Possibly destroy room
   }
 }

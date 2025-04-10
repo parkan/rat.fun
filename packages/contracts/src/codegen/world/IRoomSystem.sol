@@ -14,4 +14,6 @@ interface IRoomSystem {
     string memory _roomName,
     string memory _roomPrompt
   ) external returns (bytes32 roomId);
+
+  function ratroom__closeRoom(bytes32 _roomId) external;
 }

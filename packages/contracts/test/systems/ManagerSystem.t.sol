@@ -92,8 +92,8 @@ contract ManagerSystemTest is BaseTest {
 
     // 100 + 20
     assertEq(Health.get(ratId), 120);
-    // 100 - 20 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 47);
+    // 100 - 20
+    assertEq(Balance.get(roomId), 80);
   }
 
   function testApplyOutcomeReduceHealth() public {
@@ -133,8 +133,8 @@ contract ManagerSystemTest is BaseTest {
 
     // 100 - 20
     assertEq(Health.get(ratId), 80);
-    // 100 + 20 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 87);
+    // 100 + 20
+    assertEq(Balance.get(roomId), 120);
   }
 
   function testApplyOutcomeOverIncreaseHealth() public {
@@ -172,9 +172,9 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // 100 +  67 (because room only had 95 credits to give after creator fee)
-    assertEq(Health.get(ratId), 167);
-    // 100 - 67 - 33 (CREATOR_FEE)
+    // 100 + 100
+    assertEq(Health.get(ratId), 200);
+    // 100 - 100
     assertEq(Balance.get(roomId), 0);
   }
 
@@ -217,8 +217,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Health.get(ratId), 0);
     // Rat is dead
     assertTrue(Dead.get(ratId));
-    // 100 + 100 (because rat only had 100 health to give) - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 167);
+    // 100 + 100 (because rat only had 100 health to give)
+    assertEq(Balance.get(roomId), 200);
   }
 
   function testApplyOutcomeValueTransferOnDeath() public {
@@ -257,12 +257,8 @@ contract ManagerSystemTest is BaseTest {
 
     // Room balance:
     // Traits cancel out
-    // 100 - 20 (balance transfer) - 30 (item) - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 17);
-
-    // Check balance transfer to creator
-    // 1000 (initial credits) - 100 (ROOM_CREATION_COST) + 33 (CREATOR_FEE)
-    assertEq(Balance.get(bobId), 933);
+    // 100 - 20 (balance transfer) - 30 (item)
+    assertEq(Balance.get(roomId), 50);
 
     // Check rat balance
     // 0 + 20 (balance transfer)
@@ -310,9 +306,8 @@ contract ManagerSystemTest is BaseTest {
     // Room kill count incremented
     assertEq(KillCount.get(roomId), 1);
     // Room balance:
-    // 17 (pre-change balance) + 100 (health from rat) + 20 (balance) + 20 (positive trait) + 30 (positive item) - 17 (!!!!) (CREATOR_FEE)
-    // TODO: Change claculation of creator fee?
-    assertEq(Balance.get(roomId), 170);
+    // 50 (pre-change balance) + 100 (health from rat) + 20 (balance) + 20 (positive trait) + 30 (positive item)
+    assertEq(Balance.get(roomId), 220);
   }
 
   // * * * *
@@ -354,8 +349,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(Traits.get(ratId)[0]), 40);
     assertEq(Name.get(Traits.get(ratId)[0]), "happy");
 
-    // 100 - 40 - 33  (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 27);
+    // 100 - 40
+    assertEq(Balance.get(roomId), 60);
   }
 
   function testApplyOutcomeAddNegativeTrait() public {
@@ -393,8 +388,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(Traits.get(ratId)[0]), -40);
     assertEq(Name.get(Traits.get(ratId)[0]), "sad");
 
-    // 100 + 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 107);
+    // 100 + 40
+    assertEq(Balance.get(roomId), 140);
   }
 
   function testApplyOutcomeAddPositiveTraitTooExpensive() public {
@@ -427,10 +422,10 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // Not enough room balance, so only creator fee is subtracted
+    // Not enough room balance
     assertEq(Traits.get(ratId).length, 0);
-    // 100 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 67);
+    // 100, room balance unchanged
+    assertEq(Balance.get(roomId), 100);
   }
 
   function testApplyOutcomeRemovePositiveTrait() public {
@@ -467,8 +462,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(traitId), 40);
     assertEq(Name.get(traitId), "happy");
 
-    // 100 - 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 27);
+    // 100 - 40
+    assertEq(Balance.get(roomId), 60);
 
     bytes32[] memory traitsToRemove = new bytes32[](1);
     traitsToRemove[0] = traitId;
@@ -480,8 +475,8 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // 27 (pre-change balance) + 40 (positive trait) - 27 !!!! (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 40);
+    // 60 (pre-change balance) + 40 (positive trait)
+    assertEq(Balance.get(roomId), 100);
     assertEq(Traits.get(ratId).length, 0);
   }
 
@@ -519,8 +514,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(traitId), -40);
     assertEq(Name.get(traitId), "sad");
 
-    // 100 + 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 107);
+    // 100 + 40
+    assertEq(Balance.get(roomId), 140);
 
     bytes32[] memory traitsToRemove = new bytes32[](1);
     traitsToRemove[0] = traitId;
@@ -532,8 +527,8 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // 107 (pre-change balance) - 40 (negative trait) - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 34);
+    // 140 (pre-change balance) - 40 (negative trait)
+    assertEq(Balance.get(roomId), 100);
     assertEq(Traits.get(ratId).length, 0);
   }
 
@@ -643,8 +638,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(Inventory.get(ratId)[0]), 40);
     assertEq(Name.get(Inventory.get(ratId)[0]), "cheese");
 
-    // 100 - 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 27);
+    // 100 - 40
+    assertEq(Balance.get(roomId), 60);
   }
 
   function testApplyOutcomeAddNegativeItem() public {
@@ -684,8 +679,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(Inventory.get(ratId)[0]), 40);
     assertEq(Name.get(Inventory.get(ratId)[0]), "rotten cheese");
 
-    // 100 - 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 27);
+    // 100 - 40
+    assertEq(Balance.get(roomId), 60);
   }
 
   function testApplyOutcomeAddPositiveItemTooExpensive() public {
@@ -720,8 +715,8 @@ contract ManagerSystemTest is BaseTest {
 
     // Not enough room balance
     assertEq(Inventory.get(ratId).length, 0);
-    // 100 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 67);
+    // 100
+    assertEq(Balance.get(roomId), 100);
   }
 
   function testApplyOutcomeRemovePositiveItem() public {
@@ -758,8 +753,8 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Value.get(itemId), 40);
     assertEq(Name.get(itemId), "cheese");
 
-    // 100 - 40 - 33 (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 27);
+    // 100 - 40
+    assertEq(Balance.get(roomId), 60);
 
     bytes32[] memory itemsToRemove = new bytes32[](1);
     itemsToRemove[0] = itemId;
@@ -771,14 +766,14 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // 27 + 40 - 27 !!! (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 40);
+    // 60 + 40
+    assertEq(Balance.get(roomId), 100);
     assertEq(Inventory.get(ratId).length, 0);
   }
 
-  // // * * * * * * * * *
-  // // Balance transfer
-  // // * * * * * * * * *
+  // * * * * * * * * *
+  // Balance transfer
+  // * * * * * * * * *
 
   function testApplyOutcomeTransferToRat() public {
     setUp();
@@ -808,10 +803,10 @@ contract ManagerSystemTest is BaseTest {
 
     // 0 + 20
     assertEq(Balance.get(ratId), 20);
-    // 100 - 20 - 33  (CREATOR_FEE)
-    assertEq(Balance.get(roomId), 47);
-    // 1000 (initial credits) - 100 (ROOM_CREATION_COST) + 33 (CREATOR_FEE)
-    assertEq(Balance.get(bobId), 933);
+    // 100 - 20
+    assertEq(Balance.get(roomId), 80);
+    // 1000 (initial credits) - 100 (ROOM_CREATION_COST)
+    assertEq(Balance.get(bobId), 900);
   }
 
   function testApplyOutcomeTransferToRoom() public {
@@ -852,8 +847,8 @@ contract ManagerSystemTest is BaseTest {
 
     // 0 + 50 - 20
     assertEq(Balance.get(ratId), 30);
-    // TODO: Figure out why this is 20
-    assertEq(Balance.get(roomId), 20);
+    // 100 (initial balance) - 50 (transfer to rat) + 20 (transfer back to room)
+    assertEq(Balance.get(roomId), 70);
   }
 
   function testApplyOutcomeOverTransferToRat() public {
@@ -891,9 +886,9 @@ contract ManagerSystemTest is BaseTest {
     endGasReport();
     vm.stopPrank();
 
-    // 0 + 67 (because room only had 95 credits to give)
-    assertEq(Balance.get(ratId), 67);
-    // 100 - 67 - 33 (CREATOR_FEE)
+    // 0 + 100
+    assertEq(Balance.get(ratId), 100);
+    // 100 - 100
     assertEq(Balance.get(roomId), 0);
   }
 
@@ -935,9 +930,8 @@ contract ManagerSystemTest is BaseTest {
 
     // 0 + 50 - 50 (because rat only had 50 credits to give)
     assertEq(Balance.get(ratId), 0);
-    // 100 - 50 + 50 - 2 x 33 (CREATOR_FEE)
-    // TODO: Figure out why this is 50
-    assertEq(Balance.get(roomId), 50);
+    // 100 - 50 + 50
+    assertEq(Balance.get(roomId), 100);
   }
 
   // * * * * * * * *

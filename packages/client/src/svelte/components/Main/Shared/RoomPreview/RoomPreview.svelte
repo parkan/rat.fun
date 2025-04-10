@@ -5,6 +5,12 @@
   import { playSound } from "@svelte/modules/sound"
   import { getRoomOwnerName } from "@svelte/modules/state/base/helpers"
   import { rat } from "@svelte/modules/state/base/stores"
+  import { closeRoom } from "@svelte/modules/action"
+  import { waitForCompletion } from "@svelte/modules/action/actionSequencer/utils"
+
+  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+
+  let busy = $state(false)
 
   let {
     roomId,
@@ -17,6 +23,20 @@
   const sendEnterRoom = () => {
     playSound("tcm", "enteredPod")
     rooms.navigate("room", { roomId })
+  }
+
+  async function sendCloseRoom() {
+    if (busy) return
+    playSound("tcm", "blink")
+    busy = true
+    const action = closeRoom(roomId)
+    try {
+      await waitForCompletion(action)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      busy = false
+    }
   }
 </script>
 
@@ -74,6 +94,18 @@
       {#if room.balance > 0 && $ratTotalValue > 0 && !isOwnRoomListing}
         <div class="room-enter">
           <button onclick={sendEnterRoom}>Send {$rat.name} to room</button>
+        </div>
+      {/if}
+
+      {#if isOwnRoomListing}
+        <div class="room-close">
+          <button disabled={busy} onclick={sendCloseRoom}>
+            {#if busy}
+              <Spinner />
+            {:else}
+              Close room (get ${room.balance})
+            {/if}
+          </button>
         </div>
       {/if}
     </div>

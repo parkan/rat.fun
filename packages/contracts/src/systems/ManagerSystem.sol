@@ -49,22 +49,6 @@ contract ManagerSystem is System {
     VisitCount.set(_roomId, VisitCount.get(_roomId) + 1);
 
     // * * * * * * * * * * * * *
-    // ROOM CREATOR PAYMENT
-    // * * * * * * * * * * * * *
-
-    bytes32 roomOwner = Owner.get(_roomId);
-    // No fee to admin
-    if (roomOwner != GameConfig.getAdminId()) {
-      uint256 roomBalance = Balance.get(_roomId);
-      uint256 feeToTransfer = roomBalance < CREATOR_FEE ? roomBalance : CREATOR_FEE;
-
-      if (feeToTransfer > 0) {
-        Balance.set(_roomId, roomBalance - feeToTransfer);
-        Balance.set(roomOwner, Balance.get(roomOwner) + feeToTransfer);
-      }
-    }
-
-    // * * * * * * * * * * * * *
     // HEALTH
     // * * * * * * * * * * * * *
 
