@@ -4,10 +4,13 @@
   import { initNetwork } from "@svelte/initNetwork"
   import { initEntities } from "@modules/systems/initEntities"
   import { ENVIRONMENT } from "@mud/enums"
+  import { gsap } from "gsap"
 
   export let environment: ENVIRONMENT
 
   const dispatch = createEventDispatcher()
+
+  let innerElement: HTMLDivElement
 
   const done = () => dispatch("done")
 
@@ -17,9 +20,18 @@
   }
 
   const initSequence = async () => {
-    initEntities()
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    done()
+    const tl = gsap.timeline()
+    tl.call(() => {
+      initEntities()
+    })
+    tl.to(innerElement, {
+      opacity: 0,
+      duration: 1,
+      delay: 1,
+    })
+    tl.call(() => {
+      done()
+    })
   }
 
   onMount(async () => {
@@ -28,10 +40,10 @@
 </script>
 
 <div class="loading" class:done={Number($loadingMessage) === 100}>
-  <div class="inner">
+  <div class="inner" bind:this={innerElement}>
     <img src="/images/logo.png" alt="logo" />
     <div class="message">
-      <span class="highlight">{$loadingMessage}</span>
+      <span class="highlight" class:ready={$ready}>{$loadingMessage}</span>
     </div>
   </div>
 </div>
@@ -47,16 +59,20 @@
       justify-content: center;
       height: 100%;
       img {
-        width: 200px;
+        height: 200px;
       }
 
       .message {
-        margin-top: 10px;
+        margin-top: 20px;
 
         .highlight {
           background: var(--color-value);
           color: black;
           padding: 5px;
+
+          &.ready {
+            background: var(--color-health);
+          }
         }
       }
     }
