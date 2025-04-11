@@ -36,13 +36,14 @@
       console.error(e)
     } finally {
       busy = false
+      rooms.back(isOwnRoomListing)
     }
   }
 </script>
 
 {#if room}
   <div class="room-preview">
-    <button class="back-button" onclick={rooms.back}>
+    <button class="back-button" onclick={() => rooms.back(isOwnRoomListing)}>
       {#if isOwnRoomListing}
         ← BACK TO YOUR ROOMS
       {:else}

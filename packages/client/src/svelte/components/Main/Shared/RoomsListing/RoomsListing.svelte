@@ -21,7 +21,7 @@
   } = $props()
 
   let { rooms, panes } = getUIState()
-  const { current } = rooms
+  const { current, myCurrent } = rooms
 
   // Local state
   let currentRoom = $state<Hex | null>(null)
@@ -67,7 +67,9 @@
     }
   })
 
-  let previewing = $derived(panes.previewing === pane)
+  let previewing = $derived(
+    (isOwnRoomListing && $myCurrent) || (!isOwnRoomListing && $current)
+  )
 
   $effect(() => {
     switch (sortKey) {
@@ -88,12 +90,21 @@
 
   // Update currentroom with a delay to allow animations to play
   $effect(() => {
-    if (!$current) {
-      // Delayed
-      setTimeout(() => (currentRoom = $current as Hex), 400)
-    } else {
-      // Instant
-      currentRoom = $current as Hex
+    if (isOwnRoomListing) {
+      if (!$myCurrent) {
+        setTimeout(() => (currentRoom = $myCurrent as Hex), 400)
+      } else {
+        currentRoom = $myCurrent as Hex
+      }
+    }
+  })
+  $effect(() => {
+    if (!isOwnRoomListing) {
+      if (!$current) {
+        setTimeout(() => (currentRoom = $current as Hex), 400)
+      } else {
+        currentRoom = $current as Hex
+      }
     }
   })
 </script>
@@ -155,9 +166,15 @@
         {:else}
           <div></div>
         {/if}
-        {#each roomsList as [roomId, room]}
-          <RoomItem {roomId} {room} {isOwnRoomListing} />
-        {/each}
+        {#if roomsList.length > 0}
+          {#each roomsList as [roomId, room]}
+            <RoomItem {roomId} {room} {isOwnRoomListing} />
+          {/each}
+        {:else}
+          <div class="empty-listing">
+            <div>NO ROOMS</div>
+          </div>
+        {/if}
       </div>
       <div class:previewing class="room-preview">
         {#if currentRoom}
@@ -188,6 +205,9 @@
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    position: sticky;
+    top: 0;
+    background: black;
   }
 
   .rooms {
@@ -250,5 +270,14 @@
 
   .floor-stats {
     font-size: var(--font-size-small);
+  }
+
+  .empty-listing {
+    height: calc(100% - 100px);
+    background: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>
