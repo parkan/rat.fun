@@ -166,9 +166,15 @@
         {:else}
           <div></div>
         {/if}
-        {#each roomsList as [roomId, room]}
-          <RoomItem {roomId} {room} {isOwnRoomListing} />
-        {/each}
+        {#if roomsList.length > 0}
+          {#each roomsList as [roomId, room]}
+            <RoomItem {roomId} {room} {isOwnRoomListing} />
+          {/each}
+        {:else}
+          <div class="empty-listing">
+            <div>NO ROOMS</div>
+          </div>
+        {/if}
       </div>
       <div class:previewing class="room-preview">
         {#if currentRoom}
@@ -199,6 +205,9 @@
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    position: sticky;
+    top: 0;
+    background: black;
   }
 
   .rooms {
@@ -261,5 +270,14 @@
 
   .floor-stats {
     font-size: var(--font-size-small);
+  }
+
+  .empty-listing {
+    height: calc(100% - 100px);
+    background: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>
