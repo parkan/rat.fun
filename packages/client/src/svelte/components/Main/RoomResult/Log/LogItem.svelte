@@ -24,6 +24,7 @@
   // Elements
   let element = $state<HTMLDivElement | null>(null)
   let logTextElement = $state<HTMLSpanElement | null>(null)
+  let timestampElement = $state<HTMLSpanElement | null>(null)
   // {#each} elements
   let registeredOutcomes = $state<RegisteredOutcome[]>([])
 
@@ -51,7 +52,7 @@
   }
 
   // Action to register the nodes
-  const outcome = (node: HTMLElement) => {
+  const register = (node: HTMLElement) => {
     const data = node.dataset
     const registration: RegisteredOutcome = { node, data }
 
@@ -73,7 +74,7 @@
   // Stage 1: Prepare the animation
   const prepare = () => {
     // Ensure all parts start invisible
-    gsap.set([".timestamp", logTextElement, ".outcome"], { opacity: 0 })
+    gsap.set([timestampElement, logTextElement, ".outcome"], { opacity: 0 })
     // Clear potential previous text content if element re-renders
     if (logTextElement) logTextElement.textContent = ""
   }
@@ -85,7 +86,7 @@
       const sound = playSound("tcm", "textLineHit")
       if (sound) sound.play()
     })
-    timeline.to(".timestamp", {
+    timeline.to(timestampElement, {
       opacity: 1,
       duration: 0.3,
       ease: "power2.out",
@@ -117,8 +118,7 @@
         node,
         {
           opacity: 1,
-          duration: 0.3,
-          delay: index * 0.3,
+          duration: 0.2,
           ease: "power2.out",
         },
         outcomeStartTime
@@ -148,7 +148,7 @@
 </script>
 
 <div class="log-entry" bind:this={element}>
-  <div class="text">
+  <div class="text" bind:this={timestampElement}>
     <span class="timestamp">
       {logEntry.timestamp}
     </span>
@@ -158,7 +158,7 @@
   <div class="outcome-list">
     {#if logEntry.healthChange}
       <div
-        use:outcome
+        use:register
         class="outcome health"
         data-type="health"
         data-action={logEntry.healthChange.amount < 0 ? "reduce" : "increase"}
@@ -171,7 +171,7 @@
     {/if}
     {#if logEntry.balanceTransfer}
       <div
-        use:outcome
+        use:register
         class="outcome balance"
         data-type="balance"
         data-action={logEntry.balanceTransfer.amount < 0
@@ -186,7 +186,7 @@
     {#if logEntry.traitChanges}
       {#each logEntry.traitChanges as traitChange}
         <div
-          use:outcome
+          use:register
           class="outcome trait"
           data-type="trait"
           data-action={traitChange.type}
@@ -204,7 +204,7 @@
     {#if logEntry.itemChanges}
       {#each logEntry.itemChanges as itemChange}
         <div
-          use:outcome
+          use:register
           class="outcome item"
           data-type="item"
           data-action={itemChange.type}
