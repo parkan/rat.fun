@@ -1,9 +1,13 @@
 <script lang="ts">
   import type { MergedLogEntry } from "@components/Main/RoomResult/Log/types"
-  import { updateState } from "@svelte/components/Main/RoomResult/state.svelte"
+  import {
+    frozenRat,
+    updateState,
+  } from "@svelte/components/Main/RoomResult/state.svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import { playSound, randomPitch } from "@svelte/modules/sound"
+  import { getRatInfoboxState } from "@components/Main/RoomResult/InfoBox/Rat/state.svelte"
 
   gsap.registerPlugin(TextPlugin)
 
@@ -28,10 +32,12 @@
   // {#each} elements
   let registeredOutcomes = $state<RegisteredOutcome[]>([])
 
-  // Timeline
+  // Timelines
   const timeline = gsap.timeline({
     defaults: {},
   })
+
+  let { timeline: ratTimeline } = getRatInfoboxState()
 
   // Type hit helper
   const typeHit = (char: string) => {
@@ -124,6 +130,14 @@
         outcomeStartTime
       )
     })
+
+    timeline.addLabel("outcomesFinish", "+=0.2")
+
+    // Check the rats health
+    // if ($frozenRat?.health === 0) {
+    //   timeline.add(ratTimeline)
+    //   ratTimeline.to(".death", { opacity: 1 }, "outcomesFinish", "+=0.2")
+    // }
   }
 
   // When it's all said and done
