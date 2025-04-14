@@ -5,7 +5,7 @@
   import Item from "@components/Main/RoomResult/InfoBox/Rat/Item.svelte"
 </script>
 
-<div class="info-box">
+<div class="rat-info-box">
   {#if $frozenRat}
     <!-- INFO -->
     <div class="column info">
@@ -19,15 +19,7 @@
       </div>
       <!-- IMAGE -->
       <div class="image-container">
-        <img
-          use:tippy={{ content: $frozenRat.name, placement: "bottom" }}
-          src="/images/rat.png"
-          alt={$frozenRat.name}
-        />
-      </div>
-      <div class="meta">
-        <div class="balance">${$frozenRat.balance}</div>
-        <div class="health">{$frozenRat.health}</div>
+        <img src="/images/rat.png" alt={$frozenRat.name} />
       </div>
       <div class="info-item">
         <!-- BALANCE -->
@@ -71,8 +63,6 @@
     border-right: none;
     overflow: hidden;
     display: flex;
-    background: var(--color-grey-dark);
-    position: relative;
   }
 
   .image-container {
@@ -84,59 +74,13 @@
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      background: black;
+      object-fit: cover;
     }
   }
 
   .column {
     width: calc(100% / 3);
     border-right: 1px dashed white;
-
-    .header {
-      width: 100%;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-      border-bottom: 1px dashed white;
-    }
-
-    &.info {
-      display: grid;
-      grid-template-rows: 1fr 20px;
-      gap: 12px;
-      position: relative;
-
-      .death {
-        position: absolute;
-        background: red;
-        justify-content: center;
-        text-align: center;
-        inset: 0;
-        display: flex;
-        z-index: 2;
-        mix-blend-mode: screen;
-        pointer-events: none;
-      }
-
-      .meta {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
-        height: 100%;
-
-        .balance {
-          background: var(--color-value);
-          color: var(--black);
-        }
-
-        .health {
-          background: var(--color-death);
-          color: var(--white);
-        }
-      }
-    }
 
     &:last-child {
       border-right: none;

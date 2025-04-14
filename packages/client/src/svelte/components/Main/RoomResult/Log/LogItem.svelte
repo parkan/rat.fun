@@ -31,8 +31,6 @@
   // Timeline
   const timeline = gsap.timeline()
 
-  let { timeline: ratTimeline } = getRatInfoboxState()
-
   // Type hit helper
   const typeHit = (char: string) => {
     // Use string type hint

@@ -14,17 +14,9 @@
       <div class="info-item">
         <span class="name">{$frozenRoom.name}</span>
       </div>
-
       <!-- IMAGE -->
       <div class="image-container">
-        <img
-          use:tippy={{ content: $frozenRoom.name, placement: "bottom" }}
-          src="/images/room3.jpg"
-          alt={$frozenRoom.name}
-        />
-      </div>
-      <div class="meta">
-        <div class="balance">${$frozenRoom.balance}</div>
+        <img src="/images/room3.jpg" alt={$frozenRoom.name} />
       </div>
       <!-- BALANCE -->
       <div class="info-item">
