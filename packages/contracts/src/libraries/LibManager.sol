@@ -94,7 +94,7 @@ library LibManager {
           // Remove trait from rat
           Traits.set(_ratId, LibUtils.removeFromArray(Traits.get(_ratId), traitId));
           // Destroy trait
-          LibTrait.destroyTrait(_traitsToRemoveFromRat[i]);
+          // LibTrait.destroyTrait(_traitsToRemoveFromRat[i]);
         }
       } else {
         // Trait value is positive, add value to room balance
@@ -102,7 +102,7 @@ library LibManager {
         // Remove trait from rat
         Traits.set(_ratId, LibUtils.removeFromArray(Traits.get(_ratId), traitId));
         // Destroy trait
-        LibTrait.destroyTrait(_traitsToRemoveFromRat[i]);
+        // LibTrait.destroyTrait(_traitsToRemoveFromRat[i]);
       }
     }
   }
@@ -185,7 +185,7 @@ library LibManager {
       // Remove item from rat
       Inventory.set(_ratId, LibUtils.removeFromArray(Inventory.get(_ratId), itemId));
       // Destroy item
-      LibItem.destroyItem(_itemsToRemoveFromRat[i]);
+      // LibItem.destroyItem(_itemsToRemoveFromRat[i]);
     }
   }
 

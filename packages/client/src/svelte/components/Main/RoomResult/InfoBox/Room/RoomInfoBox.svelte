@@ -10,10 +10,6 @@
       <div class="info-item">
         <span class="id">ROOM #{$frozenRoom.index}</span>
       </div>
-      <!-- NAME -->
-      <div class="info-item">
-        <span class="name">{$frozenRoom.name}</span>
-      </div>
       <!-- IMAGE -->
       <div class="image-container">
         <img src="/images/room3.jpg" alt={$frozenRoom.name} />
@@ -24,22 +20,8 @@
       </div>
     </div>
     <!-- PROMPT -->
-    <div class="column">
-      <div class="header">Room</div>
+    <div class="column double">
       <div class="room-description">{$frozenRoom.roomPrompt}</div>
-    </div>
-    <!-- STATS -->
-    <div class="column">
-      <!-- VISITORS -->
-      <div class="info-item">
-        <span class="visitor-count">VISITS: {$frozenRoom.visitCount}</span>
-      </div>
-      <!-- PLAYER COUNT -->
-      <div class="info-item">
-        <span class="kill-count">
-          KILLS: {Number($frozenRoom.killCount) || 0}
-        </span>
-      </div>
     </div>
   {/if}
 </div>
@@ -78,6 +60,10 @@
     width: calc(100% / 3);
     border-right: 1px dashed white;
 
+    &.double {
+      width: calc(200% / 3);
+    }
+
     .header {
       width: 100%;
       padding-bottom: 10px;
@@ -89,44 +75,6 @@
       display: grid;
       grid-template-rows: 1fr 20px;
       gap: 12px;
-      // padding-bottom: 12px;
-
-      .meta {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
-        height: 100%;
-
-        .balance {
-          background: var(--color-value);
-          color: var(--black);
-        }
-
-        .health {
-          background: var(--color-death);
-          color: var(--white);
-        }
-      }
-    }
-
-    .matrix {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 20px 1fr;
-      gap: 10px;
-      width: 100%;
-      height: 100px;
-      text-align: center;
-    }
-
-    .big-num {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     &:last-child {
@@ -171,6 +119,9 @@
   }
 
   .room-description {
-    margin: 5px;
+    margin: 10px;
+    padding: 5px;
+    background: var(--color-alert);
+    color: black;
   }
 </style>

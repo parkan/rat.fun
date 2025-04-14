@@ -5,8 +5,9 @@
   import { UIState, HighScoreModalActive } from "@modules/ui/stores"
   import { UI } from "@modules/ui/enums"
   import { initOffChainSync } from "@modules/off-chain-sync"
-  import { playerId } from "@modules/state/base/stores"
+  import { playerId, player } from "@modules/state/base/stores"
   import { websocketConnected } from "@modules/off-chain-sync/stores"
+  import { FullStory, init as initFullstory } from "@fullstory/browser"
 
   // Tippy CSS
   import "tippy.js/dist/tippy.css"
@@ -27,6 +28,19 @@
     if ($playerId && $playerId !== EMPTY_CONNECTION && !$websocketConnected) {
       console.log("Initializing off-chain sync")
       initOffChainSync(environment, $playerId)
+
+      // Fullstory analytics
+      initFullstory({
+        orgId: "o-1RP0ZA-na1",
+        debug: true,
+      })
+
+      FullStory("setIdentity", {
+        uid: $playerId,
+        properties: {
+          displayName: $player.name,
+        },
+      })
     }
   })
 

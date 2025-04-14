@@ -51,9 +51,7 @@ export async function createRoom(
 
     return result
   } catch (err) {
-    console.log(err)
-    window.alert("An error occurred. Please try again.")
-    throw err
-    return undefined
+    console.error(err)
+    window.alert(`SERVER ERROR: ${err}`)
   }
 }

@@ -54,7 +54,7 @@ library LibRat {
       if (traitValue > 0) {
         balanceToTransfer += LibUtils.absToUint256(traitValue);
       }
-      LibTrait.destroyTrait(traits[i]);
+      // LibTrait.destroyTrait(traits[i]);
     }
 
     // Remove all traits from rat
@@ -69,7 +69,7 @@ library LibRat {
     for (uint i = 0; i < items.length; i++) {
       // Value of item is always positive
       balanceToTransfer += LibUtils.absToUint256(Value.get(items[i]));
-      LibItem.destroyItem(items[i]);
+      // LibItem.destroyItem(items[i]);
     }
     // Remove all items from rat
     Inventory.deleteRecord(_ratId);
@@ -119,7 +119,7 @@ library LibRat {
       if (traitValue > 0) {
         balanceToTransfer += LibUtils.absToUint256(traitValue);
       }
-      LibTrait.destroyTrait(traits[i]);
+      // LibTrait.destroyTrait(traits[i]);
     }
     // Remove all traits from rat
     Traits.deleteRecord(_ratId);
@@ -133,7 +133,7 @@ library LibRat {
     for (uint i = 0; i < items.length; i++) {
       // Value of item is always positive
       balanceToTransfer += LibUtils.absToUint256(Value.get(items[i]));
-      LibItem.destroyItem(items[i]);
+      // LibItem.destroyItem(items[i]);
     }
     // Remove all items from rat
     Inventory.deleteRecord(_ratId);

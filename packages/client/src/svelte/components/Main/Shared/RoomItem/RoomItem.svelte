@@ -29,10 +29,6 @@
     <div class="section">
       <!-- TOP ROW -->
       <div class="room-info-row top">
-        <!-- NAME -->
-        <span class="name">{room.name}</span>
-        <!-- DIVIDER -->
-        <span class="divider">•</span>
         <!-- INDEX -->
         <span class="index small">Room #{room.index}</span>
         <!-- DIVIDER -->
@@ -45,7 +41,7 @@
         </span>
       </div>
       <!-- PROMPT -->
-      <div class="room-prompt">{truncateString(room.roomPrompt, 100)}</div>
+      <div class="room-prompt">{room.roomPrompt}</div>
     </div>
 
     <!-- SECTION 2 -->
@@ -84,6 +80,7 @@
     width: 100%;
     color: white;
     text-align: left;
+    overflow: hidden;
 
     &.disabled {
       opacity: 0.5;
@@ -136,7 +133,8 @@
         padding-top: 5px;
         margin-top: 5px;
         margin-bottom: 5px;
-        font-size: var(--font-size-small);
+        background: var(--color-alert);
+        padding: 5px;
       }
 
       .index {

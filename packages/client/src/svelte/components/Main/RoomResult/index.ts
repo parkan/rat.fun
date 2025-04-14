@@ -52,8 +52,6 @@ export async function enterRoom(
     return outcome
   } catch (err) {
     console.error(err)
-    // window.alert("An error occurred. Please try again.")
-    throw err
-    // return undefined
+    window.alert(`SERVER ERROR: ${err}`)
   }
 }

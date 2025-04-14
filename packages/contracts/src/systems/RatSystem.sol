@@ -61,6 +61,6 @@ contract RatSystem is System {
     Inventory.set(ratId, LibUtils.removeFromArray(Inventory.get(ratId), _itemId));
 
     // Destroy the item
-    LibItem.destroyItem(_itemId);
+    // LibItem.destroyItem(_itemId);
   }
 }

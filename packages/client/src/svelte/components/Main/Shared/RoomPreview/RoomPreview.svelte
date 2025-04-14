@@ -61,18 +61,13 @@
       <div class="room-info">
         <div class="room-info-row">
           <span class="index">Room #{room.index}</span>
-        </div>
-
-        <div class="room-info-row">
-          <!-- NAME -->
-          <span class="name">{room.name}</span>
-        </div>
-
-        <div class="room-info-row">
-          <!-- OWNER -->
-          <span class="owner">{getRoomOwnerName(room)}</span>
           <!-- DIVIDER -->
           <span class="divider">•</span>
+          <!-- OWNER -->
+          <span class="owner">{getRoomOwnerName(room)}</span>
+        </div>
+
+        <div class="room-info-row">
           <!-- BALANCE -->
           <span class="balance">${room.balance}</span>
           <!-- DIVIDER -->

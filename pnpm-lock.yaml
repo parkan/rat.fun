@@ -41,6 +41,9 @@ importers:
 
   packages/client:
     dependencies:
+      '@fullstory/browser':
+        specifier: ^2.0.6
+        version: 2.0.6
       '@latticexyz/common':
         specifier: 2.2.22-fb2745a7b2d4735a67adffa69e70ec7d1085f4da
         version: 2.2.22-fb2745a7b2d4735a67adffa69e70ec7d1085f4da(@aws-sdk/client-kms@3.777.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.26.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
@@ -1669,6 +1672,12 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
+
+  '@fullstory/browser@2.0.6':
+    resolution: {integrity: sha512-5cbZldOkb+KhgAFRQ5iMEoJR+TgKhCBRFiZN3PMHr+++EmHqprtNMyEAGppe02GUkASV4+7s4txghq6nkrRj8Q==}
+
+  '@fullstory/snippet@2.0.5':
+    resolution: {integrity: sha512-33GJ/QhzZNk4q2B6LhU6Siha68NalrkPxdOaqrVZbUp0UyNYf3qHmU3ATTe51Vk/aM2J34ylrItJ7u94PQ16sA==}
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -12586,6 +12595,12 @@ snapshots:
       react-dom: 19.1.0(react@19.1.0)
 
   '@floating-ui/utils@0.2.9': {}
+
+  '@fullstory/browser@2.0.6':
+    dependencies:
+      '@fullstory/snippet': 2.0.5
+
+  '@fullstory/snippet@2.0.5': {}
 
   '@hookform/resolvers@3.10.0(react-hook-form@7.55.0(react@18.3.1))':
     dependencies:

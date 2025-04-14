@@ -43,7 +43,7 @@
   --player-room-listing-height: calc(100% - var(--create-room-button-height));
 
   /* Layout: Room Item */
-  --room-item-height: 160px;
+  --room-item-height: 260px;
   --room-item-padding: 15px;
   --room-item-image-height: 130px;
 
