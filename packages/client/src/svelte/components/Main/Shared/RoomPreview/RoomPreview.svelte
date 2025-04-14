@@ -2,11 +2,11 @@
   import type { Hex } from "viem"
   import { ratTotalValue, ratLevelIndex } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
-  import { playSound } from "@svelte/modules/sound"
-  import { getRoomOwnerName } from "@svelte/modules/state/base/helpers"
-  import { rat } from "@svelte/modules/state/base/stores"
-  import { closeRoom } from "@svelte/modules/action"
-  import { waitForCompletion } from "@svelte/modules/action/actionSequencer/utils"
+  import { playSound } from "@modules/sound"
+  import { getRoomOwnerName } from "@modules/state/base/helpers"
+  import { rat } from "@modules/state/base/stores"
+  import { closeRoom } from "@modules/action"
+  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
 
   import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
 

@@ -1,7 +1,8 @@
 import { writable } from "svelte/store"
+import type { FrozenRat } from "./types"
 
 export const frozenRoom = writable<Room | null>(null)
-export const frozenRat = writable<Rat | null>(null)
+export const frozenRat = writable<FrozenRat | null>(null)
 
 export function freezeObjects(rat: Rat, room: Room) {
   const preppedRat = structuredClone(rat)
@@ -54,14 +55,19 @@ export function changeBalance(balanceChange: number) {
 // Inventory
 // ------------------------------------------------------------
 
-export function addItem(itemId: string, itemValue: number) {
+export function addItem(itemName: string, itemValue: number) {
   frozenRat.update(rat => {
     if (!rat) return null
     if (!rat.inventory) rat.inventory = []
-    rat.inventory.push(itemId)
+    const newTempItem = {
+      name: itemName,
+      value: itemValue,
+    }
+    rat.inventory.push(newTempItem)
     return rat
   })
 
+  // Change room balance
   // Items always have positive value
   frozenRoom.update(room => {
     if (!room) return null
@@ -77,6 +83,7 @@ export function removeItem(itemId: string, itemValue: number) {
     return rat
   })
 
+  // Change room balance
   // Items always have positive value
   frozenRoom.update(room => {
     if (!room) return null
@@ -89,19 +96,37 @@ export function removeItem(itemId: string, itemValue: number) {
 // Traits
 // ------------------------------------------------------------
 
-export function addTrait(traitId: string) {
+export function addTrait(traitName: string, traitValue: number) {
   frozenRat.update(rat => {
     if (!rat) return null
-    rat.traits.push(traitId)
+    const newTempItem = {
+      name: traitName,
+      value: traitValue,
+    }
+    rat.traits.push(newTempItem)
     return rat
+  })
+
+  // Change room balance
+  frozenRoom.update(room => {
+    if (!room) return null
+    room.balance = Number(room.balance) - traitValue
+    return room
   })
 }
 
-export function removeTrait(traitId: string) {
+export function removeTrait(traitId: string, traitValue: number) {
   frozenRat.update(rat => {
     if (!rat) return null
     rat.traits = rat.traits.filter(t => t !== traitId)
     return rat
+  })
+
+  // Change room balance
+  frozenRoom.update(room => {
+    if (!room) return null
+    room.balance = Number(room.balance) + traitValue
+    return room
   })
 }
 
@@ -119,7 +144,7 @@ export const stateUpdateFunctions = {
 // DOM Interactions
 // ------------------------------------------------------------
 export const updateState = (dataset: DOMStringMap) => {
-  const { type, action, value, itemId, traitId } = dataset
+  const { type, action, value, name, itemId, traitId } = dataset
 
   if (!type || !action || value === undefined) return
 
@@ -131,17 +156,17 @@ export const updateState = (dataset: DOMStringMap) => {
       stateUpdateFunctions[type]?.(numericValue)
       break
     case "item":
-      console.log("item", action)
-      if (action === "add" || action === "remove") {
-        console.log("item", action, stateUpdateFunctions.item[action])
-        stateUpdateFunctions.item[action]?.(itemId ?? "", numericValue)
+      if (action === "add") {
+        stateUpdateFunctions.item["add"]?.(name ?? "", numericValue)
+      } else if (action === "remove") {
+        stateUpdateFunctions.item["remove"]?.(itemId ?? "", numericValue)
       }
       break
     case "trait":
-      if (action === "add" || action === "remove") {
-        // Pass the value from the dataset if it's relevant for traits
-        // Otherwise, keep using 1 if it's just add/remove presence
-        stateUpdateFunctions.trait[action]?.(traitId ?? "", numericValue)
+      if (action === "add") {
+        stateUpdateFunctions.trait["add"]?.(name ?? "", numericValue)
+      } else  if (action === "remove") {
+        stateUpdateFunctions.trait["remove"]?.(traitId ?? "", numericValue)
       }
       break
   }

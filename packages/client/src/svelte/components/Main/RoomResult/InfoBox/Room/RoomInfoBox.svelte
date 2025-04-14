@@ -1,15 +1,28 @@
 <script lang="ts">
-  import { frozenRoom } from "@svelte/components/Main/RoomResult/state.svelte"
+  import { frozenRoom } from "@components/Main/RoomResult/state.svelte"
 </script>
 
 <div class="room-info-box">
-  <!-- INFO -->
   {#if $frozenRoom}
+    <!-- INFO -->
     <div class="column">
+      <!-- ID -->
+      <div class="info-item">
+        <span class="id">ROOM #{$frozenRoom.index}</span>
+      </div>
+      <!-- NAME -->
+      <div class="info-item">
+        <span class="name">{$frozenRoom.name}</span>
+      </div>
+
+      <!-- IMAGE -->
       <div class="image-container">
         <img src="/images/room3.jpg" alt={$frozenRoom.name} />
       </div>
-      <div class="room-name">**{$frozenRoom.name}**</div>
+      <!-- BALANCE -->
+      <div class="info-item">
+        <span class="balance">${$frozenRoom.balance}</span>
+      </div>
     </div>
     <!-- PROMPT -->
     <div class="column">
@@ -17,12 +30,15 @@
     </div>
     <!-- STATS -->
     <div class="column">
-      <div class="room-balance">BALANCE:${$frozenRoom.balance}</div>
-      <div class="room-visitor-count">VISITORS: {$frozenRoom.visitCount}</div>
-      <div class="room-player-count">
-        KILL RATE: {((Number($frozenRoom.killCount) || 0) /
-          (Number($frozenRoom.visitCount) || 1)) *
-          100}%
+      <!-- VISITORS -->
+      <div class="info-item">
+        <span class="visitor-count">VISITS: {$frozenRoom.visitCount}</span>
+      </div>
+      <!-- PLAYER COUNT -->
+      <div class="info-item">
+        <span class="kill-count">
+          KILLS: {Number($frozenRoom.killCount) || 0}
+        </span>
       </div>
     </div>
   {/if}
@@ -30,9 +46,10 @@
 
 <style lang="scss">
   .room-info-box {
-    width: 50%;
+    width: calc(50% - 50px);
     height: 100%;
     border: 1px solid white;
+    border-left: none;
     overflow: hidden;
     display: flex;
     flex-direction: row;
@@ -43,6 +60,7 @@
     width: 100px;
     height: 100px;
     border: 1px solid white;
+    margin: 10px;
 
     img {
       width: 100%;
@@ -53,7 +71,46 @@
 
   .column {
     width: calc(100% / 3);
-    padding: 10px;
     border-right: 1px dashed white;
+  }
+
+  .info-item {
+    display: flex;
+    margin: 10px;
+    gap: 10px;
+
+    .id {
+      background: var(--color-grey-light);
+      padding: 5px;
+      color: black;
+      font-size: var(--font-size-small);
+    }
+
+    .name {
+      background: var(--color-alert);
+      padding: 5px;
+      color: black;
+    }
+
+    .balance {
+      background: var(--color-value);
+      padding: 5px;
+      color: black;
+    }
+
+    .health {
+      background: var(--color-health);
+      padding: 5px;
+      color: black;
+    }
+  }
+
+  .header {
+    border-bottom: 1px dashed white;
+    padding: 5px;
+  }
+
+  .room-description {
+    margin: 5px;
   }
 </style>

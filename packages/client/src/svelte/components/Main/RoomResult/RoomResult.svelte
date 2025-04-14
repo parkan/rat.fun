@@ -10,9 +10,9 @@
   import { walletNetwork } from "@modules/network"
 
   import Log from "@components/Main/RoomResult/Log/Log.svelte"
-  import RoomMeta from "@svelte/components/Main/RoomResult/RoomMeta/RoomMeta.svelte"
-  import RatInfoBox from "@svelte/components/Main/RoomResult/InfoBox/Rat/RatInfoBox.svelte"
-  import RoomInfoBox from "@svelte/components/Main/RoomResult/InfoBox/Room/RoomInfoBox.svelte"
+  import RoomMeta from "@components/Main/RoomResult/RoomMeta/RoomMeta.svelte"
+  import RatInfoBox from "@components/Main/RoomResult/InfoBox/Rat/RatInfoBox.svelte"
+  import RoomInfoBox from "@components/Main/RoomResult/InfoBox/Room/RoomInfoBox.svelte"
 
   import { getUIState } from "@modules/ui/state.svelte"
   const { rooms } = getUIState()
@@ -53,7 +53,7 @@
         $player.ownedRat
       )
 
-      await new Promise(resolve => setTimeout(resolve, 4500))
+      await new Promise(resolve => setTimeout(resolve, 5000))
 
       entering = false
 
@@ -87,6 +87,7 @@
     <!-- INFO BOXES -->
     <div class="info-boxes">
       <RatInfoBox />
+      <div class="divider"></div>
       <RoomInfoBox />
     </div>
     <!-- LOG -->
@@ -115,6 +116,19 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    height: 200px;
+    height: var(--info-box-height);
+  }
+
+  .divider {
+    width: 100px;
+    height: 100%;
+    background: repeating-linear-gradient(
+      45deg,
+      #000000,
+      #000000 20px,
+      var(--color-grey-dark) 20px,
+      var(--color-grey-dark) 40px
+    );
+    border: 1px solid white;
   }
 </style>

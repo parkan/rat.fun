@@ -47,6 +47,9 @@
   --room-item-padding: 15px;
   --room-item-image-height: 130px;
 
+  /* Layout: Room Result */
+  --info-box-height: 260px;
+
   /* Sizing */
   --default-padding: 14px;
   --top-bar-height: 40px;

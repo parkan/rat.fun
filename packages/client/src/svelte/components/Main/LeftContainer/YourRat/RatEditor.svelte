@@ -43,7 +43,7 @@
       if (dragState.type === "item") {
         action = dropItem(dragState.address)
         // const result = await new Promise(r => setTimeout(r, 2000))
-        const result = await waitForCompletion(action)
+        await waitForCompletion(action)
         // console.log(result)
       }
       busy = false

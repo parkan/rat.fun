@@ -6,7 +6,7 @@
     frozenRoom,
     frozenRat,
     freezeObjects,
-  } from "@svelte/components/Main/RoomResult/state.svelte"
+  } from "@components/Main/RoomResult/state.svelte"
 
   const { rat, room }: { rat: Rat; room: Room } = $props()
 
@@ -14,6 +14,7 @@
   let nameElement = $state<HTMLDivElement>()
   let imageContainerElement = $state<HTMLDivElement>()
   let promptElement = $state<HTMLDivElement>()
+  let roomInnerElement = $state<HTMLDivElement>()
 
   // Create parent timeline
   const metaTimeline = gsap.timeline({
@@ -21,7 +22,6 @@
   })
 
   onMount(() => {
-    console.log("room meta loaded", room)
     // Snapshot room and rat
     // We want the pre-result state to gradually apply changes to
     // without reactivity from on chain changes
@@ -30,7 +30,12 @@
     console.log("$frozenRoom", $frozenRoom)
     console.log("$frozenRat", $frozenRat)
 
-    if (!nameElement || !imageContainerElement || !promptElement) {
+    if (
+      !roomInnerElement ||
+      !nameElement ||
+      !imageContainerElement ||
+      !promptElement
+    ) {
       console.error("RoomMeta: Missing elements")
       return
     }
@@ -44,11 +49,12 @@
     metaTimeline.to(nameElement, { opacity: 1, scale: 1, delay: 0.5 })
     metaTimeline.to(imageContainerElement, { opacity: 1, scale: 1 })
     metaTimeline.to(promptElement, { opacity: 1, scale: 1 })
+    metaTimeline.to(roomInnerElement, { opacity: 0, delay: 2, duration: 0.5 })
   })
 </script>
 
 <div class="room-meta">
-  <div class="inner">
+  <div class="inner" bind:this={roomInnerElement}>
     <!-- NAME -->
     <div class="name" bind:this={nameElement}>
       {$frozenRoom?.name ?? ""}

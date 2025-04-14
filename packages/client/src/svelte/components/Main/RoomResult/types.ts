@@ -39,3 +39,13 @@ export type ServerReturnValue = {
   itemChanges: ItemChange[]
   balanceTransfer: BalanceTransfer
 }
+
+export type TempItem = {
+  name: string,
+  value: number
+}  
+
+export type FrozenRat = Rat & {
+  inventory: Array<string | TempItem>
+  traits: Array<string | TempItem>
+}

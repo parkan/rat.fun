@@ -63,15 +63,17 @@
     white-space: nowrap;
     display: inline-block;
   }
+
   .trait {
     background-color: #eee;
     color: black;
-    padding: 10px;
+    padding: 5px;
   }
+
   .item {
     background-color: orange;
     color: black;
-    padding: 10px;
+    padding: 5px;
   }
 
   .dragging {

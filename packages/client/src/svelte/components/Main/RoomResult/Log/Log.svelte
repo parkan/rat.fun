@@ -3,7 +3,7 @@
   import type { ServerReturnValue } from "@components/Main/RoomResult/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
-  import { playSound } from "@svelte/modules/sound"
+  import { playSound } from "@modules/sound"
 
   import LogItem from "@components/Main/RoomResult/Log/LogItem.svelte"
   import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
@@ -61,9 +61,9 @@
     }
   }
 
-  const restartAnimation = () => {
-    logTimeline.restart()
-  }
+  // const restartAnimation = () => {
+  //   logTimeline.restart()
+  // }
 
   const sendLeaveRoom = () => {
     playSound("tcm", "enteredPod")
@@ -89,12 +89,12 @@
   </button>
 </div>
 
-<button class="restart-button" onclick={restartAnimation}>Restart</button>
+<!-- <button class="restart-button" onclick={restartAnimation}>Restart</button> -->
 
 <style lang="scss">
   .log {
     margin-bottom: 20px;
-    height: calc(100vh - 240px);
+    height: calc(100vh - 300px);
     padding: 10px;
     border: 1px solid white;
     border-top: none;

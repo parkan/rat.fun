@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { MergedLogEntry } from "@components/Main/RoomResult/Log/types"
-  import { updateState } from "@svelte/components/Main/RoomResult/state.svelte"
+  import { updateState } from "@components/Main/RoomResult/state.svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
-  import { playSound, randomPitch } from "@svelte/modules/sound"
+  import { playSound, randomPitch } from "@modules/sound"
 
   gsap.registerPlugin(TextPlugin)
 
@@ -29,9 +29,7 @@
   let registeredOutcomes = $state<RegisteredOutcome[]>([])
 
   // Timeline
-  const timeline = gsap.timeline({
-    defaults: {},
-  })
+  const timeline = gsap.timeline()
 
   // Type hit helper
   const typeHit = (char: string) => {
@@ -163,6 +161,7 @@
         data-type="health"
         data-action={logEntry.healthChange.amount < 0 ? "reduce" : "increase"}
         data-value={logEntry.healthChange.amount}
+        data-name="Health"
         class:negative={logEntry.healthChange.amount < 0}
       >
         <span class="title">Health</span>
@@ -178,6 +177,7 @@
           ? "reduce"
           : "increase"}
         data-value={logEntry.balanceTransfer.amount}
+        data-name="Balance"
         class:negative={logEntry.balanceTransfer.amount < 0}
       >
         <span class="value">${logEntry.balanceTransfer.amount}</span>
@@ -192,6 +192,7 @@
           data-action={traitChange.type}
           data-traitId={traitChange.id}
           data-value={traitChange.value}
+          data-name={traitChange.name}
           class:negative={traitChange.value <= 0}
           class:remove={traitChange.type === "remove"}
         >
@@ -210,6 +211,7 @@
           data-action={itemChange.type}
           data-itemId={itemChange.id}
           data-value={itemChange.value}
+          data-name={itemChange.name}
           class:remove={itemChange.type === "remove"}
         >
           {itemChange.name} ({itemChange.type === "add"
@@ -226,8 +228,12 @@
     display: flex;
     margin-bottom: 0.5em;
     line-height: 1.4em;
+    height: 2em;
+
     .timestamp {
       background: var(--color-grey-light);
+      padding: 5px;
+      color: black;
     }
   }
 

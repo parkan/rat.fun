@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { newEvent } from "@modules/off-chain-sync/stores"
-  import type { MessageContent } from "@svelte/modules/off-chain-sync/types"
+  import type { MessageContent } from "@modules/off-chain-sync/types"
   import { playSound } from "@modules/sound"
 
   $effect(() => {
