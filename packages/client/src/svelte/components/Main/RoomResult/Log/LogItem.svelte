@@ -31,6 +31,8 @@
   // Timeline
   const timeline = gsap.timeline()
 
+  let { timeline: ratTimeline } = getRatInfoboxState()
+
   // Type hit helper
   const typeHit = (char: string) => {
     // Use string type hint
@@ -122,6 +124,14 @@
         outcomeStartTime
       )
     })
+
+    timeline.addLabel("outcomesFinish", "+=0.2")
+
+    // Check the rats health
+    // if ($frozenRat?.health === 0) {
+    //   timeline.add(ratTimeline)
+    //   ratTimeline.to(".death", { opacity: 1 }, "outcomesFinish", "+=0.2")
+    // }
   }
 
   // When it's all said and done
