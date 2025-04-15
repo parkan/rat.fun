@@ -85,6 +85,6 @@ contract ManagerSystem is System {
     // LEVEL CHANGE
     // * * * * * * * * * * * * *
 
-    LibManager.checkLevelChange(_ratId);
+    // LibManager.checkLevelChange(_ratId);
   }
 }
