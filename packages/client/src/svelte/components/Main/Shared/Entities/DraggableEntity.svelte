@@ -60,22 +60,24 @@
 <style>
   .entity {
     cursor: grab;
-    white-space: nowrap;
     display: inline-block;
-    position: relative;
-    top: 5px;
+    height: 40px;
+    line-height: 40px;
+    padding-inline: 10px;
+    user-select: none;
+    margin-right: 0;
+    white-space: nowrap;
+    margin-bottom: 5px;
   }
 
   .trait {
     background-color: #eee;
     color: black;
-    padding: 5px;
   }
 
   .item {
     background-color: orange;
     color: black;
-    padding: 5px;
   }
 
   .dragging {

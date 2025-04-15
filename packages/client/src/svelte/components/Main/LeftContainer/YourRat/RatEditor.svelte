@@ -62,7 +62,7 @@
 <div class="rat-editor" class:actions={dragAddress !== ""}>
   <div class="inner">
     <div
-      class="name"
+      class="entity name"
       draggable="false"
       use:tippy={{ content: "This is your rat's name" }}
     >
@@ -73,7 +73,7 @@
       <div
         use:tippy={{ content: " Tokens carried by your rat" }}
         draggable="false"
-        class="balance"
+        class=" entity balance"
       >
         ${$rat.balance}
       </div>
@@ -82,26 +82,26 @@
     <div
       use:tippy={{ content: " Health of your rat, death at 0" }}
       draggable="false"
-      class="health"
+      class="entity health"
     >
       {$rat.health} health
     </div>
 
     <!-- TRAITS -->
     {#if $rat?.traits && $rat?.traits?.length > 0}
-      <div class="word">is</div>
+      <div class="entity word">is</div>
       {#each $rat?.traits ?? [] as trait, i}
         <DraggableEntity type="trait" address={trait} />
         {#if i < ($rat?.traits?.length ?? 0) - 2},
         {/if}
         {#if i === ($rat?.traits?.length ?? 0) - 2}
-          <div class="word">and</div>
+          <div class=" entity word">and</div>
         {/if}
       {/each}
     {/if}
     <!-- INVENTORY -->
     {#if $rat?.inventory && $rat?.inventory?.length > 0}
-      <div class="word">
+      <div class="entity word">
         {$rat?.traits && $rat?.traits?.length > 0 ? "and" : ""} has
       </div>
       {#each $rat?.inventory ?? [] as item, i}
@@ -109,7 +109,7 @@
         {#if i < ($rat?.inventory?.length ?? 0) - 2},
         {/if}
         {#if i === ($rat?.inventory?.length ?? 0) - 2}
-          <div class="word">and</div>
+          <div class="entity word">and</div>
         {/if}
       {/each}
     {/if}
@@ -123,6 +123,8 @@
     ondragover={allowDrop}
     class="cancel"
   />
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <!-- svelte-ignore element_invalid_self_closing_tag -->
   <div
     class:open={dragAddress !== ""}
     ondrop={onDrop}
@@ -149,51 +151,46 @@
     padding: var(--default-padding);
     color: white;
     border: none;
-    display: inline-flex;
-    // align-items: center;
     height: 100%;
     overflow-y: scroll;
-    display: flex;
-    flex-flow: row wrap;
-    row-gap: 4px;
-    column-gap: 4px;
-    justify-content: flex-start;
-    align-items: flex-start;
   }
 
-  .trait,
-  .item,
-  .health,
-  .balance,
-  .name {
-    cursor: grab;
-    white-space: nowrap;
-    border: 1px solid white;
-    display: block;
-    height: 50px;
-    align-self: flex-start;
-  }
-
-  .word,
-  .name {
-    background-color: black;
-    color: white;
-    padding: 10px;
-    display: block;
-  }
-
-  .health {
-    background-color: var(--color-health);
-    color: black;
-    padding: 10px;
-    display: block;
-  }
-
-  .balance {
-    background-color: var(--color-value);
-    color: black;
-    padding: 10px;
+  .entity {
     display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    padding-inline: 10px;
+    user-select: none;
+    margin-right: 0;
+    white-space: nowrap;
+    margin-bottom: 5px;
+
+    &.name {
+      background-color: black;
+      border: 1px solid white;
+      color: white;
+    }
+
+    &.word {
+      background-color: black;
+      color: white;
+      padding-inline: 5px;
+    }
+
+    &.health {
+      background-color: var(--color-health);
+      color: black;
+    }
+
+    &.balance {
+      background-color: var(--color-value);
+      color: black;
+    }
+  }
+
+  .item {
+    cursor: grab;
+    border: 1px solid white;
   }
 
   .cancel,

@@ -61,6 +61,8 @@
   .column {
     width: calc(100% / 3);
     border-right: 1px dashed white;
+    overflow-x: hidden;
+    overflow-y: scroll;
 
     &.double {
       width: calc(200% / 3);
