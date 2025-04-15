@@ -53,7 +53,9 @@
         <!-- DIVIDER -->
         <span class="divider">•</span>
         <!-- BALANCE -->
-        <span class="balance">${room.balance}</span>
+        <span class="balance" class:depleted={room.balance == 0}>
+          ${room.balance}
+        </span>
         <!-- DIVIDER -->
         <span class="divider">•</span>
         <!-- VISITOR COUNT -->
@@ -159,6 +161,11 @@
         background: var(--color-value);
         color: black;
         padding: 5px;
+
+        &.depleted {
+          background: var(--color-death);
+          color: black;
+        }
       }
 
       .small {

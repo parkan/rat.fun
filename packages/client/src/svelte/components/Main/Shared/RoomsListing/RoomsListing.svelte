@@ -26,6 +26,7 @@
   // Local state
   let currentRoom = $state<Hex | null>(null)
   let sortKey = $state("c")
+  let showDepletedRooms = $state(false)
 
   const entriesChronologically = (a, b) => {
     return Number(b[1]?.index || 0) - Number(a[1].index || 0)
@@ -60,11 +61,16 @@
   }
 
   let roomsList = $derived.by(() => {
-    if (!isOwnRoomListing) {
-      return Object.entries($roomsOnRatLevel).sort(sortFunction)
-    } else {
-      return Object.entries($playerRooms).sort(sortFunction)
+    let entries = isOwnRoomListing
+      ? Object.entries($playerRooms)
+      : Object.entries($roomsOnRatLevel)
+
+    // Filter out rooms with zero balance unless showDepletedRooms is true
+    if (!showDepletedRooms) {
+      entries = entries.filter(([_, room]) => Number(room.balance || 0) > 0)
     }
+
+    return entries.sort(sortFunction)
   })
 
   let previewing = $derived(
@@ -118,11 +124,11 @@
             <div class="floor-title">Floor {$ratLevelIndex * -1}</div>
             <div
               use:tippy={{
-                content: `There are ${Object.values($roomsStore).length} rooms on your floor`,
+                content: `There are ${Object.values(roomsList).length} rooms on your floor`,
               }}
               class="floor-stats"
             >
-              {Object.values($roomsStore).length} rooms
+              {Object.values(roomsList).length} rooms
             </div>
             <div class="floor-filter">
               <button
@@ -161,6 +167,18 @@
                 class="sort-button"
                 onclick={() => sortBy("k")}>K</button
               >
+              <span class="divider"></span>
+              <button
+                class="sort-button"
+                class:active={showDepletedRooms}
+                use:tippy={{
+                  placement: "top",
+                  content: "show depleted rooms",
+                }}
+                onclick={() => (showDepletedRooms = !showDepletedRooms)}
+              >
+                D
+              </button>
             </div>
           </div>
         {:else}
@@ -279,5 +297,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .divider {
+    background: var(--color-grey-light);
+    width: 1px;
+    height: 20px;
+    margin-inline: 10px;
+    display: inline-block;
+    position: relative;
+    top: 4px;
   }
 </style>
