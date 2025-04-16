@@ -1,18 +1,7 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { schema } from '@routes/ws-connect/schema';
 import { broadcast, wsConnections } from '@modules/websocket';
-
-// Define the type of the request parameters
-interface WebSocketParams {
-  Params: {
-    playerId: string;
-  };
-}
-
-type Message = {
-  topic: string;
-  message: string;
-}
+import { WebSocketParams, Message } from './types';
 
 async function routes(fastify: FastifyInstance) {
   fastify.get(
