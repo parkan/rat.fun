@@ -41,14 +41,11 @@
     .inner {
       width: 500px;
       min-height: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
       padding: 20px;
       background: black;
       border: 1px solid white;
     }
-  }
-
-  .header {
-    border-bottom: 1px solid white;
-    padding-bottom: 5px;
   }
 </style>
