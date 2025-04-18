@@ -42,7 +42,14 @@
       <div class="room-image">
         {#key $lastUpdated}
           {#if sanityRoomContent}
-            <img src={urlFor(sanityRoomContent?.image).url()} alt={room.name} />
+            <img
+              src={urlFor(sanityRoomContent?.image)
+                .width(600)
+                .auto("format")
+                .saturation(-100)
+                .url()}
+              alt={room.name}
+            />
           {:else}
             <img src="/images/room3.jpg" alt={room.name} />
           {/if}
@@ -122,7 +129,7 @@
       .room-image {
         margin-bottom: 5px;
         img {
-          width: 300px;
+          width: 400px;
           aspect-ratio: 4/3;
           object-fit: cover;
           border: 1px solid var(--color-grey-mid);

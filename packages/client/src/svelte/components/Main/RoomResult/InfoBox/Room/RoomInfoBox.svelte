@@ -1,8 +1,12 @@
 <script lang="ts">
   import { frozenRoom } from "@components/Main/RoomResult/state.svelte"
   import { staticContent, lastUpdated, urlFor } from "@modules/content"
+  import type { Hex } from "viem"
+
+  let { roomId }: { roomId: Hex } = $props()
+
   let sanityRoomContent = $derived(
-    $staticContent.rooms.find(r => r._id == ($frozenRoom?.Id ?? ""))
+    $staticContent.rooms.find(r => r._id == roomId)
   )
 </script>
 
@@ -19,7 +23,11 @@
         {#key $lastUpdated}
           {#if sanityRoomContent}
             <img
-              src={urlFor(sanityRoomContent?.image).url()}
+              src={urlFor(sanityRoomContent?.image)
+                .width(300)
+                .auto("format")
+                .saturation(-100)
+                .url()}
               alt={$frozenRoom.name}
             />
           {:else}
@@ -144,5 +152,6 @@
     padding: 5px;
     background: var(--color-alert);
     color: black;
+    max-width: 50ch;
   }
 </style>

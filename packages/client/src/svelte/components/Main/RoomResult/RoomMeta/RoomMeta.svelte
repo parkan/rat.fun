@@ -17,7 +17,7 @@
   let roomInnerElement = $state<HTMLDivElement>()
 
   let sanityRoomContent = $derived(
-    $staticContent.rooms.find(r => r._id == ($frozenRoom?.Id ?? ""))
+    $staticContent.rooms.find(r => r._id == (roomId ?? ""))
   )
 
   // Create parent timeline
@@ -31,7 +31,7 @@
     // without reactivity from on chain changes
     // Do it here becuase RoomResult parent is loaded early
     freezeObjects(rat, room, roomId)
-    console.log("$frozenRoom", $frozenRoom)
+    // console.log("$frozenRoom", $frozenRoom)
     // console.log("$frozenRat", $frozenRat)
 
     if (
@@ -62,10 +62,14 @@
       ROOM #{$frozenRoom?.index ?? ""}
     </div>
     <!-- IMAGE -->
-    <div class="room-image" bind:this={imageContainerElement}>
+    <div class="image-container" bind:this={imageContainerElement}>
       {#if sanityRoomContent}
         <img
-          src={urlFor(sanityRoomContent?.image).url()}
+          src={urlFor(sanityRoomContent?.image)
+            .width(700)
+            .auto("format")
+            .saturation(-100)
+            .url()}
           alt={$frozenRoom?.name ?? ""}
         />
       {:else}
@@ -98,7 +102,7 @@
       justify-content: center;
       align-items: center;
       gap: 1rem;
-      width: 400px;
+      width: 600px;
       max-width: 90vw;
 
       .image-container {
@@ -118,6 +122,7 @@
         width: auto;
         display: inline-block;
         padding: 5px;
+        max-width: 50ch;
       }
 
       .room-index {

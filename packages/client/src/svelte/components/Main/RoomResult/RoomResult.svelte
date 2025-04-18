@@ -92,7 +92,7 @@
     <div class="info-boxes">
       <RatInfoBox />
       <div class="divider"></div>
-      <RoomInfoBox />
+      <RoomInfoBox roomId={roomId as Hex} />
     </div>
     <!-- LOG -->
     <Log {result} {animationstarted} />

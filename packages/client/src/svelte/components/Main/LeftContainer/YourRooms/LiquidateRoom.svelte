@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { ratTotalValue } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
   import { closeRoom } from "@modules/action"
   import { playSound } from "@modules/sound"
@@ -168,6 +167,7 @@
       #9e0000 40px
     );
   }
+
   .warning-mute {
     color: white;
     border: none;

@@ -26,14 +26,6 @@
     UIState.set(UI.SPAWNING)
   }
 
-  $effect(() => {
-    console.log("$rooms", $rooms)
-  })
-
-  $effect(() => {
-    console.log("$staticContent.rooms", $staticContent.rooms)
-  })
-
   // Init of chain sync when player is ready
   $effect(() => {
     if ($playerId && $playerId !== EMPTY_CONNECTION && !$websocketConnected) {

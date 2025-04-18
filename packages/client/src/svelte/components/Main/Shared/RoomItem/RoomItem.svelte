@@ -30,7 +30,14 @@
   <!-- IMAGE -->
   <div class="room-image">
     {#if sanityRoomContent}
-      <img src={urlFor(sanityRoomContent?.image).url()} alt={room.name} />
+      <img
+        src={urlFor(sanityRoomContent?.image)
+          .width(400)
+          .auto("format")
+          .saturation(-100)
+          .url()}
+        alt={room.name}
+      />
     {:else}
       <img src="/images/room3.jpg" alt={room.name} />
     {/if}
