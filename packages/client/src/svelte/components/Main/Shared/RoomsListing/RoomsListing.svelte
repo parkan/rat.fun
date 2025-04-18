@@ -2,20 +2,23 @@
   import type { Hex } from "viem"
   import RoomItem from "@components/Main/Shared/RoomItem/RoomItem.svelte"
   import RoomPreview from "@components/Main/Shared/RoomPreview/RoomPreview.svelte"
-  import { PANE } from "@modules/ui/enums"
   import { rooms as roomsStore, playerRooms } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
   import { tippy } from "svelte-tippy"
+  import {
+    entriesChronologically,
+    entriesByVisit,
+    entriesByBalance,
+    entriesByKillCount,
+  } from "./sortFunctions"
 
   let {
-    pane,
     isOwnRoomListing,
   }: {
-    pane: PANE
     isOwnRoomListing: boolean
   } = $props()
 
-  let { rooms, panes } = getUIState()
+  let { rooms } = getUIState()
   const { current, myCurrent } = rooms
 
   // Local state
@@ -24,29 +27,9 @@
   let showDepletedRooms = $state(false)
   let textFilter = $state("")
 
-  const entriesChronologically = (a, b) => {
-    return Number(b[1]?.index || 0) - Number(a[1].index || 0)
-  }
-
-  const entriesByVisit = (a, b) => {
-    const aVisitCount = Number(a[1]?.visitCount || 0)
-    const bVisitCount = Number(b[1]?.visitCount || 0)
-    return bVisitCount - aVisitCount
-  }
-
-  const entriesByBalance = (a, b) => {
-    return Number(b[1].balance || 0) - Number(a[1].balance || 0)
-  }
-
-  const entriesByKillCount = (a, b) => {
-    const aKillCount = Number(a[1]?.killCount || 0)
-    const bKillCount = Number(b[1]?.killCount || 0)
-    return bKillCount - aKillCount
-  }
-
   let sortFunction = $state(entriesChronologically)
 
-  const sortBy = key => {
+  const sortBy = (key: string) => {
     sortKey = key
   }
 
@@ -67,8 +50,8 @@
     (isOwnRoomListing && $myCurrent) || (!isOwnRoomListing && $current)
   )
 
-  let filter = ([_, room]) => {
-    if (textFilter !== "")
+  let filter = ([_, room]: [string, Room]) => {
+    if (textFilter.length > 0)
       return room.roomPrompt.toLowerCase().includes(textFilter.toLowerCase())
     else return true
   }
@@ -131,6 +114,7 @@
             <div class="text-filter">
               <input
                 placeholder="Filter"
+                class:active={textFilter.length > 0}
                 type="text"
                 name="filter"
                 bind:value={textFilter}
@@ -241,13 +225,17 @@
 
 <style lang="scss">
   input[type="text"] {
-    color: white;
+    color: black;
     background: var(--color-grey-dark);
     border: none;
     outline: none;
     font-family: var(--font-mono);
     height: 20px;
     line-height: 22px;
+
+    &.active {
+      background: var(--color-alert);
+    }
   }
 
   input[type="text"]::placeholder {
@@ -330,6 +318,7 @@
     &.close {
       position: absolute;
       top: 50%;
+      height: 21px;
       right: 0;
       transform: translateY(-50%);
     }

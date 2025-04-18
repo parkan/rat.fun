@@ -150,6 +150,9 @@
         margin-bottom: 5px;
         background: var(--color-alert);
         padding: 5px;
+        max-width: 55ch;
+        word-break: break-word; /* Break long words if needed */
+        overflow-wrap: anywhere; /* Break anywhere if necessary to prevent overflow */
       }
 
       .index {

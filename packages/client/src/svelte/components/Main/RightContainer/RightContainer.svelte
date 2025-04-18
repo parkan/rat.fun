@@ -7,7 +7,7 @@
 
 <div class="right-container">
   {#if panes.right === enums.RIGHT_PANE.ROOMS}
-    <RoomsListing isOwnRoomListing={false} pane={enums.PANE.RIGHT} />
+    <RoomsListing isOwnRoomListing={false} />
   {/if}
 </div>
 
