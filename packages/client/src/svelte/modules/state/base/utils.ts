@@ -24,6 +24,12 @@ export function filterByPlayer(rooms: Rooms, playerId: Hex): Rooms {
   )
 }
 
+export function filterByOthers(rooms: Rooms, playerId: Hex): Rooms {
+  return Object.fromEntries(
+    Object.entries(rooms).filter(([, room]) => room.owner !== playerId)
+  )
+}
+
 export function isPlayerRoom(room: Room, playerId: Hex) {
   return room.owner === playerId
 }

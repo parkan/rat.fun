@@ -142,7 +142,7 @@ export const getUIState = () => {
   const close = async () => {
     previewingPane = PANE.NONE
     await navigate("main")
-    uiStores.CurrentRoomId.set(null)
+    // uiStores.CurrentRoomId.set(null)
   }
 
   /** 3.1 Exporting state

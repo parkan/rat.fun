@@ -5,12 +5,8 @@
   import { playSound } from "@modules/sound"
   import { getRoomOwnerName } from "@modules/state/base/helpers"
   import { rat } from "@modules/state/base/stores"
-  import { closeRoom } from "@modules/action"
-  import { waitForCompletion } from "@modules/action/actionSequencer/utils"
 
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
-
-  let busy = $state(false)
+  import LiquidateRoom from "@components/Main/LeftContainer/YourRooms/LiquidateRoom.svelte"
 
   let {
     roomId,
@@ -23,21 +19,6 @@
   const sendEnterRoom = () => {
     playSound("tcm", "enteredPod")
     rooms.navigate("room", { roomId })
-  }
-
-  async function sendCloseRoom() {
-    if (busy) return
-    playSound("tcm", "blink")
-    busy = true
-    const action = closeRoom(roomId)
-    try {
-      await waitForCompletion(action)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      busy = false
-      rooms.back(isOwnRoomListing)
-    }
   }
 </script>
 
@@ -94,15 +75,7 @@
       {/if}
 
       {#if isOwnRoomListing}
-        <div class="room-close">
-          <button disabled={busy} onclick={sendCloseRoom}>
-            {#if busy}
-              <Spinner />
-            {:else}
-              Close room (get ${room.balance})
-            {/if}
-          </button>
-        </div>
+        <LiquidateRoom {roomId} {room} {isOwnRoomListing} />
       {/if}
     </div>
   </div>

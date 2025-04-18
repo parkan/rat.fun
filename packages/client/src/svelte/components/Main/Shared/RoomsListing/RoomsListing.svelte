@@ -5,7 +5,6 @@
   import { PANE } from "@modules/ui/enums"
   import {
     rooms as roomsStore,
-    roomsOnRatLevel,
     ratLevelIndex,
     playerRooms,
   } from "@modules/state/base/stores"
@@ -27,6 +26,7 @@
   let currentRoom = $state<Hex | null>(null)
   let sortKey = $state("c")
   let showDepletedRooms = $state(false)
+  let textFilter = $state("")
 
   const entriesChronologically = (a, b) => {
     return Number(b[1]?.index || 0) - Number(a[1].index || 0)
@@ -63,19 +63,24 @@
   let roomsList = $derived.by(() => {
     let entries = isOwnRoomListing
       ? Object.entries($playerRooms)
-      : Object.entries($roomsOnRatLevel)
+      : Object.entries($roomsStore)
 
     // Filter out rooms with zero balance unless showDepletedRooms is true
     if (!showDepletedRooms) {
       entries = entries.filter(([_, room]) => Number(room.balance || 0) > 0)
     }
 
-    return entries.sort(sortFunction)
+    return entries.filter(filter).sort(sortFunction)
   })
 
   let previewing = $derived(
     (isOwnRoomListing && $myCurrent) || (!isOwnRoomListing && $current)
   )
+
+  let filter = ([_, room]) => {
+    if (textFilter !== "") return room.roomPrompt.includes(textFilter)
+    else return true
+  }
 
   $effect(() => {
     switch (sortKey) {
@@ -120,15 +125,31 @@
     <div class="floor-content">
       <div class:previewing class="room-listing">
         {#if !isOwnRoomListing && $ratLevelIndex > -1}
+          {@const array = Object.values(roomsList)}
           <div class="floor-header">
-            <div class="floor-title">Floor {$ratLevelIndex * -1}</div>
+            <div class="text-filter">
+              <input
+                placeholder="Filter"
+                type="text"
+                name="filter"
+                bind:value={textFilter}
+                id=""
+              />
+              {#if textFilter !== ""}
+                <button
+                  class="sort-button close"
+                  onclick={() => (textFilter = "")}>X</button
+                >
+              {/if}
+            </div>
+            <!-- <div class="floor-title">Floor {$ratLevelIndex * -1}</div> -->
             <div
               use:tippy={{
-                content: `There are ${Object.values(roomsList).length} rooms on your floor`,
+                content: `There are ${array.length} rooms on your floor`,
               }}
               class="floor-stats"
             >
-              {Object.values(roomsList).length} rooms
+              {array.length} room{array.length > 1 ? "s" : ""}
             </div>
             <div class="floor-filter">
               <button
@@ -210,6 +231,17 @@
 </div>
 
 <style lang="scss">
+  input[type="text"] {
+    color: white;
+    background: black;
+    border: none;
+    outline: none;
+    font-family: var(--font-mono);
+  }
+  input[type="text"]::placeholder {
+    color: grey;
+    font-family: var(--font-mono);
+  }
   .wrapper {
     position: relative;
     height: 100%;
@@ -228,6 +260,9 @@
     background: black;
   }
 
+  .text-filter {
+    position: relative;
+  }
   .rooms {
     width: 100%;
     height: 100%;
@@ -276,6 +311,13 @@
     height: 20px;
     line-height: 22px;
     aspect-ratio: 1/1;
+
+    &.close {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
 
     &.active {
       background: white;

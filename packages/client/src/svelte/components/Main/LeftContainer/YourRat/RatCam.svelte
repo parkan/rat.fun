@@ -16,9 +16,11 @@
 </script>
 
 <div class="rat-cam">
-  <Main>
-    <Box></Box>
-  </Main>
+  <div class="square">
+    <Main>
+      <Box></Box>
+    </Main>
+  </div>
 </div>
 
 <style lang="scss">
@@ -29,5 +31,9 @@
     justify-content: center;
     align-items: center;
     position: relative;
+  }
+  .square {
+    aspect-ratio: 1 / 1;
+    height: 100%;
   }
 </style>
