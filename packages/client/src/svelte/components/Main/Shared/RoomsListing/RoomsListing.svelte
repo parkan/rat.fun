@@ -118,7 +118,7 @@
   <div class="rooms">
     <div class="floor-content">
       <div class:previewing class="room-listing">
-        {#if !isOwnRoomListing && $ratLevelIndex > -1}
+        {#if !isOwnRoomListing}
           {@const array = Object.values(roomsList)}
           <div class="floor-header">
             <!-- ROOM COUNTER -->
