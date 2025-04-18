@@ -42,16 +42,10 @@
     return Number(b[1].balance || 0) - Number(a[1].balance || 0)
   }
 
-  const entriesByKillRate = (a, b) => {
-    const aVisitCount = Number(a[1]?.visitCount || 0)
+  const entriesByKillCount = (a, b) => {
     const aKillCount = Number(a[1]?.killCount || 0)
-    const bVisitCount = Number(b[1]?.visitCount || 0)
     const bKillCount = Number(b[1]?.killCount || 0)
-
-    const aKillRate = aKillCount / aVisitCount
-    const bKillRate = bKillCount / bVisitCount
-
-    return bKillRate - aKillRate
+    return bKillCount - aKillCount
   }
 
   let sortFunction = $state(entriesChronologically)
@@ -94,7 +88,7 @@
         sortFunction = entriesByBalance
         break
       case "k":
-        sortFunction = entriesByKillRate
+        sortFunction = entriesByKillCount
         break
     }
   })
@@ -127,6 +121,16 @@
         {#if !isOwnRoomListing && $ratLevelIndex > -1}
           {@const array = Object.values(roomsList)}
           <div class="floor-header">
+            <!-- ROOM COUNTER -->
+            <div
+              use:tippy={{
+                content: `There are ${array.length} rooms on your floor`,
+              }}
+              class="floor-stats"
+            >
+              {array.length} room{array.length > 1 ? "s" : ""}
+            </div>
+            <!-- TEXT FILTER -->
             <div class="text-filter">
               <input
                 placeholder="Filter"
@@ -142,16 +146,11 @@
                 >
               {/if}
             </div>
+            <!-- FLOOR NAME -->
             <!-- <div class="floor-title">Floor {$ratLevelIndex * -1}</div> -->
-            <div
-              use:tippy={{
-                content: `There are ${array.length} rooms on your floor`,
-              }}
-              class="floor-stats"
-            >
-              {array.length} room{array.length > 1 ? "s" : ""}
-            </div>
+            <!-- SORT BUTTONS -->
             <div class="floor-filter">
+              <!-- SORT BY CHRONOLOGICAL -->
               <button
                 use:tippy={{
                   placement: "top",
@@ -159,8 +158,11 @@
                 }}
                 class:active={sortKey === "c"}
                 class="sort-button"
-                onclick={() => sortBy("c")}>C</button
+                onclick={() => sortBy("c")}
               >
+                C
+              </button>
+              <!-- SORT BY VISIT -->
               <button
                 use:tippy={{
                   placement: "top",
@@ -168,8 +170,11 @@
                 }}
                 class:active={sortKey === "v"}
                 class="sort-button"
-                onclick={() => sortBy("v")}>V</button
+                onclick={() => sortBy("v")}
               >
+                V
+              </button>
+              <!-- SORT BY BALANCE -->
               <button
                 use:tippy={{
                   placement: "top",
@@ -177,18 +182,25 @@
                 }}
                 class:active={sortKey === "b"}
                 class="sort-button"
-                onclick={() => sortBy("b")}>$</button
+                onclick={() => sortBy("b")}
               >
+                $
+              </button>
+              <!-- SORT BY KILLCOUNT -->
               <button
                 use:tippy={{
                   placement: "top",
-                  content: "sort by killrate",
+                  content: "sort by kill count",
                 }}
                 class:active={sortKey === "k"}
                 class="sort-button"
-                onclick={() => sortBy("k")}>K</button
+                onclick={() => sortBy("k")}
               >
+                K
+              </button>
               <span class="divider"></span>
+              <!-- SHOW DEPELETED ROOMS -->
+
               <button
                 class="sort-button"
                 class:active={showDepletedRooms}
@@ -233,15 +245,19 @@
 <style lang="scss">
   input[type="text"] {
     color: white;
-    background: black;
+    background: var(--color-grey-dark);
     border: none;
     outline: none;
     font-family: var(--font-mono);
+    height: 20px;
+    line-height: 22px;
   }
+
   input[type="text"]::placeholder {
     color: grey;
     font-family: var(--font-mono);
   }
+
   .wrapper {
     position: relative;
     height: 100%;
@@ -262,7 +278,9 @@
 
   .text-filter {
     position: relative;
+    top: -2px;
   }
+
   .rooms {
     width: 100%;
     height: 100%;
