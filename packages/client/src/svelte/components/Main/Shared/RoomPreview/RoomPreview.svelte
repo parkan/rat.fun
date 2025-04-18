@@ -161,6 +161,9 @@
       padding-bottom: 15px;
       border-bottom: 1px solid var(--color-grey-mid);
       margin-bottom: 15px;
+      word-break: break-word; /* Break long words if needed */
+      overflow-wrap: anywhere; /* Break anywhere if necessary to prevent overflow */
+      max-width: 55ch;
     }
 
     .room-recent-events {
