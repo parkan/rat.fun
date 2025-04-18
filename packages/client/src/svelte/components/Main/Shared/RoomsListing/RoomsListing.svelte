@@ -68,7 +68,8 @@
   )
 
   let filter = ([_, room]) => {
-    if (textFilter !== "") return room.roomPrompt.includes(textFilter)
+    if (textFilter !== "")
+      return room.roomPrompt.toLowerCase().includes(textFilter.toLowerCase())
     else return true
   }
 
