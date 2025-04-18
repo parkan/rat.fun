@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Hex } from "viem"
-  import { ratTotalValue, ratLevelIndex } from "@modules/state/base/stores"
+  import { ratLevelIndex } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
   import { playSound } from "@modules/sound"
   import { getRoomOwnerName } from "@modules/state/base/helpers"
@@ -68,10 +68,14 @@
 
       <!-- <div class="room-recent-events">TODO: RECENT EVENTS</div> -->
 
-      {#if room.balance > 0 && $ratTotalValue > 0 && !isOwnRoomListing}
+      {#if room.balance > 0 && ($rat?.health ?? 0) > 0 && !isOwnRoomListing}
         <div class="room-enter">
           <button onclick={sendEnterRoom}>Send {$rat.name} to room</button>
         </div>
+      {/if}
+
+      {#if ($rat?.health ?? 0) <= 0 && !isOwnRoomListing}
+        <div class="no-rat-warning">Deploy a rat to access this room</div>
       {/if}
 
       {#if isOwnRoomListing}
@@ -170,5 +174,13 @@
       background: var(--color-alert);
       padding: 20px;
     }
+  }
+
+  .no-rat-warning {
+    background: var(--color-death);
+    padding: 20px;
+    margin-top: 15px;
+    color: white;
+    text-align: center;
   }
 </style>
