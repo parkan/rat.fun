@@ -124,6 +124,34 @@ export default {
             ]
         },
         {
+            title: 'Room value',
+            name: 'roomValue',
+            type: 'number',
+            readOnly: true,
+            validation: (Rule: any) => Rule.required()
+        },
+        {
+            title: 'Room value change',
+            name: 'roomValueChange',
+            type: 'number',
+            readOnly: true,
+            validation: (Rule: any) => Rule.required()
+        },
+        {
+            title: 'Rat value',
+            name: 'ratValue',
+            type: 'number',
+            readOnly: true,
+            validation: (Rule: any) => Rule.required()
+        },
+        {
+            title: 'Rat value change',
+            name: 'ratValueChange',
+            type: 'number',
+            readOnly: true,
+            validation: (Rule: any) => Rule.required()
+        },
+        {
             title: 'Slug',
             name: 'slug',
             type: 'slug',

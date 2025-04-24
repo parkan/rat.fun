@@ -8,6 +8,7 @@ import { SetupNetworkResult } from "./setupNetwork"
 import { Rat, Room } from "@routes/room/enter/types"
 import { getOnchainData } from "./getOnchainData"
 import { createOutcomeCallArgs, updateOutcome } from "./outcome"
+import { getRoomValue, getRatValue } from "./value"
 
 // Custom error classes for better error handling
 export class SystemCallError extends Error {
@@ -60,7 +61,20 @@ export function createSystemCalls(network: SetupNetworkResult) {
           rat.id,
           room.id
         );
-        return updateOutcome(outcome, rat, newOnChainData.rat);
+
+        const validatedOutcome = updateOutcome(outcome, rat, newOnChainData.rat);
+        
+        const { newRoomValue, roomValueChange } = getRoomValue(room, newOnChainData.room);
+
+        const { newRatValue, ratValueChange } = getRatValue(rat, newOnChainData.rat);
+
+        return {
+          validatedOutcome,
+          newRoomValue,
+          roomValueChange,
+          newRatValue,
+          ratValueChange
+        }
       } catch (error) {
         // If it's already one of our custom errors, rethrow it
         if (error instanceof SystemCallError) {

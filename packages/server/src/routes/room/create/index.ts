@@ -8,7 +8,7 @@ import { MESSAGE } from "@config"
 import { CreateRoomBody } from "@routes/room/create/types"
 
 // CMS
-import { writeRoomToCMS } from "@modules/cms"
+import { writeRoomToCMS, CMSError } from "@modules/cms"
 
 // MUD
 import { systemCalls, network } from "@modules/mud/initMud"
@@ -61,14 +61,23 @@ async function routes(fastify: FastifyInstance) {
           // Get the image data
           const imageBuffer = await generateImage(roomPrompt)
           
-          // Get world address
-          const worldAddress = network?.worldContract?.address ?? "0x0"
+          // Get world address - await the network promise first
+          const resolvedNetwork = await network
+          const worldAddress = resolvedNetwork.worldContract?.address ?? "0x0"
 
           // Write the document
           await writeRoomToCMS(worldAddress, roomID, roomPrompt, playerId, imageBuffer)
           
         } catch (error) {
-          console.error("Error", error)
+          // Handle CMS-specific errors
+          if (error instanceof CMSError) {
+            console.error(`CMS Error: ${error.message}`, error);
+            // We don't want to fail the entire request if CMS write fails
+            // But we do want to log it properly
+          } else {
+            // For unexpected errors, log them but don't fail the request
+            console.error("Unexpected error in image generation or CMS write:", error);
+          }
         }
         console.timeEnd("–– Image generation")
 

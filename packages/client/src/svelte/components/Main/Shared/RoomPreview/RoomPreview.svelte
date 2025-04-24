@@ -11,7 +11,7 @@
   import { queries } from "@modules/content/sanity/groq"
 
   import LiquidateRoom from "@components/Main/LeftContainer/YourRooms/LiquidateRoom.svelte"
-
+  import type { Outcome } from "@sanity-types"
   let {
     roomId,
     room,
@@ -31,7 +31,9 @@
 
   onMount(async () => {
     // Test to get outcomes for room
-    const outcomes = await loadData(queries.outcomesForRoom, { roomId })
+    const outcomes = (await loadData(queries.outcomesForRoom, {
+      roomId,
+    })) as Outcome[]
     console.log("Room outcomes", outcomes)
   })
 </script>

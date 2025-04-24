@@ -109,6 +109,10 @@ export type Outcome = {
     id?: string
     _key: string
   }>
+  roomValue?: number
+  roomValueChange?: number
+  ratValue?: number
+  ratValueChange?: number
   slug?: Slug
 }
 

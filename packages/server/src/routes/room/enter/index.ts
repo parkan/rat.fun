@@ -32,7 +32,7 @@ import { components, systemCalls, network } from '@modules/mud/initMud';
 import { getSenderId } from '@modules/signature';
 
 // CMS
-import { getSystemPrompts, writeOutcomeToCMS } from '@modules/cms';
+import { getSystemPrompts, writeOutcomeToCMS, CMSError } from '@modules/cms';
 
 // Validate
 import { validateInputData } from './validation';
@@ -86,7 +86,13 @@ async function routes (fastify: FastifyInstance) {
 
             // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
             console.time('–– Chain');
-            const validatedOutcome = await systemCalls.applyOutcome(rat, room, eventResults.outcome);
+            const { 
+                validatedOutcome, 
+                newRoomValue, 
+                roomValueChange, 
+                newRatValue, 
+                ratValueChange 
+            } = await systemCalls.applyOutcome(rat, room, eventResults.outcome);
             console.timeEnd('–– Chain');
 
             console.log('Validated outcome:', validatedOutcome);
@@ -107,14 +113,30 @@ async function routes (fastify: FastifyInstance) {
             // Write outcome to CMS
             console.time('–– CMS write');
             try {
-                // Get world address
-                const worldAddress = network?.worldContract?.address ?? "0x0"
-
-                // Write the document
-                await writeOutcomeToCMS(worldAddress, playerId, room, rat, correctedEvents, validatedOutcome)
-
+                // Await the network promise before accessing its properties
+                const resolvedNetwork = await network;
+                await writeOutcomeToCMS(
+                    resolvedNetwork.worldContract?.address ?? "0x0",
+                    playerId, 
+                    room, 
+                    rat,
+                    newRoomValue, 
+                    roomValueChange, 
+                    newRatValue, 
+                    ratValueChange, 
+                    correctedEvents, 
+                    validatedOutcome
+                )
             } catch (error) {
-                console.error("Error", error)
+                // Handle CMS-specific errors
+                if (error instanceof CMSError) {
+                    console.error(`CMS Error: ${error.message}`, error);
+                    // We don't want to fail the entire request if CMS write fails
+                    // But we do want to log it properly
+                } else {
+                    // For unexpected errors, log them but don't fail the request
+                    console.error("Unexpected error writing to CMS:", error);
+                }
             }
             console.timeEnd('–– CMS write');
 

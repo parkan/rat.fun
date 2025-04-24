@@ -143,8 +143,6 @@ export function updateOutcome(
 }
 
 function getLogStep(name: string, list: TraitChange[] | ItemChange[]) {
-    // console.log('list:', list);
-    // console.log('name:', name);
     const item = list.find(i => i.name === name)
     return item?.logStep ?? 0
 }

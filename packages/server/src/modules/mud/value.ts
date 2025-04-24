@@ -1,0 +1,36 @@
+import { Rat, Room,} from "@routes/room/enter/types"
+
+export function getRoomValue(room: Room, newRoom: Room | undefined) {
+    return {
+        newRoomValue: newRoom?.balance ?? 0,
+        roomValueChange: newRoom?.balance ? newRoom.balance - room.balance : 0
+    }
+}
+
+export function getRatValue(rat: Rat, newRat: Rat) {
+    const newRatValue = calculateTotalRatValue(newRat);
+    const oldRatValue = calculateTotalRatValue(rat);
+    return {
+        newRatValue,
+        ratValueChange: newRatValue - oldRatValue
+    }
+}
+
+function calculateTotalRatValue(rat: Rat) {
+    if (!rat) return 0;
+    
+    const balanceValue = Number(rat.balance ?? 0);
+    const healthValue = Number(rat.stats?.health ?? 0);
+    
+    const inventoryValue = (rat.inventory ?? []).reduce(
+        (acc, item) => acc + (Number(item?.value) ?? 0),
+        0
+    );
+    
+    const traitsValue = (rat.traits ?? []).reduce(
+        (acc, trait) => acc + (Number(trait?.value) ?? 0),
+        0
+    );
+    
+    return balanceValue + healthValue + inventoryValue + traitsValue;
+}
