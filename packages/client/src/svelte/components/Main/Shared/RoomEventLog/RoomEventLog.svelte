@@ -3,15 +3,15 @@
   // import { rooms } from "@modules/state/base/stores"
   import { client } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
-  import { formatDate } from "@modules/utils"
+  import { formatDate, timeSince } from "@modules/utils"
 
-  let { room, initialOutcomes } = $props()
+  let { roomId, initialOutcomes } = $props()
 
   let subscription = $state<any>(null)
   let outcomes = $state(initialOutcomes)
 
   const query = queries.outcomesForRoom
-  const params = { roomId: room._id }
+  const params = { roomId }
 
   const callback = update => {
     if (!outcomes) {
@@ -20,7 +20,7 @@
     }
 
     if (!outcomes.map(o => o._id).includes(update?.result?._id)) {
-      outcomes.push(update.result)
+      outcomes.pop(update.result)
     }
   }
 
@@ -34,23 +34,49 @@
 </script>
 
 <div class="outcomes">
-  {#each outcomes as outcome (outcome._id)}
-    <div class="log-entry">
-      <span class="timestamp">
-        {formatDate(new Date(outcome._createdAt))}
-      </span>
-      {outcome.outcomeMessage}
-    </div>
-  {/each}
+  <div class="header">ROOM LOGS</div>
+  <div class="logs">
+    {#each outcomes as outcome (outcome._id)}
+      {@const elapsed = timeSince(new Date(outcome._createdAt).getTime())}
+      {@const ago = elapsed !== "now" && "ago"}
+      <div class="log-entry">
+        <span class="timestamp">
+          {elapsed}
+          {ago}
+        </span>
+        {outcome.outcomeMessage}
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
   .outcomes {
     margin-bottom: 12px;
+    max-height: 400px;
+    overflow-y: scroll;
+    border: 1px solid var(--color-grey-mid);
   }
   .outcome {
     display: block;
     margin-bottom: 12px;
+  }
+
+  .logs {
+    padding: 12px;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 4px;
+  }
+
+  .header {
+    border-bottom: 1px dashed var(--color-grey-mid);
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: black;
   }
 
   .log-entry {
@@ -59,9 +85,9 @@
     line-height: 1.4em;
 
     .timestamp {
-      background: var(--color-grey-light);
-      padding: 5px;
-      color: black;
+      background: var(--color-grey-dark);
+      padding: 2px 5px;
+      color: white;
       display: inline-block;
     }
   }

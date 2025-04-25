@@ -45,7 +45,7 @@
 
     // Sort the outcomes in order of creation
     outcomes.sort((a, b) => {
-      return new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
+      return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
     })
     roomOutcomes = outcomes
     // Map the values
@@ -132,25 +132,15 @@
         </div>
       </div>
 
-      <!-- Enter Room -->
-      {#if room.balance > 0 && ($rat?.health ?? 0) > 0 && !isOwnRoomListing}
-        <div class="room-enter">
-          <button onclick={sendEnterRoom}>Send {$rat.name} to room</button>
-        </div>
-      {/if}
-
       <!-- Room stats with graph -->
       <div class="room-stats">
         <RoomStats content={sanityRoomContent} data={plotData} />
       </div>
 
       <!-- Room event log -->
-      {#if sanityRoomContent && roomOutcomes}
+      {#if roomOutcomes}
         <div class="room-event-log">
-          <RoomEventLog
-            room={sanityRoomContent}
-            initialOutcomes={roomOutcomes}
-          />
+          <RoomEventLog {roomId} initialOutcomes={roomOutcomes} />
         </div>
       {/if}
 
@@ -163,6 +153,12 @@
         <LiquidateRoom {roomId} {room} {isOwnRoomListing} />
       {/if}
     </div>
+
+    {#if room.balance > 0 && ($rat?.health ?? 0) > 0 && !isOwnRoomListing}
+      <div class="room-enter">
+        <button onclick={sendEnterRoom}>Send {$rat.name} to room</button>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -286,6 +282,6 @@
   .room-enter {
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: 100;
   }
 </style>
