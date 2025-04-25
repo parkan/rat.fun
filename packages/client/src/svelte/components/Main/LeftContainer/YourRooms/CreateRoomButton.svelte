@@ -20,6 +20,10 @@
     align-items: center;
     border-bottom: 1px solid white;
     padding: var(--default-padding);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: black;
 
     button {
       width: 100%;

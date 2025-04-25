@@ -101,6 +101,12 @@ export const getUIState = () => {
     transition.type = getTransitionType(transition.from, transition.to)
     params = p
     history.pushState({ to, p }, "")
+
+    // Handle parameters
+    if (p.roomId) {
+      uiStores.CurrentRoomId.set(p.roomId)
+    }
+
     // Modifying by using class instance methods
     await transition.progress.set(1)
     transition.active = false
@@ -121,20 +127,20 @@ export const getUIState = () => {
    */
   const preview = (id: string, mine = false) => {
     if (mine) {
-      uiStores.CurrentMyRoomId.set(id)
+      uiStores.myPreviewId.set(id)
       previewingPane = PANE.LEFT
     } else {
-      uiStores.CurrentRoomId.set(id)
+      uiStores.previewId.set(id)
       previewingPane = PANE.RIGHT
     }
   }
 
   const back = (mine = false) => {
     if (mine) {
-      uiStores.CurrentMyRoomId.set(null)
+      uiStores.myPreviewId.set(null)
       setPane(PANE.LEFT, LEFT_PANE.YOUR_ROOMS)
     } else {
-      uiStores.CurrentRoomId.set(null)
+      uiStores.previewId.set(null)
       setPane(PANE.RIGHT, RIGHT_PANE.ROOMS)
     }
   }
@@ -142,7 +148,7 @@ export const getUIState = () => {
   const close = async () => {
     previewingPane = PANE.NONE
     await navigate("main")
-    // uiStores.CurrentRoomId.set(null)
+    uiStores.CurrentRoomId.set(null)
   }
 
   /** 3.1 Exporting state
@@ -198,6 +204,12 @@ export const getUIState = () => {
        *
        * And then autosubscribe `$current`
        */
+      get myPreviewId() {
+        return uiStores.myPreviewId
+      },
+      get previewId() {
+        return uiStores.previewId
+      },
       get myCurrent() {
         return uiStores.CurrentMyRoomId
       },

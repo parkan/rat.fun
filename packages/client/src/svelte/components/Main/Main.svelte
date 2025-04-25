@@ -35,11 +35,14 @@
     return `transform: translateX(${offset}%);`
   }
 
+  let { environment }: { environment: ENVIRONMENT } = $props()
+
   const { transition, route, rooms } = getUIState()
   const { current, myCurrent } = rooms
+
   let debugTransition = $state(false)
 
-  let { environment }: { environment: ENVIRONMENT } = $props()
+  $inspect("current", $current)
 </script>
 
 {#snippet mainSnippet(className = "", transitionStyle = "")}

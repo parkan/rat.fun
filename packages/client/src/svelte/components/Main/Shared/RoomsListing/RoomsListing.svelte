@@ -19,7 +19,7 @@
   } = $props()
 
   let { rooms } = getUIState()
-  const { current, myCurrent } = rooms
+  const { myPreviewId, previewId } = rooms
 
   // Local state
   let currentRoom = $state<Hex | null>(null)
@@ -47,7 +47,7 @@
   })
 
   let previewing = $derived(
-    (isOwnRoomListing && $myCurrent) || (!isOwnRoomListing && $current)
+    (isOwnRoomListing && $myPreviewId) || (!isOwnRoomListing && $previewId)
   )
 
   let filter = ([_, room]: [string, Room]) => {
@@ -76,19 +76,19 @@
   // Update currentroom with a delay to allow animations to play
   $effect(() => {
     if (isOwnRoomListing) {
-      if (!$myCurrent) {
-        setTimeout(() => (currentRoom = $myCurrent as Hex), 400)
+      if (!$myPreviewId) {
+        setTimeout(() => (currentRoom = $myPreviewId as Hex), 400)
       } else {
-        currentRoom = $myCurrent as Hex
+        currentRoom = $myPreviewId as Hex
       }
     }
   })
   $effect(() => {
     if (!isOwnRoomListing) {
-      if (!$current) {
-        setTimeout(() => (currentRoom = $current as Hex), 400)
+      if (!$previewId) {
+        setTimeout(() => (currentRoom = $previewId as Hex), 400)
       } else {
-        currentRoom = $current as Hex
+        currentRoom = $previewId as Hex
       }
     }
   })

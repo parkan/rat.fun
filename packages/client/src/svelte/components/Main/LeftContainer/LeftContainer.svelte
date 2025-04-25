@@ -80,5 +80,6 @@
 
   .tab-content {
     height: calc(100% - 60px);
+    overflow-y: scroll;
   }
 </style>

@@ -8,6 +8,7 @@
   import { enterRoom } from "@components/Main/RoomResult"
   import { ENVIRONMENT } from "@mud/enums"
   import { walletNetwork } from "@modules/network"
+  import { onDestroy } from "svelte"
   import type { Hex } from "viem"
   import Log from "@components/Main/RoomResult/Log/Log.svelte"
   import RoomMeta from "@components/Main/RoomResult/RoomMeta/RoomMeta.svelte"
@@ -77,6 +78,10 @@
       console.log("start")
       processRoom()
     }
+  })
+
+  onDestroy(() => {
+    console.log("on destroy")
   })
 </script>
 
