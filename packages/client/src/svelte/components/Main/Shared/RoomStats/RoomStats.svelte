@@ -117,7 +117,8 @@
           <path
             d={lineGenerator(data)}
             stroke="var(--color-value)"
-            stroke-width={1}
+            stroke-width={2}
+            stroke-dasharray={4}
             fill="none"
           />
 
@@ -144,7 +145,7 @@
                 <polygon
                   transform="translate({xScale(point.time)}, {yScale(
                     point.value
-                  )}) scale(1.5, 3)"
+                  )}) scale(2, 3)"
                   fill="var(--color-value-up)"
                   points="-5 2.5, 0 -5, 5 2.5"
                 />
@@ -152,7 +153,7 @@
                 <polygon
                   transform="translate({xScale(point.time)}, {yScale(
                     point.value
-                  )}) scale(1.5, 3)"
+                  )}) scale(2, 3)"
                   fill="var(--color-value-down)"
                   points="-5 -2.5, 0 5, 5 -2.5"
                 />
