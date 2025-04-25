@@ -139,10 +139,12 @@ export async function writeOutcomeToCMS(
   playerId: string,
   room: Room,
   rat: Rat,
+  message: string,
   newRoomValue: number,
   roomValueChange: number,
   newRatValue: number,
   ratValueChange: number,
+  newRatHealth: number,
   events: CorrectionReturnValue,
   outcome: OutcomeReturnValue
 ): Promise<OutcomeDoc> {
@@ -159,10 +161,12 @@ export async function writeOutcomeToCMS(
       log: createOutcomeEvents(events),
       ratId: rat.id,
       ratName: rat.name,
+      ratHealth: newRatHealth,
       roomValue: newRoomValue,
       roomValueChange: roomValueChange,
       ratValue: newRatValue,
       ratValueChange: ratValueChange,
+      outcomeMessage: message,
       slug: {
         _type: "slug",
         current: outcomeID,

@@ -124,6 +124,12 @@ export default {
             ]
         },
         {
+            title: 'Outcome message',
+            name: 'outcomeMessage',
+            type: 'string',
+            readOnly: true,
+        },
+        {
             title: 'Room value',
             name: 'roomValue',
             type: 'number',
@@ -147,6 +153,13 @@ export default {
         {
             title: 'Rat value change',
             name: 'ratValueChange',
+            type: 'number',
+            readOnly: true,
+            validation: (Rule: any) => Rule.required()
+        },
+        {
+            title: 'Rat health',
+            name: 'ratHealth',
             type: 'number',
             readOnly: true,
             validation: (Rule: any) => Rule.required()

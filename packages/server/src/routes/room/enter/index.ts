@@ -91,7 +91,8 @@ async function routes (fastify: FastifyInstance) {
                 newRoomValue, 
                 roomValueChange, 
                 newRatValue, 
-                ratValueChange 
+                ratValueChange,
+                newRatHealth
             } = await systemCalls.applyOutcome(rat, room, eventResults.outcome);
             console.timeEnd('–– Chain');
 
@@ -107,7 +108,7 @@ async function routes (fastify: FastifyInstance) {
             console.log('Corrected events:', correctedEvents);
 
             // Broadcast alert
-            const {topic, message} = createMessage(rat, room);
+            const {topic, message} = createMessage(rat, room, validatedOutcome);
             broadcast(topic, message);
 
             // Write outcome to CMS
@@ -120,10 +121,12 @@ async function routes (fastify: FastifyInstance) {
                     playerId, 
                     room, 
                     rat,
+                    message,
                     newRoomValue, 
                     roomValueChange, 
                     newRatValue, 
                     ratValueChange, 
+                    newRatHealth,
                     correctedEvents, 
                     validatedOutcome
                 )
