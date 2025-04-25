@@ -54,10 +54,12 @@
 <style lang="scss">
   .outcomes {
     margin-bottom: 12px;
-    max-height: 400px;
+    max-height: 200px;
     overflow-y: scroll;
     border: 1px solid var(--color-grey-mid);
+    font-size: 10px;
   }
+
   .outcome {
     display: block;
     margin-bottom: 12px;
