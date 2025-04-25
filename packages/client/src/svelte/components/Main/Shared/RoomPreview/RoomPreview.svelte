@@ -10,6 +10,7 @@
   import { getRoomOwnerName } from "@modules/state/base/helpers"
   import { staticContent, lastUpdated, urlFor } from "@modules/content"
   import { rat } from "@modules/state/base/stores"
+  import { publicNetwork } from "@modules/network"
   import { loadData } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
 
@@ -41,6 +42,7 @@
     // Test to get outcomes for room
     const outcomes = (await loadData(queries.outcomesForRoom, {
       roomId,
+      worldAddress: $publicNetwork.worldAddress,
     })) as Outcome[]
 
     // Sort the outcomes in order of creation
