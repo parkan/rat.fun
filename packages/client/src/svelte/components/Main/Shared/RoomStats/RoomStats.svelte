@@ -3,14 +3,12 @@
 
   import { rats } from "@modules/state/base/stores"
   import { scaleTime, scaleLinear } from "d3-scale"
-  import { extent, max } from "d3-array"
+  import { max } from "d3-array"
   import { line } from "d3-shape"
   import tippy from "tippy.js"
   import "tippy.js/dist/tippy.css" // optional for styling
 
   let { data } = $props()
-
-  $inspect(data)
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -23,21 +21,33 @@
   let innerHeight = $derived(height - padding.top - padding.bottom)
 
   // Computed values
-  let xScale = $derived(
-    data && innerWidth
-      ? scaleTime()
-          .domain(extent(data, (d: PlotPoint) => d.time))
-          .range([0, innerWidth])
-      : null
-  )
+  let xScale = $derived.by(() => {
+    // Ensure data exists, has items, and innerWidth is calculated
+    if (!data || data.length === 0 || !innerWidth) return null
 
-  let yScale = $derived(
-    data && width
-      ? scaleLinear()
-          .domain([0, max(data, (d: PlotPoint) => +d.value + 250)])
-          .range([innerHeight, 0])
-      : null
-  )
+    // Use the first point's time as the domain start, max time as the end
+    // Handle the case where there's only one data point
+    const domainStart = data[0].time
+    const domainEnd = max(data, (d: PlotPoint) => d.time)
+    const finalDomainEnd =
+      domainEnd !== undefined && domainEnd > domainStart
+        ? domainEnd
+        : domainStart + 1 // Add a minimal duration if only one point or max isn't greater
+
+    return scaleTime()
+      .domain([domainStart, finalDomainEnd])
+      .range([0, innerWidth])
+  })
+
+  let yScale = $derived.by(() => {
+    if (!data || data.length === 0 || !innerHeight) return null // Use innerHeight here
+
+    // Ensure the domain includes 0 and accommodates the highest value + buffer
+    const maxValue = max(data, (d: PlotPoint) => +d.value) ?? 0
+    return scaleLinear()
+      .domain([0, maxValue + 250]) // Ensure domain starts at 0
+      .range([innerHeight, 0]) // Use innerHeight
+  })
 
   // Line function from D3 to create the d attribute for a path element
   // which will be our line.
@@ -50,14 +60,20 @@
         null
   )
 
-  let baseLine = $derived(
-    xScale && yScale
-      ? line()
-          .x((d: PlotPoint) => xScale(d.time))
-          .y((_: PlotPoint) => yScale(data?.[0].value))
-      : // .curve(curveBasis)
-        null
-  )
+  // Generate points specifically for the full-width baseline
+  let baselinePoints = $derived.by(() => {
+    if (!xScale || !yScale || !data || data.length === 0) return null
+
+    const domain = xScale.domain() // Get the full domain [start, end]
+    const firstValue = data[0].value // Value of the first data point
+
+    // Create two points spanning the full domain width at the first data point's y-level
+    // These points need 'time' and 'value' structure to work with lineGenerator
+    return [
+      { time: domain[0], value: firstValue }, // Point at the start of the domain
+      { time: domain[1], value: firstValue }, // Point at the end of the domain
+    ]
+  })
 
   $effect(() => {
     if (data && width && xScale && yScale && lineGenerator) {
@@ -104,13 +120,16 @@
             stroke-width={1}
             fill="none"
           />
-          <path
-            d={baseLine(data)}
-            stroke="#eee"
-            stroke-width={1}
-            stroke-dasharray="8"
-            fill="none"
-          />
+
+          {#if baselinePoints}
+            <path
+              d={lineGenerator(baselinePoints)}
+              stroke="#eee"
+              stroke-width={1}
+              stroke-dasharray="4 4"
+              fill="none"
+            />
+          {/if}
 
           {#each data as point (point.time)}
             <g data-tippy-content={generateTooltipContent(point)}>
@@ -125,7 +144,7 @@
                 <polygon
                   transform="translate({xScale(point.time)}, {yScale(
                     point.value
-                  )}) scale(1, 1.5)"
+                  )}) scale(1.5, 3)"
                   fill="var(--color-value-up)"
                   points="-5 2.5, 0 -5, 5 2.5"
                 />
@@ -133,7 +152,7 @@
                 <polygon
                   transform="translate({xScale(point.time)}, {yScale(
                     point.value
-                  )}) scale(1, 1.5)"
+                  )}) scale(1.5, 3)"
                   fill="var(--color-value-down)"
                   points="-5 -2.5, 0 5, 5 -2.5"
                 />
