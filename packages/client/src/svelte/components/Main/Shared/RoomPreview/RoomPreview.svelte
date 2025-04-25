@@ -26,6 +26,8 @@
 
   let { rooms } = getUIState()
 
+  let plotData = $state([])
+
   const sendEnterRoom = () => {
     playSound("tcm", "enteredPod")
     rooms.navigate("room", { roomId })
@@ -36,7 +38,24 @@
     const outcomes = (await loadData(queries.outcomesForRoom, {
       roomId,
     })) as Outcome[]
-    console.log("Room outcomes", outcomes)
+    // Sort the outcomes in order of creation
+    outcomes.sort((a, b) => {
+      return new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
+    })
+    // Map the values
+    const computed = [
+      {
+        time: 0,
+        value: 250,
+        meta: null,
+      },
+      ...outcomes,
+    ].map((o, i) => ({
+      time: i,
+      value: o?.roomValue || 250,
+      meta: o,
+    }))
+    plotData = computed
   })
 </script>
 
@@ -100,7 +119,7 @@
       </div>
 
       <div class="room-stats">
-        <RoomStats content={sanityRoomContent} />
+        <RoomStats content={sanityRoomContent} data={plotData} />
       </div>
 
       {#if room.balance > 0 && ($rat?.health ?? 0) > 0 && !isOwnRoomListing}

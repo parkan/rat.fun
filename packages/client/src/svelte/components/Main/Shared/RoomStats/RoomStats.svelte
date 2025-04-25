@@ -6,34 +6,7 @@
 
   type DataPoint = { time: number; value: number }
 
-  const roomData: DataPoint[] = [
-    {
-      time: 0,
-      value: 250,
-    },
-    {
-      time: 1,
-      value: 200,
-    },
-    {
-      time: 2,
-      value: 120,
-    },
-    {
-      time: 3,
-      value: 280,
-    },
-    {
-      time: 4,
-      value: 220,
-    },
-    {
-      time: 5,
-      value: 10,
-    },
-  ]
-
-  let { content } = $props()
+  let { content, data } = $props()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -46,7 +19,7 @@
   let innerHeight = $derived(height - padding.top - padding.bottom)
 
   // State variables
-  let data = $state(roomData)
+  // let data = $state(roomData)
 
   // Computed values
   let xScale = $derived(
