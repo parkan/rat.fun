@@ -3,7 +3,7 @@
   // import { rooms } from "@modules/state/base/stores"
   import { client } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
-  import { formatDate, timeSince } from "@modules/utils"
+  import OutcomeMessage from "../OutcomeMessage/OutcomeMessage.svelte"
 
   let { roomId, initialOutcomes } = $props()
 
@@ -37,15 +37,7 @@
   <div class="header">ROOM LOGS</div>
   <div class="logs">
     {#each outcomes as outcome (outcome._id)}
-      {@const elapsed = timeSince(new Date(outcome._createdAt).getTime())}
-      {@const ago = elapsed !== "now" && "ago"}
-      <div class="log-entry">
-        <span class="timestamp">
-          {elapsed}
-          {ago}
-        </span>
-        {outcome.outcomeMessage}
-      </div>
+      <OutcomeMessage {outcome} />
     {/each}
   </div>
 </div>
@@ -55,6 +47,7 @@
     margin-bottom: 12px;
     max-height: 400px;
     overflow-y: scroll;
+    overscroll-behavior-y: none;
     border: 1px solid var(--color-grey-mid);
   }
   .outcome {
@@ -77,18 +70,5 @@
     position: sticky;
     top: 0;
     background: black;
-  }
-
-  .log-entry {
-    display: block;
-    margin-bottom: 0.5em;
-    line-height: 1.4em;
-
-    .timestamp {
-      background: var(--color-grey-dark);
-      padding: 2px 5px;
-      color: white;
-      display: inline-block;
-    }
   }
 </style>
