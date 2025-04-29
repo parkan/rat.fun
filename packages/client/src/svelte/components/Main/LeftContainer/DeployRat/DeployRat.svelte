@@ -26,7 +26,7 @@
     }
   }
 
-  let disabled = $derived(!name || $player.balance < 250)
+  let disabled = $derived(!name || ($player?.balance ?? 0) < 250)
 </script>
 
 <div class="main">

@@ -290,6 +290,7 @@
 
   .room-listing {
     overflow-y: scroll;
+    padding-bottom: 200px;
   }
 
   .room-preview,
