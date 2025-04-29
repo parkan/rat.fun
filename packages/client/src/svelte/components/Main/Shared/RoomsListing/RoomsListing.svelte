@@ -251,7 +251,7 @@
 
   .floor-header {
     line-height: 60px;
-    border-bottom: 1px solid white;
+    border-bottom: var(--default-border-style);
     padding-inline: 20px;
     display: flex;
     justify-content: space-between;

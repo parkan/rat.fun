@@ -86,8 +86,6 @@
     }
   })
 
-  $inspect($rats)
-
   const generateTooltipContent = (point: PlotPoint) => {
     let toolTipContent = `<div>Room balance: <span class="tooltip-value">$${point?.meta?.roomValue}</span>`
 

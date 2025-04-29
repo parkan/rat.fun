@@ -45,7 +45,7 @@
       overflow-y: auto;
       padding: 20px;
       background: black;
-      border: 1px solid white;
+      border: var(--default-border-style);
     }
   }
 </style>

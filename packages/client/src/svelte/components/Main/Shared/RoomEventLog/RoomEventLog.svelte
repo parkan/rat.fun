@@ -14,8 +14,6 @@
   let subscription = $state<any>(null)
   let outcomes = $state(initialOutcomes.reverse())
 
-  $inspect(outcomes)
-
   const query = queries.outcomesForRoom
   const params = { roomId, worldAddress: $publicNetwork.worldAddress }
 
