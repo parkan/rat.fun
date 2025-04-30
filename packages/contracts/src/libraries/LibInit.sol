@@ -21,12 +21,13 @@ library LibInit {
         globalRatIndex: 0,
         maxInventorySize: MAX_INVENTORY_SIZE,
         maxTraitsSize: MAX_TRAITS_SIZE,
+        roomCreationCost: 250,
         ratCreationCost: 100,
-        creatorFee: CREATOR_FEE,
         minRoomPromptLength: MIN_ROOM_PROMPT_LENGTH,
         maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH,
         minRoomNameLength: MIN_ROOM_NAME_LENGTH,
-        maxRoomNameLength: MAX_ROOM_NAME_LENGTH
+        maxRoomNameLength: MAX_ROOM_NAME_LENGTH,
+        startingBalance: 2000
       })
     );
 
