@@ -55,7 +55,6 @@
 <style lang="scss">
   .main {
     text-align: center;
-    // padding-inline: 20px;
     color: var(--white);
     width: 100%;
     height: 100%;
@@ -65,14 +64,11 @@
   }
 
   .done {
-    // margin-top: 20px;
     text-align: left;
     padding: 20px;
-    background-color: var(--color-grey-dark);
   }
 
   .image-container {
-    // padding: 20px;
     display: flex;
     flex-flow: column nowrap;
     gap: 20px;

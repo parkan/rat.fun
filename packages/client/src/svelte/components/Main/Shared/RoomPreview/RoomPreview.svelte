@@ -299,13 +299,19 @@
       background: var(--color-alert);
       padding: 20px;
       margin-bottom: 20px;
+      border: none;
+      border-top: var(--default-border-style);
+
+      &:hover {
+        background: var(--background);
+        color: var(--foreground);
+      }
     }
   }
 
   .no-rat-warning {
     background: var(--color-death);
     padding: 30px 20px;
-    // margin-top: 15px;
     color: white;
     text-align: center;
   }
