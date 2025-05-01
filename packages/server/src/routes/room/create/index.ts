@@ -87,13 +87,7 @@ async function routes(fastify: FastifyInstance) {
         console.timeEnd("–– Image generation")
 
         // Broadcast room creation message
-        const {topic, message} = createRoomCreationMessage(playerId, components.Name);
-        broadcast({
-          topic,
-          message,
-          playerName: "unknown",
-          timestamp: Date.now()
-        });
+        broadcast(createRoomCreationMessage(playerId, components.Name));
 
         reply.send({
           success: true,

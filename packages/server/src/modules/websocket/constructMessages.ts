@@ -9,7 +9,8 @@ export function createOutcomeMessage(rat: Rat, newRatHealth: number, room: Room,
     if (newRatHealth == 0) {
         return {
             topic: 'rat__death',
-            message: `${rat.name} died in room #${room.index}`,
+            playerName: rat.name,
+            message: `died in room #${room.index}`,
             timestamp: Date.now()
         }
     }
@@ -62,6 +63,7 @@ export function createOutcomeMessage(rat: Rat, newRatHealth: number, room: Room,
     return {
         topic: 'room__outcome',
         message,
+        playerName: rat.name,
         timestamp: Date.now()
     }
 }
@@ -70,7 +72,8 @@ export function createRoomCreationMessage(playerId: string, Name: ClientComponen
     const playerName = getPlayerName(playerId, Name)
     return {
         topic: 'room__creation',
-        message: `${playerName} created a room`,
+        message: "created a room",
+        playerName: playerName,
         timestamp: Date.now()
     }
 }
