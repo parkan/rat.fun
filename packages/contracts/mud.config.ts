@@ -3,7 +3,7 @@ import { defineWorld } from "@latticexyz/world";
 export default defineWorld({
   namespace: "ratroom",
   enums: {
-    ENTITY_TYPE: ["NONE", "PLAYER", "RAT", "ROOM", "ITEM", "TRAIT", "LEVEL" ]
+    ENTITY_TYPE: ["NONE", "PLAYER", "RAT", "ROOM", "ITEM", "TRAIT", "LEVEL"]
   },
   deploy: {
     upgradeableWorldImplementation: true,
@@ -14,12 +14,12 @@ export default defineWorld({
       schema: {
         adminAddress: "address",
         adminId: "bytes32",
-        globalRoomIndex: "uint32",
-        globalRatIndex: "uint32",
-        maxInventorySize: "uint32",
-        maxTraitsSize: "uint32",
+        globalRoomIndex: "uint256",
+        globalRatIndex: "uint256",
         ratCreationCost: "uint256",
         roomCreationCost: "uint256",
+        maxInventorySize: "uint32",
+        maxTraitsSize: "uint32",
         minRoomPromptLength: "uint32",
         maxRoomPromptLength: "uint32",
         minRoomNameLength: "uint32",
