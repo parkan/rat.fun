@@ -87,3 +87,10 @@ export function ping() {
     })
   )
 }
+
+export function sendChatMessage(message: string) {
+  socket.send(JSON.stringify({
+    topic: "chat__message",
+    message: message
+  }))
+}
