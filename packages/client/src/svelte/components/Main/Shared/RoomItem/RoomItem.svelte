@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import { getUIState } from "@modules/ui/state.svelte"
-  import { getRoomOwnerName } from "@modules/state/base/helpers"
+  import { getRoomOwnerName } from "@modules/state/base/utils"
   import { blocksToReadableTime } from "@modules/utils"
   import { urlFor } from "@modules/content"
   import { blockNumber } from "@modules/network"

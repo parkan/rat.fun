@@ -3,20 +3,24 @@
   import { getUIState } from "@modules/ui/state.svelte"
   import { blocksToReadableTime } from "@modules/utils"
   import { blockNumber } from "@modules/network"
-  import { getContentState } from "@modules/content/state.svelte"
-
-  let { rooms: roomsState } = getContentState()
 
   let { roomId, room }: { roomId: Hex; room: Room } = $props()
 
-  let sanityRoomContent = $derived(
-    roomsState.current.find(r => r._id.trim() == roomId.trim())
-  )
-
   let { rooms } = getUIState()
+
+  let profit = $derived(Number(room.balance) - 250)
 </script>
 
 <button class="room-listing-item" onclick={() => rooms.preview(roomId, true)}>
+  <div class="profit">
+    <div
+      class="profit-indicator"
+      class:positive={profit > 0}
+      class:negative={profit < 0}
+    >
+      <span>Profit: ${profit}</span>
+    </div>
+  </div>
   <!-- INFO -->
   <div class="room-info">
     <!-- SECTION 1 -->
@@ -84,6 +88,32 @@
 
     &:hover {
       background-color: #222;
+    }
+
+    .profit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50%;
+      height: 100%;
+
+      .profit-indicator {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 70%;
+        aspect-ratio: 1/1;
+        border: var(--default-border-style);
+
+        &.positive {
+          background-color: var(--color-health);
+        }
+
+        &.negative {
+          background-color: var(--color-death);
+        }
+      }
     }
 
     .room-info {

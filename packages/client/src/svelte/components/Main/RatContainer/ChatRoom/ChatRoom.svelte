@@ -1,9 +1,11 @@
 <script lang="ts">
-  import ChatEvent from "../ChatEvent/ChatEvent.svelte"
   import { latestEvents } from "@modules/off-chain-sync/stores"
   import { walletNetwork } from "@modules/network"
   import { sendChatMessage } from "@modules/off-chain-sync"
   import { websocketConnected } from "@modules/off-chain-sync/stores"
+
+  import ChatEvent from "./ChatEvent.svelte"
+  import ChatMessage from "./ChatMessage.svelte"
 
   let clientHeight = $state(0)
   let value = $state("")
@@ -16,12 +18,9 @@
   })
 
   const sendMessage = async (e: Event) => {
-    console.log("yeah")
-
     e.preventDefault()
-
+    // Limit message length to 500 characters
     if (!value || value.length > 500) return
-
     try {
       await sendChatMessage($walletNetwork, value)
       value = ""
@@ -32,17 +31,21 @@
 </script>
 
 <div bind:clientHeight class="chat-window">
+  <!-- Chat scroll -->
   <div bind:this={scrollElement} class="chat-scroll">
-    {#each $latestEvents as event (event.timestamp)}
-      <ChatEvent {event} />
+    {#each $latestEvents as event (event.id)}
+      {#if event.topic == "chat__message"}
+        <ChatMessage {event} />
+      {:else}
+        <ChatEvent {event} />
+      {/if}
     {/each}
   </div>
-  <form autocomplete="off" class="chat-input" onsubmit={sendMessage}>
-    <input bind:value class="chat-message" type="text" name="text" id="text" />
-
-    <div class="status">
-      <div class="indicator" class:connected={$websocketConnected} />
-    </div>
+  <!-- Chat input container -->
+  <form autocomplete="off" class="chat-input-container" onsubmit={sendMessage}>
+    <!-- Chat input -->
+    <input bind:value class="chat-input" type="text" name="text" id="text" />
+    <!-- Chat submit -->
     <input
       disabled={!$websocketConnected || value === ""}
       class="chat-submit"
@@ -58,6 +61,9 @@
     display: flex;
     flex-flow: column nowrap;
     position: relative;
+    background: url("/images/bg-test.jpg");
+    background-size: 100px;
+    border-top: double 2px var(--foreground);
 
     .chat-scroll {
       display: flex;
@@ -72,47 +78,26 @@
       background: grey;
     }
 
-    .chat-input {
-      height: 40px;
+    .chat-input-container {
+      height: 60px;
       display: flex;
       flex-flow: row nowrap;
       color: white;
       bottom: 0;
       z-index: 1000;
       width: 100%;
+      padding: 10px;
 
       .chat-submit {
         height: 100%;
         background: var(--color-alert);
         color: var(--white);
-      }
+        border: var(--default-border-style);
+        cursor: pointer;
 
-      .status {
-        height: 100%;
-        aspect-ratio: 1;
-        background: var(--black);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        .indicator {
-          width: 10px;
-          height: 10px;
-          border-radius: 100%;
-          background: var(--color-death);
-
-          &.connected {
-            background: var(--color-health);
-          }
+        &:hover {
+          background: var(--background);
         }
-      }
-
-      .chat-message {
-        height: 100%;
-        width: 100%;
-        font-family: var(--typewriter-font-stack);
-        color: white;
-        background-color: var(--black);
       }
 
       .chat-submit {
@@ -120,6 +105,22 @@
         width: 100px;
         height: 100%;
         color: white;
+      }
+
+      .chat-input {
+        height: 100%;
+        width: 100%;
+        font-family: var(--typewriter-font-stack);
+        color: white;
+        background-color: var(--color-grey-dark);
+        border: var(--dashed-border-style);
+        margin-right: 10px;
+
+        &:focus {
+          outline: none;
+          background: var(--color-grey-light);
+          color: var(--background);
+        }
       }
     }
   }

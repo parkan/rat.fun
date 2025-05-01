@@ -42,11 +42,11 @@
       </small>
     </div>
     <button class:disabled class:busy onclick={sendCreateRat}>
-      <span class="button-text">Deploy new rat</span><br /><span
-        >Cost: $100</span
-      >
       {#if busy}
         <div class="spinner"><Spinner /></div>
+      {:else}
+        <span class="button-text">Deploy new rat</span><br />
+        <span>Cost: $100</span>
       {/if}
     </button>
   {/if}
@@ -90,7 +90,13 @@
     width: 100%;
     height: 80px;
     background: var(--color-alert);
-    // margin-bottom: 20px;
+    border: none;
+    border-top: var(--default-border-style);
+
+    &:hover {
+      background: var(--background);
+      color: var(--foreground);
+    }
 
     .spinner {
       position: relative;

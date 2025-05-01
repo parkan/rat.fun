@@ -7,7 +7,7 @@
   import { ratLevelIndex } from "@modules/state/base/stores"
   import { getUIState } from "@modules/ui/state.svelte"
   import { playSound } from "@modules/sound"
-  import { getRoomOwnerName } from "@modules/state/base/helpers"
+  import { getRoomOwnerName } from "@modules/state/base/utils"
   import { staticContent, lastUpdated, urlFor } from "@modules/content"
   import { rat } from "@modules/state/base/stores"
   import { publicNetwork } from "@modules/network"

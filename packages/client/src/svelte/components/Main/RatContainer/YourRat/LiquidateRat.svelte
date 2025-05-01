@@ -68,7 +68,7 @@
     <div class="content">
       <img
         class="liquidate-image"
-        src="/images/liquidate.svg"
+        src="/images/liquidate.jpg"
         alt="Confirm Liquidation"
       />
       <button disabled={busy} onclick={sendLiquidateRat} class="modal-button">
@@ -151,6 +151,14 @@
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        mix-blend-mode: screen;
+        filter: grayscale(100%);
+      }
     }
 
     button {

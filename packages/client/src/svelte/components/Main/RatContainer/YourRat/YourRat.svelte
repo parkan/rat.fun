@@ -19,7 +19,7 @@
           <RatInfo />
         </div>
         <!-- Cam -->
-        <div class="rat-cam">
+        <div class="rat-cam-container">
           <RatCam />
         </div>
       </div>
@@ -43,7 +43,7 @@
   .your-rat {
     display: flex;
     flex-flow: column nowrap;
-    height: 100%;
+    height: 440px;
   }
 
   .your-rat-top {
@@ -53,24 +53,6 @@
     height: 440px;
   }
 
-  .your-rat-bottom {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    flex-shrink: 0;
-    background-image: url("/images/bg-test.jpg");
-    background-size: 200px;
-    background-position: center;
-    opacity: 0.5;
-    height: 240px;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
   .rat-main {
     display: flex;
     flex-direction: row;
@@ -78,7 +60,7 @@
     height: var(--rat-main-info-height);
     border-bottom: var(--default-border-style);
 
-    .rat-cam {
+    .rat-cam-container {
       height: 100%;
       width: var(--rat-main-cam-width);
     }

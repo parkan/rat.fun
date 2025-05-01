@@ -77,7 +77,7 @@
     width: 50%;
 
     &.selected {
-      background: white;
+      background: var(--color-alert);
       color: black;
     }
   }

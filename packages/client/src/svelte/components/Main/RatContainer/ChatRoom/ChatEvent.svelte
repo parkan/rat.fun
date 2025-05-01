@@ -1,9 +1,16 @@
 <script lang="ts">
   import type { OffChainMessage } from "@server/modules/websocket/types"
+
+  import { onMount } from "svelte"
   import { formatDate } from "@modules/utils"
   import { tippy } from "svelte-tippy"
+  import { playSound } from "@modules/sound"
 
   let { event }: { event: OffChainMessage } = $props()
+
+  onMount(() => {
+    playSound("tcm", "selectionScroll2")
+  })
 </script>
 
 <div class="chat-event {event.topic}">
@@ -25,29 +32,22 @@
 <style lang="scss">
   .chat-event {
     display: inline-block;
+    font-size: var(--font-size-small);
 
     &.room__creation {
-      background: var(--color-alert);
+      color: var(--color-health);
     }
 
     &.room__outcome {
-      background: var(--color-grey-dark);
-      color: var(--color-grey-light);
+      color: var(--color-alert);
+    }
+
+    &.rat__death {
+      color: var(--color-death);
     }
 
     .timestamp {
       display: inline;
-    }
-
-    &.chat__message {
-      .timestamp {
-        background: var(--color-grey-light);
-        // padding: 5px;
-        color: black;
-      }
-      .message-body {
-        color: var(--color-grey-mid);
-      }
     }
   }
 </style>

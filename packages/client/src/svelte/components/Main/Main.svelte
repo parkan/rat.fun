@@ -5,7 +5,6 @@
   import { getUIState } from "@modules/ui/state.svelte"
 
   import Spawn from "@components/Spawn/Spawn.svelte"
-  import OperatorBar from "@components/Main/OperatorBar/OperatorBar.svelte"
   // import Floors from "@components/Main/Floors/Floors.svelte"
   import RatContainer from "@components/Main/RatContainer/RatContainer.svelte"
   import RoomContainer from "@components/Main/RoomContainer/RoomContainer.svelte"
@@ -43,16 +42,17 @@
   let debugTransition = $state(false)
 </script>
 
+<div class="dust"></div>
+
 {#snippet mainSnippet(className = "", transitionStyle = "")}
   <div class="main {className}" style={transitionStyle}>
-    <OperatorBar />
     <div class="main-area">
-      <!-- Room container -->
-      <RoomContainer {environment} />
-      <!-- <Floors /> -->
-      <FloorsPlaceholder />
       <!-- Rat container -->
       <RatContainer />
+      <!-- <Floors /> -->
+      <FloorsPlaceholder />
+      <!-- Room container -->
+      <RoomContainer {environment} />
     </div>
   </div>
 {/snippet}
@@ -213,5 +213,19 @@
     to {
       transform: translateX(100%);
     }
+  }
+
+  .dust {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    pointer-events: none;
+    background-image: url(/images/dust.png);
+    opacity: 0.6;
+    background-size: cover;
+    // mix-blend-mode: difference;
   }
 </style>
