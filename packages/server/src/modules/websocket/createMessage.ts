@@ -1,12 +1,14 @@
 import { Rat, Room } from "@routes/room/enter/types";
+import { Message } from "@routes/ws-connect/types";
 import { OutcomeReturnValue } from "@modules/llm/types";
 
-export function createMessage(rat: Rat, newRatHealth: number, room: Room, validatedOutcome: OutcomeReturnValue) {
+export function createMessage(rat: Rat, newRatHealth: number, room: Room, validatedOutcome: OutcomeReturnValue): Message {
     // Death
     if (newRatHealth == 0) {
         return {
             topic: 'rat__death',
-            message: `${rat.name} died in room #${room.index}`
+            message: `${rat.name} died in room #${room.index}`,
+            timestamp: Date.now()
         }
     }
 
@@ -47,6 +49,7 @@ export function createMessage(rat: Rat, newRatHealth: number, room: Room, valida
 
     return {
         topic: 'room__outcome',
-        message
+        message,
+        timestamp: Date.now()
     }
 }

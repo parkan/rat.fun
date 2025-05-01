@@ -5,6 +5,7 @@ export interface WebSocketParams {
   }
   
   export type Message = {
-    topic: string;
+    topic: "test" | "clients__update" | "room__outcome" | "rat__death" | "chat__message"
     message: string;
+    timestamp: number;
   }
