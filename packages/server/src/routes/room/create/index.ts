@@ -88,7 +88,12 @@ async function routes(fastify: FastifyInstance) {
 
         // Broadcast room creation message
         const {topic, message} = createRoomCreationMessage(playerId, components.Name);
-        broadcast(topic, message);
+        broadcast({
+          topic,
+          message,
+          playerName: "unknown",
+          timestamp: Date.now()
+        });
 
         reply.send({
           success: true,

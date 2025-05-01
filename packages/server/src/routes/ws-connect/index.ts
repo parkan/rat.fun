@@ -29,7 +29,11 @@ async function routes(fastify: FastifyInstance) {
         console.log('Object.keys(wsConnections)', Object.keys(wsConnections))
 
         // Broadcast updated client list to all connected clients
-        broadcast("clients__update", Object.keys(wsConnections));
+        broadcast({
+          topic: "clients__update",
+          message: Object.keys(wsConnections),
+          timestamp: Date.now()
+        });
 
         // Add ping-pong handler
         socket.on('message', (message: OffChainMessage) => {
@@ -58,7 +62,8 @@ async function routes(fastify: FastifyInstance) {
                 message: data.message,
                 timestamp: Date.now()
               }
-              broadcast("chat__message", newMessage);
+
+              broadcast(newMessage);
             }
           } catch (error) {
             handleError(error, socket);
@@ -69,7 +74,11 @@ async function routes(fastify: FastifyInstance) {
           console.log(`WebSocket closed for Player ID: ${playerId}`);
           delete wsConnections[playerId]; // Clean up connection
           // Broadcast updated client list to all connected clients
-          broadcast("clients__update", Object.keys(wsConnections));
+          broadcast({
+            topic: "clients__update",
+            message: Object.keys(wsConnections),
+            timestamp: Date.now()
+          });
         });
       } catch (error) {
         handleError(error, socket);
