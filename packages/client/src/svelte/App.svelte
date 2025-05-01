@@ -8,9 +8,8 @@
   import { playerId } from "@modules/state/base/stores"
   import { websocketConnected } from "@modules/off-chain-sync/stores"
   import { FullStory, init as initFullstory } from "@fullstory/browser"
-  import { rooms } from "@modules/state/base/stores"
   import { EMPTY_CONNECTION } from "./modules/utils/constants"
-  import { initStaticContent, staticContent } from "@modules/content"
+  import { initStaticContent } from "@modules/content"
 
   // Tippy CSS
   import "tippy.js/dist/tippy.css"
@@ -61,6 +60,8 @@
 
 <svelte:window />
 
+<div class="dust"></div>
+
 <div class="bg">
   <div class="context-main">
     {#if $UIState === UI.LOADING}
@@ -91,6 +92,7 @@
     transform: translate(-50%, -50%);
     background: black;
   }
+
   main {
     width: var(--game-window-width);
     height: var(--game-window-height);
@@ -103,5 +105,19 @@
     position: fixed;
     inset: 0;
     z-index: 0;
+  }
+
+  .dust {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--z-10);
+    pointer-events: none;
+    background-image: url(/images/dust.png);
+    opacity: 0.6;
+    background-size: cover;
+    // mix-blend-mode: difference;
   }
 </style>

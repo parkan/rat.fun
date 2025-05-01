@@ -102,7 +102,7 @@
     background: transparent;
     outline: none;
     border: none;
-    border-bottom: 1px solid white;
+    border-bottom: var(--default-border-style);
     padding: var(--room-item-padding);
     cursor: pointer;
     height: var(--room-item-height);

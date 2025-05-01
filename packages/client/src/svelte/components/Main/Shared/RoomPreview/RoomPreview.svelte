@@ -14,7 +14,7 @@
   import { loadData } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
 
-  import LiquidateRoom from "@components/Main/LeftContainer/YourRooms/LiquidateRoom.svelte"
+  import LiquidateRoom from "@components/Main/RoomContainer/YourRooms/LiquidateRoom.svelte"
   import RoomStats from "@components/Main/Shared/RoomStats/RoomStats.svelte"
   import RoomEventLog from "@components/Main/Shared/RoomEventLog/RoomEventLog.svelte"
 
@@ -183,7 +183,7 @@
       border: none;
       color: white;
       text-transform: uppercase;
-      border-bottom: 1px solid white;
+      border-bottom: var(--default-border-style);
 
       &:hover {
         background-color: #222;
