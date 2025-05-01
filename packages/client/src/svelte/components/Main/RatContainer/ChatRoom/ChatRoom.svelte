@@ -3,7 +3,6 @@
   import { walletNetwork } from "@modules/network"
   import { sendChatMessage } from "@modules/off-chain-sync"
   import { websocketConnected } from "@modules/off-chain-sync/stores"
-  import { timeSince } from "@modules/utils"
 
   let clientHeight = $state(0)
   let value = $state("")
@@ -11,7 +10,7 @@
 
   $effect(() => {
     if ($latestEvents[$latestEvents.length - 1]) {
-      scrollElement.scrollTop = scrollElement.scrollHeight
+      scrollElement?.scrollTop = scrollElement?.scrollHeight
     }
   })
 
