@@ -10,7 +10,11 @@
 
 <style lang="scss">
   .rat-container {
-    width: calc(50% - (var(--floor-bar-width) / 2));
+    height: 100%;
+    width: 100%;
     border-bottom: var(--default-border-style);
+    display: grid;
+    grid-template-rows: 440px 1fr;
+    position: relative;
   }
 </style>

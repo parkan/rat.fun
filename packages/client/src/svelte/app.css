@@ -162,3 +162,47 @@ button {
   color: var(--black);
   padding: 2px;
 }
+
+.warning {
+  border: none;
+  background: repeating-linear-gradient(
+    45deg,
+    #f0d000,
+    #f0d000 20px,
+    #bda400 20px,
+    #bda400 40px
+  );
+}
+
+.danger {
+  border: none;
+  background: repeating-linear-gradient(
+    45deg,
+    #cc0000,
+    #cc0000 20px,
+    #9e0000 20px,
+    #9e0000 40px
+  );
+}
+.warning-mute {
+  color: white;
+  border: none;
+  background: repeating-linear-gradient(
+    45deg,
+    black,
+    black 20px,
+    #222 20px,
+    #222 40px
+  );
+}
+.warning-mute-inverse {
+  color: white;
+  border: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    black,
+    black 20px,
+    #222 20px,
+    #222 40px
+  );
+}

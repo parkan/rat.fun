@@ -245,7 +245,7 @@
 
   .wrapper {
     position: relative;
-    height: 100%;
+    height: calc(100% - 60px);
     overflow: hidden;
   }
 

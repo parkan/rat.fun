@@ -42,26 +42,27 @@
 <style lang="scss">
   .your-rat {
     display: flex;
-    flex-direction: column;
-    position: relative;
+    flex-flow: column nowrap;
+    height: 100%;
   }
 
   .your-rat-top {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    height: 382px;
+    height: 440px;
   }
 
   .your-rat-bottom {
     display: flex;
     flex-direction: column;
     flex: 1;
+    flex-shrink: 0;
     background-image: url("/images/bg-test.jpg");
     background-size: 200px;
     background-position: center;
     opacity: 0.5;
-    height: calc(var(--game-window-height) - 200px);
+    height: 240px;
 
     img {
       width: 100%;

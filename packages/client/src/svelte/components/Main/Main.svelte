@@ -69,7 +69,7 @@
 {/snippet}
 
 <!-- Routes -->
-{#if route.current === "main" || transition.to === "main"}
+{#if transition.to === "main" || route.current === "main"}
   <div class="layer-game" class:transition-active={transition.active}>
     <div class="door-container">
       <div class="left-door" style={getDoorStyle("left")}>
@@ -124,6 +124,8 @@
     overflow: hidden;
     border: var(--default-border-style);
     background: black;
+    display: grid;
+    grid-template-rows: 60px 1fr;
   }
 
   .layer-below {
@@ -137,9 +139,11 @@
 
   .main-area {
     width: 100%;
-    height: var(--game-window-height);
-    display: flex;
-    flex-direction: row;
+    height: calc(var(--game-window-height) - 80px);
+    display: grid;
+    grid-template-columns: calc(var(--game-window-width) * 0.44) 1fr calc(
+        var(--game-window-width) * 0.44
+      );
   }
 
   .main.clone-left {

@@ -21,7 +21,7 @@
   }
 </script>
 
-{#if localMessage}
+{#if localMessage && localMessage.topic !== "chat__message"}
   <div
     class="alert"
     class:death={localMessage.topic == "rat__death"}

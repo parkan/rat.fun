@@ -50,7 +50,7 @@
     </div>
   {/if}
   <div class="alert-container">
-    <Alert />
+    <!-- <Alert /> -->
   </div>
 </div>
 
@@ -69,6 +69,7 @@
     display: flex;
     justify-content: space-between;
     height: 60px;
+    background: var(--black);
 
     .player-stats {
       display: flex;
