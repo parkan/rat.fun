@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tippy } from "svelte-tippy"
-  import { rooms as roomsStore } from "@modules/state/base/stores"
+  import { rooms as roomStore } from "@modules/state/base/stores"
   import {
     entriesChronologically,
     entriesByVisit,
@@ -31,11 +31,13 @@
   <!-- ROOM COUNTER -->
   <div
     use:tippy={{
-      content: `There are ${$roomsStore.length} rooms on your floor`,
+      content: `There are ${Object.keys($roomStore).length} rooms on your floor`,
     }}
     class="floor-stats"
   >
-    {$roomsStore.length} room{Object.keys($roomsStore).length > 1 ? "s" : ""}
+    {Object.keys($roomStore).length} room{Object.keys($roomStore).length > 1
+      ? "s"
+      : ""}
   </div>
   <!-- TEXT FILTER -->
   <div class="text-filter">
