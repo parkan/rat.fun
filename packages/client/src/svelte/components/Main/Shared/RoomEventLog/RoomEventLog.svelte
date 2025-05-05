@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte"
   import { client } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
-  import OutcomeMessage from "../OutcomeMessage/OutcomeMessage.svelte"
+  import OutcomeMessage from "./OutcomeMessage.svelte"
   import { publicNetwork } from "@modules/network"
   import type { Outcome } from "@cms/sanity.types"
 
@@ -51,11 +51,6 @@
     overscroll-behavior-y: none;
     border: 1px solid var(--color-grey-mid);
     font-size: 10px;
-  }
-
-  .outcome {
-    display: block;
-    margin-bottom: 12px;
   }
 
   .logs {
