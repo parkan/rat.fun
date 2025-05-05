@@ -6,10 +6,15 @@
   import { tippy } from "svelte-tippy"
   import { playSound } from "@modules/sound"
 
-  let { event }: { event: OffChainMessage } = $props()
+  let {
+    event,
+    suppressSound = false,
+  }: { event: OffChainMessage; suppressSound?: boolean } = $props()
 
   onMount(() => {
-    playSound("tcm", "selectionScroll2")
+    if (!suppressSound) {
+      playSound("tcm", "selectionScroll2")
+    }
   })
 </script>
 
