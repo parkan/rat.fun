@@ -3,6 +3,7 @@
   import { walletNetwork } from "@modules/network"
   import { sendChatMessage } from "@modules/off-chain-sync"
   import { websocketConnected } from "@modules/off-chain-sync/stores"
+  import { onMount } from "svelte"
 
   import ChatEvent from "./ChatEvent.svelte"
   import ChatMessage from "./ChatMessage.svelte"
@@ -11,6 +12,14 @@
   let clientHeight = $state(0)
   let value = $state("")
   let scrollElement = $state<null | HTMLElement>(null)
+  let suppressSound = $state(true)
+
+  onMount(() => {
+    // Suppress sounds for the first 2 seconds
+    setTimeout(() => {
+      suppressSound = false
+    }, 2000)
+  })
 
   $effect(() => {
     if ($latestEvents && scrollElement) {
@@ -37,9 +46,9 @@
   <div bind:this={scrollElement} class="chat-scroll">
     {#each $latestEvents as event (event.id)}
       {#if event.topic == "chat__message"}
-        <ChatMessage {event} />
+        <ChatMessage {event} {suppressSound} />
       {:else}
-        <ChatEvent {event} />
+        <ChatEvent {event} {suppressSound} />
       {/if}
     {/each}
   </div>
