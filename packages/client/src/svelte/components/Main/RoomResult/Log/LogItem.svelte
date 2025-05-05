@@ -154,13 +154,16 @@
 </script>
 
 <div class="log-entry" bind:this={element}>
-  <div class="text" bind:this={timestampElement}>
-    <span class="timestamp">
+  <!-- Timestamp -->
+  <div class="timestamp-container" bind:this={timestampElement}>
+    <div class="timestamp">
       {logEntry.timestamp}
-    </span>
-    <span class="log-text" bind:this={logTextElement}> </span>
+    </div>
   </div>
+  <!-- Log Text -->
+  <div class="log-text" bind:this={logTextElement}></div>
 
+  <!-- Outcomes -->
   <div class="outcome-list">
     {#if logEntry.healthChange}
       <div
@@ -231,50 +234,63 @@
   .log-entry {
     display: flex;
     margin-bottom: 0.5em;
-    line-height: 1.4em;
-    height: 2em;
+    line-height: 1.3em;
 
-    .timestamp {
+    .timestamp-container {
+      margin-right: 10px;
+
+      .timestamp {
+        display: inline-block;
+        background: var(--color-alert-priority);
+        padding: 5px;
+        color: var(--background);
+      }
+    }
+
+    .log-text {
+      display: inline-block;
       background: var(--color-grey-light);
       padding: 5px;
       color: var(--background);
+      max-width: 60%;
     }
-  }
 
-  .outcome {
-    opacity: 0;
-    background: var(--color-health);
-    color: var(--background);
-    height: 30px;
-    line-height: 30px;
-    padding-inline: 10px;
-    font-size: 12px;
-    position: relative;
-    top: -6px;
-  }
+    .outcome-list {
+      margin-left: 10px;
+      display: flex;
+      flex-direction: row;
+      gap: 5px;
+      flex-wrap: wrap;
 
-  .health {
-    background: var(--color-health);
-    color: var(--background);
-  }
+      .outcome {
+        opacity: 0;
+        background: var(--color-health);
+        color: var(--background);
+        font-size: var(--font-size-small);
+        height: 30px;
+        line-height: 30px;
+        padding-inline: 10px;
+        font-size: 12px;
+        position: relative;
 
-  .balance {
-    background: var(--color-value);
-    color: var(--background);
-  }
+        &.health {
+          background: var(--color-health);
+          color: var(--background);
+        }
 
-  .negative {
-    background: var(--color-death);
-  }
+        &.balance {
+          background: var(--color-value);
+          color: var(--background);
+        }
 
-  .remove {
-    background: var(--color-death);
-  }
+        &.negative {
+          background: var(--color-death);
+        }
 
-  .outcome-list {
-    margin-left: 10px;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
+        &.remove {
+          background: var(--color-death);
+        }
+      }
+    }
   }
 </style>

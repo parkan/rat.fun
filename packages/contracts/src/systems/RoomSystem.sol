@@ -21,14 +21,12 @@ contract RoomSystem is System {
    * @dev Only admin can call this function
    * @param playerId The id of the player creating the room
    * @param _roomId The id of the room
-   * @param _roomName The name of the room
    * @param _roomPrompt The prompt for the room
    * @return newRoomId The id of the new room
    */
   function createRoom(
     bytes32 playerId,
     bytes32 _roomId,
-    string memory _roomName,
     string memory _roomPrompt
   ) public onlyAdmin returns (bytes32 newRoomId) {
     // TODO: What level is room created on?
@@ -43,7 +41,7 @@ contract RoomSystem is System {
     Balance.set(playerId, Balance.get(playerId) - roomCreationCost);
 
     // Create room
-    newRoomId = LibRoom.createRoom(_roomName, _roomPrompt, playerId, levelId, _roomId);
+    newRoomId = LibRoom.createRoom(_roomPrompt, playerId, levelId, _roomId);
   }
 
   function closeRoom(bytes32 _roomId) public {

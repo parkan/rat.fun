@@ -76,7 +76,6 @@ declare global {
     index: number,
     balance: number,
     level: Hex,
-    name: string,
     roomPrompt: string,
     visitCount: number,
     killCount: number,

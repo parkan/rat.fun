@@ -93,10 +93,10 @@
                 .auto("format")
                 .saturation(-100)
                 .url()}
-              alt={room.name}
+              alt={`room #${room.index}`}
             />
           {:else}
-            <img src="/images/room3.jpg" alt={room.name} />
+            <img src="/images/room3.jpg" alt={`room #${room.index}`} />
           {/if}
         {/key}
       </div>

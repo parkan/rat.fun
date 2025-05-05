@@ -79,21 +79,18 @@ export function getOnchainData(network: SetupNetworkReturnType, components: Clie
         const roomEntity = network.world.registerEntity({ id: roomId });
         
         // Check if room exists
-        const roomName = getComponentValue(Name, roomEntity)?.value;
         const roomPrompt = getComponentValue(RoomPrompt, roomEntity)?.value;
         const roomIndex = (getComponentValue(Index, roomEntity)?.value ?? 0) as number;
         
-        if (!roomName && !roomPrompt) {
+        if (!roomPrompt) {
             throw new RoomNotFoundError(roomId);
         }
         
-        const roomNameValue = (roomName ?? "") as string;
         const roomPromptValue = (roomPrompt ?? "") as string;
         const roomBalance = (getComponentValue(Balance, roomEntity)?.value ?? 0) as number;
 
         const room = {
             id: roomId,
-            name: roomNameValue,
             prompt: roomPromptValue,
             balance: Number(roomBalance),
             index: roomIndex

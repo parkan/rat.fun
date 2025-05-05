@@ -8,7 +8,7 @@ export function constructEventMessages(
 ): MessageParam[] {
     const messages: MessageParam[] = [];
     // Room
-    messages.push({ role: "user", content: `RoomDescription: ${room.name}. ${room.prompt}` });
+    messages.push({ role: "user", content: `RoomDescription: ${room.prompt}` });
     messages.push({ role: "user", content: `RoomBalance: ${room.balance}` });
     // Rat
     messages.push({ role: "user", content: `RatName: ${rat.name}` });

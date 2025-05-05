@@ -25,8 +25,6 @@ library LibInit {
         maxTraitsSize: MAX_TRAITS_SIZE,
         minRoomPromptLength: MIN_ROOM_PROMPT_LENGTH,
         maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH,
-        minRoomNameLength: MIN_ROOM_NAME_LENGTH,
-        maxRoomNameLength: MAX_ROOM_NAME_LENGTH,
         startingBalance: 2000
       })
     );
