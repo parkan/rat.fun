@@ -7,14 +7,12 @@ import { ENTITY_TYPE } from "../codegen/common.sol";
 library LibRoom {
   /**
    * @notice Create a room
-   * @param _roomName The name of the room
    * @param _roomPrompt The prompt for the room
    * @param _roomOwner Id of the owner of the room
    * @param _roomLevel Id of the level that the room is on
    * @return newRoomId The id of the new room
    */
   function createRoom(
-    string memory _roomName,
     string memory _roomPrompt,
     bytes32 _roomOwner,
     bytes32 _roomLevel,
@@ -29,7 +27,6 @@ library LibRoom {
 
     EntityType.set(newRoomId, ENTITY_TYPE.ROOM);
     RoomPrompt.set(newRoomId, _roomPrompt);
-    Name.set(newRoomId, _roomName);
 
     uint256 newRoomIndex = GameConfig.getGlobalRoomIndex() + 1;
     GameConfig.setGlobalRoomIndex(newRoomIndex);
@@ -51,7 +48,6 @@ library LibRoom {
   function destroyRoom(bytes32 _roomId) internal {
     EntityType.deleteRecord(_roomId);
     RoomPrompt.deleteRecord(_roomId);
-    Name.deleteRecord(_roomId);
     Index.deleteRecord(_roomId);
     Level.deleteRecord(_roomId);
     Owner.deleteRecord(_roomId);

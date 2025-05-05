@@ -19,7 +19,7 @@
   <!-- NAME -->
   <div class="name">{name}</div>
   <!-- VALUE -->
-  <div class="value" class:negative={value < 0}>${value}</div>
+  <span class="value" class:negative={value < 0}>${value}</span>
 </div>
 
 <style lang="scss">
@@ -31,9 +31,16 @@
     padding: 5px;
     margin: 5px;
     justify-content: space-between;
+    align-items: center;
+
+    .name {
+      flex: 1;
+    }
 
     .value {
       color: var(--color-health);
+      padding: 2px 6px;
+      line-height: 1;
       &.negative {
         background: var(--color-death);
         color: var(--background);

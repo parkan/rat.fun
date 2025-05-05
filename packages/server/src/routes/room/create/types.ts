@@ -1,6 +1,5 @@
 export type CreateRoomBody = {
     signature: string;
-    roomName: string;
     roomPrompt: string;
     roomLevel: number;
 }

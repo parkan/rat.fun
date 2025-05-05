@@ -60,6 +60,9 @@
 
   const handleModalClose = () => {
     modal.close()
+    confirming = false
+    dropCompleted = false
+    dropMessage = "CONFIRM ITEM DROP"
   }
 </script>
 
@@ -73,7 +76,7 @@
   <!-- NAME -->
   <div class="name">{isRoomInfoBox || !isHovered ? name : "Drop item"}</div>
   <!-- VALUE -->
-  <div class="value" class:negative={value < 0}>${value}</div>
+  <span class="value" class:negative={value < 0}>${value}</span>
 </button>
 
 {#snippet confirmDrop()}

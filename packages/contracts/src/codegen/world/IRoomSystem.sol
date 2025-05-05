@@ -12,7 +12,6 @@ interface IRoomSystem {
   function ratroom__createRoom(
     bytes32 playerId,
     bytes32 _roomId,
-    string memory _roomName,
     string memory _roomPrompt
   ) external returns (bytes32 newRoomId);
 

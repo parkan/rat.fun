@@ -39,7 +39,7 @@ async function routes(fastify: FastifyInstance) {
     opts,
     async (request: FastifyRequest<{ Body: CreateRoomBody }>, reply) => {
       try {
-        const { signature, roomName, roomPrompt } = request.body
+        const { signature, roomPrompt } = request.body
 
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = getSenderId(signature)
@@ -47,7 +47,7 @@ async function routes(fastify: FastifyInstance) {
         // TODO: Check if player has enough balance to create a room
 
         // Check name and prompt lengths
-        validateInputData(roomName, roomPrompt)
+        validateInputData(roomPrompt)
 
         // We need to generate a unique ID here
         // Doing it onchain does not allow us to use it to connect the room to the image
@@ -55,7 +55,7 @@ async function routes(fastify: FastifyInstance) {
 
         // Create room onchain
         console.time("–– Chain call")
-        await systemCalls.createRoom(playerId, roomID, roomName, roomPrompt)
+        await systemCalls.createRoom(playerId, roomID, roomPrompt)
         console.timeEnd("–– Chain call")
 
         // Generate image

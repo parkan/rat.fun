@@ -20,8 +20,6 @@
   let busy = $state(false)
   let roomDescription: string = $state("")
 
-  let newName: string = $state("room name")
-
   let invalidRoomDescriptionLength = $derived(
     roomDescription.length < 1 ||
       roomDescription.length > $gameConfig.gameConfig.maxRoomPromptLength
@@ -36,7 +34,7 @@
     busy = true
     const newPrompt = roomDescription
 
-    await createRoom(environment, $walletNetwork, newName, newPrompt)
+    await createRoom(environment, $walletNetwork, newPrompt)
     busy = false
     await initStaticContent()
 

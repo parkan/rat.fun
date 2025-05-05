@@ -28,7 +28,7 @@ contract RoomSystemTest is BaseTest {
     // As admin
     prankAdmin();
     startGasReport("Create room (user)");
-    bytes32 roomId = world.ratroom__createRoom(playerId, bytes32(0), "Test room", "A test room");
+    bytes32 roomId = world.ratroom__createRoom(playerId, bytes32(0), "A test room");
     endGasReport();
     vm.stopPrank();
 
@@ -37,7 +37,6 @@ contract RoomSystemTest is BaseTest {
 
     // Check room
     assertEq(uint8(EntityType.get(roomId)), uint8(ENTITY_TYPE.ROOM));
-    assertEq(Name.get(roomId), "Test room");
     assertEq(RoomPrompt.get(roomId), "A test room");
     assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
     assertEq(Owner.get(roomId), playerId);
@@ -58,7 +57,6 @@ contract RoomSystemTest is BaseTest {
     world.ratroom__createRoom(
       playerId,
       bytes32(0),
-      "Test room",
       "The room has two doors. One doors lead to death, the other to freedom. If a rat does not make a choice within 10 minutes it is killed and the body removed. Each door has a guardian mouse that needs to be defeated to pass."
     );
     endGasReport();
@@ -73,7 +71,7 @@ contract RoomSystemTest is BaseTest {
     prankAdmin();
     world.ratroom__removePlayerBalance(playerId);
     vm.expectRevert("balance too low");
-    world.ratroom__createRoom(playerId, bytes32(0), "Test room", "A test room");
+    world.ratroom__createRoom(playerId, bytes32(0), "A test room");
     vm.stopPrank();
   }
 
@@ -86,7 +84,7 @@ contract RoomSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratroom__createRoom(playerId, bytes32(0), "Test room", "A test room");
+    bytes32 roomId = world.ratroom__createRoom(playerId, bytes32(0), "A test room");
     vm.stopPrank();
 
     // Check player balance
@@ -124,7 +122,7 @@ contract RoomSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratroom__createRoom(aliceId, bytes32(0), "Test room", "A test room");
+    bytes32 roomId = world.ratroom__createRoom(aliceId, bytes32(0), "A test room");
     vm.stopPrank();
 
     // Check room balance

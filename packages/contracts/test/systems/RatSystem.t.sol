@@ -137,7 +137,7 @@ contract RatSystemTest is BaseTest {
     setInitialBalance(bobId);
 
     prankAdmin();
-    bytes32 roomId = world.ratroom__createRoom(bobId, bytes32(0), "test room", "test room");
+    bytes32 roomId = world.ratroom__createRoom(bobId, bytes32(0), "test room");
     vm.stopPrank();
 
     // Trait to add

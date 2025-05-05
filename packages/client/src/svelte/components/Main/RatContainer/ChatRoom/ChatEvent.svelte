@@ -168,8 +168,9 @@
   }
 
   .rat-name {
-    background: var(--color-grey-light);
-    color: var(--background);
-    padding: 2px;
+    // background: var(--background);
+    // color: var(--foreground);
+    // border: var(--default-border-style);
+    // padding: 2px;
   }
 </style>
