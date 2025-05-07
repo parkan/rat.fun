@@ -69,6 +69,7 @@
   .chat-window {
     height: 100%;
     display: flex;
+    overflow: hidden;
     flex-flow: column nowrap;
     position: relative;
     background: url("/images/bg-test.jpg");
@@ -76,9 +77,10 @@
     border-top: double 2px var(--foreground);
 
     .chat-scroll {
-      display: flex;
+      // display: flex;
       flex-flow: column nowrap;
-      height: calc(100% - 130px);
+      height: 100%;
+      // background: red;
       overflow-y: scroll;
       padding: 8px;
       gap: 4px;
