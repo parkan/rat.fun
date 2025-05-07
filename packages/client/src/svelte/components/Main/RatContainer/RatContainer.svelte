@@ -9,17 +9,24 @@
   <OperatorBar />
   <!-- Fixed height of 440px -->
   <YourRat />
+  <!-- Min height of 20px -->
+  <div class="spacer"></div>
   <!-- Fills rest of vertical space -->
   <ChatRoom />
 </div>
 
 <style lang="scss">
   .rat-container {
-    height: 100%;
+    height: var(--game-window-height);
     width: 100%;
     border-bottom: var(--default-border-style);
     display: grid;
-    grid-template-rows: 60px 440px 1fr;
+    grid-template-rows: 60px 440px 1fr minmax(100px, 440px);
     position: relative;
+  }
+
+  .spacer {
+    height: 100%;
+    width: 100%;
   }
 </style>
