@@ -21,12 +21,12 @@
     width: 100%;
     border-bottom: var(--default-border-style);
     display: grid;
-    grid-template-rows: 60px 440px 20px minmax(440px, 1fr);
+    grid-template-rows: 60px 440px 1fr minmax(100px, 440px);
     position: relative;
   }
 
   .spacer {
-    height: 20px;
+    height: 100%;
     width: 100%;
   }
 </style>

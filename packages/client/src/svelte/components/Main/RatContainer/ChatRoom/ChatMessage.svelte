@@ -33,7 +33,7 @@
 
 <style lang="scss">
   .chat-message {
-    display: inline-block;
+    display: block;
     font-size: var(--font-size-small);
     line-height: 1.6;
 
