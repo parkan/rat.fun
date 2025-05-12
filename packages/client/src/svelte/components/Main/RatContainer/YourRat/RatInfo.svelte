@@ -55,7 +55,7 @@
     .name {
       background: var(--color-alert);
       padding: 5px;
-      color: var(--background);
+      color: var(--foreground);
       font-family: var(--display-font-stack);
       font-size: var(--font-size-large);
     }

@@ -116,6 +116,7 @@
     padding-bottom: 0;
     font-size: var(--font-size-normal);
     overflow-y: auto;
+    border: var(--default-border-style);
   }
 
   .info-boxes {

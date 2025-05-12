@@ -30,7 +30,7 @@
         src={urlFor(sanityRoomContent?.image)
           .width(400)
           .auto("format")
-          .saturation(-100)
+          // .saturation(-100)
           .url()}
         alt={`room #${room.index}`}
       />
@@ -119,7 +119,10 @@
       height: var(--room-item-image-height);
       aspect-ratio: 4/3;
       margin-right: 20px;
-      border: 1px solid var(--color-grey-mid);
+      // border: 1px solid var(--color-grey-mid);
+
+      border: 10px solid transparent;
+      border-image: url("/images/border-2.png") 20 repeat;
 
       img {
         width: 100%;
@@ -162,6 +165,12 @@
         padding: 5px;
         word-break: break-word; /* Break long words if needed */
         overflow-wrap: anywhere; /* Break anywhere if necessary to prevent overflow */
+        font-family: var(--special-font-stack);
+        font-size: 24px;
+        max-height: 6em;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: normal;
 
         .content {
           max-width: 55ch;
