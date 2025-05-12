@@ -1,4 +1,3 @@
-import fetch from "node-fetch"
 import { pickRandom } from "@modules/utils"
 import Replicate from "replicate"
 import type { FileOutput } from "replicate"
@@ -10,20 +9,22 @@ const client = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 })
 
-const PRE_PROMPT = "Security camera view of"
+const PREPROMPT = "STYLE: Extreme fisheye distortion. High contrast black and white. Everything needs to be rat sized. NEVER include any humans. Cursed atmosphere. Liminal space. CONTENT: Security camera view of a clinical experiment room with the description: "
 const MODEL = "black-forest-labs/flux-dev"
 const IMAGE_TEMPLATES = [
   "https://rat-room-pyrope.netlify.app/images/room-templates/room-1.jpg",
   "https://rat-room-pyrope.netlify.app/images/room-templates/room-2.jpg",
   "https://rat-room-pyrope.netlify.app/images/room-templates/room-3.jpg",
   "https://rat-room-pyrope.netlify.app/images/room-templates/room-4.jpg",
-  "https://rat-room-pyrope.netlify.app/images/room-templates/room-5.jpg"
+  "https://rat-room-pyrope.netlify.app/images/room-templates/room-5.jpg",
+  "https://rat-room-pyrope.netlify.app/images/room-templates/room-6.jpg",
+  "https://rat-room-pyrope.netlify.app/images/room-templates/room-7.jpg"
 ]
 
 export const generateImage = async (prompt: string = "A rat") => {
   const input = {
     image: pickRandom(IMAGE_TEMPLATES),
-    prompt: `${PRE_PROMPT} ${prompt}.`,
+    prompt: `${PREPROMPT} ${prompt}.`,
     go_fast: true,
     guidance: 3.5,
     megapixels: "1",
@@ -31,29 +32,23 @@ export const generateImage = async (prompt: string = "A rat") => {
     aspect_ratio: "4:3",
     output_format: "webp",
     output_quality: 80,
-    prompt_strength: 0.73,
-    num_inference_steps: 28,
+    prompt_strength: 0.90, // 0.73
+    num_inference_steps: 20, // 28
   }
 
   try {
     const output = await client.run(MODEL, { input }) as FileOutput[]
 
-    const outputUrl = output[0].url()
+    if (!output[0]) throw new Error("No output received from Replicate")
 
-    if (!outputUrl) throw new Error("Could not use the output URL")
+    // Get the image data directly as a blob
+    const blob = await output[0].blob()
+    
+    // Convert blob to buffer
+    const arrayBuffer = await blob.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
 
-    const response = await fetch(outputUrl)
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch image from Replicate URL: ${response.statusText}`
-      )
-    }
-
-    // Get as Buffer (simplest for Sanity)
-    const imageBuffer = await response.buffer()
-
-    return imageBuffer
+    return buffer
   } catch (error) {
     throw new Error(error as string)
   }

@@ -98,5 +98,8 @@
     position: fixed;
     inset: 0;
     z-index: 0;
+    background: var(--background);
+    background-image: url("/images/tiles.png");
+    background-size: 300px;
   }
 </style>

@@ -133,10 +133,10 @@
     }
 
     &.room__outcome {
-      color: var(--color-alert-priority);
+      color: var(--color-alert);
 
       .timestamp {
-        background: var(--color-alert-priority);
+        background: var(--color-alert);
         color: var(--background);
         padding: 2px;
       }

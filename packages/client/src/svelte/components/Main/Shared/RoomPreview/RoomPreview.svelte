@@ -305,6 +305,8 @@
       word-break: break-word; /* Break long words if needed */
       overflow-wrap: anywhere; /* Break anywhere if necessary to prevent overflow */
       width: 100%;
+      font-family: var(--special-font-stack);
+      font-size: 24px;
 
       .content {
         max-width: 55ch;
