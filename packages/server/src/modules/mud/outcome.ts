@@ -10,7 +10,8 @@ export function createOutcomeCallArgs(rat: Rat, room: Room, outcome: OutcomeRetu
     
     // TRAIT struct
     const traitsToAddToRat = outcome?.traitChanges.filter(c => c.type === "add").map(c => {
-      return { name: c.name, value: c.value }
+      // Limit name length
+      return { name: c.name.slice(0, 48), value: c.value }
     }) ?? [];
 
     // Only ID
@@ -18,7 +19,8 @@ export function createOutcomeCallArgs(rat: Rat, room: Room, outcome: OutcomeRetu
     
     // ITEM struct
     const itemsToAddToRat = outcome?.itemChanges.filter(c => c.type === "add").map(c => {
-      return { name: c.name, value: c.value }
+      // Limit name length
+      return { name: c.name.slice(0, 48), value: c.value }
     }) ?? [];
   
     return [
