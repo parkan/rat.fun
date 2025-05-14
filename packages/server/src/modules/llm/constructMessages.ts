@@ -1,12 +1,15 @@
 import { MessageParam } from '@anthropic-ai/sdk/resources';
-import { Rat, Room } from '@modules/types'
+import { Level, Rat, Room } from '@modules/types'
 import { LogEntry, OutcomeReturnValue } from './types';
 
 export function constructEventMessages(
     rat: Rat,
     room: Room,
+    level: Level
 ): MessageParam[] {
     const messages: MessageParam[] = [];
+    // Level / floor
+    messages.push({ role: "user", content: `FloorDescription: ${level.prompt}` });
     // Room
     messages.push({ role: "user", content: `RoomDescription: ${room.prompt}` });
     messages.push({ role: "user", content: `RoomBalance: ${room.balance}` });

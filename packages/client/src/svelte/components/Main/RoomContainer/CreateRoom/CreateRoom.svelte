@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { player, gameConfig, levels } from "@modules/state/base/stores"
+  import {
+    player,
+    gameConfig,
+    levels,
+    ratLevel,
+  } from "@modules/state/base/stores"
   import { createRoom } from "./index"
   import { getUIState } from "@modules/ui/state.svelte"
   import { ENVIRONMENT } from "@mud/enums"
@@ -96,7 +101,7 @@
     <!-- ACTIONS -->
     <div class="actions">
       <button class:disabled onclick={sendCreateRoom}>
-        Create room (Cost: ${Number($gameConfig?.gameConfig?.roomCreationCost)})
+        Create room (Cost: ${Number($ratLevel?.roomCreationCost ?? 666)})
       </button>
       <button class="secondary" onclick={goYourRooms}>Cancel</button>
     </div>
