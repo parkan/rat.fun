@@ -45,7 +45,23 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
             throw new OnchainDataError('Rat ID is required');
         }
 
-        const { Owner, Name, Prompt, Dead, Traits, Health, Balance, Inventory, Index, GameConfig } = components;
+        const { 
+            Owner, 
+            Name, 
+            Prompt, 
+            Dead, 
+            Traits, 
+            Health, 
+            Balance, 
+            Inventory, 
+            Index, 
+            GameConfig, 
+            Level,
+            VisitedLevels,
+            LevelMinBalance,
+            LevelMaxBalance,
+            RoomCreationCost 
+        } = components;
 
         const result = {} as EnterRoomData;
 
@@ -69,6 +85,7 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
         const ratBalance = (getComponentValue(Balance, ratEntity)?.value ?? 0) as number;
         const ratInventory = (getComponentValue(Inventory, ratEntity)?.value ?? [""]) as string[];
         const ratTraits = (getComponentValue(Traits, ratEntity)?.value ?? [""]) as string[];
+        const ratLevel = (getComponentValue(Level, ratEntity)?.value ?? "") as string;
 
         const traitsObjects = constructTraitsObject(ratTraits);
         const inventoryObjects = constructInventoryObject(ratInventory);
@@ -80,6 +97,7 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
         const rat = {
             id: ratId,
             name: ratName,
+            level: ratLevel,
             traits: traitsObjects,
             balance: Number(ratBalance),
             inventory: inventoryObjects,
@@ -108,10 +126,12 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
             
             const roomIndex = (getComponentValue(Index, roomEntity)?.value ?? 0) as number;
             const roomBalance = (getComponentValue(Balance, roomEntity)?.value ?? 0) as number;
-
+            const roomLevel = (getComponentValue(Level, roomEntity)?.value ?? "") as string;
+            
             const room = {
                 id: roomId,
                 prompt: roomPrompt,
+                level: roomLevel,
                 balance: Number(roomBalance),
                 index: roomIndex
             };
@@ -129,7 +149,8 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
             
             const playerName = getComponentValue(Name, playerEntity)?.value as string;
             const playerBalance = Number(getComponentValue(Balance, playerEntity)?.value ?? 0);
-
+            const playerVisitedLevels = getComponentValue(VisitedLevels, playerEntity)?.value as string[];
+            
             // Check if player exists
             if (!playerName) {
                 throw new PlayerNotFoundError(playerId);
@@ -139,8 +160,32 @@ export async function getEnterRoomData(ratId: string, roomId?: string, playerId?
                 id: playerId,
                 name: playerName,
                 balance: playerBalance,
+                visitedLevels: playerVisitedLevels,
             };
         }
+
+        /////////////////
+        // LEVEL
+        /////////////////
+
+        const levelEntity = (await network).world.registerEntity({ id: ratLevel });
+
+        const levelPrompt = getComponentValue(Prompt, levelEntity)?.value as string;
+        const levelIndex = getComponentValue(Index, levelEntity)?.value as number;
+        const levelMinBalance = getComponentValue(LevelMinBalance, levelEntity)?.value as number;
+        const levelMaxBalance = getComponentValue(LevelMaxBalance, levelEntity)?.value as number;
+        const levelRoomCreationCost = getComponentValue(RoomCreationCost, levelEntity)?.value as number;
+
+        const level = {
+            id: ratLevel,
+            prompt: levelPrompt,
+            index: levelIndex,
+            minBalance: levelMinBalance,
+            maxBalance: levelMaxBalance,
+            roomCreationCost: levelRoomCreationCost,
+        };
+
+        result.level = level;
 
         /////////////////
         // GAME CONFIG

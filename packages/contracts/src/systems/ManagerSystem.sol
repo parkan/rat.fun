@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { GameConfig, EntityType, Balance, Dead, Health, Traits, Inventory, Owner, VisitCount, KillCount } from "../codegen/index.sol";
+import { GameConfig, EntityType, Balance, Dead, Health, Traits, Inventory, Owner, VisitCount, KillCount, Level } from "../codegen/index.sol";
 import { LibManager, LibRat } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 import { Item } from "../structs.sol";
@@ -45,6 +45,7 @@ contract ManagerSystem is System {
     require(Dead.get(_ratId) == false, "rat is dead");
     require(EntityType.get(_roomId) == ENTITY_TYPE.ROOM, "not room");
     require(Balance.get(_roomId) >= 0, "no room balance");
+    require(Level.get(_roomId) == Level.get(_ratId), "rat and room level mismatch");
 
     // Increment visitor count
     VisitCount.set(_roomId, VisitCount.get(_roomId) + 1);

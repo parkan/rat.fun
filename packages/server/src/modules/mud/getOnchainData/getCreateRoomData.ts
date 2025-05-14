@@ -25,13 +25,26 @@ export class GameConfigNotFoundError extends OnchainDataError {
   }
 }
 
-export async function getCreateRoomData(playerId: string): Promise<CreateRoomData> {
+export class LevelNotFoundError extends OnchainDataError {
+  constructor(levelId: string) {
+    super(`Level not found for id ${levelId}`, 'LEVEL_NOT_FOUND');
+    this.name = 'LevelNotFoundError';
+  }
+}
+
+export async function getCreateRoomData(playerId: string, levelId: string): Promise<CreateRoomData> {
     try {
         if (!playerId) {
           throw new OnchainDataError('Player ID is required');
         }
 
-        const { Name, Balance, VisitedLevels, GameConfig } = components;
+        const { 
+          Name, 
+          Balance, 
+          VisitedLevels, 
+          RoomCreationCost,
+          GameConfig 
+        } = components;
 
         const result = {} as CreateRoomData;
 
@@ -71,6 +84,25 @@ export async function getCreateRoomData(playerId: string): Promise<CreateRoomDat
         }
 
         result.gameConfig = gameConfig;
+
+                /////////////////
+        // LEVEL
+        /////////////////
+
+        const levelEntity = (await network).world.registerEntity({ id: levelId });
+
+        const levelRoomCreationCost = getComponentValue(RoomCreationCost, levelEntity)?.value as number;
+
+        if(!levelRoomCreationCost) {
+          throw new LevelNotFoundError(levelId);
+        }
+
+        const level = {
+            id: levelId,
+            roomCreationCost: levelRoomCreationCost,
+        };
+
+        result.level = level;
 
         /////////////////
         // RETURN RESULT

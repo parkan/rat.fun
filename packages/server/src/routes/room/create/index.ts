@@ -47,10 +47,10 @@ async function routes(fastify: FastifyInstance) {
         const playerId = getSenderId(signature)
 
         // Get onchain data
-        const { gameConfig, player } = await getCreateRoomData(playerId)
+        const { gameConfig, player, level } = await getCreateRoomData(playerId, levelId)
 
         // Validate data
-        validateInputData(gameConfig, roomPrompt, player, levelId)
+        validateInputData(gameConfig, roomPrompt, player, level)
 
         // We need to generate a unique ID here
         // Doing it onchain does not allow us to use it to connect the room to the image

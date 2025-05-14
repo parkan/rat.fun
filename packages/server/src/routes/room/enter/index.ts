@@ -55,7 +55,7 @@ async function routes (fastify: FastifyInstance) {
 
             // Get onchain data
             console.time('–– Get on chain data');
-            const { room, rat, player } = await getEnterRoomData(ratId, roomId, playerId) as Required<EnterRoomData>;
+            const { room, rat, player, level } = await getEnterRoomData(ratId, roomId, playerId) as Required<EnterRoomData>;
             console.timeEnd('–– Get on chain data');
 
             // Validate input data
@@ -68,7 +68,7 @@ async function routes (fastify: FastifyInstance) {
 
             // Call event model
             console.time('–– Event LLM');
-            const eventMessages = constructEventMessages(rat, room);
+            const eventMessages = constructEventMessages(rat, room, level);
             const eventResults = await callModel(llmClient, eventMessages, combinedSystemPrompt) as EventsReturnValue;
             console.timeEnd('–– Event LLM');
 
