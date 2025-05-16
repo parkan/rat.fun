@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ServerReturnValue } from "@components/Main/RoomResult/types"
+  import type { EnterRoomReturnValue } from "@server/modules/types"
   import type { Hex } from "viem"
   import { RESULT_POPUP_STATE } from "@modules/ui/enums"
   import ModalTarget from "@components/Main/Modal/ModalTarget.svelte"
@@ -40,7 +40,7 @@
   let error = $state("")
 
   let entering = $state(true)
-  let result: ServerReturnValue | null = $state(null)
+  let result: EnterRoomReturnValue | null = $state(null)
 
   let popup: RESULT_POPUP_STATE = $state(RESULT_POPUP_STATE.NONE)
 
