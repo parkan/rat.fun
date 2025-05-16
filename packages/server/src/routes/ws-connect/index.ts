@@ -21,6 +21,16 @@ async function routes(fastify: FastifyInstance) {
       const { playerId } = req.params;
 
       try {
+        // Clean up any existing connection for this playerId
+        if (wsConnections[playerId]) {
+          try {
+            wsConnections[playerId].close();
+          } catch (e) {
+            console.error('Error closing existing connection:', e);
+          }
+          delete wsConnections[playerId];
+        }
+
         // Store the WebSocket connection
         wsConnections[playerId] = socket;
         // console.log(`WebSocket connected for Player ID: ${playerId}`);
