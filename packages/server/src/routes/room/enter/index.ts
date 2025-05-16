@@ -4,15 +4,20 @@ import { schema } from '@routes/room/enter/schema';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { EnterRoomBody } from '@routes/room/enter/types';
-import { EnterRoomData } from '@modules/types';
+// Types
+import { 
+    EnterRoomBody,
+    EnterRoomData, 
+    EnterRoomReturnValue, 
+    EventsReturnValue, 
+    CorrectionReturnValue 
+} from '@modules/types';
 
 // WebSocket
 import { broadcast } from '@modules/websocket';
 import { createOutcomeMessage } from '@modules/websocket/constructMessages';
 
 // LLM  
-import { EventsReturnValue, CorrectionReturnValue } from '@modules/llm/types'
 import { constructEventMessages, constructCorrectionMessages } from '@modules/llm/constructMessages';
 
 // Anthropic
@@ -35,6 +40,7 @@ import { validateInputData } from './validation';
 
 // Error handling
 import { handleError } from './errorHandling';
+import { Hex } from 'viem';
 
 // Initialize LLM: Anthropic
 const llmClient = getLLMClient(ANTHROPIC_API_KEY);
@@ -82,7 +88,8 @@ async function routes (fastify: FastifyInstance) {
                 roomValueChange, 
                 newRatValue, 
                 ratValueChange,
-                newRatHealth
+                newRatHealth,
+                newRatLevelIndex
             } = await systemCalls.applyOutcome(rat, room, eventResults.outcome);
             console.timeEnd('–– Chain');
 
@@ -133,13 +140,20 @@ async function routes (fastify: FastifyInstance) {
             }
             console.timeEnd('–– CMS write');
 
-            reply.send({
+            const response: EnterRoomReturnValue = {
+                id: ratId as Hex,
                 log: correctedEvents.log ?? [],
                 healthChange: validatedOutcome.healthChange,
                 traitChanges: validatedOutcome.traitChanges,
                 itemChanges: validatedOutcome.itemChanges,
-                balanceTransfer: validatedOutcome.balanceTransfer
-            });
+                balanceTransfer: validatedOutcome.balanceTransfer,
+                ratDead: newRatHealth == 0,
+                roomDepleted: newRoomValue == 0,
+                levelUp: newRatLevelIndex > level.index,
+                levelDown: newRatLevelIndex < level.index
+            }
+
+            reply.send(response);
 
         } catch (error) {
             return handleError(error, reply);

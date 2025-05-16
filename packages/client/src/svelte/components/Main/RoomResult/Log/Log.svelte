@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MergedLogEntry } from "./types"
-  import type { ServerReturnValue } from "@components/Main/RoomResult/types"
+  import type { EnterRoomReturnValue } from "@server/modules/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
   import { playSound } from "@modules/sound"
@@ -13,7 +13,7 @@
     animationstarted,
     onComplete,
   }: {
-    result: ServerReturnValue | undefined
+    result: EnterRoomReturnValue | undefined
     animationstarted: boolean
     onComplete: () => void
   } = $props()
