@@ -96,8 +96,13 @@ export function ping() {
   )
 }
 
+/****************
+ * CHAT MESSAGE
+ *****************/
+
 export async function sendChatMessage(
   walletNetwork: SetupWalletNetworkResult,
+  level: string,
   message: string
 ) {
   const signature = await walletNetwork.walletClient.signMessage({
@@ -108,6 +113,7 @@ export async function sendChatMessage(
     socket.send(
       JSON.stringify({
         topic: "chat__message",
+        level: level,
         message: message,
         signature: signature,
       })
@@ -116,6 +122,10 @@ export async function sendChatMessage(
     console.error("No socket")
   }
 }
+
+/****************
+ * RAT DEPLOYMENT
+ *****************/
 
 export async function sendDeployRatMessage(walletNetwork: SetupWalletNetworkResult) {
   const signature = await walletNetwork.walletClient.signMessage({
@@ -134,7 +144,11 @@ export async function sendDeployRatMessage(walletNetwork: SetupWalletNetworkResu
   }
 }
 
-export async function sendLiquidateRatMessage(walletNetwork: SetupWalletNetworkResult, ratName: string) {
+/****************
+ * RAT LIQUIDATION
+ *****************/
+
+export async function sendLiquidateRatMessage(walletNetwork: SetupWalletNetworkResult, ratId: string) {
   const signature = await walletNetwork.walletClient.signMessage({
     message: OFFCHAIN_VALIDATION_MESSAGE
   })
@@ -143,7 +157,7 @@ export async function sendLiquidateRatMessage(walletNetwork: SetupWalletNetworkR
     socket.send(
       JSON.stringify({
         topic: "rat__liquidate",
-        ratName: ratName,
+        ratId: ratId,
         signature: signature, 
       })
     )
@@ -152,7 +166,11 @@ export async function sendLiquidateRatMessage(walletNetwork: SetupWalletNetworkR
   }
 }
 
-export async function sendLiquidateRoomMessage(roomId: string, roomIndex: number, walletNetwork: SetupWalletNetworkResult) {
+/****************
+ * ROOM LIQUIDATION
+ *****************/
+
+export async function sendLiquidateRoomMessage(walletNetwork: SetupWalletNetworkResult, roomId: string) {
   const signature = await walletNetwork.walletClient.signMessage({
     message: OFFCHAIN_VALIDATION_MESSAGE
   })
@@ -161,8 +179,7 @@ export async function sendLiquidateRoomMessage(roomId: string, roomIndex: number
     socket.send(
       JSON.stringify({
         topic: "room__liquidation",
-        roomId: roomId,
-        roomIndex: Number(roomIndex),
+        roomId: roomId,        
         signature: signature,
       })
     )

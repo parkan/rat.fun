@@ -36,6 +36,7 @@ async function routes(fastify: FastifyInstance) {
         broadcast({
           id: uuidv4(),
           topic: "clients__update",
+          level: "0", // For all clients regardless of level
           message: Object.keys(wsConnections),
           timestamp: Date.now()
         }).catch(console.error);
@@ -57,6 +58,7 @@ async function routes(fastify: FastifyInstance) {
           await broadcast({
             id: uuidv4(),
             topic: "clients__update",
+            level: "0", // For all clients regardless of level
             message: Object.keys(wsConnections),
             timestamp: Date.now()
           });
