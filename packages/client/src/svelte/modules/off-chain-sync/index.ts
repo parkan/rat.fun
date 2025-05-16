@@ -15,9 +15,25 @@ const MAX_EVENTS = 200
 let socket: WebSocket
 let reconnectAttempts = 0
 let roundTripStart = 0
+let reconnectTimeout: NodeJS.Timeout | null = null
 
 export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
   console.log("Initializing off chain sync", environment, playerId)
+
+  // Clean up any existing connection
+  if (socket) {
+    try {
+      socket.close();
+    } catch (e) {
+      console.error('Error closing existing socket:', e);
+    }
+  }
+
+  // Clear any pending reconnection
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
 
   let url = `ws://localhost:3131/ws/${playerId}`
 
@@ -74,16 +90,17 @@ export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
 }
 
 function attemptReconnect(environment: ENVIRONMENT, playerId: string) {
-  const delay = Math.min(
-    1000 * Math.pow(2, reconnectAttempts),
-    MAX_RECONNECTION_DELAY
-  )
-  reconnectAttempts += 1
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+  }
 
-  setTimeout(() => {
-    console.log(`Reconnecting attempt ${reconnectAttempts}...`)
-    initOffChainSync(environment, playerId)
-  }, delay)
+  const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECTION_DELAY);
+  reconnectAttempts++;
+
+  reconnectTimeout = setTimeout(() => {
+    console.log(`Attempting to reconnect (attempt ${reconnectAttempts})...`);
+    initOffChainSync(environment, playerId);
+  }, delay);
 }
 
 export function ping() {
