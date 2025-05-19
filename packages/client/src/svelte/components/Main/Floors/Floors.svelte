@@ -23,8 +23,10 @@
 
   let floorProgress = $derived.by(() => {
     const range =
-      Number($ratLevel.levelMaxBalance) - Number($ratLevel.levelMinBalance)
-    const value = Number($ratTotalValue) - Number($ratLevel.levelMinBalance)
+      Number($ratLevel?.levelMaxBalance ?? 0) -
+      Number($ratLevel?.levelMinBalance ?? 0)
+    const value =
+      Number($ratTotalValue) - Number($ratLevel?.levelMinBalance ?? 0)
 
     return value / range
     // $levels[levelId].levelMinBalance} / Max: ${$levels[levelId].levelMaxBalance}
@@ -45,10 +47,10 @@
         <div class="your-floor" style:background-image="url(/images/rat.png)">
           <div class="progress warning-mute">
             <div class="label-min">
-              ${$ratLevel.levelMinBalance}
+              ${$ratLevel?.levelMinBalance ?? 0}
             </div>
             <div class="label-max">
-              ${$ratLevel.levelMaxBalance}
+              ${$ratLevel?.levelMaxBalance ?? 0}
             </div>
             <div class="bar-current" style:width="{floorProgress * 100}%"></div>
           </div>
