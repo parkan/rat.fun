@@ -28,7 +28,7 @@
   }: { roomId: Hex; room: Room; isOwnRoomListing: boolean } = $props()
 
   let sanityRoomContent = $derived(
-    $staticContent.rooms.find(r => r.title == roomId)
+    $staticContent?.rooms?.find(r => r.title == roomId)
   )
 
   let { rooms } = getUIState()
