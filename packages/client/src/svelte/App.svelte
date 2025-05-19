@@ -2,6 +2,7 @@
   import { onMount } from "svelte"
   import { ENVIRONMENT } from "@mud/enums"
   import { initSound } from "@modules/sound"
+  import { getUIState } from "@modules/ui/state.svelte"
   import { UIState, UILocation } from "@modules/ui/stores"
   import { UI, LOCATION } from "@modules/ui/enums"
   import { initOffChainSync } from "@modules/off-chain-sync"
@@ -19,6 +20,8 @@
   import Spawn from "@components/Spawn/Spawn.svelte"
 
   let { environment }: { environment: ENVIRONMENT } = $props()
+
+  let { rooms } = getUIState()
 
   const environmentLoaded = () => {
     UIState.set(UI.SPAWNING)
@@ -56,10 +59,30 @@
 
     // Preload sounds
     initSound()
+
+    console.log(
+      window.location.href.includes("share"),
+      window.location.hash !== ""
+    )
+
+    if (window.location.hash !== "") {
+      rooms.preview(window.location.hash.replaceAll("#", ""))
+    }
   })
 </script>
 
-<svelte:window />
+<svelte:window
+  onhashchange={e => {
+    // If the hash is different and not a string
+    const newHash = new URL(e.newURL).hash.replaceAll("#", "")
+    const oldHash = new URL(e.oldURL).hash.replaceAll("#", "")
+
+    if (newHash !== "" && oldHash !== "") {
+      console.log(newHash)
+      rooms.preview(newHash)
+    }
+  }}
+/>
 
 <div class="bg">
   <div class="context-main">
