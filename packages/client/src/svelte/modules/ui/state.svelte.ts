@@ -136,7 +136,7 @@ export const getUIState = () => {
     if (id === "") return
     previewAnimated = animated
     const go = () => {
-      location.hash = id
+      window.location.hash = id
       if (mine) {
         uiStores.myPreviewId.set(id)
         previewingPane = PANE.ROOM_CONTAINER
@@ -157,7 +157,7 @@ export const getUIState = () => {
   }
 
   const back = (mine = false, animated = true) => {
-    location.hash = ""
+    window.location.hash = ""
     previewAnimated = animated
     uiStores.myPreviewId.set(null)
     uiStores.previewId.set(null)
