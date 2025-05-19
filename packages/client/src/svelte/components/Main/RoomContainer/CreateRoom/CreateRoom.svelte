@@ -144,7 +144,7 @@
     <div class="actions">
       <button class:disabled onclick={sendCreateRoom}>
         Create room (Cost: ${Number(
-          $ratLevel?.roomCreationCost ??
+          $levels[levelId]?.roomCreationCost ??
             $levels[$gameConfig.levelList[0]]?.roomCreationCost ??
             666
         )})
