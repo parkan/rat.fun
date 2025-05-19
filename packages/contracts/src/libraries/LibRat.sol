@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueentity/getUniqueEntity.sol";
-import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level, LevelList, Name, Owner, OwnedRat, CreationBlock } from "../codegen/index.sol";
+import { EntityType, GameConfig, Dead, Health, Index, Balance, Traits, Inventory, Value, Level, LevelList, Name, Owner, OwnedRat, CreationBlock, PastRats } from "../codegen/index.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
 library LibRat {
@@ -74,6 +74,9 @@ library LibRat {
     Balance.set(_destinationId, Balance.get(_destinationId) + balanceToTransfer);
 
     bytes32 playerId = Owner.get(_ratId);
+    // Add to history of rats
+    PastRats.push(playerId, _ratId);
+    // Then disconnect the rat from the player
     OwnedRat.deleteRecord(playerId);
   }
 
