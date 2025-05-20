@@ -29,7 +29,7 @@
   onMount(() => {
     console.log("on mount")
     if (resultEvent === RESULT_EVENT.RAT_DEAD) {
-      snd = playSound("tcm", "machineFlowing", true)
+      snd = playSound("tcm", "ratDeath", false)
     }
     if (resultEvent === RESULT_EVENT.LEVEL_UP) {
       snd = playSound("tcm", "win", true)
@@ -49,7 +49,7 @@
 
 <div
   onclick={async () => {
-    await rooms.close()
+    await rooms.close(false)
   }}
   class="popup-container"
 >
@@ -90,8 +90,8 @@
             class:death={resultEvent === RESULT_EVENT.RAT_DEAD}
             class:levelup={resultEvent === RESULT_EVENT.LEVEL_UP}
             class:leveldown={resultEvent === RESULT_EVENT.LEVEL_DOWN}
-            onclick={async () => {
-              await rooms.close()
+            onclick={() => {
+              rooms.close(false)
             }}
           >
             LEAVE ROOM
