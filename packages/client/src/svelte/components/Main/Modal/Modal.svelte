@@ -1,6 +1,9 @@
 <script lang="ts">
   import { getModalState } from "./state.svelte"
+  let { id = "main" } = $props()
   let { modal } = getModalState()
+
+  console.log("mdoal id", id)
 
   let modalBackground = $state<HTMLDivElement | undefined>(undefined)
 
@@ -11,12 +14,17 @@
   }
 </script>
 
-{#if modal.show}
+{#if modal.show && modal.config.target === id}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div bind:this={modalBackground} onclick={onModalClick} class="modal">
+  <div
+    id={modal.config.target}
+    bind:this={modalBackground}
+    onclick={onModalClick}
+    class="modal"
+  >
     <div class="content">
-      {@render modal.current?.()}
+      {@render modal.current?.()} a
     </div>
   </div>
 {/if}
@@ -31,6 +39,10 @@
     align-items: center;
     overscroll-behavior: none;
     z-index: 10;
+
+    &#roomresult {
+      position: absolute;
+    }
 
     .content {
       // width: 700px;

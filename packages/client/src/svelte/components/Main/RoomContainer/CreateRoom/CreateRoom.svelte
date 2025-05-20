@@ -54,6 +54,7 @@
     if (result.roomId) {
       busy = false
       // Go to the preview
+      rooms.preview(result.roomId, false, false)
     }
   }
 </script>
