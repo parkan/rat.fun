@@ -24,7 +24,7 @@
     class="modal"
   >
     <div class="content">
-      {@render modal.current?.()} a
+      {@render modal.current?.()} a§
     </div>
   </div>
 {/if}
@@ -45,8 +45,6 @@
     }
 
     .content {
-      // width: 700px;
-      // min-height: 500px;
       max-width: calc(var(--game-window-height) * 0.6);
       max-height: calc(var(--game-window-height) * 0.9);
       overflow-x: hidden;
