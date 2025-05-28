@@ -66,6 +66,9 @@ contract ManagerSystemTest is BaseTest {
     world.ratroom__applyOutcome(ratId, roomId, 0, 0, new bytes32[](0), new Item[](0), new bytes32[](0), new Item[](0));
     endGasReport();
     vm.stopPrank();
+
+    // Check last visit block
+    assertEq(LastVisitBlock.get(roomId), block.number);
   }
 
   // * * * *

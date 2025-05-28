@@ -8,6 +8,7 @@ import { LevelList } from "./tables/LevelList.sol";
 import { Name } from "./tables/Name.sol";
 import { EntityType } from "./tables/EntityType.sol";
 import { CreationBlock } from "./tables/CreationBlock.sol";
+import { LastVisitBlock } from "./tables/LastVisitBlock.sol";
 import { Health } from "./tables/Health.sol";
 import { Dead } from "./tables/Dead.sol";
 import { Traits } from "./tables/Traits.sol";

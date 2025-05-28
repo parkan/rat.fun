@@ -26,6 +26,7 @@ declare global {
     name?: string,
     balance?: number,
     creationBlock?: number,
+    lastVisitBlock?: number,
     level?: Hex,
     visitedLevels?: Hex[],
     value?: number,
@@ -83,7 +84,8 @@ declare global {
     prompt: string,
     visitCount: number,
     killCount: number,
-    creationBlock: number
+    creationBlock: number,
+    lastVisitBlock: number
   }
 
   type Trait = {
