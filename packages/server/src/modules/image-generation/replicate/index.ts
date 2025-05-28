@@ -11,8 +11,6 @@ const client = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 })
 
-const PREPROMPT = "STYLE: "
-
 const MODEL = {
   FLUX: "black-forest-labs/flux-dev",
   SD: "stability-ai/stable-diffusion-3.5-large" //.5-large
@@ -20,7 +18,7 @@ const MODEL = {
 
 const makePrompt = (prompt: string) => {
   const randomPrompts = pickRandomMultiple(PROMPTS, 4).join(" ")
-  return `${PREPROMPT} ${randomPrompts} . !! Important !! A scene of: ${prompt}`
+  return `STYLE: ${randomPrompts}. !! Important !! A scene of: ${prompt}`
 }
 
 export const generateImage = async (prompt: string, levelPrompt: string) => {
@@ -45,7 +43,7 @@ export const generateImage = async (prompt: string, levelPrompt: string) => {
       aspect_ratio: "1:1",
       output_format: "webp",
       output_quality: 80,
-      prompt_strength: 0.78, // 0.73
+      prompt_strength: 0.72, // 0.73
       steps: 28, // 28
     }
   }

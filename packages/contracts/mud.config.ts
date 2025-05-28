@@ -39,6 +39,7 @@ export default defineWorld({
     Name: "string", // Set on player, rat and room
     EntityType: "ENTITY_TYPE",
     CreationBlock: "uint256", // Set on player, rat and room
+    LastVisitBlock: "uint256", // Set on room
     // ...
     Health: "uint256", // Set on rat
     Dead: "bool", // Set on rat
