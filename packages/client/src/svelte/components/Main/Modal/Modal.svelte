@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getModalState } from "./state.svelte"
-  let { id = "main" } = $props()
   let { modal } = getModalState()
 
   let modalBackground = $state<HTMLDivElement | undefined>(undefined)
@@ -21,7 +20,7 @@
     onclick={onModalClick}
     class="modal"
   >
-    <div class="content">
+    <div class="content" class:fullscreen={modal.config.fullscreen}>
       {@render modal.current?.()}
     </div>
   </div>
@@ -43,10 +42,17 @@
     }
 
     .content {
-      max-width: calc(var(--game-window-height) * 0.6);
-      max-height: calc(var(--game-window-height) * 0.9);
       overflow-x: hidden;
       overflow-y: scroll;
+
+      &.fullscreen {
+        width: 100%;
+        height: 100%;
+      }
+      &:not(.fullscreen) {
+        max-width: calc(var(--game-window-height) * 0.6);
+        max-height: calc(var(--game-window-height) * 0.9);
+      }
     }
   }
 </style>

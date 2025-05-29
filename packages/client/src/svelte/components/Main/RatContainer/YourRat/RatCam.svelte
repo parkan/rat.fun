@@ -1,10 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { Tween } from "svelte/motion"
+  import { getModalState } from "@components/Main/Modal/state.svelte"
   import Main from "@components/3D/World/Main.svelte"
   import Box from "@components/3D/Box/Box.svelte"
+  import PetRat from "@components/3D/PetRat/PetRat.svelte"
   import ModalTarget from "../../Modal/ModalTarget.svelte"
 
+  let { modal } = getModalState()
   let progress = new Tween(0, { duration: 2000 })
   let showPettable = $state(false)
 
@@ -36,13 +39,23 @@
 {#snippet bigCam()}
   <div class="big-rat-cam">
     <Main>
-      <Box canPet></Box>
+      <PetRat></PetRat>
     </Main>
+    <button
+      class="close"
+      onclick={() => {
+        console.log("showPettable", showPettable)
+        modal.close()
+      }}>X</button
+    >
   </div>
 {/snippet}
 
 {#if showPettable}
-  <ModalTarget onclose={() => (showPettable = false)} content={bigCam}
+  <ModalTarget
+    fullscreen={true}
+    onclose={() => (showPettable = false)}
+    content={bigCam}
   ></ModalTarget>
 {/if}
 
@@ -66,8 +79,19 @@
   }
 
   .big-rat-cam {
-    width: calc(var(--game-window-height) * 0.6);
-    height: calc(var(--game-window-height) * 0.6);
+    width: calc(var(--game-window-width) - 20px);
+    height: var(--game-window-height);
+    position: relative;
+
+    .close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 99;
+      width: 20px;
+      height: 20px;
+      background: red;
+    }
   }
 
   .overlay {
