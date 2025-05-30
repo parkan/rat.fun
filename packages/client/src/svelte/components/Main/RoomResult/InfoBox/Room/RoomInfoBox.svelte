@@ -8,7 +8,7 @@
 
   import NoImage from "@components/Main/Shared/NoImage/NoImage.svelte"
 
-  let { roomId, depleted }: { roomId: Hex } = $props()
+  let { roomId, depleted }: { roomId: Hex; depleted: boolean } = $props()
 
   let sanityRoomContent = $derived(
     $staticContent.rooms.find(r => r._id == roomId)

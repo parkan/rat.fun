@@ -1,19 +1,12 @@
 <script lang="ts">
-  import {
-    player,
-    rat,
-    gameConfig,
-    levels,
-    ratLevel,
-  } from "@modules/state/base/stores"
+  import { player, rat, gameConfig, levels } from "@modules/state/base/stores"
   import { createRoom } from "./index"
   import { getUIState } from "@modules/ui/state.svelte"
   import { ENVIRONMENT } from "@mud/enums"
   import { walletNetwork } from "@modules/network"
-  import { staticContent } from "@modules/content"
 
   import CharacterCounter from "@components/Main/RoomContainer/CreateRoom/CharacterCounter.svelte"
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+  import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
 
   const { rooms } = getUIState()
 
@@ -61,10 +54,7 @@
 
 <div class="create-room">
   {#if busy}
-    <div class="loading-container">
-      Room creation in progress...
-      <Spinner />
-    </div>
+    <VideoLoader />
   {:else}
     <!-- LEVEL SELECTION -->
     <div class="form-group level-selection">
@@ -136,9 +126,10 @@
 
 <style lang="scss">
   .create-room {
-    padding: 1rem;
+    height: 100%;
 
     .form-group {
+      padding: 1rem;
       display: block;
       margin-bottom: 15px;
       width: 100%;
@@ -227,6 +218,7 @@
       display: flex;
       flex-flow: column nowrap;
       gap: 12px;
+      margin-inline: 1rem;
 
       button {
         width: 100%;

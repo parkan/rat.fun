@@ -71,5 +71,7 @@ function computePopularity(
   // Logarithmic scaling to dampen very high visit counts
   const popularityScore = Math.log(visits + 1) * freshnessDecay * visitDecay
 
+  console.log(visits, blocksSinceCreation, blocksSinceLastVisit, popularityScore)
+
   return popularityScore
 }

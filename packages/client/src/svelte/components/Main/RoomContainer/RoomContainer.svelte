@@ -76,6 +76,8 @@
     padding-inline: 20px;
     border: none;
     outline: none;
+    font-family: var(--label-font-stack);
+    font-size: var(--font-size-large);
     background: var(--color-grey-mid);
     color: var(--background);
     width: 50%;

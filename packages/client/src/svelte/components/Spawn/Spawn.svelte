@@ -6,7 +6,7 @@
   import { player } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+  import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
 
   const { spawned = () => {} } = $props<{
     spawned?: () => void
@@ -42,8 +42,10 @@
 </script>
 
 <div class="container">
-  <div class="main">
-    {#if !busy}
+  {#if busy}
+    <VideoLoader />
+  {:else}
+    <div class="main">
       <!-- INTRO TEXT -->
       <div class="content">
         <p class="header">
@@ -77,21 +79,10 @@
           bind:value={name}
           onkeydown={e => e.key === "Enter" && sendSpawn()}
         />
-        <button class:disabled={!name} class:busy onclick={sendSpawn}>
-          SIGN
-          {#if busy}
-            <div class="spinner"><Spinner /></div>
-          {/if}
-        </button>
+        <button class:disabled={!name} onclick={sendSpawn}>SIGN</button>
       </div>
-    {:else}
-      <div class="main">
-        <p>Standby <strong>{name}</strong></p>
-        <p>Connecting to <strong>Rat Rooms</strong>....</p>
-        <Spinner />
-      </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

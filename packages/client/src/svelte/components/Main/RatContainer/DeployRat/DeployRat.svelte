@@ -7,7 +7,7 @@
   import { sendDeployRatMessage } from "@modules/off-chain-sync"
   import { walletNetwork } from "@modules/network"
 
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+  import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
 
   let busy = $state(false)
   let done = $state(false)
@@ -36,31 +36,31 @@
   )
 </script>
 
-<div class="main">
-  {#if done}
+{#if busy}
+  <VideoLoader text="RAT" />
+{:else if done}
+  <div class="deploy-rat">
     <div class="done">
       <span>Rat deployed. Stand by...</span>
     </div>
-  {:else}
+  </div>
+{:else}
+  <div class="deploy-rat">
     <div class="image-container warning-mute-inverse">
       <img src="/images/rat.png" alt="Rat" />
       <small>
         {name}
       </small>
     </div>
-    <button class:disabled class:busy onclick={sendCreateRat}>
-      {#if busy}
-        <div class="spinner"><Spinner /></div>
-      {:else}
-        <span class="button-text">Deploy new rat</span><br />
-        <span>Cost: ${Number($gameConfig?.gameConfig?.ratCreationCost)}</span>
-      {/if}
+    <button class:disabled onclick={sendCreateRat}>
+      <span class="button-text">Deploy new rat</span><br />
+      <span>Cost: ${Number($gameConfig?.gameConfig?.ratCreationCost)}</span>
     </button>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style lang="scss">
-  .main {
+  .deploy-rat {
     text-align: center;
     color: var(--white);
     width: 100%;
