@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Hex } from "viem"
-  import { onMount } from "svelte"
   import { get } from "svelte/store"
   import {
     rooms as roomStore,
@@ -48,6 +47,7 @@
     entries = filterRooms(entries, textFilter)
     return entries.sort(sortFunction)
   })
+
   let activeList = $derived.by(() => {
     console.log("active list filtering")
 
@@ -68,6 +68,7 @@
       }
     }
   })
+
   $effect(() => {
     if (!isOwnRoomListing) {
       if (!$previewId) {

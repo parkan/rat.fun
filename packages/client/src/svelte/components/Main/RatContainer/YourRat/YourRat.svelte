@@ -6,8 +6,6 @@
   import RatCam from "@components/Main/RatContainer/YourRat/RatCam.svelte"
   import LiquidateRat from "@components/Main/RatContainer/YourRat/LiquidateRat.svelte"
   import DeployRat from "@components/Main/RatContainer/DeployRat/DeployRat.svelte"
-
-  // import FloorProgress from "@components/Main/RatContainer/YourRat/FloorProgress.svelte"
 </script>
 
 <div class="your-rat">
@@ -28,7 +26,6 @@
         <div class="rat-inventory">
           <RatInventory />
         </div>
-        <!-- <FloorProgress /> -->
         <!-- Liquidate -->
         <div class="rat-liquidate">
           <LiquidateRat />
@@ -44,7 +41,7 @@
 <style lang="scss">
   .your-rat {
     display: flex;
-    flex-flow: column nowrap;
+    // flex-flow: column nowrap;
     height: 440px;
     width: 100%;
     overflow: hidden;

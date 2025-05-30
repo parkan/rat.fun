@@ -69,9 +69,8 @@
       padding-right: 5px;
       color: var(--foreground);
       font-family: var(--label-font-stack);
+      font-size: 32px;
       letter-spacing: -0.2em;
-      font-size: var(--font-size-large);
-      font-size: 50px;
       color: var(--background);
     }
 

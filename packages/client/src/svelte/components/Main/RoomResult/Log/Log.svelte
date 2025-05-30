@@ -7,7 +7,7 @@
   import { playSound } from "@modules/sound"
 
   import LogItem from "@components/Main/RoomResult/Log/LogItem.svelte"
-  import Spinner from "@components/Main/Shared/Spinner/Spinner.svelte"
+  import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
 
   let {
     result,
@@ -90,7 +90,7 @@
       <LogItem {logEntry} onTimeline={addToTimeline} />
     {/each}
   {:else if animationstarted}
-    EXPERIMENT IN PROGRESS: <Spinner />
+    <VideoLoader />
   {/if}
 
   {#if resultEvent === RESULT_EVENT.NONE || resultEvent === RESULT_EVENT.ROOM_DEPLETED}
