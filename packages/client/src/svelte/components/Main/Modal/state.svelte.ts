@@ -4,7 +4,11 @@ import type { Snippet } from "svelte"
 
 let modalState = $state<null | Snippet>(null)
 let showModal = $state(false)
-let modalConfig = $state<{ target?: string; noclose?: boolean }>({})
+let modalConfig = $state<{
+  target?: string
+  noclose?: boolean
+  fullscreen?: boolean
+}>({})
 
 export const getModalState = () => {
   const setState = children => {
@@ -17,7 +21,7 @@ export const getModalState = () => {
     }
   }
 
-  const setConfig = c => (modalConfig = c)
+  const setConfig = c => (modalConfig = { ...modalConfig, ...c })
 
   const closeModal = () => setState(null)
 

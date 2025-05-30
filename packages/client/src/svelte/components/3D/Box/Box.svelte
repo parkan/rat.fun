@@ -59,6 +59,7 @@
   position.y={0.001}
   position.z={box.target.current.z}
   position.x={box.target.current.x}
+  {getBoxState}
 ></Rat>
 
 <T.PerspectiveCamera
