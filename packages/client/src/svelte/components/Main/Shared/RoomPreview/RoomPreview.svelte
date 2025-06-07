@@ -142,7 +142,7 @@
 
         <div class="room-info-row">
           <!-- BALANCE -->
-          <span class="balance" class:depleted={room.balance == 0}>
+          <span class="balance" class:depleted={Number(room.balance) == 0}>
             Balance: ${room.balance}
           </span>
           <!-- DIVIDER -->

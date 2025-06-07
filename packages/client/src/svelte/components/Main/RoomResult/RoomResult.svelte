@@ -120,7 +120,7 @@
     <Log
       {result}
       onComplete={() => {
-        // transitionToResultSummary(result as EnterRoomReturnValue)
+        transitionToResultSummary(result as EnterRoomReturnValue)
       }}
     />
   {/if}
