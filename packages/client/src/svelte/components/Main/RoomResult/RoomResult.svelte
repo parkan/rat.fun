@@ -2,7 +2,7 @@
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import type { Hex } from "viem"
   import { ENVIRONMENT } from "@mud/enums"
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import {
     player,
     rooms as roomsState,
@@ -88,6 +88,10 @@
     resetRoomResultState()
     processRoom()
   })
+
+  onDestroy(() => {
+    resetRoomResultState()
+  })
 </script>
 
 <div class="room-result">
@@ -157,7 +161,7 @@
   .room-result {
     height: 100%;
     color: var(--white);
-    z-index: 10000;
+    z-index: var(--z-high);
     padding: 20px;
     padding-bottom: 0;
     font-size: var(--font-size-normal);

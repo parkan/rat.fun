@@ -37,7 +37,7 @@
 </script>
 
 {#if busy}
-  <VideoLoader />
+  <VideoLoader duration={5000} />
 {:else}
   <div class="deploy-rat">
     <div class="image-container warning-mute-inverse">

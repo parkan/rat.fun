@@ -1,11 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  const { text }: { text?: string } = $props()
+  const { duration = 4000, text }: { duration?: number; text?: string } =
+    $props()
 
   let progress = $state(0)
-  let animationFrame: number
   const startTime = Date.now()
-  const duration = 4000 // 4 seconds
   const targetProgress = 0.99 // Will approach but never reach 100%
 
   function easing(t: number): number {
@@ -18,7 +17,7 @@
     // Use easeOutQuad for smooth deceleration
     progress = targetProgress * easing(t)
     if (t < 1) {
-      animationFrame = requestAnimationFrame(animate)
+      requestAnimationFrame(animate)
     }
   }
 
@@ -55,7 +54,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1;
+      z-index: var(--z-high);
     }
 
     .loading-bar-container {
@@ -68,7 +67,7 @@
       background: rgba(255, 255, 255, 0.2);
       border-radius: 2px;
       overflow: hidden;
-      z-index: 2;
+      z-index: var(--z-high);
     }
 
     .loading-bar {

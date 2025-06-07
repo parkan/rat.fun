@@ -4,6 +4,13 @@
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import { playSound, randomPitch } from "@modules/sound"
+  import {
+    TIMESTAMP_DURATION,
+    CHARACTER_DELAY,
+    OUTCOME_DELAY,
+    OUTCOME_DURATION,
+    OUTCOME_START_DELAY,
+  } from "./config"
 
   gsap.registerPlugin(TextPlugin)
 
@@ -86,7 +93,7 @@
     })
     timeline.to(timestampElement, {
       opacity: 1,
-      duration: 0.3,
+      duration: TIMESTAMP_DURATION,
       ease: "power2.out",
     })
 
@@ -97,15 +104,15 @@
     })
     const chars = logEntry.event.split("")
     for (let i = 0; i < chars.length; i++) {
-      timeline.call(typeHit, [chars[i]], "+=0.04") // 40ms delay per character
+      timeline.call(typeHit, [chars[i]], `+=${CHARACTER_DELAY}`)
     }
 
     // Add a label to mark the start of outcome animations
-    timeline.addLabel("outcomesStart", "+=0.2")
+    timeline.addLabel("outcomesStart", `+=${OUTCOME_START_DELAY}`)
 
     // Iterate through the registered outcomes and add their animations
     registeredOutcomes.forEach(({ node, data }, index) => {
-      const outcomeStartTime = `outcomesStart+=${index * 0.4}`
+      const outcomeStartTime = `outcomesStart+=${index * OUTCOME_DELAY}`
 
       // State update
       timeline.call(updateFrozenState, [data], outcomeStartTime)
@@ -116,7 +123,7 @@
         node,
         {
           opacity: 1,
-          duration: 0.2,
+          duration: OUTCOME_DURATION,
           ease: "power2.out",
         },
         outcomeStartTime
@@ -124,12 +131,6 @@
     })
 
     timeline.addLabel("outcomesFinish", "+=0.2")
-
-    // Check the rats health
-    // if ($frozenRat?.health === 0) {
-    //   timeline.add(ratTimeline)
-    //   ratTimeline.to(".death", { opacity: 1 }, "outcomesFinish", "+=0.2")
-    // }
   }
 
   // When it's all said and done
@@ -149,7 +150,9 @@
 
   // Ensure root element is mounted
   $effect(() => {
-    if (element) run()
+    if (element) {
+      run()
+    }
   })
 </script>
 

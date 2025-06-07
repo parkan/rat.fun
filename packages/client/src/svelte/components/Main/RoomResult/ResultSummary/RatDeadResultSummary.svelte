@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { EnterRoomReturnValue } from "@server/modules/types"
-  import { onMount, onDestroy } from "svelte"
-  import { Howl } from "howler"
+  import { onMount } from "svelte"
   import { getUIState } from "@modules/ui/state.svelte"
   import { frozenRat } from "@components/Main/RoomResult/state.svelte"
   import { playSound } from "@modules/sound"
+  import { gsap } from "gsap"
 
   let { rooms } = getUIState()
 
@@ -18,18 +18,52 @@
     result: EnterRoomReturnValue | null
   } = $props()
 
-  let snd = $state<Howl | undefined>(undefined)
+  let innerContainerElement = $state<HTMLDivElement | null>(null)
+  let messageElement = $state<HTMLHeadingElement | null>(null)
+  let closeButtonElement = $state<HTMLButtonElement | null>(null)
+
+  // Timeline
+  const timeline = gsap.timeline()
 
   $inspect(staticRoomContent)
   $inspect(result)
   $inspect(room)
 
   onMount(() => {
-    snd = playSound("tcm", "ratDeath", false)
-  })
+    if (!innerContainerElement || !messageElement || !closeButtonElement) {
+      console.error("Missing elements")
+      return
+    }
 
-  onDestroy(() => {
-    snd?.stop()
+    gsap.set([messageElement, closeButtonElement], {
+      opacity: 0,
+    })
+
+    gsap.set(innerContainerElement, {
+      scale: 0,
+    })
+
+    timeline.call(() => {
+      playSound("tcm", "ratsDown")
+    })
+
+    timeline.to(innerContainerElement, {
+      scale: 1,
+      duration: 0.4,
+      ease: "power2.out",
+    })
+
+    timeline.to(messageElement, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    })
+
+    timeline.to(closeButtonElement, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    })
   })
 </script>
 
@@ -41,14 +75,13 @@
   class="popup-container"
 >
   <div class="room-event-popup">
-    <div class="inner">
+    <div class="inner" bind:this={innerContainerElement}>
       <div class="content">
-        <!-- Big colored text to explain the situation -->
-        <h1 class="message">
+        <h1 class="message" bind:this={messageElement}>
           {$frozenRat?.name} DIED
         </h1>
-
         <button
+          bind:this={closeButtonElement}
           class="close-button"
           onclick={() => {
             rooms.close(false)
@@ -72,7 +105,7 @@
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
-    z-index: 1;
+    z-index: var(--z-sub);
   }
 
   .room-event-popup {
@@ -119,7 +152,7 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        z-index: 0;
+        z-index: var(--z-sub-top);
         overflow: hidden;
         mix-blend-mode: screen;
 
@@ -133,7 +166,7 @@
       .content {
         position: relative;
         height: 100%;
-        z-index: 10;
+        z-index: var(--z-sub-top);
         display: flex;
         flex-flow: column nowrap;
         justify-content: center;

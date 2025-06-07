@@ -43,7 +43,7 @@
 
 <div class="container">
   {#if busy}
-    <VideoLoader />
+    <VideoLoader duration={6000} />
   {:else}
     <div class="main">
       <!-- INTRO TEXT -->

@@ -216,7 +216,7 @@
     height: 30px;
     position: absolute;
     bottom: 0;
-    z-index: 1;
+    z-index: var(--z-base);
 
     .label {
       text-align: right;

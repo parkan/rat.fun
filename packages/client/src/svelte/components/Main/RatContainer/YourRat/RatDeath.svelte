@@ -56,7 +56,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    z-index: 1;
+    z-index: var(--z-high);
     aspect-ratio: 1 / 1;
 
     img {

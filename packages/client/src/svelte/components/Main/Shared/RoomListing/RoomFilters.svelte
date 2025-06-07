@@ -163,7 +163,7 @@
     position: sticky;
     top: 0;
     // top: 61px; // respecting the floor header component above it
-    z-index: 100;
+    z-index: var(--z-high);
     background: var(--background);
   }
 

@@ -23,7 +23,7 @@
   .chat-header {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: var(--z-mid);
     background: var(--background);
     border-bottom: var(--dashed-border-style);
     padding: 6px;

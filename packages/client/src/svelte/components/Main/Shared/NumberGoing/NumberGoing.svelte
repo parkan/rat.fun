@@ -12,7 +12,7 @@
     going = $bindable(false),
   } = $props()
 
-  const DURATION = 1000
+  const DURATION = 500
 
   let emphasis = $state("")
   let direction = $state(0)
@@ -34,17 +34,17 @@
       previousValue = goingUp.current
       goingUp.set(Number(value))
 
-      let interval = setInterval(() => {
-        if (direction < 0) {
-          if (!muted) {
-            playSound("tcm", "bugsUp", false, false, 0.5)
-          }
-        } else {
-          if (!muted) {
-            playSound("tcm", "bugsUp")
-          }
-        }
-      }, 70)
+      // let interval = setInterval(() => {
+      //   if (direction < 0) {
+      //     if (!muted) {
+      //       // playSound("tcm", "bugsUp", false, false, 0.5)
+      //     }
+      //   } else {
+      //     if (!muted) {
+      //       // playSound("tcm", "bugsUp")
+      //     }
+      //   }
+      // }, 70)
 
       setTimeout(() => {
         if (direction <= 0) {
@@ -56,21 +56,21 @@
         if (direction < 0) {
           // console.log(direction)
           if (!muted) {
-            playSound("tcm", "ratsDown")
+            // playSound("tcm", "ratsUp")
           }
         } else {
           // console.log(direction)
           if (!muted) {
-            playSound("tcm", "ratsUp")
+            // playSound("tcm", "ratsDown")
           }
         }
 
-        clearInterval(interval)
+        // clearInterval(interval)
 
         setTimeout(() => {
           emphasis = ""
           direction = 0
-        }, 3000)
+        }, 2000)
       }, DURATION)
     }
   })

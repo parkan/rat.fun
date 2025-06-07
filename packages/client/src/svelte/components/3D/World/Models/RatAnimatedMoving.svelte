@@ -132,7 +132,7 @@ Command: npx @threlte/gltf@3.0.0 src/svelte/public/models/RatAnimated.glb
         onpointerdown={() => {
           box?.pause()
           // console.log(box.target.current)
-          playSound("tcm", Math.random < 0.2 ? "ratsUp" : "ratsDown")
+          // playSound("tcm", Math.random < 0.2 ? "ratsUp" : "ratsDown")
           setTimeout(box.resume, 200 + Math.random() * 3000)
         }}
         onpointerover={positionHand}

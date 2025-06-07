@@ -94,7 +94,6 @@
     position: absolute;
     inset: 0;
     text-align: center;
-    z-index: 1000;
     display: flex;
     height: var(--game-window-height);
     justify-content: center;

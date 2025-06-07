@@ -113,12 +113,6 @@ export const transitionTo = (newState: ROOM_RESULT_STATE) => {
   roomResultState.state = newState
 }
 
-/** Resets the room result state back to the initial splash screen */
-export const resetRoomResultState = () => {
-  roomResultState.state = ROOM_RESULT_STATE.SPLASH_SCREEN
-  roomResultState.errorMessage = null
-}
-
 /**
  * Determines which result summary state to transition to based on the room result
  * @param result The result returned from entering a room
@@ -133,6 +127,12 @@ const determineResultSummaryState = (result: EnterRoomReturnValue): ROOM_RESULT_
     return ROOM_RESULT_STATE.RESULT_SUMMARY_LEVEL_DOWN
   }
   return ROOM_RESULT_STATE.RESULT_SUMMARY_NORMAL
+}
+
+/** Resets the room result state back to the initial splash screen */
+export const resetRoomResultState = () => {
+  roomResultState.state = ROOM_RESULT_STATE.SPLASH_SCREEN
+  roomResultState.errorMessage = null
 }
 
 
