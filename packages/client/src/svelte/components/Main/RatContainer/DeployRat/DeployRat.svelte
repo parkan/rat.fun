@@ -37,7 +37,7 @@
 </script>
 
 {#if busy}
-  <VideoLoader text="RAT" />
+  <VideoLoader />
 {:else if done}
   <div class="deploy-rat">
     <div class="done">
