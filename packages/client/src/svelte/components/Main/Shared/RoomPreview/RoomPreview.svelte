@@ -91,14 +91,6 @@
 
 {#if room}
   <div class="room-preview">
-    <button class="back-button" onclick={() => rooms.back(isOwnRoomListing)}>
-      {#if isOwnRoomListing}
-        ← BACK TO YOUR ROOMS
-      {:else}
-        ← BACK TO FLOOR {$ratLevelIndex * -1}
-      {/if}
-    </button>
-
     <div class="room-inner-container">
       <!-- ROOM IMAGE -->
       <div class="room-image">
