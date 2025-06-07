@@ -45,18 +45,13 @@
     receivedTimelines++
 
     if (receivedTimelines === totalItems) {
-      // Add animation for return button
-      // gsap.set(returnButtonElement, { opacity: 0 })
-      // logTimeline.to(returnButtonElement, {
-      //   opacity: 1,
-      //   duration: 0.5,
-      //   ease: "power2.out",
-      // })
-      // Add a callback to the parent timeline to check for events
-      // The call is added to the end of the timeline by default
-      logTimeline.call(() => {
-        onComplete()
-      })
+      logTimeline.call(
+        () => {
+          onComplete()
+        },
+        [],
+        "+=0.5" // Add a delay of 0.5 seconds before calling the callback
+      )
       // All timelines added, play the parent timeline
       logTimeline.play()
     }

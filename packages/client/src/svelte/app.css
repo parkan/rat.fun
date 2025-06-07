@@ -82,17 +82,14 @@
   --font-size-extra-large: 60px;
 
   /** Layers */
-  --z-0: 0;
-  --z-1: 1;
-  --z-2: 2;
-  --z-3: 3;
-  --z-4: 4;
-  --z-5: 5;
-  --z-6: 6;
-  --z-7: 7;
-  --z-8: 8;
-  --z-9: 9;
-  --z-10: 10;
+  --z-background: 0;
+  --z-sub: 5;
+  --z-sub-top: 10;
+  --z-base: 20;
+  --z-mid: 30;
+  --z-high: 40;
+  --z-top: 50;
+  --z-debug: 66666;
 }
 
 * {

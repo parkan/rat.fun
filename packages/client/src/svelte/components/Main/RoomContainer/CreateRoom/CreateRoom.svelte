@@ -54,7 +54,7 @@
 
 <div class="create-room">
   {#if busy}
-    <VideoLoader />
+    <VideoLoader duration={3000} />
   {:else}
     <!-- LEVEL SELECTION -->
     <div class="form-group level-selection">

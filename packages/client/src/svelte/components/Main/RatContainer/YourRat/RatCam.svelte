@@ -93,7 +93,7 @@
       bottom: 20px;
       position: absolute;
       transform: translateX(-50%);
-      z-index: 99;
+      z-index: var(--z-high);
 
       .name {
         background: var(--color-alert);
@@ -111,7 +111,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      z-index: 99;
+      z-index: var(--z-high);
       width: 20px;
       height: 20px;
       background: red;
@@ -123,7 +123,7 @@
     top: 0;
     left: 0;
     height: 100%;
-    z-index: 1;
+    z-index: var(--z-high);
     aspect-ratio: 1 / 1;
 
     img {

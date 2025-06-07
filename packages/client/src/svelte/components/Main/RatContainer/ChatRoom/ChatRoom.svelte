@@ -99,7 +99,7 @@
       flex-flow: row nowrap;
       color: var(--foreground);
       bottom: 0;
-      z-index: 1000;
+      z-index: var(--z-high);
       width: 100%;
       padding: 10px;
       position: sticky;

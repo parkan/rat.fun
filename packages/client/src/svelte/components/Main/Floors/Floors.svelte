@@ -126,12 +126,12 @@
         position: absolute;
         left: 0;
         background-color: var(--color-value);
-        z-index: 0;
+        z-index: var(--z-base);
       }
 
       .label-min,
       .label-max {
-        z-index: 1;
+        z-index: var(--z-mid);
         padding-top: 4px;
         padding-bottom: 2px;
         padding-left: 4px;
@@ -144,7 +144,7 @@
   .elevator {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: var(--z-mid);
     pointer-events: none;
   }
 

@@ -35,7 +35,7 @@
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
-    z-index: 10;
+    z-index: var(--z-high);
 
     &#roomresult {
       position: absolute;

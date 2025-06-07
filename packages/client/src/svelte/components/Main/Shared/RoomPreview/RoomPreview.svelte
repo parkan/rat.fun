@@ -125,11 +125,7 @@
             <div class="label">Owner</div>
             <div class="value">{getRoomOwnerName(room)}</div>
           </div>
-          <!-- BALANCE -->
-          <div class="row balance" class:depleted={Number(room.balance) == 0}>
-            <div class="label">Balance</div>
-            <div class="value">${room.balance}</div>
-          </div>
+
           <!-- VISIT COUNT -->
           <div class="row visit-count">
             <div class="label">Visits</div>
@@ -144,6 +140,11 @@
               <div class="value">{room?.killCount} kills</div>
             </div>
           {/if}
+          <!-- BALANCE -->
+          <div class="row balance" class:depleted={Number(room.balance) == 0}>
+            <div class="label">Balance</div>
+            <div class="value">${room.balance}</div>
+          </div>
           <!-- <button
             use:clickToCopy={copyShareLink}
             {oncopysuccess}
@@ -229,18 +230,18 @@
           border: 15px solid transparent;
           border-image: url("/images/border-2.png") 20 repeat;
           aspect-ratio: 1/1;
-          width: 330px;
+          width: 50%;
           line-height: 0;
 
           img {
-            height: 300px;
+            width: 100%;
             aspect-ratio: 1/1;
             object-fit: cover;
             border: var(--default-border-style);
           }
 
           .image-placeholder {
-            height: 300px;
+            width: 100%;
             aspect-ratio: 1/1;
             display: flex;
             align-items: center;
@@ -252,7 +253,7 @@
         .room-info {
           display: flex;
           flex-direction: column;
-          width: 100%;
+          width: 50%;
 
           .row {
             width: 100%;
@@ -332,8 +333,6 @@
       }
 
       .room-stats {
-        margin-bottom: 15px;
-
         .header {
           border-left: 1px solid var(--color-grey-mid);
           border-top: 1px solid var(--color-grey-mid);
@@ -395,6 +394,6 @@
   .room-enter {
     position: sticky;
     bottom: 80px;
-    z-index: 100;
+    z-index: var(--z-high);
   }
 </style>

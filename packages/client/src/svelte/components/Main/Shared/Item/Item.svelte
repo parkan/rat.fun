@@ -26,7 +26,6 @@
   let { modal } = getModalState()
 
   // Item might be the id of an item or a TempItem object
-
   const name = $derived(
     typeof item === "string" ? ($items[item]?.name ?? "---") : item.name
   )

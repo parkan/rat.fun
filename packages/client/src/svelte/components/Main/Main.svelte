@@ -29,6 +29,7 @@
   let { environment }: { environment: ENVIRONMENT } = $props()
   const { transition, route, rooms } = getUIState()
   const { current } = rooms
+
   let debugTransition = $state(false)
 
   // Determine if the main game layer (with doors) should be rendered
@@ -141,7 +142,7 @@
     left: 0;
     height: var(--game-window-height);
     width: var(--game-window-width);
-    z-index: 10;
+    z-index: var(--z-base);
     border: var(--default-border-style); // Overall game window border
     overflow: hidden; // Clip any door overflow if they animate beyond bounds
     // Though with translateX(+-50%) they shouldn't.
@@ -203,7 +204,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 1000;
+    z-index: var(--z-top);
     pointer-events: none;
     background-image: url(/images/dust.png);
     opacity: 0.6;
@@ -211,15 +212,14 @@
   }
 
   .layer-below {
-    z-index: 0;
-    // margin-top: 30px;
+    z-index: var(--z-sub);
   }
 
   .routing {
     position: fixed;
     bottom: 0;
     right: 0;
-    z-index: 9999; // Highest for debug
+    z-index: var(--z-debug);
     background: #030;
     color: grey;
     width: 400px;

@@ -93,7 +93,7 @@
     .death {
       position: absolute;
       inset: 0;
-      z-index: 9;
+      z-index: var(--z-high);
     }
   }
 

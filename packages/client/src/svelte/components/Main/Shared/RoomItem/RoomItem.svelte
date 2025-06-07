@@ -136,7 +136,7 @@
         margin-right: 10px;
         display: flex;
         flex-direction: column;
-        z-index: 0;
+        z-index: var(--z-base);
 
         .room-image {
           border: 15px solid transparent;

@@ -22,7 +22,7 @@
     padding: var(--default-padding);
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: var(--z-high);
     background: var(--background);
 
     button {
