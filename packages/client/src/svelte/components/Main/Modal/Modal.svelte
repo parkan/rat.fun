@@ -50,10 +50,10 @@
       overflow-x: hidden;
       overflow-y: scroll;
 
-      &.fullscreen {
-        width: 100%;
-        height: 100%;
-      }
+      // &.fullscreen {
+      //   width: 100%;
+      //   height: 100%;
+      // }
     }
   }
 </style>

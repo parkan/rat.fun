@@ -81,32 +81,28 @@
 </div>
 
 {#snippet confirmLiquidation()}
-  <div class="confirmation-modal">
-    <div class="content">
-      <div class="room-image">
-        {#key $lastUpdated}
-          {#if busy}
-            <VideoLoader duration={6000} />
-          {:else if sanityRoomContent}
-            <img
-              src={urlFor(sanityRoomContent?.image).url()}
-              alt={`room #${room.index}`}
-            />
-          {:else}
-            <NoImage />
-          {/if}
-        {/key}
-      </div>
-      {#if !busy}
-        <button
-          disabled={busy}
-          onclick={sendLiquidateRoom}
-          class="modal-button"
-        >
+  <div class="confirmation-modal danger">
+    {#if busy}
+      <VideoLoader duration={6000} />
+    {:else}
+      <div class="content">
+        <div class="room-image">
+          {#key $lastUpdated}
+            {#if sanityRoomContent}
+              <img
+                src={urlFor(sanityRoomContent?.image).url()}
+                alt={`room #${room.index}`}
+              />
+            {:else}
+              <NoImage />
+            {/if}
+          {/key}
+        </div>
+        <button onclick={sendLiquidateRoom} class="modal-button">
           {liquidationMessage}
         </button>
-      {/if}
-    </div>
+      </div>
+    {/if}
   </div>
 {/snippet}
 
@@ -158,6 +154,8 @@
 
   .confirmation-modal {
     width: 400px;
+    height: 460px;
+
     .content {
       display: flex;
       flex-flow: column nowrap;
@@ -174,7 +172,6 @@
         line-height: 0;
       }
 
-      video,
       img {
         width: 100%;
         height: 100%;
