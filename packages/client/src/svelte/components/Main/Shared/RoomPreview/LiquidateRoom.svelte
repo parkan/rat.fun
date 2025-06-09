@@ -83,21 +83,21 @@
 {#snippet confirmLiquidation()}
   <div class="confirmation-modal">
     <div class="content">
-      {#if busy}
-        <VideoLoader duration={6000} />
-      {:else}
-        <div class="room-image">
-          {#key $lastUpdated}
-            {#if sanityRoomContent}
-              <img
-                src={urlFor(sanityRoomContent?.image).url()}
-                alt={`room #${room.index}`}
-              />
-            {:else}
-              <NoImage />
-            {/if}
-          {/key}
-        </div>
+      <div class="room-image">
+        {#key $lastUpdated}
+          {#if busy}
+            <VideoLoader duration={6000} />
+          {:else if sanityRoomContent}
+            <img
+              src={urlFor(sanityRoomContent?.image).url()}
+              alt={`room #${room.index}`}
+            />
+          {:else}
+            <NoImage />
+          {/if}
+        {/key}
+      </div>
+      {#if !busy}
         <button
           disabled={busy}
           onclick={sendLiquidateRoom}
@@ -170,7 +170,7 @@
       }
 
       .room-image {
-        height: 100%;
+        height: 400px;
         line-height: 0;
       }
 

@@ -89,19 +89,21 @@
             {$frozenRat?.name} LIVED
           </h1>
 
-          <span class="message-text"> GOT: </span>
-          {#each changes as change, i}
-            <div
-              class="inline-block"
-              transition:fade|global={{ delay: i * 120 }}
-            >
-              <OutcomeItem
-                negative={false}
-                type={change.type}
-                value={change.name}
-              />
-            </div>
-          {/each}
+          {#if changes.length > 0}
+            <span class="message-text"> GOT: </span>
+            {#each changes as change, i}
+              <div
+                class="inline-block"
+                transition:fade|global={{ delay: i * 120 }}
+              >
+                <OutcomeItem
+                  negative={false}
+                  type={change.type}
+                  value={change.name}
+                />
+              </div>
+            {/each}
+          {/if}
         </div>
         <button
           bind:this={closeButtonElement}
