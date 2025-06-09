@@ -72,20 +72,20 @@
 
 {#snippet confirmLiquidation()}
   <div class="confirmation danger">
-    <div class="content">
-      {#if busy}
-        <VideoLoader duration={6000} />
-      {:else}
+    {#if busy}
+      <VideoLoader duration={6000} />
+    {:else}
+      <div class="content">
         <img
           class="liquidate-image"
           src={$ratImageUrl}
           alt="Confirm Liquidation"
         />
-        <button disabled={busy} onclick={sendLiquidateRat} class="modal-button">
+        <button onclick={sendLiquidateRat} class="modal-button">
           {liquidationMessage}
         </button>
-      {/if}
-    </div>
+      </div>
+    {/if}
   </div>
 {/snippet}
 
@@ -157,14 +157,14 @@
   .confirmation {
     width: 400px;
     height: 460px;
+
     .content {
       flex-flow: column nowrap;
       justify-content: space-between;
       align-items: center;
       line-height: 0;
 
-      img,
-      video {
+      img {
         width: 100%;
         height: 100%;
         object-fit: cover;
