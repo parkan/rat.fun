@@ -4,13 +4,14 @@
   import { getUIState } from "@modules/ui/state.svelte"
   import { playSound } from "@modules/sound"
   import { gsap } from "gsap"
+  import { rat } from "@modules/state/base/stores"
   import { frozenRat } from "@components/Main/RoomResult/state.svelte"
+  import Trait from "@components/Main/Shared/Trait/Trait.svelte"
+  import Item from "@components/Main/Shared/Item/Item.svelte"
 
   let { rooms } = getUIState()
 
   let {
-    room,
-    staticRoomContent,
     result,
   }: {
     room: Room
@@ -21,13 +22,15 @@
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
   let closeButtonElement = $state<HTMLButtonElement | null>(null)
+  let changes = $derived([
+    ...(result?.itemChanges || []).map(itm => ({ ...itm, type: "item" })),
+    ...(result?.traitChanges || []).map(trt => ({ ...trt, type: "trait" })),
+  ])
+
+  $inspect($rat)
 
   // Timeline
   const timeline = gsap.timeline()
-
-  $inspect(staticRoomContent)
-  $inspect(result)
-  $inspect(room)
 
   onMount(() => {
     if (!innerContainerElement || !messageElement || !closeButtonElement) {
@@ -81,7 +84,16 @@
           <h1>
             {$frozenRat?.name} LIVED
           </h1>
-          <p>Got: ...</p>
+
+          <p>
+            Got: {#each changes as change}
+              {#if change.type === "trait"}
+                <Trait trait={change} />
+              {:else}
+                <Item item={change} />
+              {/if}
+            {/each}
+          </p>
         </div>
         <button
           bind:this={closeButtonElement}
