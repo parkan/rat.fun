@@ -60,7 +60,7 @@
       border-right: 1px solid var(--color-grey-mid);
 
       &.empty {
-        height: 100px;
+        height: 300px;
       }
     }
   }

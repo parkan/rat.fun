@@ -58,7 +58,7 @@
 <style lang="scss">
   .outcomes {
     margin-bottom: 12px;
-    max-height: 200px;
+    max-height: 340px;
     overflow-y: scroll;
     overscroll-behavior-y: none;
     border-left: 1px solid var(--color-grey-mid);
@@ -78,7 +78,7 @@
   }
 
   .logs-empty {
-    height: 100px;
+    height: 300px;
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;

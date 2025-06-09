@@ -120,7 +120,7 @@
   </div>
 
   {#if isEmpty}
-    <div class="no-data">
+    <div style:height="{height}px" class="no-data">
       <span>NO DATA</span>
     </div>
   {:else}
@@ -193,7 +193,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
     width: 100%;
 
     span {

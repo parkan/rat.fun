@@ -117,7 +117,7 @@
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
-    z-index: var(--z-base);
+    z-index: var(--z-sub);
   }
   .room-event-popup {
     position: relative;
