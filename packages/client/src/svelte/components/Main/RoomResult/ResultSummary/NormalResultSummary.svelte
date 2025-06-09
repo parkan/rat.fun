@@ -6,8 +6,10 @@
   import { gsap } from "gsap"
   import { rat } from "@modules/state/base/stores"
   import { frozenRat } from "@components/Main/RoomResult/state.svelte"
-  import Trait from "@components/Main/Shared/Trait/Trait.svelte"
-  import Item from "@components/Main/Shared/Item/Item.svelte"
+  import { fade } from "svelte/transition"
+  import OutcomeItem from "@components/Main/Shared/OutcomeItem/OutcomeItem.svelte"
+  // import Trait from "@components/Main/Shared/Trait/Trait.svelte"
+  // import Item from "@components/Main/Shared/Item/Item.svelte"
 
   let { rooms } = getUIState()
 
@@ -87,15 +89,19 @@
             {$frozenRat?.name} LIVED
           </h1>
 
-          <p>
-            Got: {#each changes as change}
-              {#if change.type === "trait"}
-                <Trait trait={change} />
-              {:else}
-                <Item item={change} />
-              {/if}
-            {/each}
-          </p>
+          <span class="message-text"> GOT: </span>
+          {#each changes as change, i}
+            <div
+              class="inline-block"
+              transition:fade|global={{ delay: i * 120 }}
+            >
+              <OutcomeItem
+                negative={false}
+                type={change.type}
+                value={change.name}
+              />
+            </div>
+          {/each}
         </div>
         <button
           bind:this={closeButtonElement}
@@ -150,11 +156,14 @@
         padding: 1rem;
         color: var(--foreground);
         font-family: var(--label-font-stack);
-        letter-spacing: -0.2em;
         font-size: var(--font-size-large);
         line-height: calc(var(--font-size-extra-large) * 0.7);
         font-weight: normal;
         text-align: center;
+
+        .message-text {
+          letter-spacing: -0.2em;
+        }
       }
 
       .background {
@@ -210,6 +219,10 @@
       background: var(--color-alert);
       color: var(--white);
     }
+  }
+
+  .inline-block {
+    display: inline-block;
   }
 
   @keyframes fade-out {
