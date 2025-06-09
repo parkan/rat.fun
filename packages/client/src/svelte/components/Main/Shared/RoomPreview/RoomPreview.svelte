@@ -26,22 +26,22 @@
 
   let { rooms } = getUIState()
 
-  let roomOutcomes = $state<Outcome[]>()
+  let roomOutcomes = $derived.by<Outcome[]>(() => {
+    const outcomes =
+      $staticContent?.outcomes?.filter(o => o.roomId == roomId) || []
+
+    // Sort the outcomes in order of creation
+    const result = outcomes.sort((a, b) => {
+      return new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
+    })
+
+    return result
+  })
 
   const sendEnterRoom = () => {
     playSound("tcm", "enteredPod")
     rooms.navigate("room", { roomId })
   }
-
-  onMount(() => {
-    const outcomes =
-      $staticContent?.outcomes?.filter(o => o.roomId == roomId) || []
-
-    // Sort the outcomes in order of creation
-    roomOutcomes = outcomes.sort((a, b) => {
-      return new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime()
-    })
-  })
 </script>
 
 {#if room}

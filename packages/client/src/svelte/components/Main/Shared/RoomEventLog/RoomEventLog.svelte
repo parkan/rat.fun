@@ -1,10 +1,11 @@
 <script lang="ts">
+  import type { Outcome } from "@sanity-types"
   import { onMount, onDestroy } from "svelte"
   import { client } from "@modules/content/sanity"
   import { queries } from "@modules/content/sanity/groq"
   import OutcomeMessage from "./OutcomeMessageTemp.svelte"
   import { publicNetwork } from "@modules/network"
-  import type { Outcome } from "@sanity-types"
+  import { staticContent } from "@modules/content"
 
   let {
     roomId,
@@ -12,10 +13,13 @@
   }: { roomId: string; initialOutcomes: Outcome[] } = $props()
 
   let subscription = $state<any>(null)
-  let outcomes = $state(initialOutcomes.reverse())
 
   const query = queries.outcomesForRoom
   const params = { roomId, worldAddress: $publicNetwork.worldAddress }
+
+  let roomOutcomes = $derived(
+    $staticContent.outcomes.filter(o => o.roomId == roomId) || []
+  )
 
   const callback = (update: Outcome[]) => {
     if (!outcomes) {
@@ -38,9 +42,9 @@
 
 <div class="outcomes">
   <div class="header">ROOM LOGS</div>
-  {#if outcomes.length > 0}
+  {#if roomOutcomes.length > 0}
     <div class="logs">
-      {#each outcomes as outcome (outcome._id)}
+      {#each roomOutcomes as outcome (outcome._id)}
         <OutcomeMessage {outcome} />
       {/each}
     </div>
