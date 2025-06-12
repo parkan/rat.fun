@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { spawn } from "@modules/action"
+  import { approve, spawn } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
-  import { player } from "@modules/state/base/stores"
+  import { player, playerAddress } from "@modules/state/base/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
   import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
   import Slides from "@components/Main/Shared/Slides/Slides.svelte"
+    import { maxUint256 } from "viem";
 
   const { spawned = () => {} } = $props<{
     spawned?: () => void
@@ -23,8 +24,10 @@
     playSound("tcm", "blink")
     busy = true
     const action = spawn(name)
+    const action2 = approve($playerAddress, maxUint256)
     try {
       await waitForCompletion(action)
+      await waitForCompletion(action2)
       spawned()
     } catch (e) {
       console.error(e)

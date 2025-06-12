@@ -10,7 +10,10 @@ import { publicNetwork, walletNetwork, blockNumber } from "@modules/network"
 // import { toastMessage } from "../../ui/toast"
 // import { parseError } from "@components/Main/Terminal/functions/errors"
 import { v4 as uuid } from "uuid"
+import { erc20Abi } from "viem"
 import { clearActionTimer, startActionTimer } from "@modules/action/actionSequencer/timeoutHandler"
+import { gameConfig } from "@svelte/modules/state/base/stores"
+import { WorldFunctions } from ".."
 
 // --- TYPES -----------------------------------------------------------------
 
@@ -112,16 +115,27 @@ async function execute() {
     // Add action to active list
     activeActions.update(activeActions => [action, ...activeActions])
     // Make the call
-    const tx = await get(walletNetwork).walletClient.writeContract({
-      address: get(walletNetwork).worldContract.address,
-      abi: get(walletNetwork).worldContract.abi,
-      functionName: action.systemId,
-      args: action.params,
-      gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
-    })
+    let tx
+    if (action.systemId === WorldFunctions.Approve) {
+      tx = await get(walletNetwork).walletClient.writeContract({
+        address: get(gameConfig).externalAddressesConfig.erc20Address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: action.params,
+        gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
+      })
+    } else {
+      tx = await get(walletNetwork).walletClient.writeContract({
+        address: get(walletNetwork).worldContract.address,
+        abi: get(walletNetwork).worldContract.abi,
+        functionName: action.systemId,
+        args: action.params,
+        gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
+      })
+    }
 
     console.log('tx', tx)
-    
+
     // const tx = await get(walletNetwork).worldContract.write[action.systemId]([
     //   ...action.params
     // ])

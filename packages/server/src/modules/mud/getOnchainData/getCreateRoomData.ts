@@ -57,7 +57,12 @@ export async function getCreateRoomData(playerId: string, levelId: string): Prom
         const playerEntity = (await network).world.registerEntity({ id: playerId });
 
         const playerName = getComponentValue(Name, playerEntity)?.value as string;
-        const playerBalance = Number(getComponentValue(Balance, playerEntity)?.value);
+        const playerBalance = await network.publicClient.readContract({
+          address: network.worldContract.address,
+          abi: network.worldContract.abi,
+          functionName: 'balanceOf',
+          args: [playerId],
+        }) as bigint;
         const playerVisitedLevels = getComponentValue(VisitedLevels, playerEntity)?.value as string[];
 
         // Check if player exists
@@ -68,7 +73,7 @@ export async function getCreateRoomData(playerId: string, levelId: string): Prom
         result.player = {
           id: playerId,
           name: playerName,
-          balance: playerBalance,
+          balance: Number(playerBalance / 10n ** 18n),
           visitedLevels: playerVisitedLevels
         }
 

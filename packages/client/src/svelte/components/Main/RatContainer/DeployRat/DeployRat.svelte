@@ -2,7 +2,7 @@
   import { createRat } from "@modules/action"
   import { waitForCompletion } from "@modules/action/actionSequencer/utils"
   import { playSound } from "@modules/sound"
-  import { gameConfig, player } from "@modules/state/base/stores"
+  import { gameConfig, playerERC20Balance } from "@modules/state/base/stores"
   import { generateRatName } from "./index"
   import { sendDeployRatMessage } from "@modules/off-chain-sync"
   import { walletNetwork } from "@modules/network"
@@ -31,7 +31,7 @@
 
   let disabled = $derived(
     !name ||
-      ($player?.balance ?? 0) <
+      ($playerERC20Balance ?? 0) <
         Number($gameConfig?.gameConfig?.ratCreationCost ?? 0)
   )
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { player } from "@modules/state/base/stores"
+  import { player, playerERC20Balance } from "@modules/state/base/stores"
   import NumberGoing from "@components/Main/Shared/NumberGoing/NumberGoing.svelte"
   import { tippy } from "svelte-tippy"
   let balanceGoing = $state(false)
@@ -37,7 +37,7 @@
               $<NumberGoing
                 bind:going={balanceGoing}
                 muted={true}
-                value={$player?.balance ?? 0}
+                value={$playerERC20Balance ?? 0}
               />
             </div>
           </div>

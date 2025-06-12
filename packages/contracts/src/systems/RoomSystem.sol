@@ -45,7 +45,7 @@ contract RoomSystem is System {
     // Deposit player tokens in pool
     // ERC-20 will check that player has sufficient balance, and approval for pool to transfer it
     LibWorld.gamePool().depositTokens(
-      LibUtils.addressToEntityKey(_playerId),
+      LibUtils.entityKeyToAddress(_playerId),
       roomCreationCost * 10 ** LibWorld.erc20().decimals()
     );
   }

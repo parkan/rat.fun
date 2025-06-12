@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { player, rat, gameConfig, levels } from "@modules/state/base/stores"
+  import { player, rat, gameConfig, levels, playerERC20Balance } from "@modules/state/base/stores"
   import { createRoom } from "./index"
   import { getUIState } from "@modules/ui/state.svelte"
   import { ENVIRONMENT } from "@mud/enums"
@@ -28,7 +28,7 @@
   let disabled = $derived(
     invalidRoomDescriptionLength ||
       busy ||
-      $player.balance < Number($levels[levelId].roomCreationCost ?? 0)
+      $playerERC20Balance < Number($levels[levelId].roomCreationCost ?? 0)
   )
 
   async function sendCreateRoom() {
