@@ -84,7 +84,7 @@ library LibUtils {
    * @notice Conversion from bytes32 to address.
    * @param _key The entity to convert
    */
-  function addressToEntityKey(bytes32 _key) internal pure returns (address) {
+  function entityKeyToAddress(bytes32 _key) internal pure returns (address) {
     return address(uint160(uint256(_key)));
   }
 

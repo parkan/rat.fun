@@ -92,6 +92,8 @@ export const playerRooms = derived(
   ([$playerId, $rooms]) => filterByPlayer($rooms, $playerId) as Rooms
 )
 
+export const playerERC20Balance = writable(0 as number)
+
 // * * * * * * * * * * * * * * * * *
 // PLAYER RAT STORES
 // * * * * * * * * * * * * * * * * *
@@ -143,15 +145,15 @@ export const ratTotalValue = derived(
     const totalValue = !$rat
       ? 0
       : Number($rat.balance ?? 0) + // Balance
-        Number($rat.health ?? 0) + // Health
-        ($ratInventory ?? []).reduce(
-          (acc, item) => acc + (Number(item?.value) ?? 0),
-          0
-        ) + // Inventory
-        ($ratTraits ?? []).reduce(
-          (acc, trait) => acc + (Number(trait?.value) ?? 0),
-          0
-        ) // Traits
+      Number($rat.health ?? 0) + // Health
+      ($ratInventory ?? []).reduce(
+        (acc, item) => acc + (Number(item?.value) ?? 0),
+        0
+      ) + // Inventory
+      ($ratTraits ?? []).reduce(
+        (acc, trait) => acc + (Number(trait?.value) ?? 0),
+        0
+      ) // Traits
     return totalValue
   }
 )

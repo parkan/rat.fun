@@ -30,4 +30,8 @@ contract PlayerSystem is System {
       );
     }
   }
+
+  function balanceOf(bytes32 playerId) external view returns (uint256) {
+    return LibWorld.erc20().balanceOf(LibUtils.entityKeyToAddress(playerId));
+  }
 }
