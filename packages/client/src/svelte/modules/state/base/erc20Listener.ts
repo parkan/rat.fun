@@ -1,7 +1,7 @@
 import { derived } from "svelte/store"
 import { erc20Abi, Hex, parseAbiItem } from "viem"
-import { publicNetwork } from "../../network"
-import { gameConfig, playerAddress, playerERC20Balance } from "./stores"
+import { publicNetwork } from "@modules/network"
+import { gameConfig, playerAddress, playerERC20Balance } from "@modules/state/base/stores"
 import { SetupPublicNetworkResult } from "@mud/setupPublicNetwork"
 
 export function initErc20Listener() {
@@ -14,6 +14,9 @@ export function initErc20Listener() {
     const address = gameConfig.externalAddressesConfig.erc20Address
     const event = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 value)')
     const onLogs = () => updatePlayerERC20Balance(publicNetwork, playerAddress as Hex, gameConfig.externalAddressesConfig.erc20Address)
+
+    // Set initial balance
+    onLogs();
 
     unwatchFrom = publicNetwork.publicClient.watchEvent({
       address,
