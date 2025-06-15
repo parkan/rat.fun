@@ -8,7 +8,6 @@
   import { player } from "@modules/state/base/stores"
   import VideoLoader from "@components/Main/Shared/VideoLoader/VideoLoader.svelte"
   import Slides from "@components/Main/Shared/Slides/Slides.svelte"
-  import { get } from "svelte/store"
   import { gameConfig } from "@modules/state/base/stores"
 
   const { spawned = () => {} } = $props<{
@@ -21,14 +20,19 @@
   let showForm = $state(false)
 
   async function sendSpawn() {
-    if (!name) return
+    if (!name || !$gameConfig?.externalAddressesConfig?.gamePoolAddress) {
+      return
+    }
+
     playSound("tcm", "blink")
     busy = true
+
     const spawnAction = spawn(name)
     const approveAction = approve(
-      get(gameConfig).externalAddressesConfig.gamePoolAddress,
+      $gameConfig.externalAddressesConfig.gamePoolAddress,
       maxUint256
     )
+
     try {
       await waitForCompletion(spawnAction)
       await waitForCompletion(approveAction)
