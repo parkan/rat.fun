@@ -3,6 +3,7 @@
   import type { Hex } from "viem"
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { onMount, onDestroy } from "svelte"
+  import { pushState, goto } from '$app/navigation';
   import {
     player,
     rooms as roomsState,
@@ -21,7 +22,6 @@
   import { walletNetwork } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
   import { enterRoom } from "$lib/components/Main/RoomResult/enterRoom"
-  import { goto } from "$app/navigation"
 
   import SplashScreen from "$lib/components/Main/RoomResult/SplashScreen/SplashScreen.svelte"
   import WaitingForResult from "$lib/components/Main/RoomResult/WaitingForResult/WaitingForResult.svelte"
@@ -72,6 +72,8 @@
         }
         // Result returned, transition to showing results
         transitionTo(ROOM_RESULT_STATE.SHOWING_RESULTS)
+        console.log("result", result)
+        pushState(`/outcome/${result.outcomeId}`, {})
       } catch (err) {
         console.log("catch outcome error", err)
         throw err
@@ -79,12 +81,13 @@
     } catch (error) {
       console.log("catch result error", error)
       transitionTo(ROOM_RESULT_STATE.ERROR)
-      goto("/rooms")
+      goto("/")
       return
     }
   }
 
   onMount(() => {
+    if (!$ratState) goto("/")
     freezeObjects($ratState, room, roomId as Hex, $player.ownedRat as Hex)
     resetRoomResultState()
     processRoom()

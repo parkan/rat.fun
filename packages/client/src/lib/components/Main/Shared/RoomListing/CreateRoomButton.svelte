@@ -1,10 +1,11 @@
 <script lang="ts">
+  let { onclick } = $props()
   import BigButton from "$lib/components/Main/Shared/Buttons/BigButton.svelte"
 </script>
 
-<a href="/rooms/create" class="create-room-button">
-  <BigButton text="Create Room" />
-</a>
+<div class="create-room-button">
+  <BigButton {onclick} text="Create Room" />
+</div>
 
 <style lang="scss">
   .create-room-button {

@@ -67,7 +67,7 @@
 
 <div
   onclick={() => {
-    goto("/rooms")
+    goto("/")
   }}
   role="presentation"
   class="popup-container"

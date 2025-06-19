@@ -54,7 +54,7 @@
       liquidationMessage = "Could not liquidate room"
     } finally {
       sendLiquidateRoomMessage($walletNetwork, roomId)
-      goto("/rooms/landlord")
+      goto("/landlord")
       modal.close()
     }
   }

@@ -63,7 +63,7 @@
         </h1>
 
         <a
-          href="/rooms"
+          href="/"
           bind:this={closeButtonElement}
           class="close-button"
         >

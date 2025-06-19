@@ -59,29 +59,31 @@
   })
 </script>
 
-{#if room}
-  <div class="room-preview">
-    <div class="room-inner-container">
-      <RoomPreviewHeader {room} {sanityRoomContent} />
-      <RoomPreviewPrompt {room} />
+{#key roomId}
+  {#if room}
+    <div class="room-preview">
+      <div class="room-inner-container">
+        <RoomPreviewHeader {room} {sanityRoomContent} />
+        <RoomPreviewPrompt {room} />
 
-      {#if showLiquidateButton}
-        <LiquidateRoom {roomId} {room} {isOwnRoomListing} />
-      {/if}
+        {#if showLiquidateButton}
+          <LiquidateRoom {roomId} {room} {isOwnRoomListing} />
+        {/if}
 
-      {#if showNoRatWarning}
-        <NoRatWarning />
-      {/if}
+        {#if showNoRatWarning}
+          <NoRatWarning />
+        {/if}
 
-      {#if showEnterButton}
-        <EnterRoomButton {roomId} />
-      {/if}
+        {#if showEnterButton}
+          <EnterRoomButton {roomId} />
+        {/if}
 
-      <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
-      <RoomPreviewEventLog {roomId} {roomOutcomes} />
+        <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
+        <RoomPreviewEventLog {roomId} {roomOutcomes} />
+      </div>
     </div>
-  </div>
-{/if}
+  {/if}
+{/key}
 
 <style lang="scss">
   .room-preview {

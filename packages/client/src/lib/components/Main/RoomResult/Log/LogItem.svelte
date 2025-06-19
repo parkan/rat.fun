@@ -32,9 +32,11 @@
 
   let {
     logEntry,
+    delay = 0,
     onTimeline,
   }: {
     logEntry: MergedLogEntry
+    delay: number
     onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
   } = $props()
 
@@ -46,7 +48,7 @@
   let registeredOutcomes = $state<RegisteredOutcome[]>([])
 
   // Timeline
-  const timeline = gsap.timeline()
+  const timeline = gsap.timeline({ delay })
 
   // Type hit helper
   const typeHit = (char: string) => {
@@ -216,8 +218,8 @@
         />
       </div>
     {/if}
-    {#if logEntry.traitChanges}
-      {#each logEntry.traitChanges as traitChange}
+    {#if logEntry?.traitChanges}
+      {#each logEntry?.traitChanges as traitChange}
         <div
           class="outcome-wrapper"
           use:register={{
@@ -236,8 +238,8 @@
         </div>
       {/each}
     {/if}
-    {#if logEntry.itemChanges}
-      {#each logEntry.itemChanges as itemChange}
+    {#if logEntry?.itemChanges}
+      {#each logEntry?.itemChanges as itemChange}
         <div
           class="outcome-wrapper"
           use:register={{

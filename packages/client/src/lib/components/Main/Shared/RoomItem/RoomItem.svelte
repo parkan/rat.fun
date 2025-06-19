@@ -27,7 +27,7 @@
 </script>
 
 <a
-  href="/rooms/{roomId}"
+  href="/{roomId}"
   class="room-listing-item"
   class:disabled={Number(room.balance) == 0}
 >

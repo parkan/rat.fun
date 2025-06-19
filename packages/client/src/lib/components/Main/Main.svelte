@@ -1,84 +1,25 @@
 <script lang="ts">
-  import { onMount } from "svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
-  import { initStaticContent } from "$lib/modules/content"
-  import { publicNetwork } from "$lib/modules/network"
-  import { playSound } from "$lib/modules/sound"
 
+  import WorldPromptBox from "$lib/components/Main/RoomContainer/WorldPromptBox.svelte"
+  import PaneSwitch from "$lib/components/Main/RoomContainer/PaneSwitch.svelte"
   import RatContainer from "$lib/components/Main/RatContainer/RatContainer.svelte"
-  import RoomContainer from "$lib/components/Main/RoomContainer/RoomContainer.svelte"
   import Floors from "$lib/components/Main/Floors/Floors.svelte"
 
-  function getDoorStyle(side: "left" | "right"): string {
-    const progress = 0
-    // Return empty style if transition is not active, doors will be in their "natural" state (translateX(0%))
-    // This means when not transitioning, they are "closed".
-    // The visibility of the layer-game wrapper handles whether these closed doors are seen.
-    const isOpening = false
-    let offset = 0
-    if (side === "left") {
-      offset = isOpening ? -(progress * 50) : -50 + progress * 50 // Moves from 0% to -50%
-    } else {
-      offset = isOpening ? progress * 50 : 50 - progress * 50 // Moves from 0% to 50%
-    }
-    return `transform: translateX(${offset}%);`
-  }
-
-  let { environment }: { environment: ENVIRONMENT } = $props()
-
-  onMount(async () => {
-    // Get content from CMS
-    await initStaticContent($publicNetwork.worldAddress)
-    // Play background sound
-    playSound("tcm", "podBg", true, true)
-  })
+  let { children }: { children: import("svelte").Snippet, environment: ENVIRONMENT } = $props()
 </script>
 
 <div class="dust"></div>
 
-{#snippet LeftColumnSlot()}
-  <RatContainer />
-{/snippet}
-{#snippet CenterColumnSlot()}
-  <Floors />
-{/snippet}
-{#snippet RightColumnSlot()}
-  <RoomContainer {environment} />
-{/snippet}
+<RatContainer />
+<Floors />
 
-{#snippet MainAreaLayout(doorType: "left" | "right")}
-  <div class="main-area">
-    <div class="main-area-left-column">
-      {#if doorType === "left"}
-        {@render LeftColumnSlot()}
-      {/if}
-    </div>
-    <div class="main-area-center-column">
-      {@render CenterColumnSlot()}
-    </div>
-    <div class="main-area-right-column">
-      {#if doorType === "right"}
-        {@render RightColumnSlot()}
-      {/if}
-    </div>
-  </div>
-{/snippet}
+<div class="scroll-container">
+  <WorldPromptBox />
+  <PaneSwitch />
 
+  {@render children?.()}
 
-<div class="layer-game" class:transition-active={false}>
-  <div class="door-container">
-    <div class="left-door" style={getDoorStyle("left")}>
-      <div class="door-content-wrapper">
-        {@render MainAreaLayout("left")}
-      </div>
-    </div>
-
-    <div class="right-door" style={getDoorStyle("right")}>
-      <div class="door-content-wrapper">
-        {@render MainAreaLayout("right")}
-      </div>
-    </div>
-  </div>
 </div>
 
 <style lang="scss">
@@ -101,6 +42,10 @@
     border: none; // Assuming border is on .layer-game or not part of split content
   }
 
+  .black {
+    width: 100%;
+  }
+
   .layer-game {
     position: fixed;
     // top: 30px;
@@ -111,6 +56,13 @@
     border: var(--default-border-style); // Overall game window border
     overflow: hidden; // Clip any door overflow if they animate beyond bounds
     // Though with translateX(+-50%) they shouldn't.
+  }
+
+  .scroll-container {
+    height: var(--game-window-height);
+    background: var(--background);
+
+    overflow-y: scroll;
   }
 
   .door-container {
@@ -139,20 +91,6 @@
     // If using `right:0;` ensure transforms are intuitive. `left:0;` might be simpler.
     left: 0;
     clip-path: inset(0 0 0 50%); // Shows the right 50% of its content
-  }
-
-  // .main-area and its columns define the layout within the 1fr part of .door-content-wrapper
-  .main-area {
-    // This is the second row of the .door-content-wrapper grid
-    // No explicit grid-row needed if it's the only 1fr consumer after header
-    width: 100%;
-    height: var(
-      --game-window-height
-    ); // Fill its allocated space in the parent grid
-    display: grid;
-    grid-template-columns: calc(var(--game-window-width) * 0.44) 1fr calc(
-        var(--game-window-width) * 0.44
-      );
   }
 
   .main-area-left-column,

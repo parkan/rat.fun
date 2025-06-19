@@ -2,7 +2,6 @@
   import type { Hex } from "viem"
   import { get } from "svelte/store"
   import {
-    rooms as roomStore,
     roomsOnCurrentLevel,
     playerRooms,
   } from "$lib/modules/state/base/stores"
@@ -11,12 +10,10 @@
   import { blockNumber } from "$lib/modules/network"
 
   import RoomItem from "$lib/components/Main/Shared/RoomItem/RoomItem.svelte"
-  import RoomPreview from "$lib/components/Main/Shared/RoomPreview/RoomPreview.svelte"
   import OwnRoomItem from "$lib/components/Main/Shared/OwnRoomItem/OwnRoomItem.svelte"
   import RoomFilters from "./RoomFilters.svelte"
   import CreateRoomButton from "$lib/components/Main/Shared/RoomListing/CreateRoomButton.svelte"
-
-  // import FloorHeader from "./FloorHeader.svelte"
+  import CreateRoom from "$lib/components/Main/RoomContainer/CreateRoom/CreateRoom.svelte"
 
   let {
     isOwnRoomListing,
@@ -24,9 +21,8 @@
     isOwnRoomListing: boolean
   } = $props()
 
-  // Local state
-  let currentRoom = $state<Hex | null>(null)
   let sortFunction = $state(entriesByPopularity)
+  let showCreateRoom = $state(false)
   let showDepletedRooms = $state(isOwnRoomListing ? true : false)
   let textFilter = $state("")
   let lastChecked = $state<number>(Number(get(blockNumber)))
@@ -47,7 +43,7 @@
   })
 
   let activeList = $derived.by(() => {
-    // console.log("active list filtering")
+    // activeList
     return roomList.filter(r => r[1].creationBlock <= lastChecked)
   })
 
@@ -85,56 +81,48 @@
             }}
           />
         {:else}
-          <CreateRoomButton />
+          {#if !showCreateRoom}
+            <CreateRoomButton onclick={() => showCreateRoom = true} />
+          {/if}
         {/if}
 
-        {#if activeList.length > 0}
-          {#if activeList.length < roomList.length}
-            {#key roomList.length}
-              <button
-                onclick={() => {
-                  sortFunction = entriesChronologically
-                  updateRooms()
-                }}
-                class="new-rooms-button flash-fast-thrice"
-              >
-                {roomList.length - activeList.length} new rooms added
-              </button>
-            {/key}
-          {/if}
-          {#each activeList as roomEntry (roomEntry[0])}
-            {#if isOwnRoomListing}
-              <OwnRoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} />
-            {:else}
-              <RoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} />
+        {#if showCreateRoom}
+          <CreateRoom />
+        {:else}
+          {#if activeList.length > 0}
+            {#if activeList.length < roomList.length}
+              {#key roomList.length}
+                <button
+                  onclick={() => {
+                    sortFunction = entriesChronologically
+                    updateRooms()
+                  }}
+                  class="new-rooms-button flash-fast-thrice"
+                >
+                  {roomList.length - activeList.length} new rooms added
+                </button>
+              {/key}
             {/if}
-          {/each}
-        {:else}
-          <div class="empty-listing">
-            <div>
+            {#each activeList as roomEntry (roomEntry[0])}
               {#if isOwnRoomListing}
-                NO ROOMS CREATED YET
+                <OwnRoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} />
               {:else}
-                NO ROOMS
+                <RoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} />
               {/if}
+            {/each}
+          {:else}
+            <div class="empty-listing">
+              <div>
+                {#if isOwnRoomListing}
+                  NO ROOMS CREATED YET
+                {:else}
+                  NO ROOMS
+                {/if}
+              </div>
             </div>
-          </div>
+          {/if}
         {/if}
-      </div>
-      <div
-        class:previewing
-        class:animated={false}
-        class="room-preview"
-      >
-        {#if currentRoom}
-          <RoomPreview
-            {isOwnRoomListing}
-            roomId={currentRoom}
-            room={$roomStore?.[currentRoom]}
-          />
-        {:else}
-          <div>ERROR: NO CURRENT ROOM</div>
-        {/if}
+
       </div>
     </div>
   </div>
