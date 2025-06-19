@@ -1,16 +1,12 @@
 <script lang="ts">
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { onMount } from "svelte"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
   import { frozenRat } from "$lib/components/Main/RoomResult/state.svelte"
   import { fade } from "svelte/transition"
+  import { goto } from "$app/navigation"
   import OutcomeItem from "$lib/components/Main/Shared/OutcomeItem/OutcomeItem.svelte"
-  // import Trait from "$lib/components/Main/Shared/Trait/Trait.svelte"
-  // import Item from "$lib/components/Main/Shared/Item/Item.svelte"
-
-  let { rooms } = getUIState()
 
   let {
     result,
@@ -70,8 +66,8 @@
 </script>
 
 <div
-  onclick={async () => {
-    await rooms.close(false)
+  onclick={() => {
+    goto("/rooms")
   }}
   role="presentation"
   class="popup-container"

@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Hex } from "viem"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { urlFor } from "$lib/modules/content/sanity"
   import { getRoomOwnerName } from "$lib/modules/state/base/utils"
   import { blocksToReadableTime, renderSafeString } from "$lib/modules/utils"
@@ -18,8 +17,6 @@
     $staticContent?.rooms?.find(r => r._id.trim() == roomId.trim()) ?? undefined
   )
 
-  let { rooms } = getUIState()
-
   function getPromptLengthClass(prompt: string) {
     const length = prompt.length
     if (length > 200) return "extra-long"
@@ -29,10 +26,10 @@
   }
 </script>
 
-<button
+<a
+  href="/rooms/{roomId}"
   class="room-listing-item"
   class:disabled={Number(room.balance) == 0}
-  onclick={() => rooms.preview(roomId, false)}
 >
   <!-- COLUMN LEFT -->
   <div class="column left">
@@ -104,7 +101,7 @@
       </div>
     </div>
   </div>
-</button>
+</a>
 
 <style lang="scss">
   .room-listing-item {

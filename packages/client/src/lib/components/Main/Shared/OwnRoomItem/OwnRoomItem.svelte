@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Hex } from "viem"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { blocksToReadableTime, renderSafeString } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
   import { levels } from "$lib/modules/state/base/stores"
@@ -11,8 +10,6 @@
   import Xed from "$lib/components/Main/Shared/Graphics/Xed.svelte"
 
   let { roomId, room }: { roomId: Hex; room: Room } = $props()
-
-  let { rooms } = getUIState()
 
   let profit = $derived(
     Number(room.balance) - Number($levels[room.level]?.roomCreationCost ?? 0)
@@ -49,8 +46,8 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<button
-  onclick={() => rooms.preview(roomId, true, true, false)}
+<a
+  href="/rooms/{roomId}"
   class="room-listing-item"
   class:depleted={Number(room.balance) == 0}
 >
@@ -127,7 +124,7 @@
       </div>
     </div>
   </div>
-</button>
+</a>
 
 <style lang="scss">
   .room-listing-item {

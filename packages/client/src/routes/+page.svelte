@@ -2,7 +2,6 @@
   import { onMount } from "svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { initSound } from "$lib/modules/sound"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { UIState, UILocation } from "$lib/modules/ui/stores"
   import { UI, LOCATION } from "$lib/modules/ui/enums"
   import { initOffChainSync } from "$lib/modules/off-chain-sync"
@@ -15,8 +14,6 @@
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
 
   let { environment }: { environment: ENVIRONMENT } = $props()
-
-  let { rooms } = getUIState()
 
   const environmentLoaded = () => {
     UIState.set(UI.SPAWNING)
@@ -54,9 +51,6 @@
 
     // Preload sounds
     initSound()
-
-    const currentHash = window.location.hash.replace("#", "")
-    if (currentHash !== "") rooms.preview(currentHash)
   })
 </script>
 

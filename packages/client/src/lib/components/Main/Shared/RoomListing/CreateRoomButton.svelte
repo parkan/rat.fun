@@ -1,18 +1,10 @@
 <script lang="ts">
-  import { getUIState } from "$lib/modules/ui/state.svelte"
-
   import BigButton from "$lib/components/Main/Shared/Buttons/BigButton.svelte"
-
-  const { enums, panes } = getUIState()
-
-  const goCreateRoom = () => {
-    panes.set(enums.PANE.ROOM_CONTAINER, enums.ROOM_CONTAINER.CREATE_ROOM)
-  }
 </script>
 
-<div class="create-room-button">
-  <BigButton text="Create Room" onclick={goCreateRoom} />
-</div>
+<a href="/rooms/create" class="create-room-button">
+  <BigButton text="Create Room" />
+</a>
 
 <style lang="scss">
   .create-room-button {
