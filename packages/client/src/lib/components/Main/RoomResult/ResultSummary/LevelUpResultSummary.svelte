@@ -2,23 +2,13 @@
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { onMount } from "svelte"
   import FloorDescription from "$lib/components/Main/Floors/FloorDescription.svelte"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
   import { frozenRat } from "$lib/components/Main/RoomResult/state.svelte"
   import { ratLevel } from "$lib/modules/state/base/stores"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
 
   let { rooms } = getUIState()
-
-  let {
-    room,
-    staticRoomContent,
-    result,
-  }: {
-    room: Room
-    staticRoomContent: any
-    result: EnterRoomReturnValue | null
-  } = $props()
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
@@ -66,8 +56,8 @@
 </script>
 
 <div
-  onclick={async () => {
-    await rooms.close(false)
+  onclick={() => {
+    goto("/rooms")
   }}
   role="presentation"
   class="popup-container"
@@ -82,15 +72,13 @@
           <FloorDescription />
         </h1>
 
-        <button
+        <a
           bind:this={closeButtonElement}
           class="close-button"
-          onclick={() => {
-            rooms.close(false)
-          }}
+          href="/rooms"
         >
           LEAVE ROOM
-        </button>
+        </a>
       </div>
 
       <div class="background">

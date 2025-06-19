@@ -21,7 +21,7 @@
   import { walletNetwork } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
   import { enterRoom } from "$lib/components/Main/RoomResult/enterRoom"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
 
   import SplashScreen from "$lib/components/Main/RoomResult/SplashScreen/SplashScreen.svelte"
   import WaitingForResult from "$lib/components/Main/RoomResult/WaitingForResult/WaitingForResult.svelte"
@@ -32,8 +32,6 @@
   import RatDeadResultSummary from "$lib/components/Main/RoomResult/ResultSummary/RatDeadResultSummary.svelte"
   import LevelUpResultSummary from "$lib/components/Main/RoomResult/ResultSummary/LevelUpResultSummary.svelte"
   import LevelDownResultSummary from "$lib/components/Main/RoomResult/ResultSummary/LevelDownResultSummary.svelte"
-
-  const { rooms } = getUIState()
 
   let {
     environment,
@@ -81,7 +79,7 @@
     } catch (error) {
       console.log("catch result error", error)
       transitionTo(ROOM_RESULT_STATE.ERROR)
-      rooms.close()
+      goto("/rooms")
       return
     }
   }

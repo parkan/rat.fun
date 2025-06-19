@@ -1,23 +1,19 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import { playSound } from "$lib/modules/sound"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
 
   import BigButton from "$lib/components/Main/Shared/Buttons/BigButton.svelte"
 
   let { roomId }: { roomId: Hex } = $props()
 
-  let { rooms } = getUIState()
-
   const sendEnterRoom = () => {
     playSound("tcm", "enteredPod")
-    rooms.navigate("room", { roomId })
   }
 </script>
 
-<div class="room-enter">
+<a href="/rooms/{roomId}" class="room-enter">
   <BigButton text="Send rat to room" onclick={sendEnterRoom} />
-</div>
+</a>
 
 <style lang="scss">
   .room-enter {
@@ -25,7 +21,7 @@
     user-select: none;
     overflow: hidden;
 
-    button {
+    :global(button) {
       width: 100%;
       height: 100%;
       background: var(--color-alert-priority);

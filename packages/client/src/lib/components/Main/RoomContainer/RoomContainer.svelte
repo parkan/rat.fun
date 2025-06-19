@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getUIState } from "$lib/modules/ui/state.svelte"
-  import { ENVIRONMENT } from "$lib/mud/enums"
+   import { ENVIRONMENT } from "$lib/mud/enums"
+   import { page } from "$app/state"
 
   import WorldPromptBox from "$lib/components/Main/RoomContainer/WorldPromptBox.svelte"
   import PaneSwitch from "$lib/components/Main/RoomContainer/PaneSwitch.svelte"
@@ -9,25 +9,23 @@
   import CreateRoom from "$lib/components/Main/RoomContainer/CreateRoom/CreateRoom.svelte"
 
   let { environment }: { environment: ENVIRONMENT } = $props()
-
-  const { enums, panes } = getUIState()
 </script>
 
 <div class="room-container">
   <WorldPromptBox />
   <PaneSwitch />
 
-  {#if panes.roomContainer === enums.ROOM_CONTAINER.ALL_ROOMS}
+  {#if page.route.id === "rooms"}
     <RoomListing isOwnRoomListing={false} />
   {/if}
 
-  {#if panes.roomContainer === enums.ROOM_CONTAINER.YOUR_ROOMS}
+  {#if page.route.id === "rooms/landlord"}
     <div class="tab-content your-rooms-tab">
       <YourRooms />
     </div>
   {/if}
 
-  {#if panes.roomContainer === enums.ROOM_CONTAINER.CREATE_ROOM}
+  {#if page.route.id === "rooms/create"}
     <div class="tab-content">
       <CreateRoom {environment} />
     </div>

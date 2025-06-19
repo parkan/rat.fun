@@ -6,7 +6,6 @@
     roomsOnCurrentLevel,
     playerRooms,
   } from "$lib/modules/state/base/stores"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { entriesByPopularity, entriesChronologically } from "./sortFunctions"
   import { filterRooms, filterDepletedRooms } from "./filterFunctions"
   import { blockNumber } from "$lib/modules/network"
@@ -24,9 +23,6 @@
   }: {
     isOwnRoomListing: boolean
   } = $props()
-
-  let { rooms } = getUIState()
-  const { myPreviewId, previewId } = rooms
 
   // Local state
   let currentRoom = $state<Hex | null>(null)
@@ -55,30 +51,8 @@
     return roomList.filter(r => r[1].creationBlock <= lastChecked)
   })
 
-  let previewing = $derived(
-    (isOwnRoomListing && $myPreviewId) || (!isOwnRoomListing && $previewId)
-  )
+  let previewing = $state(false)
 
-  // Update currentroom with a delay to allow animations to play
-  $effect(() => {
-    if (isOwnRoomListing) {
-      if (!$myPreviewId) {
-        setTimeout(() => (currentRoom = $myPreviewId as Hex), 400)
-      } else {
-        currentRoom = $myPreviewId as Hex
-      }
-    }
-  })
-
-  $effect(() => {
-    if (!isOwnRoomListing) {
-      if (!$previewId) {
-        setTimeout(() => (currentRoom = $previewId as Hex), 400)
-      } else {
-        currentRoom = $previewId as Hex
-      }
-    }
-  })
 </script>
 
 <div class="wrapper">
@@ -86,7 +60,7 @@
     <div class="floor-content">
       <div
         class:previewing
-        class:animated={rooms.previewAnimated}
+        class:animated={false}
         class="room-listing"
       >
         {#if !isOwnRoomListing}
@@ -149,7 +123,7 @@
       </div>
       <div
         class:previewing
-        class:animated={rooms.previewAnimated}
+        class:animated={false}
         class="room-preview"
       >
         {#if currentRoom}

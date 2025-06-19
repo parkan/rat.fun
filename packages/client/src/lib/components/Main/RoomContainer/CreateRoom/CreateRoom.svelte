@@ -9,15 +9,13 @@
   } from "$lib/modules/state/base/stores"
   import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
   import { createRoom } from "./index"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { walletNetwork } from "$lib/modules/network"
 
   import CharacterCounter from "$lib/components/Main/RoomContainer/CreateRoom/CharacterCounter.svelte"
   import VideoLoader from "$lib/components/Main/Shared/VideoLoader/VideoLoader.svelte"
   import BigButton from "$lib/components/Main/Shared/Buttons/BigButton.svelte"
-
-  const { rooms } = getUIState()
 
   let {
     environment,
@@ -68,7 +66,7 @@
     if (result.roomId) {
       busy = false
       // Go to the preview
-      rooms.preview(result.roomId, false, false)
+      goto(`/rooms/${result.roomId}`)
     }
   }
 </script>
@@ -101,17 +99,6 @@
           </button>
         {/each}
       </div>
-
-      <!-- <div class="level-description">
-        <div class="level-name">
-          Floor {Number($levels[levelId].index) * -1}: {$levels[levelId].name}
-        </div>
-        {#if $levels[levelId].prompt}
-          <div class="level-prompt">
-            {$levels[levelId].prompt}
-          </div>
-        {/if}
-      </div> -->
     </div>
 
     <!-- ROOM DESCRIPTION -->

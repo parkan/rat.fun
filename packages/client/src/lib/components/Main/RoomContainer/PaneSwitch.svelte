@@ -1,39 +1,28 @@
 <script lang="ts">
-  import { getUIState } from "$lib/modules/ui/state.svelte"
-  const { enums, panes, rooms } = getUIState()
+  import { page } from "$app/state"
 </script>
 
 <div class="pane-switch">
   <!-- ALL ROOMS -->
   <div
     class="pane-switch-item"
-    class:selected={panes.roomContainer === enums.ROOM_CONTAINER.ALL_ROOMS}
+    class:selected={page.url.pathname.includes("/landlord")}
   >
-    <button
-      onclick={() => {
-        panes.set(enums.PANE.ROOM_CONTAINER, enums.ROOM_CONTAINER.ALL_ROOMS)
-        rooms.back()
-      }}
+    <a
+      href="/rooms"
     >
       ALL ROOMS
-    </button>
+    </a>
   </div>
   <!-- YOUR ROOMS -->
   <div
     class="pane-switch-item"
-    class:selected={[
-      enums.ROOM_CONTAINER.YOUR_ROOMS,
-      enums.ROOM_CONTAINER.CREATE_ROOM,
-    ].includes(panes.roomContainer)}
+    class:selected={false}
   >
-    <button
-      onclick={() => {
-        panes.set(enums.PANE.ROOM_CONTAINER, enums.ROOM_CONTAINER.YOUR_ROOMS)
-        rooms.back(true)
-      }}
+    <a href="/rooms/landlord"
     >
       YOUR ROOMS
-    </button>
+    </a>
   </div>
 </div>
 

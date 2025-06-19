@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getUIState } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
   import { closeRoom } from "$lib/modules/action"
   import { playSound } from "$lib/modules/sound"
   import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
@@ -24,11 +24,8 @@
 
   let {
     room,
-    roomId,
-    isOwnRoomListing,
+    roomId
   }: { room: Room; roomId: string; isOwnRoomListing: boolean } = $props()
-
-  let { rooms } = getUIState()
 
   let { modal } = getModalState()
 
@@ -57,7 +54,7 @@
       liquidationMessage = "Could not liquidate room"
     } finally {
       sendLiquidateRoomMessage($walletNetwork, roomId)
-      rooms.back(isOwnRoomListing)
+      goto("/rooms/landlord")
       modal.close()
     }
   }

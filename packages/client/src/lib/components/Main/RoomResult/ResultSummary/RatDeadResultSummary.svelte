@@ -1,22 +1,9 @@
 <script lang="ts">
-  import type { EnterRoomReturnValue } from "@server/modules/types"
   import { onMount } from "svelte"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { frozenRat } from "$lib/components/Main/RoomResult/state.svelte"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
-
-  let { rooms } = getUIState()
-
-  let {
-    room,
-    staticRoomContent,
-    result,
-  }: {
-    room: Room
-    staticRoomContent: any
-    result: EnterRoomReturnValue | null
-  } = $props()
+  import { goto } from "$app/transition"
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
@@ -64,8 +51,8 @@
 </script>
 
 <div
-  onclick={async () => {
-    await rooms.close(false)
+  onclick={() => {
+    goto("/rooms")
   }}
   role="presentation"
   class="popup-container"

@@ -1,23 +1,20 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
-  import { getUIState } from "$lib/modules/ui/state.svelte"
   import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { playSound } from "$lib/modules/sound"
 
   import RatContainer from "$lib/components/Main/RatContainer/RatContainer.svelte"
   import RoomContainer from "$lib/components/Main/RoomContainer/RoomContainer.svelte"
-  import RoomResult from "$lib/components/Main/RoomResult/RoomResult.svelte"
   import Floors from "$lib/components/Main/Floors/Floors.svelte"
 
   function getDoorStyle(side: "left" | "right"): string {
-    const progress = transition.progress.current
+    const progress = 0
     // Return empty style if transition is not active, doors will be in their "natural" state (translateX(0%))
     // This means when not transitioning, they are "closed".
     // The visibility of the layer-game wrapper handles whether these closed doors are seen.
-    if (!transition.active) return ""
-    const isOpening = transition.type === "doorsOpen"
+    const isOpening = false
     let offset = 0
     if (side === "left") {
       offset = isOpening ? -(progress * 50) : -50 + progress * 50 // Moves from 0% to -50%
@@ -28,15 +25,6 @@
   }
 
   let { environment }: { environment: ENVIRONMENT } = $props()
-  const { transition, route, rooms } = getUIState()
-  const { current } = rooms
-
-  let debugTransition = $state(false)
-
-  // Determine if the main game layer (with doors) should be rendered
-  let shouldRenderMainGameLayer = $derived(
-    route.current === "main" || transition.to === "main"
-  )
 
   onMount(async () => {
     // Get content from CMS
@@ -76,48 +64,22 @@
   </div>
 {/snippet}
 
-{#if shouldRenderMainGameLayer}
-  <div class="layer-game" class:transition-active={transition.active}>
-    <div class="door-container">
-      <div class="left-door" style={getDoorStyle("left")}>
-        <div class="door-content-wrapper">
-          {@render MainAreaLayout("left")}
-        </div>
-      </div>
 
-      <div class="right-door" style={getDoorStyle("right")}>
-        <div class="door-content-wrapper">
-          {@render MainAreaLayout("right")}
-        </div>
+<div class="layer-game" class:transition-active={false}>
+  <div class="door-container">
+    <div class="left-door" style={getDoorStyle("left")}>
+      <div class="door-content-wrapper">
+        {@render MainAreaLayout("left")}
+      </div>
+    </div>
+
+    <div class="right-door" style={getDoorStyle("right")}>
+      <div class="door-content-wrapper">
+        {@render MainAreaLayout("right")}
       </div>
     </div>
   </div>
-{/if}
-
-<!-- What does this mean? -->
-{#if route.current === "room" || (transition.from === "room" && transition.active) || $current}
-  <div class="layer-below">
-    <RoomResult roomId={$current} {environment} />
-  </div>
-{/if}
-
-{#if debugTransition}
-  <pre class="routing">
-    transition active: {transition.active}{#if transition.active}
-      ---
-      transition from: {transition.from}
-      transition to: {transition.to}
-      transition type: {transition.type}
-      transition progress: {transition.progress.current.toFixed(
-        5
-      )}
-    {/if}
-    ---
-    route: {route.current}
-    route params: {JSON.stringify(route.params)}
-    ---
-  </pre>
-{/if}
+</div>
 
 <style lang="scss">
   // Base layout structure (from original .main class)
