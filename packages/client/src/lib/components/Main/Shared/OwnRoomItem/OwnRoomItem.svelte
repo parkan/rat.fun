@@ -47,7 +47,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <a
-  href="/rooms/{roomId}"
+  href="/{roomId}?landlord"
   class="room-listing-item"
   class:depleted={Number(room.balance) == 0}
 >
@@ -179,13 +179,15 @@
         justify-content: center;
         border: var(--default-border-style);
         padding: 5px;
-        color: var(--background);
+        color: var(--white);
 
         &.positive {
+          color: var(--background);
           background-color: var(--color-health);
         }
-
+        
         &.negative {
+          color: var(--background);
           background-color: var(--color-death);
         }
       }

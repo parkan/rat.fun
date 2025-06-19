@@ -9,7 +9,7 @@
     class:selected={page.url.pathname.includes("/landlord")}
   >
     <a
-      href="/rooms"
+      href="/"
     >
       ALL ROOMS
     </a>
@@ -19,7 +19,7 @@
     class="pane-switch-item"
     class:selected={false}
   >
-    <a href="/rooms/landlord"
+    <a href="/landlord"
     >
       YOUR ROOMS
     </a>
@@ -44,24 +44,25 @@
       color: var(--background);
       width: 50%;
 
-      button {
+      a {
         width: 100%;
         height: 100%;
         border: none;
         outline: none;
+        display: block;
         background: transparent;
         color: var(--background);
         font-family: var(--label-font-stack);
         font-size: var(--font-size-large);
         letter-spacing: -0.2em;
+        text-decoration: none;
+        transition: transform 0.2s ease-in-out;
       }
-
+      
       &:hover {
         background: var(--color-grey-light);
-
-        button {
+        a {
           transform: scale(1.4);
-          transition: transform 0.2s ease-in-out;
         }
       }
 

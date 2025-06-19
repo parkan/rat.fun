@@ -3,7 +3,7 @@
   import { frozenRat } from "$lib/components/Main/RoomResult/state.svelte"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
-  import { goto } from "$app/transition"
+  import { goto } from "$app/navigation"
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
@@ -52,7 +52,7 @@
 
 <div
   onclick={() => {
-    goto("/rooms")
+    goto("/")
   }}
   role="presentation"
   class="popup-container"

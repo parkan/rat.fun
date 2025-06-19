@@ -136,7 +136,6 @@ export const resetRoomResultState = () => {
   roomResultState.errorMessage = null
 }
 
-
 /*
  * ─────────────────────────────────────────────
  * Frozen Rat and Room

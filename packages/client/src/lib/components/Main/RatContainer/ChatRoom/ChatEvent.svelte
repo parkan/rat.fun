@@ -29,7 +29,7 @@
     >
       {event.playerName}
     </span>
-    created room <a href="#{event.roomId}">#{event.roomIndex ?? "unknown"}</a>
+    created room <a href="/{event.roomId}">#{event.roomIndex ?? "unknown"}</a>
   {:else if event.topic == "room__liquidation"}
     <!-- ROOM LIQUIDATION -->
     <span

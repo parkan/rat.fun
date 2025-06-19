@@ -11,7 +11,7 @@
   }
 </script>
 
-<a href="/rooms/{roomId}" class="room-enter">
+<a href="/{roomId}/enter" class="room-enter">
   <BigButton text="Send rat to room" onclick={sendEnterRoom} />
 </a>
 
@@ -20,6 +20,7 @@
     height: 80px;
     user-select: none;
     overflow: hidden;
+    display: block;
 
     :global(button) {
       width: 100%;
@@ -31,9 +32,12 @@
       transition: transform 0.2s ease-in-out;
       letter-spacing: -0.2em;
 
-      &:hover {
-        background: var(--color-alert-priority);
-        color: var(--background);
+    }
+    &:hover {
+      background: var(--color-alert-priority);
+      color: var(--background);
+
+      :global(button) {
         transform: scale(1.3);
       }
     }

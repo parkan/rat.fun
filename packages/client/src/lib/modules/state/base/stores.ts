@@ -122,7 +122,7 @@ export const ratLevelIndex = derived(
   [gameConfig, rat],
   ([$gameConfig, $rat]) => {
     if ($gameConfig?.levelList) {
-      return $gameConfig.levelList.findIndex(lvl => lvl === ($rat?.level ?? 0))
+      return $gameConfig?.levelList?.findIndex(lvl => lvl === ($rat?.level ?? 0))
     }
     return 0
   }
@@ -164,7 +164,7 @@ export const roomsOnCurrentLevel = derived(
     if (!$rat) {
       // Show room on first level if no rat
       // Assumes that the first element in the levelList is the first level...
-      return filterByLevel($rooms, $gameConfig?.levelList[0]) as Rooms
+      return filterByLevel($rooms, $gameConfig?.levelList?.[0]) as Rooms
     }
     return filterByLevel($rooms, $rat?.level) as Rooms
   }

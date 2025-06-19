@@ -39,6 +39,8 @@ export function playSound(category: string, id: string, loop: boolean = false, f
 
   const sound = soundLibrary[category][id].sound
 
+  console.log(Object.keys(sound))
+
   if (!sound) return
 
   if (loop) {

@@ -10,18 +10,13 @@
   import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
   import { createRoom } from "./index"
   import { goto } from "$app/navigation"
+  import { page } from "$app/state"
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { walletNetwork } from "$lib/modules/network"
 
   import CharacterCounter from "$lib/components/Main/RoomContainer/CreateRoom/CharacterCounter.svelte"
   import VideoLoader from "$lib/components/Main/Shared/VideoLoader/VideoLoader.svelte"
   import BigButton from "$lib/components/Main/Shared/Buttons/BigButton.svelte"
-
-  let {
-    environment,
-  }: {
-    environment: ENVIRONMENT
-  } = $props()
 
   let busy = $state(false)
   let roomDescription: string = $state("")
@@ -56,7 +51,7 @@
     await waitForCompletion(approveAction)
 
     const result = await createRoom(
-      environment,
+      page.data.environment,
       $walletNetwork,
       newPrompt,
       levelId
@@ -65,8 +60,9 @@
 
     if (result.roomId) {
       busy = false
+      // console.log(result)
       // Go to the preview
-      goto(`/rooms/${result.roomId}`)
+      goto(`/${result.roomId}`)
     }
   }
 </script>
@@ -134,6 +130,7 @@
 <style lang="scss">
   .create-room {
     height: 100%;
+    background: var(--black);
 
     .form-group {
       padding: 1rem;
