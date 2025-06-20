@@ -49,7 +49,7 @@
   .layer-game {
     position: fixed;
     // top: 30px;
-    left: 0;
+    // left: 20px;
     height: var(--game-window-height);
     width: var(--game-window-width);
     z-index: var(--z-base);
