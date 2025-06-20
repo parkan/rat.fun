@@ -70,6 +70,7 @@
 </script>
 
 <div class="bg">
+  <div class="context-main">
 {#if $UIState === UI.LOADING}
   <main>
     <Loading environment={data.environment} loaded={environmentLoaded} />
@@ -79,12 +80,11 @@
     <Spawn spawned={playerSpawned} />
   </main>
 {:else if $UIState === UI.READY}
-    <div class="context-main">
       <div class="layer-game">
         {@render children?.()}
       </div>
+      {/if}
     </div>
-    {/if}
   </div>
 
 <Modal />
