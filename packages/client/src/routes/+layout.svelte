@@ -6,6 +6,7 @@
 
   import Loading from "$lib/components/Loading/Loading.svelte"
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
+  import PageTransitions from "$lib/components/Main/Shared/PageTransitions/PageTransitions.svelte"
   import { Modal } from "$lib/components/Main/Modal/state.svelte"
   import { onMount } from "svelte"
   import { initStaticContent } from "$lib/modules/content"
@@ -32,6 +33,11 @@
     UIState.set(UI.READY)
     UILocation.set(LOCATION.MAIN)
   }
+
+  const transitionsConfig = [
+    { from: "/(rooms)/[roomId]", to: "/(rooms)/[roomId]/enter", transition: "doorsOpen" },
+    { from: "/(rooms)/[roomId]/enter", to: "*", transition: "leftToRight" },
+  ]
 
   // Init of chain sync when player is ready
   $effect(() => {
@@ -71,21 +77,23 @@
 
 <div class="bg">
   <div class="context-main">
-{#if $UIState === UI.LOADING}
-  <main>
-    <Loading environment={data.environment} loaded={environmentLoaded} />
-  </main>
-{:else if $UIState === UI.SPAWNING}
-  <main>
-    <Spawn spawned={playerSpawned} />
-  </main>
-{:else if $UIState === UI.READY}
+    {#if $UIState === UI.LOADING}
+      <main>
+        <Loading environment={data.environment} loaded={environmentLoaded} />
+      </main>
+    {:else if $UIState === UI.SPAWNING}
+      <main>
+        <Spawn spawned={playerSpawned} />
+      </main>
+    {:else if $UIState === UI.READY}
       <div class="layer-game">
-        {@render children?.()}
+        <PageTransitions config={transitionsConfig} >
+          {@render children?.()}
+        </PageTransitions>
       </div>
-      {/if}
-    </div>
+    {/if}
   </div>
+</div>
 
 <Modal />
 
