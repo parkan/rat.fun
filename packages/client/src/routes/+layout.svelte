@@ -54,8 +54,42 @@
   }
 
   const transitionsConfig = [
-    { from: "/(rooms)/[roomId]", to: "/(rooms)/[roomId]/enter", transition: "doorsOpen" },
-    { from: "/(rooms)/[roomId]/enter", to: "*", transition: "leftToRight" },
+    {
+      from: "/(rooms)/[roomId]",
+      to: "/(rooms)/[roomId]/enter",
+      out: {
+        transition: "wipe",
+        params: {
+          duration: 2000,
+          direction: "in"
+        }
+      },
+      in: {
+        transition: "fade",
+        params: {
+          duration: 1000,
+          delay: 200
+        }
+      },
+    },
+    {
+      from: "/(rooms)/[roomId]/enter",
+      to: "*",
+      out: {
+        transition: "wipe",
+        params: {
+          duration: 2000,
+          direction: "in"
+        }
+      },
+      in: {
+        transition: "fade",
+        params: {
+          duration: 1000,
+          delay: 200
+        }
+      },
+    },
   ]
 
   // Init of chain sync when player is ready
