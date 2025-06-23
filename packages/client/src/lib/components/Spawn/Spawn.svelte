@@ -65,6 +65,11 @@
 			accountKitConnectReturn.appAccountClient
 		) as SetupWalletNetworkResult;
 
+		// Session wallet address => wallet.walletClient.account?.address
+		console.log('wallet.walletClient.account?.address', wallet.walletClient.account.address);
+		// Main user address => accountKitStoreState.userAddress
+		console.log('accountKitConnectReturn.userAddress', accountKitConnectReturn.userAddress);
+
 		const isSpawned = initWalletNetwork(wallet, accountKitConnectReturn.userAddress as Hex);
 
 		if (isSpawned) {
@@ -99,11 +104,22 @@
 			 * and set playerAddress to the user address
 			 */
 			const accountKitStoreState = accountKitStore.getState();
-			console.log('accountKitStoreState', accountKitStoreState);
-
 			if (accountKitStoreState.appAccountClient && accountKitStoreState.userAddress) {
+				console.log('accountKitStoreState', accountKitStoreState);
+
+				const wallet = setupWalletNetwork(
+					$publicNetwork,
+					accountKitStoreState.appAccountClient
+				) as SetupWalletNetworkResult;
+
+				// Session wallet address => wallet.walletClient.account?.address
+				console.log('wallet.walletClient.account?.address', wallet.walletClient.account?.address);
+				// Main user address => accountKitStoreState.userAddress
+				console.log('accountKitStoreState.userAddress', accountKitStoreState.userAddress);
+
+				const isSpawned = initWalletNetwork(wallet, accountKitStoreState.userAddress);
+
 				// Wallet is connected
-				const isSpawned = initWalletNetwork(accountKitStoreState, accountKitStoreState.userAddress);
 				if (isSpawned) {
 					// Connected and spawned - go to next step
 					spawned();

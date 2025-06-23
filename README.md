@@ -6,27 +6,29 @@
 
 SvelteKit frontend.
 
-### cms-private
-
-- Stores the system prompts for the LLM calls
-- Requires authentication to read
-
-### cms-public
-
-- Stores room images
-- Stores room and outcome statistics
-- Publicly accessible
-
 ### contracts
 
 Mud based.
 
 ### server
 
-- Creating and entering rooms is done through the server
-- The server executes the LLM calls
-- Chain calls are done from admin account on behalf of the player
-- Server maintains websocket connections to the players for alerts
+- creating and entering rooms is done through the server
+- the server executes the LLM calls
+- chain calls are done from admin account on behalf of the player
+- server maintains websocket connections to the players for alerts
+
+### cms-private
+
+- using (sanity.io)[https://www.sanity.io/]
+- stores the system prompts for the LLM calls
+- requires authentication to read
+
+### cms-public
+
+- using (sanity.io)[https://www.sanity.io/]
+- stores room images
+- stores room and outcome statistics
+- publicly accessible
 
 ### scripts
 

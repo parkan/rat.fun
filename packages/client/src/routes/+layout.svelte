@@ -30,6 +30,7 @@
 	import { fallback, webSocket } from 'viem';
 	import type { Chain } from 'viem';
 	import { ENVIRONMENT, WALLET_TYPE } from '$lib/mud/enums';
+	import { gameConfig } from '$lib/modules/state/base/stores';
 
 	let { children, data }: LayoutProps = $props();
 
@@ -76,6 +77,7 @@
 
 	$effect(() => {
 		console.log('$walletNetwork', $walletNetwork);
+		console.log('$gameConfig', $gameConfig);
 	});
 
 	const environmentLoaded = async () => {
