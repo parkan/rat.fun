@@ -6,15 +6,18 @@
 
 import type { Writable } from "svelte/store"
 import { writable, get } from "svelte/store"
+import { transactionQueue } from "@latticexyz/common/actions";
 import { store as accountKitStore } from '@latticexyz/account-kit/bundle';
 import { publicNetwork, walletNetwork, blockNumber } from "$lib/modules/network"
 // import { toastMessage } from "../../ui/toast"
 // import { parseError } from "$lib/components/Main/Terminal/functions/errors"
 import { v4 as uuid } from "uuid"
 import { erc20Abi } from "viem"
+import { addChain, switchChain } from "viem/actions";
 import { clearActionTimer, startActionTimer } from "$lib/modules/action/actionSequencer/timeoutHandler"
 import { gameConfig } from "$lib/modules/state/base/stores"
 import { WorldFunctions } from ".."
+import { getChain } from "$lib/mud/utils";
 
 // --- TYPES -----------------------------------------------------------------
 
@@ -27,6 +30,7 @@ export type Action = {
   actionId: string
   systemId: string
   params: string[]
+  useUserAccount: boolean
   tx?: string
   timestamp?: number
   completed: boolean
@@ -49,11 +53,12 @@ export const failedActions = writable([] as Action[])
  * @param params
  * @returns action
  */
-export function addToSequencer(systemId: string, params: any[] = []) {
+export function addToSequencer(systemId: string, params: any[] = [], useUserAccount: boolean = false) {
   const newAction: Action = {
     actionId: uuid(),
     systemId: systemId,
     params: params || [],
+    useUserAccount,
     completed: false,
     error: undefined,
   }
@@ -63,7 +68,10 @@ export function addToSequencer(systemId: string, params: any[] = []) {
   })
 
   // Display error message if action does not complete in 15 seconds
-  startActionTimer()
+  // Unless it must be signed via the user's wallet, which has its own UI and can take arbitrarily long
+  if (!useUserAccount) {
+    startActionTimer()
+  }
 
   return newAction
 }
@@ -105,6 +113,25 @@ export function initActionSequencer() {
   })
 }
 
+async function prepareUserAccountClient() {
+  const userAccountClient = accountKitStore.getState().userAccountClient
+  if (!userAccountClient) {
+    throw new Error("User account client is not available")
+  }
+  // User's wallet may switch between different chains, ensure the current chain is correct
+  const expectedChainId = get(publicNetwork).config.chain.id
+  if (userAccountClient.chain.id !== expectedChainId) {
+    try {
+      await switchChain(userAccountClient, { id: expectedChainId })
+    } catch (e) {
+      await addChain(userAccountClient, { chain: getChain(expectedChainId) })
+      await switchChain(userAccountClient, { id: expectedChainId })
+    }
+  }
+  // MUD's `transactionQueue` extends the client with `writeContract` method
+  return userAccountClient.extend(transactionQueue({}));
+}
+
 async function execute() {
   const action = get(queuedActions)[0]
 
@@ -115,15 +142,12 @@ async function execute() {
     queuedActions.update(queuedActions => queuedActions.slice(1))
     // Add action to active list
     activeActions.update(activeActions => [action, ...activeActions])
+    // Prepare the action's client
+    const client = action.useUserAccount ? await prepareUserAccountClient() : get(walletNetwork).walletClient
     // Make the call
     let tx
     if (action.systemId === WorldFunctions.Approve) {
-      const userAccountClient = accountKitStore.getState().userAccountClient;
-      // TODO use switchChain in case chainId does not match
-      // and handle undefined client?
-      console.log(userAccountClient)
-
-      tx = await userAccountClient.writeContract({
+      tx = await client.writeContract({
         address: get(gameConfig).externalAddressesConfig.erc20Address,
         abi: erc20Abi,
         functionName: "approve",
@@ -131,7 +155,7 @@ async function execute() {
         gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
       })
     } else {
-      tx = await get(walletNetwork).walletClient.writeContract({
+      tx = await client.writeContract({
         address: get(walletNetwork).worldContract.address,
         abi: get(walletNetwork).worldContract.abi,
         functionName: action.systemId,

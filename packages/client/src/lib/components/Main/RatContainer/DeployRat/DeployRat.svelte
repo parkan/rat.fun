@@ -11,7 +11,6 @@
 	import BigButton from '$lib/components/Main/Shared/Buttons/BigButton.svelte';
 
 	let busy = $state(false);
-	let done = $state(false);
 
 	const name: string = generateRatName();
 
@@ -29,8 +28,8 @@
 			await waitForCompletion(createRatAction);
 		} catch (e) {
 			console.error(e);
+			busy = false;
 		} finally {
-			done = true;
 			sendDeployRatMessage($walletNetwork);
 		}
 	}

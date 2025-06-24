@@ -69,7 +69,7 @@
 		// Main user address => accountKitStoreState.userAddress
 		console.log('accountKitConnectReturn.userAddress', accountKitConnectReturn.userAddress);
 
-		const isSpawned = initWalletNetwork(wallet, accountKitConnectReturn.userAddress as Hex);
+		const isSpawned = initWalletNetwork(wallet, accountKitConnectReturn.userAddress as Hex, WALLET_TYPE.ACCOUNTKIT);
 
 		if (isSpawned) {
 			// Connected and spawned - go to next step
@@ -82,7 +82,7 @@
 
 	async function connectBurner() {
 		const wallet = setupBurnerWalletNetwork($publicNetwork);
-		const isSpawned = initWalletNetwork(wallet, wallet.walletClient?.account.address);
+		const isSpawned = initWalletNetwork(wallet, wallet.walletClient?.account.address, WALLET_TYPE.BURNER);
 
 		// Check if player is already spawned
 		if (isSpawned) {
@@ -113,7 +113,7 @@
 				// Main user address => accountKitStoreState.userAddress
 				console.log('accountKitStoreState.userAddress', accountKitStoreState.userAddress);
 
-				const isSpawned = initWalletNetwork(wallet, accountKitStoreState.userAddress);
+				const isSpawned = initWalletNetwork(wallet, accountKitStoreState.userAddress, walletType);
 
 				if (isSpawned) {
 					// Connected and spawned - go to next step

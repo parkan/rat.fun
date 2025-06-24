@@ -42,17 +42,22 @@
 		busy = true;
 		const newPrompt = roomDescription;
 
-		const approveAction = approve(
-			$gameConfig.externalAddressesConfig.gamePoolAddress,
-			roomCreationCost
-		);
-		await waitForCompletion(approveAction);
+		try {
+			const approveAction = approve(
+				$gameConfig.externalAddressesConfig.gamePoolAddress,
+				roomCreationCost
+			);
+			await waitForCompletion(approveAction);
+		} catch (e) {
+			console.error(e);
+			busy = false;
+			return;
+		}
 
 		const result = await createRoom(page.data.environment, $walletNetwork, newPrompt, levelId);
 		busy = false;
 
 		if (result.roomId) {
-			busy = false;
 			// console.log(result)
 			// Go to the preview
 			goto(`/${result.roomId}`);
