@@ -65,7 +65,9 @@ export const waitForCompletion = (
   loadingFunction?: (index: number) => void
 ): Promise<Action> => {
   return new Promise((resolve, reject) => {
-    const maxRetries = 150
+    // Much longer timeout if the action must be signed via the user's wallet,
+    // which has its own UI and can take arbitrarily long
+    const maxRetries = action.useUserAccount ? 15000 : 150
     let attempts = 0
     let index = 0
 

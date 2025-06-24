@@ -1,3 +1,6 @@
+import { WALLET_TYPE } from "$lib/mud/enums"
+import { get } from "svelte/store"
+import { walletType } from "../network"
 import { addToSequencer } from "./actionSequencer"
 
 const NAMESPACE = "ratroom__"
@@ -9,7 +12,7 @@ export enum WorldFunctions {
   DropItem = NAMESPACE + "dropItem",
   CloseRoom = NAMESPACE + "closeRoom",
   Approve = "ERC20-approve",
-  GiveCallerTokens =  NAMESPACE + "giveCallerTokens"
+  GiveCallerTokens = NAMESPACE + "giveCallerTokens"
 }
 
 // --- API --------------------------------------------------------------
@@ -36,7 +39,8 @@ export function closeRoom(roomId: string) {
 
 export function approve(address: string, value: bigint) {
   const scaledValue = value * 10n ** 18n
-  return addToSequencer(WorldFunctions.Approve, [address, scaledValue])
+  const useUserAccount = get(walletType) === WALLET_TYPE.ACCOUNTKIT
+  return addToSequencer(WorldFunctions.Approve, [address, scaledValue], useUserAccount)
 }
 
 export function giveCallerTokens() {

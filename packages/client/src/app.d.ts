@@ -23,4 +23,4 @@ declare module '@latticexyz/account-kit/bundle' {
 	}): void;
 }
 
-export {};
+export { };
