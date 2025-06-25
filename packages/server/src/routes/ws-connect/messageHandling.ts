@@ -1,4 +1,5 @@
-import { OffChainMessage, WebSocketInterface } from "@modules/types"
+import type { OffChainMessage, WebSocketInterface } from "@modules/types"
+import type { Hex } from "viem"
 import { v4 as uuidv4 } from "uuid"
 import { getSenderId } from "@modules/signature"
 import { getEntityName, getEntityLevel, getRatId } from "@modules/mud/getOnchainData"
@@ -54,7 +55,7 @@ async function handleChatMessage(message: OffChainMessage): Promise<void> {
     return
   }
 
-  const senderId = getSenderId(message.signature)
+  const senderId = await getSenderId(message.signature as Hex)
 
   if (!senderId) {
     console.error("Missing senderId in chat message")
@@ -83,7 +84,7 @@ async function handleRatDeploy(message: OffChainMessage): Promise<void> {
     return
   }
 
-  const senderId = getSenderId(message.signature)
+  const senderId = await getSenderId(message.signature as Hex)
 
   if (!senderId) {
     console.error("Missing senderId in rat deploy message")
@@ -115,7 +116,7 @@ async function handleRatLiquidate(message: OffChainMessage): Promise<void> {
     return
   }
 
-  const senderId = getSenderId(message.signature)
+  const senderId = await getSenderId(message.signature as Hex)
 
   if (!senderId) {
     console.error("Missing senderId in rat deploy message")
@@ -147,7 +148,7 @@ async function handleRoomLiquidation(message: OffChainMessage): Promise<void> {
     return
   }
 
-  const senderId = getSenderId(message.signature)
+  const senderId = await getSenderId(message.signature as Hex)
 
   if (!senderId) {
     console.error("Missing senderId in room liquidation message")

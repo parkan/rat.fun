@@ -58,7 +58,7 @@ async function routes(fastify: FastifyInstance) {
         const { signature, roomId, ratId } = request.body
 
         // Recover player address from signature and convert to MUD bytes32 format
-        const playerId = getSenderId(signature)
+        const playerId = await getSenderId(signature as Hex)
 
         // Get onchain data
         console.time("–– Get on chain data")

@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
+import type { Hex } from "viem"
 import { schema } from "@routes/room/create/schema"
 import dotenv from "dotenv"
 
@@ -70,7 +71,7 @@ async function routes(fastify: FastifyInstance) {
         const { signature, roomPrompt, levelId } = request.body
 
         // Recover player address from signature and convert to MUD bytes32 format
-        const playerId = getSenderId(signature)
+        const playerId = await getSenderId(signature as Hex)
 
         // Get onchain data
         const { gameConfig, player, level } = await getCreateRoomData(playerId, levelId)
