@@ -2,7 +2,11 @@
   import { createRat, approve } from "$lib/modules/action"
   import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
   import { playSound } from "$lib/modules/sound"
-  import { gameConfig, playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/base/stores"
+  import {
+    gameConfig,
+    playerERC20Allowance,
+    playerERC20Balance
+  } from "$lib/modules/state/base/stores"
   import { generateRatName } from "./index"
   import { sendDeployRatMessage } from "$lib/modules/off-chain-sync"
 

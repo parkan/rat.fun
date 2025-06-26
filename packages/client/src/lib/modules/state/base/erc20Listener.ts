@@ -1,7 +1,12 @@
 import { derived } from "svelte/store"
 import { erc20Abi, Hex, parseAbiItem } from "viem"
 import { publicNetwork } from "$lib/modules/network"
-import { gameConfig, playerAddress, playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/base/stores"
+import {
+  gameConfig,
+  playerAddress,
+  playerERC20Allowance,
+  playerERC20Balance
+} from "$lib/modules/state/base/stores"
 import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
 
 export function initErc20Listener() {
