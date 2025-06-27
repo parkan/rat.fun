@@ -12,7 +12,7 @@
     OUTCOME_START_DELAY
   } from "./config"
 
-  import OutcomeItem from "$lib/components/Room/OutcomeItem/OutcomeItem.svelte"
+  import { OutcomeItem } from "$lib/components/Room"
 
   gsap.registerPlugin(TextPlugin)
 
