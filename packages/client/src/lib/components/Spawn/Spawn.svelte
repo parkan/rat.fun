@@ -7,8 +7,7 @@
   import { store as accountKitStore } from "@latticexyz/account-kit/bundle"
 
   import { onMount } from "svelte"
-  import { spawn } from "$lib/modules/action"
-  import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
+  import { spawn } from "$lib/modules/on-chain-action"
   import { playSound } from "$lib/modules/sound"
   import { publicNetwork } from "$lib/modules/network"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
@@ -36,8 +35,7 @@
     currentState = SPAWN_STATE.BUSY
 
     try {
-      const spawnAction = spawn(name)
-      await waitForCompletion(spawnAction)
+      await spawn(name)
       spawned()
     } catch (e) {
       console.error(e)

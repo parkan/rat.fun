@@ -1,7 +1,6 @@
 <script lang="ts">
   import { ratTotalValue } from "$lib/modules/state/base/stores"
-  import { liquidateRat } from "$lib/modules/action"
-  import { waitForCompletion } from "$lib/modules/action/actionSequencer/utils"
+  import { liquidateRat } from "$lib/modules/on-chain-action"
   import { playSound } from "$lib/modules/sound"
   import { player, ratImageUrl } from "$lib/modules/state/base/stores"
   import { tippy } from "svelte-tippy"
@@ -20,12 +19,10 @@
   const sendLiquidateRat = async () => {
     if (busy) return
     busy = true
-    playSound("tcm", "ratScream")
-    const action = liquidateRat()
-
     try {
+      playSound("tcm", "ratScream")
       liquidationMessage = "Eliminating rat..."
-      await waitForCompletion(action)
+      await liquidateRat()
     } catch (e) {
       busy = false
       console.error(e)
@@ -34,9 +31,6 @@
       modal.close()
     }
   }
-
-  // Withhold changes to this value until the
-  // ratTotalValue
 </script>
 
 <div class="liquidate-rat">
