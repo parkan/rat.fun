@@ -6,7 +6,7 @@
   import { frozenRat } from "$lib/components/Room/RoomResult/state.svelte"
   import { fade } from "svelte/transition"
   import { goto } from "$app/navigation"
-  import { OutcomeItem } from "$lib/components/Shared"
+  import { OutcomeItem } from "$lib/components/Room"
 
   let {
     result
