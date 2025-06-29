@@ -7,6 +7,7 @@ import {
   websocketConnected
 } from "$lib/modules/off-chain-sync/stores"
 import { getSignature } from "$lib/modules/signature"
+import { PUBLIC_DEVELOPMENT_SERVER_HOST, PUBLIC_PYROPE_SERVER_HOST } from "$env/static/public"
 
 const MAX_RECONNECTION_DELAY = 30000 // Maximum delay of 30 seconds
 const MAX_EVENTS = 200
@@ -32,11 +33,9 @@ export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
     reconnectTimeout = null
   }
 
-  let url = `ws://localhost:3131/ws/${playerId}`
-
-  if ([ENVIRONMENT.PYROPE].includes(environment)) {
-    url = `wss://reality-model-1.mc-infra.com/ws/${playerId}`
-  }
+  const url = [ENVIRONMENT.PYROPE].includes(environment)
+    ? `wss://${PUBLIC_PYROPE_SERVER_HOST}/ws/${playerId}`
+    : `ws://${PUBLIC_DEVELOPMENT_SERVER_HOST}/ws/${playerId}`
 
   socket = new WebSocket(url)
 

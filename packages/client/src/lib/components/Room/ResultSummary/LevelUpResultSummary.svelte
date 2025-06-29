@@ -8,18 +8,18 @@
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
-  let closeButtonElement = $state<HTMLButtonElement | null>(null)
+  let closeLinkElement = $state<HTMLAnchorElement | null>(null)
 
   // Timeline
   const timeline = gsap.timeline()
 
   onMount(() => {
-    if (!innerContainerElement || !messageElement || !closeButtonElement) {
+    if (!innerContainerElement || !messageElement || !closeLinkElement) {
       console.error("Missing elements")
       return
     }
 
-    gsap.set([messageElement, closeButtonElement], {
+    gsap.set([messageElement, closeLinkElement], {
       opacity: 0
     })
 
@@ -43,7 +43,7 @@
       ease: "power2.out"
     })
 
-    timeline.to(closeButtonElement, {
+    timeline.to(closeLinkElement, {
       opacity: 1,
       duration: 0.3,
       ease: "power2.out"
@@ -67,7 +67,7 @@
           )}
         </h1>
 
-        <a bind:this={closeButtonElement} class="close-button" href="/rat"> LEAVE ROOM </a>
+        <a bind:this={closeLinkElement} class="close-button" href="/rat"> LEAVE ROOM </a>
       </div>
 
       <div class="background">

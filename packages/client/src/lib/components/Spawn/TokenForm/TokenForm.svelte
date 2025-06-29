@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { giveCallerTokens } from "$lib/modules/on-chain-action"
-  import { busy as busyState } from "$lib/modules/action-manager/index.svelte"
+  import { sendGiveCallerTokens, busy } from "$lib/modules/action-manager/index.svelte"
   import gsap from "gsap"
   import { onMount } from "svelte"
   import { player } from "$lib/modules/state/base/stores"
@@ -14,23 +13,16 @@
 
   let buttonText = "Get RatFunTokens"
   let message = `${$player.name}, your money is not good here. You need RatFunTokens to play.`
-  let busy = $state(false)
+
   let imageElement: HTMLImageElement | null = $state(null)
   let messageElement: HTMLParagraphElement | null = $state(null)
   let buttonElement: HTMLDivElement | null = $state(null)
+
   const timeline = gsap.timeline()
 
   async function getTokens() {
-    if (busy) return
-    busy = true
-    try {
-      await giveCallerTokens()
-      onComplete()
-    } catch (e) {
-      console.error(e)
-    } finally {
-      busy = false
-    }
+    await sendGiveCallerTokens()
+    onComplete()
   }
 
   onMount(() => {
@@ -59,8 +51,8 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    {#if busy}
-      <VideoLoader progress={busyState.Spawn} />
+    {#if busy.GiveCallerTokens.current !== 0}
+      <VideoLoader progress={busy.GiveCallerTokens} />
     {:else}
       <img class="image" src="/images/cashier2.png" alt="RAT.FUN" bind:this={imageElement} />
       <p bind:this={messageElement}>{message}</p>

@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { gameConfig } from "$lib/modules/state/base/stores"
-  import { approveMax } from "$lib/modules/on-chain-action"
-  import { busy as busyState } from "$lib/modules/action-manager/index.svelte"
+  import { sendApproveMax, busy } from "$lib/modules/action-manager/index.svelte"
   import { playerERC20Balance } from "$lib/modules/state/base/stores"
 
   import gsap from "gsap"
@@ -17,18 +15,14 @@
   let textElement: HTMLDivElement | null = $state(null)
   let imageElement: HTMLImageElement | null = $state(null)
   let buttonElement: HTMLDivElement | null = $state(null)
-  let busy = $state(false)
   const timeline = gsap.timeline()
 
   async function sendApproval() {
-    if (busy) return
-    busy = true
     try {
-      await approveMax($gameConfig.externalAddressesConfig.gamePoolAddress)
+      await sendApproveMax()
     } catch (e) {
       console.error(e)
     } finally {
-      busy = false
       onComplete()
     }
   }
@@ -59,8 +53,8 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    {#if busy}
-      <VideoLoader progress={busyState.Spawn} />
+    {#if busy.ApproveMax.current !== 0}
+      <VideoLoader progress={busy.ApproveMax} />
     {:else}
       <img class="image" src="/images/cashier3.png" alt="RAT.FUN" bind:this={imageElement} />
       <div class="text" bind:this={textElement}>
