@@ -53,6 +53,7 @@ export async function setupNetwork(
   chainId: number
 ): Promise<SetupNetworkReturnType> {
   const networkConfig = await getNetworkConfig(privateKey, chainId)
+
   /*
    * Create a viem public (read only) client
    * (https://viem.sh/docs/clients/public.html)
@@ -105,6 +106,8 @@ export async function setupNetwork(
     client: { public: publicClient, wallet: burnerWalletClient }
   })
 
+  console.log("mudConfig.default", mudConfig.default)
+
   /*
    * Sync on-chain state into RECS and keeps our client in sync.
    * Uses the MUD indexer if available, otherwise falls back
@@ -113,7 +116,7 @@ export async function setupNetwork(
    */
   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } = await syncToRecs({
     world,
-    config: mudConfig,
+    config: mudConfig.default,
     address: networkConfig.worldAddress as Hex,
     publicClient,
     startBlock: BigInt(networkConfig.initialBlockNumber)

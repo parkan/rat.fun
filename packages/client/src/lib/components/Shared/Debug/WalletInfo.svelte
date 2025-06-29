@@ -4,6 +4,7 @@
   import { ENTITY_TYPE } from "contracts/enums"
   import { player } from "$lib/modules/state/base/stores"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/base/stores"
+  import { sendGiveCallerTokens } from "$lib/modules/action-manager/index.svelte"
 
   let { walletType, environment }: { walletType: WALLET_TYPE; environment: ENVIRONMENT } = $props()
 
@@ -30,6 +31,7 @@
     <p>Spawned: {$player?.entityType == ENTITY_TYPE.PLAYER}</p>
     <p>Tokens: {$playerERC20Balance}</p>
     <p>Allowance: {$playerERC20Allowance}</p>
+    <button onclick={sendGiveCallerTokens}>Get tokens</button>
   {/if}
 </div>
 
