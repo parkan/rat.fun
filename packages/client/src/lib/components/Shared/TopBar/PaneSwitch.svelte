@@ -11,11 +11,11 @@
 </script>
 
 <div class="pane-switch">
-  <div class="pane-switch-item" class:selected={page.route.id?.includes("/(rooms)/rat")}>
-    <a href="/rat">RAT</a>
+  <div class="pane-switch-item">
+    <a class:selected={page.route.id?.includes("/(rooms)/rat")} href="/rat">RAT</a>
   </div>
-  <div class="pane-switch-item" class:selected={page.route.id?.includes("/(rooms)/landlord")}>
-    <a href="/landlord">LANDLORD</a>
+  <div class="pane-switch-item">
+    <a class:selected={page.route.id?.includes("/(rooms)/landlord")} href="/landlord">LANDLORD</a>
   </div>
   <div class="selection-indicator" bind:this={selectionIndicator}></div>
 </div>
@@ -52,12 +52,18 @@
         outline: none;
         display: block;
         background: transparent;
-        color: var(--background);
         font-family: var(--label-font-stack);
         font-size: var(--font-size-large);
         letter-spacing: -0.2em;
         text-decoration: none;
-        transition: transform 0.2s ease-in-out;
+        transition:
+          transform 0.2s ease-in-out,
+          color 0.2s;
+        color: var(--background);
+
+        &.selected {
+          color: var(--white);
+        }
       }
 
       &:hover {

@@ -3,7 +3,7 @@
   import { updateFrozenState } from "$lib/components/Room/RoomResult/state.svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
-  import { playSound, randomPitch } from "$lib/modules/sound"
+  import { playSound, typeHit } from "$lib/modules/sound"
   import {
     TIMESTAMP_DURATION,
     CHARACTER_DELAY,
@@ -51,11 +51,10 @@
   const timeline = gsap.timeline({ delay })
 
   // Type hit helper
-  const typeHit = (char: string) => {
+  const playTypeHit = (char: string) => {
     // Use string type hint
     if (logTextElement) logTextElement.textContent += char
-    const sound = playSound("tcm", "type2", false, false, randomPitch())
-    if (sound) sound.play()
+    typeHit()
   }
 
   // Outcome sound helper
@@ -112,7 +111,7 @@
     })
     const chars = logEntry.event.split("")
     for (let i = 0; i < chars.length; i++) {
-      timeline.call(typeHit, [chars[i]], `+=${CHARACTER_DELAY}`)
+      timeline.call(playTypeHit, [chars[i]], `+=${CHARACTER_DELAY}`)
     }
 
     // Add a label to mark the start of outcome animations

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { goto } from "$app/navigation"
+  import { navigating } from "$app/state"
   import { frozenRat } from "$lib/components/Room/RoomResult/state.svelte"
   import { ratLevel } from "$lib/modules/state/base/stores"
   import { playSound } from "$lib/modules/sound"
@@ -14,6 +15,8 @@
   const timeline = gsap.timeline()
 
   onMount(() => {
+    if (navigating.to) return
+
     if (!innerContainerElement || !messageElement || !closeButtonElement) {
       console.error("Missing elements")
       return

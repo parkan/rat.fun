@@ -4,6 +4,7 @@
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
   import { goto } from "$app/navigation"
+  import { navigating } from "$app/state"
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
@@ -13,6 +14,8 @@
   const timeline = gsap.timeline()
 
   onMount(() => {
+    if (navigating.to) return
+
     if (!innerContainerElement || !messageElement || !closeButtonElement) {
       console.error("Missing elements")
       return

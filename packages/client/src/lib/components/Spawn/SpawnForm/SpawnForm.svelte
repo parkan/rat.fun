@@ -1,5 +1,6 @@
 <script lang="ts">
   import { BigButton } from "$lib/components/Shared"
+  import { typeHit } from "$lib/modules/sound"
 
   const { onComplete = () => {} } = $props<{
     onComplete: (name: string) => void
@@ -26,6 +27,7 @@
       <p>Sign with name to proceed.</p>
       <!-- INPUT -->
       <input
+        oninput={typeHit}
         type="text"
         placeholder="YOUR NAME"
         bind:value={name}

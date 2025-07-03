@@ -4,6 +4,7 @@
   import { sendChatMessage } from "$lib/modules/off-chain-sync"
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { onMount } from "svelte"
+  import { typeHit } from "$lib/modules/sound"
 
   import ChatEvent from "./ChatEvent.svelte"
   import ChatMessage from "./ChatMessage.svelte"
@@ -56,7 +57,7 @@
   <!-- Chat input container -->
   <form autocomplete="off" class="chat-input-container" onsubmit={sendMessage}>
     <!-- Chat input -->
-    <input bind:value class="chat-input" type="text" name="text" id="text" />
+    <input oninput={typeHit} bind:value class="chat-input" type="text" name="text" id="text" />
     <!-- Chat submit -->
     <input
       disabled={!$websocketConnected || value === ""}
