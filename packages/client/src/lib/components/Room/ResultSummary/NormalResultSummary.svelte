@@ -6,6 +6,7 @@
   import { frozenRat } from "$lib/components/Room/RoomResult/state.svelte"
   import { fade } from "svelte/transition"
   import { goto } from "$app/navigation"
+  import { navigating } from "$app/state"
   import { OutcomeItem } from "$lib/components/Room"
 
   let {
@@ -28,6 +29,8 @@
   const timeline = gsap.timeline()
 
   onMount(() => {
+    if (navigating.to) return
+
     if (!innerContainerElement || !messageElement || !closeButtonElement) {
       console.error("Missing elements")
       return

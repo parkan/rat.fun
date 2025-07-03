@@ -175,6 +175,7 @@
       max-height: 90%;
       object-fit: contain;
       border: var(--default-border-style);
+      transition: opacity 0.2s ease;
     }
   }
 </style>

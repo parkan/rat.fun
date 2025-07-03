@@ -73,3 +73,10 @@ export function randomPitch(): number {
   const min = 0.8
   return Math.random() * (max - min) + min
 }
+
+export const typeHit = () => {
+  const sound = playSound("tcm", "type2", false, false, randomPitch())
+  if (sound) {
+    sound.play()
+  }
+}

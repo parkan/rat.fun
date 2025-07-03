@@ -8,6 +8,7 @@
     entriesByKillCount,
     entriesByPopularity
   } from "./sortFunctions"
+  import { typeHit } from "$lib/modules/sound"
 
   let {
     textFilter,
@@ -48,7 +49,10 @@
       type="text"
       name="filter"
       bind:value={textFilter}
-      oninput={e => onTextFilterChange(e.currentTarget.value)}
+      oninput={e => {
+        typeHit()
+        onTextFilterChange(e.currentTarget.value)
+      }}
     />
     {#if textFilter !== ""}
       <button class="sort-button close" onclick={onTextFilterClear}>X</button>

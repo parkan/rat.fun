@@ -4,6 +4,7 @@
   import { ratLevel } from "$lib/modules/state/base/stores"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
+  import { navigating } from "$app/state"
 
   let innerContainerElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLHeadingElement | null>(null)
@@ -13,6 +14,8 @@
   const timeline = gsap.timeline()
 
   onMount(() => {
+    if (navigating.to) return
+
     if (!innerContainerElement || !messageElement || !closeButtonElement) {
       console.error("Missing elements")
       return

@@ -2,6 +2,7 @@
   import { rat, gameConfig, levels, playerERC20Balance } from "$lib/modules/state/base/stores"
   import { CharacterCounter, VideoLoader, BigButton } from "$lib/components/Shared"
   import { busy, sendCreateRoom } from "$lib/modules/external/index.svelte"
+  import { typeHit } from "$lib/modules/sound"
 
   let roomDescription: string = $state("")
   let levelId: string = $state($rat?.level ?? $gameConfig.levelList[0])
@@ -40,6 +41,7 @@
         id="room-description"
         rows="6"
         placeholder="You're creating a room that can modify traits, items, health, and tokens of rats that enter. Your room balance decreases whenever a rat gains something, and increases when your room takes something. You can withdraw remaining balance from your room."
+        oninput={typeHit}
         bind:value={roomDescription}
       ></textarea>
     </div>
@@ -67,6 +69,9 @@
   .create-room {
     height: 100%;
     background: var(--black);
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
 
     .form-group {
       padding: 1rem;
@@ -158,7 +163,7 @@
       display: flex;
       flex-flow: column nowrap;
       gap: 12px;
-      margin-inline: 1rem;
+      // margin-inline: 1rem;
       overflow: hidden;
     }
   }

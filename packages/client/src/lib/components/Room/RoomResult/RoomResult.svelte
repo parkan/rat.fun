@@ -119,7 +119,9 @@
     <Log
       {result}
       onComplete={() => {
-        transitionToResultSummary(result as EnterRoomReturnValue)
+        setTimeout(() => {
+          transitionToResultSummary(result as EnterRoomReturnValue)
+        }, 1000)
       }}
     />
   {/if}
