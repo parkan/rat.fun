@@ -74,6 +74,7 @@ function parseReturnMessage(msg: Anthropic.Messages.Message) {
       const contentBlock = msg.content[0]
       if ("text" in contentBlock) {
         rawText = contentBlock.text
+        console.log(rawText)
       }
     }
 
