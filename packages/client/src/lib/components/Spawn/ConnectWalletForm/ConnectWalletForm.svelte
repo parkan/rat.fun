@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import type { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
-  import { EntryKit } from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
+  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
 
@@ -17,7 +17,6 @@
   import { initWalletNetwork } from "$lib/initWalletNetwork"
 
   import { BigButton } from "$lib/components/Shared"
-  import EntryKit from "../EntryKit/EntryKit.svelte"
 
   const { walletType, onComplete = () => {} } = $props<{
     walletType: WALLET_TYPE

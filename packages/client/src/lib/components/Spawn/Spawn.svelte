@@ -20,7 +20,6 @@
   import TokenForm from "$lib/components/Spawn/TokenForm/TokenForm.svelte"
   import ApprovalForm from "$lib/components/Spawn/ApprovalForm/ApprovalForm.svelte"
   import HeroImage from "$lib/components/Spawn/HeroImage/HeroImage.svelte"
-  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
 
   const { walletType, spawned = () => {} } = $props<{
     walletType: WALLET_TYPE
