@@ -2,11 +2,13 @@ import { Chain, http, webSocket } from "viem"
 import { anvil } from "viem/chains"
 import { createWagmiConfig } from "@latticexyz/entrykit/internal"
 import { garnet, pyrope, redstone } from "@latticexyz/common/chains"
+import { baseSepolia } from "viem/chains"
 
 export const chains = [
   redstone,
   garnet,
   pyrope,
+  baseSepolia,
   {
     ...anvil,
     contracts: {
@@ -29,20 +31,23 @@ export const transports = {
   [anvil.id]: webSocket(),
   [garnet.id]: http(),
   [pyrope.id]: http(),
-  [redstone.id]: http()
+  [redstone.id]: http(),
+  [baseSepolia.id]: http()
 } as const
 
-export const wagmiConfig = createWagmiConfig({
-  chainId: 31337,
-  // TODO: swap this with another default project ID or leave empty
-  walletConnectProjectId: "3f1000f6d9e0139778ab719fddba894a",
-  appName: document.title,
-  chains,
-  transports,
-  pollingInterval: {
-    [anvil.id]: 2000,
-    [garnet.id]: 2000,
-    [pyrope.id]: 2000,
-    [redstone.id]: 2000
-  }
-})
+export const wagmiConfig = (chainId: number) =>
+  createWagmiConfig({
+    chainId,
+    // TODO: swap this with another default project ID or leave empty
+    walletConnectProjectId: "3f1000f6d9e0139778ab719fddba894a",
+    appName: document.title,
+    chains,
+    transports,
+    pollingInterval: {
+      [anvil.id]: 2000,
+      [garnet.id]: 2000,
+      [pyrope.id]: 2000,
+      [redstone.id]: 2000,
+      [baseSepolia.id]: 2000
+    }
+  })

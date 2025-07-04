@@ -36,7 +36,7 @@
 
       const providers = createElement(
         WagmiProvider,
-        { config: wagmiConfig },
+        { config: wagmiConfig(networkConfig.chainId) },
         createElement(QueryClientProvider, { client: queryClient }, entrykit)
       )
       root.render(providers)
