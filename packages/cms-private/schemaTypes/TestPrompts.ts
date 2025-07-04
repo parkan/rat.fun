@@ -11,16 +11,30 @@ export default {
       validation: (Rule: any) => Rule.required()
     },
     {
-      title: "Test prompt A",
+      title: "Event prompt A",
       type: "reference",
-      name: "testPromptA",
+      name: "eventPromptA",
       to: [{ type: "prompt" }],
       validation: (Rule: any) => Rule.required()
     },
     {
-      title: "Test prompt B",
+      title: "Event prompt B",
       type: "reference",
-      name: "testPromptB",
+      name: "eventPromptB",
+      to: [{ type: "prompt" }],
+      validation: (Rule: any) => Rule.required()
+    },
+    {
+      title: "Correction prompt A",
+      type: "reference",
+      name: "correctionPromptA",
+      to: [{ type: "prompt" }],
+      validation: (Rule: any) => Rule.required()
+    },
+    {
+      title: "Correction prompt B",
+      type: "reference",
+      name: "correctionPromptB",
       to: [{ type: "prompt" }],
       validation: (Rule: any) => Rule.required()
     }
