@@ -13,6 +13,81 @@
  */
 
 // Source: schema.json
+export type TestPrompts = {
+  _id: string
+  _type: "testPrompts"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  eventPromptA?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+  eventPromptB?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+  correctionPromptA?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+  correctionPromptB?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+}
+
+export type ActivePrompts = {
+  _id: string
+  _type: "activePrompts"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  activeEventPrompt?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+  activeCorrectionPrompt?: {
+    _ref: string
+    _type: "reference"
+    _weak?: boolean
+    [internalGroqTypeReferenceTo]?: "prompt"
+  }
+}
+
+export type Prompt = {
+  _id: string
+  _type: "prompt"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  prompt?: string
+  returnFormat?: Code
+}
+
+export type Markdown = string
+
+export type Code = {
+  _type: "code"
+  language?: string
+  filename?: string
+  code?: string
+  highlightedLines?: Array<number>
+}
+
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch"
   background?: string
@@ -131,49 +206,12 @@ export type SanityAssetSourceData = {
   url?: string
 }
 
-export type ActivePrompts = {
-  _id: string
-  _type: "activePrompts"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  activeEventPrompt?: {
-    _ref: string
-    _type: "reference"
-    _weak?: boolean
-    [internalGroqTypeReferenceTo]?: "prompt"
-  }
-  activeCorrectionPrompt?: {
-    _ref: string
-    _type: "reference"
-    _weak?: boolean
-    [internalGroqTypeReferenceTo]?: "prompt"
-  }
-}
-
-export type Prompt = {
-  _id: string
-  _type: "prompt"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  prompt?: string
-  returnFormat?: Code
-}
-
-export type Markdown = string
-
-export type Code = {
-  _type: "code"
-  language?: string
-  filename?: string
-  code?: string
-  highlightedLines?: Array<number>
-}
-
 export type AllSanitySchemaTypes =
+  | TestPrompts
+  | ActivePrompts
+  | Prompt
+  | Markdown
+  | Code
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -185,8 +223,4 @@ export type AllSanitySchemaTypes =
   | Geopoint
   | Slug
   | SanityAssetSourceData
-  | ActivePrompts
-  | Prompt
-  | Markdown
-  | Code
 export declare const internalGroqTypeReferenceTo: unique symbol
