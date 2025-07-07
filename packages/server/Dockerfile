@@ -37,9 +37,6 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Install only production dependencies for server
 RUN pnpm install --prod --ignore-scripts --filter server...
 
-# Create and set permissions for db-files directory
-RUN mkdir -p /app/packages/server/db-files && chown -R nodejs:nodejs /app/packages/server/db-files
-
 USER nodejs
 
 EXPOSE 3131

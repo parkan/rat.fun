@@ -3,9 +3,6 @@ import formbody from "@fastify/formbody"
 import cors from "@fastify/cors"
 import websocket from "@fastify/websocket"
 
-import { initializeMessagesDB } from "@modules/message-store"
-import { initializeNoncesDB } from "@modules/signature/db"
-
 import { PORT } from "@config"
 
 import ping from "@routes/test/ping"
@@ -44,9 +41,6 @@ const start = async (port: number) => {
       port,
       host: "0.0.0.0" // Listen on all interfaces for Docker
     })
-    // Initialize databases after server starts
-    await initializeMessagesDB()
-    await initializeNoncesDB()
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
