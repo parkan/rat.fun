@@ -13,6 +13,8 @@ class InMemoryStore {
 
   async getMessages(limit?: number): Promise<OffChainMessage[]> {
     const messages = [...this.messages]
+    // Sort by timestamp: oldest first, newest last
+    messages.sort((a, b) => a.timestamp - b.timestamp)
     return limit ? messages.slice(-limit) : messages
   }
 
@@ -87,6 +89,8 @@ class RedisStore {
       }
     }
 
+    // Sort by timestamp: oldest first, newest last
+    messages.sort((a, b) => a.timestamp - b.timestamp)
     return limit ? messages.slice(-limit) : messages
   }
 

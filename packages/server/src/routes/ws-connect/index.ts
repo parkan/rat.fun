@@ -33,8 +33,6 @@ async function routes(fastify: FastifyInstance) {
 
         // Store the WebSocket connection
         wsConnections[playerId] = socket as unknown as WebSocket
-        // console.log(`WebSocket connected for Player ID: ${playerId}`);
-        // console.log('Object.keys(wsConnections)', Object.keys(wsConnections))
 
         // Send last 30 messages to the newly connected user
         const lastMessages = await getMessages(30)
