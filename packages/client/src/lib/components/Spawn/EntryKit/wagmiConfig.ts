@@ -8,7 +8,15 @@ export const chains = [
   redstone,
   garnet,
   pyrope,
-  baseSepolia,
+  {
+    ...baseSepolia,
+    rpcUrls: {
+      default: {
+        http: ["https://api.pimlico.io/v2/84532/rpc?apikey=pim_8gQqpbnmKF1njADAZmuHy5"],
+        webSocket: ["wss://api.pimlico.io/v2/84532/rpc?apikey=pim_8gQqpbnmKF1njADAZmuHy5"]
+      }
+    }
+  },
   {
     ...anvil,
     contracts: {
@@ -39,7 +47,7 @@ export const wagmiConfig = (chainId: number) =>
   createWagmiConfig({
     chainId,
     // TODO: swap this with another default project ID or leave empty
-    walletConnectProjectId: "3f1000f6d9e0139778ab719fddba894a",
+    walletConnectProjectId: "",
     appName: document.title,
     chains,
     transports,

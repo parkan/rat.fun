@@ -14,7 +14,6 @@
 
   const environment = getEnvironment(new URL(window.location.href))
   const networkConfig = getNetworkConfig(environment)
-
   const queryClient = new QueryClient()
 
   $effect(() => {
@@ -37,7 +36,13 @@
       const providers = createElement(
         WagmiProvider,
         { config: wagmiConfig(networkConfig.chainId) },
-        createElement(QueryClientProvider, { client: queryClient }, entrykit)
+        //
+        createElement(
+          QueryClientProvider,
+          { client: queryClient },
+          //
+          entrykit
+        )
       )
       root.render(providers)
     })
