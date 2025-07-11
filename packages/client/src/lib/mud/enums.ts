@@ -6,6 +6,5 @@ export enum ENVIRONMENT {
 
 export enum WALLET_TYPE {
   BURNER = "burner",
-  ACCOUNTKIT = "accountkit",
   ENTRYKIT = "entrykit"
 }

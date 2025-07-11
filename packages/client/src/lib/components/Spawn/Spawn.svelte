@@ -1,16 +1,16 @@
 <script lang="ts">
   import type { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
 
+  import { onMount } from "svelte"
+
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SPAWN_STATE } from "$lib/modules/ui/enums"
 
-  import { store as accountKitStore } from "@latticexyz/account-kit/bundle"
-
-  import { onMount } from "svelte"
   import { publicNetwork } from "$lib/modules/network"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
+  import { entryKitSession } from "$lib/components/Spawn/EntryKit/stores"
 
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/base/stores"
 
@@ -27,6 +27,8 @@
   }>()
 
   let currentState = $state<SPAWN_STATE>(SPAWN_STATE.INTRODUCTION)
+
+  const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
 
   async function connectBurner() {
     const wallet = setupBurnerWalletNetwork($publicNetwork)
@@ -46,21 +48,26 @@
     }
   }
 
-  onMount(() => {
-    if (walletType == WALLET_TYPE.ACCOUNTKIT) {
+  const onWalletConnectionComplete = () => {
+    console.log("Here my wallet type is ", walletType)
+    if (walletType === WALLET_TYPE.ENTRYKIT) {
+      console.log("entrykitStore", $entryKitSession)
+
       /* We get the account kit store state
        * If appAccountClient and userAddress are set the user is connected
        * We set up the wallet network using the appAccountClient
        * and set playerAddress to the user address
        */
-      const accountKitStoreState = accountKitStore.getState()
-      if (accountKitStoreState.appAccountClient && accountKitStoreState.userAddress) {
+
+      console.log("entryKitSession", $entryKitSession)
+
+      if (entrykitStoreState.appAccountClient && entrykitStoreState.userAddress) {
         const wallet = setupWalletNetwork(
           $publicNetwork,
-          accountKitStoreState.appAccountClient
+          entrykitStoreState.appAccountClient
         ) as SetupWalletNetworkResult
 
-        const isSpawned = initWalletNetwork(wallet, accountKitStoreState.userAddress, walletType)
+        const isSpawned = initWalletNetwork(wallet, entrykitStoreState.userAddress, walletType)
 
         if (isSpawned) {
           // Connected and spawned - finish spawn process
@@ -73,29 +80,22 @@
         // New user – show introduction
         currentState = SPAWN_STATE.INTRODUCTION
       }
-    } else if (walletType === WALLET_TYPE.ENTRYKIT) {
-      console.log("Connect entrykit")
     } else {
-      // For burner wallet, connect immediately
-      connectBurner()
+      // Burna
+      currentState = SPAWN_STATE.SPAWN_FORM
     }
+  }
+
+  onMount(() => {
+    if (walletType === WALLET_TYPE.BURNER) connectBurner()
   })
 </script>
 
 <div class="container">
   {#if currentState === SPAWN_STATE.INTRODUCTION}
-    <Introduction onComplete={() => (currentState = SPAWN_STATE.CONNECT_WALLET)} />
+    <Introduction onComplete={onIntroductionComplete} />
   {:else if currentState === SPAWN_STATE.CONNECT_WALLET}
-    <ConnectWalletForm
-      {walletType}
-      onComplete={isSpawned => {
-        if (isSpawned) {
-          spawned()
-        } else {
-          currentState = SPAWN_STATE.SPAWN_FORM
-        }
-      }}
-    />
+    <ConnectWalletForm {walletType} onComplete={onWalletConnectionComplete} />
   {:else if currentState === SPAWN_STATE.SPAWN_FORM}
     <SpawnForm
       onComplete={() => {

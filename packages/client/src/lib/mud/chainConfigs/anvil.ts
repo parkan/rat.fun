@@ -3,11 +3,11 @@ import { anvil as anvilConfig } from "viem/chains"
 export const anvil = {
   ...anvilConfig,
   rpcUrls: {
-    ...anvilConfig.rpcUrls,
-    default: {
-      http: ["https://anvil.tunnel.offchain.dev"],
-      webSocket: ["wss://anvil.tunnel.offchain.dev"]
-    }
+    ...anvilConfig.rpcUrls
+    // default: {
+    //   http: ["https://anvil.tunnel.offchain.dev"],
+    //   webSocket: ["wss://anvil.tunnel.offchain.dev"]
+    // }
   },
   contracts: {
     paymaster: {

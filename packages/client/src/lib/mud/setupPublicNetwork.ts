@@ -88,8 +88,6 @@ export async function setupPublicNetwork(environment: ENVIRONMENT) {
     // tables: extraTables,
   })
 
-  console.log(networkConfig.indexerUrl)
-
   // Allows us to to only listen to the game sepcific tables
   const tableKeys = [
     ...Object.keys(mudConfig.tables).map(key => key.split("__")[1]) // Strips everything before and including '__'
