@@ -1,4 +1,0 @@
-[build]
-base = "packages/client"
-publish = "packages/client/src/svelte/public"
-command = "pnpm run build"
