@@ -9,15 +9,11 @@ cd ..
 # build the frontend
 pnpm build
 
-ls
-
 # Change directory to the location of the built frontend
 cd ./build
 
 # Deploy for Base Sepolia (burner wallet)
-NETLIFY_SITE_ID=$BASE_SEPOLIA_CLIENT_ID netlify deploy --dir=. --prod --auth=$NETLIFY_AUTH_TOKEN
+NETLIFY_SITE_ID=$BASE_SEPOLIA_CLIENT_ID netlify deploy --dir=. --prod --auth=$NETLIFY_AUTH_TOKEN --no-build
 
-# Deploy for Base Sepolia (account kit)
-NETLIFY_SITE_ID=$BASE_SEPOLIA_ACCOUNTKIT_CLIENT_ID netlify deploy --dir=. --prod --auth=$NETLIFY_AUTH_TOKEN
-
-# pnpm preview
+# Deploy for Base Sepolia (entry kit)
+NETLIFY_SITE_ID=$BASE_SEPOLIA_ENTRYKIT_CLIENT_ID netlify deploy --dir=. --prod --auth=$NETLIFY_AUTH_TOKEN --no-build
