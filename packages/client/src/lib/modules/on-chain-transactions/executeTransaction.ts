@@ -1,7 +1,6 @@
 import type { Hex } from "viem"
 import { get } from "svelte/store"
 import { transactionQueue } from "@latticexyz/common/actions"
-import { store as accountKitStore } from "@latticexyz/account-kit/bundle"
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
 import { erc20Abi } from "viem"
 import { addChain, switchChain } from "viem/actions"
@@ -65,7 +64,8 @@ export async function executeTransaction(
 }
 
 async function prepareUserAccountClient() {
-  const userAccountClient = accountKitStore.getState().userAccountClient
+  const userAccountClient = false // replace with entryKitSession info
+  // const userAccountClient = accountKitStore.getState().userAccountClient
   if (!userAccountClient) {
     throw new Error("User account client is not available")
   }

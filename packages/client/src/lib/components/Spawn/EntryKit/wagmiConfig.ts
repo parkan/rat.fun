@@ -1,6 +1,6 @@
 import { Chain, http, webSocket } from "viem"
 import { createWagmiConfig } from "@latticexyz/entrykit/internal"
-import { baseSepolia, anvil } from "$lib/modules/entrykit/chainConfigs"
+import { baseSepolia, anvil } from "$lib/mud/chainConfigs"
 
 export const chains = [baseSepolia, anvil] as const satisfies Chain[]
 

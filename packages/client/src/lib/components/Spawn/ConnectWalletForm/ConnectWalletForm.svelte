@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { Hex } from "viem"
-  import type { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
@@ -10,7 +8,7 @@
 
   const { walletType, onComplete = () => {} } = $props<{
     walletType: WALLET_TYPE
-    onComplete: (isSpawned: boolean) => void
+    onComplete: () => void
   }>()
 
   let buttonText = $derived(
@@ -57,9 +55,11 @@
   <div class="inner-container">
     <img src="/images/bouncer2.png" alt="BASE(TM) ID" bind:this={imageElement} />
     <p bind:this={messageElement}>{message}</p>
-    <div class="button" bind:this={buttonElement}>
-      <EntryKit {onComplete} />
-    </div>
+    {#if walletType === WALLET_TYPE.ENTRYKIT}
+      <EntryKit />
+    {:else}
+      <div class="button" bind:this={buttonElement} onclick={onComplete}>Connect Burner</div>
+    {/if}
   </div>
 </div>
 

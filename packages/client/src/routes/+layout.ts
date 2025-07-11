@@ -8,8 +8,8 @@ export const ssr = false
 const getWalletType = (url: URL) => {
   const hostname = url.hostname
 
-  if (hostname.includes("accountkit") || url.searchParams.has("accountkit")) {
-    return WALLET_TYPE.ACCOUNTKIT
+  if (hostname.includes("entrykit") || url.searchParams.has("entrykit")) {
+    return WALLET_TYPE.ENTRYKIT
   }
 
   return WALLET_TYPE.BURNER
@@ -18,6 +18,8 @@ const getWalletType = (url: URL) => {
 export const load: LayoutLoad = async ({ url }) => {
   const environment = getEnvironment(url)
   const walletType = getWalletType(url)
+
+  console.log("Found wallet type", walletType)
 
   return {
     environment: environment,

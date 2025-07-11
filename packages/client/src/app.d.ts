@@ -10,17 +10,4 @@ declare global {
   }
 }
 
-declare module "@latticexyz/account-kit/bundle" {
-  export function mount(config: {
-    wagmiConfig: unknown
-    accountKitConfig: {
-      theme: string
-      worldAddress: string
-      erc4337: boolean
-      chainId: number
-      appInfo: { name: string }
-    }
-  }): void
-}
-
 export {}

@@ -2,14 +2,10 @@ import { get } from "svelte/store"
 import { publicNetwork } from "$lib/modules/network"
 import { filterObjectByKey, toCamelCase, removePrivateKeys } from "$lib/modules/utils"
 import { entities } from "$lib/modules/state/base/stores"
-// import { playerAddress } from "$lib/modules/state/base/stores"
-// import { addressToId } from "$lib/modules/utils"
 import { createComponentSystem } from "$lib/modules/systems"
 
 export function initEntities() {
   const tableKeys = get(publicNetwork).tableKeys
-  console.log("initEntities", tableKeys)
-  console.log("tableKeys", tableKeys)
   const filteredComponents = filterObjectByKey(get(publicNetwork).components, tableKeys)
   const syncEntities = {} as Entities
   for (let i = 0; i < tableKeys.length; i++) {

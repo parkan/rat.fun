@@ -7,31 +7,19 @@
  *   basefee set to zero to avoid transaction fees.
  *
  */
-import { type MUDChain, mudFoundry } from "@latticexyz/common/chains"
 
 import {
   arbitrum,
   arbitrumNova,
   arbitrumSepolia,
-  base,
-  baseSepolia,
   holesky,
   mainnet,
   optimism,
   optimismSepolia,
   sepolia
 } from "viem/chains"
-
-const extendedBaseSepolia = {
-  ...baseSepolia,
-  faucetUrl: "https://pyrope-faucet.jimmy9-infra.com/trpc/drip",
-  indexerUrl: "https://base-sepolia.rat-fun-indexer.com"
-} as const satisfies MUDChain
-
-const extendedBase = {
-  ...base,
-  indexerUrl: "https://base.rat-fun-indexer.com"
-} as const satisfies MUDChain
+import { MUDChain, mudFoundry } from "@latticexyz/common/chains"
+import { base, baseSepolia } from "$lib/mud/chainConfigs"
 
 export const supportedChains = [
   mudFoundry,
@@ -40,9 +28,9 @@ export const supportedChains = [
   sepolia,
   optimism,
   optimismSepolia,
-  extendedBase,
-  extendedBaseSepolia,
+  base,
+  baseSepolia,
   arbitrum,
   arbitrumNova,
   arbitrumSepolia
-] as const
+] as const satisfies MUDChain[]

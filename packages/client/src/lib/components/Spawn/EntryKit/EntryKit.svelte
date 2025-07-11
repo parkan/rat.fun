@@ -7,14 +7,16 @@
   import { defineConfig, AccountButton } from "@latticexyz/entrykit/internal"
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
   import { getEnvironment } from "$lib/modules/network"
-
-  let { onComplete } = $props()
+  import SessionBridge from "./SessionBridge"
+  import { entryKitSession } from "./stores"
 
   let rootEl: HTMLElement
 
   const environment = getEnvironment(new URL(window.location.href))
   const networkConfig = getNetworkConfig(environment)
   const queryClient = new QueryClient()
+
+  $inspect($entryKitSession)
 
   $effect(() => {
     const root = createRoot(rootEl)
@@ -28,10 +30,13 @@
             worldAddress: networkConfig.worldAddress
           })
         },
-        createElement(AccountButton)
+        [
+          // The button
+          createElement(AccountButton),
+          // State sync
+          createElement(SessionBridge)
+        ]
       )
-
-      console.log(networkConfig)
 
       const providers = createElement(
         WagmiProvider,
