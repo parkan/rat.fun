@@ -3,6 +3,7 @@ import { PROMPTS } from "./prompts"
 import Replicate from "replicate"
 import type { FileOutput } from "replicate"
 import sharp from "sharp"
+import { ReplicateError } from "@modules/error-handling/errors"
 
 import dotenv from "dotenv"
 dotenv.config()
@@ -37,7 +38,7 @@ export const generateImage = async (prompt: string) => {
   try {
     const output = (await client.run(MODEL.SD as any, { input: INPUT.SD })) as FileOutput[]
 
-    if (!output[0]) throw new Error("No output received from Replicate")
+    if (!output[0]) throw new ReplicateError("No output received from Replicate")
 
     // Get the image data directly as a blob
     const blob = await output[0].blob()
@@ -55,6 +56,6 @@ export const generateImage = async (prompt: string) => {
 
     return processedBuffer
   } catch (error) {
-    throw new Error(error as string)
+    throw new ReplicateError(error as string, error)
   }
 }

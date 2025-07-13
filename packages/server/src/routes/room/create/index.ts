@@ -29,9 +29,6 @@ import { validateInputData } from "./validation"
 import { broadcast } from "@modules/websocket"
 import { createRoomCreationMessage } from "@modules/websocket/constructMessages"
 
-// Error handling
-import { handleError } from "./errorHandling"
-
 // Utils
 import { generateRandomBytes32 } from "@modules/utils"
 
@@ -105,7 +102,7 @@ async function routes(fastify: FastifyInstance) {
           roomId
         })
       } catch (error) {
-        return handleError(error, reply)
+        throw error
       }
     }
   )

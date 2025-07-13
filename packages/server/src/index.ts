@@ -4,6 +4,7 @@ import cors from "@fastify/cors"
 import websocket from "@fastify/websocket"
 
 import { PORT } from "@config"
+import { errorHandler } from "@modules/error-handling"
 
 import enter from "@routes/room/enter"
 import create from "@routes/room/create"
@@ -24,8 +25,11 @@ fastify.register(websocket)
 fastify.register(formbody)
 fastify.register(cors, {
   origin: "*", // Allow all origins (restrict for production)
-  methods: ["GET", "POST", "PUT", "DELETE"] // Allowed HTTP methods
+  methods: ["GET", "POST"] // Allowed HTTP methods
 })
+
+// Setup centralized error handling
+fastify.setErrorHandler(errorHandler)
 
 // Register routes
 fastify.register(enter)

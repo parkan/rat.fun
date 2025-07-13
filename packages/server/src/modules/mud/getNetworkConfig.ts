@@ -9,6 +9,7 @@
  * deploys a new `World`, it updates this file.
  */
 import worlds from "../../../../contracts/worlds.json"
+import { ChainNotFoundError, WorldAddressNotFoundError } from "@modules/error-handling/errors"
 
 /*
  * The supported chains.
@@ -23,7 +24,7 @@ export async function getNetworkConfig(privateKey: string, chainId: number) {
   const chainIndex = supportedChains.findIndex(c => c.id === chainId)
   const chain = supportedChains[chainIndex]
   if (!chain) {
-    throw new Error(`Chain ${chainId} not found`)
+    throw new ChainNotFoundError(chainId.toString())
   }
 
   /*
@@ -34,7 +35,7 @@ export async function getNetworkConfig(privateKey: string, chainId: number) {
   const envWorldAddress = process.env.WORLD_ADDRESS
   const worldAddress = envWorldAddress || world?.address
   if (!worldAddress) {
-    throw new Error(`No world address found for chain ${chainId}. Did you run \`mud deploy\`?`)
+    throw new WorldAddressNotFoundError(chainId.toString())
   }
 
   /*
