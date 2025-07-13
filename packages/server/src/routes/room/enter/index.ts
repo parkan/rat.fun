@@ -34,15 +34,12 @@ import { systemCalls, network } from "@modules/mud/initMud"
 import { verifyRequest } from "@modules/signature"
 
 // CMS
-// import { CMSError } from '@modules/cms';
 import { getSystemPrompts } from "@modules/cms/private"
 import { writeOutcomeToCMS } from "@modules/cms/public"
 
 // Validation
 import { validateInputData } from "./validation"
 
-// Error handling
-import { handleError } from "./errorHandling"
 import { Hex } from "viem"
 
 // Initialize LLM: Anthropic
@@ -144,17 +141,7 @@ async function routes(fastify: FastifyInstance) {
           correctedEvents,
           validatedOutcome
         )
-        // } catch (error) {
-        //     // Handle CMS-specific errors
-        //     if (error instanceof CMSError) {
-        //         console.error(`CMS Error: ${error.message}`, error);
-        //         // We don't want to fail the entire request if CMS write fails
-        //         // But we do want to log it properly
-        //     } else {
-        //         // For unexpected errors, log them but don't fail the request
-        //         console.error("Unexpected error writing to CMS:", error);
-        //     }
-        // }
+
         console.timeEnd("–– CMS write")
 
         const response: EnterRoomReturnValue = {
@@ -173,7 +160,7 @@ async function routes(fastify: FastifyInstance) {
 
         reply.send(response)
       } catch (error) {
-        return handleError(error, reply)
+        throw error
       }
     }
   )

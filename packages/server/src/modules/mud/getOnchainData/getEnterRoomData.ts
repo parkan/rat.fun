@@ -2,45 +2,13 @@ import type { EnterRoomData, Trait, Item, GameConfig } from "@modules/types"
 import { getComponentValue, Entity } from "@latticexyz/recs"
 import { components, network } from "@modules/mud/initMud"
 import { GAME_CONFIG_ID } from "@config"
-
-// Custom error classes for better error handling
-export class OnchainDataError extends Error {
-  constructor(
-    message: string,
-    public code: string = "ONCHAIN_DATA_ERROR"
-  ) {
-    super(message)
-    this.name = "OnchainDataError"
-  }
-}
-
-export class RatNotFoundError extends OnchainDataError {
-  constructor(ratId: string) {
-    super(`Rat with ID ${ratId} not found`, "RAT_NOT_FOUND")
-    this.name = "RatNotFoundError"
-  }
-}
-
-export class RoomNotFoundError extends OnchainDataError {
-  constructor(roomId: string) {
-    super(`Room with ID ${roomId} not found`, "ROOM_NOT_FOUND")
-    this.name = "RoomNotFoundError"
-  }
-}
-
-export class PlayerNotFoundError extends OnchainDataError {
-  constructor(playerId: string) {
-    super(`Player with ID ${playerId} not found`, "PLAYER_NOT_FOUND")
-    this.name = "PlayerNotFoundError"
-  }
-}
-
-export class GameConfigNotFoundError extends OnchainDataError {
-  constructor(gameConfigEntity: Entity) {
-    super(`Game config not found for entity ${gameConfigEntity}`, "GAME_CONFIG_NOT_FOUND")
-    this.name = "GameConfigNotFoundError"
-  }
-}
+import {
+  OnchainDataError,
+  RatNotFoundError,
+  RoomNotFoundError,
+  PlayerNotFoundError,
+  GameConfigNotFoundError
+} from "@modules/error-handling/errors"
 
 export async function getEnterRoomData(
   ratId: string,

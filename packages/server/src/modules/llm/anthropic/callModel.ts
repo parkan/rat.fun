@@ -1,39 +1,7 @@
 import { MessageParam } from "@anthropic-ai/sdk/resources"
 import { ANTHROPIC_MODEL } from "@config"
 import Anthropic from "@anthropic-ai/sdk"
-
-// Custom error classes for better error handling
-export class LLMError extends Error {
-  constructor(
-    message: string,
-    public code: string = "LLM_ERROR"
-  ) {
-    super(message)
-    this.name = "LLMError"
-  }
-}
-
-export class LLMAPIError extends LLMError {
-  constructor(
-    message: string,
-    public originalError?: unknown
-  ) {
-    super(message, "LLM_API_ERROR")
-    this.name = "LLMAPIError"
-    this.originalError = originalError
-  }
-}
-
-export class LLMParseError extends LLMError {
-  constructor(
-    message: string,
-    public rawText: string
-  ) {
-    super(message, "LLM_PARSE_ERROR")
-    this.name = "LLMParseError"
-    this.rawText = rawText
-  }
-}
+import { LLMError, LLMAPIError, LLMParseError } from "@modules/error-handling/errors"
 
 export async function callModel(
   anthropic: Anthropic,

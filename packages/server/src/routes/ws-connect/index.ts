@@ -9,9 +9,8 @@ import type { WebSocketParams, OffChainMessage, SignedRequest } from "@modules/t
 // Message store
 import { getMessages } from "@modules/message-store"
 
-// Error handling
-import { handleError } from "./errorHandling"
 import { handleMessage } from "./messageHandling"
+import { handleWebSocketError } from "@modules/error-handling"
 
 async function routes(fastify: FastifyInstance) {
   fastify.get(
@@ -56,7 +55,7 @@ async function routes(fastify: FastifyInstance) {
             const signedRequest = JSON.parse(message.toString()) as SignedRequest<OffChainMessage>
             await handleMessage(signedRequest, socket)
           } catch (error) {
-            handleError(error, socket as unknown as WebSocket)
+            handleWebSocketError(error, socket as unknown as WebSocket)
           }
         })
 
@@ -73,7 +72,7 @@ async function routes(fastify: FastifyInstance) {
           })
         })
       } catch (error) {
-        handleError(error, socket as unknown as WebSocket)
+        handleWebSocketError(error, socket as unknown as WebSocket)
       }
     }
   )

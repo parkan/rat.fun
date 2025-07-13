@@ -9,37 +9,11 @@ import { Rat, Room } from "@modules/types"
 import { getEnterRoomData } from "@modules/mud/getOnchainData/getEnterRoomData"
 import { createOutcomeCallArgs, updateOutcome } from "./outcome"
 import { getRoomValue, getRatValue } from "./value"
-
-// Custom error classes for better error handling
-export class SystemCallError extends Error {
-  constructor(
-    message: string,
-    public code: string = "SYSTEM_CALL_ERROR"
-  ) {
-    super(message)
-    this.name = "SystemCallError"
-  }
-}
-
-export class ContractCallError extends SystemCallError {
-  constructor(
-    message: string,
-    public originalError?: unknown
-  ) {
-    super(message, "CONTRACT_CALL_ERROR")
-    this.name = "ContractCallError"
-  }
-}
-
-export class OutcomeUpdateError extends SystemCallError {
-  constructor(
-    message: string,
-    public originalError?: unknown
-  ) {
-    super(message, "OUTCOME_UPDATE_ERROR")
-    this.name = "OutcomeUpdateError"
-  }
-}
+import {
+  SystemCallError,
+  ContractCallError,
+  OutcomeUpdateError
+} from "@modules/error-handling/errors"
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>
 

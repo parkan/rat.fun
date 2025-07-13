@@ -1,4 +1,10 @@
 import { Player, GameConfig, MinimalLevel } from "@modules/types"
+import {
+  AuthorizationError,
+  InsufficientBalanceError,
+  InvalidLevelError,
+  InvalidPromptError
+} from "@modules/error-handling/errors"
 
 export function validateInputData(
   gameConfig: GameConfig,
@@ -8,22 +14,22 @@ export function validateInputData(
 ) {
   // Check if player has master key
   if (!player.masterKey) {
-    throw new Error("Not authorized.")
+    throw new AuthorizationError()
   }
 
   // Check if player has enough balance to create a room
   if (player.balance < Number(level.roomCreationCost)) {
-    throw new Error("Not enough balance to create room.")
+    throw new InsufficientBalanceError("Not enough balance to create room.")
   }
 
   // Check if player has visited the level
   if (!player.visitedLevels.includes(level.id)) {
-    throw new Error("Invalid level ID.")
+    throw new InvalidLevelError()
   }
 
-  // Check that the is not empty and prompt is less than limit
+  // Check that the prompt is not empty and prompt is less than limit
   if (roomPrompt.length < 1 || roomPrompt.length > gameConfig.maxRoomPromptLength) {
-    throw new Error(
+    throw new InvalidPromptError(
       `Room prompt must be between 1 and ${gameConfig.maxRoomPromptLength} characters.`
     )
   }
