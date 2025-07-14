@@ -6,8 +6,8 @@
  */
 
 import { Hex } from "viem"
-import { BLOCKTIME } from "./constants"
-import { ONE_UNIT } from "$lib/modules/ui/constants"
+
+const BLOCKTIME = 2
 
 /**
  * Converts a string to camel case
@@ -94,7 +94,7 @@ export function filterObjectByKey(
  * @returns The object with private keys removed
  */
 export function removePrivateKeys(obj: Record<string, any>): Record<string, any> {
-  let newObj: Record<string, any> = {}
+  const newObj: Record<string, any> = {}
   for (const key in obj) {
     if (!key.startsWith("__")) {
       newObj[key] = obj[key]
@@ -277,17 +277,6 @@ export function mod(n: number, m: number) {
 }
 
 /**
- * Scales down big ints to displayable numbers
- * @param amount The amount to scale down
- * @returns The scaled down amount
- */
-export function displayAmount(amount: bigint | undefined) {
-  if (amount === undefined) return 0
-  if (amount === BigInt(0)) return 0
-  return Number(amount / ONE_UNIT)
-}
-
-/**
  * Pads a number with zeros
  * @param value The number to pad
  * @returns The padded number
@@ -368,7 +357,7 @@ export function parseJSONFromContent<T = Record<string, unknown>>(content: strin
 
   try {
     return JSON.parse(jsonString) as T
-  } catch (error: any) {
+  } catch (error) {
     throw new Error("Failed to parse JSON: " + error.message)
   }
 }

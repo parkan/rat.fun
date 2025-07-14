@@ -1,7 +1,7 @@
 <script lang="ts">
   import { busy, sendCreateRat } from "$lib/modules/action-manager/index.svelte"
   import { gameConfig, playerERC20Balance } from "$lib/modules/state/base/stores"
-  import { generateRatName } from "./index"
+  import { generateRatName } from "./ratNameGenerator"
   import { sendDeployRatMessage } from "$lib/modules/off-chain-sync"
   import { VideoLoader, BigButton } from "$lib/components/Shared"
 

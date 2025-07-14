@@ -16,6 +16,8 @@ export const ready = writable(false)
 export const loadingMessage = writable("Loading")
 export const walletType = writable(WALLET_TYPE.BURNER as WALLET_TYPE)
 
+// ----------------------------------------------------------------------------
+
 export const getEnvironment = (url: URL) => {
   const hostname = url.hostname
 

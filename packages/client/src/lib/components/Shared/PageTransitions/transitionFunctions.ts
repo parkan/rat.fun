@@ -1,29 +1,5 @@
 import { fade, fly } from "svelte/transition"
-// import { lerp } from '$lib/modules/utils/maths';
 import { elasticOut, linear } from "svelte/easing"
-
-type LayoutRouteId =
-  | "/"
-  | "/(rooms)"
-  | "/(rooms)/game/[roomId]"
-  | "/(rooms)/game/[roomId]/enter"
-  | "/(rooms)/admin"
-  | "/(rooms)/admin/[roomId]"
-  | "/outcome/[id]"
-  | null
-
-export type TransitionConfig = {
-  from: LayoutRouteId | "*"
-  to: LayoutRouteId | "*"
-  in?: {
-    transition: TransitionFunction
-    params: Record<string, string | number>
-  }
-  out?: {
-    transition: TransitionFunction
-    params: Record<string, string | number>
-  }
-}
 
 export const wipe = (
   _: HTMLElement,
@@ -37,7 +13,6 @@ export const wipe = (
     direction: "out"
   }
 ) => {
-  console.log(params)
   return {
     delay: params.delay || 0,
     duration: params.duration || 400,
@@ -76,8 +51,8 @@ export const leftToRight = (
   }
 ) => {
   const css = (t: number, _: number) => `
-  -webkit-mask-image: linear-gradient(to left,  #ffff ${t * 100}%, ${fromColor} ${t * 100 + (params?.feather || 0)}%);
-  mask-image: linear-gradient(to left,  #ffff ${t * 100}%, ${fromColor} ${t * 100 + (params?.feather || 0)}%);
+  -webkit-mask-image: linear-gradient(to left,  #ffff ${t * 100}%, #0000 ${t * 100 + (params?.feather || 0)}%);
+  mask-image: linear-gradient(to left,  #ffff ${t * 100}%, #0000 ${t * 100 + (params?.feather || 0)}%);
   -webkit-mask-size: 100vw 100vh;
   mask-size: 100vw 100vh;
   mask-position: 50% 50%;
@@ -102,7 +77,7 @@ export function whoosh(
     delay: params.delay || 0,
     duration: params.duration || 400,
     easing: params.easing || elasticOut,
-    css: (t, u) => `transform: ${existingTransform} scale(${t})`
+    css: (t: number, _: number) => `transform: ${existingTransform} scale(${t})`
   }
 }
 
@@ -120,7 +95,7 @@ export const strobeWipe = (
     delay: params.delay || 0,
     duration: params.duration || 800,
     easing: params.easing || linear,
-    css: (t, u) => {
+    css: (t: number, u: number) => {
       const cycles = params.cycles || 10
       const feather = params.feather || 100
       const progress = u
@@ -162,7 +137,7 @@ export const slideLeft = (
     delay: params.delay || 0,
     duration: params.duration || 400,
     easing: params.easing || linear,
-    css: (t, u) => `
+    css: (t: number, u: number) => `
       position: absolute;
       display: block !important;
       top: 0;
@@ -188,7 +163,7 @@ export const slideRight = (
     delay: params.delay || 0,
     duration: params.duration || 400,
     easing: params.easing || linear,
-    css: (t, u) => `
+    css: (t: number, u: number) => `
       position: absolute;
       display: block !important;
       top: 0;
@@ -214,7 +189,7 @@ export const slideFromLeft = (
     delay: params.delay || 0,
     duration: params.duration || 400,
     easing: params.easing || linear,
-    css: (t, u) => `
+    css: (t: number, u: number) => `
       position: absolute;
       display: block !important;
       top: 0;
@@ -253,7 +228,7 @@ export const slideFromRight = (
 }
 
 export const transitionFunctions = {
-  none: (_: HTMLElement, __: object) => {},
+  none: () => ({ delay: 0, duration: 0, css: () => "" }),
   fade,
   fly,
   wipe: wipe,

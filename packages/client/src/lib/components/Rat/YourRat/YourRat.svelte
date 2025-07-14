@@ -1,8 +1,12 @@
 <script lang="ts">
   import { player, ratImageUrl } from "$lib/modules/state/base/stores"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
-  import { RatInfo, RatInventory, LiquidateRat, DeployRat } from "$lib/components/Rat"
   import { ModalTarget } from "$lib/components/Shared"
+
+  import RatInfo from "$lib/components/Rat/YourRat/RatInfo.svelte"
+  import RatInventory from "$lib/components/Rat/YourRat/RatInventory.svelte"
+  import LiquidateRat from "$lib/components/Rat/YourRat/LiquidateRat.svelte"
+  import DeployRat from "$lib/components/Rat/DeployRat/DeployRat.svelte"
 
   let { modal } = getModalState()
   let showRatModal = $state(false)

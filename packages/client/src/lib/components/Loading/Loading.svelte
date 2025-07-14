@@ -15,12 +15,9 @@
 
   $effect(() => {
     if ($ready) {
-      console.log("READY")
       // Done here because currently we are not filtering on by playerAddress
       initEntities()
-      // console.log("entities inited")
       // Animate out
-      // console.log("sequence inited")
       initSequence()
     }
   })
@@ -38,9 +35,7 @@
   }
 
   onMount(async () => {
-    console.log("before public network")
     await initPublicNetwork(environment)
-    console.log("after public network", $ready)
   })
 </script>
 

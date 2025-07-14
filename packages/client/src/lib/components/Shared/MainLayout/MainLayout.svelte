@@ -1,29 +1,7 @@
 <script lang="ts">
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { PageTransitions, TopBar } from "$lib/components/Shared"
-
-  const config = [
-    {
-      from: "/(rooms)/game",
-      to: "/(rooms)/admin",
-      in: {
-        transition: "fade"
-      },
-      out: {
-        transition: "none"
-      }
-    },
-    {
-      from: "/(rooms)/admin",
-      to: "/(rooms)/game",
-      in: {
-        transition: "fade"
-      },
-      out: {
-        transition: "none"
-      }
-    }
-  ]
+  import { mainLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
 
   let { children }: { children: import("svelte").Snippet; environment: ENVIRONMENT } = $props()
 </script>
@@ -32,7 +10,7 @@
   <TopBar />
 
   <div class="main-content">
-    <PageTransitions id="main" wrapperClass="main-area-inner" {config}>
+    <PageTransitions id="main" wrapperClass="main-area-inner" config={mainLayoutTransitionConfig}>
       {@render children?.()}
     </PageTransitions>
   </div>
@@ -58,7 +36,6 @@
     }
   }
 
-  // Other styles like .dust, .layer-below, .routing remain as you had them.
   .dust {
     position: fixed;
     top: 0;

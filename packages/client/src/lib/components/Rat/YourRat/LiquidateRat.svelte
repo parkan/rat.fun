@@ -29,7 +29,11 @@
     <DangerButton
       text="Liquidate Rat"
       tippyText="Kill rat to get the value added to your wallet"
-      onclick={() => (confirming = true)}
+      onclick={() => {
+        console.log("Button clicked, setting confirming to true")
+        confirming = true
+        console.log("confirming is now:", confirming)
+      }}
       disabled={busy.LiquidateRat.current !== 0}
     />
   </div>
@@ -68,6 +72,7 @@
       confirming = false
     }}
     content={confirmLiquidation}
+    noclose={false}
   />
 {/if}
 
