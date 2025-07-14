@@ -14,7 +14,8 @@
   import { initOffChainSync } from "$lib/modules/off-chain-sync"
   import { playerId } from "$lib/modules/state/base/stores"
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
-  import { EMPTY_CONNECTION } from "$lib/modules/utils/constants"
+  import { EMPTY_ID } from "$lib/modules/state/base/constants"
+  import { outerLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
 
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
@@ -23,45 +24,6 @@
   let { children, data }: LayoutProps = $props()
 
   const { environment, walletType } = data
-
-  const config = [
-    {
-      from: "/(rooms)/game/[roomId]",
-      to: "/(rooms)/game/[roomId]/enter",
-      out: {
-        transition: "wipe",
-        params: {
-          duration: 1000,
-          direction: "in"
-        }
-      },
-      in: {
-        transition: "fade",
-        params: {
-          duration: 1000,
-          delay: 200
-        }
-      }
-    },
-    {
-      from: "/(rooms)/game/[roomId]/enter",
-      to: "*",
-      out: {
-        transition: "fade",
-        params: {
-          duration: 400,
-          delay: 200
-        }
-      },
-      in: {
-        transition: "wipe",
-        params: {
-          duration: 1000,
-          direction: "out"
-        }
-      }
-    }
-  ]
 
   const environmentLoaded = async () => {
     try {
@@ -80,7 +42,7 @@
 
   // Init of chain sync when player is ready
   $effect(() => {
-    if ($playerId && $playerId !== EMPTY_CONNECTION && !$websocketConnected) {
+    if ($playerId && $playerId !== EMPTY_ID && !$websocketConnected) {
       initOffChainSync(data.environment, $playerId)
     }
   })
@@ -88,7 +50,6 @@
   onMount(async () => {
     // Remove preloader
     document.querySelector(".preloader")?.remove()
-
     // Preload sounds
     initSound()
     // Play background sound
@@ -108,7 +69,7 @@
       </main>
     {:else if $UIState === UI.READY}
       <div class="layer-game">
-        <PageTransitions {config}>
+        <PageTransitions config={outerLayoutTransitionConfig}>
           {@render children?.()}
         </PageTransitions>
       </div>

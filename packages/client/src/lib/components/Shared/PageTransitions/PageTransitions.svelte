@@ -1,9 +1,6 @@
 <script lang="ts">
-  import {
-    transitionFunctions,
-    type TransitionConfig,
-    type TransitionFunction
-  } from "./transitions"
+  import { transitionFunctions, type TransitionFunction } from "./transitionFunctions"
+  import type { TransitionConfig } from "./types"
   import { beforeNavigate } from "$app/navigation"
   import { page } from "$app/state"
 
@@ -26,8 +23,8 @@
   let transitionFunctionIn = $state(transitionFunctions[defaultIn])
   let transitionFunctionOut = $state(transitionFunctions[defaultOut])
 
-  let inParams = $state<Record<string, string | number>>({ duration: 0 })
-  let outParams = $state<Record<string, string | number>>({ duration: 0 })
+  let inParams = $state<any>({ direction: "in", duration: 0 })
+  let outParams = $state<any>({ direction: "out", duration: 0 })
 
   let wanted = $state<TransitionConfig>()
   let transitionKey = $state(`${page.route.id}`)
@@ -42,12 +39,11 @@
     if (wanted) {
       transitionFunctionIn = transitionFunctions?.[wanted?.in?.transition || "none"]
       transitionFunctionOut = transitionFunctions?.[wanted?.out?.transition || "none"]
-      inParams = wanted?.in?.params || {}
-      outParams = wanted?.out?.params || {}
+      inParams = { direction: "in", ...(wanted?.in?.params || {}) }
+      outParams = { direction: "out", ...(wanted?.out?.params || {}) }
 
       // Only update the key if this component should actually transition
       transitionKey = `${e.from?.route.id}-${e.to?.route.id}-${Date.now()}`
-      console.log("starting")
     } else {
       transitionFunctionIn = transitionFunctions["none"]
       transitionFunctionOut = transitionFunctions["none"]
@@ -58,9 +54,10 @@
 
 {#key transitionKey}
   <div
+    {id}
     class={wrapperClass}
-    in:transitionFunctionIn={inParams}
-    out:transitionFunctionOut={outParams}
+    in:transitionFunctionIn={inParams as any}
+    out:transitionFunctionOut={outParams as any}
   >
     {@render children?.()}
   </div>
@@ -77,13 +74,5 @@
     grid-template-columns: calc(var(--game-window-width) * 0.46) 1fr calc(
         var(--game-window-width) * 0.46
       );
-
-    .header {
-      grid-column: 1 / span 3;
-      display: flex;
-      a {
-        color: white;
-      }
-    }
   }
 </style>

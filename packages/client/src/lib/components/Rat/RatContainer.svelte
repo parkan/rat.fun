@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { YourRat } from "$lib/components/Rat"
+  import YourRat from "$lib/components/Rat/YourRat/YourRat.svelte"
   import { ChatRoom } from "$lib/components/Shared"
 </script>
 
