@@ -30,7 +30,11 @@ import {
   LLMParseError,
   CMSError,
   CMSAPIError,
-  CMSDataError
+  CMSDataError,
+  RedisError,
+  RedisConnectionError,
+  RedisOperationError,
+  RedisDataError
 } from "./errors"
 
 /**
@@ -61,16 +65,19 @@ function createServerErrorResponse(reply: FastifyReply, request: FastifyRequest,
 
 /**
  * Centralized error handler for Fastify
- * This is the direct error handler function that Fastify expects
  */
 export function errorHandler(error: FastifyError, request: FastifyRequest, reply: FastifyReply) {
-  // Log the error
+  // Log the error with a proper message for the one-line logger
+  const errorCode = error instanceof AppError ? error.code : "UNKNOWN_ERROR"
+  const errorMessage = `${errorCode}: ${error.message}`
+
   request.log.error({
     error: error.message,
     stack: error.stack,
     url: request.url,
     method: request.method,
-    code: error instanceof AppError ? error.code : "UNKNOWN_ERROR"
+    code: errorCode,
+    msg: errorMessage // This will be the main message shown by one-line-logger
   })
 
   // Handle client errors (400)
@@ -110,7 +117,11 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
     error instanceof LLMError ||
     error instanceof CMSAPIError ||
     error instanceof CMSDataError ||
-    error instanceof CMSError
+    error instanceof CMSError ||
+    error instanceof RedisError ||
+    error instanceof RedisConnectionError ||
+    error instanceof RedisOperationError ||
+    error instanceof RedisDataError
   ) {
     return createServerErrorResponse(reply, request, error)
   }
@@ -158,4 +169,19 @@ export function handleWebSocketError(error: unknown, socket: WebSocket): void {
   }
 
   socket.send(JSON.stringify(errorMessage))
+}
+
+/**
+ * Handle errors in background processes (outside of main request context)
+ */
+export function handleBackgroundError(error: unknown, context: string): void {
+  const errorCode = error instanceof AppError ? error.code : "UNKNOWN_ERROR"
+  const errorMessage = `${errorCode}: ${error instanceof Error ? error.message : String(error)}`
+
+  console.error(`🚨 BACKGROUND ERROR [${context}]:`, {
+    message: errorMessage,
+    code: errorCode,
+    stack: error instanceof Error ? error.stack : undefined,
+    context
+  })
 }

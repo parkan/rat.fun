@@ -34,9 +34,14 @@ async function routes(fastify: FastifyInstance) {
         wsConnections[playerId] = socket as unknown as WebSocket
 
         // Send last 30 messages to the newly connected user
-        const lastMessages = await getMessages(30)
-        for (const message of lastMessages) {
-          socket.send(JSON.stringify(message))
+        try {
+          const lastMessages = await getMessages(30)
+          for (const message of lastMessages) {
+            socket.send(JSON.stringify(message))
+          }
+        } catch (error) {
+          // Log the error but don't fail the connection
+          console.error("Failed to get messages for new connection:", error)
         }
 
         // Broadcast updated client list to all connected clients
@@ -60,7 +65,6 @@ async function routes(fastify: FastifyInstance) {
         })
 
         socket.on("close", async () => {
-          // console.log(`WebSocket closed for Player ID: ${playerId}`);
           delete wsConnections[playerId] // Clean up connection
           // Broadcast updated client list to all connected clients
           await broadcast({
