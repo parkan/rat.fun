@@ -313,3 +313,45 @@ export class ReplicateError extends ImageGenerationError {
     super("REPLICATE_ERROR", "Image generation service unavailable", message)
   }
 }
+
+// ============================================================================
+// Redis Errors
+// ============================================================================
+
+export class RedisError extends AppError {
+  constructor(
+    code: string = "REDIS_ERROR",
+    errorType: string = "Redis service error",
+    message: string
+  ) {
+    super(code, errorType, message)
+  }
+}
+
+export class RedisConnectionError extends RedisError {
+  constructor(
+    message: string = "Failed to connect to Redis",
+    public originalError?: unknown
+  ) {
+    super("REDIS_CONNECTION_ERROR", "Redis connection failed", message)
+  }
+}
+
+export class RedisOperationError extends RedisError {
+  constructor(
+    message: string,
+    public operation: string,
+    public originalError?: unknown
+  ) {
+    super("REDIS_OPERATION_ERROR", "Redis operation failed", message)
+  }
+}
+
+export class RedisDataError extends RedisError {
+  constructor(
+    message: string,
+    public data?: unknown
+  ) {
+    super("REDIS_DATA_ERROR", "Redis data error", message)
+  }
+}

@@ -8,7 +8,6 @@ dotenv.config()
 import { CreateSpecialRoomRequestBody, SignedRequest } from "@modules/types"
 
 // CMS
-import { CMSError } from "@modules/error-handling/errors"
 import { writeRoomToCMS } from "@modules/cms/public"
 
 // MUD
@@ -32,6 +31,9 @@ import { createRoomCreationMessage } from "@modules/websocket/constructMessages"
 // Utils
 import { generateRandomBytes32 } from "@modules/utils"
 
+// Error handling
+import { handleBackgroundError } from "@modules/error-handling"
+
 const opts = { schema }
 
 async function routes(fastify: FastifyInstance) {
@@ -45,32 +47,17 @@ async function routes(fastify: FastifyInstance) {
       try {
         const { roomPrompt, levelId, roomCreationCost, maxValuePerWin } = request.body.data
 
-        console.log("roomPrompt", roomPrompt)
-        console.log("levelId", levelId)
-        console.log("roomCreationCost", roomCreationCost)
-        console.log("maxValuePerWin", maxValuePerWin)
-        console.log("request.body", request.body)
-
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = await verifyRequest(request.body)
 
-        console.log("playerId", playerId)
-
         // Get onchain data
         const { gameConfig, player, level } = await getCreateRoomData(playerId, levelId)
-
-        console.log("gameConfig", gameConfig)
-        console.log("player", player)
-        console.log("level", level)
-
         // Validate data
         validateInputData(gameConfig, roomPrompt, player, level)
 
         // We need to generate a unique ID here
         // Doing it onchain does not allow us to use it to connect the room to the image
         const roomId = generateRandomBytes32()
-
-        console.log("roomId", roomId)
 
         // Create room onchain
         console.time("–– Chain call")
@@ -97,15 +84,7 @@ async function routes(fastify: FastifyInstance) {
             // Write the document
             await writeRoomToCMS(worldAddress, roomId, roomPrompt, player, imageBuffer)
           } catch (error) {
-            // Handle CMS-specific errors
-            if (error instanceof CMSError) {
-              console.error(`CMS Error: ${error.message}`, error)
-              // We don't want to fail the entire request if CMS write fails
-              // But we do want to log it properly
-            } else {
-              // For unexpected errors, log them but don't fail the request
-              console.error("Unexpected error in image generation or CMS write:", error)
-            }
+            handleBackgroundError(error, "Special Room Creation - Image Generation & CMS")
           } finally {
             console.timeEnd("–– Image generation")
           }

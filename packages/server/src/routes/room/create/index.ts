@@ -8,7 +8,6 @@ dotenv.config()
 import { CreateRoomRequestBody, SignedRequest } from "@modules/types"
 
 // CMS
-import { CMSError } from "@modules/error-handling/errors"
 import { writeRoomToCMS } from "@modules/cms/public"
 
 // MUD
@@ -31,6 +30,9 @@ import { createRoomCreationMessage } from "@modules/websocket/constructMessages"
 
 // Utils
 import { generateRandomBytes32 } from "@modules/utils"
+
+// Error handling
+import { handleBackgroundError } from "@modules/error-handling"
 
 const opts = { schema }
 
@@ -74,15 +76,7 @@ async function routes(fastify: FastifyInstance) {
             // Write the document
             await writeRoomToCMS(worldAddress, roomId, roomPrompt, player, imageBuffer)
           } catch (error) {
-            // Handle CMS-specific errors
-            if (error instanceof CMSError) {
-              console.error(`CMS Error: ${error.message}`, error)
-              // We don't want to fail the entire request if CMS write fails
-              // But we do want to log it properly
-            } else {
-              // For unexpected errors, log them but don't fail the request
-              console.error("Unexpected error in image generation or CMS write:", error)
-            }
+            handleBackgroundError(error, "Room Creation - Image Generation & CMS")
           } finally {
             console.timeEnd("–– Image generation")
           }
