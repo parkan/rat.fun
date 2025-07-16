@@ -8,7 +8,7 @@ async function routes(fastify: FastifyInstance, options: object) {
       status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: process.env.npm_package_version || "1.0.0",
+      app_version: process.env.APP_VERSION || "unknown",
       services: {
         redis: { status: "unknown" as string, error: null as string | null },
         blockchain: {
