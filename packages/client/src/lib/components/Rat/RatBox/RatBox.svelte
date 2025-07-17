@@ -9,9 +9,11 @@
   import ConfirmLiquidation from "$lib/components/Rat/RatBox/ConfirmLiquidation/ConfirmLiquidation.svelte"
   import LiquidatingRat from "$lib/components/Rat/RatBox/LiquidatingRat/LiquidatingRat.svelte"
 
-  import { ratBoxState, RAT_BOX_STATE, transitionTo } from "./state.svelte"
+  import { ratBoxState, RAT_BOX_STATE, transitionTo, resetRatBoxState } from "./state.svelte"
 
   onMount(() => {
+    // Set state to RAT_BOX_STATE.INIT
+    resetRatBoxState()
     if ($rat) {
       if ($rat.dead) {
         transitionTo(RAT_BOX_STATE.DEAD_RAT)
