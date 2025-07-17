@@ -75,3 +75,11 @@ export const transitionTo = (newState: RAT_BOX_STATE) => {
   }
   ratBoxState.state = newState
 }
+
+/**
+ * Resets the rat box state to the initial state
+ */
+export const resetRatBoxState = () => {
+  ratBoxState.state = RAT_BOX_STATE.INIT
+  ratBoxState.errorMessage = null
+}
