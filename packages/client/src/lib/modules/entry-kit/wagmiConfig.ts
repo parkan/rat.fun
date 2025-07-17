@@ -1,11 +1,12 @@
 import { Chain, http } from "viem"
 import { createWagmiConfig } from "@latticexyz/entrykit/internal"
-import { extendedBaseSepolia } from "$lib/mud/extendedChainConfigs"
+import { extendedBaseSepolia, extendedMudFoundry } from "$lib/mud/extendedChainConfigs"
 
-export const chains = [extendedBaseSepolia] as const satisfies Chain[]
+export const chains = [extendedMudFoundry, extendedBaseSepolia] as const satisfies Chain[]
 
 export const transports = {
-  [extendedBaseSepolia.id]: http()
+  [extendedBaseSepolia.id]: http(),
+  [extendedMudFoundry.id]: http(),
 } as const
 
 export const wagmiConfig = (chainId: number) =>
