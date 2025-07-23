@@ -4,10 +4,11 @@
 
   import type { LayoutProps } from "./$types"
 
+  import { type Outcome as SanityOutcome } from "@sanity-types"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { onMount } from "svelte"
   import { goto } from "$app/navigation"
-  import { initStaticContent } from "$lib/modules/content"
+  import { initStaticContent, staticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { initSound, playSound } from "$lib/modules/sound"
   import { UIState } from "$lib/modules/ui/stores"
@@ -18,13 +19,19 @@
   import { EMPTY_ID } from "$lib/modules/state/constants"
   import { outerLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
   import { errorHandler, WebSocketError } from "$lib/modules/error-handling"
+  import { Modal, PageTransitions, WalletInfo } from "$lib/components/Shared"
+  import { removeHash } from "$lib/modules/utils"
 
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import { Modal, PageTransitions, WalletInfo } from "$lib/components/Shared"
   import ShaderTest from "$lib/components/Shared/ShaderTest/ShaderTest.svelte"
+  import ModalTarget from "$lib/components/Shared/Modal/ModalTarget.svelte"
+  import { Outcome } from "$lib/components/Room"
 
   let { children, data }: LayoutProps = $props()
+
+  let outcomeId = $state("")
+  let outcome = $state<SanityOutcome | undefined>()
 
   const { environment, walletType } = data
 
@@ -62,6 +69,14 @@
   })
 </script>
 
+<svelte:window
+  onhashchange={e => {
+    outcomeId = new URL(e.newURL).hash.replace("#", "")
+    console.log(outcomeId)
+    outcome = $staticContent.outcomes.find(o => o._id === outcomeId)
+  }}
+/>
+
 {#if $UIState === UI.LOADING}
   <div class="bg">
     <div class="context-main">
@@ -89,6 +104,13 @@
       </div>
     </div>
   </div>
+{/if}
+
+{#if outcome}
+  {#snippet content()}
+    <Outcome {outcome} />
+  {/snippet}
+  <ModalTarget onclose={removeHash} {content}></ModalTarget>
 {/if}
 
 <Modal />

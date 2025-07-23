@@ -9,7 +9,7 @@
   import { waitForPropertyChange } from "$lib/modules/state/utils"
 
   let roomDescription: string = $state("")
-  let levelId: string = $state($rat?.level ?? $gameConfig.levelList[0])
+  let levelId: string = $state($rat?.level ?? $gameConfig?.levelList?.[0])
   let busy: boolean = $state(false)
 
   // Prompt has to be between 1 and MAX_ROOM_PROMPT_LENGTH characters
@@ -19,7 +19,9 @@
   )
 
   const roomCreationCost = $derived(
-    $levels[levelId]?.roomCreationCost ?? $levels[$gameConfig.levelList[0]]?.roomCreationCost ?? 0
+    $levels[levelId]?.roomCreationCost ??
+      $levels[$gameConfig?.levelList?.[0]]?.roomCreationCost ??
+      0
   )
 
   // Disabled if:
