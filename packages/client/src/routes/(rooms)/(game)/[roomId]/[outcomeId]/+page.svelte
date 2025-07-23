@@ -1,6 +1,6 @@
 <script lang="ts">
   // Outcome logs
-  import Outcome from "$lib/components/Room"
+  import { Outcome } from "$lib/components/Room"
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
 
