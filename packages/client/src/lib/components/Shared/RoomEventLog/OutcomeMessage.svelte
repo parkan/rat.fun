@@ -32,7 +32,7 @@
   })
 </script>
 
-<div class="chat-event {topic}">
+<a href="#{outcome._id}" class="chat-event {topic}">
   {#if topic == "room__outcome"}
     <!-- ROOM OUTCOME -->
     <span
@@ -62,7 +62,7 @@
       {topic}
     </span>
   {/if}
-</div>
+</a>
 
 <style lang="scss">
   .chat-event {
