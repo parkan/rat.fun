@@ -84,6 +84,10 @@ library LibRat {
     bytes32 playerId = Owner.get(_ratId);
     // Add to history of rats
     PastRats.push(playerId, _ratId);
+
+    // Increment kill counter and set last killed rat block
+    WorldStats.setGlobalRatKillCount(WorldStats.getGlobalRatKillCount() + 1);
+    WorldStats.setLastKilledRatBlock(block.number);
   }
 
   /**
