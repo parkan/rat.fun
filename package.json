@@ -13,7 +13,7 @@
     "dev:contracts": "pnpm --filter 'contracts' run dev",
     "foundry:up": "curl -L https://foundry.paradigm.xyz | bash && bash $HOME/.foundry/bin/foundryup",
     "mud:up": "pnpm mud set-version --tag main && pnpm install",
-    "prepare": "(forge --version || pnpm foundry:up)",
+    "prepare": "if [ \"$NETLIFY\" = \"true\" ]; then echo 'Skipping prepare on Netlify'; else (forge --version || pnpm foundry:up); fi",
     "test": "pnpm recursive run test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
