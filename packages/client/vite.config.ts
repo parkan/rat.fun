@@ -33,7 +33,8 @@ export default defineConfig(() => {
         "@latticexyz/schema",
         "@latticexyz/store",
         "@latticexyz/utils",
-        "@latticexyz/world"
+        "@latticexyz/world",
+        "viem"
       ]
     }
   }
