@@ -34,6 +34,7 @@ export default defineConfig(() => {
         "@latticexyz/store",
         "@latticexyz/utils",
         "@latticexyz/world",
+        "@sentry/sveltekit",
         "viem",
         "ox"
       ]
