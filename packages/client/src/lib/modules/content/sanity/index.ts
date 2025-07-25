@@ -68,6 +68,7 @@ const sanitizeSanityData = (data: any): any => {
 
 export const loadData = async (query: string, params: any) => {
   try {
+    console.log("loading data,", query)
     const res = await client.fetch(query, params)
     if (res === null) {
       return Promise.reject(new CMSError("Content not found", null))
