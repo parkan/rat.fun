@@ -6,10 +6,8 @@ import { CMSError } from "$lib/modules/error-handling"
 
 export const load: PageLoad = async ({ params }) => {
   try {
-    console.log("trying")
     const roomContent = await loadData(queries.singleRoom, { id: params.roomId })
 
-    console.log("success")
     return {
       roomContent
     }
