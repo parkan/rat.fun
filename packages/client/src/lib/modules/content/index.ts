@@ -1,5 +1,6 @@
-import { writable } from "svelte/store"
+import { writable, derived } from "svelte/store"
 import { client, loadData } from "./sanity"
+import { blockNumber } from "$lib/modules/network"
 import type {
   Room as SanityRoom,
   Outcome as SanityOutcome,
@@ -19,6 +20,18 @@ export type StaticContent = {
 
 export const staticContent = writable({} as StaticContent)
 export const lastUpdated = writable(performance.now())
+export const upcomingWorldEvent = derived(
+  [staticContent, blockNumber],
+  ([$staticContent, _]: [StaticContent, bigint]) => {
+    const event = $staticContent?.worldEvents?.[0]
+
+    if (event && event?.publicationText !== "") {
+      return event
+    }
+
+    return undefined
+  }
+)
 
 // --- API --------------------------------------------------------------
 
@@ -58,7 +71,7 @@ export async function initStaticContent(worldAddress: string) {
   })
 
   // Subscribe to changes to world events in sanity DB
-  client.listen(queries.worldEvents).subscribe(update => {
+  client.listen(queries.worldEvents, { worldAddress }).subscribe(update => {
     if (update.transition == "appear" && update.result) {
       const worldEvent = update.result as SanityWorldEvent
 
