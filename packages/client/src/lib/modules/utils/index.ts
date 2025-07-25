@@ -268,6 +268,42 @@ export function timeSince(timestamp: number): string {
 }
 
 /**
+ * Calculates the seconds until a given timestamp
+ * @param timestamp The timestamp to calculate the time until
+ * @returns A string in the format of "HH:MM:SS" or "00:00:00" if past
+ */
+export function timeUntil(timestamp: number): string {
+  const now = Date.now() // Current time in milliseconds
+  const remaining = timestamp - now // Remaining time in milliseconds
+
+  // If the time has passed, return zeros
+  if (remaining <= 0) {
+    return "00:00:00"
+  }
+
+  // Convert milliseconds to hours, minutes, and seconds
+  const totalSeconds = Math.floor(remaining / 1000)
+  const hours = Math.floor(totalSeconds / 3600) % 24
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const days = Math.floor(remaining / 86400000)
+  const seconds = totalSeconds % 60
+
+  // Format with leading zeros
+  const formattedDays = days.toString().padStart(2, "0")
+  const formattedHours = hours.toString().padStart(2, "0")
+  const formattedMinutes = minutes.toString().padStart(2, "0")
+  const formattedSeconds = seconds.toString().padStart(2, "0")
+
+  return `${formattedDays} days ${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+}
+
+export function millisUntil(timestamp: number): number {
+  const now = Date.now()
+
+  return timestamp - now
+}
+
+/**
  * Calculates the modulus of two numbers
  * @param n The number to calculate the modulus of
  * @param m The modulus
