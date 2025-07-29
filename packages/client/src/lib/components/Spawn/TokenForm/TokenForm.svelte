@@ -11,8 +11,8 @@
     onComplete: (isSpawned: boolean) => void
   }>()
 
-  let buttonText = "Get RatFunTokens"
-  let message = `${$player?.name ?? "Loser"}, your money is not good here. You need RatFunTokens to play.`
+  let buttonText = "Get Slopamine"
+  let message = `${$player?.name ?? "Loser"}, you need Slopamine to play.`
 
   let imageElement: HTMLImageElement | null = $state(null)
   let messageElement: HTMLParagraphElement | null = $state(null)
@@ -54,7 +54,12 @@
     {#if busy.GiveCallerTokens.current !== 0}
       <VideoLoader progress={busy.GiveCallerTokens} />
     {:else}
-      <img class="image" src="/images/cashier2.png" alt="RAT.FUN" bind:this={imageElement} />
+      <img
+        class="image"
+        src="/images/slopamine-dealer.png"
+        alt="RAT.FUN"
+        bind:this={imageElement}
+      />
       <p bind:this={messageElement}>{message}</p>
       <div class="button" bind:this={buttonElement}>
         <BigButton text={buttonText} onclick={getTokens} />

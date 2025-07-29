@@ -59,8 +59,8 @@
     {:else}
       <img class="image" src="/images/cashier3.png" alt="RAT.FUN" bind:this={imageElement} />
       <div class="text" bind:this={textElement}>
-        <p>Good. You now have {$playerERC20Balance} tokens.</p>
-        <p>You just need give us permission to spend them.</p>
+        <p>Good. You now have {$playerERC20Balance} Slopamine.</p>
+        <p>You just need to give us permission to use it.</p>
       </div>
       <div class="button" bind:this={buttonElement}>
         <BigButton text="APPROVE" onclick={sendApproval} />
