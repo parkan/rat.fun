@@ -12,11 +12,9 @@ import { WorldAddressNotFoundError } from "$lib/modules/error-handling/errors"
 
 export function getNetworkConfig(environment: ENVIRONMENT, url?: string | URL) {
   // Use provided URL or fallback to empty search params for SSR
-  const searchParams = url 
-    ? new URLSearchParams(typeof url === 'string' ? new URL(url).search : url.search)
+  const searchParams = url
+    ? new URLSearchParams(typeof url === "string" ? new URL(url).search : url.search)
     : new URLSearchParams()
-
-
 
   // Default to local development chain
   let chainId = 31337
@@ -61,9 +59,8 @@ export function getNetworkConfig(environment: ENVIRONMENT, url?: string | URL) {
   }
 
   // Only call getBurnerPrivateKey if we're in a browser environment
-  const privateKey = searchParams.get("privateKey") ?? 
-    (typeof window !== 'undefined' ? getBurnerPrivateKey() : null)
-
+  const privateKey =
+    searchParams.get("privateKey") ?? (typeof window !== "undefined" ? getBurnerPrivateKey() : null)
 
   return {
     provider: {
