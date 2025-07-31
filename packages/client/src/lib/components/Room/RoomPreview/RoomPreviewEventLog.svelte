@@ -2,7 +2,7 @@
   import type { Outcome } from "@sanity-types"
   import type { Hex } from "viem"
 
-  import { RoomEventLog } from "$lib/components/Shared"
+  import { RoomEventLog } from "$lib/components/Room"
 
   let { roomId, roomOutcomes }: { roomId: Hex; roomOutcomes?: Outcome[] } = $props()
 </script>

@@ -5,7 +5,8 @@
   import { entriesByPopularity, entriesChronologically } from "./sortFunctions"
   import { filterRooms, filterDepletedRooms } from "./filterFunctions"
   import { blockNumber } from "$lib/modules/network"
-  import { RoomItem, OwnRoomItem, RoomFilters } from "$lib/components/Shared"
+  import { OwnRoomItem } from "$lib/components/Shared"
+  import { RoomItem, RoomFilters } from "$lib/components/Room"
 
   let {
     isOwnRoomListing

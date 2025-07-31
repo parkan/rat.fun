@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { TempItem } from "$lib/components/Room/RoomResult/types"
   import { items } from "$lib/modules/state/stores"
-
   import {
     RAT_BOX_STATE,
     transitionTo,
@@ -9,11 +8,9 @@
   } from "$lib/components/Rat/RatBox/state.svelte"
 
   let {
-    item,
-    isRoomInfoBox = false
+    item
   }: {
     item: string | TempItem
-    isRoomInfoBox?: boolean
   } = $props()
 
   let { item: itemState } = getItemState()
@@ -23,23 +20,24 @@
 
   // Item might be the id of an item or a TempItem object
   const name = $derived(typeof item === "string" ? ($items[item]?.name ?? "---") : item.name)
-
   const value = $derived(typeof item === "string" ? ($items[item]?.value ?? 0) : item.value)
+
+  // Get the item ID for state management
+  const itemId = $derived(typeof item === "string" ? item : item.id)
 </script>
 
 <button
   class="list-item"
-  class:clickable={!isRoomInfoBox}
   class:disabled={busy}
-  onmouseenter={() => !isRoomInfoBox && (isHovered = true)}
-  onmouseleave={() => !isRoomInfoBox && (isHovered = false)}
+  onmouseenter={() => (isHovered = true)}
+  onmouseleave={() => (isHovered = false)}
   onclick={() => {
-    itemState.set(item)
+    itemState.set(itemId)
     transitionTo(RAT_BOX_STATE.CONFIRM_RE_ABSORB_ITEM)
   }}
 >
   <!-- NAME -->
-  <div class="name">{isRoomInfoBox || !isHovered ? name : "Re-absorb item"}</div>
+  <div class="name">{!isHovered ? name : "Re-absorb item"}</div>
   <!-- VALUE -->
   <span class="value" class:negative={value < 0}>${value}</span>
 </button>
@@ -57,7 +55,7 @@
     border: none;
     outline: none;
     width: calc(100% - 10px);
-    cursor: default;
+    cursor: pointer;
     text-align: left;
 
     .value {
@@ -67,53 +65,12 @@
       }
     }
 
-    &.clickable {
-      cursor: pointer;
-      &:hover {
-        background: var(--color-death);
-        color: var(--background);
-
-        .value {
-          color: var(--background);
-        }
-      }
-    }
-  }
-
-  .confirmation {
-    .content {
-      height: 100%;
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--default-padding);
-    }
-
-    .sale-message {
-      font-size: var(--font-size-large);
-      margin-bottom: var(--default-padding);
-    }
-
-    button {
-      height: 60px;
-      width: 100%;
-      border: var(--default-border-style);
-      color: var(--background);
+    &:hover {
       background: var(--color-death);
+      color: var(--background);
 
-      &:hover {
-        background: var(--background);
-        color: var(--foreground);
-      }
-
-      &.close-button {
-        background: var(--color-success);
-
-        &:hover {
-          background: var(--background);
-          color: var(--foreground);
-        }
+      .value {
+        color: var(--background);
       }
     }
   }

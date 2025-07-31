@@ -2,7 +2,8 @@
   import type { Hex } from "viem"
   import { rooms } from "$lib/modules/state/stores"
   import { page } from "$app/state"
-  import { AdminRoomPreview, SEO } from "$lib/components/Shared"
+  import { SEO } from "$lib/components/Shared"
+  import { AdminRoomPreview } from "$lib/components/Room"
 
   let { data } = $props()
 

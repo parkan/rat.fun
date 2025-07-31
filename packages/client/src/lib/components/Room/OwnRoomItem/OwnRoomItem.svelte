@@ -5,7 +5,8 @@
   import { blockNumber } from "$lib/modules/network"
   import { levels } from "$lib/modules/state/stores"
   import { staticContent } from "$lib/modules/content"
-  import { RoomGraph, Xed } from "$lib/components/Shared"
+  import { Xed } from "$lib/components/Shared"
+  import { RoomGraph } from "$lib/components/Room"
 
   let { roomId, room }: { roomId: Hex; room: Room } = $props()
 

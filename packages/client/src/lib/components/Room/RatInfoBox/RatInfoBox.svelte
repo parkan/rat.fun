@@ -1,6 +1,6 @@
 <script lang="ts">
   import { frozenRat } from "$lib/components/Room/RoomResult/state.svelte"
-  import { NumberGoing, Item } from "$lib/components/Shared"
+  import { NumberGoing, DisplayItem } from "$lib/components/Shared"
 
   let balanceGoing = $state(false)
 </script>
@@ -37,7 +37,7 @@
       </div>
       <!-- INVENTORY -->
       {#each $frozenRat.inventory as item}
-        <Item {item} isRoomInfoBox={true} />
+        <DisplayItem {item} />
       {/each}
     </div>
   {/if}

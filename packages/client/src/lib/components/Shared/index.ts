@@ -20,31 +20,6 @@ export { default as VideoLoaderDuration } from "./Loaders/VideoLoaderDuration.sv
 export { default as Modal } from "./Modal/Modal.svelte"
 export { default as ModalTarget } from "./Modal/ModalTarget.svelte"
 
-/* RoomEventLog */
-export { default as RoomEventLog } from "./RoomEventLog/RoomEventLog.svelte"
-
-/* RoomGraph */
-export { default as RoomGraph } from "./RoomGraph/RoomGraph.svelte"
-
-/* RoomItem */
-export { default as RoomItem } from "./RoomItem/RoomItem.svelte"
-
-/* RoomListing */
-export { default as RoomFilters } from "./RoomListing/RoomFilters.svelte"
-export { default as RoomListing } from "./RoomListing/RoomListing.svelte"
-
-/* RoomPreview */
-export { default as AdminRoomPreview } from "./RoomPreview/AdminRoomPreview.svelte"
-export { default as EnterRoomButton } from "./RoomPreview/EnterRoomButton.svelte"
-export { default as GameRoomPreview } from "./RoomPreview/GameRoomPreview.svelte"
-export { default as LiquidateRoom } from "./RoomPreview/LiquidateRoom.svelte"
-export { default as NoRatWarning } from "./RoomPreview/NoRatWarning.svelte"
-export { default as RoomPreviewEventLog } from "./RoomPreview/RoomPreviewEventLog.svelte"
-export { default as RoomPreviewGraph } from "./RoomPreview/RoomPreviewGraph.svelte"
-export { default as RoomPreviewHeader } from "./RoomPreview/RoomPreviewHeader.svelte"
-export { default as RoomPreviewPrompt } from "./RoomPreview/RoomPreviewPrompt.svelte"
-export { default as ShareButton } from "./RoomPreview/ShareButton.svelte"
-
 /* Top Bar */
 export { default as TopBar } from "./TopBar/TopBar.svelte"
 
@@ -58,7 +33,9 @@ export { default as PageTransitions } from "./PageTransitions/PageTransitions.sv
 
 /* Item Components */
 export { default as Item } from "./Item/Item.svelte"
-export { default as OwnRoomItem } from "./OwnRoomItem/OwnRoomItem.svelte"
+export { default as OwnRoomItem } from "../Room/OwnRoomItem/OwnRoomItem.svelte"
+export { default as InteractiveItem } from "./Item/InteractiveItem.svelte"
+export { default as DisplayItem } from "./Item/DisplayItem.svelte"
 
 /* Utility Components */
 export { default as SEO } from "./SEO/SEO.svelte"

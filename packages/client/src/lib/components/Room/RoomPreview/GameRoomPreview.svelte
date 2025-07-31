@@ -5,16 +5,16 @@
 
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
-  import { goto } from "$app/navigation"
-  import RoomConfirmLiquidating from "$lib/components/Shared/RoomPreview/RoomConfirmLiquidating.svelte"
+  import { rat } from "$lib/modules/state/stores"
 
   import {
     RoomPreviewHeader,
     RoomPreviewPrompt,
     RoomPreviewGraph,
     RoomPreviewEventLog,
-    LiquidateRoom
-  } from "$lib/components/Shared"
+    NoRatWarning,
+    EnterRoomButton
+  } from "$lib/components/Room"
 
   let {
     roomId,
@@ -24,11 +24,17 @@
 
   let roomOutcomes = $state<Outcome[]>()
 
-  // Show liquidate button if:
+  //  Show enter button if:
   //  * - Room is not depleted
-  let showLiquidateButton = $derived(room.balance > 0)
+  //  * - Rat exists and is alive
+  //  * - Room is at the same level as the rat
+  let showEnterButton = $derived(
+    (room?.balance ?? 0) > 0 && !$rat?.dead && room.level == $rat?.level
+  )
 
-  let liquidating = $state(false)
+  // Show no rat warning if:
+  //  * - Rat does not exist or is dead
+  let showNoRatWarning = $derived($rat?.dead)
 
   onMount(() => {
     const outcomes = $staticContent?.outcomes?.filter(o => o.roomId == roomId) || []
@@ -40,34 +46,22 @@
   })
 </script>
 
-<a class="back-button" href="/admin">Back</a>
-{#if !liquidating}
-  <div class="room-inner-container" class:depleted={!showLiquidateButton}>
-    <RoomPreviewHeader {room} {sanityRoomContent} />
-    <RoomPreviewPrompt {room} />
+<a class="back-button" href="/">Back</a>
+<div class="room-inner-container">
+  <RoomPreviewHeader {room} {sanityRoomContent} />
+  <RoomPreviewPrompt {room} />
 
-    {#if showLiquidateButton}
-      <LiquidateRoom onclick={() => (liquidating = true)} {roomId} {room} isOwnRoomListing={true} />
-    {/if}
+  {#if showNoRatWarning}
+    <NoRatWarning />
+  {/if}
 
-    <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
-    <RoomPreviewEventLog {roomId} {roomOutcomes} />
-  </div>
-{:else}
-  <RoomConfirmLiquidating
-    {room}
-    roomContent={sanityRoomContent}
-    onDone={async () => {
-      console.log("ON DONE")
-      await goto("/admin")
-      liquidating = false
-    }}
-    onAbort={() => {
-      console.log("ON ABORT")
-      liquidating = false
-    }}
-  />
-{/if}
+  {#if showEnterButton}
+    <EnterRoomButton {roomId} />
+  {/if}
+
+  <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
+  <RoomPreviewEventLog {roomId} {roomOutcomes} />
+</div>
 
 <style lang="scss">
   .room-inner-container {
@@ -78,10 +72,6 @@
     max-height: 100%;
     padding-bottom: calc(var(--pane-switch-height) + var(--world-prompt-box-height) + 20px);
     overflow-x: hidden;
-
-    &.depleted {
-      filter: grayscale(0.8) contrast(0.7);
-    }
   }
 
   .back-button {
@@ -97,7 +87,6 @@
     font-size: 20px;
     text-transform: uppercase;
     background: var(--background-semi-transparent);
-    z-index: 10;
 
     &:hover {
       color: var(--white);
