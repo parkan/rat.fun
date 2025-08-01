@@ -16,8 +16,8 @@ export async function constructEventMessages(
   }
 
   // Room
-  messages.push({ role: "user", content: `RoomDescription: ${room.prompt}` })
-  messages.push({ role: "user", content: `RoomBalance: ${room.balance}` })
+  messages.push({ role: "user", content: `TripDescription: ${room.prompt}` })
+  messages.push({ role: "user", content: `TripSlopamineBalance: ${room.balance}` })
 
   // If room is special, use the max value per win.
   // Otherwise, use half of the room creation cost.
@@ -28,13 +28,13 @@ export async function constructEventMessages(
   const maxValuePerWin = Math.min(valueLimit, room.balance)
   messages.push({
     role: "user",
-    content: `RoomMaxValuePerWin: ${maxValuePerWin}`
+    content: `TripMaxValuePerWin: ${maxValuePerWin}`
   })
 
   // Rat
   messages.push({ role: "user", content: `RatName: ${rat.name}` })
-  messages.push({ role: "user", content: `RatItems: ${JSON.stringify(rat.inventory)}` })
-  messages.push({ role: "user", content: `RatBalance: ${rat.balance}` })
+  messages.push({ role: "user", content: `RatInventory: ${JSON.stringify(rat.inventory)}` })
+  messages.push({ role: "user", content: `RatSlopamineBalance: ${rat.balance}` })
   return messages
 }
 
