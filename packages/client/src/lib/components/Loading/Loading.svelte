@@ -21,6 +21,7 @@
 
   $effect(() => {
     if ($ready) {
+      console.log("init entities")
       // Done here because currently we are not filtering on by playerAddress
       initEntities()
       // Animate out

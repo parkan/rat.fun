@@ -1,9 +1,9 @@
 <script lang="ts">
+  import gsap from "gsap"
+
+  import { onMount } from "svelte"
   import { sendApproveMax, busy } from "$lib/modules/action-manager/index.svelte"
   import { playerERC20Balance } from "$lib/modules/state/stores"
-
-  import gsap from "gsap"
-  import { onMount } from "svelte"
 
   import { BigButton } from "$lib/components/Shared"
   import VideoLoader from "$lib/components/Shared/Loaders/VideoLoader.svelte"

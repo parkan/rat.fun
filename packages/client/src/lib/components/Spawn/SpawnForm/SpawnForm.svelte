@@ -3,6 +3,7 @@
   import gsap from "gsap"
   import { onMount } from "svelte"
   import { BigButton } from "$lib/components/Shared"
+  import { player } from "$lib/modules/state/stores"
   import { typeHit } from "$lib/modules/sound"
   import { VideoLoader } from "$lib/components/Shared"
   import { InputValidationError } from "$lib/modules/error-handling/errors"
@@ -17,6 +18,8 @@
   let textElement: HTMLDivElement | null = $state(null)
   const timeline = gsap.timeline()
 
+  $inspect($player)
+
   async function submitForm() {
     try {
       // Validate name is not empty
@@ -29,9 +32,12 @@
         throw new InputValidationError("Name is too long (maximum 50 characters)", "name", name)
       }
 
+      console.log(name)
+
       await sendSpawn(name)
       onComplete(name)
     } catch (error) {
+      console.error(error)
       if (error instanceof InputValidationError) {
         // In a real UI, you might want to show this error to the user
         // For now, validation errors are handled silently
@@ -74,7 +80,7 @@
       <!-- INTRO TEXT -->
       <div class="text" bind:this={textElement}>
         <!-- <p>OK {shortenAddress($playerAddress)}</p> -->
-        <p>ID checks out. You can enter. But we need your name to proceed.</p>
+        <p>{$player?.name}? ID checks out. You can enter. But we need your name to proceed.</p>
       </div>
 
       <!-- FORM -->

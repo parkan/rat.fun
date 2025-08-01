@@ -5,6 +5,7 @@
 
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SPAWN_STATE } from "$lib/modules/ui/enums"
+  import { player, playerAddress, entities } from "$lib/modules/state/stores"
 
   import { publicNetwork } from "$lib/modules/network"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
@@ -20,6 +21,8 @@
   import TokenForm from "$lib/components/Spawn/TokenForm/TokenForm.svelte"
   import ApprovalForm from "$lib/components/Spawn/ApprovalForm/ApprovalForm.svelte"
   import HeroImage from "$lib/components/Spawn/HeroImage/HeroImage.svelte"
+  import EntryKit from "$lib/components/Spawn/Entrykit/EntryKit.svelte"
+
   const { walletType, spawned = () => {} } = $props<{
     walletType: WALLET_TYPE
     spawned: () => void
@@ -36,6 +39,11 @@
       wallet.walletClient?.account.address,
       WALLET_TYPE.BURNER
     )
+
+    console.log("IS SPAWNED? ", isSpawned)
+    console.log("player? ", $player)
+    console.log("address? ", $playerAddress)
+    console.log("entities? ", $entities)
 
     // Check if player is already spawned
     if (
@@ -89,6 +97,10 @@
       if ($entryKitSession?.userAddress) {
         const wallet = setupWalletNetwork($publicNetwork, $entryKitConnector)
         const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
+
+        console.log("IS SPAWNED? ", isSpawned, $player)
+        console.log("address? ", $playerAddress)
+        console.log("entities? ", $entities)
 
         if (isSpawned) {
           spawned()
@@ -161,6 +173,12 @@
     {/if}
   </div>
 </div>
+
+<!-- <div class="hidden">
+  {#if walletType === WALLET_TYPE.ENTRYKIT}
+    <EntryKit />
+  {/if}
+</div> -->
 
 <style lang="scss">
   .container {
