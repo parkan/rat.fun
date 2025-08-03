@@ -3,7 +3,7 @@
   import { rooms } from "$lib/modules/state/stores"
   import { page } from "$app/state"
   import { RoomSEO } from "$lib/components/Room"
-  import { GameRoomPreview } from "$lib/components/Shared"
+  import { GameRoomPreview } from "$lib/components/Room"
 
   let { data } = $props()
 
