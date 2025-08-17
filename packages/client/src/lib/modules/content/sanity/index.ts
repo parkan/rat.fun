@@ -18,7 +18,6 @@ export const client = createClient({
 const builder = imageUrlBuilder(client)
 
 export const urlFor = (source: any) => {
-  // console.log("urlFor", source)
   if (!source) return undefined
   return builder.image(source)
 }
@@ -72,7 +71,6 @@ const sanitizeSanityData = (data: any): any => {
 
 export const loadData = async (query: string, params: any) => {
   try {
-    console.log("loading data,", query)
     const res = await client.fetch(query, params)
     if (res === null) {
       return Promise.reject(new CMSError("Content not found", null))

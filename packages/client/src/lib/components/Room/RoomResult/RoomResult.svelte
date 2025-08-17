@@ -92,7 +92,6 @@
   }
 
   onMount(() => {
-    console.log("onmount")
     if (!$ratState || !valid) {
       goto("/")
       return
@@ -116,8 +115,6 @@
       {staticRoomContent}
       onComplete={() => {
         if (destroyed) return
-        console.log(performance.now() + " Completed splash")
-        console.log(page.route.id)
         transitionTo(ROOM_RESULT_STATE.WAITING_FOR_RESULT)
       }}
     />

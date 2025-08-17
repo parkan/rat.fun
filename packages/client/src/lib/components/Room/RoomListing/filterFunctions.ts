@@ -20,7 +20,6 @@ export const filterRooms = (entries: [string, Room][], textFilter: string) => {
  * @returns The filtered entries
  */
 export const filterDepletedRooms = (entries: [string, Room][], showDepletedRooms: boolean) => {
-  console.log("filterDepletedRooms", entries)
   if (!showDepletedRooms) {
     return entries.filter(([_, room]) => Number(room.balance || 0) > 0)
   }

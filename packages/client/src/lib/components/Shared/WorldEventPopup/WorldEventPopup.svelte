@@ -1,20 +1,22 @@
 <script lang="ts">
   import { activeWorldEvent, activeWorldEventContent } from "$lib/modules/state/stores"
   import { urlFor } from "$lib/modules/content/sanity"
-  $inspect("event content", $activeWorldEventContent)
 </script>
 
 {#if $activeWorldEventContent}
   <div class="world-event">
     <div class="image-container">
       <h1 class="world-event-title">{$activeWorldEventContent?.title}</h1>
-      <img src={urlFor($activeWorldEventContent?.image).width(500).url()} />
+      <img
+        src={urlFor($activeWorldEventContent?.image).width(500).url()}
+        alt={$activeWorldEventContent?.title}
+      />
     </div>
     <p class="world-event-prompt">
       {$activeWorldEvent?.prompt}
     </p>
   </div>
-  <div class="pulse" />
+  <div class="pulse"></div>
 {/if}
 
 <style lang="scss">

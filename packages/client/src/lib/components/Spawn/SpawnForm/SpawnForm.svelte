@@ -18,8 +18,6 @@
   let textElement: HTMLDivElement | null = $state(null)
   const timeline = gsap.timeline()
 
-  $inspect($player)
-
   async function submitForm() {
     try {
       // Validate name is not empty
@@ -31,8 +29,6 @@
       if (name.length > 50) {
         throw new InputValidationError("Name is too long (maximum 50 characters)", "name", name)
       }
-
-      console.log(name)
 
       await sendSpawn(name)
       onComplete(name)
@@ -80,7 +76,7 @@
       <!-- INTRO TEXT -->
       <div class="text" bind:this={textElement}>
         <!-- <p>OK {shortenAddress($playerAddress)}</p> -->
-        <p>{$player?.name}? ID checks out. You can enter. But we need your name to proceed.</p>
+        <p>{$player?.name}ID checks out. You can enter. But we need your name to proceed.</p>
       </div>
 
       <!-- FORM -->

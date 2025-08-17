@@ -7,8 +7,6 @@
 
   let { outcome }: { outcome: Outcome } = $props()
 
-  $inspect(outcome)
-
   // let room = $derived($staticContent?.rooms.find(r => r._id === outcome.roomId))
 </script>
 

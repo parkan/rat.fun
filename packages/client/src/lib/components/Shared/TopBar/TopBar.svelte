@@ -1,11 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state"
-  import {
-    player,
-    worldStats,
-    activeWorldEvent,
-    activeWorldEventContent
-  } from "$lib/modules/state/stores"
+  import { player, worldStats, activeWorldEvent } from "$lib/modules/state/stores"
   import { upcomingWorldEvent } from "$lib/modules/content"
 
   import PlayerInfo from "./PlayerInfo.svelte"
@@ -13,10 +8,9 @@
   import WorldEvent from "./WorldEvent.svelte"
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
   import GlobalStats from "./GlobalStats.svelte"
-  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
+  // import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
 
   const isAdminView = $derived(page.route?.id?.includes("/(rooms)/admin") ?? false)
-  $inspect($activeWorldEventContent)
 </script>
 
 <div class="top-bar">

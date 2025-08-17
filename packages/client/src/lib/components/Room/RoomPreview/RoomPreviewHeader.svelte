@@ -17,7 +17,6 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="image" onclick={() => (showImageModal = true)}>
     {#key $lastUpdated}
-      {console.log(urlFor(sanityRoomContent?.image))}
       {#if sanityRoomContent?.image?.asset}
         <img
           src={urlFor(sanityRoomContent?.image)?.width?.(600)?.height(600)?.url() ?? ""}

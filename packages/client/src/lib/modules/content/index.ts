@@ -49,7 +49,6 @@ export async function initStaticContent(worldAddress: string) {
 
   // Subscribe to changes to rooms in sanity DB
   client.listen(queries.rooms, { worldAddress }).subscribe(update => {
-    console.log("rooms update", update)
     staticContent.update(content => ({
       ...content,
       rooms: handleSanityUpdate<SanityRoom>(update, content.rooms, (item, id) => item._id === id)
@@ -58,7 +57,6 @@ export async function initStaticContent(worldAddress: string) {
 
   // Subscribe to changes to outcomes in sanity DB
   client.listen(queries.outcomes, { worldAddress }).subscribe(update => {
-    console.log("outcomes update", update)
     staticContent.update(content => ({
       ...content,
       outcomes: handleSanityUpdate<SanityOutcome>(
@@ -71,7 +69,6 @@ export async function initStaticContent(worldAddress: string) {
 
   // Subscribe to changes to world events in sanity DB
   client.listen(queries.worldEvents, { worldAddress }).subscribe(update => {
-    console.log("world events update", update)
     staticContent.update(content => ({
       ...content,
       worldEvents: handleSanityUpdate<SanityWorldEvent>(

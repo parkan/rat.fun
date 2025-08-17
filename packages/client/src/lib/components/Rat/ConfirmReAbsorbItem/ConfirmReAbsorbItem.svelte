@@ -5,10 +5,7 @@
 
   let { item } = getItemState()
 
-  $inspect(item.current)
-
   const onClickConfirm = () => {
-    console.log("RE_ABSORBING_ITEM")
     transitionTo(RAT_BOX_STATE.RE_ABSORBING_ITEM)
   }
 

@@ -29,6 +29,7 @@
   import ModalTarget from "$lib/components/Shared/Modal/ModalTarget.svelte"
   import WorldEventPopup from "$lib/components/Shared/WorldEventPopup/WorldEventPopup.svelte"
   import { Outcome } from "$lib/components/Room"
+  import WalletInfo from "$lib/components/Shared/Debug/WalletInfo.svelte"
 
   let { children, data }: LayoutProps = $props()
 
@@ -36,8 +37,6 @@
   let outcome = $state<SanityOutcome | undefined>()
 
   const { environment, walletType } = data
-
-  $inspect($UIState)
 
   const environmentLoaded = async () => {
     try {
@@ -132,6 +131,8 @@
 {/if}
 
 <Modal />
+
+<WalletInfo {walletType} {environment} />
 
 <style lang="scss">
   .context-main {
