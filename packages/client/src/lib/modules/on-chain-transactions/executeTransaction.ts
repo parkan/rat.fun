@@ -49,6 +49,8 @@ export async function executeTransaction(
 
     console.log("tx", tx)
 
+    console.log(get(publicNetwork))
+
     // Wait for transaction to be executed
     const receipt = await get(publicNetwork).publicClient.waitForTransactionReceipt({
       hash: tx

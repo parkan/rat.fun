@@ -28,169 +28,215 @@
     spawned: () => void
   }>()
 
-  let currentState = $state<SPAWN_STATE>(SPAWN_STATE.INTRODUCTION)
+  let currentState = $state<SPAWN_STATE>(SPAWN_STATE.NONE)
+  let entryKitMounted = $state(false)
+  let walletInitialized = $state(false)
+  let userCompletedConnection = $state(false)
 
-  const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
+  // Check if we're already in a game and should skip spawn
+  const shouldSkipSpawn = () => {
+    return page.route.id === "/(rooms)/(game)/[roomId]" && !page.url.searchParams.has("spawn")
+  }
 
-  async function connectBurner() {
-    const wallet = setupBurnerWalletNetwork($publicNetwork)
-    const isSpawned = initWalletNetwork(
-      wallet,
-      wallet.walletClient?.account.address,
-      WALLET_TYPE.BURNER
-    )
+  // Centralized state transition logic
+  const transitionToNextState = () => {
+    console.log("Transitioning state:", {
+      currentState,
+      walletInitialized,
+      userCompletedConnection,
+      player: $player,
+      balance: $playerERC20Balance,
+      allowance: $playerERC20Allowance
+    })
 
-    // Check if player is already spawned
-    if (
-      isSpawned ||
-      (page.route.id === "/(rooms)/(game)/[roomId]" && !page.url.searchParams.has("spawn"))
-    ) {
-      // Connected and spawned - finish spawn process
+    // If player exists and we should skip spawn, go directly to game
+    if ($player && shouldSkipSpawn()) {
       spawned()
-    } else {
-      // New user – show introduction
+      return
+    }
+
+    // If player exists, check their token/allowance status
+    if ($player) {
+      if ($playerERC20Balance < 100) {
+        currentState = SPAWN_STATE.TOKEN_FORM
+      } else if ($playerERC20Allowance < 100) {
+        currentState = SPAWN_STATE.APPROVAL_FORM
+      } else {
+        currentState = SPAWN_STATE.HERO_IMAGE
+      }
+      return
+    }
+
+    // If user has completed connection flow and wallet is ready, show spawn form
+    if (userCompletedConnection && walletInitialized) {
+      currentState = SPAWN_STATE.SPAWN_FORM
+      return
+    }
+
+    // For EntryKit, wait for mounting and session
+    if (walletType === WALLET_TYPE.ENTRYKIT) {
+      if (entryKitMounted && $entryKitSession?.userAddress) {
+        initializeEntryKitWallet()
+      } else if (entryKitMounted) {
+        currentState = SPAWN_STATE.INTRODUCTION
+      }
+      // Otherwise stay in NONE state until EntryKit is ready
+      return
+    }
+
+    // For burner wallet, show introduction if wallet is set up
+    if (walletType === WALLET_TYPE.BURNER && walletInitialized) {
       currentState = SPAWN_STATE.INTRODUCTION
     }
   }
 
-  async function connectEntryKit() {
-    if ($entryKitConnector && $entryKitSession?.userAddress) {
+  const initializeBurnerWallet = async () => {
+    try {
+      const wallet = setupBurnerWalletNetwork($publicNetwork)
+      const isSpawned = initWalletNetwork(
+        wallet,
+        wallet.walletClient?.account.address,
+        WALLET_TYPE.BURNER
+      )
+
+      walletInitialized = true
+
+      // Check if already spawned and should skip
+      if (isSpawned && shouldSkipSpawn()) {
+        spawned()
+      } else {
+        transitionToNextState()
+      }
+    } catch (error) {
+      console.error("Failed to initialize burner wallet:", error)
+      currentState = SPAWN_STATE.INTRODUCTION
+    }
+  }
+
+  const initializeEntryKitWallet = () => {
+    if (!$entryKitSession?.userAddress || !$entryKitConnector) {
+      console.log("EntryKit session not ready")
+      return
+    }
+
+    try {
       const wallet = setupWalletNetwork($publicNetwork, $entryKitConnector)
       const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
 
-      // Check if player is already spawned
-      if (
-        isSpawned ||
-        (page.route.id === "/(rooms)/(game)/[roomId]" && !page.url.searchParams.has("spawn"))
-      ) {
-        console.log("spawned already")
-        // Connected and spawned - finish spawn process
+      walletInitialized = true
+      userCompletedConnection = true // EntryKit connection is automatic
+
+      if (isSpawned && shouldSkipSpawn()) {
         spawned()
       } else {
-        // New user – show spawn form directly
-        currentState = SPAWN_STATE.SPAWN_FORM
+        transitionToNextState()
       }
-    } else {
-      // No EntryKit session - show introduction
+    } catch (error) {
+      console.error("Failed to initialize EntryKit wallet:", error)
       currentState = SPAWN_STATE.INTRODUCTION
     }
   }
 
-  const onWalletConnectionComplete = () => {
-    if (walletType === WALLET_TYPE.ENTRYKIT) {
-      // This is now just here for the burner. Entrykit is moved to $effect call below
-    } else {
-      // Burner
-      currentState = SPAWN_STATE.SPAWN_FORM
-    }
+  // Event handlers
+  const onEntryKitMounted = () => {
+    console.log("EntryKit mounted")
+    entryKitMounted = true
+    transitionToNextState()
   }
 
-  // Handle EntryKit session changes
+  const onEntryKitSessionReady = () => {
+    console.log("EntryKit session ready")
+    transitionToNextState()
+  }
+
+  const onIntroductionComplete = () => {
+    currentState = SPAWN_STATE.CONNECT_WALLET
+  }
+
+  const onWalletConnectionComplete = () => {
+    userCompletedConnection = true
+    if (walletType === WALLET_TYPE.BURNER) {
+      transitionToNextState()
+    }
+    // EntryKit connection is handled by session effects
+  }
+
+  const onSpawnComplete = () => {
+    transitionToNextState()
+  }
+
+  const onTokenFormComplete = () => {
+    transitionToNextState()
+  }
+
+  const onApprovalFormComplete = () => {
+    transitionToNextState()
+  }
+
+  const onHeroImageComplete = () => {
+    spawned()
+  }
+
+  // React to EntryKit session changes
   $effect(() => {
-    if (walletType === WALLET_TYPE.ENTRYKIT && $entryKitSession && $entryKitConnector) {
-      console.log("__ EntryKit session effect triggered", $entryKitSession)
-      if ($entryKitSession?.userAddress) {
-        const wallet = setupWalletNetwork($publicNetwork, $entryKitConnector)
-        const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
+    if (walletType === WALLET_TYPE.ENTRYKIT && entryKitMounted && $entryKitSession?.userAddress) {
+      onEntryKitSessionReady()
+    }
+  })
 
-        if (isSpawned) {
-          // Player is spawned via EntryKit
-          console.log("!!! spawned")
-          console.log("!!! player", $player)
-          console.log("!!! playerERC20Balance", $playerERC20Balance)
-          console.log("!!! playerERC20Allowance", $playerERC20Allowance)
-
-          if ($playerERC20Balance < 100) {
-            // Player has no tokens => go to token form
-            currentState = SPAWN_STATE.TOKEN_FORM
-          } else if ($playerERC20Allowance < 100) {
-            // Player has tokens, but not enough allowance => go to approval form
-            currentState = SPAWN_STATE.APPROVAL_FORM
-          } else {
-            // Player has tokens and allowance => go to game
-            spawned()
-          }
-        } else {
-          currentState = SPAWN_STATE.SPAWN_FORM
-        }
-      }
+  // React to player state changes
+  $effect(() => {
+    if ($player && walletInitialized) {
+      transitionToNextState()
     }
   })
 
   onMount(() => {
+    console.log("Spawn component mounted with wallet type:", walletType)
+
     if (walletType === WALLET_TYPE.BURNER) {
-      connectBurner()
+      initializeBurnerWallet()
     } else if (walletType === WALLET_TYPE.ENTRYKIT) {
-      // For EntryKit, check if session already exists immediately
-      if ($entryKitConnector && $entryKitSession?.userAddress) {
-        connectEntryKit()
-      } else {
-        // No session yet, wait for it in the $effect
-        currentState = SPAWN_STATE.INTRODUCTION
-      }
+      // EntryKit initialization will happen when mounted + session ready
+      currentState = SPAWN_STATE.NONE // Wait for EntryKit to mount
     } else {
-      console.log("missing clause for wallet type:", walletType)
+      console.error("Unknown wallet type:", walletType)
+      currentState = SPAWN_STATE.INTRODUCTION
     }
   })
 </script>
 
 <div class="container">
   <div class="content">
-    {#if currentState === SPAWN_STATE.INTRODUCTION}
+    {#if currentState === SPAWN_STATE.NONE}
+      {#if walletType === WALLET_TYPE.ENTRYKIT}
+        <EntryKit
+          hidden={false}
+          onMounted={onEntryKitMounted}
+          onAccountConnected={onEntryKitSessionReady}
+        />
+      {/if}
+      <!-- Show loading or wait state -->
+    {:else if currentState === SPAWN_STATE.INTRODUCTION}
       <Introduction onComplete={onIntroductionComplete} />
     {:else if currentState === SPAWN_STATE.CONNECT_WALLET}
       <ConnectWalletForm {walletType} onComplete={onWalletConnectionComplete} />
     {:else if currentState === SPAWN_STATE.SPAWN_FORM}
-      <SpawnForm
-        onComplete={() => {
-          if ($playerERC20Balance < 100) {
-            currentState = SPAWN_STATE.TOKEN_FORM
-          } else {
-            if ($playerERC20Allowance < 100) {
-              currentState = SPAWN_STATE.APPROVAL_FORM
-            } else {
-              currentState = SPAWN_STATE.HERO_IMAGE
-            }
-          }
-        }}
-      />
+      <SpawnForm onComplete={onSpawnComplete} />
     {:else if currentState === SPAWN_STATE.TOKEN_FORM}
-      <TokenForm
-        onComplete={() => {
-          if ($playerERC20Allowance < 100) {
-            currentState = SPAWN_STATE.APPROVAL_FORM
-          } else {
-            currentState = SPAWN_STATE.HERO_IMAGE
-          }
-        }}
-      />
+      <TokenForm onComplete={onTokenFormComplete} />
     {:else if currentState === SPAWN_STATE.APPROVAL_FORM}
-      <ApprovalForm
-        onComplete={() => {
-          currentState = SPAWN_STATE.HERO_IMAGE
-        }}
-      />
+      <ApprovalForm onComplete={onApprovalFormComplete} />
     {:else if currentState === SPAWN_STATE.HERO_IMAGE}
-      <HeroImage
-        onComplete={() => {
-          spawned()
-        }}
-      />
+      <HeroImage onComplete={onHeroImageComplete} />
     {/if}
   </div>
-</div>
-
-<div class="hidden">
-  {#if walletType === WALLET_TYPE.ENTRYKIT}
-    <EntryKit />
-  {/if}
 </div>
 
 <style lang="scss">
   .container {
     width: 100vw;
     height: 100vh;
-    // background: var(--background);
     color: var(--foreground);
     font-family: var(--special-font-stack);
     text-transform: none;
@@ -201,10 +247,5 @@
   .content {
     position: relative;
     z-index: 1;
-  }
-
-  .hidden {
-    position: absolute;
-    opacity: 0;
   }
 </style>
