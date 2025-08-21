@@ -3,16 +3,21 @@
   import { playSound } from "$lib/modules/sound"
   import { sessionId } from "$lib/modules/ui/state.svelte"
   import { goto } from "$app/navigation"
+  import { getEnvironment } from "$lib/modules/network"
   import { v4 as uuid } from "uuid"
+  import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
 
   import { BigButton } from "$lib/components/Shared"
 
   let { roomId }: { roomId: Hex } = $props()
 
   const onClick = async () => {
+    const environment = getEnvironment()
     sessionId.set(uuid())
     playSound("ratfun", "enteredPod")
-    goto(`/${roomId}/enter?sessionId=${$sessionId}`)
+    goto(
+      `/${roomId}/enter?sessionId=${$sessionId}${environment === ENVIRONMENT.BASE_SEPOLIA ? "&entrykit&sepolia" : ""}`
+    )
   }
 </script>
 

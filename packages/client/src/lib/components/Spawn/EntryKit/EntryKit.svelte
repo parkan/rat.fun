@@ -19,7 +19,7 @@
 
   console.log(page.url)
 
-  const environment = getEnvironment(page.url)
+  const environment = getEnvironment()
   const networkConfig = getNetworkConfig(environment, page.url)
   const queryClient = new QueryClient()
 

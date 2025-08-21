@@ -61,7 +61,7 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
  */
 export function initializeSentry(): void {
   const dsn = PUBLIC_SENTRY_DSN
-  const environment = getEnvironment(new URL(window.location.href))
+  const environment = getEnvironment()
   const release = version // Sveltekit assigned version number
   const tracesSampleRate = parseFloat(import.meta.env.SENTRY_TRACES_SAMPLE_RATE || "0.1")
   const profilesSampleRate = parseFloat(import.meta.env.SENTRY_PROFILES_SAMPLE_RATE || "0.1")

@@ -2,6 +2,7 @@ import { writable } from "svelte/store"
 import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
 import { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
 import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
+import { page } from "$app/state"
 
 // ----------------------------------------------------------------------------
 
@@ -19,7 +20,7 @@ export const walletType = writable(WALLET_TYPE.BURNER as WALLET_TYPE)
 
 // ----------------------------------------------------------------------------
 
-export const getEnvironment = (url: URL) => {
+export const getEnvironmentFromUrl = (url: URL) => {
   const hostname = url.hostname
 
   if (hostname.includes("sepolia") || url.searchParams.has("sepolia")) {
@@ -33,7 +34,9 @@ export const getEnvironment = (url: URL) => {
   return ENVIRONMENT.DEVELOPMENT
 }
 
-export const getWalletType = (url: URL) => {
+export const getEnvironment = () => getEnvironmentFromUrl(page.url)
+
+export const getWalletTypeFromUrl = (url: URL) => {
   const hostname = url.hostname
 
   if (hostname.includes("entrykit") || url.searchParams.has("entrykit")) {
@@ -42,3 +45,5 @@ export const getWalletType = (url: URL) => {
 
   return WALLET_TYPE.BURNER
 }
+
+export const getWalletType = () => getWalletTypeFromUrl(page.url)

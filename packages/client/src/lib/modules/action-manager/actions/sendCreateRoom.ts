@@ -4,6 +4,7 @@ import {
   externalAddressesConfig,
   playerERC20Allowance
 } from "$lib/modules/state/stores"
+import { page } from "$app/state"
 import { approve } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
 import type { CreateRoomRequestBody, CreateRoomReturnValue } from "@server/modules/types"
@@ -34,7 +35,7 @@ export async function sendCreateRoom(
   const _gameConfig = get(gameConfig)
   const _externalAddressesConfig = get(externalAddressesConfig)
   const _playerERC20Allowance = get(playerERC20Allowance)
-  const environment = getEnvironment(new URL(window.location.href))
+  const environment = getEnvironment()
 
   if (busy.CreateRoom.current !== 0) return
   busy.CreateRoom.set(0.99, { duration: DEFAULT_TIMING })
@@ -46,6 +47,7 @@ export async function sendCreateRoom(
     }
 
     let url = ""
+
     switch (environment) {
       case ENVIRONMENT.BASE_SEPOLIA:
         url = `https://${PUBLIC_BASE_SEPOLIA_SERVER_HOST}/room/create`

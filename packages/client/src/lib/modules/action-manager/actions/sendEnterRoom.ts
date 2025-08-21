@@ -19,7 +19,7 @@ const DEFAULT_TIMING = 4000
  * @param ratId The ID of the rat to enter the room with
  */
 export async function sendEnterRoom(roomId: string, ratId: string) {
-  const environment = getEnvironment(new URL(window.location.href))
+  const environment = getEnvironment()
 
   if (busy.EnterRoom.current !== 0) {
     return null
