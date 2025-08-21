@@ -20,16 +20,21 @@
   import { EMPTY_ID } from "$lib/modules/state/constants"
   import { outerLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { Modal, PageTransitions } from "$lib/components/Shared"
   import { removeHash } from "$lib/modules/utils"
 
+  // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import ShaderTest from "$lib/components/Shared/ShaderTest/ShaderTest.svelte"
-  import ModalTarget from "$lib/components/Shared/Modal/ModalTarget.svelte"
-  import WorldEventPopup from "$lib/components/Shared/WorldEventPopup/WorldEventPopup.svelte"
+  import {
+    WalletInfo,
+    ShaderTest,
+    Modal,
+    PageTransitions,
+    ModalTarget,
+    WorldEventPopup,
+    SessionManager
+  } from "$lib/components/Shared"
   import { Outcome } from "$lib/components/Room"
-  import WalletInfo from "$lib/components/Shared/Debug/WalletInfo.svelte"
 
   let { children, data }: LayoutProps = $props()
 
@@ -79,6 +84,8 @@
     outcome = $staticContent.outcomes.find(o => o._id === outcomeId)
   }}
 />
+
+<SessionManager />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}

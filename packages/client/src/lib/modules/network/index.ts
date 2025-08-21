@@ -1,4 +1,5 @@
-import { writable } from "svelte/store"
+import { writable, get } from "svelte/store"
+import { browser } from "$app/environment"
 import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
 import { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
 import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
@@ -16,7 +17,10 @@ export const blockNumber = writable(BigInt(0))
 export const ready = writable(false)
 export const loadingMessage = writable("Loading started")
 export const loadingPercentage = writable(0)
-export const walletType = writable(WALLET_TYPE.BURNER as WALLET_TYPE)
+
+// Persistent stores
+export const environment = writable() // important to be undefined first
+export const walletType = writable() // same
 
 // ----------------------------------------------------------------------------
 
@@ -34,7 +38,21 @@ export const getEnvironmentFromUrl = (url: URL) => {
   return ENVIRONMENT.DEVELOPMENT
 }
 
-export const getEnvironment = () => getEnvironmentFromUrl(page.url)
+export const getEnvironment = () => {
+  if (browser) {
+    const storedEnvironment = get(environment)
+    if (storedEnvironment) {
+      console.log("resolved environment from store", storedEnvironment)
+      return storedEnvironment
+    }
+  }
+
+  const urlEnvironment = getEnvironmentFromUrl(page.url)
+  environment.set(urlEnvironment)
+
+  console.log("resolved environment from URL", urlEnvironment)
+  return urlEnvironment
+}
 
 export const getWalletTypeFromUrl = (url: URL) => {
   const hostname = url.hostname
@@ -46,4 +64,15 @@ export const getWalletTypeFromUrl = (url: URL) => {
   return WALLET_TYPE.BURNER
 }
 
-export const getWalletType = () => getWalletTypeFromUrl(page.url)
+export const getWalletType = () => {
+  if (browser) {
+    const storedWalletType = get(walletType)
+    if (storedWalletType) {
+      return storedWalletType
+    }
+  }
+
+  const urlWalletType = getWalletTypeFromUrl(page.url)
+  walletType.set(urlWalletType)
+  return urlWalletType
+}

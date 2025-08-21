@@ -9,6 +9,7 @@ export { default as ChatBox } from "./ChatBox/ChatBox.svelte"
 export { default as Circle } from "./Graphics/Circle.svelte"
 export { default as Cross } from "./Graphics/Cross.svelte"
 export { default as Xed } from "./Graphics/Xed.svelte"
+export { default as ShaderTest } from "./ShaderTest/ShaderTest.svelte"
 
 /* Loaders */
 export { default as SmallSpinner } from "./Loaders/SmallSpinner.svelte"
@@ -22,6 +23,7 @@ export { default as ModalTarget } from "./Modal/ModalTarget.svelte"
 
 /* Top Bar */
 export { default as TopBar } from "./TopBar/TopBar.svelte"
+export { default as WorldEventPopup } from "./WorldEventPopup/WorldEventPopup.svelte"
 
 /* Layout Components */
 export { default as CenterBar } from "./CenterBar/CenterBar.svelte"
