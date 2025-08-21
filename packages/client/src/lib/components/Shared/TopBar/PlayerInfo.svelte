@@ -1,10 +1,13 @@
 <script lang="ts">
   import { player, playerERC20Balance } from "$lib/modules/state/stores"
-  import { NumberGoing } from "$lib/components/Shared"
+  import { NumberGoing, WalletInfo } from "$lib/components/Shared"
   import { tippy } from "svelte-tippy"
+  import AccountStats from "./AccountStats.svelte"
+
   let { isAdminView }: { isAdminView: boolean } = $props()
 
   let balanceGoing = $state(false)
+  let showAccountStats = $state(false)
 </script>
 
 <div class="player-info">
@@ -14,6 +17,7 @@
       <!-- NAME -->
       <div class="stat-item">
         <div
+          onclick={() => (showAccountStats = !showAccountStats)}
           use:tippy={{
             content: `This is you`,
             placement: "bottom"
@@ -50,12 +54,17 @@
   {/if}
 </div>
 
+{#if showAccountStats}
+  <AccountStats />
+{/if}
+
 <style lang="scss">
   .player-info {
     .player-stats {
       display: flex;
       align-items: center;
       height: 100%;
+      cursor: pointer;
 
       .stat-item {
         display: flex;

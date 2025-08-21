@@ -21,6 +21,7 @@
   import { outerLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
   import { errorHandler } from "$lib/modules/error-handling"
   import { removeHash } from "$lib/modules/utils"
+  import { walletType as walletTypeStore } from "$lib/modules/network"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -31,8 +32,7 @@
     Modal,
     PageTransitions,
     ModalTarget,
-    WorldEventPopup,
-    SessionManager
+    WorldEventPopup
   } from "$lib/components/Shared"
   import { Outcome } from "$lib/components/Room"
 
@@ -42,6 +42,8 @@
   let outcome = $state<SanityOutcome | undefined>()
 
   const { environment, walletType } = data
+
+  walletTypeStore.set(walletType)
 
   const environmentLoaded = async () => {
     try {
@@ -84,8 +86,6 @@
     outcome = $staticContent.outcomes.find(o => o._id === outcomeId)
   }}
 />
-
-<SessionManager />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}

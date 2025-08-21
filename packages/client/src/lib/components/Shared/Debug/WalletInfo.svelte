@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
   import { playerAddress } from "$lib/modules/state/stores"
   import { ENTITY_TYPE } from "contracts/enums"
   import { player } from "$lib/modules/state/stores"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
   import { sendGiveCallerTokens, sendApproveMax } from "$lib/modules/action-manager/index.svelte"
-
-  let { walletType, environment }: { walletType: WALLET_TYPE; environment: ENVIRONMENT } = $props()
+  import { walletType, environment } from "$lib/modules/network"
 
   let isMinimized = $state(true)
 
@@ -25,8 +23,8 @@
   </button>
 
   {#if !isMinimized}
-    <p>Environment: {environment}</p>
-    <p>Wallet Type: {walletType}</p>
+    <p>Environment: {$environment}</p>
+    <p>Wallet Type: {$walletType}</p>
     <p>Player Address: {$playerAddress}</p>
     <p>Spawned: {$player?.entityType == ENTITY_TYPE.PLAYER}</p>
     <p>Tokens: {$playerERC20Balance}</p>
