@@ -8,22 +8,26 @@
   let canvas: HTMLCanvasElement
   let renderer: any
 
-  function setShaderMode(mode: "admin" | "home") {
+  function setShaderMode(mode: "admin" | "home" | "outcome") {
     if (renderer) {
-      renderer.setUniform("u_invert", mode === "admin", "bool")
+      renderer.setUniform("u_invert", mode === "admin" || mode === "outcome", "bool")
+      renderer.setUniform("u_saturation", mode === "outcome" ? 0.2 : 1, "float")
     }
   }
 
-  $effect(() => {
-    if ((page.route?.id ?? "").includes("/admin")) {
+  const getShaderMode = (url: URL) => {
+    if (url.pathname.includes("/admin")) {
       setShaderMode("admin")
+    } else if (url.pathname.includes("enter")) {
+      setShaderMode("outcome")
     } else {
       setShaderMode("home")
     }
-  })
+  }
 
   // Debounced resize handler
   let resizeTimeout: ReturnType<typeof setTimeout>
+
   const handleResize = () => {
     clearTimeout(resizeTimeout)
     resizeTimeout = setTimeout(() => {
@@ -33,21 +37,22 @@
     }, 100) // Debounce resize events
   }
 
+  $effect(() => {
+    getShaderMode(page.url)
+  })
+
   onMount(() => {
     if (!canvas) return
 
     renderer = createWebGLRenderer(canvas, {
       shader: shaders.clouds,
       uniforms: {
-        u_invert: { type: "bool", value: false }
+        u_invert: { type: "bool", value: false },
+        u_saturation: { type: "float", value: 1.0 }
       }
     })
 
-    if ((page.route?.id ?? "").includes("/admin")) {
-      setShaderMode("admin")
-    } else {
-      setShaderMode("home")
-    }
+    getShaderMode(page.url)
 
     renderer.render()
 

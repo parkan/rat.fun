@@ -15,9 +15,9 @@
   import { wagmiConfig } from "$lib/modules/entry-kit/wagmiConfig"
   import SessionBridge from "$lib/modules/entry-kit/SessionBridge"
 
-  let rootEl: HTMLElement
+  let { hidden } = $props()
 
-  console.log(page.url)
+  let rootEl: HTMLElement
 
   const environment = getEnvironment()
   const networkConfig = getNetworkConfig(environment, page.url)
@@ -63,12 +63,16 @@
   })
 </script>
 
-<div bind:this={rootEl} class="root"></div>
+<div class:hidden bind:this={rootEl} class="root"></div>
 
 <style>
   .root {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .hidden {
+    display: none;
   }
 </style>

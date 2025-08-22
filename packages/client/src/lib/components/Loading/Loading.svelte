@@ -3,7 +3,8 @@
   import { ready, loadingMessage, loadingPercentage } from "$lib/modules/network"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
-  import { player } from "$lib/modules/state/stores"
+  import { EntryKit } from "$lib/components/Spawn"
+
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { gsap } from "gsap"
 
@@ -44,6 +45,8 @@
     await initPublicNetwork(environment)
   })
 </script>
+
+<EntryKit hidden />
 
 <div class="loading">
   <div class="inner" bind:this={innerElement}>

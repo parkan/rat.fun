@@ -1,12 +1,9 @@
 <script lang="ts">
   import { playerAddress } from "$lib/modules/state/stores"
   import { onMount, onDestroy } from "svelte"
-  import { ENTITY_TYPE } from "contracts/enums"
-  import { player } from "$lib/modules/state/stores"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
   import { sendGiveCallerTokens, sendApproveMax } from "$lib/modules/action-manager/index.svelte"
-  import { BigButton } from "$lib/components/Shared"
-  import { walletType, environment } from "$lib/modules/network"
+  import { SmallButton } from "$lib/components/Shared"
   import { playSound } from "$lib/modules/sound"
 
   let isMinimized = $state(true)
@@ -59,8 +56,18 @@
       {$playerERC20Allowance}
     </p>
   </div>
-  <BigButton onclick={sendGiveCallerTokens} text="Get tokens"></BigButton>
-  <BigButton onclick={sendApproveMax} text="Approve max"></BigButton>
+  <div class="actions">
+    <SmallButton
+      tippyText="Request tokens from the contract"
+      onclick={sendGiveCallerTokens}
+      text="Get tokens"
+    ></SmallButton>
+    <SmallButton
+      tippyText="Allow the contract to spend on your behalf"
+      onclick={sendApproveMax}
+      text="Approve max allowance"
+    ></SmallButton>
+  </div>
 </div>
 
 <style lang="scss">
@@ -70,13 +77,20 @@
     left: 0px;
     background-color: var(--background-semi-transparent);
     color: var(--white);
-    padding: 10px;
+    padding: 20px;
     transition: all 0.2s ease;
     line-height: 1.3em;
     z-index: 1;
     display: flex;
     flex-flow: column nowrap;
     gap: 8px;
+    font-size: 20px;
+    font-family: var(--special-font-stack);
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
 
     p {
       margin: 0;
