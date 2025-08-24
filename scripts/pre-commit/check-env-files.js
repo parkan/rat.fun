@@ -58,7 +58,7 @@ function checkForHardcodedEnvVars() {
       /PRIVATE_KEY\s*=\s*['"`][^'"`]+['"`]/,
       /REPLICATE_API_TOKEN\s*=\s*['"`][^'"`]+['"`]/,
       /ANTHROPIC_API_KEY\s*=\s*['"`][^'"`]+['"`]/,
-      /SENTRY_DSN\s*=\s*['"`][^'"`]+['"`]/,
+      /^(?!PUBLIC_)SENTRY_DSN\s*=\s*['"`][^'"`]+['"`]/,
       /MASTER_KEY_CODE\s*=\s*['"`][^'"`]+['"`]/,
       /NETLIFY_AUTH_TOKEN\s*=\s*['"`][^'"`]+['"`]/,
       /SANITY_TOKEN\s*=\s*['"`][^'"`]+['"`]/

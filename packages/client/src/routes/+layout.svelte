@@ -41,7 +41,9 @@
   let outcomeId = $state("")
   let outcome = $state<SanityOutcome | undefined>()
 
-  const { environment, walletType } = data
+  const { environment, walletType, saleStatus } = data
+
+  console.log("saleStatus", saleStatus)
 
   walletTypeStore.set(walletType)
 
