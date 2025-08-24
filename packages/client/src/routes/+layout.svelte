@@ -35,6 +35,7 @@
     WorldEventPopup
   } from "$lib/components/Shared"
   import { Outcome } from "$lib/components/Room"
+  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
 
   let { children, data }: LayoutProps = $props()
 
@@ -134,6 +135,8 @@
     content={worldEventContent}
   ></ModalTarget>
 {/if}
+
+<EntryKit />
 
 <Modal />
 

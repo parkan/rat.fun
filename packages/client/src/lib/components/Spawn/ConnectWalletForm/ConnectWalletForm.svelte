@@ -3,8 +3,8 @@
   import { onMount } from "svelte"
   import gsap from "gsap"
 
-  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
+  import { entryKitButton } from "$lib/modules/entry-kit/stores"
 
   const { walletType, onComplete = () => {} } = $props<{
     walletType: WALLET_TYPE
@@ -53,7 +53,8 @@
     <img src="/images/bouncer2.png" alt="BASE(TM) ID" bind:this={imageElement} />
     <p bind:this={messageElement}>{message}</p>
     {#if walletType === WALLET_TYPE.ENTRYKIT}
-      <EntryKit />
+      <div bind:this={$entryKitButton}>
+      </div>
     {:else}
       <div bind:this={buttonElement}>
         <BigButton text="Connect Burner" onclick={onComplete} />

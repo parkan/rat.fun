@@ -104,9 +104,9 @@ export class WorldAddressNotFoundError extends BlockchainError {
   }
 }
 
-export class ConnectorClientUnavailableError extends BlockchainError {
-  constructor(message: string = "Connector client is not available") {
-    super("CONNECTOR_CLIENT_UNAVAILABLE", "Wallet connection error", message)
+export class WagmiConfigUnavailableError extends BlockchainError {
+  constructor(message: string = "Wagmi config is not available") {
+    super("WAGMI_CONFIG_UNAVAILABLE", "Wallet connection error", message)
   }
 }
 
@@ -369,7 +369,7 @@ export type ExpectedError =
   | ContractCallError
   | ChainConfigError
   | WorldAddressNotFoundError
-  | ConnectorClientUnavailableError
+  | WagmiConfigUnavailableError
   | BlockTimeoutError
   | GraphicsError
   | WebGLError
