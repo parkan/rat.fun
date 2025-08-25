@@ -16,8 +16,8 @@
   "devDependencies": {
     "@eslint/compat": "^1.3.1",
     "@eslint/js": "^9.32.0",
-    "@sveltejs/kit": "^2.26.1",
     "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.26.1",
     "@sveltejs/vite-plugin-svelte": "^6.1.0",
     "@types/d3-array": "^3.2.1",
     "@types/d3-scale": "^4.0.9",
@@ -54,6 +54,7 @@
     "@sanity/image-url": "^1.1.0",
     "@sentry/sveltekit": "^9.40.1",
     "@tanstack/react-query": "^5.83.0",
+    "@tanstack/svelte-query": "^5.83.1",
     "@wagmi/core": "2.18.0",
     "connectkit": "^1.9.1",
     "d3-array": "^3.2.4",
