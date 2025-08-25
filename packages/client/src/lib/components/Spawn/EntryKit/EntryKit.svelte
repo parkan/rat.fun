@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import { WagmiProvider } from "wagmi"
+  import { get } from "svelte/store"
 
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
   import { getEnvironment } from "$lib/modules/network"
 
   import { page } from "$app/state"
-  import { createElement } from "react"
+  import { createElement, useSyncExternalStore } from "react"
+  import { createPortal } from "react-dom"
   import { createRoot } from "react-dom/client"
   import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
   import { defineConfig, AccountButton } from "@latticexyz/entrykit/internal"
@@ -14,14 +16,22 @@
   import { paymasters } from "$lib/modules/entry-kit/paymasters"
   import { wagmiConfig } from "$lib/modules/entry-kit/wagmiConfig"
   import SessionBridge from "$lib/modules/entry-kit/SessionBridge"
-
-  let { hidden } = $props()
+  import { entryKitButton } from "$lib/modules/entry-kit/stores"
 
   let rootEl: HTMLElement
 
   const environment = getEnvironment()
   const networkConfig = getNetworkConfig(environment, page.url)
   const queryClient = new QueryClient()
+
+  function AccountButtonPortal() {
+    const syncedEntryKitButton = useSyncExternalStore(entryKitButton.subscribe, () => get(entryKitButton))
+    if (!syncedEntryKitButton) {
+      return null
+    } else {
+      return createPortal(createElement(AccountButton), syncedEntryKitButton)
+    }
+  }
 
   $effect(() => {
     const root = createRoot(rootEl)
@@ -38,8 +48,8 @@
           })
         },
         [
-          // The button
-          createElement(AccountButton, { key: "account-button" }),
+          // The button (rendered via portal to the element bound to entryKitButton, so it can be inside svelte, not react tree)
+          createElement(AccountButtonPortal, { key: "account-button" }),
           // State sync
           createElement(SessionBridge, { key: "session-bridge" })
         ]
@@ -63,16 +73,10 @@
   })
 </script>
 
-<div class:hidden bind:this={rootEl} class="root"></div>
+<div bind:this={rootEl} class="root"></div>
 
 <style>
   .root {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .hidden {
     display: none;
   }
 </style>

@@ -4,8 +4,10 @@ import { signMessage } from "viem/actions"
 import { SessionClient } from "@latticexyz/entrykit/internal"
 import { SignedRequest, SignedRequestInfo } from "@server/modules/types"
 import { stringifyRequestForSignature } from "@server/modules/signature/stringifyRequestForSignature"
-import { entryKitConnector } from "$lib/modules/entry-kit/stores"
+import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { walletNetwork } from "$lib/modules/network"
+import { getConnectorClient } from "@wagmi/core"
+import { WagmiConfigUnavailableError } from "../error-handling"
 
 export async function signRequest<T>(data: T): Promise<SignedRequest<T>> {
   const client = get(walletNetwork).walletClient
@@ -13,7 +15,7 @@ export async function signRequest<T>(data: T): Promise<SignedRequest<T>> {
   const info: SignedRequestInfo = {
     timestamp: Date.now(),
     nonce: Math.floor(Math.random() * 1e12),
-    calledFrom: getCalledFrom()
+    calledFrom: await getCalledFrom()
   }
 
   let signature: Hex
@@ -38,8 +40,12 @@ export async function signRequest<T>(data: T): Promise<SignedRequest<T>> {
   }
 }
 
-function getCalledFrom(): Hex | null {
-  const connectorClient = get(entryKitConnector)
+async function getCalledFrom(): Promise<Hex | null> {
+  const wagmiConfig = get(wagmiConfigStateful)
+  if (!wagmiConfig) {
+    throw new WagmiConfigUnavailableError()
+  }
+  const connectorClient = await getConnectorClient(wagmiConfig)
   console.log("connector client", connectorClient)
   if (!connectorClient) {
     return null

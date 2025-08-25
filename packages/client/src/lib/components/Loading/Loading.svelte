@@ -46,8 +46,6 @@
   })
 </script>
 
-<EntryKit hidden />
-
 <div class="loading">
   <div class="inner" bind:this={innerElement}>
     <img src="/images/logo.png" alt="logo" />
