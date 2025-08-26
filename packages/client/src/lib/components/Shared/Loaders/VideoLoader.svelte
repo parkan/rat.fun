@@ -10,7 +10,7 @@
   <div class="loading-bar-container">
     <div class="loading-bar" style="transform: scaleX({progress.current})"></div>
   </div>
-  <video class="video" src="/videos/loading.mov" autoplay loop muted playsinline></video>
+  <!-- <video class="video" src="/videos/loading.mov" autoplay loop muted playsinline></video> -->
 </div>
 
 <style lang="scss">
