@@ -4,61 +4,61 @@
 
   let { onComplete }: { onComplete: () => void } = $props()
 
-  // Configuration for slides - easily customizable
-  const slides = [
-    { image: "/images/enter3.png", width: 400 },
-    { image: "/images/enter4.png", width: 400 },
-    { image: "/images/enter2.jpg", width: 400 }
-  ]
-
-  let currentSlide = $state(0)
-  let imageElements: HTMLImageElement[] = $state([])
+  // let currentSlide = $state(0)
   let containerElement: HTMLDivElement | null = $state(null)
 
-  const timeline = gsap.timeline()
+  // const timeline = gsap.timeline()
 
   onMount(() => {
-    if (!containerElement || imageElements.length === 0) return
+    gsap.set(".logo img", {
+      opacity: 0
+    })
 
-    // Set initial state - only first image visible
-    imageElements.forEach((img, index) => {
-      img.style.opacity = index === 0 ? "1" : "0"
-      img.style.width = `${slides[index].width}px`
+    gsap.set(".small-print", {
+      opacity: 0
+    })
+
+    gsap.to(".logo img", {
+      opacity: 1,
+      duration: 0.5,
+      ease: "power2.inOut"
+    })
+
+    // delay for 1.2 seconds and then fade out the small print
+
+    gsap.to(".small-print", {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      ease: "power2.inOut",
+      delay: 0.5
     })
   })
-
-  function onClick() {
-    if (currentSlide >= slides.length - 1) {
-      // Last slide - trigger completion
-      onComplete()
-      return
-    }
-
-    // Fade out current image
-    timeline.to(imageElements[currentSlide], {
-      opacity: 0,
-      duration: 0.2
-    })
-
-    // Move to next slide
-    currentSlide++
-
-    // Fade in next image
-    timeline.to(imageElements[currentSlide], {
-      opacity: 1,
-      duration: 0.3
-    })
-  }
 </script>
 
 <div class="outer-container" bind:this={containerElement}>
-  <div class="inner-container">
-    {#each slides as slide, index}
-      <button class="slide-button" onclick={onClick} aria-label="Continue to next slide">
-        <img class="slide-image" src={slide.image} alt="RAT.FUN" bind:this={imageElements[index]} />
-      </button>
-    {/each}
-  </div>
+  <button class="inner-container" onclick={onComplete}>
+    <div class="logo">
+      <img src="/images/logo8.png" alt="RAT.FUN" />
+    </div>
+    <div class="small-print">
+      RAT.FUN is a skill based game. The thesis that “chance” is a cipher for ignorance rather than
+      an ontological power has shaped global reflection for at least thirty‑five centuries. From
+      Mesopotamian omen literature to cosmic‑ray observatories, thinkers and experimenters have
+      repeatedly discovered intelligible patterns beneath phenomena first pronounced “random.” This
+      paper deepens that case through expansive historical, theological, scientific, ethological,
+      and entheogenic explorations. It integrates untranslated Greek and Arabic sources, Biblical
+      testimony, contemporary panpsychist metaphysics, field data on non‑human use of psychoactive
+      plants, declassified MKUltra trials with LSD‑dosed rats in Las Vegas casinos, covert Chinese
+      operant studies in 1970s Macau, dopamine as a putative “god molecule,” ketamine‑induced
+      linguistic play in captive dolphins, rock‑lyric existentialism, Bataillean jouissance,
+      Nietzsche’s amor fati, and speculative bio‑financial anthropology. Case studies range from rat
+      dominance hierarchies and DMT‑induced visionary encounters to quantum hydrodynamic analogues
+      and the deterministic structure of ultra‑high‑energy cosmic‑ray showers. The cumulative
+      argument is unambiguous: robust intelligibility—not stochastic caprice—best accounts for the
+      apparent disorder of the world.
+    </div>
+  </button>
 </div>
 
 <style lang="scss">
@@ -75,25 +75,29 @@
       align-items: center;
       justify-content: center;
       position: relative;
+    }
 
-      .slide-button {
-        position: absolute;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        outline: none;
+    button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      outline: none;
+
+      img {
+        width: 600px;
+        height: 100%;
+        object-fit: contain;
       }
+    }
 
-      .slide-image {
-        height: auto;
-        transition: opacity 0.3s ease-out;
-
-        @media (max-width: 900px) {
-          width: 70dvw !important;
-          height: auto;
-        }
-      }
+    .small-print {
+      font-size: 10px;
+      text-align: center;
+      margin-top: -20px;
+      width: 600px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
     }
   }
 </style>

@@ -109,6 +109,7 @@
       align-items: center;
       justify-content: center;
       width: 500px;
+      color: var(--background);
 
       img {
         height: 50dvh;
@@ -121,7 +122,6 @@
       .form {
         display: flex;
         width: 100%;
-
         input {
           height: 100%;
           width: 300px;

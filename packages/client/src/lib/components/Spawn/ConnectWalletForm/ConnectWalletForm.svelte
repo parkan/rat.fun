@@ -13,8 +13,8 @@
 
   let message = $derived(
     walletType === WALLET_TYPE.ENTRYKIT
-      ? "Stop. You need an offical BASE(TM) WALLET TO ENTER."
-      : "Stop. Connect your burner ID (wallet) to enter"
+      ? "Connect your wallet to proceed."
+      : "Connect your wallet to proceed."
   )
 
   let imageElement: HTMLImageElement | null = $state(null)
@@ -53,8 +53,7 @@
     <img src="/images/bouncer2.png" alt="BASE(TM) ID" bind:this={imageElement} />
     <p bind:this={messageElement}>{message}</p>
     {#if walletType === WALLET_TYPE.ENTRYKIT}
-      <div bind:this={$entryKitButton}>
-      </div>
+      <div bind:this={$entryKitButton}></div>
     {:else}
       <div bind:this={buttonElement}>
         <BigButton text="Connect Burner" onclick={onComplete} />
@@ -77,6 +76,7 @@
       align-items: center;
       justify-content: center;
       width: 500px;
+      color: var(--background);
 
       img {
         height: 50dvh;

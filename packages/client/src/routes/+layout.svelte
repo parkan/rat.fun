@@ -100,6 +100,9 @@
       </main>
     </div>
   {:else if $UIState === UI.SPAWNING}
+    {#if browser}
+      <ShaderTest />
+    {/if}
     <div class="context-main">
       <main>
         <Spawn spawned={playerSpawned} {walletType} />
@@ -146,7 +149,7 @@
 
 <Toasts />
 
-<WalletInfo {walletType} {environment} />
+<!-- <WalletInfo {walletType} {environment} /> -->
 
 <style lang="scss">
   .context-main {

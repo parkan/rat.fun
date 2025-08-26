@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { player } from "$lib/modules/state/stores"
   import { BigButton } from "$lib/components/Shared"
   import gsap from "gsap"
   import { onMount } from "svelte"
@@ -36,10 +37,9 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    <img class="image" src="/images/slides/intro.jpg" alt="RAT.FUN" bind:this={imageElement} />
-    <p bind:this={textElement}>You are set.</p>
+    <p bind:this={textElement}>{$player?.name}, you are set!</p>
     <div class="button" bind:this={buttonElement}>
-      <BigButton text="ENJOY" onclick={onComplete} />
+      <BigButton text="ENJOY SKILLFULLY" onclick={onComplete} />
     </div>
   </div>
 </div>
@@ -58,6 +58,7 @@
       align-items: center;
       justify-content: center;
       width: 500px;
+      color: var(--background);
 
       img {
         height: 50dvh;
