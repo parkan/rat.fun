@@ -4,7 +4,7 @@
   import { fade } from "svelte/transition"
   import { createWebGLRenderer } from "$lib/modules/webgl"
   import { shaders } from "$lib/modules/webgl/shaders"
-  import { cubicInOut, bounceIn } from "svelte/easing"
+  import { cubicInOut } from "svelte/easing"
   import { page } from "$app/state"
 
   type Mode = "admin" | "home" | "outcome"
@@ -97,7 +97,7 @@
     if (!canvas) return
 
     renderer = createWebGLRenderer(canvas, {
-      shader: shaders.clouds,
+      shader: shaders.spiralVortex,
       uniforms: {
         u_spiral: { type: "float", value: spiral.current },
         u_invert: { type: "float", value: invert.current },
