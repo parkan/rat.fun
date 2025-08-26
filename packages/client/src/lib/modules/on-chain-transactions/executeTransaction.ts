@@ -11,6 +11,7 @@ import { getChain } from "$lib/mud/utils"
 import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { errorHandler } from "$lib/modules/error-handling"
 import { TransactionError, WagmiConfigUnavailableError } from "../error-handling/errors"
+import mainSaleAbi from "contracts/out/MainSale.sol/MainSale.abi.json"
 
 /**
  * Executes an on-chain transaction.
@@ -21,7 +22,8 @@ import { TransactionError, WagmiConfigUnavailableError } from "../error-handling
 export async function executeTransaction(
   systemId: string,
   params: (string | Hex | number | bigint)[] = [],
-  useConnectorClient: boolean = false
+  useConnectorClient: boolean = false,
+  value?: bigint
 ) {
   try {
     // Prepare the action's client
@@ -38,7 +40,18 @@ export async function executeTransaction(
         args: params,
         gas: 5000000n // TODO: Added to fix gas estimation. Change this.
       })
+    } else if (systemId === WorldFunctions.BuyWithEth) {
+      console.log("Buying with ETH", params, value)
+      tx = await client.writeContract({
+        address: get(externalAddressesConfig).mainSaleAddress,
+        abi: mainSaleAbi,
+        functionName: "buyWithEth",
+        args: params,
+        value: value,
+        gas: 5000000n // TODO: Added to fix gas estimation. Change this.
+      })
     } else {
+      // @ts-expect-error - MUD world contract ABI causes excessive type instantiation
       tx = await client.writeContract({
         address: get(walletNetwork).worldContract.address,
         abi: get(walletNetwork).worldContract.abi,
@@ -62,7 +75,12 @@ export async function executeTransaction(
       }
     }
   } catch (e: unknown) {
-    console.log("HERE WE GO", e)
+    console.log("Transaction error details:", e)
+    console.log("Error type:", typeof e)
+    console.log("Error constructor:", e?.constructor?.name)
+    if (e && typeof e === "object" && "cause" in e) {
+      console.log("Error cause:", e.cause)
+    }
     errorHandler(e)
   }
 }

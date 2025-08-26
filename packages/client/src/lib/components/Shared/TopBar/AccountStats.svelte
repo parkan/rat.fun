@@ -2,9 +2,16 @@
   import { playerAddress } from "$lib/modules/state/stores"
   import { onMount, onDestroy } from "svelte"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
-  import { sendGiveCallerTokens, sendApproveMax } from "$lib/modules/action-manager/index.svelte"
+  import {
+    sendGiveCallerTokens,
+    sendApproveMax,
+    sendBuyWithEth
+  } from "$lib/modules/action-manager/index.svelte"
   import { SmallButton } from "$lib/components/Shared"
   import { playSound } from "$lib/modules/sound"
+  import { ENTITY_TYPE } from "contracts/enums"
+  import { walletType, environment } from "$lib/modules/network"
+  import { player } from "$lib/modules/state/stores"
 
   let isMinimized = $state(true)
 
@@ -28,7 +35,7 @@
       {$playerAddress}
     </p>
   </div>
-  <!-- <div class="tab">
+  <div class="tab">
     <p class="key">Environment</p>
     <p class="value">{$environment}</p>
   </div>
@@ -37,19 +44,19 @@
     <p class="value">
       {$walletType}
     </p>
-  </div> -->
-  <!-- <div class="tab">
+  </div>
+  <div class="tab">
     <p class="key">Spawned:</p>
     <p class="value">
       {$player?.entityType == ENTITY_TYPE.PLAYER}
     </p>
-  </div> -->
-  <!-- <div class="tab">
+  </div>
+  <div class="tab">
     <p class="key">Tokens:</p>
     <p class="value">
       {$playerERC20Balance}
     </p>
-  </div> -->
+  </div>
   <div class="tab">
     <p class="key">Allowance:</p>
     <p class="value">
@@ -60,7 +67,12 @@
     <SmallButton
       tippyText="Request tokens from the contract"
       onclick={sendGiveCallerTokens}
-      text="Get tokens"
+      text="Get free tokens"
+    ></SmallButton>
+    <SmallButton
+      tippyText="Request tokens from the contract"
+      onclick={sendBuyWithEth}
+      text="Buy $Slopamine (0.01ETH)"
     ></SmallButton>
     <SmallButton
       tippyText="Allow the contract to spend on your behalf"
@@ -89,6 +101,7 @@
 
     .actions {
       display: flex;
+      flex-flow: column nowrap;
       gap: 8px;
     }
 

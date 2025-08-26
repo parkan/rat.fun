@@ -105,7 +105,7 @@ contract MainSale {
     // Set the pricing and pause configuration - it can be changed during the sale
     MutableConfig._set(
       MutableConfigData({
-        paused: true,
+        paused: false,
         usdEthPriceAggregator: usdEthPriceAggregator,
         usdEurPriceAggregator: usdEurPriceAggregator,
         eurTokenPrice: eurTokenPrice

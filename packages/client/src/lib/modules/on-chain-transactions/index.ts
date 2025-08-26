@@ -1,4 +1,4 @@
-import { maxUint256 } from "viem"
+import { maxUint256, parseEther } from "viem"
 import { WALLET_TYPE } from "$lib/mud/enums"
 import { get } from "svelte/store"
 import { walletType } from "$lib/modules/network"
@@ -13,6 +13,7 @@ export enum WorldFunctions {
   ReAbsorbItem = NAMESPACE + "reAbsorbItem",
   CloseRoom = NAMESPACE + "closeRoom",
   Approve = "ERC20-approve",
+  BuyWithEth = "buyWithEth",
   GiveCallerTokens = NAMESPACE + "giveCallerTokens"
 }
 
@@ -51,6 +52,16 @@ export async function approve(address: string, value: bigint) {
 export async function approveMax(address: string) {
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
   return await executeTransaction(WorldFunctions.Approve, [address, maxUint256], useConnectorClient)
+}
+
+export async function buyWithEth(purchaseTokenAmount: number, countryCode: string) {
+  const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
+  return await executeTransaction(
+    WorldFunctions.BuyWithEth,
+    [BigInt(purchaseTokenAmount), countryCode],
+    useConnectorClient,
+    parseEther("0.01")
+  )
 }
 
 export async function giveCallerTokens() {
