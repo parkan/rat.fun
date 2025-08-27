@@ -12,7 +12,7 @@
   import { goto } from "$app/navigation"
   import { initStaticContent, staticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
-  import { initSound, playSound } from "$lib/modules/sound"
+  import { initSound } from "$lib/modules/sound"
   import { UIState, notificationsRead } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { initOffChainSync } from "$lib/modules/off-chain-sync"
@@ -29,7 +29,7 @@
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import {
-    ShaderTest,
+    Shader,
     Modal,
     PageTransitions,
     ModalTarget,
@@ -109,7 +109,7 @@
       </div>
     {:else}
       {#if browser}
-        <ShaderTest />
+        <Shader />
       {/if}
       <div class="context-main">
         <div class="layer-game">
@@ -143,12 +143,9 @@
   {/if}
 
   <EntryKit />
-
   <Modal />
-
   <Toasts />
-
-  <WalletInfo {walletType} {environment} />
+  <WalletInfo />
 </QueryClientProvider>
 
 <style lang="scss">
