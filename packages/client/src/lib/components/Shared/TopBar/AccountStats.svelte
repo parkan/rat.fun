@@ -13,14 +13,11 @@
   import { ENTITY_TYPE } from "contracts/enums"
   import { walletType, environment } from "$lib/modules/network"
   import { player } from "$lib/modules/state/stores"
+  import { busy } from "$lib/modules/action-manager/index.svelte"
 
-  let isMinimized = $state(true)
+  let { close } = $props()
 
   const queryClient = getQueryClientContext()
-
-  function toggleMinimize() {
-    isMinimized = !isMinimized
-  }
 
   onMount(() => {
     playSound("ratfun", "textLineHit")
@@ -68,18 +65,32 @@
   </div>
   <div class="actions">
     <SmallButton
+      disabled={busy.GiveCallerTokens.current !== 0}
       tippyText="Request tokens from the contract"
-      onclick={() => sendGiveCallerTokens(queryClient)}
+      onclick={async () => {
+        await sendGiveCallerTokens(queryClient)
+        console.log("CLOSE MOTHERFUCKER")
+        close()
+      }}
       text="Get tokens"
     ></SmallButton>
     <SmallButton
+      disabled={busy.BuyWithEth.current !== 0}
       tippyText="Buy some $Slopamine"
-      onclick={sendBuyWithEth}
+      onclick={async () => {
+        await sendBuyWithEth(queryClient)
+        close()
+      }}
       text="Buy $Slopamine (0.001ETH)"
     ></SmallButton>
     <SmallButton
+      disabled={busy.ApproveMax.current !== 0}
       tippyText="Allow the contract to spend on your behalf"
-      onclick={() => sendApproveMax(queryClient)}
+      onclick={() => {
+        sendApproveMax(queryClient)
+        console.log("CLOSE MOTHERFUCKER")
+        close()
+      }}
       text="Approve max allowance"
     ></SmallButton>
   </div>
@@ -88,8 +99,8 @@
 <style lang="scss">
   .account-stats {
     position: fixed;
-    top: 60px;
-    left: 0px;
+    top: 68px;
+    left: 8px;
     background-color: var(--background-semi-transparent);
     color: var(--white);
     padding: 20px;
@@ -101,6 +112,8 @@
     gap: 8px;
     font-size: 20px;
     font-family: var(--special-font-stack);
+    z-index: 99;
+    border: 1px solid var(--color-border);
 
     .actions {
       display: flex;

@@ -24,7 +24,7 @@ const DEFAULT_TIMINGS = {
   LiquidateRat: 4000,
   LiquidateRoom: 4000,
   ReAbsorbItem: 4000,
-  BuyWithEth: 4000
+  BuyWithEth: 60000
 }
 
 export const busy = $state({

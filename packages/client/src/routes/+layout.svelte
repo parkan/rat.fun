@@ -23,6 +23,7 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { removeHash } from "$lib/modules/utils"
   import { walletType as walletTypeStore } from "$lib/modules/network"
+  import { busy } from "$lib/modules/action-manager/index.svelte"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -38,7 +39,6 @@
   import { Outcome } from "$lib/components/Room"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
-  import { toastManager } from "$lib/modules/ui/toasts.svelte"
 
   let { children, data }: LayoutProps = $props()
 
@@ -64,6 +64,8 @@
   const playerSpawned = () => {
     UIState.set(UI.READY)
   }
+
+  $inspect(busy.BuyWithEth.current)
 
   if (browser) {
     initializeSentry()
