@@ -97,9 +97,6 @@ importers:
       '@tanstack/react-query':
         specifier: 5.81.5
         version: 5.81.5(react@19.1.1)
-      '@tanstack/svelte-query':
-        specifier: ^5.83.1
-        version: 5.85.5(svelte@5.37.1)
       '@wagmi/core':
         specifier: 2.18.0
         version: 2.18.0(@tanstack/query-core@5.85.5)(@types/react@19.1.9)(immer@10.1.1)(react@19.1.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.1))(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
@@ -5550,11 +5547,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  '@tanstack/svelte-query@5.85.5':
-    resolution: {integrity: sha512-/oiyfVh0B+8b7DiGJI6s5ua8cU1wvMw+0yscs+XmQejQ29ngBlRAjkh2PEYif2VO3BK1FxGa2CdiKt62xRHywA==}
-    peerDependencies:
-      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0
 
   '@tanstack/table-core@8.21.3':
     resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
@@ -21670,7 +21662,8 @@ snapshots:
 
   '@tanstack/query-core@5.81.5': {}
 
-  '@tanstack/query-core@5.85.5': {}
+  '@tanstack/query-core@5.85.5':
+    optional: true
 
   '@tanstack/react-query@5.81.5(react@18.3.1)':
     dependencies:
@@ -21699,11 +21692,6 @@ snapshots:
       '@tanstack/virtual-core': 3.13.12
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
-
-  '@tanstack/svelte-query@5.85.5(svelte@5.37.1)':
-    dependencies:
-      '@tanstack/query-core': 5.85.5
-      svelte: 5.37.1
 
   '@tanstack/table-core@8.21.3': {}
 
