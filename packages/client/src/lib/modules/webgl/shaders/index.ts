@@ -1,4 +1,5 @@
 // Re-export all shaders from their respective folders
+import { main } from "./main"
 import { noise } from "./noise"
 import { gradient } from "./gradient"
 import { waves } from "./waves"
@@ -14,6 +15,7 @@ import { lissajousWarpField } from "./lissajous-warp-field"
 import { kaleidoscopeTunnel } from "./kaleidoscope-tunnel"
 
 const shaders = {
+  main,
   noise,
   gradient,
   waves,

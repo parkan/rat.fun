@@ -7,7 +7,29 @@
   import { cubicInOut } from "svelte/easing"
   import { page } from "$app/state"
 
-  type Mode = "admin" | "home" | "outcome"
+  type Mode = "introduction" | "admin" | "home" | "outcome"
+
+  // Main shader
+  //
+  // "Layers" are the different base states of the shader
+  // "Adjustments" are modulations of the base states
+  //
+  // Introduction: clouds
+  // ---
+  // Layer: Clouds moving, side to side
+  // Adjustments: none
+  //
+  // Home: slightly psychedelic
+  // Admin: slightly psychedelic, inverted
+  // ---
+  // Layer: Clouds form together Starry, more noisy small clusters
+  // Adjustments: Inversion, blur / sharpen
+  //
+  // Outcome: Spiraling, tripping
+  // ---
+  // Layer: Spiral, zooming
+  // Adjustments: Speed
+  //
 
   let canvas: HTMLCanvasElement
   let renderer: any
@@ -97,7 +119,7 @@
     if (!canvas) return
 
     renderer = createWebGLRenderer(canvas, {
-      shader: shaders.spiralVortex,
+      shader: shaders.main,
       uniforms: {
         u_spiral: { type: "float", value: spiral.current },
         u_invert: { type: "float", value: invert.current },

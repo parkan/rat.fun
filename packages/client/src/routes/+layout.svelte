@@ -30,6 +30,7 @@
   import Loading from "$lib/components/Loading/Loading.svelte"
   import {
     Shader,
+    ShaderTest,
     Modal,
     PageTransitions,
     ModalTarget,
@@ -108,9 +109,6 @@
         </main>
       </div>
     {:else}
-      {#if browser}
-        <Shader />
-      {/if}
       <div class="context-main">
         <div class="layer-game">
           <PageTransitions config={outerLayoutTransitionConfig}>
@@ -118,6 +116,12 @@
           </PageTransitions>
         </div>
       </div>
+    {/if}
+
+    {#if $UIState !== UI.LOADING}
+      {#if browser}
+        <Shader />
+      {/if}
     {/if}
   </div>
 
