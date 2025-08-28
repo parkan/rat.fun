@@ -5,8 +5,11 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC20Burnable } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 // TODO ensure these amounts are all that should ever be minted, the contract isn't upgradeable and has no public mint
+// 53M
 uint256 constant MAIN_SALE_AMOUNT = 53_000_000;
-uint256 constant SERVICE_AMOUNT = 100_000;
+// 100k => increased to 10M for testing
+uint256 constant SERVICE_AMOUNT = 10_000_000;
+// 100k => increased to 10M for testing
 uint256 constant TREASURY_AMOUNT = 100_000;
 
 contract SlopERC20 is ERC20, ERC20Burnable {
