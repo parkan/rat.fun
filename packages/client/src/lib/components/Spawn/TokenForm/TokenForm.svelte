@@ -62,6 +62,7 @@
         bind:this={imageElement}
       />
       <p bind:this={messageElement}>{message}</p>
+
       <div class="button" bind:this={buttonElement}>
         <BigButton text={buttonText} onclick={getTokens} />
       </div>

@@ -84,12 +84,6 @@ export async function executeTransaction(
       }
     }
   } catch (e: unknown) {
-    console.log("Transaction error details:", e)
-    console.log("Error type:", typeof e)
-    console.log("Error constructor:", e?.constructor?.name)
-    if (e && typeof e === "object" && "cause" in e) {
-      console.log("Error cause:", e.cause)
-    }
     errorHandler(e)
   }
 }

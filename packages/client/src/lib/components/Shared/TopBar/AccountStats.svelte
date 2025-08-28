@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { playerAddress } from "$lib/modules/state/stores"
+  import { playerAddress, externalAddressesConfig } from "$lib/modules/state/stores"
   import { onMount, onDestroy } from "svelte"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
   import {

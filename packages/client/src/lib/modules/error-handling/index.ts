@@ -5,6 +5,7 @@ import { version } from "$app/environment"
 import { AppError, type ExpectedError } from "./errors"
 import { toastManager } from "$lib/modules/ui/toasts.svelte"
 import { parseViemError } from "./viemErrorParser"
+import { ABIS } from "./abi"
 export * from "./errors"
 
 export function captureMessage(
@@ -26,6 +27,8 @@ export function captureMessage(
 
 export function errorHandler(error: ExpectedError | unknown, message = "") {
   let processedError: ExpectedError | unknown = error
+
+  console.log("processedError", processedError)
 
   // Auto-detect and parse viem errors
   if (error && typeof error === "object" && "name" in error) {
