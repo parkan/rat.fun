@@ -1,7 +1,7 @@
 import type { Hex } from "viem"
 import { get } from "svelte/store"
 import { transactionQueue } from "@latticexyz/common/actions"
-import { QueryClient } from "@tanstack/svelte-query"
+
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
 import { erc20Abi } from "viem"
 import { addChain, switchChain } from "viem/actions"
@@ -71,9 +71,9 @@ export async function executeTransaction(
 
     // Force an erc20 query refetch for calls that definitely update balance or allowance
     if (systemId === WorldFunctions.Approve) {
-      refetchAllowance(queryClient)
+      refetchAllowance()
     } else if (systemId === WorldFunctions.GiveCallerTokens) {
-      refetchBalance(queryClient)
+      refetchBalance()
     }
 
     if (receipt) {

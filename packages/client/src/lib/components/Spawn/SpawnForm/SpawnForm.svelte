@@ -2,7 +2,7 @@
   import { busy, sendSpawn } from "$lib/modules/action-manager/index.svelte"
   import gsap from "gsap"
   import { onMount } from "svelte"
-  import { getQueryClientContext } from "@tanstack/svelte-query"
+
   import { BigButton } from "$lib/components/Shared"
   import { player } from "$lib/modules/state/stores"
   import { typeHit } from "$lib/modules/sound"
@@ -12,8 +12,6 @@
   const { onComplete = () => {} } = $props<{
     onComplete: (name: string) => void
   }>()
-
-  const queryClient = getQueryClientContext()
 
   let name = $state("")
   let imageElement: HTMLImageElement | null = $state(null)
@@ -33,7 +31,7 @@
         throw new InputValidationError("Name is too long (maximum 50 characters)", "name", name)
       }
 
-      await sendSpawn(queryClient, name)
+      await sendSpawn(name)
       onComplete(name)
     } catch (error) {
       console.error(error)

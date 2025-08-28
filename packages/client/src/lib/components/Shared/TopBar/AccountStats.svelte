@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getQueryClientContext } from "@tanstack/svelte-query"
   import { playerAddress } from "$lib/modules/state/stores"
   import { onMount, onDestroy } from "svelte"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
@@ -16,8 +15,6 @@
   import { busy } from "$lib/modules/action-manager/index.svelte"
 
   let { close } = $props()
-
-  const queryClient = getQueryClientContext()
 
   onMount(() => {
     playSound("ratfun", "textLineHit")
@@ -68,7 +65,7 @@
       disabled={busy.GiveCallerTokens.current !== 0}
       tippyText="Request tokens from the contract"
       onclick={async () => {
-        await sendGiveCallerTokens(queryClient)
+        await sendGiveCallerTokens()
         console.log("CLOSE MOTHERFUCKER")
         close()
       }}
@@ -78,7 +75,7 @@
       disabled={busy.BuyWithEth.current !== 0}
       tippyText="Buy some $Slopamine"
       onclick={async () => {
-        await sendBuyWithEth(queryClient)
+        await sendBuyWithEth()
         close()
       }}
       text="Buy $Slopamine (0.001ETH)"
@@ -87,7 +84,7 @@
       disabled={busy.ApproveMax.current !== 0}
       tippyText="Allow the contract to spend on your behalf"
       onclick={() => {
-        sendApproveMax(queryClient)
+        sendApproveMax()
         console.log("CLOSE MOTHERFUCKER")
         close()
       }}

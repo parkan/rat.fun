@@ -2,7 +2,7 @@
   import gsap from "gsap"
 
   import { onMount } from "svelte"
-  import { getQueryClientContext } from "@tanstack/svelte-query"
+
   import { sendApproveMax, busy } from "$lib/modules/action-manager/index.svelte"
   import { playerERC20Balance } from "$lib/modules/state/stores"
 
@@ -19,11 +19,9 @@
   let buttonElement: HTMLDivElement | null = $state(null)
   const timeline = gsap.timeline()
 
-  const queryClient = getQueryClientContext()
-
   async function sendApproval() {
     try {
-      await sendApproveMax(queryClient)
+      await sendApproveMax()
     } catch (error) {
       errorHandler(error)
     } finally {

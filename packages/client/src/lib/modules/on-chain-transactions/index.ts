@@ -1,7 +1,6 @@
 import { maxUint256, parseEther } from "viem"
 import { WALLET_TYPE } from "$lib/mud/enums"
 import { get } from "svelte/store"
-import { QueryClient } from "@tanstack/svelte-query"
 import { walletType } from "$lib/modules/network"
 import { executeTransaction } from "./executeTransaction"
 
@@ -20,45 +19,39 @@ export enum WorldFunctions {
 
 // --- API --------------------------------------------------------------
 
-export async function spawn(queryClient: QueryClient, name: string) {
-  return await executeTransaction(queryClient, WorldFunctions.Spawn, [name])
+export async function spawn(name: string) {
+  return await executeTransaction(WorldFunctions.Spawn, [name])
 }
 
-export async function createRat(queryClient: QueryClient, name: string) {
-  return await executeTransaction(queryClient, WorldFunctions.CreateRat, [name])
+export async function createRat(name: string) {
+  return await executeTransaction(WorldFunctions.CreateRat, [name])
 }
 
-export async function liquidateRat(queryClient: QueryClient) {
-  return await executeTransaction(queryClient, WorldFunctions.LiquidateRat, [])
+export async function liquidateRat() {
+  return await executeTransaction(WorldFunctions.LiquidateRat, [])
 }
 
-export async function reAbsorbItem(queryClient: QueryClient, itemId: string) {
-  return await executeTransaction(queryClient, WorldFunctions.ReAbsorbItem, [itemId])
+export async function reAbsorbItem(itemId: string) {
+  return await executeTransaction(WorldFunctions.ReAbsorbItem, [itemId])
 }
 
-export async function closeRoom(queryClient: QueryClient, roomId: string) {
-  return await executeTransaction(queryClient, WorldFunctions.CloseRoom, [roomId])
+export async function closeRoom(roomId: string) {
+  return await executeTransaction(WorldFunctions.CloseRoom, [roomId])
 }
 
-export async function approve(queryClient: QueryClient, address: string, value: bigint) {
+export async function approve(address: string, value: bigint) {
   const scaledValue = value * 10n ** 18n
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
   return await executeTransaction(
-    queryClient,
     WorldFunctions.Approve,
     [address, scaledValue],
     useConnectorClient
   )
 }
 
-export async function approveMax(queryClient: QueryClient, address: string) {
+export async function approveMax(address: string) {
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
-  return await executeTransaction(
-    queryClient,
-    WorldFunctions.Approve,
-    [address, maxUint256],
-    useConnectorClient
-  )
+  return await executeTransaction(WorldFunctions.Approve, [address, maxUint256], useConnectorClient)
 }
 
 export async function buyWithEth(
@@ -68,7 +61,6 @@ export async function buyWithEth(
 ) {
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
   return await executeTransaction(
-    queryClient,
     WorldFunctions.BuyWithEth,
     [BigInt(purchaseTokenAmount), countryCode],
     useConnectorClient,
@@ -76,6 +68,6 @@ export async function buyWithEth(
   )
 }
 
-export async function giveCallerTokens(queryClient: QueryClient) {
-  return await executeTransaction(queryClient, WorldFunctions.GiveCallerTokens, [])
+export async function giveCallerTokens() {
+  return await executeTransaction(WorldFunctions.GiveCallerTokens, [])
 }

@@ -3,7 +3,7 @@ import { getEnvironmentFromUrl, getWalletTypeFromUrl } from "$lib/modules/networ
 import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
 import { SALE_STATUS } from "$lib/mud/enums"
 import { PUBLIC_SALE_STATUS } from "$env/static/public"
-import { QueryClient } from "@tanstack/svelte-query"
+
 import { browser } from "$app/environment"
 
 export const ssr = false
@@ -20,9 +20,9 @@ export const load: LayoutLoad = async ({ url }) => {
     defaultOptions: {
       queries: {
         enabled: browser,
-        staleTime: 60 * 1000,
-      },
-    },
+        staleTime: 60 * 1000
+      }
+    }
   })
 
   return {

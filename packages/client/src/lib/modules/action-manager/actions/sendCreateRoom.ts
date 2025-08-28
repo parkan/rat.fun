@@ -1,5 +1,5 @@
 import { get } from "svelte/store"
-import { QueryClient } from "@tanstack/svelte-query"
+
 import {
   gameConfig,
   externalAddressesConfig,
@@ -45,7 +45,7 @@ export async function sendCreateRoom(
   // Approve
   try {
     if (_playerERC20Allowance < _gameConfig.roomCreationCost) {
-      await approve(queryClient, _externalAddressesConfig.gamePoolAddress, roomCreationCost)
+      await approve(_externalAddressesConfig.gamePoolAddress, roomCreationCost)
     }
 
     let url = ""
