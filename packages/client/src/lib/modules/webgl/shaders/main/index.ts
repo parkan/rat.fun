@@ -17,7 +17,7 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
   modes: defineShaderModes({
     introduction: {
       spiral: 0,
-      invert: 0.5,
+      invert: 0.3,
       saturation: 1,
       contrast: 0.5,
       exposure: 0,

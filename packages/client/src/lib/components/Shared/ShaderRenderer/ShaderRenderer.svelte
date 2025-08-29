@@ -2,23 +2,22 @@
   import { onMount, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
   import { page } from "$app/state"
-  import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
-  import { type ShaderMode } from "$lib/modules/webgl/shaders/main/index.svelte"
-  import { createShaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import {
+    shaders,
+    createShaderManager,
+    type ShaderModes
+  } from "$lib/modules/webgl/shaders/index.svelte"
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
 
   let canvas = $state<HTMLCanvasElement>()
 
-  const shaderManager = $state(createShaderManager(shaders.main.config))
+  const shaderManager = $state(createShaderManager(shaders.noise.config))
 
-  function getMode(page: import("@sveltejs/kit").Page): ShaderMode {
+  function getMode(page: import("@sveltejs/kit").Page): ShaderModes["Noise"] {
     console.log("Get mode called for:", page.url.pathname, page.route.id)
-    if (page.route.id?.includes("admin")) return "admin"
-    if (page.url.pathname.includes("enter") || page.url.pathname.includes("outcome"))
-      return "outcome"
-    if (page.url.searchParams.has("spawn") || $UIState === UI.SPAWNING) return "introduction"
-    return "home"
+    if (page.route.id?.includes("admin")) return "base"
+    return "inverted"
   }
 
   // Derived reactive values
@@ -46,7 +45,7 @@
   // Lifecycle
   onMount(() => {
     if (canvas) {
-      shaderManager.initializeRenderer(canvas, shaders.main)
+      shaderManager.initializeRenderer(canvas, shaders.noise)
 
       // Set initial mode
       shaderManager.setMode(currentMode)
