@@ -112,6 +112,7 @@ export class ShaderManager<TMode extends string = string> {
    * Set new mode and transition uniforms
    */
   setMode(newMode: TMode) {
+    console.log("Switching to", newMode)
     if (!this.modes[newMode]) {
       console.warn(`Mode '${newMode}' not found in configuration`)
       return

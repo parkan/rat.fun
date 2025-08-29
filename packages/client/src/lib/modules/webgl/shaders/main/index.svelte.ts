@@ -12,12 +12,12 @@ export type ShaderMode = "introduction" | "admin" | "home" | "outcome"
 
 // Complete shader configuration
 export const shaderConfig: ShaderConfiguration<ShaderMode> = {
-  initialMode: "home",
+  initialMode: "introduction",
 
   modes: defineShaderModes({
     introduction: {
       spiral: 0,
-      invert: 0,
+      invert: 0.5,
       saturation: 1,
       contrast: 0.5,
       exposure: 0,

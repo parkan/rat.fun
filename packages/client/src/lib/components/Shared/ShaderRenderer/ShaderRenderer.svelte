@@ -14,21 +14,22 @@
   const shaderManager = $state(createShaderManager(shaders.main.config))
 
   // URL-based mode detection
-  function getModeFromUrl(url: URL): ShaderMode {
-    if (url.pathname.includes("/admin")) return "admin"
-    if (url.pathname.includes("/enter") || url.pathname.includes("/outcome")) return "outcome"
-    if (url.pathname === "/" || url.pathname.includes("/intro")) return "introduction"
+  function getMode(page: import("@sveltejs/kit").Page): ShaderMode {
+    console.log("Get mode called")
+    if (page.route.id?.includes("admin")) return "admin"
+    if (page.url.pathname.includes("enter") || page.url.pathname.includes("outcome"))
+      return "outcome"
+    if (page.route.id?.includes("spawn")) return "introduction"
     return "home"
   }
 
   // Derived reactive values
-  const currentMode = $derived(getModeFromUrl(page.url))
+  const currentMode = $derived(getMode(page))
   const uniformValues = $derived(shaderManager.uniformValues)
 
   // Effect: Update mode when URL changes
   $effect(() => {
     if (mounted) {
-      console.log(`Shader mode changed to: ${currentMode}`)
       shaderManager.setMode(currentMode)
     }
   })
