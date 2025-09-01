@@ -23,13 +23,11 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { removeHash } from "$lib/modules/utils"
   import { walletType as walletTypeStore } from "$lib/modules/network"
-  import { busy } from "$lib/modules/action-manager/index.svelte"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import {
-    Shader,
     ShaderRenderer,
     Modal,
     PageTransitions,

@@ -12,7 +12,6 @@ export { default as Cross } from "./Graphics/Cross.svelte"
 export { default as Xed } from "./Graphics/Xed.svelte"
 export { default as ShaderTest } from "./ShaderTest/ShaderTest.svelte"
 export { default as ShaderRenderer } from "./ShaderRenderer/ShaderRenderer.svelte"
-export { default as Shader } from "./Shader/Shader.svelte"
 
 /* Loaders */
 export { default as SmallSpinner } from "./Loaders/SmallSpinner.svelte"
