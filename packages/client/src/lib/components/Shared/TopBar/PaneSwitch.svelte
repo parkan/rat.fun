@@ -1,15 +1,16 @@
 <script lang="ts">
+  import { page } from "$app/state"
   let { isAdminView }: { isAdminView: boolean } = $props()
 </script>
 
 <div class="pane-switch">
   {#if isAdminView}
     <div class="pane-switch-item">
-      <a href="/">X</a>
+      <a href="/{page.route.id?.includes('roomId') && page.params.roomId}">X</a>
     </div>
   {:else}
     <div class="pane-switch-item">
-      <a href="/admin">⚙</a>
+      <a href="/admin{page.route.id?.includes('roomId') && `/${page.params.roomId}`}">⚙</a>
     </div>
   {/if}
 </div>
