@@ -154,7 +154,7 @@ async function routes(fastify: FastifyInstance) {
           log: correctedEvents.log ?? [],
           outcomeId: outcomeDocument._id,
           itemChanges: validatedOutcome.itemChanges,
-          balanceTransfer: validatedOutcome.balanceTransfer,
+          balanceTransfers: validatedOutcome.balanceTransfers,
           ratDead: newRatBalance == 0,
           roomDepleted: newRoomValue == 0,
           levelUp: newRatLevelIndex > level.index,

@@ -85,6 +85,11 @@ export type Outcome = {
     logStep?: number
     amount?: number
   }
+  balanceTransfers?: Array<{
+    logStep?: number
+    amount?: number
+    _key: string
+  }>
   itemChanges?: Array<{
     name?: string
     logStep?: number

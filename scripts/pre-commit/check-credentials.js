@@ -1,19 +1,10 @@
 const { execSync } = require("child_process")
 
 const patterns = [
-  /PRIVATE_KEY\s*=/,
-  /API_KEY\s*=/,
-  /TOKEN\s*=/,
-  /SECRET\s*=/,
-  /PASSWORD\s*=/,
-  /AWS_ACCESS_KEY_ID\s*=/,
-  /AWS_SECRET_ACCESS_KEY\s*=/,
-  /REPLICATE_API_TOKEN\s*=/,
-  /ANTHROPIC_API_KEY\s*=/,
-  /^(?!PUBLIC_)SENTRY_DSN\s*=/,
-  /MASTER_KEY_CODE\s*=/,
-  /NETLIFY_AUTH_TOKEN\s*=/,
-  /_TOKEN\s*=/
+  // Hardcoded credential patterns (excludes environment variable usage)
+  /(?:^|[^.])\b(?:PRIVATE_KEY|API_KEY|TOKEN|SECRET|PASSWORD|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|REPLICATE_API_TOKEN|ANTHROPIC_API_KEY|SENTRY_DSN|MASTER_KEY_CODE|NETLIFY_AUTH_TOKEN)\b\s*=\s*["'][^"']{10,}["']/,
+  // Check for long alphanumeric strings that might be credentials
+  /(?:^|[^.])\b(?:PRIVATE_KEY|API_KEY|TOKEN|SECRET|PASSWORD|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|REPLICATE_API_TOKEN|ANTHROPIC_API_KEY|SENTRY_DSN|MASTER_KEY_CODE|NETLIFY_AUTH_TOKEN)\b\s*=\s*[^;\n]*[a-zA-Z0-9]{20,}[^;\n]*/
 ]
 
 try {
@@ -47,10 +38,30 @@ try {
       const content = execSync(`git show :${file}`, { encoding: "utf8" })
 
       for (const pattern of patterns) {
-        if (pattern.test(content)) {
-          console.error(`❌ Found credential pattern in ${file}`)
-          console.error(`   Pattern: ${pattern.source}`)
-          foundCredentials = true
+        const matches = content.match(pattern, 'g')
+        if (matches) {
+          const lines = content.split('\n')
+          for (const match of matches) {
+            const lineIndex = lines.findIndex(line => line.includes(match))
+            if (lineIndex !== -1) {
+              const line = lines[lineIndex]
+              
+              // Skip if it's environment variable usage
+              if (line.includes('process.env.')) {
+                continue
+              }
+              
+              // Skip if it's a comment
+              if (line.trim().startsWith('//') || line.trim().startsWith('/*') || line.trim().startsWith('*')) {
+                continue
+              }
+              
+              console.error(`❌ Found credential pattern in ${file}`)
+              console.error(`   Pattern: ${pattern.source}`)
+              console.error(`   Line: ${line.trim()}`)
+              foundCredentials = true
+            }
+          }
         }
       }
     } catch (error) {

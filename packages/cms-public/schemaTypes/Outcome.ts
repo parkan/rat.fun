@@ -94,6 +94,20 @@ export default {
       ]
     },
     {
+      title: "Balance transfers",
+      name: "balanceTransfers",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { type: "number", name: "logStep" },
+            { type: "number", name: "amount" }
+          ]
+        }
+      ]
+    },
+    {
       title: "Item changes",
       name: "itemChanges",
       type: "array",

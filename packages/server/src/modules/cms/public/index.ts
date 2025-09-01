@@ -178,8 +178,8 @@ export async function writeOutcomeToCMS(
       }
     }
 
-    if (outcome.balanceTransfer) {
-      newOutcomeDoc.balanceTransfer = createBalanceTransfer(outcome.balanceTransfer)
+    if (outcome.balanceTransfers) {
+      newOutcomeDoc.balanceTransfers = createBalanceTransfers(outcome.balanceTransfers)
     }
 
     // Item changes
@@ -217,12 +217,12 @@ function createOutcomeEvents(events: CorrectionReturnValue) {
   }))
 }
 
-function createBalanceTransfer(balanceTransfer: OutcomeReturnValue["balanceTransfer"]) {
-  return {
+function createBalanceTransfers(balanceTransfers: OutcomeReturnValue["balanceTransfers"]) {
+  return balanceTransfers.map(balanceTransfer => ({
     _key: uuidv4(),
     logStep: balanceTransfer.logStep,
     amount: balanceTransfer.amount
-  }
+  }))
 }
 
 function createItemChanges(itemChanges: OutcomeReturnValue["itemChanges"]) {

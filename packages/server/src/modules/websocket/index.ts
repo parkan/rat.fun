@@ -20,8 +20,6 @@ export function sendToClient(playerId: string, messageObject: OffChainMessage): 
 }
 
 export async function broadcast(messageObject: OffChainMessage): Promise<void> {
-  console.log("wsConnections", Object.keys(wsConnections))
-
   // Store the message in the message store
   if (!["clients__update", "test"].includes(messageObject.topic)) {
     try {
