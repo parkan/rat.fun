@@ -158,9 +158,9 @@ export const resetRoomResultState = () => {
  */
 
 /** Room information frozen before entering a room */
-export const frozenRoom = writable<FrozenRoom | null>(null)
+export const frozenRoom = writable<Partial<FrozenRoom> | null>(null)
 /** Rat information frozen before entering a room */
-export const frozenRat = writable<FrozenRat | null>(null)
+export const frozenRat = writable<Partial<FrozenRat> | null>(null)
 
 /**
  * Freezes the rat and room objects before entering a room
@@ -177,6 +177,11 @@ export function freezeObjects(rat: Rat, room: Room, roomId: Hex, ratId: Hex) {
   const preppedRoom = structuredClone(room) as FrozenRoom
   preppedRoom.id = roomId
   frozenRoom.set(preppedRoom)
+
+  return {
+    frozenRat: preppedRat,
+    frozenRoom: preppedRoom
+  }
 }
 
 // ======= Route updates to frozen state =======

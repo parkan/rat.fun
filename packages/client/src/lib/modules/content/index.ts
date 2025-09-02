@@ -38,9 +38,15 @@ export const upcomingWorldEvent = derived(
 // --- API --------------------------------------------------------------
 
 export async function initStaticContent(worldAddress: string) {
+  console.log("get rooms")
   const rooms = await loadData(queries.rooms, { worldAddress })
+  console.log("got rooms")
+  console.log("get outcomes")
   const outcomes = await loadData(queries.outcomes, { worldAddress })
+  console.log("got outcomes")
+  console.log("get worldEvents")
   const worldEvents = await loadData(queries.worldEvents, { worldAddress })
+  console.log("got worldEvents")
 
   const processedWorldEvents = worldEvents.filter(upcomingWorldEventFilter)
 

@@ -10,7 +10,9 @@ export const load: PageLoad = async ({ url }) => {
   const networkConfig = getNetworkConfig(environment, url)
 
   try {
+    console.log("hi from load function for rooms")
     const rooms = await loadData(queries.rooms, { worldAddress: networkConfig.worldAddress })
+    console.log("got rooms from load function", rooms)
 
     return {
       rooms

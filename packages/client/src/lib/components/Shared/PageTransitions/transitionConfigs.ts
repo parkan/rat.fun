@@ -31,7 +31,7 @@ const mainLayoutTransitionConfig: TransitionConfig[] = [
 const outerLayoutTransitionConfig: TransitionConfig[] = [
   {
     from: "/(rooms)/(game)/[roomId]",
-    to: "/(rooms)/(game)/[roomId]/enter",
+    to: "/(rooms)/(game)/[roomId]/result",
     in: {
       transition: "fade",
       params: {
@@ -48,7 +48,7 @@ const outerLayoutTransitionConfig: TransitionConfig[] = [
     }
   },
   {
-    from: "/(rooms)/(game)/[roomId]/enter",
+    from: "/(rooms)/(game)/[roomId]/result",
     to: "*",
     in: {
       transition: "wipe",
