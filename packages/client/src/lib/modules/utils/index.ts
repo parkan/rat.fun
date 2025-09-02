@@ -554,5 +554,5 @@ export function addressToRatImage(address: string, maxRats: number = 50): string
  * Remove hash from the current URL
  */
 export function removeHash() {
-  pushState("", document.title, window.location.pathname + window.location.search)
+  // pushState("", document.title, window.location.pathname + window.location.search)
 }

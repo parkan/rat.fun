@@ -30,6 +30,7 @@ export async function sendEnterRoom(roomId: string, ratId: string) {
   const startTime = performance.now()
 
   let url = ""
+
   switch (environment) {
     case ENVIRONMENT.BASE_SEPOLIA:
       url = `https://${PUBLIC_BASE_SEPOLIA_SERVER_HOST}/room/enter`

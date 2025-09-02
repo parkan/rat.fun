@@ -2,8 +2,6 @@
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import type { Hex } from "viem"
   import { onMount, onDestroy } from "svelte"
-  import { goto } from "$app/navigation"
-  import { page } from "$app/state"
   import { player, rooms as roomsState, rat as ratState } from "$lib/modules/state/stores"
   import {
     ROOM_RESULT_STATE,
@@ -11,9 +9,7 @@
     SHOW_LOG,
     roomResultState,
     transitionTo,
-    transitionToResultSummary,
-    resetRoomResultState,
-    freezeObjects
+    transitionToResultSummary
   } from "$lib/components/Room/RoomResult/state.svelte"
   import {
     SplashScreen,
@@ -28,18 +24,22 @@
   } from "$lib/components/Room"
   import { staticContent } from "$lib/modules/content"
   import { sendEnterRoom } from "$lib/modules/action-manager/index.svelte"
-  import { RoomError, APIError, NetworkError } from "$lib/modules/error-handling/errors"
+  import { RoomError } from "$lib/modules/error-handling/errors"
 
   let {
     roomId,
-    valid
+    result: externalResult,
+    valid,
+    hasError = false
   }: {
     roomId: string | null
+    result: EnterRoomReturnValue | null
     valid: boolean
+    hasError?: boolean
   } = $props()
 
   // Result of the room entry, returned by the server
-  let result: EnterRoomReturnValue | null = $state(null)
+  let result: EnterRoomReturnValue | null = $state(externalResult)
 
   let timeout: ReturnType<typeof setTimeout> = $state()
 
@@ -48,59 +48,37 @@
   // Get room info from global store based on id
   let room = $derived($roomsState?.[roomId ?? ""])
 
+  $inspect(room)
+
   // Get static room content from cms
   let staticRoomContent = $derived($staticContent.rooms.find(r => r._id == (roomId ?? "")))
 
-  const processRoom = async () => {
-    if (!roomId) {
-      throw new RoomError("No trip ID provided")
-    }
+  $inspect(staticRoomContent)
 
-    try {
-      const ret = sendEnterRoom(roomId, $player.currentRat)
+  // const processRoom = async () => {
+  //   if (!roomId) {
+  //     throw new RoomError("No trip ID provided")
+  //   }
 
-      try {
-        result = await ret
-        if (!result) {
-          throw new RoomError("No result returned from trip entry", roomId)
-        }
-        // Result returned, transition to showing results
-        transitionTo(ROOM_RESULT_STATE.SHOWING_RESULTS)
-      } catch (err) {
-        console.log("catch outcome error", err)
-        // Wrap the error in more specific error types based on the error
-        if (err instanceof Error) {
-          if (err.message.includes("network") || err.message.includes("fetch")) {
-            throw new NetworkError(
-              "ROOM_ENTRY_NETWORK_ERROR",
-              "Network error during room entry",
-              err.message
-            )
-          } else if (err.message.includes("api") || err.message.includes("server")) {
-            throw new APIError("Trip entry API error: " + err.message, err)
-          } else {
-            throw new RoomError("Trip entry failed: " + err.message, roomId)
-          }
-        }
-        throw err
-      }
-    } catch (error) {
-      transitionTo(ROOM_RESULT_STATE.ERROR)
-      await goto("/")
-      return
-    }
-  }
+  //   try {
+  //     const ret = sendEnterRoom(roomId, $player.currentRat)
 
-  onMount(() => {
-    if (!$ratState || !valid) {
-      goto("/")
-      return
-    }
+  //     try {
+  //       result = await ret
 
-    freezeObjects($ratState, room, roomId as Hex, $player.currentRat as Hex)
-    resetRoomResultState()
-    processRoom()
-  })
+  //       // Result returned, transition to showing results
+  //       transitionTo(ROOM_RESULT_STATE.SHOWING_RESULTS)
+  //     } catch (err) {
+  //       console.log("catch outcome error", err)
+  //       // Wrap the error in more specific error types based on the error
+
+  //       throw err
+  //     }
+  //   } catch (error) {
+  //     transitionTo(ROOM_RESULT_STATE.ERROR)
+  //     return
+  //   }
+  // }
 
   onDestroy(() => {
     destroyed = true

@@ -9,6 +9,7 @@ export const load: PageLoad = async ({ params }) => {
     const roomContent = await loadData(queries.singleRoom, { id: params.roomId })
 
     return {
+      roomId: params.roomId,
       roomContent
     }
   } catch (err) {

@@ -177,6 +177,32 @@ export function freezeObjects(rat: Rat, room: Room, roomId: Hex, ratId: Hex) {
   const preppedRoom = structuredClone(room) as FrozenRoom
   preppedRoom.id = roomId
   frozenRoom.set(preppedRoom)
+
+  return {
+    frozenRat: preppedRat,
+    frozenRoom: preppedRoom
+  }
+}
+
+// Prepare for serialization with big int inside
+export function stringifyWithBigInt(obj: any): string {
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'bigint') {
+      return { __bigint: value.toString() }
+    }
+    return value
+  })
+}
+
+// We need to serialize the JSON data so we can store in session sometimes. This means encoding BigInt values
+// This function brings the Bigints back
+export function parseWithBigInt(str: string): any {
+  return JSON.parse(str, (key, value) => {
+    if (value && typeof value === 'object' && '__bigint' in value) {
+      return BigInt(value.__bigint)
+    }
+    return value
+  })
 }
 
 // ======= Route updates to frozen state =======

@@ -6,11 +6,11 @@
 <div class="pane-switch">
   {#if isAdminView}
     <div class="pane-switch-item">
-      <a href="/{page.route.id?.includes('roomId') && page.params.roomId}">X</a>
+      <a href="/{page.route.id?.includes('roomId') ? page.params.roomId : ''}">X</a>
     </div>
   {:else}
     <div class="pane-switch-item">
-      <a href="/admin{page.route.id?.includes('roomId') && `/${page.params.roomId}`}">⚙</a>
+      <a href="/admin{page.route.id?.includes('roomId') ? `/${page.params.roomId}` : ''}">⚙</a>
     </div>
   {/if}
 </div>

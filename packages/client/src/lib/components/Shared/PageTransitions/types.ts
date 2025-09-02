@@ -4,7 +4,7 @@ export type LayoutRouteId =
   | "/"
   | "/(rooms)/(game)"
   | "/(rooms)/(game)/[roomId]"
-  | "/(rooms)/(game)/[roomId]/enter"
+  | "/(rooms)/(game)/[roomId]/result"
   | "/(rooms)/admin"
   | "/(rooms)/admin/[roomId]"
   | "/outcome/[id]"
