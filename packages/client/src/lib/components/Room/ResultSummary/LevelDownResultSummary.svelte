@@ -77,10 +77,6 @@
 
         <a href="/" bind:this={closeLinkElement} class="close-button"> COME DOWN </a>
       </div>
-
-      <div class="background">
-        <img class="background-image" src={$frozenRat?.image} alt={$frozenRat?.name} />
-      </div>
     </div>
   </div>
 </div>

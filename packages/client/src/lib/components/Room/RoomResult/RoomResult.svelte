@@ -71,7 +71,9 @@
   {/if}
 
   <!-- LOG -->
-  {#if entryState?.state === ROOM_RESULT_STATE.SHOWING_RESULTS && result}
+  {#if entryState?.state === ROOM_RESULT_STATE.SHOWING_RESULTS || (entryState?.state
+      ?.toLowerCase()
+      .includes("summary") && result)}
     <Log
       {result}
       onComplete={() => {

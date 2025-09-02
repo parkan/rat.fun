@@ -9,10 +9,7 @@ export const load = async ({ params }) => {
   const result = await loadData(queries.singleOutcome, { id: params.outcomeId })
   const roomResult = await loadData(queries.singleRoom, { id: result.roomId })
 
-  console.log("loaded result ", result)
-
   try {
-    console.log("has room balance", result.roomValue)
     return {
       entryState: {
         state: ROOM_RESULT_STATE.SHOWING_RESULTS,

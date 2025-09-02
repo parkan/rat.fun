@@ -85,10 +85,6 @@
 
         <a bind:this={closeLinkElement} class="close-button" href="/"> LEAVE ROOM </a>
       </div>
-
-      <div class="background">
-        <img class="background-image" src={$frozenRat?.image} alt={$frozenRat?.name} />
-      </div>
     </div>
   </div>
 </div>
