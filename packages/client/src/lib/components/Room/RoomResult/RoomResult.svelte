@@ -3,6 +3,7 @@
   import { onDestroy } from "svelte"
   import { rooms as roomsState } from "$lib/modules/state/stores"
   import { ROOM_RESULT_STATE, SHOW_INFO_BOXES } from "$lib/components/Room/RoomResult/state.svelte"
+  import { fade } from "svelte/transition"
   import {
     SplashScreen,
     WaitingForResult,
@@ -56,7 +57,7 @@
 
   <!-- INFO BOXES -->
   {#if SHOW_INFO_BOXES.includes(entryState?.state || ROOM_RESULT_STATE.SPLASH_SCREEN)}
-    <div class="info-boxes">
+    <div transition:fade|global class="info-boxes">
       <RatInfoBox />
       <div class="divider"></div>
       <RoomInfoBox {staticRoomContent} />

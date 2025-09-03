@@ -58,7 +58,7 @@
     <EnterRoomButton disabled={busy.LiquidateRat.current != 0} {roomId} />
   {/if}
 
-  <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
+  <RoomPreviewGraph {room} {roomOutcomes} {sanityRoomContent} />
   <RoomPreviewEventLog {roomId} {roomOutcomes} />
 </div>
 

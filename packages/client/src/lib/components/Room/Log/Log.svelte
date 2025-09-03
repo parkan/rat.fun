@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { MergedLogEntry } from "$lib/components/Room/RoomResult/types"
   import type { EnterRoomReturnValue } from "@server/modules/types"
+  import { fade } from "svelte/transition"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
   import { LogItem } from "$lib/components/Room"
@@ -57,7 +58,7 @@
   }
 </script>
 
-<div class="log" bind:this={logElement}>
+<div transition:fade|global class="log" bind:this={logElement}>
   {#if mergedLog && mergedLog.length > 0}
     {#each mergedLog as logEntry, i (i)}
       <LogItem {logEntry} onTimeline={addToTimeline} delay={0} />
