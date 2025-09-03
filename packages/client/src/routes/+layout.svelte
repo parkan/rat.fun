@@ -94,8 +94,7 @@
 
 <svelte:window
   onkeypress={e => {
-    console.log(e)
-    if (e.key == " ") {
+    if (e.keyCode == 94) {
       DEBUG_SHADER = !DEBUG_SHADER
     }
   }}
