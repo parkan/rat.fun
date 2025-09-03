@@ -50,7 +50,7 @@
       <LiquidateRoom onclick={() => (liquidating = true)} {roomId} {room} isOwnRoomListing={true} />
     {/if}
 
-    <RoomPreviewGraph {roomOutcomes} {sanityRoomContent} />
+    <RoomPreviewGraph {room} {roomOutcomes} {sanityRoomContent} />
     <RoomPreviewEventLog {roomId} {roomOutcomes} />
   </div>
 {:else}

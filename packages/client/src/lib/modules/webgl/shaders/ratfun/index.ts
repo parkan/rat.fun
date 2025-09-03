@@ -31,13 +31,13 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
     },
     warpspeed: {
       invert: 0.0,
-      speed: 1.2,
-      clouds_amount: 0.0
+      speed: 1.0,
+      clouds_amount: 0.1
     },
     hyperspeed: {
       speed: 2.0,
       invert: 0.0,
-      clouds_amount: 0.0
+      clouds_amount: 0.1
     }
   }),
   tweens: {

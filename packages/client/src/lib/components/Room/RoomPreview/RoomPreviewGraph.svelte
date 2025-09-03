@@ -3,8 +3,11 @@
   import type { PlotPoint } from "$lib/components/Shared/RoomGraph/types"
   import { RoomGraph } from "$lib/components/Room"
 
-  let { roomOutcomes, sanityRoomContent }: { roomOutcomes?: Outcome[]; sanityRoomContent: any } =
-    $props()
+  let {
+    room,
+    roomOutcomes,
+    sanityRoomContent
+  }: { room: Room; roomOutcomes?: Outcome[]; sanityRoomContent: any } = $props()
 
   let plotData: PlotPoint[] = $derived.by(() => {
     if (!roomOutcomes) {
@@ -13,7 +16,7 @@
     return [
       {
         time: 0,
-        roomValue: 250,
+        roomValue: Number(room.roomCreationCost),
         meta: sanityRoomContent
       },
       ...roomOutcomes

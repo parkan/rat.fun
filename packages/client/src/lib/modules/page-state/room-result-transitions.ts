@@ -54,8 +54,6 @@ export const createRoomResultTransitions = (entryState: App.PageState["entryStat
       return
     }
     entryState.state = newState
-
-    console.log("NEW STATE", entryState.state)
   }
 
   const transitionToResultSummary = (result?: EnterRoomReturnValue) => {
