@@ -23,13 +23,13 @@ uniform float u_invert;
 // 7. Column width (sin(dx*PI)): Makes streaks thicker in the center of each column
 float vDrop(vec2 uv,float t)
 {
-  uv.x=uv.x*2.;
+  uv.x=uv.x*20.;// H-Count
   float dx=fract(uv.x);
   uv.x=floor(uv.x);
-  uv.y*=.05;
-  float o=sin(uv.x*215.4);
-  float s=cos(uv.x*33.1)*.3+.7;
-  float trail=mix(95.,35.,s);
+  uv.y*=.05;// stretch
+  float o=sin(uv.x*215.4);// offset
+  float s=cos(uv.x*33.1)*.3+.7;// speed
+  float trail=mix(95.,35.,s);// trail length
   float yv=fract(uv.y+t*s+o)*trail;
   yv=1./yv;
   yv=smoothstep(0.,1.,yv*yv);

@@ -9,13 +9,16 @@ import {
 export type ShaderMode = "stars" | "clouds" | "clouds-inverted" | "hyperspeed" | "warpspeed"
 
 export const shaderConfig: ShaderConfiguration<ShaderMode> = {
+  // Start style
   initialMode: "stars",
+  // Modes
   modes: defineShaderModes({
     stars: {
       speed: 1.0,
       invert: 0.0,
       clouds_amount: 0.0
     },
+    // Have to add
     clouds: {
       speed: 1.0,
       invert: 0.0,
