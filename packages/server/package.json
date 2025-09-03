@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "contracts": "workspace:*",
-    "@anthropic-ai/sdk": "^0.57.0",
+    "@anthropic-ai/sdk": "^0.61.0",
     "@fastify/compress": "^8.1.0",
-    "@fastify/cors": "^11.0.1",
+    "@fastify/cors": "^11.1.0",
     "@fastify/formbody": "^8.0.2",
     "@fastify/one-line-logger": "^2.0.2",
     "@fastify/websocket": "^11.2.0",
@@ -22,12 +22,12 @@
     "@latticexyz/store-sync": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/utils": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/world": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
-    "@sanity/client": "^7.8.1",
-    "@sentry/node": "^9.42.1",
-    "dotenv": "^17.2.1",
-    "fastify": "^5.4.0",
-    "redis": "^5.6.1",
-    "replicate": "^1.0.1",
+    "@sanity/client": "^7.11.0",
+    "@sentry/node": "^10.9.0",
+    "dotenv": "^17.2.2",
+    "fastify": "^5.5.0",
+    "redis": "^5.8.2",
+    "replicate": "^1.1.0",
     "rxjs": "^7.8.2",
     "sharp": "^0.34.3",
     "uuid": "^11.1.0",
@@ -39,6 +39,6 @@
   "type": "module",
   "devDependencies": {
     "tsup": "^8.5.0",
-    "tsx": "4.20.3"
+    "tsx": "4.20.5"
   }
 }

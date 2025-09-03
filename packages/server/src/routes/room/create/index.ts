@@ -16,7 +16,6 @@ import { getCreateRoomData } from "@modules/mud/getOnchainData/getCreateRoomData
 import { getRoomIndex } from "@modules/mud/getOnchainData"
 
 // Image generation
-// Replicate
 import { generateImage } from "@modules/image-generation/replicate"
 
 // Signature
