@@ -1,9 +1,34 @@
 <script lang="ts">
-  // ...
+  import { onMount } from "svelte"
+
+  const { onComplete }: { onComplete: () => void } = $props()
+
+  // Timer state
+  let timeElapsed = $state(0)
+  let timerInterval: ReturnType<typeof setInterval> | undefined
+
+  onMount(() => {
+    // Start timer
+    timerInterval = setInterval(() => {
+      timeElapsed += 0.1
+    }, 100)
+
+    setTimeout(() => {
+      if (timerInterval) {
+        clearInterval(timerInterval)
+      }
+      onComplete()
+      // TODO: we are now returning after a fixed amount of time
+      // We should check that the result is ready
+    }, 7000)
+  })
 </script>
 
 <div class="splash-screen">
-  <div class="inner">VISUALIZER</div>
+  <div class="inner">
+    <div class="processing-title">VISUALIZER</div>
+    <div class="timer">{timeElapsed.toFixed(1)}s</div>
+  </div>
 </div>
 
 <style lang="scss">
@@ -27,39 +52,20 @@
       gap: 1rem;
       width: 500px;
       max-width: calc(var(--game-window-width) * 0.9);
-
-      .image-container {
-        width: 100%;
-        border: var(--default-border-style);
-        line-height: 0;
-
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          aspect-ratio: 1/1;
-        }
-
-        .image-placeholder {
-          width: 100%;
-          aspect-ratio: 1/1;
-        }
+      .processing-title {
+        font-size: 64px;
+        font-weight: bold;
       }
 
-      .prompt {
+      .timer {
+        font-size: 32px;
+        font-family: monospace;
         background: var(--color-alert);
         color: var(--background);
-        width: auto;
-        display: inline-block;
-        padding: 5px;
-        max-width: 50ch;
-      }
-
-      .room-index {
-        background: var(--color-alert-priority);
-        color: var(--background);
-        width: auto;
-        padding: 5px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        min-width: 120px;
+        text-align: center;
       }
     }
   }
