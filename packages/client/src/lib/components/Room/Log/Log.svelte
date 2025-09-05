@@ -69,7 +69,6 @@
 <style lang="scss">
   .log {
     margin-bottom: 0;
-    height: calc(var(--game-window-height) - 360px);
     padding: 10px;
     border-top: none;
     position: relative;

@@ -79,15 +79,18 @@
 <style lang="scss">
   .splash-screen {
     padding: 0;
-    position: absolute;
-    inset: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
     text-align: center;
     display: flex;
-    height: var(--game-window-height);
+    height: 100vh;
+    width: 100vw;
     justify-content: center;
     align-items: center;
     color: var(--foreground);
     font-size: 64px;
+    background: rgba(0, 0, 0, 1);
 
     .inner {
       display: flex;

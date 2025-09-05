@@ -137,8 +137,8 @@ export function createSystemCalls(network: SetupNetworkResult) {
 
 function calculateRoomValues(roomCreationCost: number) {
   // 10% of room creation cost
-  const minRatValueToEnter = roomCreationCost * MIN_RAT_VALUE_TO_ENTER_FACTOR
+  const minRatValueToEnter = Math.floor(roomCreationCost * MIN_RAT_VALUE_TO_ENTER_FACTOR)
   // 25% of room creation cost
-  const maxValuePerWin = roomCreationCost * MAX_VALUE_PER_WIN_FACTOR
+  const maxValuePerWin = Math.floor(roomCreationCost * MAX_VALUE_PER_WIN_FACTOR)
   return { maxValuePerWin, minRatValueToEnter }
 }
