@@ -7,4 +7,4 @@ export const UIState = writable(UI.LOADING)
 // For world events, an empty prompt means that the transaction has not been made yet
 export const notificationsRead = new LocalStorage("rat.fun.notifications", [])
 
-export const collapsed = writable(false)
+export const collapsed = writable(true)

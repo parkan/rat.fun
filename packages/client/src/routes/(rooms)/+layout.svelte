@@ -30,7 +30,7 @@
       } else if (routeId.includes("enter") || routeId.includes("outcomeId")) {
         s = playSound("ratfun", "outcome", true, true, 1, false)
       } else {
-        s = playSound("ratfun", "main", true, true, 1, false)
+        s = playSound("ratfun", "mainAll", true, true, 1, false)
       }
     }
     return s

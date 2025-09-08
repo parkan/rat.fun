@@ -19,9 +19,7 @@
 
   let contrast = new Spring(1.0)
   let brightness = new Spring(2, { stiffness: 0.5 })
-  let filter = $derived(
-    `grayscale(100%) contrast(${contrast.current}) brightness(${brightness.current})`
-  )
+  let filter = $derived(`grayscale(100%)`)
 
   const onSpawnClick = async () => {
     await goto("?spawn")
@@ -29,16 +27,16 @@
   }
 
   onMount(() => {
-    const randomTimeout = () => 400 + Math.random() * 2000
-    const tick = () => {
-      brightness.set(0.9 + Math.random() / 2)
-      contrast.set(0.9 + Math.random() / 2)
-      setTimeout(tick, randomTimeout())
-    }
+    // const randomTimeout = () => 400 + Math.random() * 2000
+    // const tick = () => {
+    //   brightness.set(0.9 + Math.random() / 2)
+    //   contrast.set(0.9 + Math.random() / 2)
+    //   setTimeout(tick, randomTimeout())
+    // }
     // const contrastTick = () => {
     //   setTimeout(tick, randomTimeout())
     // }
-    tick()
+    // tick()
     // contrastTick()
   })
 </script>
