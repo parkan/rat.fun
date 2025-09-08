@@ -64,9 +64,7 @@ export async function sendCreateRoom(roomPrompt: string, roomCreationCost: numbe
     })
 
     if (!response.ok) {
-      console.log("response", response)
       const error = await response.json()
-      console.log("error", error)
       throw new APIError(`${error.error}: ${error.message}`, error)
     }
 

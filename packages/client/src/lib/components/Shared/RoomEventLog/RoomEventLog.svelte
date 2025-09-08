@@ -25,7 +25,7 @@
     if (update.length > 0) {
       // Note: roomOutcomes is derived, so we can't assign to it directly
       // This might need a different approach depending on the intended behavior
-      console.log("Received update:", update)
+      // console.log("Received update:", update)
     }
   }
 

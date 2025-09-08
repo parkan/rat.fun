@@ -30,7 +30,6 @@ export default function SessionBridge({
   // Transfer wagmi config state updates to svelte store
   useEffect(() => {
     wagmiConfigStateful.set(wagmiConfig)
-    // console.log("We have synced entrykit's wagmi config state for use by the app", wagmiConfig)
     // callback(wagmiConfig)
   }, [wagmiConfig, wagmiConfig.state])
 

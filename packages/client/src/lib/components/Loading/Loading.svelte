@@ -14,11 +14,6 @@
 
   let innerElement: HTMLDivElement
 
-  // Debugging
-  $effect(() => {
-    console.log($loadingMessage, $loadingPercentage)
-  })
-
   $effect(() => {
     if ($ready) {
       // Done here because currently we are not filtering on by playerAddress

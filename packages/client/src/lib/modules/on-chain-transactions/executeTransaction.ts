@@ -43,7 +43,6 @@ export async function executeTransaction(
         gas: 5000000n // TODO: Added to fix gas estimation. Change this.
       })
     } else if (systemId === WorldFunctions.BuyWithEth) {
-      console.log("Buying with ETH", params, value)
       tx = await client.writeContract({
         address: get(externalAddressesConfig).mainSaleAddress,
         abi: mainSaleAbi,

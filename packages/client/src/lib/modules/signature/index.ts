@@ -51,7 +51,6 @@ async function getCalledFrom(): Promise<Hex | null> {
   if (get(walletType) === WALLET_TYPE.BURNER) return null
 
   const connectorClient = await getConnectorClient(wagmiConfig)
-  console.log("connector client", connectorClient)
   if (!connectorClient) {
     return null
   }

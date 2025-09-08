@@ -67,7 +67,6 @@
             },
             onSessionChange: (e: any) => {
               console.log("the session changed", e)
-
               if (!e) {
                 // The user has now disconnected or changed account
                 console.log("DISCONNECTING ACCOUNT")
