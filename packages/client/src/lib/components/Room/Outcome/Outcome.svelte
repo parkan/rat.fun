@@ -112,6 +112,7 @@
   .logs {
     margin-bottom: 20px;
   }
+
   .log-entry {
     display: flex;
     align-items: stretch;

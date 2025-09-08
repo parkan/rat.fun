@@ -14,18 +14,18 @@
     background: var(--color-success);
     color: var(--background);
     font-size: var(--font-size-small);
-    height: 30px;
-    line-height: 30px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding-inline: 10px;
-    font-size: 12px;
+    font-size: 24px;
     position: relative;
     display: inline-block;
-
     &.balance {
       background: var(--color-value);
       color: var(--background);
     }
-
     &.remove,
     &.negative {
       background: var(--color-death);

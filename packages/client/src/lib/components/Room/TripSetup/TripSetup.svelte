@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { gsap } from "gsap"
-  import { errorHandler, UIError } from "$lib/modules/error-handling"
+  import { TextPlugin } from "gsap/TextPlugin"
+  import { typeHit } from "$lib/modules/sound"
+
+  gsap.registerPlugin(TextPlugin)
 
   const {
     staticRoomContent,
@@ -12,19 +15,36 @@
   } = $props()
 
   // Elements
-  let roomIndexElement = $state<HTMLDivElement>()
-  let imageContainerElement = $state<HTMLDivElement>()
-  let promptElement = $state<HTMLDivElement>()
   let roomInnerElement = $state<HTMLDivElement>()
+  let textDisplayElement = $state<HTMLDivElement>()
+
+  const text = [
+    "= Rat placed in trip chamber",
+    "= RAT-o-FUN harness secured",
+    "= Intercranial probes attached",
+    "= PETA approved Diaper attached",
+    "= Rat dosed with 44mg of Slopamine",
+    "= Trip initiated....."
+  ]
 
   // Timer state
   let timeElapsed = $state(0)
   let timerInterval: ReturnType<typeof setInterval> | undefined
 
+  // Animation constants
+  const CHARACTER_DELAY = 0.02
+  const LINE_DELAY = 0.05
+
   // Create parent timeline
   const splashScreenTimeline = gsap.timeline({
     defaults: { duration: 0.75, ease: "power2.out" }
   })
+
+  // Type hit helper for text array
+  const playTypeHitText = (char: string) => {
+    if (textDisplayElement) textDisplayElement.textContent += char
+    typeHit()
+  }
 
   onMount(() => {
     // Start timer
@@ -32,32 +52,38 @@
       timeElapsed += 0.1
     }, 100)
 
-    // if (!roomInnerElement || !imageContainerElement || !promptElement || !roomIndexElement) {
-    //   errorHandler(new UIError("Missing elements"))
-    //   return
-    // }
+    // Prepare animation
+    if (textDisplayElement) {
+      gsap.set([textDisplayElement], { opacity: 0 })
+      textDisplayElement.textContent = ""
 
-    // // Set initial values
-    // gsap.set(imageContainerElement, { opacity: 0, scale: 0.95 })
-    // gsap.set(promptElement, { opacity: 0, scale: 0.95 })
-    // gsap.set(roomIndexElement, { opacity: 0, scale: 0.95 })
+      // Animate text array line by line
+      splashScreenTimeline.set(textDisplayElement!, { opacity: 1 }, "+=0.1")
 
-    // // Add to timeline
-    // splashScreenTimeline.to(roomIndexElement, {
-    //   opacity: 1,
-    //   scale: 1,
-    //   delay: 0.5
-    // })
-    // splashScreenTimeline.to(imageContainerElement, { opacity: 1, scale: 1 })
-    // splashScreenTimeline.to(promptElement, { opacity: 1, scale: 1 })
-    // splashScreenTimeline.to(roomInnerElement, {
-    //   opacity: 0,
-    //   delay: 2,
-    //   duration: 0.5
-    // })
+      text.forEach((line, lineIndex) => {
+        // Add line break if not first line
+        if (lineIndex > 0) {
+          splashScreenTimeline.call(
+            () => {
+              if (textDisplayElement) textDisplayElement.textContent += "\n"
+            },
+            [],
+            "+=0.1"
+          )
+        }
 
-    // // Return to parent
-    // splashScreenTimeline.call(onComplete)
+        // Type each character in the line
+        const lineChars = line.split("")
+        for (let i = 0; i < lineChars.length; i++) {
+          splashScreenTimeline.call(playTypeHitText, [lineChars[i]], `+=${CHARACTER_DELAY}`)
+        }
+
+        // Add delay after each line (except the last one)
+        if (lineIndex < text.length - 1) {
+          splashScreenTimeline.to({}, { duration: LINE_DELAY })
+        }
+      })
+    }
 
     setTimeout(() => {
       // Clear timer
@@ -65,14 +91,14 @@
         clearInterval(timerInterval)
       }
       onComplete()
-    }, 4000)
+    }, 5000)
   })
 </script>
 
 <div class="splash-screen">
+  <div class="timer">{timeElapsed.toFixed(1)}s</div>
   <div class="inner" bind:this={roomInnerElement}>
-    <div class="setup-title">SETUP PHASE</div>
-    <div class="timer">{timeElapsed.toFixed(1)}s</div>
+    <div class="text-display" bind:this={textDisplayElement}></div>
   </div>
 </div>
 
@@ -82,38 +108,36 @@
     position: fixed;
     top: 0;
     left: 0;
-    text-align: center;
-    display: flex;
     height: 100vh;
     width: 100vw;
-    justify-content: center;
-    align-items: center;
     color: var(--foreground);
     font-size: 64px;
     background: rgba(0, 0, 0, 1);
 
+    .timer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 32px;
+      font-family: monospace;
+      background: var(--color-alert);
+      color: var(--background);
+      padding: 10px 20px;
+      border-radius: 8px;
+      min-width: 120px;
+      text-align: center;
+      z-index: 1000;
+    }
+
     .inner {
       display: flex;
-      flex-flow: column nowrap;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      width: 500px;
-      max-width: calc(var(--game-window-width) * 0.9);
-      .setup-title {
-        font-size: 64px;
-        font-weight: bold;
-      }
-
-      .timer {
-        font-size: 32px;
-        font-family: monospace;
-        background: var(--color-alert);
-        color: var(--background);
-        padding: 10px 20px;
-        border-radius: 8px;
-        min-width: 120px;
-        text-align: center;
+      font-size: 44px;
+      .text-display {
+        text-align: left;
+        white-space: pre-line;
+        margin-top: 2rem;
+        line-height: 1.5;
+        width: 100%;
       }
     }
   }
