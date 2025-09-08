@@ -28,9 +28,6 @@
   const getAvailableUniforms = shader => {
     if (shader?.config?.modes && selectedMode) {
       const mode = shader.config.modes[selectedMode]
-      console.log("selected shader", selectedShader)
-      console.log("selected mode", selectedMode)
-      console.log("get the config for mode", mode)
       if (mode) {
         return Object.entries(mode).map(([name, value]) => ({
           name,
@@ -58,7 +55,6 @@
     onShaderChange(selectedShader)
     availableUniforms = getAvailableUniforms(shaders[selectedShader as keyof typeof shaders])
     onModeChange(selectedMode)
-    console.log("handle shader change")
   }
 
   // Handle mode selection change

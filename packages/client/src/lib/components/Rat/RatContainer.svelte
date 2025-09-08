@@ -1,13 +1,12 @@
 <script lang="ts">
   import { RatBox } from "$lib/components/Rat"
   import { ChatBox } from "$lib/components/Shared"
-
-  let collapsed = $state<boolean>()
+  import { collapsed } from "$lib/modules/ui/state.svelte"
 </script>
 
-<div class="rat-container" class:collapsed>
+<div class="rat-container" class:collapsed={$collapsed}>
   <RatBox />
-  <ChatBox bind:collapsed />
+  <ChatBox />
 </div>
 
 <style lang="scss">

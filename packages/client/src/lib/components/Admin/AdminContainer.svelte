@@ -1,9 +1,10 @@
 <script lang="ts">
   import { CreateRoom } from "$lib/components/Admin"
   import { ChatBox } from "$lib/components/Shared"
+  import { collapsed } from "$lib/modules/ui/state.svelte"
 </script>
 
-<div class="admin-container">
+<div class="admin-container" class:collapsed={$collapsed}>
   <CreateRoom />
   <ChatBox />
 </div>
@@ -14,5 +15,10 @@
     width: 100%;
     display: grid;
     grid-template-rows: 440px minmax(100px, 1fr);
+    transition: grid-template-rows 0.1s ease;
+
+    &.collapsed {
+      grid-template-rows: calc(var(--game-window-height) - 89px) minmax(100px, 1fr);
+    }
   }
 </style>

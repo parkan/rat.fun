@@ -12,6 +12,7 @@
     MIN_RAT_VALUE_TO_ENTER_FACTOR,
     MAX_VALUE_PER_WIN_FACTOR
   } from "@server/config"
+  import { collapsed } from "$lib/modules/ui/state.svelte"
 
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
@@ -89,62 +90,65 @@
   }
 </script>
 
-<div class="create-room">
+<div class="create-room" class:collapsed={$collapsed}>
   {#if busy}
     <VideoLoaderDuration duration={6000} />
   {:else}
-    <!-- ROOM DESCRIPTION -->
-    <div class="form-group">
-      <label for="room-description">
-        <span class="highlight">Trip Description</span>
-        <CharacterCounter
-          currentLength={roomDescription.length}
-          maxLength={$gameConfig.maxRoomPromptLength}
-        />
-      </label>
-      <textarea
-        disabled={busy}
-        id="room-description"
-        rows="6"
-        {placeholder}
-        oninput={typeHit}
-        bind:value={roomDescription}
-      ></textarea>
-    </div>
+    <div class="controls">
+      <!-- ROOM DESCRIPTION -->
+      <div class="form-group">
+        <label for="room-description">
+          <span class="highlight">Trip Description</span>
+          <CharacterCounter
+            currentLength={roomDescription.length}
+            maxLength={$gameConfig.maxRoomPromptLength}
+          />
+        </label>
+        <textarea
+          disabled={busy}
+          id="room-description"
+          rows={$collapsed ? 12 : 6}
+          {placeholder}
+          oninput={typeHit}
+          bind:value={roomDescription}
+        ></textarea>
+      </div>
 
-    <!-- ROOM CREATION COST SLIDER -->
-    <div class="slider-group">
-      <label for="room-creation-cost-slider">
-        <span class="highlight">TRIP CREATION COST</span>
-        <span class="cost-display">${flooredRoomCreationCost}</span>
-      </label>
-      <div class="slider-container">
-        <input
-          type="range"
-          id="room-creation-cost-slider"
-          class="cost-slider"
-          min={MIN_ROOM_CREATION_COST}
-          max={$playerERC20Balance}
-          bind:value={roomCreationCost}
-        />
-        <div class="slider-labels">
-          <span class="slider-min">${MIN_ROOM_CREATION_COST}</span>
-          <span class="slider-max">${$playerERC20Balance}</span>
+      <!-- ROOM CREATION COST SLIDER -->
+      <div class="slider-group">
+        <label for="room-creation-cost-slider">
+          <span class="highlight">TRIP CREATION COST</span>
+          <span class="cost-display">${flooredRoomCreationCost}</span>
+        </label>
+        <div class="slider-container">
+          <input
+            type="range"
+            id="room-creation-cost-slider"
+            class="cost-slider"
+            step="25"
+            min={MIN_ROOM_CREATION_COST}
+            max={$playerERC20Balance}
+            bind:value={roomCreationCost}
+          />
+          <div class="slider-labels">
+            <span class="slider-min">${MIN_ROOM_CREATION_COST}</span>
+            <span class="slider-max">${$playerERC20Balance}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- CALCULATED VALUES -->
-    <div class="calculated-values">
-      <div class="value-box">
-        <div class="value-label">
-          MIN RAT VALUE TO TRIP {#if import.meta.env.DEV}BALLS{/if}
+      <!-- CALCULATED VALUES -->
+      <div class="calculated-values">
+        <div class="value-box">
+          <div class="value-label">
+            MIN RAT VALUE TO TRIP {#if import.meta.env.DEV}BALLS{/if}
+          </div>
+          <div class="value-amount">${minRatValueToEnter}</div>
         </div>
-        <div class="value-amount">${minRatValueToEnter}</div>
-      </div>
-      <div class="value-box">
-        <div class="value-label">MAX VALUE PER WIN</div>
-        <div class="value-amount">${maxValuePerWin}</div>
+        <div class="value-box">
+          <div class="value-label">MAX VALUE PER WIN</div>
+          <div class="value-amount">${maxValuePerWin}</div>
+        </div>
       </div>
     </div>
 
@@ -160,9 +164,16 @@
     height: 100%;
     display: flex;
     flex-flow: column nowrap;
-    justify-content: space-between;
     background-image: url("/images/texture-3.png");
     background-size: 200px;
+    justify-content: space-between;
+
+    .controls {
+      display: flex;
+      justify-self: start;
+      gap: 8px;
+      flex-flow: column nowrap;
+    }
 
     .form-group {
       padding: 1rem;

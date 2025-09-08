@@ -17,7 +17,8 @@
   import ChatEvent_KeyActivation from "./ChatEvent/ChatEvent_KeyActivation.svelte"
   import ChatEvent_ChatMessage from "./ChatEvent/ChatEvent_ChatMessage.svelte"
 
-  let { collapsed = $bindable() } = $props()
+  import { collapsed } from "$lib/modules/ui/state.svelte"
+
   let value = $state("")
   let scrollElement = $state<null | HTMLElement>(null)
   let suppressSound = $state(true)
@@ -59,12 +60,12 @@
   }
 
   const toggle = () => {
-    collapsed = !collapsed
+    $collapsed = !$collapsed
   }
 </script>
 
-<div class:collapsed class="chat-box">
-  <ChatHeader {collapsed} onclick={toggle} />
+<div class:collapsed={$collapsed} class="chat-box">
+  <ChatHeader onclick={toggle} />
 
   <div bind:this={scrollElement} class="chat-scroll">
     {#each $latestEvents as event (event.id)}
@@ -114,9 +115,6 @@
 <style lang="scss">
   .chat-box {
     height: 100%;
-    // &.collapsed {
-    //   height: 40px;
-    // }
     display: flex;
     overflow: hidden;
     flex-flow: column nowrap;
