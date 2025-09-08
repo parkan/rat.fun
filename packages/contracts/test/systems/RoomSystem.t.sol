@@ -18,20 +18,20 @@ contract RoomSystemTest is BaseTest {
     // As admin
     prankAdmin();
     startGasReport("Create room");
-    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), 250, 100, 10, "A test room");
+    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     endGasReport();
     vm.stopPrank();
 
     // Check player balance
     assertEq(
       LibWorld.erc20().balanceOf(alice),
-      initialBalance - GameConfig.getRoomCreationCost() * 10 ** LibWorld.erc20().decimals()
+      initialBalance - ROOM_INITIAL_BALANCE * 10 ** LibWorld.erc20().decimals()
     );
 
     // Check room
     assertEq(uint8(EntityType.get(roomId)), uint8(ENTITY_TYPE.ROOM));
     assertEq(Prompt.get(roomId), "A test room");
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE);
     assertEq(Owner.get(roomId), playerId);
     assertEq(CreationBlock.get(roomId), block.number);
   }
@@ -50,7 +50,7 @@ contract RoomSystemTest is BaseTest {
     world.ratfun__createRoom(
       playerId,
       bytes32(0),
-      250,
+      ROOM_INITIAL_BALANCE,
       100,
       10,
       "The room has two doors. One doors lead to death, the other to freedom. If a rat does not make a choice within 10 minutes it is killed and the body removed. Each door has a guardian mouse that needs to be defeated to pass."
@@ -73,10 +73,10 @@ contract RoomSystemTest is BaseTest {
         IERC20Errors.ERC20InsufficientBalance.selector,
         alice,
         0,
-        GameConfig.getRoomCreationCost() * 10 ** LibWorld.erc20().decimals()
+        ROOM_INITIAL_BALANCE * 10 ** LibWorld.erc20().decimals()
       )
     );
-    world.ratfun__createRoom(playerId, bytes32(0), 250, 100, 10, "A test room");
+    world.ratfun__createRoom(playerId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     vm.stopPrank();
   }
 
@@ -88,9 +88,9 @@ contract RoomSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    world.ratfun__createRoom(playerId, bytes32(uint256(666)), 250, 100, 10, "A test room");
+    world.ratfun__createRoom(playerId, bytes32(uint256(666)), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     vm.expectRevert("room id already in use");
-    world.ratfun__createRoom(playerId, bytes32(uint256(666)), 250, 100, 10, "Another test room");
+    world.ratfun__createRoom(playerId, bytes32(uint256(666)), ROOM_INITIAL_BALANCE, 100, 10, "Another test room");
     vm.stopPrank();
   }
 
@@ -104,17 +104,17 @@ contract RoomSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), 250, 100, 10, "A test room");
+    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     vm.stopPrank();
 
     // Check player balance
     assertEq(
       LibWorld.erc20().balanceOf(alice),
-      initialBalance - GameConfig.getRoomCreationCost() * 10 ** LibWorld.erc20().decimals()
+      initialBalance - ROOM_INITIAL_BALANCE * 10 ** LibWorld.erc20().decimals()
     );
 
     // Check room balance
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE);
 
     // Wait for cooldown
     vm.roll(block.number + GameConfig.getCooldownCloseRoom() + 1);
@@ -130,7 +130,7 @@ contract RoomSystemTest is BaseTest {
     vm.stopPrank();
 
     // Calculate tax
-    uint256 tax = (GameConfig.getRoomCreationCost() * GameConfig.getTaxationCloseRoom()) / 100;
+    uint256 tax = (ROOM_INITIAL_BALANCE * GameConfig.getTaxationCloseRoom()) / 100;
 
     // Check that tax was transferred to admin
     assertEq(
@@ -155,7 +155,7 @@ contract RoomSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), 250, 100, 10, "A test room");
+    bytes32 roomId = world.ratfun__createRoom(playerId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     vm.stopPrank();
 
     // Advance blocks but not enough to pass cooldown
@@ -183,11 +183,11 @@ contract RoomSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(aliceId, bytes32(0), 250, 100, 10, "A test room");
+    bytes32 roomId = world.ratfun__createRoom(aliceId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "A test room");
     vm.stopPrank();
 
     // Check room balance
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE);
 
     // Bob tries to close alice's room
     vm.startPrank(bob);

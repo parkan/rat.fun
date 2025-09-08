@@ -16,7 +16,6 @@ export default defineWorld({
         adminAddress: "address",
         adminId: "bytes32",
         ratCreationCost: "uint256",
-        roomCreationCost: "uint256",
         maxInventorySize: "uint32",
         maxRoomPromptLength: "uint32",
         cooldownCloseRoom: "uint32",

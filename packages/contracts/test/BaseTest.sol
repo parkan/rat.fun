@@ -15,7 +15,6 @@ import "../src/libraries/Libraries.sol";
 
 contract BaseTest is MudTest, GasReporter {
   IWorld world;
-  // GameConfigData gameConfig;
 
   uint256 userNonce = 0;
 
@@ -23,10 +22,12 @@ contract BaseTest is MudTest, GasReporter {
   address payable bob;
   address payable eve;
 
+  // Base room creation cost / initial balance of room
+  uint256 constant ROOM_INITIAL_BALANCE = 250;
+
   function setUp() public virtual override {
     super.setUp();
     world = IWorld(worldAddress);
-    // gameConfig = GameConfig.get();
     alice = getUser();
     bob = getUser();
     eve = getUser();

@@ -48,7 +48,6 @@ library LibWorld {
       GameConfigData({
         adminAddress: _adminAddress,
         adminId: adminId,
-        roomCreationCost: 250, // TODO: remove this as room creation cost should be set per room
         ratCreationCost: RAT_CREATION_COST,
         maxInventorySize: MAX_INVENTORY_SIZE,
         maxRoomPromptLength: MAX_ROOM_PROMPT_LENGTH,

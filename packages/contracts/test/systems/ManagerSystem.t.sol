@@ -39,7 +39,7 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     vm.stopPrank();
 
     // As admin
@@ -74,7 +74,7 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     vm.stopPrank();
 
     // Item to add
@@ -94,7 +94,7 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Name.get(Inventory.getItem(ratId, 0)), "cheese");
 
     // pre-change balance - 40
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() - 40);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE - 40);
   }
 
   function testApplyOutcomeAddItemTooExpensive() public {
@@ -114,12 +114,12 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     vm.stopPrank();
 
     // Item to add
     Item[] memory newItems = new Item[](1);
-    newItems[0] = Item("cheese", GameConfig.getRoomCreationCost() + 1);
+    newItems[0] = Item("cheese", ROOM_INITIAL_BALANCE + 1);
 
     // As admin
     prankAdmin();
@@ -131,7 +131,7 @@ contract ManagerSystemTest is BaseTest {
     // Not enough room balance
     assertEq(Inventory.length(ratId), 0);
     // Initial room balance
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE);
   }
 
   function testApplyOutcomeAddItemInventoryFull() public {
@@ -151,7 +151,7 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     vm.stopPrank();
 
     uint256 maxInventorySize = GameConfig.getMaxInventorySize();
@@ -201,7 +201,7 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     vm.stopPrank();
 
     // Item to add
@@ -220,7 +220,7 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Name.get(itemId), "cheese");
 
     // Initial room balance - 40
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() - 40);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE - 40);
 
     bytes32[] memory itemsToRemove = new bytes32[](1);
     itemsToRemove[0] = itemId;
@@ -233,7 +233,7 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
 
     // Initial room balance again
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost());
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE);
     assertEq(Inventory.length(ratId), 0);
   }
 
@@ -259,7 +259,7 @@ contract ManagerSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     startGasReport("Apply outcome (transfer to rat)");
     world.ratfun__applyOutcome(ratId, roomId, 20, new bytes32[](0), new Item[](0));
     endGasReport();
@@ -268,11 +268,11 @@ contract ManagerSystemTest is BaseTest {
     // Initial balance + 20
     assertEq(Balance.get(ratId), RAT_CREATION_COST + 20);
     // Initial room balance - 20
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() - 20);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE - 20);
     // Initial bob balance - ROOM_CREATION_COST
     assertEq(
       LibWorld.erc20().balanceOf(bob),
-      initialBalance - GameConfig.getRoomCreationCost() * 10 ** LibWorld.erc20().decimals()
+      initialBalance - ROOM_INITIAL_BALANCE * 10 ** LibWorld.erc20().decimals()
     );
   }
 
@@ -294,7 +294,7 @@ contract ManagerSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     world.ratfun__applyOutcome(ratId, roomId, 50, new bytes32[](0), new Item[](0));
     startGasReport("Apply outcome (transfer to room)");
     world.ratfun__applyOutcome(ratId, roomId, -20, new bytes32[](0), new Item[](0));
@@ -304,7 +304,7 @@ contract ManagerSystemTest is BaseTest {
     // Initial balance + 50 - 20
     assertEq(Balance.get(ratId), RAT_CREATION_COST + 30);
     // Initial room balance - 50 (transfer to rat) + 20 (transfer back to room)
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() - 50 + 20);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE - 50 + 20);
   }
 
   function testApplyOutcomeOverTransferToRat() public {
@@ -325,22 +325,16 @@ contract ManagerSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     startGasReport("Apply outcome (over transfer to rat)");
-    world.ratfun__applyOutcome(
-      ratId,
-      roomId,
-      int256(GameConfig.getRoomCreationCost() + 100),
-      new bytes32[](0),
-      new Item[](0)
-    );
+    world.ratfun__applyOutcome(ratId, roomId, int256(ROOM_INITIAL_BALANCE + 100), new bytes32[](0), new Item[](0));
     endGasReport();
     vm.stopPrank();
 
     // Initial balance + half of room creation cost (because room can only give half of its creation cost)
     assertEq(Balance.get(ratId), RAT_CREATION_COST + 100);
     // Half of room creation cost was given to rat
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() - 100);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE - 100);
   }
 
   function testApplyOutcomeOverTransferToRoom() public {
@@ -361,7 +355,7 @@ contract ManagerSystemTest is BaseTest {
 
     // As admin
     prankAdmin();
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     world.ratfun__applyOutcome(ratId, roomId, 50, new bytes32[](0), new Item[](0));
     startGasReport("Apply outcome (over transfer to room)");
     world.ratfun__applyOutcome(ratId, roomId, -200, new bytes32[](0), new Item[](0));
@@ -372,7 +366,7 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Balance.get(ratId), 0);
     assertTrue(Dead.get(ratId));
     // Initial room balance + RAT_CREATION_COST
-    assertEq(Balance.get(roomId), GameConfig.getRoomCreationCost() + RAT_CREATION_COST);
+    assertEq(Balance.get(roomId), ROOM_INITIAL_BALANCE + RAT_CREATION_COST);
   }
 
   // * * * *
@@ -404,13 +398,13 @@ contract ManagerSystemTest is BaseTest {
     prankAdmin();
 
     // Create room
-    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), 250, 100, 10, "test room");
+    bytes32 roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, 10, "test room");
     // Add items and transfer balance to rat
     world.ratfun__applyOutcome(ratId, roomId, 20, new bytes32[](0), newItems);
 
     // Room balance:
     // initial room balance - 20 (balance transfer) - 50 (items)
-    uint256 intermediateRoomBalance = GameConfig.getRoomCreationCost() - 20 - 50;
+    uint256 intermediateRoomBalance = ROOM_INITIAL_BALANCE - 20 - 50;
     assertEq(Balance.get(roomId), intermediateRoomBalance);
 
     // Check rat balance

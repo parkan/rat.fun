@@ -6,7 +6,7 @@
  */
 
 import { writable, derived } from "svelte/store"
-import { addressToId, addressToRatImage } from "$lib/modules/utils"
+import { addressToId } from "$lib/modules/utils"
 import { blockNumber } from "$lib/modules/network"
 import { ENTITY_TYPE } from "contracts/enums"
 import { filterByEntitytype, filterByPlayer, filterByOthers } from "./utils"
