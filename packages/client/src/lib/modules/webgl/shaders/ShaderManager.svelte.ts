@@ -235,7 +235,7 @@ export class ShaderManager<TMode extends string = string> {
   updateBooleanUniform(uniformName: string, value: boolean) {
     // Update the reactive boolean uniform
     this.booleanUniforms[uniformName] = value
-    
+
     // Update all modes to maintain consistency
     Object.keys(this.modes).forEach(modeName => {
       this.modes[modeName][uniformName] = value

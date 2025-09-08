@@ -76,7 +76,7 @@
   // Handle uniform changes from dev controls
   function onUniformChange(uniformName: string, value: number | boolean) {
     if (shaderManager && shaderManager.mode) {
-      if (typeof value === 'boolean') {
+      if (typeof value === "boolean") {
         shaderManager.updateBooleanUniform(uniformName, value)
       } else {
         shaderManager.updateModeUniform(shaderManager.mode, uniformName, value)
