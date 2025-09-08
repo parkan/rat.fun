@@ -16,6 +16,9 @@
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
 
+  $inspect("maxRoomPromptLength", $gameConfig.maxRoomPromptLength)
+  $inspect("roomDescription", roomDescription.length)
+
   // Prompt has to be between 1 and MAX_ROOM_PROMPT_LENGTH characters
   const invalidRoomDescriptionLength = $derived(
     roomDescription.length < 1 || roomDescription.length > $gameConfig.maxRoomPromptLength

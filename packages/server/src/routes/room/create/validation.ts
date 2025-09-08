@@ -30,6 +30,11 @@ export function validateInputData(
 
   // Check that the prompt is not empty and prompt is less than limit
   if (roomPrompt.length < 1 || roomPrompt.length > gameConfig.maxRoomPromptLength) {
+    console.log("Lengths:")
+    console.log(roomPrompt.length)
+    console.log(gameConfig.maxRoomPromptLength)
+    console.log("End Lengths")
+    //
     throw new InvalidPromptError(
       `Room prompt must be between 1 and ${gameConfig.maxRoomPromptLength} characters.`
     )

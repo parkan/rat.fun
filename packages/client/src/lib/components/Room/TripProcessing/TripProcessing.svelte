@@ -1,11 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte"
 
-  const { onComplete }: { onComplete: () => void } = $props()
+  const { onComplete, result }: { onComplete: () => void; result: null | any } = $props()
 
   // Timer state
   let timeElapsed = $state(0)
   let timerInterval: ReturnType<typeof setInterval> | undefined
+  let timerDone = $state(false)
+
+  $effect(() => {
+    if (timerDone && result) onComplete()
+  })
 
   onMount(() => {
     // Start timer
@@ -17,7 +22,7 @@
       if (timerInterval) {
         clearInterval(timerInterval)
       }
-      onComplete()
+      timerDone = true
       // TODO: we are now returning after a fixed amount of time
       // We should check that the result is ready
     }, 7000)

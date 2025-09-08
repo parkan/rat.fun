@@ -230,6 +230,25 @@ export class ShaderManager<TMode extends string = string> {
   }
 
   /**
+   * Update boolean uniform value immediately
+   */
+  updateBooleanUniform(uniformName: string, value: boolean) {
+    // Update the reactive boolean uniform
+    this.booleanUniforms[uniformName] = value
+    
+    // Update all modes to maintain consistency
+    Object.keys(this.modes).forEach(modeName => {
+      this.modes[modeName][uniformName] = value
+    })
+
+    // Update the renderer immediately if available
+    if (this.renderer) {
+      this.renderer.setUniform(`u_${uniformName}`, value, "bool")
+      console.log(`Updated boolean uniform u_${uniformName} to:`, value)
+    }
+  }
+
+  /**
    * Debounced resize handler
    */
   private handleResize = () => {

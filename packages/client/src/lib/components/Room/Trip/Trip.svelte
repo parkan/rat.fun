@@ -55,6 +55,7 @@
   <!-- ### 2. TRIP PROCESSING ### -->
   {#if entryState?.state === TRIP_STATE.PROCESSING}
     <TripProcessing
+      {result}
       onComplete={() => {
         transitionTo(TRIP_STATE.RESULTS)
       }}
