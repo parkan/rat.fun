@@ -1,6 +1,7 @@
 <script lang="ts">
   import { rat } from "$lib/modules/state/stores"
   import { InteractiveItem } from "$lib/components/Rat"
+  import { collapsed } from "$lib/modules/ui/state.svelte"
 
   const MAX_INVENTORY_SIZE = 6
 
@@ -14,19 +15,7 @@
 
 <div class="inventory">
   {#if $rat}
-    <!-- HEADER -->
-    <!-- <div class="header">
-      <div
-        class="label"
-        use:tippy={{
-          content: "Items carried by your rat. You can re-absorb them by clicking."
-        }}
-      >
-        Inventory
-      </div>
-      <div class="counter">{$rat?.inventory?.length ?? 0}/{MAX_INVENTORY_SIZE}</div>
-    </div> -->
-    <div class="inventory-container">
+    <div class="inventory-container" class:collapsed={$collapsed}>
       <!-- INVENTORY GRID -->
       {#each inventorySlots as item, index}
         {#if item}
@@ -42,7 +31,6 @@
 <style lang="scss">
   .inventory {
     width: 100%;
-    height: 100%;
     border-right: none;
     overflow: hidden;
     display: flex;
@@ -79,10 +67,17 @@
   .inventory-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 70px);
     gap: 8px;
     padding: 8px;
+    flex-shrink: 0;
     height: 100%;
+
+    &.collapsed {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 70px);
+      height: 100%;
+    }
   }
 
   .empty-slot {

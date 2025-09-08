@@ -1,9 +1,10 @@
 <script lang="ts">
   import { websocketConnected, clientList } from "$lib/modules/off-chain-sync/stores"
-  let { onclick, collapsed } = $props()
+  import { collapsed } from "$lib/modules/ui/state.svelte"
+  let { onclick } = $props()
 </script>
 
-<div {onclick} class="chat-header" class:collapsed>
+<div {onclick} class="chat-header" class:collapsed={$collapsed}>
   <div class="header-content">
     <div class="chat-label">TRIP SITTERS</div>
     <span class="status" class:connected={$websocketConnected}>

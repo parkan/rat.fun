@@ -16,10 +16,16 @@ export const ratfun: SoundAssets = {
     author: "ian",
     volume: 0.6
   },
-  main: {
-    src: "/sounds/ratfun/Environment_2_LYR4_Rats.mp3",
+  // Not used
+  mainAll: {
+    src: "/sounds/ratfun/bossajazzloop.mp3",
     author: "leo",
-    volume: 1
+    volume: 0.001
+  },
+  main: {
+    src: "/sounds/ratfun/baseloop181.mp3",
+    author: "leo",
+    volume: 0.01
   },
   mousedown: {
     src: "/sounds/ratfun/FTSTP_LYR1_KICK_3.mp3",

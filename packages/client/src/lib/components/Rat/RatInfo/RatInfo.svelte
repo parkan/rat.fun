@@ -24,7 +24,7 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    height: 440px;
+    height: 100%;
     width: 100%;
   }
 
@@ -32,7 +32,6 @@
     display: flex;
     flex-direction: row;
     height: 100%;
-    height: var(--rat-main-info-height);
     border-bottom: var(--default-border-style);
     overflow: hidden;
 
@@ -42,7 +41,6 @@
   }
 
   .rat-inventory {
-    height: var(--rat-inventory-height);
     width: 100%;
     border-bottom: var(--default-border-style);
   }
