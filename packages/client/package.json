@@ -32,6 +32,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.12.2",
     "globals": "^16.3.0",
+    "sam-js": "^0.3.1",
     "sass-embedded": "^1.92.1",
     "svelte": "^5.38.7",
     "svelte-check": "^4.3.1",

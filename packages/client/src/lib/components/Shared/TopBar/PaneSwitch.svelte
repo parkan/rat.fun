@@ -6,9 +6,14 @@
 
 <div class="pane-switch">
   {#if isAdminView}
-    <div class="pane-switch-item">
+    <button
+      onclick={() => {
+        playSound("ratfun", "adminExit")
+      }}
+      class="pane-switch-item"
+    >
       <a href="/{page.route.id?.includes('roomId') ? page.params.roomId : ''}">X</a>
-    </div>
+    </button>
   {:else}
     <button
       onclick={() => {

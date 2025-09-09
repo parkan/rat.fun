@@ -31,6 +31,7 @@
     font-family: var(--typewriter-font-stack);
     color: var(--foreground);
     cursor: pointer;
+    height: 48px;
 
     .chat-label {
       color: var(--background);

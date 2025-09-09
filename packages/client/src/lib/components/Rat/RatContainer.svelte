@@ -18,7 +18,7 @@
     transition: grid-template-rows 0.1s ease;
 
     &.collapsed {
-      grid-template-rows: calc(var(--game-window-height) - 89px) minmax(100px, 1fr);
+      grid-template-rows: calc(var(--game-window-height) - 110px) minmax(100px, 1fr);
     }
   }
 </style>

@@ -109,7 +109,10 @@
           id="room-description"
           rows={$collapsed ? 12 : 6}
           {placeholder}
-          oninput={typeHit}
+          oninput={e => {
+            console.log(e)
+            typeHit(e.data)
+          }}
           bind:value={roomDescription}
         ></textarea>
       </div>

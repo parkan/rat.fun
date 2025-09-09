@@ -92,6 +92,11 @@ export const ratfun: SoundAssets = {
     author: "leo",
     volume: 1
   },
+  adminExit: {
+    src: "/sounds/ratfun/backdoor_exit.mp3",
+    author: "leo",
+    volume: 1
+  },
   // To replace
   // XXX.mp3 is just placeholder
   acceptOrderFail: {

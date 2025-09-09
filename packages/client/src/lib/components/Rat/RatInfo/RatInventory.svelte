@@ -44,7 +44,7 @@
   .inventory-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 70px);
+    grid-template-rows: repeat(2, 85px);
     gap: 8px;
     padding: 8px;
     flex-shrink: 0;
@@ -52,7 +52,7 @@
 
     &.collapsed {
       grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(3, 70px);
+      grid-template-rows: repeat(3, 160px);
       height: 100%;
     }
   }

@@ -64,7 +64,9 @@
 </script>
 
 <div class:collapsed={$collapsed} class="chat-box">
-  <ChatHeader onclick={toggle} />
+  <div class="header">
+    <ChatHeader onclick={toggle} />
+  </div>
 
   <div bind:this={scrollElement} class="chat-scroll">
     {#each $latestEvents as event (event.id)}
@@ -123,6 +125,10 @@
     background-size: 100px;
     border-top: var(--default-border-style);
     min-height: 100px;
+
+    .header {
+      height: 48px;
+    }
 
     .chat-scroll {
       flex-flow: column nowrap;

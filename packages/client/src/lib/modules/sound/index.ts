@@ -1,9 +1,12 @@
 import { Howl } from "howler"
 import { writable } from "svelte/store"
 import { soundLibrary } from "./sound-library"
+import SamJs from "sam-js"
 
 export const music = writable(new Howl({ src: [""] }))
 export const fx = writable([new Howl({ src: [""] })])
+
+const sam = new SamJs()
 
 /**
  * Initializes and preloads all sounds from the `tcm` property of the `soundLibrary` object.
@@ -96,7 +99,13 @@ export function randomPitch(): number {
   return Math.random() * (max - min) + min
 }
 
-export const typeHit = () => {
+export const typeHit = (letter?: string) => {
+  if (letter) {
+    if (Math.random() > 0.7) {
+      sam.speak(letter)
+    }
+  }
+
   const sound = playSound("ratfun", "type", false, false, randomPitch())
   const sound2 = playSound("ratfun", "hat", false, false)
   if (sound && sound2) {
