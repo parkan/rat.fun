@@ -6,13 +6,13 @@
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
   import { goto } from "$app/navigation"
-  import RoomConfirmLiquidation from "$lib/components/Shared/RoomPreview/RoomConfirmLiquidation.svelte"
 
   import {
     RoomPreviewHeader,
     RoomPreviewPrompt,
     RoomPreviewGraph,
     RoomPreviewEventLog,
+    RoomConfirmLiquidation,
     LiquidateRoom
   } from "$lib/components/Room"
 
