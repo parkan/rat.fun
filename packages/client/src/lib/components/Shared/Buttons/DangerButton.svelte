@@ -15,11 +15,11 @@
   } = $props()
 
   const onmousedown = () => {
-    playSound("ratfun", "mousedown")
+    // playSound("ratfun", "mousedown")
   }
 
   const onmouseup = () => {
-    playSound("ratfun", "mouseupdanger")
+    // playSound("ratfun", "mouseupdanger")
     onclick()
   }
 

@@ -61,8 +61,8 @@
   const playOutcomeSound = (action: string) => {
     const soundName =
       action === "increase" || action === "add" ? "acceptOrderSuccessOld" : "acceptOrderFail"
-    const sound = playSound("ratfun", soundName)
-    if (sound) sound.play()
+    // const sound = // playSound("ratfun", soundName)
+    // if (sound) sound.play()
   }
 
   // Action to register the nodes
@@ -93,8 +93,8 @@
   const main = () => {
     // Timestamp Animation
     timeline.call(() => {
-      const sound = playSound("ratfun", "textLineHit")
-      if (sound) sound.play()
+      // const sound = // playSound("ratfun", "textLineHit")
+      // if (sound) sound.play()
     })
     timeline.to(timestampElement, {
       opacity: 1,

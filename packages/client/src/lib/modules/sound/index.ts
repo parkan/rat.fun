@@ -1,81 +1,45 @@
 import * as Tone from "tone"
-import { writable } from "svelte/store"
 import { soundLibrary } from "./sound-library"
 import type { TimingOptions } from "./types"
 
-export const music = writable(new Tone.Player())
-export const fx = writable([new Tone.Player()])
-
-let audioContextStarted = false
-
-/**
- * Starts the Tone.js audio context after user interaction
- * Call this on first user click/touch to enable audio
- */
-export async function startAudioContext(): Promise<boolean> {
-  if (audioContextStarted) return true
-  
-  try {
-    await Tone.start()
-    audioContextStarted = true
-    console.log("Audio context started after user gesture")
-    return true
-  } catch (error) {
-    console.warn("Failed to start audio context:", error)
-    return false
-  }
-}
-
-/**
- * Initializes and preloads all sounds from the `tcm` property of the `soundLibrary` object.
- * This ensures that there's minimal delay when the sounds are played for the first time.
- *
- * @example
- * initSound();  // Preloads all the sounds in soundLibrary.tcm
- *
- * @returns {void}
- */
 export async function initSound(): Promise<void> {
-  // Try to start the audio context early, but don't fail if it requires user gesture
   try {
     await Tone.start()
-    audioContextStarted = true
+
+    Tone.getTransport().loop = true
+    Tone.getTransport().loopStart = 0
+    Tone.getTransport().loopEnd = 42.456 // Length of the main sample
+    Tone.getTransport().start()
+    Tone.getTransport().on("loop", e => {
+      console.log("just looped", e)
+      // Tone.getTransport().bpm.rampTo(Tone.getTransport().bpm.value * 2, "4m")
+    })
+
+    // Load and play the main audio
+    const mainPlayer = new Tone.Player({
+      url: soundLibrary.ratfun.main.src,
+      loop: true,
+      onload: () => {
+        mainPlayer.start(0) // start on beginning of transport loop
+      }
+    })
+      .toDestination()
+      .sync()
+
+    const loopingUp = new Tone.Player({
+      url: soundLibrary.ratfun.upwardspiral.src,
+      loop: false,
+      onload: () => {
+        loopingUp.start("1m") // start after 4 measures
+      }
+    })
+      .toDestination()
+      .sync()
+
     console.log("Audio context started during init")
   } catch (error) {
     console.log("Audio context requires user gesture, will start later")
   }
-
-  // Load sounds regardless of audio context state
-  for (const key in soundLibrary.tcm) {
-    try {
-      console.log(`Loading TCM sound: ${key} from ${soundLibrary.tcm[key].src}`)
-      const player = new Tone.Player(soundLibrary.tcm[key].src).toDestination()
-      player.volume.value = soundLibrary.tcm[key].volume
-      await player.load(soundLibrary.tcm[key].src)
-      soundLibrary.tcm[key].sound = player
-      console.log(`Successfully loaded TCM sound: ${key}`)
-    } catch (error) {
-      console.warn(`Failed to load TCM sound: ${key}`, error)
-    }
-  }
-  for (const key in soundLibrary.ratfun) {
-    try {
-      console.log(`Loading ratfun sound: ${key} from ${soundLibrary.ratfun[key].src}`)
-      const player = new Tone.Player(soundLibrary.ratfun[key].src).toDestination()
-      player.volume.value = soundLibrary.ratfun[key].volume
-      await player.load(soundLibrary.ratfun[key].src)
-      soundLibrary.ratfun[key].sound = player
-      console.log(`Successfully loaded ratfun sound: ${key}`)
-    } catch (error) {
-      console.warn(`Failed to load ratfun sound: ${key}`, error, soundLibrary.ratfun[key])
-    }
-  }
-  
-  console.log("Sound loading complete. Ratfun sounds:", Object.keys(soundLibrary.ratfun).map(key => ({ 
-    key, 
-    hasSound: !!soundLibrary.ratfun[key].sound,
-    src: soundLibrary.ratfun[key].src
-  })))
 }
 
 /**
@@ -100,46 +64,11 @@ export async function playSound(
   play: boolean = true,
   timing?: TimingOptions
 ): Promise<Tone.Player | undefined> {
-  // Ensure Tone.js audio context is started
-  if (!audioContextStarted) {
-    const started = await startAudioContext()
-    if (!started) {
-      console.warn(`Cannot play sound ${category}.${id} - audio context not started`)
-      return
-    }
-  }
-
-  const soundEntry = soundLibrary[category]?.[id]
-  const sound = soundEntry?.sound
-
-  console.log("sound", category + " " + id, soundLibrary[category])
-  console.log("soundEntry for", id, soundEntry)
-  console.log("sound object for", id, sound)
-
-  if (!sound) {
-    console.warn(`Sound not found: ${category}.${id}. Available sounds:`, Object.keys(soundLibrary[category] || {}))
-    if (soundEntry) {
-      console.warn("Sound entry exists but .sound property is missing:", soundEntry)
-    }
-    return
-  }
-
-  // Check for placeholder sound
-  if (sound.buffer && sound.buffer.numberOfChannels === 0) {
-    console.warn(
-      "It looks like you might be playing silence. Are you enjoying that? Information: (%o)",
-      {
-        category,
-        id
-      }
-    )
-  }
-
-  // Set loop
-  sound.loop = loop
-
-  // Set playback rate (pitch)
-  sound.playbackRate = pitch
+  const sound = new Tone.Player({
+    url: soundLibrary[category][id].src,
+    loop,
+    autostart: true
+  })
 
   if (!play) {
     return sound
@@ -186,8 +115,8 @@ export function randomPitch(): number {
 }
 
 export const typeHit = async () => {
-  const sound = await playSound("ratfun", "type", false, false, randomPitch())
-  if (sound) {
-    sound.start()
-  }
+  // const sound = await playSound("ratfun", "type", false, false, randomPitch())
+  // if (sound) {
+  //   sound.start()
+  // }
 }

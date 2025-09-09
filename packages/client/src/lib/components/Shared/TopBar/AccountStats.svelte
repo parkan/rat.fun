@@ -17,11 +17,11 @@
   let { close } = $props()
 
   onMount(() => {
-    playSound("ratfun", "textLineHit")
+    // playSound("ratfun", "textLineHit")
   })
 
   onDestroy(() => {
-    playSound("ratfun", "textLineHit")
+    // playSound("ratfun", "textLineHit")
   })
 </script>
 
@@ -67,7 +67,7 @@
       extraClass="red"
       onclick={async () => {
         await sendGiveCallerTokens()
-        playSound("ratfun", "coins")
+        // playSound("ratfun", "coins")
       }}
       text="Get 2000 free $SLopamine"
     ></SmallButton>
@@ -76,7 +76,7 @@
       tippyText="Buy some $Slopamine"
       onclick={async () => {
         await sendBuyWithEth()
-        playSound("ratfun", "coins")
+        // playSound("ratfun", "coins")
       }}
       text="Buy 1 $Slopamine for 0.001ETH"
     ></SmallButton>
@@ -85,7 +85,7 @@
       tippyText="Allow the contract to spend on your behalf"
       onclick={async () => {
         await sendApproveMax()
-        playSound("ratfun", "coins")
+        // playSound("ratfun", "coins")
       }}
       text="Approve max allowance"
     ></SmallButton>
