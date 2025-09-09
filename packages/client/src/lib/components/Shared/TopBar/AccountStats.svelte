@@ -8,13 +8,15 @@
     sendBuyWithEth
   } from "$lib/modules/action-manager/index.svelte"
   import { SmallButton } from "$lib/components/Shared"
-  import { playSound } from "$lib/modules/sound"
+  import { getVolumeState } from "$lib/modules/sound/state.svelte"
   import { ENTITY_TYPE } from "contracts/enums"
   import { walletType, environment } from "$lib/modules/network"
   import { player } from "$lib/modules/state/stores"
   import { busy } from "$lib/modules/action-manager/index.svelte"
 
   let { close } = $props()
+
+  const channelVolume = getVolumeState()
 
   onMount(() => {
     // playSound("ratfun", "textLineHit")
@@ -89,6 +91,19 @@
       }}
       text="Approve max allowance"
     ></SmallButton>
+  </div>
+
+  <div class="tab">
+    <p class="key">Game volume</p>
+    <input
+      min="-20"
+      max="0"
+      type="range"
+      name="volume"
+      id="volume"
+      bind:value={channelVolume.current.main}
+    />
+    {channelVolume.current.main}
   </div>
 </div>
 

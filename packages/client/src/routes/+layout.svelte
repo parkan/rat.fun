@@ -5,7 +5,7 @@
   import type { LayoutProps } from "./$types"
 
   import { type Outcome as SanityOutcome } from "@sanity-types"
-  import * as Tone from "tone"
+  import { initSound } from "$lib/modules/sound/state.svelte"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { afterNavigate } from "$app/navigation"
@@ -43,6 +43,7 @@
   let { children, data }: LayoutProps = $props()
 
   let DEBUG_SHADER = $state(false)
+  let initingSound = $state(false)
   let outcomeId = $state("")
   let outcome = $state<SanityOutcome | undefined>()
   let debuggingShader = $derived(import.meta.env.DEV && DEBUG_SHADER)
@@ -78,9 +79,28 @@
     }
   })
 
+  // Enable audio on first user interaction
+  const enableAudio = async () => {
+    if (initingSound) return false
+
+    initingSound = true
+
+    console.log("init sound called")
+    await initSound()
+
+    document.removeEventListener("click", enableAudio)
+    document.removeEventListener("touchstart", enableAudio)
+    document.removeEventListener("keydown", enableAudio)
+    console.log("event listeners were removed")
+  }
+
   onMount(async () => {
     // Remove preloader
     document.querySelector(".preloader")?.remove()
+
+    document.addEventListener("click", enableAudio)
+    document.addEventListener("touchstart", enableAudio)
+    document.addEventListener("keydown", enableAudio)
   })
 
   afterNavigate(({ to }) => {

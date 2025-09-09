@@ -2,44 +2,8 @@ import * as Tone from "tone"
 import { soundLibrary } from "./sound-library"
 import type { TimingOptions } from "./types"
 
-export async function initSound(): Promise<void> {
-  try {
-    await Tone.start()
-
-    Tone.getTransport().loop = true
-    Tone.getTransport().loopStart = 0
-    Tone.getTransport().loopEnd = 42.456 // Length of the main sample
-    Tone.getTransport().start()
-    Tone.getTransport().on("loop", e => {
-      console.log("just looped", e)
-      // Tone.getTransport().bpm.rampTo(Tone.getTransport().bpm.value * 2, "4m")
-    })
-
-    // Load and play the main audio
-    const mainPlayer = new Tone.Player({
-      url: soundLibrary.ratfun.main.src,
-      loop: true,
-      onload: () => {
-        mainPlayer.start(0) // start on beginning of transport loop
-      }
-    })
-      .toDestination()
-      .sync()
-
-    const loopingUp = new Tone.Player({
-      url: soundLibrary.ratfun.upwardspiral.src,
-      loop: false,
-      onload: () => {
-        loopingUp.start("1m") // start after 4 measures
-      }
-    })
-      .toDestination()
-      .sync()
-
-    console.log("Audio context started during init")
-  } catch (error) {
-    console.log("Audio context requires user gesture, will start later")
-  }
+export async function cleanup(): Promise<void> {
+  console.log("cleaning up")
 }
 
 /**
