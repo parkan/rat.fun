@@ -7,7 +7,7 @@ export const ratfun: SoundAssets = {
     volume: 0.7
   },
   admin: {
-    src: "/sounds/ratfun/click_16.mp3", // sehr misleading title, this is actually soundscape
+    src: "/sounds/ratfun/backdoor_loop.mp3",
     author: "leo",
     volume: 1
   },
@@ -80,10 +80,15 @@ export const ratfun: SoundAssets = {
   hat: {
     src: "/sounds/ratfun/hat.mp3",
     author: "leo",
-    volume: 0.02
+    volume: 0.2
   },
   send: {
     src: "/sounds/ratfun/send.mp3",
+    author: "leo",
+    volume: 1
+  },
+  adminAccess: {
+    src: "/sounds/ratfun/backdoor_access.mp3",
     author: "leo",
     volume: 1
   },

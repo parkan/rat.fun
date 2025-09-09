@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state"
+  import { playSound } from "$lib/modules/sound"
   let { isAdminView }: { isAdminView: boolean } = $props()
 </script>
 
@@ -9,9 +10,14 @@
       <a href="/{page.route.id?.includes('roomId') ? page.params.roomId : ''}">X</a>
     </div>
   {:else}
-    <div class="pane-switch-item">
+    <button
+      onclick={() => {
+        playSound("ratfun", "adminAccess")
+      }}
+      class="pane-switch-item"
+    >
       <a href="/admin{page.route.id?.includes('roomId') ? `/${page.params.roomId}` : ''}">⚙</a>
-    </div>
+    </button>
   {/if}
 </div>
 
