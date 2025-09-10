@@ -94,20 +94,6 @@
   </div>
 
   <div class="tab">
-    <p class="key">Master volume</p>
-    <input
-      min="-100"
-      max="0"
-      type="range"
-      name="master-volume"
-      id="master-volume"
-      value={mixer.master}
-      oninput={e => mixer.setMasterVolume(Number(e.target.value))}
-    />
-    {mixer.master}dB
-  </div>
-
-  <div class="tab">
     <p class="key">Music volume</p>
     <input
       min="-100"
@@ -115,16 +101,16 @@
       type="range"
       name="music-volume"
       id="music-volume"
-      value={mixer.channels.music.volume}
+      value={mixer.channelStates.music.volume}
       oninput={e => {
         mixer.setChannelVolume("music", Number(e.target.value))
       }}
     />
-    {mixer.channels.music.volume}dB
+    {mixer.channelStates.music.volume}dB
     <label>
       <input
         type="checkbox"
-        bind:checked={mixer.channels.music.muted}
+        bind:checked={mixer.channelStates.music.muted}
         onchange={e => mixer.setChannelMute("music", e.target.checked)}
       />
       Mute
@@ -134,20 +120,20 @@
   <div class="tab">
     <p class="key">UI Volume</p>
     <input
-      min="-60"
+      min="-100"
       max="0"
       type="range"
       name="ui-volume"
       id="ui-volume"
-      bind:value={mixer.channels.ui.volume}
+      bind:value={mixer.channelStates.ui.volume}
       oninput={e => mixer.setChannelVolume("ui", Number(e.target.value))}
     />
-    {mixer.channels.ui.volume}dB
+    {mixer.channelStates.ui.volume}dB
     <label>
       <input
         type="checkbox"
-        bind:checked={mixer.channels.ui.muted}
-        onchange={e => mixer.setChannelMute("music", e.target.checked)}
+        bind:checked={mixer.channelStates.ui.muted}
+        onchange={e => mixer.setChannelMute("ui", e.target.checked)}
       />
       Mute
     </label>

@@ -1,6 +1,5 @@
 import * as Tone from "tone"
 import { soundLibrary } from "./sound-library"
-import type { TimingOptions } from "./types"
 import { getMixerState } from "./state.svelte"
 
 /**
@@ -12,14 +11,19 @@ import { getMixerState } from "./state.svelte"
  * @returns {Promise<Tone.Player | undefined>} - The Tone.js Player object of the sound.
  */
 export async function playSound(collection: string, id: string): Promise<Tone.Player | undefined> {
-  console.log("will play sound", collection, id)
+  // This check just in case tone context hasn't started
   await Tone.start()
-  const sound = new Tone.Player({
-    url: soundLibrary[collection][id].src,
-    autostart: true
-  }).toDestination()
 
-  return sound
+  const mixer = getMixerState()
+
+  if (mixer.channels.ui) {
+    const sound = new Tone.Player({
+      url: soundLibrary[collection][id].src,
+      autostart: true
+    }).connect(mixer.channels.ui)
+
+    return sound
+  }
 }
 
 /**

@@ -12,6 +12,8 @@ let channelStates = $state<Record<string, ChannelConfig>>({
   ui: { volume: 0, muted: false, solo: false, pan: 0 },
   music: { volume: 0, muted: false, solo: false, pan: 0 }
 })
+let uiChannel = $state<Tone.InputNode>()
+let musicChannel = $state<Tone.InputNode>()
 
 let masterVolume = $state(-10)
 let channels: Record<string, Tone.Channel> = {}
@@ -91,6 +93,12 @@ export const getMixerState = () => {
     // System
     registerChannel,
     get channels() {
+      return {
+        ui: uiChannel,
+        music: musicChannel
+      }
+    },
+    get channelStates() {
       return channelStates
     },
     get master() {
@@ -117,11 +125,11 @@ export async function initSound(): Promise<void> {
     })
 
     // Create and register Music channel
-    const musicChannel = new Tone.Channel().toDestination()
+    musicChannel = new Tone.Channel().toDestination()
     mixer.registerChannel("music", musicChannel)
 
     // Create and register UI channel
-    const uiChannel = new Tone.Channel().toDestination()
+    uiChannel = new Tone.Channel().toDestination()
     mixer.registerChannel("ui", uiChannel)
 
     // ** Register audio for the mixer
@@ -129,9 +137,7 @@ export async function initSound(): Promise<void> {
       url: soundLibrary.ratfun.main.src,
       loop: true,
       onload: () => {
-        console.log("on load")
         mainPlayer.start(0)
-        console.log("started")
         mainPlayer.volume.rampTo(0, "1m")
       }
     })
