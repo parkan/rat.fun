@@ -1,12 +1,14 @@
 <script lang="ts">
-  import { rat, gameConfig } from "$lib/modules/state/stores"
+  import { rat } from "$lib/modules/state/stores"
   import { InteractiveItem } from "$lib/components/Rat"
   import { collapsed } from "$lib/modules/ui/state.svelte"
 
-  // Create array with actual items + empty slots to fill 6 slots
+  const MAX_INVENTORY_SIZE = 6
+
+  // Create array with actual items + empty slots to fill MAX_INVENTORY_SIZE slots
   const inventorySlots = $derived.by(() => {
     const actualItems = $rat?.inventory ?? []
-    const emptySlots = Array(6 - actualItems.length).fill(null)
+    const emptySlots = Array(MAX_INVENTORY_SIZE - actualItems.length).fill(null)
     return [...actualItems, ...emptySlots]
   })
 </script>
