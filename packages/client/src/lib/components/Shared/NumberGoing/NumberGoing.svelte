@@ -43,11 +43,11 @@
 
         if (direction < 0) {
           if (!muted) {
-            // // playSound("ratfun", "ratsUp")
+            playSound("ratfun", "ratsUp")
           }
         } else {
           if (!muted) {
-            // // playSound("ratfun", "ratsDown")
+            playSound("ratfun", "ratsDown")
           }
         }
 

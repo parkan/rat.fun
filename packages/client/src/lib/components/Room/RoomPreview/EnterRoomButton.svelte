@@ -8,7 +8,7 @@
   let { roomId, disabled }: { roomId: Hex; disabled: boolean } = $props()
 
   const onClick = async () => {
-    // playSound("ratfun", "enteredPod")
+    playSound("ratfun", "enteredPod")
     goto(`/${roomId}/result?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
   }
 </script>

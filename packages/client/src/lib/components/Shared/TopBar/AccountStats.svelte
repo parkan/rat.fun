@@ -2,6 +2,7 @@
   import { playerAddress } from "$lib/modules/state/stores"
   import { onMount, onDestroy } from "svelte"
   import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/state/stores"
+  import { playSound } from "$lib/modules/sound"
   import {
     sendGiveCallerTokens,
     sendApproveMax,
@@ -19,11 +20,11 @@
   const mixer = getMixerState()
 
   onMount(() => {
-    // playSound("ratfun", "textLineHit")
+    playSound("ratfun", "textLineHit")
   })
 
   onDestroy(() => {
-    // playSound("ratfun", "textLineHit")
+    playSound("ratfun", "textLineHit")
   })
 </script>
 
@@ -69,7 +70,7 @@
       extraClass="red"
       onclick={async () => {
         await sendGiveCallerTokens()
-        // playSound("ratfun", "coins")
+        playSound("ratfun", "coins")
       }}
       text="Get 2000 free $SLopamine"
     ></SmallButton>
@@ -78,7 +79,7 @@
       tippyText="Buy some $Slopamine"
       onclick={async () => {
         await sendBuyWithEth()
-        // playSound("ratfun", "coins")
+        playSound("ratfun", "coins")
       }}
       text="Buy 1 $Slopamine for 0.001ETH"
     ></SmallButton>
