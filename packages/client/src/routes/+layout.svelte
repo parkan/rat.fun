@@ -5,7 +5,7 @@
   import type { LayoutProps } from "./$types"
 
   import { type Outcome as SanityOutcome } from "@sanity-types"
-  import { initSound } from "$lib/modules/sound/state.svelte"
+  import { initSound, getMixerState, snapshotFactory } from "$lib/modules/sound/state.svelte"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { afterNavigate } from "$app/navigation"
@@ -39,6 +39,9 @@
   import { Outcome } from "$lib/components/Room"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
+  // This will persist data across page loads.
+  // Used for user settings
+  export const snapshot = snapshotFactory()
 
   let { children, data }: LayoutProps = $props()
 
@@ -49,7 +52,6 @@
   let debuggingShader = $derived(import.meta.env.DEV && DEBUG_SHADER)
 
   const { environment, walletType } = data
-
   walletTypeStore.set(walletType)
 
   const environmentLoaded = async () => {

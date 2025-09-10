@@ -1,3 +1,4 @@
+import type { Snapshot } from "./$types"
 import * as Tone from "tone"
 import { soundLibrary } from "$lib/modules/sound/sound-library"
 
@@ -19,6 +20,10 @@ let masterVolume = $state(-10)
 let channels: Record<string, Tone.Channel> = {}
 
 export const getMixerState = () => {
+  const setChannelStates = states => {
+    channelStates = states
+  }
+
   const setChannelVolume = (channel: string, volume: number) => {
     if (channelStates[channel]) {
       channelStates[channel].volume = volume
@@ -85,6 +90,7 @@ export const getMixerState = () => {
 
   return {
     // Channel controls
+    setChannelStates, // for setting from page load
     setChannelVolume,
     setChannelMute,
     setChannelSolo,
@@ -160,5 +166,19 @@ export async function initSound(): Promise<void> {
     console.log("Audio context started during init")
   } catch (error) {
     console.log("Audio context requires user gesture, will start later")
+  }
+}
+
+export const snapshotFactory = (): Snapshot => {
+  const mixer = getMixerState()
+  return {
+    capture: () => {
+      return {
+        channelStates: mixer.channelStates
+      }
+    },
+    restore: value => {
+      mixer.setChannelStates(value.channelStates)
+    }
   }
 }
