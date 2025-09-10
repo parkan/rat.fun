@@ -6,6 +6,9 @@ export default defineWorld({
   enums: {
     ENTITY_TYPE: ENTITY_TYPE_ARRAY
   },
+  codegen: {
+    generateSystemLibraries: true
+  },
   deploy: {
     upgradeableWorldImplementation: true
   },
@@ -84,6 +87,14 @@ export default defineWorld({
     RoomCreationCost: "uint256", // Initial balance of room.
     MaxValuePerWin: "uint256", // Limits how much a rat can extract from room in one run.
     MinRatValueToEnter: "uint256" // Minimum total value of rat to enter room.
+  },
+  systems: {
+    // DevSystem is conditionally deployed for local/test chains in PostDeploy
+    DevSystem: {
+      deploy: {
+        disabled: true
+      }
+    },
   },
   modules: [
     {
