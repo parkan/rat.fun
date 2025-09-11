@@ -16,7 +16,7 @@ let channelStates = $state<Record<string, ChannelConfig>>({
 let uiChannel = $state<Tone.InputNode>()
 let musicChannel = $state<Tone.InputNode>()
 let channels = $state<Record<string, Tone.Channel>>({})
-let players = $state<Record<string, Tone.InputNode>>()
+let players = $state<Record<string, Tone.Player>>()
 
 let masterVolume = $state(-10)
 
@@ -93,6 +93,32 @@ export const getMixerState = () => {
     Object.keys(channelStates).forEach(updateChannelVolume)
   }
 
+  const stopAllMusic = () => {
+    if (players) {
+      Object.values(players).forEach(player => {
+        if (player.state !== "stopped") {
+          player.stop()
+        }
+      })
+    }
+  }
+
+  const startMusic = (key: string) => {
+    if (players && players[key]) {
+      if (players[key].state !== "started") {
+        players[key].start()
+      }
+    }
+  }
+
+  const stopMusic = (key: string) => {
+    if (players && players[key]) {
+      if (players[key].state !== "stopped") {
+        players[key].stop()
+      }
+    }
+  }
+
   return {
     // Channel controls
     registerChannel,
@@ -101,6 +127,9 @@ export const getMixerState = () => {
     setChannelVolume,
     setChannelMute,
     setChannelSolo,
+    stopAllMusic,
+    startMusic,
+    stopMusic,
     // Master control
     setMasterVolume,
     get channels() {
@@ -121,28 +150,30 @@ export const getMixerState = () => {
 const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player> => {
   // Looping music ONLY
   // Main
-  const mainSound = new Tone.Player({
+  const main = new Tone.Player({
     url: soundLibrary.ratfun.main.src,
     loop: true,
-    autostart: true
+    fadeIn: 3,
+    fadeOut: 1,
+    autostart: false
   })
     .connect(channel)
     .sync()
 
   // Admin
-  const adminSound = new Tone.Player({
+  const admin = new Tone.Player({
     url: soundLibrary.ratfun.admin.src,
     loop: true,
-    autostart: true
+    autostart: false
   })
     .connect(channel)
     .sync()
 
   // Spawn
-  const spawnSound = new Tone.Player({
+  const spawn = new Tone.Player({
     url: soundLibrary.tcm.podBg.src,
     loop: true,
-    autostart: true
+    autostart: false
   })
     .connect(channel)
     .sync()
@@ -178,15 +209,37 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
     .sync()
 
   const result = {
-    mainSound,
-    adminSound,
-    spawnSound,
+    main,
+    admin,
+    spawn,
     tripSetup,
     tripProcessing,
     tripResultGood
   }
 
   return result
+}
+
+export async function switchAudio(
+  to: import("@sveltejs/kit").RouteDefinition,
+  from: import("@sveltejs/kit").RouteDefinition
+) {
+  const mixer = getMixerState()
+
+  if (!mixer.players) return
+
+  if (to.route.id.includes("admin")) {
+    // Check playstate
+    mixer.stopAllMusic()
+    mixer.startMusic("admin")
+  } else if (to.url.pathname.includes("result")) {
+    mixer.stopAllMusic()
+    // Rest of the music is arranged inside the Trip component
+  } else if (to.route.id.includes("(game)")) {
+    mixer.stopAllMusic()
+    console.log("calling start main")
+    mixer.startMusic("main")
+  }
 }
 
 // Initialise the sound
@@ -199,11 +252,11 @@ export async function initSound(): Promise<void> {
     // Set up master volume
     Tone.getDestination().volume.value = mixer.masterVolume
 
-    Tone.getTransport().loop = true
-    Tone.getTransport().loopStart = 0
-    Tone.getTransport().loopEnd = 42.456 // Length of the main sample
+    // Tone.getTransport().loop = true
+    // Tone.getTransport().loopStart = 0
+    // Tone.getTransport().loopEnd = 42.456 // Length of the main sample
     Tone.getTransport().start()
-    Tone.getTransport().on("loop", e => {})
+    // Tone.getTransport().on("loop", e => {})
 
     // Create and register Music channel
     musicChannel = new Tone.Channel().toDestination()
@@ -219,7 +272,7 @@ export async function initSound(): Promise<void> {
 
     // @todo: Try to play the correct music based on the current page
     if (mixer.players) {
-      mixer.players?.mainSound?.volume?.rampTo(0, "1m")
+      mixer.players?.main
     }
 
     // We will use the individual players to change play state

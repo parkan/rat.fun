@@ -90,6 +90,8 @@ async function routes(fastify: FastifyInstance) {
         )) as EventsReturnValue
         console.timeEnd("–– Event LLM")
 
+        console.log(eventResults)
+
         // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
         console.time("–– Chain")
         const {

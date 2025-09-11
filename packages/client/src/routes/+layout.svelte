@@ -5,7 +5,12 @@
   import type { LayoutProps } from "./$types"
 
   import { type Outcome as SanityOutcome } from "@sanity-types"
-  import { initSound, getMixerState, snapshotFactory } from "$lib/modules/sound/state.svelte"
+  import {
+    initSound,
+    getMixerState,
+    snapshotFactory,
+    switchAudio
+  } from "$lib/modules/sound/state.svelte"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { afterNavigate } from "$app/navigation"
@@ -105,7 +110,8 @@
     document.addEventListener("keydown", enableAudio)
   })
 
-  afterNavigate(({ to }) => {
+  afterNavigate(({ to, from }) => {
+    switchAudio(to, from)
     if (to?.url.searchParams.has("spawn")) {
       UIState.set(UI.SPAWNING)
     }
