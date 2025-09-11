@@ -119,45 +119,34 @@ export const getMixerState = () => {
 }
 
 const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player> => {
-  console.log("register music: is called")
   // Looping music ONLY
   // Main
   const mainSound = new Tone.Player({
-    url: soundLibrary.ratfun.main.src,
-    volume: -Infinity,
+    url: soundLibrary.tcm.main.src,
+    loop: true,
+    volume: 0,
+    autostart: true
+  })
+    .connect(channel)
+    .sync()
+
+  // Admin
+  const adminSound = new Tone.Player({
+    url: soundLibrary.ratfun.admin.src,
     loop: true,
     autostart: true
   })
     .connect(channel)
     .sync()
 
-  console.log("register music: hi")
-
-  // Admin
-  const adminSound = new Tone.Player({
-    url: soundLibrary.ratfun.admin.src,
-    volume: -Infinity,
-    loop: true,
-    autostart: false
-  })
-    .connect(channel)
-    .sync()
-
-  console.log("register music: hi 2")
-
-  console.log("register music: ", soundLibrary.tcm.podBg.src)
-
   // Spawn
   const spawnSound = new Tone.Player({
     url: soundLibrary.tcm.podBg.src,
-    volume: -Infinity,
     loop: true,
-    autostart: false
+    autostart: true
   })
     .connect(channel)
     .sync()
-
-  console.log("register music: hi 3")
 
   // Non-looping music
 
@@ -189,8 +178,6 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
     .connect(channel)
     .sync()
 
-  console.log("register music: hi N")
-
   const result = {
     mainSound,
     adminSound,
@@ -199,10 +186,6 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
     tripProcessing,
     tripResultGood
   }
-
-  console.log("register music: Result")
-
-  console.log("register music: returning the music players", result)
 
   return result
 }
@@ -221,20 +204,20 @@ export async function initSound(): Promise<void> {
     Tone.getTransport().loopEnd = 42.456 // Length of the main sample
     Tone.getTransport().start()
     Tone.getTransport().on("loop", e => {
-      console.log("just looped", e)
+      console.log("loop")
     })
 
     // Create and register Music channel
-    // musicChannel = new Tone.Channel().toDestination()
-    // mixer.registerChannel("music", musicChannel)
+    musicChannel = new Tone.Channel().toDestination()
+    mixer.registerChannel("music", musicChannel)
 
     // Create and register UI channel
     uiChannel = new Tone.Channel().toDestination()
     mixer.registerChannel("ui", uiChannel)
 
     // Register the music players and apply them to the music channel
-    // const musicPlayers = registerMusic(musicChannel)
-    // mixer.setPlayers(musicPlayers)
+    const musicPlayers = registerMusic(musicChannel)
+    mixer.setPlayers(musicPlayers)
 
     // @todo: Try to play the correct music based on the current page
     if (mixer.players) {
@@ -242,9 +225,7 @@ export async function initSound(): Promise<void> {
     }
 
     // We will use the individual players to change play state
-  } catch (error) {
-    console.log("Audio context requires user gesture, will start later")
-  }
+  } catch (error) {}
 }
 
 export const snapshotFactory = (): Snapshot => {

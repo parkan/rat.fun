@@ -48,38 +48,16 @@ const outerLayoutTransitionConfig: TransitionConfig[] = [
     }
   },
   {
-    from: "/(rooms)/(game)/[roomId]/result",
-    to: "*",
-    in: {
-      transition: "wipe",
-      params: {
-        duration: 1000,
-        direction: "out"
-      }
-    },
-    out: {
-      transition: "fade",
-      params: {
-        duration: 400,
-        delay: 200
-      }
-    }
-  },
-  {
     from: "/(rooms)/(game)/[roomId]/result/[outcomeId]",
     to: "*",
     in: {
-      transition: "wipe",
-      params: {
-        duration: 1000,
-        direction: "out"
-      }
+      transition: "none",
+      params: {}
     },
     out: {
       transition: "fade",
       params: {
-        duration: 400,
-        delay: 200
+        duration: 400
       }
     }
   }
