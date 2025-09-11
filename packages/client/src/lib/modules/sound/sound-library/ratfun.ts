@@ -4,7 +4,7 @@ export const ratfun: SoundAssets = {
   intro: {
     src: "/sounds/ratfun/main_theme.mp3",
     author: "leo",
-    volume: 0.7
+    volume: 1
   },
   admin: {
     src: "/sounds/ratfun/backdoor_loop.mp3",
@@ -14,7 +14,7 @@ export const ratfun: SoundAssets = {
   outcome: {
     src: "/sounds/ratfun/Heavy_Low_Machine.mp3", // sehr misleading title, this is actually soundscape
     author: "ian",
-    volume: 0.6
+    volume: 1
   },
   // Not used
   mainAll: {

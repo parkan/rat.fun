@@ -33,7 +33,6 @@ export class ShaderManager<TMode extends string = string> {
   private booleanUniforms = $state<Record<string, boolean>>({})
 
   constructor(config: ShaderConfiguration<TMode>) {
-    console.log("Constructing shaderManager with config", config)
     this.modes = config.modes
     this.currentMode = config.initialMode
 
@@ -59,7 +58,6 @@ export class ShaderManager<TMode extends string = string> {
     booleanUniformNames.forEach(uniformName => {
       const initialValue = initialModeConfig[uniformName] as boolean
       this.booleanUniforms[uniformName] = initialValue !== undefined ? initialValue : false
-      console.log(`Initialized boolean uniform ${uniformName} to:`, initialValue)
     })
   }
 
@@ -105,10 +103,8 @@ export class ShaderManager<TMode extends string = string> {
    * Set new mode and transition uniforms
    */
   setMode(newMode: TMode) {
-    console.log("Switching to", newMode)
     if (!this.modes[newMode]) {
       console.warn(`Mode '${newMode}' not found in configuration`)
-      console.log(this.modes)
       return
     }
 
@@ -119,14 +115,11 @@ export class ShaderManager<TMode extends string = string> {
     Object.entries(modeConfig).forEach(([uniformName, targetValue]) => {
       const tween = this.tweens.get(uniformName)
       if (tween && typeof targetValue === "number") {
-        console.log(uniformName, targetValue)
         // Handle tween-based uniforms
         tween.set(targetValue)
-        console.log(`Updated tween uniform ${uniformName} to:`, targetValue)
       } else if (typeof targetValue === "boolean") {
         // Handle boolean uniforms
         this.booleanUniforms[uniformName] = targetValue
-        console.log(`Updated boolean uniform ${uniformName} to:`, targetValue)
       }
     })
   }
@@ -160,11 +153,9 @@ export class ShaderManager<TMode extends string = string> {
         type: "bool",
         value: value
       }
-      console.log(`Adding boolean uniform to renderer: u_${name} =`, value)
     })
 
     // Use the factory function from your WebGL module
-    console.log("Initializing renderer with uniforms:", initialUniforms)
     this.renderer = new WebGLGeneralRenderer(canvas, {
       shader: shaderSource,
       uniforms: initialUniforms
@@ -190,7 +181,6 @@ export class ShaderManager<TMode extends string = string> {
     // Update boolean uniforms
     Object.entries(this.booleanUniforms).forEach(([name, value]) => {
       this.renderer!.setUniform(`u_${name}`, value, "bool")
-      console.log(`Setting boolean uniform u_${name} to:`, value)
     })
   }
 
@@ -244,7 +234,6 @@ export class ShaderManager<TMode extends string = string> {
     // Update the renderer immediately if available
     if (this.renderer) {
       this.renderer.setUniform(`u_${uniformName}`, value, "bool")
-      console.log(`Updated boolean uniform u_${uniformName} to:`, value)
     }
   }
 

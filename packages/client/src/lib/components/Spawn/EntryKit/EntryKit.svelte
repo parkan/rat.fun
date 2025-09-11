@@ -66,14 +66,11 @@
               }
             },
             onSessionChange: (e: any) => {
-              console.log("the session changed", e)
               if (!e) {
                 // The user has now disconnected or changed account
-                console.log("DISCONNECTING ACCOUNT")
                 UIState.set(UI.SPAWNING)
               } else if (e.account) {
                 if (lastConnectedAddress !== "" && lastConnectedAddress !== e.account.address) {
-                  console.log("SWITCHING ACCOUNTS")
                   UIState.set(UI.SPAWNING)
                 }
                 lastConnectedAddress = e.account.address

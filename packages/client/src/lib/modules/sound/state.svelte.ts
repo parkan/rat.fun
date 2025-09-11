@@ -122,9 +122,8 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
   // Looping music ONLY
   // Main
   const mainSound = new Tone.Player({
-    url: soundLibrary.tcm.main.src,
+    url: soundLibrary.ratfun.main.src,
     loop: true,
-    volume: 0,
     autostart: true
   })
     .connect(channel)
@@ -194,6 +193,7 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
 export async function initSound(): Promise<void> {
   try {
     await Tone.start()
+
     const mixer = getMixerState()
 
     // Set up master volume
@@ -203,9 +203,7 @@ export async function initSound(): Promise<void> {
     Tone.getTransport().loopStart = 0
     Tone.getTransport().loopEnd = 42.456 // Length of the main sample
     Tone.getTransport().start()
-    Tone.getTransport().on("loop", e => {
-      console.log("loop")
-    })
+    Tone.getTransport().on("loop", e => {})
 
     // Create and register Music channel
     musicChannel = new Tone.Channel().toDestination()
