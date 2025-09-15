@@ -8,6 +8,7 @@ uniform float u_speed;
 uniform float u_clouds_amount;
 uniform float u_opacity;
 uniform float u_invert;
+uniform float u_trippy;
 
 // Simple hash function for noise
 float hash(vec2 p){
@@ -56,6 +57,35 @@ float dangerousZones(vec2 p){
   }
   
   return value;
+}
+
+// Spiral vortex displacement function
+vec2 spiralDisplacement(vec2 uv,float intensity){
+  if(intensity<=0.)return uv;
+  
+  vec2 center=vec2(.5,.5);
+  vec2 p=uv-center;
+  
+  // Fix aspect ratio for circular vortex
+  p.x*=u_resolution.x/u_resolution.y;
+  
+  float r=length(p);
+  float a=atan(p.y,p.x);
+  
+  // Spiral parameters
+  float k=2.*intensity;// Spiral tightness
+  float spin=.3*intensity;// Rotation speed
+  float arms=12.;// Number of spiral arms
+  
+  // Create spiral effect: rotate angle based on radius and time
+  float displacement=k*log(r+.2)-u_time*spin;
+  a+=displacement*intensity;
+  
+  // Convert back to Cartesian and restore aspect ratio
+  vec2 displaced=vec2(cos(a),sin(a))*r;
+  displaced.x/=u_resolution.x/u_resolution.y;
+  
+  return displaced+center;
 }
 
 // Star field generation
@@ -132,18 +162,21 @@ vec3 normalClouds(vec2 uv){
 void main(){
   vec2 uv=gl_FragCoord.xy/u_resolution;
   
+  // Apply spiral displacement to UV coordinates
+  vec2 displacedUV=spiralDisplacement(uv,u_trippy);
+  
   // Deep space background
   vec3 spaceColor=vec3(.05,.02,.1);
   
-  // Generate star field using noise-based approach
-  vec2 starPos=uv*2.+u_time*.01*u_speed;
+  // Generate star field using displaced coordinates
+  vec2 starPos=displacedUV*2.+u_time*.01*u_speed;
   float stars=starField(starPos);
   
   // Add some twinkling effect
   stars*=.8+.2*sin(u_time*3.+hash(floor(starPos*50.))*10.);
   
-  // Generate nebula clouds
-  vec2 cloudPos=uv*1.5+u_time*.02*u_speed;
+  // Generate nebula clouds using displaced coordinates
+  vec2 cloudPos=displacedUV*1.5+u_time*.02*u_speed;
   float clouds=nebulaClouds(cloudPos);
   clouds=smoothstep(.3,.7,clouds);
   
@@ -161,7 +194,7 @@ void main(){
   // Combine everything
   vec3 starfieldColor=starColor+nebulaColor;
   
-  vec3 cloudColor=normalClouds(uv);
+  vec3 cloudColor=normalClouds(displacedUV);
   
   vec3 finalColor=mix(starfieldColor,cloudColor,u_clouds_amount);
   

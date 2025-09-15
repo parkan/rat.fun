@@ -7,52 +7,66 @@ export type ShaderMode = "off" | "stars" | "clouds" | "clouds-inverted" | "hyper
 
 export const shaderConfig: ShaderConfiguration<ShaderMode> = {
   // Start style
-  initialMode: "stars",
+  initialMode: "off",
   // Modes
   modes: {
     off: {
       opacity: 0.2,
       speed: 0.0,
       invert: 0.0,
-      clouds_amount: 0.0
+      clouds_amount: 0.0,
+      nebula_amount: 0.0,
+      trippy: 0.0
     },
     stars: {
       opacity: 1.0,
-      speed: 1.0,
+      speed: 0.2,
       invert: 0.0,
-      clouds_amount: 0.0
+      clouds_amount: 0.0,
+      nebula_amount: 1.0,
+      trippy: 0.0
     },
     // Have to add
     clouds: {
       opacity: 1.0,
-      speed: 1.0,
+      speed: 0.2,
       invert: 0.0,
-      clouds_amount: 1.0
+      clouds_amount: 1.0,
+      nebula_amount: 0.0,
+      trippy: 0.0
     },
     "clouds-inverted": {
       opacity: 1.0,
-      speed: 1.0,
+      speed: 0.2,
       invert: 1.0,
-      clouds_amount: 1.0
+      clouds_amount: 1.0,
+      nebula_amount: 0.0,
+      trippy: 0.0
     },
     warpspeed: {
       opacity: 1.0,
       invert: 0.0,
-      speed: 1.0,
-      clouds_amount: 0.1
+      speed: 0.5,
+      clouds_amount: 0.1,
+      nebula_amount: 0.5,
+      trippy: 0.8
     },
     hyperspeed: {
       opacity: 1.0,
       speed: 2.0,
       invert: 0.0,
-      clouds_amount: 0.1
+      clouds_amount: 0.1,
+      nebula_amount: 1.0,
+      trippy: 1.0
     }
   },
   tweens: {
     opacity: new Tween(1, { duration: 1000 }),
     speed: new Tween(1, { duration: 5000 }),
     invert: new Tween(1, { duration: 100 }),
-    clouds_amount: new Tween(1, { duration: 1000 })
+    clouds_amount: new Tween(1, { duration: 1000 }),
+    nebula_amount: new Tween(1, { duration: 1000 }),
+    trippy: new Tween(0, { duration: 1000 })
   },
   getMode: (page: import("@sveltejs/kit").Page): string => {
     if (!page.route.id) return "normal"
