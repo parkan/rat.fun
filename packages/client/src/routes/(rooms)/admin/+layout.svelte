@@ -1,10 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
   import { page } from "$app/state"
-  import { PageTransitions, CenterBar } from "$lib/components/Shared"
+  import { CenterBar } from "$lib/components/Shared"
   import { AdminContainer } from "$lib/components/Admin"
   import { player } from "$lib/modules/state/stores"
-  import { adminLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
 
   let { children } = $props()
 
@@ -29,9 +28,7 @@
 {/if}
 
 <div class="right-column">
-  <PageTransitions config={adminLayoutTransitionConfig}>
-    {@render children?.()}
-  </PageTransitions>
+  {@render children?.()}
 </div>
 
 <style lang="scss">

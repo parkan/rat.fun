@@ -1,7 +1,6 @@
 <script lang="ts">
   import { ENVIRONMENT } from "$lib/mud/enums"
-  import { PageTransitions, TopBar } from "$lib/components/Shared"
-  import { mainLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
+  import { TopBar } from "$lib/components/Shared"
 
   let { children }: { children: import("svelte").Snippet; environment: ENVIRONMENT } = $props()
 </script>
@@ -10,9 +9,9 @@
   <TopBar />
 
   <div class="main-content">
-    <PageTransitions id="main" wrapperClass="main-area-inner" config={mainLayoutTransitionConfig}>
+    <div class="main-area-inner">
       {@render children?.()}
-    </PageTransitions>
+    </div>
   </div>
 </div>
 
@@ -35,6 +34,18 @@
       grid-column: 1 / 4;
       position: relative;
       overflow: hidden;
+    }
+
+    .main-area-inner {
+      width: 100%;
+      height: calc(var(--game-window-height) - 60px);
+      display: grid;
+      position: relative;
+      grid-row: 2 / 3;
+      grid-column: 1 / 4;
+      grid-template-columns: calc(var(--game-window-width) * 0.46) 1fr calc(
+          var(--game-window-width) * 0.46
+        );
     }
   }
 

@@ -11,7 +11,7 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
   // Modes
   modes: {
     off: {
-      opacity: 0.0,
+      opacity: 0.2,
       speed: 0.0,
       invert: 0.0,
       clouds_amount: 0.0
@@ -49,7 +49,7 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
     }
   },
   tweens: {
-    opacity: new Tween(1, { duration: 100 }),
+    opacity: new Tween(1, { duration: 1000 }),
     speed: new Tween(1, { duration: 5000 }),
     invert: new Tween(1, { duration: 100 }),
     clouds_amount: new Tween(1, { duration: 1000 })

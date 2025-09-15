@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { PageTransitions, CenterBar } from "$lib/components/Shared"
+  import { CenterBar } from "$lib/components/Shared"
   import RatContainer from "$lib/components/Rat/RatContainer.svelte"
-  import { gameLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
 
   let { children } = $props()
 </script>
@@ -12,9 +11,7 @@
 <CenterBar />
 
 <div class="right-column">
-  <PageTransitions config={gameLayoutTransitionConfig}>
-    {@render children?.()}
-  </PageTransitions>
+  {@render children?.()}
 </div>
 
 <style lang="scss">

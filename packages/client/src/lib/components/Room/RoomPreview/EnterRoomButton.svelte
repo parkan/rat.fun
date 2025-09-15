@@ -9,7 +9,7 @@
 
   const onClick = async () => {
     playUISound("ratfun", "enteredPod")
-    goto(`/${roomId}/result?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
+    await goto(`/${roomId}/result?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
   }
 </script>
 

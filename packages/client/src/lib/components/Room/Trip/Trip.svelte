@@ -58,33 +58,6 @@
       }}
     />
   {/if}
-
-  {#if entryState?.state === TRIP_STATE.RESULTS || (entryState?.state
-      ?.toLowerCase()
-      .includes("summary") && result)}
-    <TripReport
-      {result}
-      onComplete={() => {
-        transitionToResultSummary(result)
-      }}
-    />
-  {/if}
-
-  {#if entryState?.state === TRIP_STATE.SUMMARY}
-    <NormalResultSummary />
-  {/if}
-
-  <!-- Result Summary: Rat Dead -->
-  {#if entryState?.state === TRIP_STATE.SUMMARY_RAT_DEAD}
-    <RatDeadResultSummary />
-  {/if}
-
-  <!-- Error -->
-  {#if entryState?.state === TRIP_STATE.ERROR}
-    <div class="error">
-      {entryState?.errorMessage}
-    </div>
-  {/if}
 </div>
 
 <style lang="scss">

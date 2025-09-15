@@ -19,7 +19,6 @@
   import { playerId, activeWorldEvent } from "$lib/modules/state/stores"
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { EMPTY_ID } from "$lib/modules/state/constants"
-  import { outerLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
   import { errorHandler } from "$lib/modules/error-handling"
   import { removeHash } from "$lib/modules/utils"
   import { walletType as walletTypeStore } from "$lib/modules/network"
@@ -32,7 +31,6 @@
     ShaderRenderer,
     Shader,
     Modal,
-    PageTransitions,
     ModalTarget,
     WorldEventPopup
     // WalletInfo
@@ -142,9 +140,9 @@
   {:else}
     <div class="context-main">
       <div class="layer-game">
-        <PageTransitions config={outerLayoutTransitionConfig}>
+        {#if !debuggingShader}
           {@render children?.()}
-        </PageTransitions>
+        {/if}
       </div>
     </div>
   {/if}

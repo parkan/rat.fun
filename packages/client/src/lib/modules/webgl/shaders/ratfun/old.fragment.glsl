@@ -10,7 +10,6 @@ uniform float u_speed;
 // Amount of clouds
 uniform float u_clouds_amount;
 // Invert colors
-uniform float u_opacity;
 uniform float u_invert;
 
 // How it works:
@@ -71,30 +70,15 @@ float smoothNoise(vec2 p){
 }
 
 // Fractal noise for clouds
-float fractalCloudNoise(vec2 p){
+float fractalNoise(vec2 p){
   float value=0.;
   float amplitude=.5;
   float frequency=1.;
   
-  for(int i=0;i<2;i++){
+  for(int i=0;i<4;i++){
     value+=amplitude*smoothNoise(p*frequency);
     amplitude*=.5;
     frequency*=2.;
-  }
-  
-  return value;
-}
-
-// Fractal noise for clouds
-float fractalStarNoise(vec2 p){
-  float value=0.;
-  float amplitude=.5;
-  float frequency=.1;
-  
-  for(int i=0;i<4;i++){
-    value+=amplitude*smoothNoise(p*frequency);
-    amplitude*=.9;
-    frequency*=200.;
   }
   
   return value;
@@ -110,17 +94,15 @@ void main(){
   vec2 uv=gl_FragCoord.xy/u_resolution;
   
   vec3 skyColor=mix(vec3(.5,.8,1.),vec3(.2,.6,1.),uv.y);
-  vec3 starBackgroundColor=vec3(.2,0.,0.);
-  vec3 starForegroundColor=vec3(.95,1.,.8);
   
   // Create multiple layers of clouds
   vec2 cloudPos1=uv*3.+vec2(u_time*.1,0.);
   vec2 cloudPos2=uv*5.+vec2(u_time*.05,0.);
   vec2 cloudPos3=uv*2.+vec2(u_time*.15,0.);
   
-  float cloud1=fractalCloudNoise(cloudPos1);
-  float cloud2=fractalCloudNoise(cloudPos2);
-  float cloud3=fractalCloudNoise(cloudPos3);
+  float cloud1=fractalNoise(cloudPos1);
+  float cloud2=fractalNoise(cloudPos2);
+  float cloud3=fractalNoise(cloudPos3);
   
   // Combine cloud layers
   float clouds=max(cloud1,max(cloud2*.7,cloud3*.5));
@@ -134,18 +116,6 @@ void main(){
   // ### Stars part
   //
   //
-  
-  // Create multiple layers of stars
-  vec2 starPos1=uv*6.+vec2(u_time*.1,0.);
-  vec2 starPos2=uv*2.+vec2(u_time*.05,0.);
-  vec2 starPos3=uv*1.+vec2(u_time*.15,0.);
-  
-  float starField1=fractalStarNoise(starPos1);
-  
-  float stars=starField1;
-  
-  stars=smoothstep(.4,.405,stars);
-  
   // Coordinate calculation
   vec2 p=(gl_FragCoord.xy-.5*u_resolution.xy)/u_resolution.y;
   float d=length(p)+.1;
@@ -166,12 +136,18 @@ void main(){
   cloudColor=mix(cloudColor,vec3(1.)-cloudColor,u_invert);
   
   // # Stars
-  vec3 starColor=mix(starBackgroundColor,vec3(1.),stars);
+  vec3 starColor=vec3(1.0,1.0,1.0)*vDrop(p,t)*intensity;// white
+  starColor+=vec3(1.0,1.0,1.0)*vDrop(p,t+.33)*intensity;// white
+  starColor+=vec3(1.0,1.0,1.0)*vDrop(p,t+.66)*intensity;// white
+  
+  starColor+=vec3(1.0,1.0,1.0)*vDrop(p,t+1.)*(u_speed-.5);
+  starColor+=vec3(1.0,1.0,1.0)*vDrop(p,t+1.33)*(u_speed-.5);
   
   starColor=mix(starColor,vec3(1.)-starColor,u_invert);
+  starColor*=(d*d);
   
   // Now, mix them both
-  vec3 finalColor=mix(vec3(0.,0.,0.),mix(starColor,cloudColor,u_clouds_amount),u_opacity);
+  vec3 finalColor=mix(starColor,cloudColor,u_clouds_amount);
   
   gl_FragColor=vec4(finalColor,1.);
 }

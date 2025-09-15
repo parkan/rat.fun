@@ -5,49 +5,49 @@ uniform vec2 u_resolution;
 uniform bool u_invert;
 
 // Color palette function for trippy colors
-vec3 palette(float t) {
-  vec3 a = vec3(0.5, 0.5, 0.5);
-  vec3 b = vec3(0.5, 0.5, 0.5);
-  vec3 c = vec3(1.0, 1.0, 1.0);
-  vec3 d = vec3(0.263, 0.416, 0.557);
+vec3 palette(float t){
+  vec3 a=vec3(.5,.5,.5);
+  vec3 b=vec3(.5,.5,.5);
+  vec3 c=vec3(1.,1.,1.);
+  vec3 d=vec3(.263,.416,.557);
   
-  return a + b * cos(6.28318 * (c * t + d));
+  return a+b*cos(6.28318*(c*t+d));
 }
 
-void main() {
+void main(){
   // Use UV coordinates directly to avoid seams
-  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-  vec2 p = (uv - 0.5) * 2.0;
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=(uv-.5)*2.;
   
   // Fix aspect ratio to ensure circular vortex
-  p.x *= u_resolution.x / u_resolution.y;
+  p.x*=u_resolution.x/u_resolution.y;
   
-  float r = length(p);
-  float a = atan(p.y, p.x);
+  float r=length(p);
+  float a=atan(p.y,p.x);
   
   // Spiral vortex parameters
-  float t = u_time;
-  float k = 2.0;        // Spiral tightness
-  float spin = 0.3;     // Rotation speed (reduced from 1.0)
-  float arms = 4.0;     // Number of spiral arms
+  float t=u_time;
+  float k=2.;// Spiral tightness
+  float spin=.3;// Rotation speed (reduced from 1.0)
+  float arms=4.;// Number of spiral arms
   
   // Create spiral effect: rotate angle based on radius and time
   // Use a smoother function to avoid extreme values
-  a += k * log(r + 0.5) - t * spin;
+  a+=k*log(r+.2)-t*spin;
   
   // Create the spiral pattern using fractional angle
-  float pattern = fract(a * arms);
+  float pattern=fract(a*arms);
   
   // Generate trippy colors using the palette
-  vec3 col = palette(pattern);
+  vec3 col=palette(pattern);
   
   // Add some variation based on radius
-  col *= 0.5 + 0.5 * sin(r * 15.0 - t * 2.0);
+  col*=.5+.5*sin(r*15.-t*2.);
   
   // Optional inversion
-  if (u_invert) {
-    col = vec3(1.0) - col;
+  if(u_invert){
+    col=vec3(1.)-col;
   }
   
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor=vec4(col,1.);
 }

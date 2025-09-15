@@ -239,12 +239,12 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
   return result
 }
 
-const getMusicForRoute = route => {
-  if (route.route.id.includes("admin")) {
+const getMusicForRoute = (route: Partial<import("@sveltejs/kit").Page>) => {
+  if (route?.route?.id?.includes("admin")) {
     return "admin"
-  } else if (route.url.pathname.includes("result")) {
+  } else if (route?.url?.pathname.includes("result")) {
     return null // Stop all music for results
-  } else if (route.route.id.includes("(game)")) {
+  } else if (route?.route?.id?.includes("(game)")) {
     return "main"
   }
 
@@ -253,7 +253,7 @@ const getMusicForRoute = route => {
 
 export async function switchAudio(
   to: Partial<import("@sveltejs/kit").Page>,
-  from?: import("@sveltejs/kit").RouteDefinition
+  from?: Partial<import("@sveltejs/kit").Page>
 ) {
   const mixer = getMixerState()
 
@@ -280,12 +280,7 @@ export async function initSound(): Promise<void> {
 
     // Set up master volume
     Tone.getDestination().volume.value = mixer.masterVolume
-
-    // Tone.getTransport().loop = true
-    // Tone.getTransport().loopStart = 0
-    // Tone.getTransport().loopEnd = 42.456 // Length of the main sample
     Tone.getTransport().start()
-    // Tone.getTransport().on("loop", e => {})
 
     // Create and register Music channel
     musicChannel = new Tone.Channel().toDestination()

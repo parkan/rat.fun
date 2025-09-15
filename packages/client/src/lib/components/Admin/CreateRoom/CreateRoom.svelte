@@ -6,6 +6,7 @@
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
+  import { playSample } from "$lib/modules/sound/synth-library/plucked"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
   import {
     MIN_ROOM_CREATION_COST,
@@ -16,9 +17,6 @@
 
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
-
-  $inspect("maxRoomPromptLength", $gameConfig.maxRoomPromptLength)
-  $inspect("roomDescription", roomDescription.length)
 
   // Prompt has to be between 1 and MAX_ROOM_PROMPT_LENGTH characters
   const invalidRoomDescriptionLength = $derived(
@@ -109,10 +107,7 @@
           id="room-description"
           rows={$collapsed ? 12 : 6}
           {placeholder}
-          oninput={e => {
-            console.log(e)
-            typeHit(e.data)
-          }}
+          oninput={typeHit}
           bind:value={roomDescription}
         ></textarea>
       </div>
@@ -121,20 +116,36 @@
       <div class="slider-group">
         <label for="room-creation-cost-slider">
           <span class="highlight">TRIP CREATION COST</span>
-          <span class="cost-display">${flooredRoomCreationCost}</span>
+          <input
+            class="cost-display"
+            onblur={e => {
+              const value = Number(e.target.value)
+              if (value < MIN_ROOM_CREATION_COST || value > $playerERC20Balance) {
+                roomCreationCost = Math.min(
+                  $playerERC20Balance,
+                  Math.max(MIN_ROOM_CREATION_COST, value)
+                )
+              }
+            }}
+            bind:value={roomCreationCost}
+            type="number"
+          />
         </label>
         <div class="slider-container">
           <input
             type="range"
             id="room-creation-cost-slider"
             class="cost-slider"
-            step="25"
-            min={MIN_ROOM_CREATION_COST}
+            step={Math.floor($playerERC20Balance / 40)}
+            min={Math.min($playerERC20Balance, MIN_ROOM_CREATION_COST)}
             max={$playerERC20Balance}
+            oninput={e => {
+              playSample(Number(e.target.value) / Number($playerERC20Balance))
+            }}
             bind:value={roomCreationCost}
           />
           <div class="slider-labels">
-            <span class="slider-min">${MIN_ROOM_CREATION_COST}</span>
+            <span class="slider-min">${Math.min($playerERC20Balance, MIN_ROOM_CREATION_COST)}</span>
             <span class="slider-max">${$playerERC20Balance}</span>
           </div>
         </div>
@@ -163,6 +174,17 @@
 </div>
 
 <style lang="scss">
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+  }
+
   .create-room {
     height: 100%;
     display: flex;
@@ -225,6 +247,14 @@
         color: var(--background);
         font-weight: normal;
         font-family: var(--typewriter-font-stack);
+        border: none;
+        width: 200px;
+        border: none;
+        outline: none;
+        &:focus {
+          border: none;
+          outline: none;
+        }
       }
     }
 

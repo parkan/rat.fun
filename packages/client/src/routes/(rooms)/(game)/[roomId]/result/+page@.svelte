@@ -73,8 +73,11 @@
         // Already has an ID
         // entryState.state = TRIP_STATE.RESULTS
         entryState.result = result
-        replaceState(`/${data.roomId}/result/${result.outcomeId}`, {
-          entryState: JSON.parse(stringifyWithBigInt(entryState))
+        entryState.state = TRIP_STATE.RESULTS
+        await goto(`/${data.roomId}/result/${result.outcomeId}`, {
+          state: {
+            entryState: JSON.parse(stringifyWithBigInt(entryState))
+          }
         })
       } else {
         entryState.state = TRIP_STATE.ERROR
@@ -119,6 +122,7 @@
       entryState.frozenRat = frozenRat
       entryState.frozenRoom = frozenRoom
       await processRoomEntry()
+      console.log("done processing room")
     } else if (!entryState.valid) {
       console.log("We mounted and we cannot enter")
       await goto("/")

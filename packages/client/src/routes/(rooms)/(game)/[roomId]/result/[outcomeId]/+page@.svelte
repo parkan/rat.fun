@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
   // Outcome logs
-  import { Trip } from "$lib/components/Room"
+  import { TripReport, NormalResultSummary, RatDeadResultSummary } from "$lib/components/Room"
   // import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { onMount } from "svelte"
@@ -21,7 +22,7 @@
       ? parseWithBigInt(stringifyWithBigInt(page.state.entryState))
       : data?.entryState || {}
   )
-
+  let result = $derived(entryState?.result)
   let { transitionTo, transitionToResultSummary } = $derived(createTripTransitions(entryState))
 
   onMount(() => {
@@ -32,4 +33,29 @@
   })
 </script>
 
-<Trip roomId={data.roomId} {entryState} {transitionTo} {transitionToResultSummary} />
+{#if entryState?.state === TRIP_STATE.RESULTS || (entryState?.state
+    ?.toLowerCase()
+    .includes("summary") && result)}
+  <TripReport
+    {result}
+    onComplete={() => {
+      transitionToResultSummary(result)
+    }}
+  />
+{/if}
+
+{#if entryState?.state === TRIP_STATE.SUMMARY}
+  <NormalResultSummary />
+{/if}
+
+<!-- Result Summary: Rat Dead -->
+{#if entryState?.state === TRIP_STATE.SUMMARY_RAT_DEAD}
+  <RatDeadResultSummary />
+{/if}
+
+<!-- Error -->
+{#if entryState?.state === TRIP_STATE.ERROR}
+  <div class="error">
+    {entryState?.errorMessage}
+  </div>
+{/if}
