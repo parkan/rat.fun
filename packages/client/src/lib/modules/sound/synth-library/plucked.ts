@@ -7,7 +7,6 @@ const make = (note: string) => {
   if (!mixer.channels.ui) throw new Error("Not ready")
 
   const frequency = Tone.Frequency(note).toFrequency()
-  console.log("playing note", frequency)
 
   // Envelope for attack/decay
   const env = new Tone.AmplitudeEnvelope({
@@ -99,10 +98,13 @@ export const playSample = (scale: number) => {
     env.triggerAttackRelease(0.2)
 
     // Cleanup after the envelope finishes (attack + decay + release)
-    setTimeout(() => {
-      pluckedString.dispose()
-      env.dispose()
-    }, (0.001 + 1.5 + 0.1) * 1000 + 100) // Add 100ms buffer
+    setTimeout(
+      () => {
+        pluckedString.dispose()
+        env.dispose()
+      },
+      (0.001 + 1.5 + 0.1) * 1000 + 100
+    ) // Add 100ms buffer
   } catch (error) {
     console.warn(error)
   }

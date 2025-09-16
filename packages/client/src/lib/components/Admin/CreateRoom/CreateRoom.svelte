@@ -19,7 +19,7 @@
   let busy: boolean = $state(false)
 
   // Prompt has to be between 1 and MAX_ROOM_PROMPT_LENGTH characters
-  const invalidRoomDescriptionLength = $derived(
+  let invalidRoomDescriptionLength = $derived(
     roomDescription.length < 1 || roomDescription.length > $gameConfig.maxRoomPromptLength
   )
 
@@ -50,6 +50,21 @@
       flooredRoomCreationCost < MIN_ROOM_CREATION_COST ||
       $playerERC20Balance < flooredRoomCreationCost
   )
+
+  $effect(() => {
+    console.log("busy", $state.snapshot(busy))
+    console.log("busy", $state.snapshot(busy))
+    console.log("!maxValuePerWin", $state.snapshot(!maxValuePerWin))
+    console.log("!minRatValueToEnter", $state.snapshot(!minRatValueToEnter))
+    console.log(
+      "flooredRoomCreationCost < MIN_ROOM_CREATION_COST",
+      $state.snapshot(flooredRoomCreationCost < MIN_ROOM_CREATION_COST)
+    )
+    console.log(
+      "$playerERC20Balance < flooredRoomCreationCost",
+      $state.snapshot($playerERC20Balance < flooredRoomCreationCost)
+    )
+  })
 
   $inspect("busy", busy)
   $inspect("!maxValuePerWin", !maxValuePerWin)
