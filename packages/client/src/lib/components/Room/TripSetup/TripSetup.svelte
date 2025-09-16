@@ -3,8 +3,6 @@
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import { typeHit, playUISound } from "$lib/modules/sound"
-  import { page } from "$app/state"
-  import { replaceState } from "$app/navigation"
 
   gsap.registerPlugin(TextPlugin)
 
@@ -43,7 +41,6 @@
 
   // Type hit helper for text array
   const playTypeHitText = (char: string) => {
-    console.log("play type hit")
     if (textDisplayElement) {
       textDisplayElement.textContent += char
       typeHit()
@@ -127,7 +124,7 @@
     width: 100vw;
     color: var(--foreground);
     font-size: 64px;
-    background: rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 0.1);
 
     .timer {
       position: fixed;

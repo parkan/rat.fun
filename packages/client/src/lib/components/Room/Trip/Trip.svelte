@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EnterRoomReturnValue } from "@server/modules/types"
-  import { onDestroy } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import { rooms as roomsState } from "$lib/modules/state/stores"
   import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
   import {
@@ -11,6 +11,7 @@
     RatDeadResultSummary
   } from "$lib/components/Room"
   import { staticContent } from "$lib/modules/content"
+  import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
   let {
     roomId,
@@ -44,6 +45,7 @@
       {staticRoomContent}
       onComplete={() => {
         if (destroyed) return
+        shaderManager.setMode("hyperspeed")
         transitionTo(TRIP_STATE.PROCESSING)
       }}
     />

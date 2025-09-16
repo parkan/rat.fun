@@ -1,21 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
+  import { afterNavigate } from "$app/navigation"
   import { fade } from "svelte/transition"
   import { page } from "$app/state"
-  import { shaders, createShaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
+  import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
   let canvas = $state<HTMLCanvasElement>()
   let currentShader = $state("ratfun")
-  let shaderManager = $state(createShaderManager(shaders.ratfun.config))
-
-  const currentMode = $derived(shaders.ratfun.config?.getMode?.(page))
-  const uniformValues = $derived(shaderManager.uniformValues)
-
-  $effect(() => {
-    if (shaderManager) {
-      shaderManager.setMode(currentMode)
-    }
-  })
+  let currentMode = $derived(shaders.ratfun.config?.getMode?.(page))
+  let uniformValues = $derived(shaderManager.uniformValues)
 
   $effect(() => {
     if (shaderManager) {
@@ -36,6 +30,11 @@
 
   onDestroy(() => {
     shaderManager.destroy()
+  })
+
+  afterNavigate(() => {
+    currentMode = shaders.ratfun.config?.getMode?.(page)
+    shaderManager.setMode(currentMode)
   })
 </script>
 

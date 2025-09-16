@@ -14,7 +14,10 @@
   }
   let shaderManager = $state(createShaderManager(currentConfig))
 
+  $inspect("currentMode", currentMode)
+
   function getMode(page: import("@sveltejs/kit").Page, shader: string = "ratfun"): string {
+    console.log("GET MODE CALLED ", page)
     // Use provided mode getter if it's available
     if (shaders[currentShader].config?.getMode) {
       return shaders[currentShader].config.getMode(page)

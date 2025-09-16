@@ -1,4 +1,6 @@
 import { Tween } from "svelte/motion"
+import { get } from "svelte/store"
+import { player } from "$lib/modules/state/stores"
 import vertexShader from "./vertex.glsl"
 import fragmentShader from "./fragment.glsl"
 import { type ShaderConfiguration } from "$lib/modules/webgl/shaders/index.svelte"
@@ -20,7 +22,7 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
     },
     stars: {
       opacity: 1.0,
-      speed: 0.2,
+      speed: 0.5,
       invert: 0.0,
       clouds_amount: 0.0,
       nebula_amount: 1.0,
@@ -71,17 +73,17 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
   getMode: (page: import("@sveltejs/kit").Page): string => {
     if (!page.route.id) return "stars"
 
-    if (page.route.id.includes("result")) {
-      // Start mode is off, the rest of the modes will be set by the component itself
-      if (page.url.searchParams.has("hyperspeed")) {
-        return "hyperspeed"
-      } else if (page.url.searchParams.has("warpspeed")) {
-        return "warpspeed"
-      } else {
-        return "stars"
-      }
+    if (page.route.id === "/(rooms)/(game)/[roomId]/result/[outcomeId]") {
+      return "stars"
+    } else if (page.route.id === "/(rooms)/(game)/[roomId]/result") {
+      return "warpspeed"
     } else if (page.route.id.includes("(game)")) {
-      return "clouds"
+      // not spawned
+      if (!get(player)) {
+        return "off"
+      } else {
+        return "clouds"
+      }
     } else if (page.route.id.includes("admin")) {
       return "clouds-inverted"
     }

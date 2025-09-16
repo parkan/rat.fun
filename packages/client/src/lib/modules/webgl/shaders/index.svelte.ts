@@ -99,3 +99,5 @@ export {
   // Functions
   createShaderManager
 }
+
+export let shaderManager = $state(createShaderManager(shaders.ratfun.config))

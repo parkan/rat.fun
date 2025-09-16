@@ -11,6 +11,7 @@
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
   import { entryKitSession } from "$lib/modules/entry-kit/stores"
+  import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
   import Introduction from "$lib/components/Spawn/Introduction/Introduction.svelte"
   import ConnectWalletForm from "$lib/components/Spawn/ConnectWalletForm/ConnectWalletForm.svelte"
@@ -72,6 +73,7 @@
   })
 
   onMount(() => {
+    shaderManager.setMode("off")
     if (walletType === WALLET_TYPE.BURNER) {
       connectBurner()
     }

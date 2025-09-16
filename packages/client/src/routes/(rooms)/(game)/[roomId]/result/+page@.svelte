@@ -45,7 +45,6 @@
       console.log("Restoring while entering")
       if (value?.valid && Date.now() - value.timestamp < 300000) {
         const parsed = parseWithBigInt(stringifyWithBigInt(value)) as any
-        console.log(parsed)
         entryState.valid = true
         entryState.processing = parsed.processing || false
         entryState.frozenRat = parsed.frozenRat
