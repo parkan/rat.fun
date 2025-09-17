@@ -44,7 +44,7 @@
   let previewing = $state(false)
 </script>
 
-<div class="content">
+<div class="content" id="room-listing-sanity-check">
   <div class:previewing class:animated={false} class="room-listing">
     {#if !isOwnRoomListing}
       <RoomFilters

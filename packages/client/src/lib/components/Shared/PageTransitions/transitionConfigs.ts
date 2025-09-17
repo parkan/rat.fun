@@ -42,90 +42,23 @@ const mainLayoutTransitionConfig: TransitionConfig[] = [
   }
 ]
 
-const outerLayoutTransitionConfig: TransitionConfig[] = [
-  {
-    from: "/(rooms)/(game)/[roomId]/result",
-    to: "*",
-    out: {
-      transition: "wipe",
-      params: {
-        duration: 1000,
-        direction: "out"
-      }
-    }
-  },
-  {
-    from: "/(rooms)/(game)/[roomId]/result/[outcomeId]",
-    to: "*",
-    in: {
-      transition: "none",
-      params: {}
-    },
-    out: {
-      transition: "wipe",
-      params: {
-        duration: 400,
-        direction: "out"
-      }
-    }
-  }
-]
-
-const adminLayoutTransitionConfig: TransitionConfig[] = [
-  {
-    from: "/(rooms)/admin",
-    to: "/(rooms)/admin/[roomId]",
-    in: {
-      transition: "slideFromRight",
-      params: {
-        duration: 200,
-        easing
-      }
-    },
-    out: {
-      transition: "slideLeft",
-      params: {
-        duration: 200,
-        easing
-      }
-    }
-  },
-  {
-    from: "/(rooms)/admin/[roomId]",
-    to: "/(rooms)/admin",
-    in: {
-      transition: "slideFromLeft",
-      params: {
-        duration: 200,
-        easing
-      }
-    },
-    out: {
-      transition: "slideRight",
-      params: {
-        duration: 200,
-        easing
-      }
-    }
-  }
-]
-
 const gameLayoutTransitionConfig: TransitionConfig[] = [
   {
     from: "/(rooms)/(game)",
     to: "/(rooms)/(game)/[roomId]",
     in: {
-      transition: "slideFromRight",
+      transition: "wipeDiagonal",
       params: {
-        duration: 200,
+        direction: "in",
+        duration: 450,
         easing
       }
     },
     out: {
-      transition: "slideLeft",
+      transition: "fade",
       params: {
-        duration: 200,
-        easing
+        delay: 400,
+        duration: 50
       }
     }
   },
@@ -133,25 +66,17 @@ const gameLayoutTransitionConfig: TransitionConfig[] = [
     from: "/(rooms)/(game)/[roomId]",
     to: "/(rooms)/(game)",
     in: {
-      transition: "slideFromLeft",
-      params: {
-        duration: 200,
-        easing
-      }
+      transition: "none"
     },
     out: {
-      transition: "slideRight",
+      transition: "wipeDiagonal",
       params: {
-        duration: 200,
+        direction: "in",
+        duration: 400,
         easing
       }
     }
   }
 ]
 
-export {
-  outerLayoutTransitionConfig,
-  mainLayoutTransitionConfig,
-  adminLayoutTransitionConfig,
-  gameLayoutTransitionConfig
-}
+export { mainLayoutTransitionConfig, gameLayoutTransitionConfig }

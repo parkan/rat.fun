@@ -73,6 +73,47 @@ export const wipe = (
   }
 }
 
+export const wipeDiagonal = (
+  _: HTMLElement,
+  params: {
+    delay?: number
+    duration?: number
+    feather?: number
+    direction: "in" | "out"
+    easing?: (t: number) => number
+  } = {
+    direction: "out"
+  }
+) => {
+  return {
+    delay: params.delay || 0,
+    duration: params.duration || 400,
+    easing: params.easing || linear,
+    css: (t: number, u: number) => {
+      const feather = params.feather || 10
+      const progress = params.direction === "in" ? t : u
+      const wipePosition = progress * 100
+      const featherStart = Math.max(0, wipePosition - feather)
+      const featherEnd = Math.min(100, wipePosition + feather)
+
+      return `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999999;
+        pointer-events: none;
+        -webkit-mask-image: linear-gradient(45deg, #ffff ${featherStart}%, #ffff ${wipePosition}%, #0000 ${featherEnd}%, #0000 100%);
+        mask-image: linear-gradient(45deg, #ffff ${featherStart}%, #ffff ${wipePosition}%, #0000 ${featherEnd}%, #0000 100%);
+        mask-size: 100% 100%;
+        mask-position: 50% 50%;
+        mask-repeat: no-repeat;
+      `
+    }
+  }
+}
+
 export const leftToRight = (
   node: HTMLElement,
   params: {
@@ -265,6 +306,7 @@ export const transitionFunctions = {
   fly,
   flip,
   wipe: wipe,
+  wipeDiagonal,
   leftToRight,
   strobeWipe,
   slideLeft,

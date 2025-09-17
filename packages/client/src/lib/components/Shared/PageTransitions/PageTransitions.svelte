@@ -75,4 +75,13 @@
         var(--game-window-width) * 0.46
       );
   }
+
+  .right-column {
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+    height: calc(var(--game-window-height) - 60px);
+    background-image: url("/images/texture-5.png");
+    background-size: 200px;
+  }
 </style>

@@ -9,15 +9,15 @@
     x: 0,
     y: 0
   })
-  let tiltTransform = $derived(`rotate3d(${tilt.x}deg, ${tilt.y}deg)`)
+  let tiltTransform = $derived(`rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`)
 
   const setTilt = e => {
-    //   console.log(e.clientX / window.innerWidth)
-    //   console.log(e.clientY / window.innerHeight)
+    tilt.x = (e.clientX / window.innerWidth) * 20
+    tilt.y = (e.clientY / window.innerHeight) * 20
   }
 </script>
 
-<svelte:window onmousemove={setTilt} />
+<!-- <svelte:window onmousemove={setTilt} /> -->
 
 <PageTransitions config={mainLayoutTransitionConfig}>
   <div style:transform={tiltTransform} class="main-area">
