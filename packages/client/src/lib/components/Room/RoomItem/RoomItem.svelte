@@ -44,12 +44,7 @@
         <NoImage />
       {/if}
     </div>
-    <div class="room-balance">
-      <!-- BALANCE -->
-      <span class="balance" class:depleted={Number(room.balance) == 0}>
-        Balance: $<NumberGoing muted={true} value={room.balance} />
-      </span>
-    </div>
+    <!-- <div class="room-balance"></div> -->
   </div>
   <!-- COLUMN RIGHT -->
   <div class="column right">
@@ -58,9 +53,9 @@
       <!-- TOP ROW -->
       <div class="room-info-row top">
         <!-- INDEX -->
-        <span class="index small">Trip #{room.index}</span>
+        <!-- <span class="index small">Trip #{room.index}</span> -->
         <!-- DIVIDER -->
-        <span class="divider">•</span>
+        <!-- <span class="divider">•</span> -->
         <!-- CREATION TIME  -->
         <span class="creation-time small">
           {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
@@ -71,27 +66,6 @@
         <div class="content">
           {renderSafeString(room.prompt)}
         </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2 -->
-    <div class="section">
-      <!-- BOTTOM ROW -->
-      <div class="room-info-row bottom">
-        <!-- OWNER -->
-        <span class="owner">{getRoomOwnerName(room)}</span>
-        <!-- DIVIDER -->
-        <span class="divider">•</span>
-        <!-- VISITOR COUNT -->
-        <span class="visit-count small">{room.visitCount} visits</span>
-        {#if room?.killCount > 0}
-          <!-- DIVIDER -->
-          <span class="divider">•</span>
-          <!-- KILL RATE -->
-          <span class="kill-count small">
-            {room.killCount} kill{#if room.killCount > 1}s{/if}
-          </span>
-        {/if}
       </div>
     </div>
   </div>
@@ -133,14 +107,12 @@
         .room-image {
           line-height: 0;
           width: 100%;
-          aspect-ratio: 1/1;
-          border: var(--default-border-style);
-          border-bottom: none;
 
           img {
             display: block;
             width: 100%;
             height: 100%;
+            aspect-ratio: 1/1;
             object-fit: cover;
           }
         }
@@ -186,7 +158,6 @@
           padding-top: 5px;
           margin-top: 5px;
           margin-bottom: 5px;
-          background: var(--color-alert);
           padding: 5px;
           word-break: break-word;
           overflow-wrap: anywhere;

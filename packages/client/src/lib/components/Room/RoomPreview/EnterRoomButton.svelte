@@ -20,6 +20,8 @@
 <style>
   .room-enter {
     display: block;
-    height: 90px;
+    height: 100%;
+    padding: 5px;
+    width: 100%;
   }
 </style>

@@ -38,27 +38,27 @@
     </div>
     <!-- OWNER -->
     <div class="row">
-      <div class="label">OWNER</div>
+      <div class="label">Creator</div>
       <div class="value">{getRoomOwnerName(room)}</div>
     </div>
     <!-- VISIT COUNT -->
-    <div class="row visit-count">
+    <!-- <div class="row visit-count">
       <div class="label">VISITS</div>
       <div class="value">{room.visitCount}</div>
-    </div>
+    </div> -->
     <!-- KILL COUNT -->
-    {#if room?.killCount > 0}
+    <!-- {#if room?.killCount > 0}
       <div class="row kill-count">
         <div class="label">KILLS</div>
         <div class="value">{room?.killCount}</div>
       </div>
-    {/if}
-    {#if room?.minRatValueToEnter > 0}
+    {/if} -->
+    <!-- {#if room?.minRatValueToEnter > 0}
       <div class="row min-rat-value-to-enter">
         <div class="label">MIN RAT VALUE TO ENTER</div>
         <div class="value">${room?.minRatValueToEnter}</div>
       </div>
-    {/if}
+    {/if} -->
     {#if room?.maxValuePerWin > 0}
       <div class="row max-value-per-win">
         <div class="label">MAX VALUE PER WIN</div>
@@ -66,10 +66,10 @@
       </div>
     {/if}
     <!-- BALANCE -->
-    <div class="row balance" class:depleted={Number(room.balance) == 0}>
+    <!-- <div class="row balance" class:depleted={Number(room.balance) == 0}>
       <div class="label">BALANCE</div>
       <div class="value">${room.balance}</div>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -110,8 +110,7 @@
       img {
         width: 100%;
         aspect-ratio: 1/1;
-        object-fit: cover;
-        border: var(--default-border-style);
+        object-fit: contain;
       }
 
       .image-placeholder {
@@ -146,26 +145,26 @@
           font-size: var(--font-size-large);
         }
 
-        &.balance {
-          background: var(--color-value);
-          color: var(--background);
-          padding: 5px;
-          height: auto;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
+        // &.balance {
+        //   background: var(--color-value);
+        //   color: var(--background);
+        //   padding: 5px;
+        //   height: auto;
+        //   flex: 1;
+        //   display: flex;
+        //   flex-direction: column;
+        //   align-items: center;
+        //   justify-content: center;
 
-          &.depleted {
-            background: var(--color-death);
-            color: var(--background);
-          }
+        //   &.depleted {
+        //     background: var(--color-death);
+        //     color: var(--background);
+        //   }
 
-          .value {
-            font-size: var(--font-size-extra-large);
-          }
-        }
+        //   .value {
+        //     font-size: var(--font-size-extra-large);
+        //   }
+        // }
 
         &.index {
           color: var(--color-grey-mid);

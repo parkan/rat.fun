@@ -38,7 +38,7 @@
 <style lang="scss">
   button {
     width: 100%;
-    height: 100px;
+    height: 100%;
     background: var(--color-alert-priority);
     border: none;
     border-style: outset;
@@ -60,8 +60,8 @@
     }
 
     &:active {
-      background: var(--color-alert-priority-muted);
       border-style: inset;
+      background: var(--color-alert-priority-muted);
       transform: translateY(2px);
       position: relative;
       color: white;

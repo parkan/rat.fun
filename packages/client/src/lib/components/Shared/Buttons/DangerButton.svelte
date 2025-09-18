@@ -36,14 +36,14 @@
     height: 100%;
     border: none;
     border-style: outset;
-    border-width: 7px;
+    border-width: 10px;
     border-color: rgba(0, 0, 0, 0.5);
 
     background: var(--color-death);
 
     .button-text {
       letter-spacing: -0.2em;
-      font-size: 32px;
+      font-size: var(--font-size-extra-large);
       font-family: var(--label-font-stack);
     }
 
@@ -53,10 +53,9 @@
 
     &:active {
       border-style: inset;
+      background: var(--color-alert-priority-muted);
       transform: translateY(2px);
-      border-width: 5px;
       position: relative;
-      top: -2px;
       color: white;
     }
 

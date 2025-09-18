@@ -34,7 +34,7 @@
     height: var(--pane-switch-height);
     line-height: var(--pane-switch-height);
     width: 100px;
-    background: var(--color-grey-mid);
+    background: var(--color-grey-dark);
     position: relative;
 
     .pane-switch-item {
@@ -46,10 +46,6 @@
       color: var(--background);
       width: 100px;
       z-index: 100;
-
-      &:first-child {
-        border-right: var(--default-border-style);
-      }
 
       a {
         border: none;

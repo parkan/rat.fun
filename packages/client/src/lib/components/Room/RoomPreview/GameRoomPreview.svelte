@@ -9,13 +9,7 @@
   import { busy } from "$lib/modules/action-manager/index.svelte"
 
   import { NoRatWarning } from "$lib/components/Rat"
-  import {
-    RoomPreviewHeader,
-    RoomPreviewPrompt,
-    RoomPreviewGraph,
-    RoomPreviewEventLog,
-    EnterRoomButton
-  } from "$lib/components/Room"
+  import { RoomPreviewHeader, RoomPreviewPrompt, EnterRoomButton } from "$lib/components/Room"
 
   let {
     roomId,
@@ -45,50 +39,89 @@
   })
 </script>
 
-<a class="back-button" href="/">Back</a>
-<div class="room-inner-container">
-  <RoomPreviewHeader {room} {sanityRoomContent} />
-  <RoomPreviewPrompt {room} />
+<div class="game-room-preview">
+  <!-- Back Button -->
+  <a class="back-button" href="/">
+    <div>Back</div>
+  </a>
 
-  {#if showNoRatWarning}
-    <NoRatWarning />
-  {/if}
+  <!-- Header -->
+  <div class="room-header">
+    <RoomPreviewHeader {room} {sanityRoomContent} />
+  </div>
 
-  {#if showEnterButton}
-    <EnterRoomButton
-      disabled={busy.LiquidateRat.current != 0 || ($rat?.balance || 0) < room.minRatValueToEnter}
-      {roomId}
-    />
-  {/if}
+  <!-- Prompt -->
+  <div class="room-prompt">
+    <RoomPreviewPrompt {room} />
+  </div>
 
-  <RoomPreviewGraph {room} {roomOutcomes} {sanityRoomContent} />
-  <RoomPreviewEventLog {roomId} {roomOutcomes} />
+  <!-- Bottom section -->
+  <div class="room-bottom">
+    {#if showNoRatWarning}
+      <NoRatWarning />
+    {/if}
+
+    {#if showEnterButton}
+      <EnterRoomButton
+        disabled={busy.LiquidateRat.current != 0 || ($rat?.balance || 0) < room.minRatValueToEnter}
+        {roomId}
+      />
+    {/if}
+  </div>
+
+  <!-- <RoomPreviewGraph {room} {roomOutcomes} {sanityRoomContent} /> -->
+  <!-- <RoomPreviewEventLog {roomId} {roomOutcomes} /> -->
 </div>
 
 <style lang="scss">
-  .room-inner-container {
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
+  .game-room-preview {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
     height: 100%;
+    width: 100%;
     max-height: 100%;
-    padding-bottom: calc(var(--pane-switch-height) + var(--world-prompt-box-height) + 20px);
-    overflow-x: hidden;
+    overflow: hidden;
+
+    .room-header {
+      width: 100%;
+      border-bottom: var(--default-border-style);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .room-prompt {
+      flex: 1; /* Take remaining space */
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+    }
+
+    .room-bottom {
+      height: var(--liquidate-rat-height);
+      width: 100%;
+      border-top: var(--default-border-style);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   .back-button {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--color-grey-light);
     border-bottom: 1px solid var(--color-grey-mid);
     padding: 0 12px;
-    position: sticky;
     height: 60px;
-    top: 0;
-    line-height: 60px;
     font-family: var(--special-font-stack);
     font-size: 20px;
     text-transform: uppercase;
     background: var(--background-semi-transparent);
+    flex-shrink: 0;
 
     &:hover {
       color: var(--white);
