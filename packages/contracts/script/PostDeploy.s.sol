@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
+import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { MockV3Aggregator } from "@chainlink/contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
 
@@ -9,8 +10,10 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
+import { worldRegistrationSystem } from "@latticexyz/world/src/codegen/experimental/systems/WorldRegistrationSystemLib.sol";
 
 import { GameConfig } from "../src/codegen/index.sol";
+import { devSystem, DevSystem } from "../src/codegen/systems/DevSystemLib.sol";
 
 import { LibWorld, LibRoom } from "../src/libraries/Libraries.sol";
 
@@ -28,6 +31,19 @@ contract PostDeploy is Script {
     // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
     uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     vm.startBroadcast(deployerPrivateKey);
+
+    // Conditionally deploy DevSystem for local/test chains
+    if (block.chainid == 31337 || block.chainid == 84532) {
+      bool systemExists = ResourceIds.getExists(devSystem.toResourceId());
+      worldRegistrationSystem.registerSystem(devSystem.toResourceId(), new DevSystem(), true);
+      // Register selectors if this is the first time deploying the system
+      if (!systemExists) {
+        worldRegistrationSystem.registerFunctionSelector(
+          devSystem.toResourceId(),
+          "giveCallerTokens()"
+        );
+      }
+    }
 
     // TODO replace placeholders with actual contract/wallet addresses
     address incomeRecipient = vm.addr(deployerPrivateKey);
