@@ -38,10 +38,7 @@ contract PostDeploy is Script {
       worldRegistrationSystem.registerSystem(devSystem.toResourceId(), new DevSystem(), true);
       // Register selectors if this is the first time deploying the system
       if (!systemExists) {
-        worldRegistrationSystem.registerFunctionSelector(
-          devSystem.toResourceId(),
-          "giveCallerTokens()"
-        );
+        worldRegistrationSystem.registerFunctionSelector(devSystem.toResourceId(), "giveCallerTokens()");
       }
     }
 

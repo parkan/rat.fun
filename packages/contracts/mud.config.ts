@@ -94,7 +94,7 @@ export default defineWorld({
       deploy: {
         disabled: true
       }
-    },
+    }
   },
   modules: [
     {
