@@ -1,7 +1,17 @@
 <script lang="ts">
   import { SmallButton } from "$lib/components/Shared"
+  import { rooms, playerRooms, playerIsNew } from "$lib/modules/state/stores"
+  import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
 
   let sidebar = $state(false)
+
+  let sortFunction = $state(entriesChronologically)
+
+  let roomList = $derived.by(() => {
+    let entries = Object.entries($playerRooms)
+
+    return entries.sort(sortFunction)
+  })
 </script>
 
 <div class="admin-trip-table-container">
@@ -17,74 +27,25 @@
       </tr>
     </thead>
     <tbody>
-      <tr
-        onclick={() => {
-          sidebar = true
-        }}
-        class="simple-row"
-      >
-        <td class="cell-description"
-          >This trip is volatile and churny; all interactions are fast and can swing balance
-          quickly. Keep hands on controls.</td
+      {#each roomList as roomEntry (roomEntry[0])}
+        <tr
+          onclick={() => {
+            sidebar = true
+          }}
+          class="simple-row"
         >
-        <td class="cell-balance">200</td>
-        <td class="cell-profit-loss">+1000</td>
-        <td class="cell-age">0:21:22</td>
-        <td class="cell-graph">
-          <div class="mini-graph" />
-        </td>
-        <td class="cell-actions">
-          <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-        </td>
-      </tr>
-      <!--  -->
-      <tr class="simple-row">
-        <td class="cell-description"
-          >This trip is volatile and churny; all interactions are fast and can swing balance
-          quickly. Keep hands on controls.</td
-        >
-        <td class="cell-balance">200</td>
-        <td class="cell-profit-loss">+1000</td>
-        <td class="cell-age">0:21:22</td>
-        <td class="cell-graph">
-          <div class="mini-graph" />
-        </td>
-        <td class="cell-actions">
-          <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-        </td>
-      </tr>
-      <!--  -->
-      <tr class="simple-row">
-        <td class="cell-description"
-          >This trip is volatile and churny; all interactions are fast and can swing balance
-          quickly. Keep hands on controls.</td
-        >
-        <td class="cell-balance">200</td>
-        <td class="cell-profit-loss">+1000</td>
-        <td class="cell-age">0:21:22</td>
-        <td class="cell-graph">
-          <div class="mini-graph" />
-        </td>
-        <td class="cell-actions">
-          <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-        </td>
-      </tr>
-      <!--  -->
-      <tr class="simple-row">
-        <td class="cell-description"
-          >This trip is volatile and churny; all interactions are fast and can swing balance
-          quickly. Keep hands on controls.</td
-        >
-        <td class="cell-balance">200</td>
-        <td class="cell-profit-loss">+1000</td>
-        <td class="cell-age">0:21:22</td>
-        <td class="cell-graph">
-          <div class="mini-graph" />
-        </td>
-        <td class="cell-actions">
-          <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-        </td>
-      </tr>
+          <td class="cell-description">{roomEntry[1].prompt}</td>
+          <td class="cell-balance">{roomEntry[1].balance}</td>
+          <td class="cell-profit-loss">{roomEntry[1].roomCreationCost - roomEntry[1].balance}</td>
+          <td class="cell-age">0:21:22</td>
+          <td class="cell-graph">
+            <div class="mini-graph" />
+          </td>
+          <td class="cell-actions">
+            <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
+          </td>
+        </tr>
+      {/each}
     </tbody>
   </table>
 </div>

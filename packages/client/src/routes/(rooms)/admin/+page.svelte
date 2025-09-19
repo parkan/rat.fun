@@ -36,7 +36,7 @@
 
 {#snippet createTrip()}
   <div class="create-room-wrapper">
-    <CreateRoom />
+    <CreateRoom ondone={modal.close} />
   </div>
 {/snippet}
 

@@ -7,7 +7,6 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
   import { playSample } from "$lib/modules/sound/synth-library/plucked"
-  import { waitForPropertyChange } from "$lib/modules/state/utils"
   import { playUISound, getMixerState } from "$lib/modules/sound/state.svelte"
   import {
     MIN_ROOM_CREATION_COST,
@@ -15,6 +14,8 @@
     MAX_VALUE_PER_WIN_FACTOR
   } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
+
+  let { ondone } = $props()
 
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
@@ -83,13 +84,7 @@
         mixer.rampChannelVolume("music", 0, 0.5)
       })
       const result = await sendCreateRoom(roomDescription, flooredRoomCreationCost)
-
-      if (result?.roomId) {
-        // Wait for created room to be available in the store
-        await waitForPropertyChange(rooms, result.roomId, undefined, 10000)
-        goto(`/admin/${result.roomId}`)
-        busy = false
-      }
+      ondone()
     } catch (error) {
       errorHandler(error)
       roomDescription = ""

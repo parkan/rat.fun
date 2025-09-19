@@ -8,23 +8,33 @@
   const balance = derived(playerRooms, $playerRooms =>
     Object.values($playerRooms).reduce((a, b) => a + Number(b.balance), 0)
   )
+  const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
+  const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
+    if ($profitLoss === $balance) return "neutral"
+    return $profitLoss > $balance ? "upText" : "downText"
+  })
 </script>
 
 <div class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
       <p>Unrealized P&L</p>
-      <h1>{$balance - $investment} ({(($balance / $investment) * 100).toFixed(2)}%)</h1>
+      <h1>
+        <span class={$portfolioClass}>{$profitLoss}</span> ({(
+          ($balance / $investment) *
+          100
+        ).toFixed(2)}%)
+      </h1>
       <!-- Investment minus balance (percentage of investment) -->
     </div>
     <div class="bottom-left">
       <p>Portfolio</p>
-      <h1>{$balance}</h1>
+      <h2 class={$portfolioClass}>{$balance}</h2>
       <!-- Complete balance of all active trips -->
     </div>
     <div class="bottom-right">
       <p>Invested</p>
-      <h1>{$investment}</h1>
+      <h2>{$investment}</h2>
       <!-- Complete invested  -->
     </div>
   </div>
@@ -35,14 +45,45 @@
   .admin-trip-monitor {
     width: 100%;
     height: 400px;
-    background: green;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     padding: 2rem;
 
+    .down {
+      background: red;
+    }
+
+    .up {
+      background: green;
+    }
+    .downText {
+      color: red;
+    }
+
+    .upText {
+      color: green;
+    }
+
+    p {
+      color: var(--color-grey-light);
+      margin: 2rem;
+    }
+
+    h1 {
+      font-family: var(--special-font-stack);
+      font-size: 3.6rem;
+      margin: 2rem 1rem;
+    }
+    h2 {
+      font-family: var(--special-font-stack);
+      font-size: 2rem;
+      margin: 1.2rem 1rem;
+    }
+
     .p-l-overview {
       // background: #000;
+      min-width: 500px;
       width: 500px;
       padding-right: 1rem;
       display: grid;
@@ -52,17 +93,18 @@
 
       .top {
         grid-column: 1/3;
-        background: red;
+        background: rgba(0, 0, 0, 0.2);
         padding: 0.2rem;
       }
       .bottom-left,
       .bottom-right {
         padding: 0.2rem;
         margin: 0;
-        background: blue;
-      }
-      p {
-        margin: 0;
+        background: rgba(0, 0, 0, 0.2);
+
+        p {
+          margin: 1.2rem 1rem;
+        }
       }
     }
 
