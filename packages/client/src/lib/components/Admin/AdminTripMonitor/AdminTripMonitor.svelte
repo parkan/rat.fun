@@ -1,23 +1,30 @@
 <script lang="ts">
-  let investment = $state(700)
-  let balance = $state(3000)
+  import { derived } from "svelte/store"
+  import { playerRooms } from "$lib/modules/state/stores"
+
+  const investment = derived(playerRooms, $playerRooms =>
+    Object.values($playerRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+  )
+  const balance = derived(playerRooms, $playerRooms =>
+    Object.values($playerRooms).reduce((a, b) => a + Number(b.balance), 0)
+  )
 </script>
 
 <div class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
       <p>Unrealized P&L</p>
-      <h1>{balance - investment} ({((balance / investment) * 100).toFixed(2)}%)</h1>
+      <h1>{$balance - $investment} ({(($balance / $investment) * 100).toFixed(2)}%)</h1>
       <!-- Investment minus balance (percentage of investment) -->
     </div>
     <div class="bottom-left">
       <p>Portfolio</p>
-      <h1>{balance}</h1>
+      <h1>{$balance}</h1>
       <!-- Complete balance of all active trips -->
     </div>
     <div class="bottom-right">
       <p>Invested</p>
-      <h1>{investment}</h1>
+      <h1>{$investment}</h1>
       <!-- Complete invested  -->
     </div>
   </div>

@@ -1,6 +1,11 @@
 <script lang="ts">
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
-  import { AdminTripMonitor, AdminTripTable, CreateRoom } from "$lib/components/Admin"
+  import {
+    AdminTripMonitor,
+    AdminPastTripsMonitor,
+    AdminTripTable,
+    CreateRoom
+  } from "$lib/components/Admin"
   import { BigButton } from "$lib/components/Shared"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
 
@@ -25,6 +30,7 @@
   <!-- Event feed -->
 
   <!-- Past Trip Monitor -->
+  <AdminPastTripsMonitor />
   <!-- Past Trip Table -->
 </div>
 
@@ -33,7 +39,6 @@
     <CreateRoom />
   </div>
 {/snippet}
-
 
 <style>
   .create-room-wrapper {
