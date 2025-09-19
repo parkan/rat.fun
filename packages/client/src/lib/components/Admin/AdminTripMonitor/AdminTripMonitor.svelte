@@ -38,7 +38,7 @@
       <!-- Complete invested  -->
     </div>
   </div>
-  <div class="p-l-graph"></div>
+  <div class="p-l-graph">BigGraph</div>
 </div>
 
 <style lang="scss">
@@ -112,6 +112,9 @@
       height: 400px;
       width: 100%;
       background: #222;
+      text-align: center;
+      font-size: 7rem;
+      line-height: 400px;
     }
   }
 </style>

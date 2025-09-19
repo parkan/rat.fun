@@ -1,11 +1,50 @@
 <script lang="ts">
+  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
   import { SmallButton } from "$lib/components/Shared"
+  import { RoomGraph } from "$lib/components/Room"
   import { rooms, playerRooms, playerIsNew } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
+  import { blocksToReadableTime, renderSafeString } from "$lib/modules/utils"
+  import { blockNumber } from "$lib/modules/network"
+  import { staticContent } from "$lib/modules/content"
+  import { Xed } from "$lib/components/Shared"
 
   let sidebar = $state(false)
 
   let sortFunction = $state(entriesChronologically)
+
+  let plots: Record<string, PlotPoint[]> = $derived.by(() => {
+    const result = Object.fromEntries(
+      roomList.map(([roomId, room]) => {
+        let sanityRoomContent = $staticContent?.rooms?.find(r => r.title == roomId)
+
+        const outcomes = $staticContent?.outcomes?.filter(o => o.roomId == roomId) || []
+        // Sort the outcomes in order of creation
+        outcomes.sort((a, b) => {
+          return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
+        })
+        const roomOutcomes = outcomes.reverse()
+        const value = [
+          {
+            time: 0,
+            roomValue: 250,
+            meta: sanityRoomContent
+          },
+          ...roomOutcomes
+        ].map((o, i) => {
+          return {
+            time: i,
+            value: o?.roomValue || 0,
+            meta: o
+          }
+        })
+
+        // Map the values
+        return [roomId, value]
+      })
+    )
+    return result
+  })
 
   let roomList = $derived.by(() => {
     let entries = Object.entries($playerRooms)
@@ -28,18 +67,29 @@
     </thead>
     <tbody>
       {#each roomList as roomEntry (roomEntry[0])}
+        {@const room = roomEntry[1]}
+        {@const plotData = plots[roomEntry[0]]}
         <tr
           onclick={() => {
             sidebar = true
           }}
           class="simple-row"
         >
-          <td class="cell-description">{roomEntry[1].prompt}</td>
-          <td class="cell-balance">{roomEntry[1].balance}</td>
-          <td class="cell-profit-loss">{roomEntry[1].roomCreationCost - roomEntry[1].balance}</td>
-          <td class="cell-age">0:21:22</td>
+          <td class="cell-description">{room.prompt}</td>
+          <td class="cell-balance">{room.balance}</td>
+          <td class="cell-profit-loss">{room.roomCreationCost - room.balance}</td>
+          <td class="cell-age">
+            {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
+          </td>
           <td class="cell-graph">
-            <div class="mini-graph" />
+            {console.log(plotData)}
+            {#if plotData}
+              <div class="mini-graph">
+                <RoomGraph {plotData} isEmpty={plotData.length === 0} />
+              </div>
+            {:else}
+              <div class="mini-graph" />
+            {/if}
           </td>
           <td class="cell-actions">
             <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>

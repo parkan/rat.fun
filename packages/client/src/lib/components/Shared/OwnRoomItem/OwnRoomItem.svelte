@@ -4,7 +4,8 @@
   import { blocksToReadableTime, renderSafeString } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
-  import { RoomGraph, Xed } from "$lib/components/Shared"
+  import { RoomGraph } from "$lib/components/Room"
+  import { Xed } from "$lib/components/Shared"
 
   let { roomId, room }: { roomId: Hex; room: Room } = $props()
 
