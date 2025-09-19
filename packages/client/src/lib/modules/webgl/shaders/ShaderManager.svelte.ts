@@ -17,7 +17,7 @@ export type ShaderModeConfig<TMode extends string = string> = Record<
 
 export interface ShaderConfiguration<TMode extends string = string> {
   modes: ShaderModeConfig<TMode>
-  tweens: Record<string, Tween<number>>
+  tweens: Record<string, { value: number; duration: number }>
   initialMode: TMode
   getMode?: (page: import("@sveltejs/kit").Page) => string
 }
@@ -26,19 +26,19 @@ export class ShaderManager<TMode extends string = string> {
   private renderer: WebGLGeneralRenderer | null = null
   private resizeTimeout: ReturnType<typeof setTimeout> | null = null
   private currentMode = $state<TMode>()
-
-  // Configuration
   private modes: ShaderModeConfig<TMode>
   private tweens: Map<string, Tween<number>> = new Map()
+  private tweenConfigs: Record<string, any>
   private booleanUniforms = $state<Record<string, boolean>>({})
 
   constructor(config: ShaderConfiguration<TMode>) {
     this.modes = config.modes
     this.currentMode = config.initialMode
+    this.tweenConfigs = config.tweens
 
     // Store the provided tweens
     Object.entries(config.tweens).forEach(([name, tween]) => {
-      this.tweens.set(name, tween)
+      this.tweens.set(name, new Tween(tween.value, { duration: tween.duration }))
     })
 
     // Initialize boolean uniforms by scanning all modes for non-tween values
@@ -81,7 +81,6 @@ export class ShaderManager<TMode extends string = string> {
   get uniformValues(): Record<string, number | boolean> {
     const values: Record<string, number | boolean> = {}
     this.tweens.forEach((tween, name) => {
-      console.log("u_" + name, tween.current)
       values[name] = tween.current
     })
     Object.entries(this.booleanUniforms).forEach(([name, value]) => {
@@ -103,7 +102,7 @@ export class ShaderManager<TMode extends string = string> {
   /**
    * Set new mode and transition uniforms
    */
-  setMode(newMode: TMode) {
+  setMode(newMode: TMode, tweenDuration?: number) {
     console.log("setting mode to ", newMode)
     if (!this.modes[newMode]) {
       console.warn(`Mode '${newMode}' not found in configuration`)
@@ -117,8 +116,13 @@ export class ShaderManager<TMode extends string = string> {
     Object.entries(modeConfig).forEach(([uniformName, targetValue]) => {
       const tween = this.tweens.get(uniformName)
       if (tween && typeof targetValue === "number") {
+        const config = this.tweenConfigs[uniformName]
         // Handle tween-based uniforms
-        tween.set(targetValue)
+        if (tweenDuration) {
+          tween.set(targetValue, { duration: tweenDuration })
+        } else {
+          tween.set(targetValue, { duration: config.duration })
+        }
       } else if (typeof targetValue === "boolean") {
         // Handle boolean uniforms
         this.booleanUniforms[uniformName] = targetValue
@@ -177,7 +181,6 @@ export class ShaderManager<TMode extends string = string> {
 
     // Update tween-based uniforms
     this.tweens.forEach((tween, name) => {
-      console.log("u_" + name, tween.current)
       this.renderer!.setUniform(`u_${name}`, tween.current, "float")
     })
 

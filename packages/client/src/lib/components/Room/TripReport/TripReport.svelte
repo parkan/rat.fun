@@ -11,7 +11,7 @@
     console.log("play result good")
     sound = playUISound("ratfun", "tripResultLoop")
     playUISound("ratfun", "tripResultTrigger")
-    shaderManager.setMode("stars")
+    // shaderManager.setMode("stars")
   })
 
   onDestroy(async () => {

@@ -63,12 +63,12 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
     }
   },
   tweens: {
-    opacity: new Tween(1, { duration: 1000 }),
-    speed: new Tween(1, { duration: 200 }),
-    invert: new Tween(1, { duration: 100 }),
-    clouds_amount: new Tween(1, { duration: 1000 }),
-    nebula_amount: new Tween(1, { duration: 1000 }),
-    trippy: new Tween(0, { duration: 10000 })
+    opacity: { value: 1, duration: 1000 },
+    speed: { value: 1, duration: 200 },
+    invert: { value: 1, duration: 100 },
+    clouds_amount: { value: 1, duration: 1000 },
+    nebula_amount: { value: 1, duration: 1000 },
+    trippy: { value: 0, duration: 4000 }
   },
   getMode: (page: import("@sveltejs/kit").Page): string => {
     if (!page.route.id) return "stars"
@@ -76,7 +76,7 @@ export const shaderConfig: ShaderConfiguration<ShaderMode> = {
     if (page.route.id === "/(rooms)/(game)/[roomId]/result/[outcomeId]") {
       return "stars"
     } else if (page.route.id === "/(rooms)/(game)/[roomId]/result") {
-      return "warpspeed"
+      return "off"
     } else if (page.route.id.includes("(game)")) {
       // not spawned
       if (!get(player)) {

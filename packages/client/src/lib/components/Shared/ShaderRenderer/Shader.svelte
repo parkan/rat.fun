@@ -34,7 +34,12 @@
 
   afterNavigate(() => {
     currentMode = shaders.ratfun.config?.getMode?.(page)
-    shaderManager.setMode(currentMode)
+    console.log("we are setting the mode here", currentMode)
+    if (currentMode === "stars") {
+      shaderManager.setMode(currentMode, 100)
+    } else if (currentMode) {
+      shaderManager.setMode(currentMode)
+    }
   })
 </script>
 

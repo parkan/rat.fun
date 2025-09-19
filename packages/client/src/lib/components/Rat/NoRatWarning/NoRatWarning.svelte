@@ -12,5 +12,6 @@
     height: 80px;
     line-height: 80px;
     user-select: none;
+    width: 100%;
   }
 </style>
