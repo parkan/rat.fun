@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SmallButton, CreateRoom } from "$lib/components/Shared"
+  import { SmallButton } from "$lib/components/Shared"
 
   let sidebar = $state(false)
 </script>
@@ -107,7 +107,7 @@
   .mini-graph {
     width: 200px;
     height: 80px;
-    background: red;
+    background: #222;
   }
 
   .simple-row {
@@ -125,7 +125,7 @@
     }
     .cell-balance {
       width: 120px;
-      background: red;
+      // background: red;
     }
     .cell-profit-loss {
       width: 120px;

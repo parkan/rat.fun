@@ -9,7 +9,7 @@
     initSound,
     snapshotFactory,
     switchAudio,
-    audienceCoughs
+    ratCoughs
   } from "$lib/modules/sound/state.svelte"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
@@ -95,7 +95,7 @@
 
     switchAudio(page)
 
-    audienceCoughs()
+    ratCoughs()
 
     document.removeEventListener("click", enableAudio)
     document.removeEventListener("touchstart", enableAudio)

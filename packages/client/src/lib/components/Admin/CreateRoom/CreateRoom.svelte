@@ -252,13 +252,14 @@
       width: 100%;
 
       .cost-display {
-        background: var(--color-alert);
+        background: var(--foreground);
         padding: 5px;
         color: var(--background);
         font-weight: normal;
         font-family: var(--typewriter-font-stack);
         border: none;
-        width: 200px;
+        width: 60px;
+        text-align: right;
         border: none;
         outline: none;
         &:focus {
@@ -287,7 +288,7 @@
           appearance: none;
           width: 20px;
           height: 20px;
-          background: var(--foreground);
+          background: var(--color-alert);
           border: 2px solid var(--background);
           cursor: pointer;
         }
@@ -328,7 +329,7 @@
       padding-right: 1rem;
       display: flex;
       gap: 0;
-      margin-bottom: 0;
+      margin-bottom: 1rem;
 
       .value-box {
         flex: 1;

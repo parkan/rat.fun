@@ -3,7 +3,7 @@ import type { Snapshot } from "./$types"
 import * as Tone from "tone"
 import { soundLibrary } from "$lib/modules/sound/sound-library"
 import { page } from "$app/state"
-import { player } from "$lib/modules/state/stores"
+import { player, ratTotalValue } from "$lib/modules/state/stores"
 
 export type ChannelConfig = {
   volume: number
@@ -258,16 +258,26 @@ const getMusicForRoute = (route: Partial<import("@sveltejs/kit").Page>) => {
   return null
 }
 
-export async function audienceCoughs() {
+export async function ratCoughs() {
   const randomCough = () => {
-    // Just not when we're not spawned and also not when we are in the results
-    if (get(player) && !page.route.id?.includes("result")) {
+    // Just not when we're not with rat and also not when we are in the results
+    if (get(player)?.currentRat && !page.route.id?.includes("result")) {
       console.log("playing a little cough")
       playUISound("ratfun", "cough" + Math.ceil(Math.random() * 13))
     }
 
+    // Base the next cough on the rat health
+    // Above 200 is too healthy to cough a lot. So only once every 15-20 seconds
+    // 100 is pretty good. So only one cough every 10 seconds.
+    // below 50 is low value, and means random, more frequent coughing
+
+    let chillTime = 10000
+    const _total = get(ratTotalValue)
+    if (_total > 200) chillTime = 15000 + Math.random() * 5000
+    if (_total < 50) chillTime = 3000 + Math.random() * 7000
+
     // Trigger the next one in 10 seconds
-    setTimeout(randomCough, 10000)
+    setTimeout(randomCough, chillTime)
   }
   // Set a wait time of 2 seconds
   setTimeout(randomCough, 2000)

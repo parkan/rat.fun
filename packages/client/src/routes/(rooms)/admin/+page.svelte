@@ -1,21 +1,26 @@
 <script lang="ts">
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
-  // import { AdminTripMonitor, AdminTripTable, CreateRoom } from "$lib/components/Admin"
-  // import { BigButton, ModalTarget } from "$lib/components/Shared"
+  import { AdminTripMonitor, AdminTripTable, CreateRoom } from "$lib/components/Admin"
+  import { BigButton } from "$lib/components/Shared"
+  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
 
-  let showCreateTrip = $state(false)
+  let { modal } = getModalState()
+
+  const startCreateRoom = () => {
+    modal.set(createTrip)
+  }
 </script>
 
 <SEO prependTitle="ADMIN" />
 
 <div class="">
-  <!-- <AdminTripMonitor /> -->
-  <!-- <BigButton text="Create trip" onclick={() => (showCreateTrip = true)} /> -->
+  <AdminTripMonitor />
+  <BigButton text="Create trip" onclick={startCreateRoom} />
   <!-- In top bar: ProfitLossOverview -->
 
   <!-- Active Trip Monitor -->
   <!-- New Trip Dialog -->
-  <!-- <AdminTripTable /> -->
+  <AdminTripTable />
   <!-- Active Trip Table -->
   <!-- Event feed -->
 
@@ -23,15 +28,16 @@
   <!-- Past Trip Table -->
 </div>
 
-<!-- {#snippet createTrip()}
-  <CreateRoom />
-{/snippet} -->
+{#snippet createTrip()}
+  <div class="create-room-wrapper">
+    <CreateRoom />
+  </div>
+{/snippet}
 
-<!-- {#if showCreateTrip}
-  <ModalTarget
-    onclose={() => {
-      showCreateTrip = false
-    }}
-    content={createTrip}
-  />
-{/if} -->
+
+<style>
+  .create-room-wrapper {
+    width: 600px;
+    z-index: 99;
+  }
+</style>
