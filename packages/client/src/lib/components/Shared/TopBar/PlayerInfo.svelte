@@ -1,6 +1,7 @@
 <script lang="ts">
   import { player, playerERC20Balance } from "$lib/modules/state/stores"
   import { NumberGoing } from "$lib/components/Shared"
+  import { playUISound } from "$lib/modules/sound/state.svelte"
   import { tippy } from "svelte-tippy"
 
   import AccountStats from "./AccountStats.svelte"
@@ -9,6 +10,11 @@
 
   let balanceGoing = $state(false)
   let showAccountStats = $state(false)
+
+  function toggleAccountStats() {
+    playUISound("ratfun", "textLineHit")
+    showAccountStats = !showAccountStats
+  }
 </script>
 
 <div class="player-info">
@@ -16,7 +22,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   {#if $player}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="player-stats" onclick={() => (showAccountStats = !showAccountStats)}>
+    <div class="player-stats" onclick={toggleAccountStats}>
       <!-- NAME -->
       <div class="stat-item">
         <!-- AVATAR -->

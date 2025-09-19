@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte"
   import {
     playerAddress,
     playerERC20Allowance,
@@ -40,14 +39,6 @@
   const sendUnlockAdmin = async () => {
     await sendChatMessage("RatsRiseUp666")
   }
-
-  onMount(() => {
-    playUISound("ratfun", "textLineHit")
-  })
-
-  onDestroy(() => {
-    playUISound("ratfun", "textLineHit")
-  })
 </script>
 
 <div class="account-stats">
