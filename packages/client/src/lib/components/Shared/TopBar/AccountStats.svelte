@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { mask } from "$lib/components/Shared/PageTransitions/transitionFunctions"
+  import { fade } from "svelte/transition"
   import {
     playerAddress,
     playerERC20Allowance,
@@ -139,6 +141,7 @@
     position: fixed;
     top: 68px;
     left: 8px;
+    width: 600px;
     background-color: var(--background-semi-transparent);
     color: var(--white);
     padding: 20px;
