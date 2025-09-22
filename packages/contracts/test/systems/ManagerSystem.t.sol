@@ -41,7 +41,10 @@ contract ManagerSystemTest is BaseTest {
     vm.stopPrank();
   }
 
-  function _removeFromItemArray(Item[] memory _array, string memory _name) internal pure returns (Item[] memory newArray) {
+  function _removeFromItemArray(
+    Item[] memory _array,
+    string memory _name
+  ) internal pure returns (Item[] memory newArray) {
     bool found = false;
     uint256 foundIndex = 0;
 
@@ -128,7 +131,14 @@ contract ManagerSystemTest is BaseTest {
     prankAdmin();
 
     // Create a room with minRatValueToEnter higher than the initial rat balance
-    roomId = world.ratfun__createRoom(bobId, bytes32(0), ROOM_INITIAL_BALANCE, 100, RAT_CREATION_COST + 10, "test room");
+    roomId = world.ratfun__createRoom(
+      bobId,
+      bytes32(0),
+      ROOM_INITIAL_BALANCE,
+      100,
+      RAT_CREATION_COST + 10,
+      "test room"
+    );
 
     vm.expectRevert("rat value too low");
     world.ratfun__applyOutcome(ratId, roomId, 0, new bytes32[](0), new Item[](0));
