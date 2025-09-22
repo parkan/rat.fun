@@ -35,8 +35,6 @@
     if (canvas) {
       const currentShaderObj = shaders[currentShader as keyof typeof shaders]
       shaderManager.initializeRenderer(canvas, currentShaderObj)
-
-      shaderManager.setMode(currentMode)
     }
   })
 
@@ -44,11 +42,11 @@
     shaderManager.destroy()
   })
 
-  afterNavigate(() => {
-    const newMode = shaders[currentShader as keyof typeof shaders]?.config?.getMode?.(page)
-    console.log("we are setting the mode here", newMode)
-    shaderManager.setMode(newMode)
-  })
+  // afterNavigate(() => {
+  //   const newMode = shaders[currentShader as keyof typeof shaders]?.config?.getMode?.(page)
+  //   console.log("we are setting the mode here", newMode)
+  //   shaderManager.setMode(newMode)
+  // })
 </script>
 
 <div class="shader-container" in:fade={{ duration: 300 }}>

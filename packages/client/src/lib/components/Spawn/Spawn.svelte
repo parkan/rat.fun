@@ -73,7 +73,6 @@
   })
 
   onMount(() => {
-    shaderManager.setMode("off")
     if (walletType === WALLET_TYPE.BURNER) {
       connectBurner()
     }

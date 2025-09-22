@@ -12,8 +12,6 @@
 
   let { data } = $props()
 
-  $inspect("result", data.entryState)
-
   frozenRoom.set(data.entryState.frozenRoom)
   frozenRat.set(data.entryState.frozenRat)
 

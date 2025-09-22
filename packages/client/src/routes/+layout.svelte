@@ -103,22 +103,24 @@
     document.removeEventListener("keydown", enableAudio)
   }
 
-  const setRandomShader = () => {
-    const keys = Object.keys(shaders)
-    const shaderKey = keys[Math.floor(Math.random() * keys.length)]
-    console.log(shaderKey)
-    shaderManager.setShader(shaderKey)
-  }
+  // const setRandomShader = () => {
+  //   const keys = Object.keys(shaders)
+  //   const shaderKey = keys[Math.floor(Math.random() * keys.length)]
+  //   console.log(shaderKey)
+  //   shaderManager.setShader(shaderKey)
+  // }
 
-  const setShaderWithDefaults = () => {
-    shaderManager.setShader("ratfun")
-  }
+  // const setShaderWithDefaults = () => {
+  //   shaderManager.setShader("ratfun")
+  // }
 
-  const setShaderWithMode = () => {
-    shaderManager.setShader("ratfun", "stars")
-  }
+  // const setShaderWithMode = () => {
+  //   shaderManager.setShader("ratfun", "stars")
+  // }
 
   onMount(async () => {
+    shaderManager.setShader("clouds")
+
     // Remove preloader
     document.querySelector(".preloader")?.remove()
 
@@ -147,11 +149,11 @@
   }}
 />
 
-<div class="testing">
+<!-- <div class="testing">
   <button onclick={setRandomShader}> Random shader </button>
   <button onclick={setShaderWithDefaults}>Set shader with defaults </button>
   <button onclick={setShaderWithMode}>Set shader with mode predefined </button>
-</div>
+</div> -->
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
@@ -181,7 +183,7 @@
       {#if debuggingShader}
         <ShaderRenderer />
       {:else}
-        <!-- <Shader /> -->
+        <Shader />
       {/if}
     {/if}
   {/if}

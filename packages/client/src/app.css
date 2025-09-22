@@ -141,11 +141,6 @@ button {
   transition: all 0.2s ease;
 }
 
-.button-text {
-  position: relative;
-  top: 3px;
-}
-
 .center-tooltip {
   text-align: center;
 }

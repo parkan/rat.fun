@@ -1,7 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { frozenRat } from "$lib/components/Room/Trip/state.svelte"
-  import { goto } from "$app/navigation"
 </script>
 
 <div transition:fade|global class="summary">

@@ -28,6 +28,7 @@ import {
 } from "./kaleidoscope-tunnel"
 import { starfield, type ShaderMode as StarfieldMode } from "./starfield"
 import { ratfun, type ShaderMode as RatfunMode } from "./ratfun"
+import { blank, type ShaderMode as BlankMode } from "./blank"
 
 const shaders = {
   //
@@ -53,7 +54,8 @@ const shaders = {
   kaleidoscopeTunnel,
   starfield,
   starspeed,
-  ratfun
+  ratfun,
+  blank
 }
 
 /**
@@ -86,6 +88,7 @@ type ShaderModes = {
   Starfield: StarfieldMode
   StarSpeed: StarSpeedMode
   RatFun: RatfunMode
+  Blank: BlankMode
 }
 
 export {
@@ -100,4 +103,4 @@ export {
   createShaderManager
 }
 
-export let shaderManager = $state(createShaderManager(shaders.ratfun.config))
+export const shaderManager = $state(createShaderManager(shaders.ratfun.config))

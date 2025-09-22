@@ -35,8 +35,8 @@
     color: var(--foreground);
 
     .rat-dead-image {
-      width: 100px;
-      height: 100px;
+      width: 250px;
+      height: 260px;
 
       img {
         width: 100%;
@@ -51,6 +51,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 80px;
     }
   }
 </style>

@@ -49,9 +49,9 @@ void main() {
   );
   
   // Create multiple layers of clouds
-  vec2 cloudPos1 = uv * 3.0 + vec2(u_time * 0.1, 0.0);
-  vec2 cloudPos2 = uv * 5.0 + vec2(u_time * 0.05, 0.0);
-  vec2 cloudPos3 = uv * 2.0 + vec2(u_time * 0.15, 0.0);
+  vec2 cloudPos1 = uv * 3.0 + vec2(u_time * 0.2, 0.0);
+  vec2 cloudPos2 = uv * 5.0 + vec2(u_time * 0.1, 0.0);
+  vec2 cloudPos3 = uv * 2.0 + vec2(u_time * 0.35, 0.0);
   
   float cloud1 = fractalNoise(cloudPos1);
   float cloud2 = fractalNoise(cloudPos2);

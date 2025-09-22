@@ -4,8 +4,6 @@
 
   let modalBackground = $state<HTMLDivElement | undefined>(undefined)
 
-  $inspect(modal)
-
   const onModalClick = (e: MouseEvent) => {
     if (e.target === modalBackground && !modal.config?.noclose) {
       modal.close()

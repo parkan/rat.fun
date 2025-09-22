@@ -3,8 +3,6 @@
   import { NumberGoing } from "$lib/components/Shared"
   import { ratImageUrl } from "$lib/modules/state/stores"
 
-  $inspect($rat)
-
   import HealthBar from "./HealthBar.svelte"
 
   let balanceGoing = $state(false)

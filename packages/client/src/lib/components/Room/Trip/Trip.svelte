@@ -45,7 +45,6 @@
       {staticRoomContent}
       onComplete={() => {
         if (destroyed) return
-        shaderManager.setMode("warpspeed")
         transitionTo(TRIP_STATE.PROCESSING)
       }}
     />

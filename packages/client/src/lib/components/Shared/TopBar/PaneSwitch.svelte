@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state"
   import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   let { isAdminView }: { isAdminView: boolean } = $props()
 </script>
 
@@ -9,6 +10,7 @@
     <button
       onclick={() => {
         playUISound("ratfun", "adminExit")
+        shaderManager.setShader("clouds")
       }}
       class="pane-switch-item"
     >
@@ -17,6 +19,7 @@
   {:else}
     <button
       onclick={() => {
+        shaderManager.setShader("blank")
         playUISound("ratfun", "adminAccess")
       }}
       class="pane-switch-item"
