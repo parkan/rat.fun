@@ -31,14 +31,8 @@ import { ratfun, type ShaderMode as RatfunMode } from "./ratfun"
 import { blank, type ShaderMode as BlankMode } from "./blank"
 
 const shaders = {
-  //
-  // Main game shader
   main,
-  //
-  // This could be yours
   copy,
-  //
-  // Other ones
   noise,
   gradient,
   waves,

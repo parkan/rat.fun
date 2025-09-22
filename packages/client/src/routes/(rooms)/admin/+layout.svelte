@@ -19,6 +19,8 @@
 
   let { modal } = getModalState()
 
+  let focus = $state("")
+
   $effect(() => {
     if ($player) {
       if (!$player.masterKey) {
@@ -30,11 +32,13 @@
       }
     }
   })
-
-  const startCreateRoom = () => {
-    modal.set(createTrip)
-  }
 </script>
+
+{#snippet createTrip()}
+  <div class="create-room-wrapper">
+    <CreateRoom ondone={modal.close} />
+  </div>
+{/snippet}
 
 <div class="span-all">
   <PageTransitions config={gameLayoutTransitionConfig}>
@@ -42,18 +46,17 @@
       <SEO prependTitle="ADMIN" />
 
       <div class="">
-        <AdminTripMonitor />
-        <BigButton text="Create trip" onclick={startCreateRoom} />
-        <AdminTripTable />
+        <AdminTripMonitor {focus} />
+        <BigButton
+          text="Create trip"
+          onclick={() => {
+            modal.set(createTrip)
+          }}
+        />
+        <AdminTripTable bind:focus />
         <AdminPastTripsMonitor />
       </div>
     </div>
-
-    {#snippet createTrip()}
-      <div class="create-room-wrapper">
-        <CreateRoom ondone={modal.close} />
-      </div>
-    {/snippet}
   </PageTransitions>
 </div>
 
