@@ -16,7 +16,7 @@
   })
 
   onMount(() => {
-    shaderManager.setShader("zoomTunnel")
+    shaderManager.setShader("vortex")
     playUISound("ratfun", "tripProcessing")
     // Start timer
     timerInterval = setInterval(() => {

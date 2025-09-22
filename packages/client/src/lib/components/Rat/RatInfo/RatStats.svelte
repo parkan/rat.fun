@@ -22,17 +22,14 @@
         <span class="name">{$rat.name}</span>
       </div>
 
-      <!-- HEALTH -->
-      <div class="info-item" class:priority={balanceGoing}>
-        <span class="health">
-          Health:
-          <NumberGoing bind:going={balanceGoing} value={$rat.balance} />
-        </span>
-      </div>
-
       <!-- HEALTHBAR -->
       <div class="info-item">
         <HealthBar value={Number($rat.balance)} />
+      </div>
+
+      <!-- TRIP COUNT -->
+      <div class="info-item">
+        <span class="trip-count">Trip Count: {$rat.tripCount ?? 0}</span>
       </div>
     </div>
 
@@ -77,6 +74,12 @@
           color: var(--foreground);
           font-size: var(--font-size-normal);
           color: var(--foreground);
+        }
+
+        .trip-count {
+          padding-inline: 10px;
+          color: var(--foreground);
+          font-size: var(--font-size-normal);
         }
 
         .health {

@@ -46,25 +46,15 @@
   </div>
   <!-- COLUMN RIGHT -->
   <div class="column right">
-    <!-- SECTION 1 -->
-    <div class="section">
-      <!-- TOP ROW -->
-      <!-- <div class="room-info-row top"> -->
-      <!-- INDEX -->
-      <!-- <span class="index small">Trip #{room.index}</span> -->
-      <!-- DIVIDER -->
-      <!-- <span class="divider">•</span> -->
-      <!-- CREATION TIME  -->
-      <!-- <span class="creation-time small">
-          {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
-        </span> -->
-      <!-- </div> -->
-      <!-- PROMPT -->
-      <div class="room-prompt {getPromptLengthClass(room.prompt)}">
-        <div class="content">
-          {renderSafeString(room.prompt)}
-        </div>
+    <!-- PROMPT -->
+    <div class="room-prompt {getPromptLengthClass(room.prompt)}">
+      <div class="content">
+        {renderSafeString(room.prompt)}
       </div>
+    </div>
+    <!-- MAX WIN -->
+    <div class="room-info-max-win">
+      <span class="max-win">Max Win: ${room.maxValuePerWin}</span>
     </div>
   </div>
 </a>
@@ -78,7 +68,7 @@
     border-bottom: var(--default-border-style);
     padding: var(--room-item-padding);
     cursor: pointer;
-    height: var(--room-item-height);
+    // height: var(--room-item-height);
     width: 100%;
     color: var(--foreground);
     text-align: left;
@@ -105,6 +95,7 @@
         .room-image {
           line-height: 0;
           width: 100%;
+          filter: grayscale(100%);
 
           img {
             display: block;
@@ -114,45 +105,17 @@
             object-fit: cover;
           }
         }
-
-        .room-balance {
-          border: var(--default-border-style);
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--color-value);
-          color: var(--background);
-        }
       }
 
       &.right {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         justify-content: space-between;
         width: 100%;
-
-        .room-info-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-
-          &.top {
-            margin-bottom: 5px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--color-grey-mid);
-          }
-
-          &.bottom {
-            margin-top: 5px;
-            padding-top: 5px;
-            border-top: 1px solid var(--color-grey-mid);
-          }
-        }
+        flex-wrap: nowrap;
 
         .room-prompt {
-          width: 100%;
+          width: calc(100% - 100px);
           padding-top: 5px;
           margin-top: 5px;
           margin-bottom: 5px;
@@ -186,47 +149,14 @@
           }
         }
 
-        .index {
-          color: var(--color-grey-mid);
-        }
-
-        .creation-time {
-          color: var(--color-grey-mid);
-        }
-
-        .name {
-          background: var(--color-alert);
-          color: var(--background);
-          padding: 5px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 25ch;
-        }
-
-        .balance {
-          background: var(--color-value);
-          color: var(--background);
-          padding: 5px;
-
-          &.depleted {
-            background: var(--color-death);
-            color: var(--background);
-          }
+        .room-info-max-win {
+          border-left: var(--default-border-style);
+          padding-left: 10px;
+          width: 100px;
         }
 
         .small {
           font-size: var(--font-size-small);
-        }
-
-        .divider {
-          color: var(--color-grey-light);
-        }
-
-        .owner {
-          background: var(--color-grey-light);
-          color: var(--background);
-          padding: 5px;
         }
       }
     }

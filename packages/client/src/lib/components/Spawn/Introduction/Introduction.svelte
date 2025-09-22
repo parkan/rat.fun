@@ -76,7 +76,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      color: white;
+      color: var(--background);
     }
 
     button {

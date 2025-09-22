@@ -25,7 +25,7 @@
       }}
       class="pane-switch-item"
     >
-      <a href="/admin{page.route.id?.includes('roomId') ? `/${page.params.roomId}` : ''}">⚙</a>
+      <a href="/admin">⚙</a>
     </button>
   {/if}
 </div>

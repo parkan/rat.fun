@@ -20,12 +20,12 @@
     justify-content: center;
     padding-inline: 10px;
     font-size: var(--font-size-normal);
-    position: relative;
-    display: inline-block;
+
     &.balance {
       background: var(--color-value);
       color: var(--background);
     }
+
     &.remove,
     &.negative {
       background: var(--color-death);

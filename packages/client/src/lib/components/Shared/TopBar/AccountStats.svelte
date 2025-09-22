@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { mask } from "$lib/components/Shared/PageTransitions/transitionFunctions"
-  import { fade } from "svelte/transition"
   import {
+    player,
     playerAddress,
     playerERC20Allowance,
     playerERC20Balance,
@@ -19,7 +18,6 @@
   import { getMixerState } from "$lib/modules/sound/state.svelte"
   import { ENTITY_TYPE } from "contracts/enums"
   import { walletType, environment } from "$lib/modules/network"
-  import { player } from "$lib/modules/state/stores"
   import { busy } from "$lib/modules/action-manager/index.svelte"
 
   let mixer = getMixerState()
@@ -80,12 +78,11 @@
     <SmallButton
       disabled={busy.GiveCallerTokens.current !== 0}
       tippyText="Request tokens from the contract"
-      extraClass="red"
       onclick={async () => {
         await sendGiveCallerTokens()
         playUISound("ratfun", "coins")
       }}
-      text="Get 2000 free $SLopamine"
+      text="Get 2000 free $slopamine"
     ></SmallButton>
     <SmallButton
       disabled={busy.BuyWithEth.current !== 0}
@@ -97,7 +94,7 @@
       text="Buy 1 $Slopamine for 0.001ETH"
     ></SmallButton>
     <SmallButton
-      disabled={busy.ApproveMax.current !== 0}
+      disabled={busy.ApproveMax.current !== 0 || $playerERC20Allowance > 0}
       tippyText="Allow the contract to spend on your behalf"
       onclick={async () => {
         await sendApproveMax()
@@ -109,6 +106,7 @@
       onclick={async () => {
         await sendUnlockAdmin()
       }}
+      disabled={$player?.masterKey}
       text="Unlock admin mode"
     ></SmallButton>
   </div>

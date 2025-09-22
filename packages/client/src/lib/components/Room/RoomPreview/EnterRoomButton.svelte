@@ -2,12 +2,12 @@
   import type { Hex } from "viem"
   import { playUISound } from "$lib/modules/sound/state.svelte"
   import { getMixerState } from "$lib/modules/sound/state.svelte"
-  import { player } from "$lib/modules/state/stores"
+  import { player, ratTotalValue } from "$lib/modules/state/stores"
   import { goto } from "$app/navigation"
   import { BigButton } from "$lib/components/Shared"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
-  let { roomId, disabled }: { roomId: Hex; disabled: boolean } = $props()
+  let { roomId, room, disabled }: { roomId: Hex; room: Room; disabled: boolean } = $props()
 
   let mixer = getMixerState()
 
@@ -25,6 +25,13 @@
 </script>
 
 <div class="room-enter">
+  {#if Number(room.minRatValueToEnter) > Number($ratTotalValue)}
+    <BigButton
+      disabled={true}
+      text={`Rat value too low (at least ${Number(room.minRatValueToEnter)})`}
+      onclick={onClick}
+    />
+  {/if}
   <BigButton {disabled} text="Send rat to trip" onclick={onClick} />
 </div>
 

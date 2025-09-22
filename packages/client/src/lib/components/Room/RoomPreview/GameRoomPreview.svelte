@@ -5,7 +5,7 @@
 
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
-  import { rat } from "$lib/modules/state/stores"
+  import { rat, ratTotalValue } from "$lib/modules/state/stores"
   import { busy } from "$lib/modules/action-manager/index.svelte"
 
   import { NoRatWarning } from "$lib/components/Rat"
@@ -63,7 +63,8 @@
 
     {#if showEnterButton}
       <EnterRoomButton
-        disabled={busy.LiquidateRat.current != 0 || ($rat?.balance || 0) < room.minRatValueToEnter}
+        {room}
+        disabled={busy.LiquidateRat.current != 0 || ($ratTotalValue || 0) < room.minRatValueToEnter}
         {roomId}
       />
     {/if}

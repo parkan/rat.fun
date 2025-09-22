@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { player, playerERC20Balance } from "$lib/modules/state/stores"
+  import { player, playerERC20Balance, playerAddress } from "$lib/modules/state/stores"
   import { NumberGoing } from "$lib/components/Shared"
   import { playUISound } from "$lib/modules/sound/state.svelte"
   import { tippy } from "svelte-tippy"
@@ -28,7 +28,7 @@
         <!-- AVATAR -->
         <div
           use:tippy={{
-            content: `This is you`,
+            content: `This is you: ${$playerAddress}`,
             placement: "bottom"
           }}
           class="inner-wrapper player"
@@ -47,8 +47,8 @@
       >
         <div class:priority={balanceGoing} class="inner-wrapper balance">
           <div class="value">
-            <span class="unit">SLOPAMINE</span>
             <NumberGoing bind:going={balanceGoing} muted={true} value={$playerERC20Balance ?? 0} />
+            <span class="unit">$SLOPAMINE</span>
           </div>
         </div>
       </div>
@@ -105,9 +105,7 @@
             color: var(--black);
 
             .value {
-              position: relative;
               font-size: var(--font-size-normal);
-              top: 4px;
             }
           }
 

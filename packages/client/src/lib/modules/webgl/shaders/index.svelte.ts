@@ -28,6 +28,7 @@ import {
 } from "./kaleidoscope-tunnel"
 import { starfield, type ShaderMode as StarfieldMode } from "./starfield"
 import { ratfun, type ShaderMode as RatfunMode } from "./ratfun"
+import { vortex, type ShaderMode as VortexMode } from "./vortex"
 import { blank, type ShaderMode as BlankMode } from "./blank"
 
 const shaders = {
@@ -49,6 +50,7 @@ const shaders = {
   starfield,
   starspeed,
   ratfun,
+  vortex,
   blank
 }
 
@@ -82,6 +84,7 @@ type ShaderModes = {
   Starfield: StarfieldMode
   StarSpeed: StarSpeedMode
   RatFun: RatfunMode
+  Vortex: VortexMode
   Blank: BlankMode
 }
 

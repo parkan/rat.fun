@@ -14,13 +14,16 @@
   import { RAT_BOX_STATE, ratBoxState, transitionTo, resetRatBoxState } from "./state.svelte"
 
   onMount(() => {
-    console.log("mounting rat box")
     shaderManager.setShader("clouds")
 
     // Set state to RAT_BOX_STATE.INIT
     resetRatBoxState()
+
     if ($rat) {
       if ($rat.dead) {
+        // TODO: Here we should check if rat just died in the room
+        // or if the page was reloaded...
+        // If the later we should got to Deploy Rat
         transitionTo(RAT_BOX_STATE.DEAD_RAT)
       } else {
         transitionTo(RAT_BOX_STATE.HAS_RAT)

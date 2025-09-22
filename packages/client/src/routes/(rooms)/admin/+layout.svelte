@@ -47,12 +47,14 @@
 
     <div class="">
       <AdminTripMonitor {focus} />
-      <BigButton
-        text="Create trip"
-        onclick={() => {
-          modal.set(createTrip)
-        }}
-      />
+      <div class="create-room-button">
+        <BigButton
+          text="Create trip"
+          onclick={() => {
+            modal.set(createTrip)
+          }}
+        />
+      </div>
       <AdminTripTable bind:focus />
       <AdminPastTripsMonitor />
     </div>
@@ -79,6 +81,11 @@
   .create-room-wrapper {
     width: 600px;
     z-index: 99;
+  }
+
+  .create-room-button {
+    width: 100%;
+    height: 80px;
   }
 
   .sidebar {

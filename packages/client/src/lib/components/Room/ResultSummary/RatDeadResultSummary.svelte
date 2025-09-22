@@ -2,6 +2,7 @@
   import { fade } from "svelte/transition"
   import { frozenRat } from "$lib/components/Room/Trip/state.svelte"
   import { goto } from "$app/navigation"
+  import { BigButton } from "$lib/components/Shared"
 </script>
 
 <div transition:fade|global class="summary">
@@ -10,7 +11,14 @@
       {$frozenRat?.name} DIED
     </h1>
   </div>
-  <a href="/" class="close-button"> COME DOWN </a>
+  <div class="button-container">
+    <BigButton
+      text="COME DOWN"
+      onclick={() => {
+        goto("/")
+      }}
+    />
+  </div>
 </div>
 
 <style lang="scss">
@@ -33,16 +41,9 @@
       align-items: center;
     }
 
-    .close-button {
-      border: none;
-
-      background: var(--black);
-      background: var(--color-alert-priority);
-
-      &:hover {
-        background: var(--color-alert);
-        color: var(--white);
-      }
+    .button-container {
+      width: 100%;
+      height: 80px;
     }
   }
 </style>

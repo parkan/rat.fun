@@ -79,7 +79,7 @@
       // Duck music
       mixer.rampChannelVolume("music", -12, 0.5)
       const id = "fill" + Math.ceil(Math.random() * 4)
-      playUISound("ratfun", id, null, () => {
+      playUISound("ratfun", id, undefined, () => {
         mixer.rampChannelVolume("music", 0, 0.5)
       })
       // Quack
@@ -355,6 +355,7 @@
       flex-flow: column nowrap;
       gap: 12px;
       overflow: hidden;
+      height: 80px;
     }
   }
 </style>

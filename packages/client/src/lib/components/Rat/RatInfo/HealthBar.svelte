@@ -12,6 +12,7 @@
 
 <div class="health-bar">
   <div class="health-bar-inner">
+    <span class="health-bar-inner-value">Health: {value}</span>
     <div
       class="health-bar-inner-fill"
       style:width={`${value}%`}
@@ -29,11 +30,25 @@
     height: 100%;
 
     .health-bar-inner {
+      position: relative;
       width: 100%;
       height: 100%;
     }
 
+    .health-bar-inner-value {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      z-index: 2;
+      color: black;
+      pointer-events: none;
+    }
+
     .health-bar-inner-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
       height: 100%;
       transition: width 0.2s ease-in-out;
     }

@@ -51,6 +51,7 @@
     height: var(--game-window-height);
     align-items: center;
     justify-content: center;
+    color: var(--background);
 
     .inner-container {
       display: flex;
@@ -58,7 +59,6 @@
       align-items: center;
       justify-content: center;
       width: 500px;
-      color: white;
 
       .button {
         width: 100%;
