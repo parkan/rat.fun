@@ -19,7 +19,7 @@ const MODEL = {
 
 const makePrompt = (prompt: string) => {
   const randomPrompts = pickRandomMultiple(PROMPTS, 4).join(" ")
-  return `STYLE: ${randomPrompts}. !! Important: no text !! A square acid blotter printed with: ${prompt}`
+  return `STYLE: ${randomPrompts}. SCENE:${prompt}`
 }
 
 /**
@@ -40,22 +40,100 @@ export const generateImage = async (prompt: string, templateImages: ResolvedTemp
       aspect_ratio: "1:1",
       output_format: "webp",
       output_quality: 80,
-      prompt_strength: 0.9,
+      prompt_strength: 0.8,
       steps: 28
     }
   }
 
   try {
-    const output = (await client.run(MODEL.SD as any, { input: INPUT.SD })) as FileOutput[]
+    const output = await client.run(MODEL.SD as any, { input: INPUT.SD })
 
-    if (!output[0]) throw new ReplicateError("No output received from Replicate")
+    console.log("Raw output:", output)
+    console.log("Output type:", typeof output)
+    console.log("Output length:", Array.isArray(output) ? output.length : "not an array")
 
-    // Get the image data directly as a blob
-    const blob = await output[0].blob()
+    if (Array.isArray(output)) {
+      output.forEach((item, index) => {
+        console.log(`Output[${index}]:`, item)
+        console.log(`Output[${index}] type:`, typeof item)
+        if (item && typeof item === "object") {
+          console.log(`Output[${index}] keys:`, Object.keys(item))
+        }
+      })
+    }
 
-    // Convert blob to buffer
-    const arrayBuffer = await blob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    if (!output) {
+      throw new ReplicateError("No output received from Replicate")
+    }
+
+    let buffer: Buffer
+
+    // Handle different output formats
+    if (Array.isArray(output) && output[0]) {
+      // Legacy format: array of FileOutput objects
+      console.log("Handling array format with FileOutput objects")
+      const fileOutput = output[0] as FileOutput
+
+      let blob
+      try {
+        blob = await fileOutput.blob()
+        console.log("Blob obtained successfully:", blob)
+      } catch (blobError) {
+        console.error("Error getting blob:", blobError)
+        throw new ReplicateError(`Failed to get blob from output: ${blobError}`)
+      }
+
+      const arrayBuffer = await blob.arrayBuffer()
+      buffer = Buffer.from(arrayBuffer)
+    } else if (typeof output === "string") {
+      // New format: direct URL string
+      console.log("Handling string format (URL):", output)
+
+      try {
+        const response = await fetch(output)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`)
+        }
+        const arrayBuffer = await response.arrayBuffer()
+        buffer = Buffer.from(arrayBuffer)
+        console.log("Image fetched from URL, buffer size:", buffer.length)
+      } catch (fetchError) {
+        console.error("Error fetching image from URL:", fetchError)
+        throw new ReplicateError(`Failed to fetch image from URL: ${fetchError}`)
+      }
+    } else if (output && typeof output === "object" && "getReader" in output) {
+      // Newest format: ReadableStream
+      console.log("Handling ReadableStream format")
+
+      try {
+        const reader = (output as ReadableStream<Uint8Array>).getReader()
+        const chunks: Uint8Array[] = []
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+        }
+
+        // Combine all chunks into a single buffer
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
+        const combinedBuffer = new Uint8Array(totalLength)
+        let offset = 0
+
+        for (const chunk of chunks) {
+          combinedBuffer.set(chunk, offset)
+          offset += chunk.length
+        }
+
+        buffer = Buffer.from(combinedBuffer)
+        console.log("ReadableStream processed, buffer size:", buffer.length)
+      } catch (streamError) {
+        console.error("Error processing ReadableStream:", streamError)
+        throw new ReplicateError(`Failed to process ReadableStream: ${streamError}`)
+      }
+    } else {
+      throw new ReplicateError(`Unexpected output format: ${typeof output}`)
+    }
 
     // Process image with sharp
     const processedBuffer = await sharp(buffer)
@@ -66,6 +144,7 @@ export const generateImage = async (prompt: string, templateImages: ResolvedTemp
 
     return processedBuffer
   } catch (error) {
+    console.error(error)
     throw new ReplicateError(error as string, error)
   }
 }

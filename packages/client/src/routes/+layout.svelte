@@ -38,7 +38,6 @@
     Modal,
     ModalTarget,
     WorldEventPopup
-    // WalletInfo
   } from "$lib/components/Shared"
   import { Outcome } from "$lib/components/Room"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
@@ -210,8 +209,6 @@
 <EntryKit />
 <Modal />
 <Toasts />
-
-<!-- <WalletInfo /> -->
 
 <style lang="scss">
   .context-main {
