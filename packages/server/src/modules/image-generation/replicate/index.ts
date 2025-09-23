@@ -1,5 +1,5 @@
 import { ResolvedTemplateImages } from "@modules/types"
-import { pickRandomMultiple } from "@modules/utils"
+import { pickRandomMultiple, pickRandom } from "@modules/utils"
 import { PROMPTS } from "./prompts"
 import Replicate from "replicate"
 import type { FileOutput } from "replicate"
@@ -29,8 +29,8 @@ const makePrompt = (prompt: string) => {
  * @returns The generated image
  */
 export const generateImage = async (prompt: string, templateImages: ResolvedTemplateImages) => {
-  // Just get the first image for now
-  const image = templateImages?.roomImages?.[0]
+  // Pick a random image from roomImages
+  const image = templateImages?.roomImages ? pickRandom(templateImages.roomImages) : undefined
 
   const INPUT = {
     SD: {
@@ -47,20 +47,6 @@ export const generateImage = async (prompt: string, templateImages: ResolvedTemp
 
   try {
     const output = await client.run(MODEL.SD as any, { input: INPUT.SD })
-
-    console.log("Raw output:", output)
-    console.log("Output type:", typeof output)
-    console.log("Output length:", Array.isArray(output) ? output.length : "not an array")
-
-    if (Array.isArray(output)) {
-      output.forEach((item, index) => {
-        console.log(`Output[${index}]:`, item)
-        console.log(`Output[${index}] type:`, typeof item)
-        if (item && typeof item === "object") {
-          console.log(`Output[${index}] keys:`, Object.keys(item))
-        }
-      })
-    }
 
     if (!output) {
       throw new ReplicateError("No output received from Replicate")
