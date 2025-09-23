@@ -37,6 +37,7 @@
   <div class="button-container">
     {#if $player}
       <BigButton
+        id="buy_rat"
         text="Buy rat"
         cost={Number($gameConfig?.ratCreationCost)}
         {disabled}

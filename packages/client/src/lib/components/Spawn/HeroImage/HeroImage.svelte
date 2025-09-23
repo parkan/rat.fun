@@ -39,7 +39,7 @@
   <div class="inner-container">
     <p bind:this={textElement}>{$player?.name}, you are set!</p>
     <div class="button" bind:this={buttonElement}>
-      <BigButton text="ENJOY SKILLFULLY" onclick={onComplete} />
+      <BigButton id="skillz" text="ENJOY SKILLFULLY" onclick={onComplete} />
     </div>
   </div>
 </div>

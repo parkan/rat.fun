@@ -56,7 +56,7 @@
       <div bind:this={$entryKitButton}></div>
     {:else}
       <div bind:this={buttonElement}>
-        <BigButton text="Connect Burner" onclick={onComplete} />
+        <BigButton id="connect" text="Connect Burner" onclick={onComplete} />
       </div>
     {/if}
   </div>

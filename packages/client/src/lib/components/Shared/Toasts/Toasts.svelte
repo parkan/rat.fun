@@ -16,7 +16,7 @@
       <div
         onintrostart={() => {
           if (toast.type === "error") {
-            playUISound("ratfun", "mouseupdanger")
+            playUISound("ratfun", "releaseError1")
           }
         }}
         transition:slide|global

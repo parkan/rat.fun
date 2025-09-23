@@ -43,11 +43,11 @@
 
         if (direction < 0) {
           if (!muted) {
-            playUISound("ratfun", "ratsUp")
+            playUISound("ratfun", "releaseUpSlide")
           }
         } else {
           if (!muted) {
-            playUISound("ratfun", "ratsDown")
+            playUISound("ratfun", "releaseSlopDrain")
           }
         }
 

@@ -1,15 +1,15 @@
 <script lang="ts">
   import { derived } from "svelte/store"
-  import { playerRooms } from "$lib/modules/state/stores"
+  import { playerActiveRooms } from "$lib/modules/state/stores"
   import { MultiTripGraph } from "$lib/components/Room"
 
   let { focus } = $props()
 
-  const investment = derived(playerRooms, $playerRooms =>
-    Object.values($playerRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+  const investment = derived(playerActiveRooms, $playerActiveRooms =>
+    Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
   )
-  const balance = derived(playerRooms, $playerRooms =>
-    Object.values($playerRooms).reduce((a, b) => a + Number(b.balance), 0)
+  const balance = derived(playerActiveRooms, $playerActiveRooms =>
+    Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.balance), 0)
   )
   const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
   const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
@@ -44,7 +44,7 @@
     </div>
   </div>
   <div class="p-l-graph">
-    <MultiTripGraph {focus} trips={$playerRooms} />
+    <MultiTripGraph {focus} trips={$playerActiveRooms} />
   </div>
 </div>
 

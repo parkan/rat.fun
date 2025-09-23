@@ -1,4 +1,40 @@
-<div class="admin-trip-monitor">Past trips</div>
+<script lang="ts">
+  import { derived } from "svelte/store"
+  import { playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
+  import { MultiTripGraph } from "$lib/components/Room"
+
+  let { focus } = $props()
+
+  const investment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
+    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+  )
+  const balance = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
+    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.balance), 0)
+  )
+  const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
+  const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
+    if ($profitLoss === 0) return "neutral"
+    return $profitLoss < $balance ? "upText" : "downText"
+  })
+
+  $inspect($playerLiquidatedRooms)
+  $inspect($playerRooms)
+</script>
+
+<div class="admin-trip-monitor">
+  <div class="p-l-overview">
+    <div class="top">
+      <p>Realized P&L</p>
+      <h1>
+        <span class="main {$portfolioClass}"
+          >{$profitLoss}
+          <span class="small">({(($balance / $investment) * 100).toFixed(2)}%)</span></span
+        >
+        <!-- {$balance / $investment} -->
+      </h1>
+    </div>
+  </div>
+</div>
 
 <style lang="scss">
   .admin-trip-monitor {

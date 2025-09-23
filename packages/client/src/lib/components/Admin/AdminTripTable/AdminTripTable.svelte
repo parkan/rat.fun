@@ -3,7 +3,7 @@
   import { SmallButton } from "$lib/components/Shared"
   import { RoomGraph } from "$lib/components/Room"
   import { goto } from "$app/navigation"
-  import { playerRooms } from "$lib/modules/state/stores"
+  import { playerActiveRooms } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
@@ -47,7 +47,7 @@
   })
 
   let roomList = $derived.by(() => {
-    let entries = Object.entries($playerRooms)
+    let entries = Object.entries($playerActiveRooms)
 
     return entries.sort(sortFunction)
   })
