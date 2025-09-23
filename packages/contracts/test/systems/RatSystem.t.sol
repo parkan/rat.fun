@@ -101,6 +101,12 @@ contract RatSystemTest is BaseTest {
     assertEq(PastRats.length(playerId), 1);
     assertEq(PastRats.getItem(playerId, 0), ratId);
 
+    assertEq(Liquidated.get(ratId), true);
+    assertEq(LiquidationBlock.get(ratId), block.number);
+
+    uint256 liquidationValue = ratValue - (ratValue * GameConfig.getTaxationLiquidateRat()) / 100;
+    assertEq(LiquidationValue.get(ratId), liquidationValue);
+
     // Global stats set
     assertEq(WorldStats.getGlobalRatKillCount(), 1);
     assertEq(WorldStats.getLastKilledRatBlock(), block.number);

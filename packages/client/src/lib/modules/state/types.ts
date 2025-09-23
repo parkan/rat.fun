@@ -77,6 +77,8 @@ declare global {
     killCount?: mudComponents["KillCount"]
     tripCount?: mudComponents["TripCount"]
     liquidated?: mudComponents["Liquidated"]
+    liquidationValue?: mudComponents["LiquidationValue"]
+    liquidationBlock?: mudComponents["LiquidationBlock"]
     masterKey?: mudComponents["MasterKey"]
     // Gameconfig related fields
     gameConfig: GameConfigObject

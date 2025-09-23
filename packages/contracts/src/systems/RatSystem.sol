@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
-import { Owner, CurrentRat, Dead, Inventory, GameConfig, Value, Balance } from "../codegen/index.sol";
+import {
+  Owner,
+  CurrentRat,
+  Dead,
+  Inventory,
+  GameConfig,
+  Value,
+  Balance,
+  Liquidated,
+  LiquidationValue
+} from "../codegen/index.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibUtils, LibRat, LibWorld } from "../libraries/Libraries.sol";
 
@@ -40,15 +50,17 @@ contract RatSystem is System {
     bytes32 ratId = CurrentRat.get(playerId);
 
     require(ratId != bytes32(0), "no rat");
-
-    // Check that the rat is alive
     require(!Dead.get(ratId), "rat is dead");
 
     uint256 valueToPlayer = LibRat.killRat(ratId);
-
     // Calculate tax
     uint256 tax = (valueToPlayer * GameConfig.getTaxationLiquidateRat()) / 100;
     valueToPlayer -= tax;
+
+    // Update rat
+    Balance.set(ratId, 0);
+    Liquidated.set(ratId, true);
+    LiquidationValue.set(ratId, valueToPlayer);
 
     // Withdraw tokens equal to rat value minus tax from pool to player
     // ERC-20 will check that pool has sufficient balance

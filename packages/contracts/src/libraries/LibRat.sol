@@ -12,7 +12,9 @@ import {
   Name,
   Owner,
   CreationBlock,
-  PastRats
+  PastRats,
+  LiquidationValue,
+  LiquidationBlock
 } from "../codegen/index.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 import { RAT_CREATION_COST } from "../constants.sol";
@@ -45,23 +47,13 @@ library LibRat {
   function killRat(bytes32 _ratId) internal returns (uint256 balanceToTransfer) {
     Dead.set(_ratId, true);
 
-    // * * * *
-    // Items
-    // * * * *
-    bytes32[] memory items = Inventory.get(_ratId);
-    for (uint i = 0; i < items.length; i++) {
-      balanceToTransfer += Value.get(items[i]);
-    }
+    balanceToTransfer = getTotalRatValue(_ratId);
 
-    // * * * *
-    // Balance
-    // * * * *
-    balanceToTransfer += Balance.get(_ratId);
-    Balance.set(_ratId, 0);
-
-    bytes32 playerId = Owner.get(_ratId);
     // Add to history of rats
-    PastRats.push(playerId, _ratId);
+    PastRats.push(Owner.get(_ratId), _ratId);
+
+    // Update rat
+    LiquidationBlock.set(_ratId, block.number);
 
     // Increment kill counter and set last killed rat block
     WorldStats.setGlobalRatKillCount(WorldStats.getGlobalRatKillCount() + 1);
