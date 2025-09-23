@@ -111,6 +111,8 @@
         width: 100%;
         aspect-ratio: 1/1;
         object-fit: contain;
+        filter: grayscale(100%);
+        mix-blend-mode: screen;
       }
 
       .image-placeholder {

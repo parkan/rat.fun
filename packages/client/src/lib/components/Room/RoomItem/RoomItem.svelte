@@ -42,7 +42,6 @@
         <NoImage />
       {/if}
     </div>
-    <!-- <div class="room-balance"></div> -->
   </div>
   <!-- COLUMN RIGHT -->
   <div class="column right">
@@ -103,6 +102,7 @@
             height: 100%;
             aspect-ratio: 1/1;
             object-fit: cover;
+            mix-blend-mode: screen;
           }
         }
       }

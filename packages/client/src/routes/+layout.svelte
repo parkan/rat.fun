@@ -3,7 +3,6 @@
   import "tippy.js/dist/tippy.css"
 
   import type { LayoutProps } from "./$types"
-
   import { type Outcome as SanityOutcome } from "@sanity-types"
   import {
     initSound,
