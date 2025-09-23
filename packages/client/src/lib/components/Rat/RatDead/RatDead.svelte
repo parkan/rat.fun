@@ -32,7 +32,7 @@
     width: 100%;
     background-image: url("/images/texture-2.png");
     background-size: 200px;
-    color: var(--foreground);
+    color: var(--background);
 
     .rat-dead-image {
       width: 250px;
@@ -42,6 +42,7 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
+        mix-blend-mode: screen;
       }
     }
 

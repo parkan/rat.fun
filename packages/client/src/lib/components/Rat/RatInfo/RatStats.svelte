@@ -92,13 +92,13 @@
     .image-container {
       width: 260px;
       height: 100%;
-      border: var(--default-border-style);
+      border-left: var(--default-border-style);
 
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: grayscale(1);
+        // filter: grayscale(1);
         mix-blend-mode: screen;
       }
     }
