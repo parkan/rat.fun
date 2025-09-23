@@ -11,6 +11,7 @@
     AdminTripMonitor,
     AdminPastTripsMonitor,
     AdminTripTable,
+    AdminPastTripTable,
     CreateRoom
   } from "$lib/components/Admin"
   import { BigButton } from "$lib/components/Shared"
@@ -57,6 +58,7 @@
       </div>
       <AdminTripTable bind:focus />
       <AdminPastTripsMonitor />
+      <AdminPastTripTable bind:focus />
     </div>
   </div>
 </div>
