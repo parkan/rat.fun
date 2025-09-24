@@ -31,7 +31,7 @@
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import { Shader, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
-  import { Outcome } from "$lib/components/Room"
+  import { Outcome } from "$lib/components/GameRun"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 

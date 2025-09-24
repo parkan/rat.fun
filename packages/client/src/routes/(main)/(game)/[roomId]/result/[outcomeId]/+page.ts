@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit"
-import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
+import { TRIP_STATE } from "$lib/components/GameRun/state.svelte"
 import { loadData } from "$lib/modules/content/sanity"
 import { queries } from "$lib/modules/content/sanity/groq"
 import { addressToRatImage } from "$lib/modules/utils"

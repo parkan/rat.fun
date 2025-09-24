@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { gameConfig, playerERC20Balance, rooms } from "$lib/modules/state/stores"
-  import { CharacterCounter, VideoLoaderDuration, BigButton } from "$lib/components/Shared"
+  import { gameConfig, playerERC20Balance } from "$lib/modules/state/stores"
+  import { CharacterCounter, BigButton } from "$lib/components/Shared"
   import { sendCreateRoom } from "$lib/modules/action-manager/index.svelte"
-  import { goto } from "$app/navigation"
   import { typeHit } from "$lib/modules/sound/state.svelte"
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"

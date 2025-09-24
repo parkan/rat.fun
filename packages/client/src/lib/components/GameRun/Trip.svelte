@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { EnterRoomReturnValue } from "@server/modules/types"
-  import { onMount, onDestroy } from "svelte"
-  import { rooms as roomsState } from "$lib/modules/state/stores"
-  import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
-  import { TripSetup, TripProcessing } from "$lib/components/Room"
+  import { onDestroy } from "svelte"
+  import { TRIP_STATE } from "$lib/components/GameRun/state.svelte"
+  import { TripSetup, TripProcessing } from "$lib/components/GameRun"
   import { staticContent } from "$lib/modules/content"
   import { goto } from "$app/navigation"
   import { stringifyWithBigInt } from "$lib/modules/state/utils"

@@ -3,11 +3,11 @@
   import { onMount } from "svelte"
   import { replaceState, goto } from "$app/navigation"
   import { page } from "$app/state"
-  import { Trip } from "$lib/components/Room"
+  import { Trip } from "$lib/components/GameRun"
   import { sendEnterRoom } from "$lib/modules/action-manager/index.svelte"
   import { RoomError, APIError, NetworkError } from "$lib/modules/error-handling/errors"
   import { player, rooms as roomsState, rat } from "$lib/modules/state/stores"
-  import { freezeObjects, TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
+  import { freezeObjects, TRIP_STATE } from "$lib/components/GameRun/state.svelte"
   import { stringifyWithBigInt, parseWithBigInt } from "$lib/modules/state/utils"
   import { createTripTransitions } from "$lib/modules/page-state/trip-transitions"
 

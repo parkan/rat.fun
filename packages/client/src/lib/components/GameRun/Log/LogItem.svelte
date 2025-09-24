@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MergedLogEntry, OutcomeDataStringMap } from "$lib/components/Room/Trip/types"
-  import { updateFrozenState } from "$lib/components/Room/Trip/state.svelte"
+  import { updateFrozenState } from "$lib/components/GameRun/state.svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import { playUISound, typeHit } from "$lib/modules/sound/state.svelte"
@@ -12,7 +12,7 @@
     OUTCOME_START_DELAY
   } from "./config"
 
-  import { OutcomeItem } from "$lib/components/Room"
+  import { OutcomeItem } from "$lib/components/GameRun"
 
   gsap.registerPlugin(TextPlugin)
 

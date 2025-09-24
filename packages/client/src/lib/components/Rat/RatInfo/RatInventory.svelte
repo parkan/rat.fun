@@ -8,7 +8,6 @@
   // Create array with actual items + empty slots to fill MAX_INVENTORY_SIZE slots
   const inventorySlots: (Item | null)[] = $derived.by(() => {
     const actualItems = $ratInventory ?? []
-    console.log("### actualItems ###", actualItems)
     const emptySlots = Array(MAX_INVENTORY_SIZE - actualItems.length).fill(null)
     return [...actualItems, ...emptySlots]
   })

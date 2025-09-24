@@ -1,7 +1,7 @@
 <script lang="ts">
   import { derived } from "svelte/store"
   import { playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
-  import { MultiTripGraph } from "$lib/components/Room"
+  import { MultiTripGraph } from "$lib/components/Admin"
 
   let { focus } = $props()
 

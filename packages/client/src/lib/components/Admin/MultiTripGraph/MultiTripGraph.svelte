@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "../RoomGraph/types"
+  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
 
   import { truncateString } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"

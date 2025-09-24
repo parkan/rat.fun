@@ -4,7 +4,7 @@
  */
 
 import type { EnterRoomReturnValue } from "@server/modules/types"
-import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
+import { TRIP_STATE } from "$lib/components/GameRun/state.svelte"
 
 /**
  * Defines valid state transitions between room result states

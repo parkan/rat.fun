@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { frozenRat } from "$lib/components/Room/Trip/state.svelte"
+  import { frozenRat } from "$lib/components/GameRun/state.svelte"
   import { goto } from "$app/navigation"
+
   import { BigButton } from "$lib/components/Shared"
 </script>
 
 <div class="summary">
   <div class="event">
     <h1>
-      {$frozenRat?.name} DIED
+      {$frozenRat?.name} SURVIVED
     </h1>
   </div>
   <div class="button-container">
@@ -31,14 +32,14 @@
     width: 50vw;
 
     .event {
-      width: 100%;
-      background: var(--color-death);
+      background: var(--color-secondary);
       margin: 0;
       padding: 0;
       text-align: center;
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 80px;
     }
 
     .button-container {

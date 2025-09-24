@@ -5,3 +5,4 @@ export { default as AdminTripMonitor } from "./AdminTripMonitor/AdminTripMonitor
 export { default as AdminPastTripsMonitor } from "./AdminPastTripsMonitor/AdminPastTripsMonitor.svelte"
 export { default as AdminTripTable } from "./AdminTripTable/AdminTripTable.svelte"
 export { default as AdminPastTripTable } from "./AdminPastTripTable/AdminPastTripTable.svelte"
+export { default as MultiTripGraph } from "./MultiTripGraph/MultiTripGraph.svelte"

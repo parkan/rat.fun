@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Log } from "$lib/components/Room"
   import { onMount, onDestroy } from "svelte"
+  import { Log } from "$lib/components/GameRun"
   import { playUISound } from "$lib/modules/sound/state.svelte"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 

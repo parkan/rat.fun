@@ -1,5 +1,6 @@
 import { Hex } from "viem"
-import { LogEntry, BalanceTransfer, ItemChange } from "@server/modules/types"
+import { LogEntry, BalanceTransfer, ItemChange, EnterRoomReturnValue } from "@server/modules/types"
+import { TRIP_STATE } from "$lib/components/GameRun/state.svelte"
 
 export type TempItem = {
   name: string
@@ -26,4 +27,15 @@ export type OutcomeDataStringMap = {
   value: string
   name?: string
   id?: string
+}
+
+export type RoomEntryState = {
+  state: TRIP_STATE
+  valid: boolean
+  processing: boolean
+  result: EnterRoomReturnValue | null
+  error: boolean
+  errorMessage?: string
+  frozenRat: FrozenRat | null
+  frozenRoom: FrozenRoom | null
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Outcome } from "@sanity-types"
-  import type { PlotPoint } from "$lib/components/Shared/RoomGraph/types"
+  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
   import { RoomGraph } from "$lib/components/Room"
 
   let {

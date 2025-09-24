@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
-  import { TripReport, NormalResultSummary, RatDeadResultSummary } from "$lib/components/Room"
+  import { TripReport, NormalResultSummary, RatDeadResultSummary } from "$lib/components/GameRun"
   import { page } from "$app/state"
   import { onMount } from "svelte"
   import { replaceState } from "$app/navigation"
   import { stringifyWithBigInt, parseWithBigInt } from "$lib/modules/state/utils"
   import { createTripTransitions } from "$lib/modules/page-state/trip-transitions"
-  import { frozenRat, frozenRoom } from "$lib/components/Room/Trip/state.svelte"
+  import { TRIP_STATE, frozenRat, frozenRoom } from "$lib/components/GameRun/state.svelte"
+  import type { RoomEntryState } from "$lib/components/GameRun/types"
 
   let { data } = $props()
 
@@ -19,7 +19,7 @@
     page.state?.entryState
       ? parseWithBigInt(stringifyWithBigInt(page.state.entryState))
       : data?.entryState || {}
-  )
+  ) as RoomEntryState
   let result = $derived(entryState?.result)
   let { transitionToResultSummary } = $derived(createTripTransitions(entryState))
 

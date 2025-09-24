@@ -3,7 +3,7 @@
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
-  import { LogItem } from "$lib/components/Room"
+  import { LogItem } from "$lib/components/GameRun"
 
   let {
     result,
