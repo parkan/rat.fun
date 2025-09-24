@@ -38,7 +38,7 @@
     // Check if player is already spawned
     if (
       isSpawned ||
-      (page.route.id === "/(rooms)/(game)/[roomId]" && !page.url.searchParams.has("spawn"))
+      (page.route.id === "/(main)/(game)/[roomId]" && !page.url.searchParams.has("spawn"))
     ) {
       // Connected and spawned - finish spawn process
       spawned()
@@ -57,6 +57,8 @@
     }
   }
 
+  // Listen to changes the entrykit session
+  // ???
   $effect(() => {
     if ($entryKitSession) {
       if ($entryKitSession?.account?.client && $entryKitSession.userAddress) {
@@ -72,8 +74,10 @@
     }
   })
 
+  console.log("### Spawn.svelte ###")
+
   onMount(() => {
-    shaderManager.setMode("clouds")
+    shaderManager.setShader("clouds", "inverted")
     if (walletType === WALLET_TYPE.BURNER) {
       connectBurner()
     }

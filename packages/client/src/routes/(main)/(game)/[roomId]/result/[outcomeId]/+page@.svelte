@@ -1,8 +1,6 @@
 <script lang="ts">
   import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
-  // Outcome logs
   import { TripReport, NormalResultSummary, RatDeadResultSummary } from "$lib/components/Room"
-  // import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { onMount } from "svelte"
   import { replaceState } from "$app/navigation"
@@ -11,6 +9,8 @@
   import { frozenRat, frozenRoom } from "$lib/components/Room/Trip/state.svelte"
 
   let { data } = $props()
+
+  console.log("### routes/(main)/(game)/[roomId]/result/[outcomeId]/+page@.svelte ###")
 
   frozenRoom.set(data.entryState.frozenRoom)
   frozenRat.set(data.entryState.frozenRat)

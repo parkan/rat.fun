@@ -1,11 +1,6 @@
 <script lang="ts">
-  import { rat } from "$lib/modules/state/stores"
-  import { NumberGoing } from "$lib/components/Shared"
-  import { ratImageUrl } from "$lib/modules/state/stores"
-
+  import { rat, ratImageUrl } from "$lib/modules/state/stores"
   import HealthBar from "./HealthBar.svelte"
-
-  let balanceGoing = $state(false)
 </script>
 
 <div class="rat-info-box">

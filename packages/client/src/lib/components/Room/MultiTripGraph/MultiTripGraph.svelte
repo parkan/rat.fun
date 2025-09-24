@@ -163,8 +163,6 @@
     return profitLossData
   })
 
-  $inspect(profitLossOverTime)
-
   const generateTooltipContent = (point: PlotPoint) => {
     let toolTipContent = `<div>${truncateString(point.meta.prompt, 32)}<br>balance: <span class="tooltip-value">$${point?.value}</span>`
 

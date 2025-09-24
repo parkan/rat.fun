@@ -83,9 +83,7 @@
         mixer.rampChannelVolume("music", 0, 0.5)
       })
       // Quack
-      console.log("send...")
       await sendCreateRoom(roomDescription, flooredRoomCreationCost)
-      console.log("...done")
       ondone()
     } catch (error) {
       errorHandler(error)

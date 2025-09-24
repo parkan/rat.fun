@@ -25,7 +25,7 @@
   $effect(() => {
     if ($player) {
       if (!$player.masterKey) {
-        if (page.route.id === "/(rooms)/admin/[roomId]") {
+        if (page.route.id === "/(main)/admin/[roomId]") {
           goto(`/${page.params.roomId}`)
         } else {
           goto("/")

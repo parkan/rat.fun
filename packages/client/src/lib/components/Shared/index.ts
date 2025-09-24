@@ -30,10 +30,8 @@ export { default as WorldEventPopup } from "./WorldEventPopup/WorldEventPopup.sv
 /* Layout Components */
 export { default as CenterBar } from "./CenterBar/CenterBar.svelte"
 export { default as CharacterCounter } from "./CharacterCounter/CharacterCounter.svelte"
-export { default as MainLayout } from "./MainLayout/MainLayout.svelte"
 export { default as NoImage } from "./NoImage/NoImage.svelte"
 export { default as NumberGoing } from "./NumberGoing/NumberGoing.svelte"
-export { default as PageTransitions } from "./PageTransitions/PageTransitions.svelte"
 
 /* Utility Components */
 export { default as SEO } from "./SEO/SEO.svelte"

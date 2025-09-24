@@ -1,16 +1,17 @@
 <script lang="ts">
-  import { PageTransitions, CenterBar } from "$lib/components/Shared"
+  import { CenterBar } from "$lib/components/Shared"
   import RatContainer from "$lib/components/Rat/RatContainer.svelte"
-  import { gameLayoutTransitionConfig } from "$lib/components/Shared/PageTransitions/transitionConfigs"
 
   let { children } = $props()
+
+  console.log("### routes/(main)/(game)/+layout.svelte ###")
 </script>
 
 <!-- Grid position 1  -->
 <RatContainer />
 <!-- Grid position 2 -->
 <CenterBar />
-
+<!-- Grid position 3 -->
 <div class="right-column">
   {@render children?.()}
 </div>

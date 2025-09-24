@@ -11,7 +11,7 @@
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
   import GlobalStats from "./GlobalStats.svelte"
 
-  const isAdminView = $derived(page.route?.id?.includes("/(rooms)/admin") ?? false)
+  const isAdminView = $derived(page.route?.id?.includes("/(main)/admin") ?? false)
 
   onMount(() => {
     switchAudio(page)

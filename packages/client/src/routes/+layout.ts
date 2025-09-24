@@ -14,6 +14,12 @@ export const load: LayoutLoad = async ({ url }) => {
   const saleStatus = (PUBLIC_SALE_STATUS ?? SALE_STATUS.NOT_STARTED) as SALE_STATUS
   const networkConfig = getNetworkConfig(environment, url)
 
+  console.log("### routes/+layout.ts ###")
+  // console.log("environment", environment)
+  // console.log("walletType", walletType)
+  // console.log("saleStatus", saleStatus)
+  // console.log("networkConfig", networkConfig)
+
   return {
     environment: environment,
     walletType: walletType,

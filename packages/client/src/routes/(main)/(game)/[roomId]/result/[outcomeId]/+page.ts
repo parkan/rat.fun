@@ -9,6 +9,8 @@ export const load = async ({ params }) => {
   const result = await loadData(queries.singleOutcome, { id: params.outcomeId })
   const roomResult = await loadData(queries.singleRoom, { id: result.roomId })
 
+  console.log("### routes/(main)/(game)/[roomId]/result/[outcomeId]/+page.ts ###")
+
   try {
     return {
       entryState: {
