@@ -11,6 +11,7 @@
     AdminTripMonitor,
     AdminPastTripsMonitor,
     AdminTripTable,
+    AdminPastTripTable,
     CreateRoom
   } from "$lib/components/Admin"
   import { BigButton } from "$lib/components/Shared"
@@ -41,10 +42,10 @@
   </div>
 {/snippet}
 
+<SEO prependTitle="ADMIN" />
+
 <div class="span-all">
   <div class="">
-    <SEO prependTitle="ADMIN" />
-
     <div class="">
       <AdminTripMonitor {focus} />
       <div class="create-room-button">
@@ -57,6 +58,7 @@
       </div>
       <AdminTripTable bind:focus />
       <AdminPastTripsMonitor />
+      <AdminPastTripTable bind:focus />
     </div>
   </div>
 </div>

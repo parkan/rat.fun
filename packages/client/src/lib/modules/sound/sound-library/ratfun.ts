@@ -233,6 +233,67 @@ export const ratfun: SoundAssets = {
     author: "leo",
     volume: -12
   },
+  // Buttons
+  clickDownHeavy: {
+    src: "/sounds/ratfun/buttons/click-down-heavy.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseError2: {
+    src: "/sounds/ratfun/buttons/release-error-2.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseUpSlide: {
+    src: "/sounds/ratfun/buttons/release-up-slide.mp3",
+    author: "leo",
+    volume: 1
+  },
+  clickDownLight: {
+    src: "/sounds/ratfun/buttons/click-down-light.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseMini: {
+    src: "/sounds/ratfun/buttons/release-mini.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseWoop: {
+    src: "/sounds/ratfun/buttons/release-woop.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseConnect: {
+    src: "/sounds/ratfun/buttons/release-connect.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseSlopCharge: {
+    src: "/sounds/ratfun/buttons/release-slop-charge.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseError1: {
+    src: "/sounds/ratfun/buttons/release-error-1.mp3",
+    author: "leo",
+    volume: 1
+  },
+  releaseSlopDrain: {
+    src: "/sounds/ratfun/buttons/release-slop-drain.mp3",
+    author: "leo",
+    volume: 1
+  },
+  chicken1: {
+    src: "/sounds/ratfun/chicken1.mp3",
+    author: "leo",
+    volume: 1
+  },
+  chicken2: {
+    src: "/sounds/ratfun/chicken2.mp3",
+    author: "leo",
+    volume: 1
+  },
   // To replace
   // XXX.mp3 is just placeholder
   acceptOrderFail: {

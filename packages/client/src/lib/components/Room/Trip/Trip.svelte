@@ -5,6 +5,9 @@
   import { TRIP_STATE } from "$lib/components/Room/Trip/state.svelte"
   import { TripSetup, TripProcessing } from "$lib/components/Room"
   import { staticContent } from "$lib/modules/content"
+  import { goto } from "$app/navigation"
+  import { stringifyWithBigInt } from "$lib/modules/state/utils"
+  import { page } from "$app/state"
 
   let {
     roomId,
@@ -47,8 +50,13 @@
   {#if entryState?.state === TRIP_STATE.PROCESSING}
     <TripProcessing
       {result}
-      onComplete={() => {
+      onComplete={async () => {
         transitionTo(TRIP_STATE.RESULTS)
+        await goto(`/${page.data.roomId}/result/${result.outcomeId}?warpspeed`, {
+          state: {
+            entryState: JSON.parse(stringifyWithBigInt(entryState))
+          }
+        })
       }}
     />
   {/if}

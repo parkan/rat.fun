@@ -11,8 +11,12 @@
   let balanceGoing = $state(false)
   let showAccountStats = $state(false)
 
+  function onmousedown() {
+    playUISound("ratfun", "clickDownLight")
+  }
+
   function toggleAccountStats() {
-    playUISound("ratfun", "textLineHit")
+    playUISound("ratfun", "releaseMini")
     showAccountStats = !showAccountStats
   }
 </script>
@@ -22,7 +26,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   {#if $player}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="player-stats" onclick={toggleAccountStats}>
+    <div class="player-stats" {onmousedown} onmouseup={toggleAccountStats}>
       <!-- NAME -->
       <div class="stat-item">
         <!-- AVATAR -->

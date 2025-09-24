@@ -68,12 +68,6 @@
       if (result) {
         // Already has an ID
         entryState.result = result
-        entryState.state = TRIP_STATE.RESULTS
-        await goto(`/${data.roomId}/result/${result.outcomeId}?warpspeed`, {
-          state: {
-            entryState: JSON.parse(stringifyWithBigInt(entryState))
-          }
-        })
       } else {
         entryState.state = TRIP_STATE.ERROR
         goto("/")

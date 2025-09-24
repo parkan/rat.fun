@@ -9,7 +9,13 @@ import { writable, derived } from "svelte/store"
 import { addressToId } from "$lib/modules/utils"
 import { blockNumber } from "$lib/modules/network"
 import { ENTITY_TYPE } from "contracts/enums"
-import { filterByEntitytype, filterByPlayer, filterByOthers, filterLiquidated } from "./utils"
+import {
+  filterByEntitytype,
+  filterByPlayer,
+  filterByOthers,
+  filterActive,
+  filterLiquidated
+} from "./utils"
 import { staticContent } from "$lib/modules/content"
 import { WORLD_OBJECT_ID } from "./constants"
 
@@ -119,6 +125,15 @@ export const playerRooms = derived(
   [playerId, rooms],
   ([$playerId, $rooms]) => filterByPlayer($rooms, $playerId) as Rooms
 )
+
+export const playerActiveRooms = derived([playerRooms], ([$playerRooms]) => {
+  return filterActive($playerRooms) as Rooms
+})
+
+export const playerLiquidatedRooms = derived([playerRooms], ([$playerRooms]) => {
+  // console.log("player rooms", $playerRooms)
+  return filterLiquidated($playerRooms) as Rooms
+})
 
 export const playerERC20Balance = writable(0 as number)
 export const playerERC20Allowance = writable(0 as number)

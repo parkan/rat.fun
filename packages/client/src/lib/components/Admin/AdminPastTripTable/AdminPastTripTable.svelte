@@ -3,7 +3,7 @@
   import { SmallButton } from "$lib/components/Shared"
   import { RoomGraph } from "$lib/components/Room"
   import { goto } from "$app/navigation"
-  import { playerActiveRooms } from "$lib/modules/state/stores"
+  import { playerLiquidatedRooms } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
@@ -47,7 +47,9 @@
   })
 
   let roomList = $derived.by(() => {
-    let entries = Object.entries($playerActiveRooms)
+    let entries = Object.entries($playerLiquidatedRooms)
+
+    console.log(entries)
 
     return entries.sort(sortFunction)
   })
@@ -89,6 +91,7 @@
               {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
             </td>
             <td class="cell-graph">
+              {console.log(plotData)}
               {#if plotData}
                 <div class="mini-graph">
                   <RoomGraph smallIcons height={80} {plotData} isEmpty={plotData.length === 0} />

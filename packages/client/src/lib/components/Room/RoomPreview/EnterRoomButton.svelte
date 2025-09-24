@@ -31,7 +31,7 @@
       onclick={onClick}
     />
   {/if}
-  <BigButton {disabled} text="Send rat to trip" onclick={onClick} />
+  <BigButton id="send_rat" {disabled} text="Send rat to trip" onclick={onClick} />
 </div>
 
 <style>

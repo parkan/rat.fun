@@ -28,8 +28,6 @@
         clearInterval(timerInterval)
       }
       timerDone = true
-      // TODO: we are now returning after a fixed amount of time
-      // We should check that the result is ready
     }, 8000)
   })
 

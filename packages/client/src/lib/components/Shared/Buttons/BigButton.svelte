@@ -7,23 +7,42 @@
     cost,
     tippyText,
     disabled = false,
+    id,
     onclick
   }: {
     text: string
     cost?: number
     tippyText?: string
     disabled?: boolean
+    id?: string
     onclick: () => void
   } = $props()
 
   const onmousedown = () => {
-    playUISound("ratfun", "mousedown")
+    if (id === "connect") {
+      playUISound("ratfun", "clickDownLight")
+    } else {
+      playUISound("ratfun", "clickDownHeavy")
+    }
   }
 
   let conditionalAction = $derived(tippyText ? tippy : () => {})
 
   const onmouseup = () => {
-    playUISound("ratfun", "mouseup")
+    if (id === "send_rat" || id === "buy_rat") {
+      playUISound("ratfun", "chicken1")
+    } else if (id === "skillz") {
+      // enjoy skillfully
+      playUISound("ratfun", "chicken2")
+    } else if (id === "connect") {
+      playUISound("ratfun", "releaseConnect")
+    } else if (id === "abort") {
+      playUISound("ratfun", "releaseError1")
+    } else if (id === "liquidate") {
+      playUISound("ratfun", "releaseSlopCharge")
+    } else {
+      playUISound("ratfun", "releaseMini")
+    }
     onclick()
   }
 </script>

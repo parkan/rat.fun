@@ -6,6 +6,11 @@ uniform bool u_invert;
 
 void main() {
     vec2 position = gl_FragCoord.xy / u_resolution;
+    
+    // Zoom in effect - much more pronounced with acceleration over time
+    float zoomFactor = 1.0 + pow(u_time, 1.5) * 0.3; // Accelerating zoom with power curve
+    vec2 center = vec2(0.5, 0.5);
+    position = center + (position - center) / zoomFactor;
 
     float cX = position.x - 0.5;
     float cY = position.y - 0.5;

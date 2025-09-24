@@ -50,13 +50,13 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    <img src="/images/mascot1.png" alt="Mascot" bind:this={imageElement} />
+    <!-- <img src="/images/mascot1.png" alt="Mascot" bind:this={imageElement} /> -->
     <p bind:this={messageElement}>{message}</p>
     {#if walletType === WALLET_TYPE.ENTRYKIT}
       <div bind:this={$entryKitButton}></div>
     {:else}
       <div class="button-container" bind:this={buttonElement}>
-        <BigButton text="Connect Burner" onclick={onComplete} />
+        <BigButton id="connect" text="Connect Burner" onclick={onComplete} />
       </div>
     {/if}
   </div>

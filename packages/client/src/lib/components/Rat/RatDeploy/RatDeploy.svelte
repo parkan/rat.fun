@@ -31,12 +31,13 @@
 </script>
 
 <div class="deploy-rat">
-  <div class="image-container">
+  <!-- <div class="image-container">
     <img style:filter src="/images/mascot1.png" alt="Rat" />
-  </div>
+  </div> -->
   <div class="button-container">
     {#if $player}
       <BigButton
+        id="buy_rat"
         text="Buy rat"
         cost={Number($gameConfig?.ratCreationCost)}
         {disabled}
