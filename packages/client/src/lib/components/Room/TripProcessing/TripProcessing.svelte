@@ -15,7 +15,7 @@
   let timerDone = $state(false)
 
   // Wait until timer is done AND result is available
-  // We do this so that the visualized will run at least MINIMUM_DURATION
+  // We do this so that the visualized will last at least MINIMUM_DURATION
   $effect(() => {
     if (timerDone && result) onComplete()
   })

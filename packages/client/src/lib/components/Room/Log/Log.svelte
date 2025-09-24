@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { MergedLogEntry } from "$lib/components/Room/Trip/types"
   import type { EnterRoomReturnValue } from "@server/modules/types"
-  import { fade } from "svelte/transition"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
   import { LogItem } from "$lib/components/Room"

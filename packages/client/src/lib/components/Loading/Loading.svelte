@@ -18,6 +18,7 @@
   $effect(() => {
     if ($ready) {
       // Done here because currently we are not filtering on by playerAddress
+      // ???
       initEntities()
       // We are loaded. Animate the component out...
       animateOut()
