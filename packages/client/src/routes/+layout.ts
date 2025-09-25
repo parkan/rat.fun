@@ -15,10 +15,6 @@ export const load: LayoutLoad = async ({ url }) => {
   const networkConfig = getNetworkConfig(environment, url)
 
   console.log("### routes/+layout.ts ###")
-  // console.log("environment", environment)
-  // console.log("walletType", walletType)
-  // console.log("saleStatus", saleStatus)
-  // console.log("networkConfig", networkConfig)
 
   return {
     environment: environment,

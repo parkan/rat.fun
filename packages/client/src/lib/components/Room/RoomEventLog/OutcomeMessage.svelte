@@ -33,7 +33,7 @@
 </script>
 
 <!-- Deprecated; modal view #{outcome._id} -->
-<a href="/{outcome.roomId}/result/{outcome._id}" class="chat-event {topic}">
+<a href="/{outcome.roomId}/tripopedia/{outcome._id}" class="chat-event {topic}">
   {#if topic == "room__outcome"}
     <!-- ROOM OUTCOME -->
     <span

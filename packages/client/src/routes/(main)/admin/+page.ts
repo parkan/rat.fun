@@ -9,8 +9,6 @@ export const load: PageLoad = async ({ url }) => {
   const environment = getEnvironmentFromUrl(url)
   const networkConfig = getNetworkConfig(environment, url)
 
-  console.log("### routes/(main)/admin/+page.ts ###")
-
   try {
     const rooms = await loadData(queries.rooms, { worldAddress: networkConfig.worldAddress })
     return {

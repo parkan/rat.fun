@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { MergedLogEntry } from "$lib/components/Room/Trip/types"
+  import type { MergedLogEntry } from "$lib/components/GameRun/types"
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"

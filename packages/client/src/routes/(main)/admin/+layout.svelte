@@ -20,8 +20,6 @@
 
   let focus = $state("")
 
-  console.log("### routes/(main)/admin/+layout.svelte ###")
-
   // Redirect to game route if player is not authorized to view admin page
   $effect(() => {
     if ($player) {

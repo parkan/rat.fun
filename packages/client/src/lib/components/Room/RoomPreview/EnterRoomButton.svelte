@@ -9,7 +9,7 @@
 
   const onClick = async () => {
     shaderManager.setShader("blank")
-    await goto(`/${roomId}/result?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
+    await goto(`/${roomId}/tripping?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
   }
 </script>
 

@@ -3,7 +3,6 @@
   import "tippy.js/dist/tippy.css"
 
   import type { LayoutProps } from "./$types"
-  import { type Outcome as SanityOutcome } from "@sanity-types"
   import {
     initSound,
     snapshotFactory,
@@ -15,7 +14,7 @@
   import { afterNavigate, goto } from "$app/navigation"
   import { page } from "$app/state"
   import { onMount } from "svelte"
-  import { initStaticContent, staticContent } from "$lib/modules/content"
+  import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, notificationsRead } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -24,14 +23,12 @@
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { EMPTY_ID } from "$lib/modules/state/constants"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { removeHash } from "$lib/modules/utils"
   import { walletType as walletTypeStore } from "$lib/modules/network"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import { Shader, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
-  import { Outcome } from "$lib/components/GameRun"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
@@ -42,8 +39,6 @@
   let { children, data }: LayoutProps = $props()
 
   let initingSound = $state(false)
-  let outcomeId = $state("")
-  let outcome = $state<SanityOutcome | undefined>()
 
   const { environment, walletType } = data
 
@@ -69,6 +64,7 @@
     UIState.set(UI.READY)
   }
 
+  // Initialize Sentry
   if (browser) {
     initializeSentry()
   }
@@ -114,12 +110,7 @@
   })
 </script>
 
-<svelte:window
-  onhashchange={e => {
-    outcomeId = new URL(e.newURL).hash.replace("#", "")
-    outcome = $staticContent.outcomes.find(o => o._id === outcomeId)
-  }}
-/>
+<svelte:window />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
@@ -146,15 +137,6 @@
     {/if}
   {/if}
 </div>
-
-{#key outcomeId}
-  {#if outcome}
-    {#snippet content()}
-      <Outcome {outcome} />
-    {/snippet}
-    <ModalTarget onclose={removeHash} {content}></ModalTarget>
-  {/if}
-{/key}
 
 {#if $activeWorldEvent && !notificationsRead.current.includes($activeWorldEvent.cmsId)}
   {#snippet worldEventContent()}
