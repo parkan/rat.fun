@@ -48,7 +48,6 @@
         );
     }
   }
-
   .dust {
     position: fixed;
     top: 0;
