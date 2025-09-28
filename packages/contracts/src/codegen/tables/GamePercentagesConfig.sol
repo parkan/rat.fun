@@ -19,6 +19,8 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 struct GamePercentagesConfigData {
   uint32 maxValuePerWin;
   uint32 minRatValueToEnter;
+  uint32 taxationLiquidateRat;
+  uint32 taxationCloseRoom;
 }
 
 library GamePercentagesConfig {
@@ -26,12 +28,12 @@ library GamePercentagesConfig {
   ResourceId constant _tableId = ResourceId.wrap(0x746272617466756e000000000000000047616d6550657263656e746167657343);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0008020004040000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0010040004040404000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of ()
   Schema constant _keySchema = Schema.wrap(0x0000000000000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint32, uint32)
-  Schema constant _valueSchema = Schema.wrap(0x0008020003030000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint32, uint32, uint32, uint32)
+  Schema constant _valueSchema = Schema.wrap(0x0010040003030303000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -46,9 +48,11 @@ library GamePercentagesConfig {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](2);
+    fieldNames = new string[](4);
     fieldNames[0] = "maxValuePerWin";
     fieldNames[1] = "minRatValueToEnter";
+    fieldNames[2] = "taxationLiquidateRat";
+    fieldNames[3] = "taxationCloseRoom";
   }
 
   /**
@@ -142,6 +146,82 @@ library GamePercentagesConfig {
   }
 
   /**
+   * @notice Get taxationLiquidateRat.
+   */
+  function getTaxationLiquidateRat() internal view returns (uint32 taxationLiquidateRat) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint32(bytes4(_blob)));
+  }
+
+  /**
+   * @notice Get taxationLiquidateRat.
+   */
+  function _getTaxationLiquidateRat() internal view returns (uint32 taxationLiquidateRat) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint32(bytes4(_blob)));
+  }
+
+  /**
+   * @notice Set taxationLiquidateRat.
+   */
+  function setTaxationLiquidateRat(uint32 taxationLiquidateRat) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((taxationLiquidateRat)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set taxationLiquidateRat.
+   */
+  function _setTaxationLiquidateRat(uint32 taxationLiquidateRat) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((taxationLiquidateRat)), _fieldLayout);
+  }
+
+  /**
+   * @notice Get taxationCloseRoom.
+   */
+  function getTaxationCloseRoom() internal view returns (uint32 taxationCloseRoom) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
+    return (uint32(bytes4(_blob)));
+  }
+
+  /**
+   * @notice Get taxationCloseRoom.
+   */
+  function _getTaxationCloseRoom() internal view returns (uint32 taxationCloseRoom) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
+    return (uint32(bytes4(_blob)));
+  }
+
+  /**
+   * @notice Set taxationCloseRoom.
+   */
+  function setTaxationCloseRoom(uint32 taxationCloseRoom) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((taxationCloseRoom)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set taxationCloseRoom.
+   */
+  function _setTaxationCloseRoom(uint32 taxationCloseRoom) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((taxationCloseRoom)), _fieldLayout);
+  }
+
+  /**
    * @notice Get the full data.
    */
   function get() internal view returns (GamePercentagesConfigData memory _table) {
@@ -172,8 +252,18 @@ library GamePercentagesConfig {
   /**
    * @notice Set the full data using individual values.
    */
-  function set(uint32 maxValuePerWin, uint32 minRatValueToEnter) internal {
-    bytes memory _staticData = encodeStatic(maxValuePerWin, minRatValueToEnter);
+  function set(
+    uint32 maxValuePerWin,
+    uint32 minRatValueToEnter,
+    uint32 taxationLiquidateRat,
+    uint32 taxationCloseRoom
+  ) internal {
+    bytes memory _staticData = encodeStatic(
+      maxValuePerWin,
+      minRatValueToEnter,
+      taxationLiquidateRat,
+      taxationCloseRoom
+    );
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -186,8 +276,18 @@ library GamePercentagesConfig {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(uint32 maxValuePerWin, uint32 minRatValueToEnter) internal {
-    bytes memory _staticData = encodeStatic(maxValuePerWin, minRatValueToEnter);
+  function _set(
+    uint32 maxValuePerWin,
+    uint32 minRatValueToEnter,
+    uint32 taxationLiquidateRat,
+    uint32 taxationCloseRoom
+  ) internal {
+    bytes memory _staticData = encodeStatic(
+      maxValuePerWin,
+      minRatValueToEnter,
+      taxationLiquidateRat,
+      taxationCloseRoom
+    );
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -201,7 +301,12 @@ library GamePercentagesConfig {
    * @notice Set the full data using the data struct.
    */
   function set(GamePercentagesConfigData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.maxValuePerWin, _table.minRatValueToEnter);
+    bytes memory _staticData = encodeStatic(
+      _table.maxValuePerWin,
+      _table.minRatValueToEnter,
+      _table.taxationLiquidateRat,
+      _table.taxationCloseRoom
+    );
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -215,7 +320,12 @@ library GamePercentagesConfig {
    * @notice Set the full data using the data struct.
    */
   function _set(GamePercentagesConfigData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.maxValuePerWin, _table.minRatValueToEnter);
+    bytes memory _staticData = encodeStatic(
+      _table.maxValuePerWin,
+      _table.minRatValueToEnter,
+      _table.taxationLiquidateRat,
+      _table.taxationCloseRoom
+    );
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -228,10 +338,20 @@ library GamePercentagesConfig {
   /**
    * @notice Decode the tightly packed blob of static data using this table's field layout.
    */
-  function decodeStatic(bytes memory _blob) internal pure returns (uint32 maxValuePerWin, uint32 minRatValueToEnter) {
+  function decodeStatic(
+    bytes memory _blob
+  )
+    internal
+    pure
+    returns (uint32 maxValuePerWin, uint32 minRatValueToEnter, uint32 taxationLiquidateRat, uint32 taxationCloseRoom)
+  {
     maxValuePerWin = (uint32(Bytes.getBytes4(_blob, 0)));
 
     minRatValueToEnter = (uint32(Bytes.getBytes4(_blob, 4)));
+
+    taxationLiquidateRat = (uint32(Bytes.getBytes4(_blob, 8)));
+
+    taxationCloseRoom = (uint32(Bytes.getBytes4(_blob, 12)));
   }
 
   /**
@@ -245,7 +365,12 @@ library GamePercentagesConfig {
     EncodedLengths,
     bytes memory
   ) internal pure returns (GamePercentagesConfigData memory _table) {
-    (_table.maxValuePerWin, _table.minRatValueToEnter) = decodeStatic(_staticData);
+    (
+      _table.maxValuePerWin,
+      _table.minRatValueToEnter,
+      _table.taxationLiquidateRat,
+      _table.taxationCloseRoom
+    ) = decodeStatic(_staticData);
   }
 
   /**
@@ -270,8 +395,13 @@ library GamePercentagesConfig {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(uint32 maxValuePerWin, uint32 minRatValueToEnter) internal pure returns (bytes memory) {
-    return abi.encodePacked(maxValuePerWin, minRatValueToEnter);
+  function encodeStatic(
+    uint32 maxValuePerWin,
+    uint32 minRatValueToEnter,
+    uint32 taxationLiquidateRat,
+    uint32 taxationCloseRoom
+  ) internal pure returns (bytes memory) {
+    return abi.encodePacked(maxValuePerWin, minRatValueToEnter, taxationLiquidateRat, taxationCloseRoom);
   }
 
   /**
@@ -282,9 +412,16 @@ library GamePercentagesConfig {
    */
   function encode(
     uint32 maxValuePerWin,
-    uint32 minRatValueToEnter
+    uint32 minRatValueToEnter,
+    uint32 taxationLiquidateRat,
+    uint32 taxationCloseRoom
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(maxValuePerWin, minRatValueToEnter);
+    bytes memory _staticData = encodeStatic(
+      maxValuePerWin,
+      minRatValueToEnter,
+      taxationLiquidateRat,
+      taxationCloseRoom
+    );
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

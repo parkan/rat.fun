@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import {
   GameConfig,
+  GamePercentagesConfig,
   EntityType,
   Balance,
   Owner,
@@ -70,7 +71,7 @@ contract RoomSystem is System {
     uint256 valueToPlayer = Balance.get(_roomId);
 
     // Calculate tax
-    uint256 tax = (valueToPlayer * GameConfig.getTaxationCloseRoom()) / 100;
+    uint256 tax = (valueToPlayer * GamePercentagesConfig.getTaxationCloseRoom()) / 100;
     valueToPlayer -= tax;
 
     Balance.set(_roomId, 0);

@@ -21,9 +21,7 @@ export default defineWorld({
         ratCreationCost: "uint256",
         maxInventorySize: "uint32",
         maxRoomPromptLength: "uint32",
-        cooldownCloseRoom: "uint32",
-        taxationLiquidateRat: "uint32",
-        taxationCloseRoom: "uint32"
+        cooldownCloseRoom: "uint32"
       },
       codegen: {
         dataStruct: true
@@ -33,7 +31,9 @@ export default defineWorld({
       key: [],
       schema: {
         maxValuePerWin: "uint32", // Limits how much a rat can extract from room in one run
-        minRatValueToEnter: "uint32" // Minimum total value of rat to enter room.
+        minRatValueToEnter: "uint32", // Minimum total value of rat to enter room.
+        taxationLiquidateRat: "uint32",
+        taxationCloseRoom: "uint32"
       }
     },
     WorldStats: {
