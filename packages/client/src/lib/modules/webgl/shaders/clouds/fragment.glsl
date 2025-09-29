@@ -75,9 +75,11 @@ void main() {
   // Mix sky and clouds
   vec3 color = mix(skyColor, vec3(1.0), clouds * 0.9);
   
-  if (u_invert) {
-    color = vec3(1.0) - color;
-  }
+  // Always invert the color
+  color = vec3(1.0) - color;
+
+  // if (u_invert) {
+  // }
   
   gl_FragColor = vec4(color, 1.0);
 } 

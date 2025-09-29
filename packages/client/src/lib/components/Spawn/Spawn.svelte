@@ -74,13 +74,15 @@
     }
   })
 
-  onMount(() => {
-    shaderManager.setShader("clouds", "inverted")
-
+  onMount(async () => {
     // ???
     if (walletType === WALLET_TYPE.BURNER) {
       connectBurner()
     }
+
+    // HACK
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    shaderManager.setShader("clouds")
   })
 </script>
 

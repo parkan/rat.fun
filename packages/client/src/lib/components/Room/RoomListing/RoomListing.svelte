@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import { get } from "svelte/store"
+  import { fade } from "svelte/transition"
   import { rooms, playerIsNew } from "$lib/modules/state/stores"
   import { entriesChronologically } from "./sortFunctions"
   import { filterRooms, filterDepletedRooms } from "./filterFunctions"
@@ -36,7 +37,7 @@
 </script>
 
 <div class="content">
-  <div class:animated={false} class="room-listing">
+  <div class:animated={false} class="room-listing" in:fade|global={{ duration: 300 }}>
     {#if $playerIsNew}
       <div class="new-player-message">
         <div>Buy your first rat to start tripping.</div>
@@ -55,8 +56,8 @@
           </button>
         {/key}
       {/if}
-      {#each activeList as roomEntry (roomEntry[0])}
-        <RoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} />
+      {#each activeList as roomEntry, index (roomEntry[0])}
+        <RoomItem roomId={roomEntry[0] as Hex} room={roomEntry[1]} {index} />
       {/each}
     {:else}
       <div class="empty-listing">

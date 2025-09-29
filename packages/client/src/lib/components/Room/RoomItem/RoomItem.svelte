@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Hex } from "viem"
+  import { fade } from "svelte/transition"
   import { urlFor } from "$lib/modules/content/sanity"
   import { renderSafeString } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
@@ -7,7 +8,9 @@
 
   import type { Room as SanityRoom } from "@sanity-types"
 
-  let { roomId, room }: { roomId: Hex; room: Room } = $props()
+  let { roomId, room, index }: { roomId: Hex; room: Room; index: number } = $props()
+
+  console.log("index", index)
 
   let sanityRoomContent: SanityRoom | undefined = $derived(
     $staticContent?.rooms?.find(r => r._id.trim() == roomId.trim()) ?? undefined
@@ -67,7 +70,6 @@
     border-bottom: var(--default-border-style);
     padding: var(--room-item-padding);
     cursor: pointer;
-    // height: var(--room-item-height);
     width: 100%;
     color: var(--foreground);
     text-align: left;
