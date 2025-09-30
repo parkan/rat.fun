@@ -77,7 +77,12 @@ async function routes(fastify: FastifyInstance) {
 
         // Call event model
         console.time("–– Construct event messages")
-        const eventMessages = await constructEventMessages(rat, room, gamePercentagesConfig, worldEvent)
+        const eventMessages = await constructEventMessages(
+          rat,
+          room,
+          gamePercentagesConfig,
+          worldEvent
+        )
         console.timeEnd("–– Construct event messages")
 
         console.time("–– Event LLM")

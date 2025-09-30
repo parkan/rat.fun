@@ -44,12 +44,7 @@ contract RoomSystem is System {
     // Room id can be 0 (which generates a new id) or an unused entity id
     require(_roomId == bytes32(0) || EntityType.get(_roomId) == ENTITY_TYPE.NONE, "room id already in use");
 
-    newRoomId = LibRoom.createRoom(
-      _playerId,
-      _roomId,
-      _roomCreationCost,
-      _prompt
-    );
+    newRoomId = LibRoom.createRoom(_playerId, _roomId, _roomCreationCost, _prompt);
 
     // Deposit player tokens in pool
     // ERC-20 will check that player has sufficient balance, and approval for pool to transfer it

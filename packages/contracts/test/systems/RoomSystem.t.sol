@@ -191,7 +191,8 @@ contract RoomSystemTest is BaseTest {
     // Check that room has been marked as liquidated
     assertEq(Liquidated.get(roomId), true);
 
-    uint256 liquidationValue = ROOM_INITIAL_BALANCE - (ROOM_INITIAL_BALANCE * GamePercentagesConfig.getTaxationCloseRoom()) / 100;
+    uint256 liquidationValue = ROOM_INITIAL_BALANCE -
+      (ROOM_INITIAL_BALANCE * GamePercentagesConfig.getTaxationCloseRoom()) / 100;
     assertEq(LiquidationValue.get(roomId), liquidationValue);
     assertEq(LiquidationBlock.get(roomId), block.number);
   }

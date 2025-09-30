@@ -17,7 +17,9 @@
 
   // Calculate tax and payout amounts
   const taxAmount = Math.floor((originalValue * $gamePercentagesConfig[taxRateKey]) / 100)
-  const payoutAmount = Math.floor((originalValue * (100 - $gamePercentagesConfig[taxRateKey])) / 100)
+  const payoutAmount = Math.floor(
+    (originalValue * (100 - $gamePercentagesConfig[taxRateKey])) / 100
+  )
 </script>
 
 <div class="value-breakdown">

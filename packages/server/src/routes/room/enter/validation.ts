@@ -7,7 +7,12 @@ import {
 } from "@modules/error-handling/errors"
 import { getRoomMinRatValueToEnter } from "@modules/mud/value"
 
-export function validateInputData(player: Player, rat: Rat, room: Room, gamePercentagesConfig: GamePercentagesConfig) {
+export function validateInputData(
+  player: Player,
+  rat: Rat,
+  room: Room,
+  gamePercentagesConfig: GamePercentagesConfig
+) {
   // Check that sender owns the rat
   if (rat.owner !== player.id) {
     throw new RatOwnershipError()

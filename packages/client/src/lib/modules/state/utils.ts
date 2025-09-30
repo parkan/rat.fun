@@ -83,20 +83,23 @@ export function getRoomOwnerName(room: Room) {
   return get(players)[room.owner]?.name ?? "unknown"
 }
 
-export function getRoomMaxValuePerWin(roomCreationCost: number | bigint, roomBalance: number | bigint): Readable<number> {
-  return derived(gamePercentagesConfig, ($gamePercentagesConfig) => {
+export function getRoomMaxValuePerWin(
+  roomCreationCost: number | bigint,
+  roomBalance: number | bigint
+): Readable<number> {
+  return derived(gamePercentagesConfig, $gamePercentagesConfig => {
     // Use balance or creation cost, whichever is higher
     const costBalanceMax = Math.max(Number(roomCreationCost), Number(roomBalance))
     // Multiply by the configured percentage
-    const result = Math.floor($gamePercentagesConfig.maxValuePerWin * costBalanceMax / 100)
+    const result = Math.floor(($gamePercentagesConfig.maxValuePerWin * costBalanceMax) / 100)
     // Cap to balance
     return Math.min(result, Number(roomBalance))
   })
 }
 
 export function getRoomMinRatValueToEnter(roomCreationCost: number | bigint): Readable<number> {
-  return derived(gamePercentagesConfig, ($gamePercentagesConfig) => {
-    return Math.floor(Number(roomCreationCost) * $gamePercentagesConfig.minRatValueToEnter / 100)
+  return derived(gamePercentagesConfig, $gamePercentagesConfig => {
+    return Math.floor((Number(roomCreationCost) * $gamePercentagesConfig.minRatValueToEnter) / 100)
   })
 }
 

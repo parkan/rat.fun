@@ -1,4 +1,10 @@
-import type { EnterRoomData, Item, GameConfig, GamePercentagesConfig, WorldEvent } from "@modules/types"
+import type {
+  EnterRoomData,
+  Item,
+  GameConfig,
+  GamePercentagesConfig,
+  WorldEvent
+} from "@modules/types"
 import { getComponentValue, Entity } from "@latticexyz/recs"
 import { components, network } from "@modules/mud/initMud"
 import { GAME_CONFIG_ID } from "@config"
@@ -31,7 +37,7 @@ export async function getEnterRoomData(
       Index,
       GameConfig,
       GamePercentagesConfig,
-      RoomCreationCost,
+      RoomCreationCost
     } = components
 
     const result = {} as EnterRoomData
@@ -129,7 +135,10 @@ export async function getEnterRoomData(
     const gameConfigEntity = (await network).world.registerEntity({ id: GAME_CONFIG_ID })
 
     const gameConfig = getComponentValue(GameConfig, gameConfigEntity) as GameConfig
-    const gamePercentagesConfig = getComponentValue(GamePercentagesConfig, gameConfigEntity) as GamePercentagesConfig
+    const gamePercentagesConfig = getComponentValue(
+      GamePercentagesConfig,
+      gameConfigEntity
+    ) as GamePercentagesConfig
     const worldEvent = getComponentValue(WorldEvent, gameConfigEntity) as WorldEvent
 
     // Check if game config exists

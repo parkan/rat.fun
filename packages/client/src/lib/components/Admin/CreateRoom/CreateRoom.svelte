@@ -31,7 +31,9 @@
   // 10% of room creation cost
   let minRatValueToEnter = $derived(getRoomMinRatValueToEnter(flooredRoomCreationCost))
   // Portion of room creation cost
-  let maxValuePerWin = $derived(getRoomMaxValuePerWin(flooredRoomCreationCost, flooredRoomCreationCost))
+  let maxValuePerWin = $derived(
+    getRoomMaxValuePerWin(flooredRoomCreationCost, flooredRoomCreationCost)
+  )
 
   // Disabled if:
   // - Room description is invalid
