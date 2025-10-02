@@ -3,6 +3,7 @@
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
   import type { Room as SanityRoom } from "@sanity-types"
+  import { playUISound } from "$lib/modules/sound/state.svelte"
 
   import LogoBox from "./Boxes/LogoBox.svelte"
   import TextLogBox from "./Boxes/TextLogBox.svelte"
@@ -24,6 +25,7 @@
   const SETUP_DURATION = 5000
 
   onMount(async () => {
+    playUISound("ratfun", "tripSetupv2")
     setTimeout(() => {
       onComplete()
     }, SETUP_DURATION)

@@ -9,7 +9,7 @@
 
   onMount(() => {
     shaderManager.setShader("blank")
-    sound = playUISound("ratfun", "tripResultLoop")
+    sound = playUISound("ratfun", "tripResultLoopv2")
     playUISound("ratfun", "tripResultTrigger")
   })
 

@@ -17,7 +17,7 @@
 
   onMount(() => {
     shaderManager.setShader("vortex")
-    playUISound("ratfun", "tripProcessing")
+    playUISound("ratfun", "tripProcessingv2")
     // Start timer
     timerInterval = setInterval(() => {
       timeElapsed += 0.1

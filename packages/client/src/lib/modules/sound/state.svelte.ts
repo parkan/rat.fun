@@ -200,7 +200,7 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
 
   // Trip setup
   const tripSetup = new Tone.Player({
-    url: soundLibrary.ratfun.tripSetup.src,
+    url: soundLibrary.ratfun.tripSetupv2.src,
     volume: -Infinity,
     loop: false,
     autostart: false
@@ -209,7 +209,7 @@ const registerMusic = (channel: Tone.ToneAudioNode): Record<string, Tone.Player>
     .sync()
 
   const tripProcessing = new Tone.Player({
-    url: soundLibrary.ratfun.tripProcessing.src,
+    url: soundLibrary.ratfun.tripProcessingv2.src,
     volume: -Infinity,
     loop: false,
     autostart: false
