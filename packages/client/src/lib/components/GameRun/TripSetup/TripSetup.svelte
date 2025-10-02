@@ -1,14 +1,17 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
+  import { Howl } from "howler"
   import type { Room as SanityRoom } from "@sanity-types"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateTripSetupOutput } from "./tripSetupOutput"
+  import { playSound } from "$lib/modules/sound-classic"
 
   gsap.registerPlugin(TextPlugin)
 
   let terminalBoxElement = $state<HTMLDivElement>()
+  let backgroundMusic: Howl | undefined = $state()
 
   const {
     onComplete,
@@ -20,25 +23,23 @@
 
   const SETUP_DURATION = 5000
 
-  // const text = [
-  //   "= Pneumatic system engaged",
-  //   `= Rat ${$rat.name} conveyed to trip chamber`,
-  //   "= Trip chamber lid closed",
-  //   "= RAT-o-FUN harness secured",
-  //   "= PETA approved Diaper attached",
-  //   "= Intercranial probes attached",
-  //   "= Rat dosed with 44mg of Slopamine",
-  //   "= Video feed activated",
-  //   "= Trip initiated....."
-  // ]
-
   onMount(async () => {
+    backgroundMusic = playSound("ratfun", "tripSetup", true)
+
     setTimeout(() => {
       onComplete()
     }, SETUP_DURATION)
 
     if (terminalBoxElement) {
       await terminalTyper(terminalBoxElement, generateTripSetupOutput())
+    }
+  })
+
+  onDestroy(() => {
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
     }
   })
 </script>

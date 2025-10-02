@@ -1,13 +1,16 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
 
+  import { onMount, onDestroy } from "svelte"
+
+  import { playSound } from "$lib/modules/sound-classic"
+
   import { truncateString } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
   import tippy from "tippy.js"
-  import { onMount } from "svelte"
 
   import "tippy.js/dist/tippy.css" // optional for styling
 
@@ -15,6 +18,8 @@
 
   // Add reactive timestamp for real-time updates
   let currentTime = $state(Date.now())
+
+  let backgroundMusic: Howl | undefined = $state()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -231,11 +236,20 @@
 
   // Setup real-time updates
   onMount(() => {
+    backgroundMusic = playSound("ratfun", "admin", true)
     const interval = setInterval(() => {
       currentTime = Date.now()
     }, 1000)
 
     return () => clearInterval(interval)
+  })
+
+  onDestroy(() => {
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
+    }
   })
 </script>
 

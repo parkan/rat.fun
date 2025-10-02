@@ -4,11 +4,12 @@
 
   import type { LayoutProps } from "./$types"
   import {
-    initSound,
-    snapshotFactory,
-    switchAudio
+    // initSound,
+    snapshotFactory
+    // switchAudio
     // ratCoughs
   } from "$lib/modules/sound/state.svelte"
+  import { initSound } from "$lib/modules/sound-classic"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { afterNavigate, goto } from "$app/navigation"
@@ -38,7 +39,7 @@
 
   let { children, data }: LayoutProps = $props()
 
-  let initingSound = $state(false)
+  // let initingSound = $state(false)
 
   const { environment, walletType } = data
 
@@ -75,37 +76,40 @@
   })
 
   // Enable audio on first user interaction
-  const enableAudio = async () => {
-    if (initingSound) return false
+  // const enableAudio = async () => {
+  //   if (initingSound) return false
 
-    initingSound = true
+  //   initingSound = true
 
-    await initSound()
+  // await initSound()
+  // initSound()
 
-    switchAudio(page)
+  // switchAudio(page)
 
-    // ratCoughs()
+  // ratCoughs()
 
-    document.removeEventListener("click", enableAudio)
-    document.removeEventListener("touchstart", enableAudio)
-    document.removeEventListener("keydown", enableAudio)
-  }
+  // document.removeEventListener("click", enableAudio)
+  // document.removeEventListener("touchstart", enableAudio)
+  // document.removeEventListener("keydown", enableAudio)
+  // }
 
   onMount(async () => {
     // Remove preloader
     document.querySelector(".preloader")?.remove()
 
-    document.addEventListener("click", enableAudio)
-    document.addEventListener("touchstart", enableAudio)
-    document.addEventListener("keydown", enableAudio)
+    initSound()
+
+    // document.addEventListener("click", enableAudio)
+    // document.addEventListener("touchstart", enableAudio)
+    // document.addEventListener("keydown", enableAudio)
   })
 
-  afterNavigate(({ to, from }) => {
-    switchAudio(to, from)
-    if (to?.url.searchParams.has("spawn")) {
-      UIState.set(UI.SPAWNING)
-    }
-  })
+  // afterNavigate(({ to, from }) => {
+  //   switchAudio(to, from)
+  //   if (to?.url.searchParams.has("spawn")) {
+  //     UIState.set(UI.SPAWNING)
+  //   }
+  // })
 </script>
 
 <svelte:window />

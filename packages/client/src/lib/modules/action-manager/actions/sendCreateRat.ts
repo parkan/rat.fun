@@ -1,11 +1,6 @@
 import { get } from "svelte/store"
-
-import { playUISound } from "$lib/modules/sound/state.svelte"
-import {
-  gameConfig,
-  externalAddressesConfig,
-  playerERC20Allowance
-} from "$lib/modules/state/stores"
+import { gameConfig } from "$lib/modules/state/stores"
+import { externalAddressesConfig, playerERC20Allowance } from "$lib/modules/state/stores"
 import { createRat, approve } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
 import { RatError } from "$lib/modules/error-handling/errors"
@@ -20,7 +15,7 @@ export async function sendCreateRat(name: string) {
   const _playerERC20Allowance = get(playerERC20Allowance)
 
   if (busy.CreateRat.current !== 0) return
-  playUISound("ratfun", "blink")
+
   busy.CreateRat.set(0.99)
   // Approve
   try {

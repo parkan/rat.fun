@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte"
   import { page } from "$app/state"
   import { player, worldStats, activeWorldEvent } from "$lib/modules/state/stores"
   import { upcomingWorldEvent } from "$lib/modules/content"
-  import { switchAudio } from "$lib/modules/sound/state.svelte"
 
   import PlayerInfo from "./PlayerInfo/PlayerInfo.svelte"
   import PaneSwitch from "./PaneSwitch.svelte"
@@ -12,10 +10,6 @@
   import GlobalStats from "./GlobalStats.svelte"
 
   const isAdminView = $derived(page.route?.id?.includes("/(main)/admin") ?? false)
-
-  onMount(() => {
-    switchAudio(page)
-  })
 </script>
 
 <div class="top-bar">
