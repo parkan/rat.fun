@@ -23,6 +23,3 @@
 
 <!-- LOG -->
 <Log {result} {onComplete} />
-
-<style lang="scss">
-</style>

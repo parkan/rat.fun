@@ -18,6 +18,9 @@
     if ($profitLoss === 0) return "neutral"
     return $profitLoss < $balance ? "upText" : "downText"
   })
+  const plSymbol = derived(portfolioClass, $pc =>
+    $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
+  )
 </script>
 
 <div bind:clientHeight class="admin-trip-monitor">
@@ -26,20 +29,23 @@
     <div class="top">
       <p>Unrealized P&L</p>
       {#if $balance && $investment}
-        <h1>
-          <span class="main {$portfolioClass}"
-            >{$profitLoss}
-            <span class="small">({(($balance / $investment) * 100).toFixed(2)}%)</span></span
-          >
-          <!-- {$balance / $investment} -->
-        </h1>
+        <div class="main {$portfolioClass}">
+          <h1>{$plSymbol}{$profitLoss}</h1>
+          <div class="calculations">
+            <span class="percentage">({(($balance / $investment) * 100).toFixed(2)}%)</span>
+            <span>
+              <span class="unit">$slop</span>
+            </span>
+          </div>
+        </div>
+        <!-- {$balance / $investment} -->
       {:else}
         <h1>None</h1>
       {/if}
     </div>
     <div class="bottom-left">
       <p>Portfolio</p>
-      <h2 class={$portfolioClass}>{$balance}</h2>
+      <h2 class={$portfolioClass}>{$plSymbol}{$balance}</h2>
     </div>
     <div class="bottom-right">
       <p>Invested</p>
@@ -79,22 +85,29 @@
       margin: 2rem 1rem;
     }
 
+    .main {
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      border-radius: 4px;
+      padding: 2rem 1.8rem 1rem;
+
+      .calculations {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: space-between;
+      }
+    }
     h1 {
       font-family: var(--special-font-stack);
       font-size: 3.6rem;
       margin: 2rem 1rem;
+      width: 100%;
+      text-align: center;
 
-      .main {
-        background: rgba(0, 0, 0, 0.5);
+      .percentage {
+        font-size: 2rem;
         display: inline-block;
-        border-radius: 4px;
-        padding: 2rem 1.8rem 1rem;
-      }
-
-      .small {
-        font-size: 2.6rem;
-        display: inline-block;
-        transform: translateY(-50%);
+        transform: translate(-100%, 0);
       }
     }
     h2 {
@@ -141,6 +154,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .unit {
+      font-size: var(--font-size-small);
+      background: black;
+      padding: 5px;
+      color: white;
+      vertical-align: sub;
+      display: inline-block;
+      // transform: translate(0, -100%);
     }
   }
 </style>
