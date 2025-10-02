@@ -1,15 +1,16 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { Log, NormalResultSummary, RatDeadResultSummary } from "$lib/components/GameRun"
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { RESULT_SUMMARY } from "$lib/components/GameRun/state.svelte"
+  import { Howl } from "howler"
 
   let { result }: { result: EnterRoomReturnValue | null } = $props()
 
-  let sound = $state()
   let resultSummary = $state<RESULT_SUMMARY>(RESULT_SUMMARY.UNKNOWN)
+  let backgroundMusic: Howl | undefined = $state()
 
   // Called after log output is complete
   const onComplete = () => {
@@ -22,14 +23,14 @@
 
   onMount(() => {
     shaderManager.setShader("blank")
-    sound = playUISound("ratfun", "tripResultLoop")
-    playUISound("ratfun", "tripResultTrigger")
+    backgroundMusic = playSound("ratfun", "tripResultLoop", true)
   })
 
   onDestroy(async () => {
-    const resultSnd = await sound
-    if (resultSnd) {
-      resultSnd.stop()
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
     }
   })
 </script>

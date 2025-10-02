@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import { rat, playerIsBroke, tokenAllowanceApproved } from "$lib/modules/state/stores"
+  import { Howl } from "howler"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import {
     RatInfo,
     RatDeploy,
@@ -21,7 +23,10 @@
     resetRatBoxState
   } from "$lib/components/Rat/state.svelte"
 
+  let backgroundMusic: Howl | undefined = $state()
+
   onMount(() => {
+    backgroundMusic = playSound("ratfun", "main", true)
     shaderManager.setShader("clouds", "inverted")
 
     // Set state to RAT_BOX_STATE.INIT
@@ -41,6 +46,14 @@
       } else {
         transitionTo(RAT_BOX_STATE.NO_RAT)
       }
+    }
+  })
+
+  onDestroy(() => {
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
     }
   })
 </script>

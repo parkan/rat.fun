@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state"
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  // import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
   let { isAdminView }: { isAdminView: boolean } = $props()
@@ -10,7 +11,8 @@
   {#if isAdminView}
     <button
       onclick={() => {
-        playUISound("ratfun", "adminExit")
+        // playUISound("ratfun", "adminExit")
+        playSound("ratfun", "adminExit")
         shaderManager.setShader("clouds", "inverted")
       }}
       class="pane-switch-item"
@@ -21,7 +23,8 @@
     <button
       onclick={() => {
         shaderManager.setShader("blank")
-        playUISound("ratfun", "adminAccess")
+        // playUISound("ratfun", "adminAccess")
+        playSound("ratfun", "adminAccess")
       }}
       class="pane-switch-item"
     >

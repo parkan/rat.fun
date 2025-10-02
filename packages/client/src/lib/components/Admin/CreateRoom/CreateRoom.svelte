@@ -7,7 +7,7 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
   import { playSample } from "$lib/modules/sound/synth-library/plucked"
-  import { playUISound, getMixerState } from "$lib/modules/sound/state.svelte"
+  // import { playUISound, getMixerState } from "$lib/modules/sound/state.svelte"
   import { MIN_ROOM_CREATION_COST } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
 
@@ -16,7 +16,7 @@
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
 
-  let mixer = getMixerState()
+  // let mixer = getMixerState()
 
   // Prompt has to be between 1 and MAX_ROOM_PROMPT_LENGTH characters
   let invalidRoomDescriptionLength = $derived(
@@ -73,11 +73,11 @@
         )
       }
       // Duck music
-      mixer.rampChannelVolume("music", -12, 0.5)
-      const id = "fill" + Math.ceil(Math.random() * 4)
-      playUISound("ratfun", id, undefined, () => {
-        mixer.rampChannelVolume("music", 0, 0.5)
-      })
+      // mixer.rampChannelVolume("music", -12, 0.5)
+      // const id = "fill" + Math.ceil(Math.random() * 4)
+      // playUISound("ratfun", id, undefined, () => {
+      //   mixer.rampChannelVolume("music", 0, 0.5)
+      // })
       // Quack
       await sendCreateRoom(roomDescription, flooredRoomCreationCost)
       ondone()

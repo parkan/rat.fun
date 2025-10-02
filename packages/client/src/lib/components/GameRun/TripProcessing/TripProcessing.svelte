@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+
+  let backgroundMusic: Howl | undefined = $state()
 
   const { onComplete, result }: { onComplete: () => void; result: null | any } = $props()
 
   const MINIMUM_DURATION = 8000
-
-  let sound = $state()
 
   // Timer state
   let timeElapsed = $state(0)
@@ -22,30 +22,29 @@
 
   onMount(() => {
     shaderManager.setShader("vortex")
-    playUISound("ratfun", "tripProcessing")
+    backgroundMusic = playSound("ratfun", "tripProcessing", true)
+
     // Start timer
     timerInterval = setInterval(() => {
       timeElapsed += 0.1
     }, 100)
 
     setTimeout(() => {
-      if (timerInterval) {
-        clearInterval(timerInterval)
-      }
       timerDone = true
     }, MINIMUM_DURATION)
   })
 
   onDestroy(async () => {
-    const result = await sound
-    if (result) {
-      result.stop()
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
     }
   })
 </script>
 
 <div class="splash-screen">
-  <div class="timer">{timeElapsed.toFixed(1)}s</div>
+  <div class="timer" class:critical={timerDone}>{timeElapsed.toFixed(1)}s</div>
   <div class="inner"></div>
 </div>
 
@@ -84,6 +83,10 @@
       border-radius: 8px;
       min-width: 120px;
       text-align: center;
+
+      &.critical {
+        background: red;
+      }
     }
   }
 </style>

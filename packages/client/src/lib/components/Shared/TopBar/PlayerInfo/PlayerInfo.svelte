@@ -1,6 +1,7 @@
 <script lang="ts">
   import { player, playerERC20Balance, playerAddress } from "$lib/modules/state/stores"
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  // import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import { tippy } from "svelte-tippy"
 
   import AccountDropdown from "./AccountDropdown.svelte"
@@ -11,11 +12,13 @@
   let playerStatsElement = $state<HTMLElement | undefined>(undefined)
 
   function onmousedown() {
-    playUISound("ratfun", "clickDownLight")
+    // playUISound("ratfun", "clickDownLight")
+    playSound("ratfun", "clickDownLight")
   }
 
   function toggleAccountStats() {
-    playUISound("ratfun", "releaseMini")
+    // playUISound("ratfun", "releaseMini")
+    playSound("ratfun", "releaseMini")
     showAccountDropdown = !showAccountDropdown
   }
 

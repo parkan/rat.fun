@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  // import { playUISound } from "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
+
   import { tippy } from "svelte-tippy"
 
   let {
@@ -19,13 +21,13 @@
   } = $props()
 
   const onmousedown = () => {
-    playUISound("ratfun", "clickDownLight")
+    playSound("ratfun", "clickDownLight")
   }
 
   let conditionalAction = $derived(tippyText ? tippy : () => {})
 
   const onmouseup = () => {
-    playUISound("ratfun", "releaseMini")
+    playSound("ratfun", "releaseMini")
     onclick()
   }
 </script>

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { playUISound } from "$lib/modules/sound/state.svelte"
+  // import { playUISound } frosm "$lib/modules/sound/state.svelte"
+  import { playSound } from "$lib/modules/sound-classic"
   import { tippy } from "svelte-tippy"
 
   let {
@@ -20,9 +21,9 @@
 
   const onmousedown = () => {
     if (id === "connect") {
-      playUISound("ratfun", "clickDownLight")
+      playSound("ratfun", "clickDownLight")
     } else {
-      playUISound("ratfun", "clickDownHeavy")
+      playSound("ratfun", "clickDownHeavy")
     }
   }
 
@@ -30,20 +31,17 @@
 
   const onmouseup = () => {
     if (id === "send_rat" || id === "buy_rat") {
-      playUISound("ratfun", "releaseConnect")
-      // playUISound("ratfun", "chicken1")
+      playSound("ratfun", "releaseConnect")
     } else if (id === "skillz") {
-      playUISound("ratfun", "releaseConnect")
-      // enjoy skillfully
-      // playUISound("ratfun", "chicken2")
+      playSound("ratfun", "releaseConnect")
     } else if (id === "connect") {
-      playUISound("ratfun", "releaseConnect")
+      playSound("ratfun", "releaseConnect")
     } else if (id === "abort") {
-      playUISound("ratfun", "releaseError1")
+      playSound("ratfun", "releaseError1")
     } else if (id === "liquidate") {
-      playUISound("ratfun", "releaseSlopCharge")
+      playSound("ratfun", "releaseSlopCharge")
     } else {
-      playUISound("ratfun", "releaseMini")
+      playSound("ratfun", "releaseMini")
     }
     onclick()
   }

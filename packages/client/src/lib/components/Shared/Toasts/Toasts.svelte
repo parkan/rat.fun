@@ -1,7 +1,6 @@
 <script lang="ts">
   import { slide } from "svelte/transition"
   import { toastManager } from "$lib/modules/ui/toasts.svelte"
-  import { playUISound } from "$lib/modules/sound/state.svelte"
 
   const onToastClick = (id: string) => {
     toastManager.remove(id)
@@ -14,11 +13,6 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        onintrostart={() => {
-          if (toast.type === "error") {
-            playUISound("ratfun", "releaseError1")
-          }
-        }}
         transition:slide|global
         class="toast toast-{toast.type}"
         onclick={() => onToastClick(toast.id)}

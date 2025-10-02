@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte"
-
+  import { onDestroy, onMount } from "svelte"
   import { page } from "$app/state"
+  import { Howl } from "howler"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SPAWN_STATE } from "$lib/modules/ui/enums"
+
+  import { playSound } from "$lib/modules/sound-classic"
 
   import { publicNetwork } from "$lib/modules/network"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
@@ -24,6 +26,8 @@
   }>()
 
   let currentState = $state<SPAWN_STATE>(SPAWN_STATE.INTRODUCTION)
+
+  let backgroundMusic: Howl | undefined = $state()
 
   const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
 
@@ -80,9 +84,20 @@
       connectBurner()
     }
 
+    // Start background music
+    backgroundMusic = playSound("ratfun", "mainOld")
+
     // HACK
     await new Promise(resolve => setTimeout(resolve, 1000))
     shaderManager.setShader("clouds")
+  })
+
+  onDestroy(() => {
+    // Stop background music
+    if (backgroundMusic) {
+      backgroundMusic.stop()
+      backgroundMusic = undefined
+    }
   })
 </script>
 
