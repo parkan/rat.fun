@@ -8,6 +8,7 @@
   let { focus } = $props()
 
   let clientHeight = $state(0)
+  let allData = $state([])
 
   const investment = derived(playerRooms, $playerRooms =>
     Object.values($playerRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
@@ -66,7 +67,7 @@
     </div>
   </div>
   <div class="p-l-graph">
-    <MultiTripGraph height={clientHeight} {focus} trips={$playerRooms} />
+    <MultiTripGraph bind:allData height={clientHeight} {focus} trips={$playerRooms} />
   </div>
 </div>
 

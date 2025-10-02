@@ -87,18 +87,17 @@
 
       maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
       minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
-
-      // Ensure 0 is included and create symmetric range around 0
-      const maxAbsValue = Math.max(Math.abs(maxValue), Math.abs(minValue))
-      maxValue = Math.max(maxAbsValue, 1) // Minimum range of 1
-      minValue = -maxValue // Symmetric range
     } else {
       yScaleData = limitedData
       maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
       minValue = 0
     }
 
-    return scaleLinear().domain([minValue, maxValue]).range([innerHeight, 0])
+    const fraction = (maxValue - minValue) / 8
+
+    return scaleLinear()
+      .domain([minValue - fraction, maxValue + fraction])
+      .range([innerHeight, 0])
   })
 
   /** All plots for the rooms */
@@ -280,7 +279,7 @@
       </div>
       <div class="legend x">
         <!-- Time window options -->
-        <button
+        <!-- <button
           class="time-option"
           onclick={() => (timeWindow = "1m")}
           class:active={timeWindow === "1m"}
@@ -309,12 +308,12 @@
           onclick={() => (timeWindow = "all_time")}
           class:active={timeWindow === "all_time"}
           >All-time
-        </button>
+        </button> -->
         <button
           class="time-option"
           onclick={() => (timeWindow = "events")}
           class:active={timeWindow === "events"}
-          >Recent events
+          >Recent events ({allData.length})
         </button>
       </div>
       <svg {width} {height}>
@@ -465,9 +464,9 @@
       border: none;
 
       &.time-option {
-        &:not(.active) {
+        &.active {
           background: black;
-          text: white;
+          color: white;
         }
       }
 

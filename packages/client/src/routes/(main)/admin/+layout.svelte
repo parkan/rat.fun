@@ -56,7 +56,7 @@
       </div>
       <AdminTripTable bind:focus />
       <AdminPastTripsMonitor />
-      <AdminPastTripTable bind:focus />
+      <AdminPastTripTable />
     </div>
   </div>
 </div>
