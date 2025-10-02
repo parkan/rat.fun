@@ -59,12 +59,12 @@
     <table class="admin-trip-table">
       <thead>
         <tr>
-          <td><!-- Trip --></td>
-          <td>Slopamine ({CURRENCY_SYMBOL})</td>
-          <td>P&L</td>
-          <td>Age</td>
-          <td>Spark</td>
-          <td><!-- Action --></td>
+          <th><!-- Trip --></th>
+          <th>Slopamine ({CURRENCY_SYMBOL})</th>
+          <th>P&L</th>
+          <th>Age</th>
+          <th>Spark</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>

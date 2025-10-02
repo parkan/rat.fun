@@ -1,5 +1,5 @@
 import { Howl } from "howler"
-import { soundLibrary } from "./sound-library"
+import { soundLibrary } from "$lib/modules/sound/sound-library"
 
 /**
  * Initializes and preloads all sounds from the `tcm` property of the `soundLibrary` object.

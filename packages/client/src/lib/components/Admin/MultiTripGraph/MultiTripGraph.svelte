@@ -25,7 +25,7 @@
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
   let graph = $state<"trips" | "profitloss">("profitloss")
-  let timeWindow = $state<"1m" | "1h" | "1d" | "1w" | "all_time">("all_time")
+  let timeWindow = $state<"1m" | "1h" | "1d" | "1w" | "all_time" | "events">("events")
 
   const padding = { top: 6, right: 12, bottom: 6, left: 6 }
 
@@ -51,15 +51,22 @@
           return currentTime - 1000 * 60 * 60 * 24
         case "1w":
           return currentTime - 1000 * 60 * 60 * 24 * 7
-        default:
+        case "all_time":
           return Number(min(allData, (d: PlotPoint) => d.time))
+        default:
+          return 0
       }
     }
 
-    const domainStart = new Date(getRelevantDomainStart())
-    const domainEnd = new Date(currentTime) // Always go to current time
+    const domainStart =
+      timeWindow === "events" ? getRelevantDomainStart() : new Date(getRelevantDomainStart())
+    const domainEnd = timeWindow === "events" ? allData.length - 1 : new Date(currentTime) // Always go to current time
 
-    return scaleTime().domain([domainStart, domainEnd]).range([0, innerWidth])
+    if (timeWindow === "events") {
+      return scaleLinear().domain([domainStart, domainEnd]).range([0, innerWidth])
+    } else {
+      return scaleTime().domain([domainStart, domainEnd]).range([0, innerWidth])
+    }
   })
   let yScale = $derived.by(() => {
     const allPlots = Object.values(plots)
@@ -112,7 +119,8 @@
           return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
         })
         const roomOutcomes = outcomes.reverse()
-        const initialTime = new Date(sanityRoomContent?._createdAt).getTime()
+        const initialTime =
+          timeWindow === "events" ? 0 : new Date(sanityRoomContent?._createdAt).getTime()
         const data = [
           {
             time: initialTime,
@@ -121,7 +129,7 @@
           },
           ...roomOutcomes
         ].map((o, i) => {
-          const time = new Date(o?._createdAt).getTime()
+          const time = timeWindow === "events" ? i : new Date(o?._createdAt).getTime()
           return {
             time: time || o.time,
             value: o?.roomValue || 0,
@@ -305,6 +313,12 @@
           onclick={() => (timeWindow = "all_time")}
           class:active={timeWindow === "all_time"}
           >All-time
+        </button>
+        <button
+          class="time-option"
+          onclick={() => (timeWindow = "events")}
+          class:active={timeWindow === "events"}
+          >Recent events
         </button>
       </div>
       <svg {width} {height}>
