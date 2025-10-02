@@ -5,13 +5,13 @@
   import { upcomingWorldEvent } from "$lib/modules/content"
   import { switchAudio } from "$lib/modules/sound/state.svelte"
 
-  import PlayerInfo from "./PlayerInfo.svelte"
+  import PlayerInfo from "./PlayerInfo/PlayerInfo.svelte"
   import PaneSwitch from "./PaneSwitch.svelte"
   import WorldEvent from "./WorldEvent.svelte"
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
   import GlobalStats from "./GlobalStats.svelte"
 
-  const isAdminView = $derived(page.route?.id?.includes("/(rooms)/admin") ?? false)
+  const isAdminView = $derived(page.route?.id?.includes("/(main)/admin") ?? false)
 
   onMount(() => {
     switchAudio(page)
@@ -19,7 +19,7 @@
 </script>
 
 <div class="top-bar">
-  <PlayerInfo {isAdminView} />
+  <PlayerInfo />
   <div class="right">
     {#if isAdminView && $worldStats}
       <GlobalStats />

@@ -3,19 +3,18 @@
   import "tippy.js/dist/tippy.css"
 
   import type { LayoutProps } from "./$types"
-  import { type Outcome as SanityOutcome } from "@sanity-types"
   import {
     initSound,
     snapshotFactory,
-    switchAudio,
-    ratCoughs
+    switchAudio
+    // ratCoughs
   } from "$lib/modules/sound/state.svelte"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
-  import { afterNavigate } from "$app/navigation"
+  import { afterNavigate, goto } from "$app/navigation"
+  import { page } from "$app/state"
   import { onMount } from "svelte"
-  import { goto } from "$app/navigation"
-  import { initStaticContent, staticContent } from "$lib/modules/content"
+  import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, notificationsRead } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -24,43 +23,33 @@
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { EMPTY_ID } from "$lib/modules/state/constants"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { removeHash } from "$lib/modules/utils"
   import { walletType as walletTypeStore } from "$lib/modules/network"
-  import { page } from "$app/state"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import {
-    ShaderRenderer,
-    Shader,
-    Modal,
-    ModalTarget,
-    WorldEventPopup
-  } from "$lib/components/Shared"
-  import { Outcome } from "$lib/components/Room"
+  import { Shader, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
+
   // This will persist data across page loads.
   // Used for user settings
   export const snapshot = snapshotFactory()
 
   let { children, data }: LayoutProps = $props()
 
-  let DEBUG_SHADER = $state(false)
   let initingSound = $state(false)
-  let outcomeId = $state("")
-  let outcome = $state<SanityOutcome | undefined>()
-  let debuggingShader = $derived(import.meta.env.DEV && DEBUG_SHADER)
 
   const { environment, walletType } = data
+
   walletTypeStore.set(walletType)
 
-  const environmentLoaded = async () => {
+  // Called when loading is complete
+  const loaded = async () => {
     try {
       // Get content from CMS
       await initStaticContent($publicNetwork.worldAddress)
-
+      // Loading done. Set the UI state to spawning
       UIState.set(UI.SPAWNING)
     } catch (error) {
       errorHandler(error) // CMS error
@@ -68,10 +57,12 @@
     }
   }
 
-  const playerSpawned = () => {
+  // Called when spawning is complete
+  const spawned = () => {
     UIState.set(UI.READY)
   }
 
+  // Initialize Sentry
   if (browser) {
     initializeSentry()
   }
@@ -93,7 +84,7 @@
 
     switchAudio(page)
 
-    ratCoughs()
+    // ratCoughs()
 
     document.removeEventListener("click", enableAudio)
     document.removeEventListener("touchstart", enableAudio)
@@ -117,60 +108,33 @@
   })
 </script>
 
-<svelte:window
-  onkeypress={e => {
-    if (e.key === "^") {
-      DEBUG_SHADER = !DEBUG_SHADER
-    }
-  }}
-  onhashchange={e => {
-    outcomeId = new URL(e.newURL).hash.replace("#", "")
-    outcome = $staticContent.outcomes.find(o => o._id === outcomeId)
-  }}
-/>
+<svelte:window />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
     <div class="context-main">
       <main>
-        <Loading {environment} loaded={environmentLoaded} />
+        <Loading {environment} {loaded} />
       </main>
     </div>
   {:else if $UIState === UI.SPAWNING}
     <div class="context-main">
       <main>
-        <Spawn spawned={playerSpawned} {walletType} />
+        <Spawn {walletType} {spawned} />
       </main>
     </div>
   {:else}
     <div class="context-main">
-      <div class="layer-game">
-        {#if !debuggingShader}
-          {@render children?.()}
-        {/if}
-      </div>
+      {@render children?.()}
     </div>
   {/if}
 
   {#if $UIState !== UI.LOADING}
     {#if browser}
-      {#if debuggingShader}
-        <ShaderRenderer />
-      {:else}
-        <Shader />
-      {/if}
+      <Shader />
     {/if}
   {/if}
 </div>
-
-{#key outcomeId}
-  {#if outcome}
-    {#snippet content()}
-      <Outcome {outcome} />
-    {/snippet}
-    <ModalTarget onclose={removeHash} {content}></ModalTarget>
-  {/if}
-{/key}
 
 {#if $activeWorldEvent && !notificationsRead.current.includes($activeWorldEvent.cmsId)}
   {#snippet worldEventContent()}

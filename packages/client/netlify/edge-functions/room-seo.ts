@@ -125,19 +125,19 @@ export default async (request: Request, context: Context) => {
     return context.next()
   }
 
-  console.log("User agent identified as crawler:", userAgent)
+  // console.log("User agent identified as crawler:", userAgent)
 
-  // Extract roomId from path: /(rooms)/(game)/[roomId]
+  // Extract roomId from path: /(main)/(game)/[roomId]
   const roomId = url.pathname.split("/").pop()
 
   if (!roomId) {
-    console.log("No room found for:", roomId)
+    // console.log("No room found for:", roomId)
     return context.next()
   }
 
   // Check that room id is a valid 32-byte hex string (64 characters + 0x prefix)
   if (!roomId || !/^0x[a-fA-F0-9]{64}$/.test(roomId)) {
-    console.log("Invalid room ID format:", roomId)
+    // console.log("Invalid room ID format:", roomId)
     return context.next()
   }
 
@@ -146,14 +146,14 @@ export default async (request: Request, context: Context) => {
 
   // Move on if no sanity project ID is not found
   if (!sanityProjectId) {
-    console.log("No sanity project ID found")
+    // console.log("No sanity project ID found")
     return context.next()
   }
 
   // Fetch room data from Sanity
   const room = await fetchRoomData(roomId, sanityProjectId)
   if (!room) {
-    console.log("No room found for:", roomId)
+    // console.log("No room found for:", roomId)
     return context.next()
   }
 

@@ -66,7 +66,7 @@ export function initEntities() {
   // Single write to store
   entities.set(filteredEntities)
 
-  console.log(`initEntities: ${Object.keys(filteredEntities).length} entities initialized`)
+  // console.log(`initEntities: ${Object.keys(filteredEntities).length} entities initialized`)
 
   // Create systems to listen to changes to game specific tables
   for (const componentKey of get(publicNetwork).tableKeys) {

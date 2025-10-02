@@ -9,7 +9,7 @@ This edge function intercepts crawler requests for room pages and renders basic 
 ### How it works
 
 1. **Crawler Detection**: Detects common crawler user agents (Googlebot, Bingbot, Facebook, Twitter, etc.)
-2. **Path Matching**: Intercepts requests to `/(rooms)/(game)/[roomId]` routes
+2. **Path Matching**: Intercepts requests to `/(main)/(game)/[roomId]` routes
 3. **Data Fetching**: Fetches room data from Sanity CMS
 4. **HTML Generation**: Renders basic HTML with proper meta tags for social sharing and SEO
 

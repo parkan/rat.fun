@@ -7,7 +7,7 @@
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
 
   let canvas = $state<HTMLCanvasElement>()
-  let currentShader = $state("clouds")
+  let currentShader = $state("blank")
   let currentMode = $derived(
     shaders[currentShader as keyof typeof shaders]?.config?.getMode?.(page)
   )
@@ -23,10 +23,10 @@
     }
   }
 
+  // ???
   $effect(() => {
     if (shaderManager) {
       uniformValues
-
       shaderManager.updateUniforms()
     }
   })

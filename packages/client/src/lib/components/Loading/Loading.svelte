@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { ready, loadingMessage, loadingPercentage } from "$lib/modules/network"
+  import { ready, loadingPercentage } from "$lib/modules/network"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
 
@@ -14,16 +14,17 @@
 
   let innerElement: HTMLDivElement
 
+  // Wait for chain sync to complete
   $effect(() => {
     if ($ready) {
-      // Done here because currently we are not filtering on by playerAddress
+      // ??? Explain what this does
       initEntities()
-      // Animate out
-      initSequence()
+      // We are loaded. Animate the component out...
+      animateOut()
     }
   })
 
-  const initSequence = async () => {
+  const animateOut = async () => {
     const tl = gsap.timeline()
     tl.to(innerElement, {
       opacity: 0,
@@ -36,6 +37,9 @@
   }
 
   onMount(async () => {
+    // This sets up the public network and listens to the SyncProgress component
+    // When sync is complete, the ready store is set to true
+    // We listen to for this in the $effect above
     await initPublicNetwork(environment)
   })
 </script>

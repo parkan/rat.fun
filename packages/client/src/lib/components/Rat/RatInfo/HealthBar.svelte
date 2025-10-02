@@ -6,8 +6,6 @@
   // Health 51-75 => 3
   // Health 76-> => 4
   let healthLevel = $derived(Math.floor(value / 25))
-
-  $inspect(healthLevel)
 </script>
 
 <div class="health-bar">

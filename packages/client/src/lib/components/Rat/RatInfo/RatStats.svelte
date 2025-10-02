@@ -1,11 +1,8 @@
 <script lang="ts">
-  import { rat } from "$lib/modules/state/stores"
-  import { NumberGoing } from "$lib/components/Shared"
-  import { ratImageUrl } from "$lib/modules/state/stores"
-
+  import { fade } from "svelte/transition"
+  import { rat, ratImageUrl } from "$lib/modules/state/stores"
+  import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import HealthBar from "./HealthBar.svelte"
-
-  let balanceGoing = $state(false)
 </script>
 
 <div class="rat-info-box">
@@ -28,14 +25,22 @@
       </div>
 
       <!-- TRIP COUNT -->
-      <div class="info-item">
-        <span class="trip-count">Trip Count: {$rat.tripCount ?? 0}</span>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div
+        class="info-item trip-count"
+        role="button"
+        tabindex="0"
+        onclick={() => transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)}
+      >
+        <span>
+          Trip Count: {$rat.tripCount ?? 0}
+        </span>
       </div>
     </div>
 
     <!-- IMAGE -->
     <div class="image-container">
-      <img src={$ratImageUrl} alt={$rat.name} />
+      <img src={$ratImageUrl} alt={$rat.name} in:fade|global={{ duration: 400, delay: 300 }} />
     </div>
   {/if}
 </div>
@@ -76,16 +81,11 @@
           color: var(--foreground);
         }
 
-        .trip-count {
+        &.trip-count {
           padding-inline: 10px;
           color: var(--foreground);
           font-size: var(--font-size-normal);
-        }
-
-        .health {
-          padding-inline: 10px;
-          color: var(--foreground);
-          font-size: var(--font-size-normal);
+          cursor: pointer;
         }
       }
     }

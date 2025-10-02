@@ -42,15 +42,12 @@ export const getEnvironment = (): ENVIRONMENT => {
   if (browser) {
     const storedEnvironment = get(environment)
     if (storedEnvironment) {
-      console.log("resolved environment from store", storedEnvironment)
       return storedEnvironment
     }
   }
 
   const urlEnvironment = getEnvironmentFromUrl(page.url)
   environment.set(urlEnvironment)
-
-  console.log("resolved environment from URL", urlEnvironment)
   return urlEnvironment
 }
 
@@ -73,13 +70,11 @@ export const getWalletType = () => {
   if (browser) {
     const storedWalletType = get(walletType)
     if (storedWalletType) {
-      console.log("resolved stored wallet type ", storedWalletType)
       return storedWalletType
     }
   }
 
   const urlWalletType = getWalletTypeFromUrl(page.url)
-  console.log("resolved url wallet type ", urlWalletType)
   walletType.set(urlWalletType)
   return urlWalletType
 }

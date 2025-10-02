@@ -14,9 +14,9 @@
       opacity: 0
     })
 
-    gsap.set(".small-print", {
-      opacity: 0
-    })
+    // gsap.set(".small-print", {
+    //   opacity: 0
+    // })
 
     gsap.to(".logo img", {
       opacity: 1,
@@ -26,13 +26,13 @@
 
     // delay for 1.2 seconds and then fade out the small print
 
-    gsap.to(".small-print", {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: "power2.inOut",
-      delay: 0.5
-    })
+    // gsap.to(".small-print", {
+    //   opacity: 1,
+    //   y: 0,
+    //   duration: 0.5,
+    //   ease: "power2.inOut",
+    //   delay: 0.5
+    // })
   })
 </script>
 

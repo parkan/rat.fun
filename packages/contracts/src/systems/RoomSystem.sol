@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import {
   GameConfig,
+  GamePercentagesConfig,
   EntityType,
   Balance,
   Owner,
@@ -29,8 +30,6 @@ contract RoomSystem is System {
    * @param _playerId The id of the player creating the room
    * @param _roomId The id of the room
    * @param _roomCreationCost Custom room creation cost
-   * @param _maxValuePerWin Max value a rat can extract in one run
-   * @param _minRatValueToEnter Min total value of rat to enter
    * @param _prompt The prompt for the room
    * @return newRoomId The id of the new room
    */
@@ -38,8 +37,6 @@ contract RoomSystem is System {
     bytes32 _playerId,
     bytes32 _roomId,
     uint256 _roomCreationCost,
-    uint256 _maxValuePerWin,
-    uint256 _minRatValueToEnter,
     string memory _prompt
   ) public onlyAdmin returns (bytes32 newRoomId) {
     // Disallow rooms with 0 value
@@ -47,14 +44,7 @@ contract RoomSystem is System {
     // Room id can be 0 (which generates a new id) or an unused entity id
     require(_roomId == bytes32(0) || EntityType.get(_roomId) == ENTITY_TYPE.NONE, "room id already in use");
 
-    newRoomId = LibRoom.createRoom(
-      _playerId,
-      _roomId,
-      _roomCreationCost,
-      _maxValuePerWin,
-      _minRatValueToEnter,
-      _prompt
-    );
+    newRoomId = LibRoom.createRoom(_playerId, _roomId, _roomCreationCost, _prompt);
 
     // Deposit player tokens in pool
     // ERC-20 will check that player has sufficient balance, and approval for pool to transfer it
@@ -76,7 +66,7 @@ contract RoomSystem is System {
     uint256 valueToPlayer = Balance.get(_roomId);
 
     // Calculate tax
-    uint256 tax = (valueToPlayer * GameConfig.getTaxationCloseRoom()) / 100;
+    uint256 tax = (valueToPlayer * GamePercentagesConfig.getTaxationCloseRoom()) / 100;
     valueToPlayer -= tax;
 
     Balance.set(_roomId, 0);

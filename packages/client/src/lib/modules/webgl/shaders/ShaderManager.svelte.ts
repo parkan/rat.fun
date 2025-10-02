@@ -105,7 +105,6 @@ export class ShaderManager<TMode extends string = string> {
    * Set new mode and transition uniforms
    */
   setMode(newMode: TMode, tweenDuration?: number) {
-    console.log("setting mode to ", newMode)
     if (!this.modes[newMode]) {
       console.warn(`Mode '${newMode}' not found in configuration`)
       return
@@ -136,10 +135,7 @@ export class ShaderManager<TMode extends string = string> {
    * Set new shader programmatically
    */
   setShader(shaderKey: string, mode?: string) {
-    console.log("FUNC_ setting shader to ", shaderKey)
     const shaderSource = shaders?.[shaderKey as keyof typeof shaders]
-
-    console.log("SHADER_SOURCE ", shaderSource)
 
     if (!shaderSource) throw new Error("ShaderNotExistError")
 
@@ -186,9 +182,7 @@ export class ShaderManager<TMode extends string = string> {
 
     // If we have a canvas, reinitialize the renderer
     if (this.canvas) {
-      console.log("FUNC_ initializing renderer", this.canvas)
       this.initializeRenderer(this.canvas, shaderSource)
-
       if (mode) {
         this.setMode(mode)
       }

@@ -1,24 +1,22 @@
 <script lang="ts">
-  import type { TempItem } from "$lib/components/Room/Trip/types"
-  import { items } from "$lib/modules/state/stores"
+  import { fade } from "svelte/transition"
 
   let {
-    item
+    item,
+    index
   }: {
-    item: string | TempItem
+    item: Item
+    index: number
   } = $props()
 
   let busy = $state(false)
   let isHovered = $state(false)
-
-  // Item might be the id of an item or a TempItem object
-  const name = $derived(typeof item === "string" ? ($items[item]?.name ?? "---") : item.name)
-  const value = $derived(typeof item === "string" ? ($items[item]?.value ?? 0) : item.value)
 </script>
 
 <div
   class="list-item"
   class:disabled={busy}
+  in:fade|global={{ duration: 100, delay: index * 50 }}
   role="button"
   tabindex="0"
   onmouseenter={() => (isHovered = true)}
@@ -26,9 +24,9 @@
 >
   <div class="inner">
     <!-- NAME -->
-    <div class="name">{name}</div>
+    <div class="name">{item.name}</div>
     <!-- VALUE -->
-    <span class="value" class:negative={value < 0}>${value}</span>
+    <span class="value" class:negative={item.value < 0}>${item.value}</span>
   </div>
 </div>
 

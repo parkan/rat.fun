@@ -11,7 +11,7 @@ import { WorldFunctions } from "./index"
 import { getChain } from "$lib/mud/utils"
 import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { errorHandler } from "$lib/modules/error-handling"
-import { refetchAllowance, refetchBalance } from "$lib/modules/state/erc20Listener"
+import { refetchAllowance } from "$lib/modules/erc20Listener"
 import { TransactionError, WagmiConfigUnavailableError } from "../error-handling/errors"
 import mainSaleAbi from "contracts/out/MainSale.sol/MainSale.abi.json"
 
@@ -67,18 +67,15 @@ export async function executeTransaction(
       hash: tx
     })
 
-    // Force an erc20 query refetch for calls that definitely update balance or allowance
+    // Force an erc20 query to get updated allowance
     if (systemId === WorldFunctions.Approve) {
       await refetchAllowance()
-    } else if (systemId === WorldFunctions.GiveCallerTokens) {
-      await refetchBalance()
     }
 
     if (receipt) {
       if (receipt.status == "success") {
         return receipt
       } else {
-        console.log(receipt)
         throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
       }
     }
