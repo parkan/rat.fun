@@ -16,8 +16,6 @@
     height = 300
   }: { smallIcons?: boolean; plotData: PlotPoint[]; isEmpty: boolean; height?: number } = $props()
 
-  $inspect("plotData for single trip", plotData)
-
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
 

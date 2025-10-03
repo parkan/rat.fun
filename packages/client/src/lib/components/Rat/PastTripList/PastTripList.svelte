@@ -14,8 +14,6 @@
         return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
       })
   )
-
-  $inspect(pastTrips)
 </script>
 
 <div class="past-trip-list">

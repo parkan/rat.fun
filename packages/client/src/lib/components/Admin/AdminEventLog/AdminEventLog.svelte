@@ -1,0 +1,84 @@
+<script lang="ts">
+  import { Icon } from "$lib/components/Shared"
+  import { timeSince, addressToRatImage } from "$lib/modules/utils"
+  import tippy from "tippy.js"
+
+  let { eventData, focus = $bindable() } = $props()
+
+  $effect(() => {
+    tippy("[data-tippy-content]", {
+      followCursor: true,
+      allowHTML: true
+    })
+  })
+
+  $inspect(eventData)
+</script>
+
+{#snippet ratVisitEvent(p)}
+  <Icon name="Paw" width={10} /> {p.meta.ratName} visited trip #{p.meta.index}
+{/snippet}
+
+{#snippet tripLiquidated(p)}
+  <Icon width={10} name="Handshake" fill="white" /> You liquidated trip #{p.meta.index}
+{/snippet}
+
+{#snippet ratDied(p)}
+  <Icon width={10} name="Cross" fill="white" /> {p.meta.ratName} died tripping #{p.meta.index}
+{/snippet}
+
+{#snippet tripCreated(p)}
+  <Icon width={10} name="Asterisk" fill="white" /> You created trip #{p.meta.index}
+{/snippet}
+
+<div class="admin-event-log">
+  {#each eventData.toReversed() as point}
+    <p
+      data-tippy-content={"createNote(point)"}
+      onpointerenter={() => (focus = point.tripId)}
+      onpointerleave={() => (focus = "")}
+      class="event"
+    >
+      {#if point.eventType === "trip_visit"}
+        {@render ratVisitEvent(point)}
+      {:else if point.eventType === "trip_liquidated"}
+        {@render tripLiquidated(point)}
+      {:else if point.eventType === "trip_created"}
+        {@render tripCreated(point)}
+      {:else if point.eventType === "trip_death"}
+        {@render ratDied(point)}
+      {/if}
+      <span class="meta">{timeSince(new Date(point.time).getTime())} ago</span>
+    </p>
+  {/each}
+</div>
+
+<style lang="scss">
+  .admin-event-log {
+    background: var(--color-grey-dark);
+    height: 100%;
+    max-height: 800px;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 4px;
+    padding: 4px;
+
+    .event {
+      padding: 0;
+      margin: 0;
+
+      cursor: pointer;
+      &:hover {
+        background: black;
+      }
+    }
+  }
+
+  .meta {
+    font-size: var(--font-size-normal);
+    color: var(--color-grey-light);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+</style>

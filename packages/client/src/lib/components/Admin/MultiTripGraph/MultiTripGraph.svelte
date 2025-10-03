@@ -188,6 +188,10 @@
     return data
   })
 
+  $effect(() => {
+    graphData = allData
+  })
+
   // Limited version of allData for display
   let limitedData = $derived([...allData].slice(-limit, allData.length))
 
@@ -257,6 +261,16 @@
     return toolTipContent
   }
 
+  const toggleSource = () => {
+    console.log("TOGGLE SOURCE")
+    if (limit === 50 && allData.length > 50) {
+      limit = allData.length
+    } else {
+      limit = 50
+    }
+    // TOggle the data source used
+  }
+
   // Setup real-time updates
   onMount(() => {
     backgroundMusic = playSound("ratfun", "admin", true)
@@ -291,14 +305,12 @@
   {:else}
     <div class="graph" bind:clientWidth={width}>
       <div class="legend y">
-        <button class="active">Profit/Loss {focus}</button>
+        <button class="active">Profit/Loss</button>
       </div>
       <div class="legend x">
-        <button
-          class="time-option"
-          onclick={() => (timeWindow = "events")}
-          class:active={timeWindow === "events"}
-          >Recent events ({allData.length})
+        <button onclick={toggleSource} class="time-option" class:active={timeWindow === "events"}
+          >{#if limitedData.length === allData.length}All&nbsp;
+          {/if}events ({#if limitedData.length < allData.length}{limitedData.length}/{allData.length}{:else}{limitedData.length}{/if})
         </button>
       </div>
       <svg {width} {height}>
@@ -404,11 +416,10 @@
 
   .legend {
     position: absolute;
-    // z-index: 999;
+    z-index: 999;
     display: flex;
     gap: 8px;
     padding: 8px;
-    pointer-events: none;
 
     &.y {
       top: 0;

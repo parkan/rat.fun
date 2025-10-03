@@ -44,6 +44,7 @@
         return [roomId, value]
       })
     )
+
     return result
   })
 
@@ -59,12 +60,12 @@
     <table class="admin-trip-table">
       <thead>
         <tr>
-          <td><!-- Trip --></td>
-          <td>Slopamine ({CURRENCY_SYMBOL})</td>
-          <td>P&L</td>
-          <td>Lifespan</td>
-          <td>Spark</td>
-          <td><!-- Action --></td>
+          <th><!-- Trip --></th>
+          <th>Slopamine ({CURRENCY_SYMBOL})</th>
+          <th>P&L</th>
+          <th>Lifespan</th>
+          <th>Spark</th>
+          <th><!-- Action --></th>
         </tr>
       </thead>
       <tbody>

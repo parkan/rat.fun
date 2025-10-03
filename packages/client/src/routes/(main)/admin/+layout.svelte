@@ -5,6 +5,7 @@
   import { player } from "$lib/modules/state/stores"
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
   import {
+    AdminEventLog,
     AdminTripMonitor,
     AdminPastTripsMonitor,
     AdminTripTable,
@@ -14,6 +15,9 @@
   let { children }: { children?: any } = $props()
 
   let focus = $state("")
+  let graphData = $state([])
+
+  $inspect(graphData)
 
   // Redirect to game route if player is not authorized to view admin page
   $effect(() => {
@@ -32,13 +36,17 @@
 <SEO prependTitle="ADMIN" />
 
 <div class="span-all">
-  <div class="">
-    <div class="">
-      <AdminTripMonitor {focus} />
-      <AdminTripTable bind:focus />
-      <AdminPastTripsMonitor />
-      <AdminPastTripTable />
-    </div>
+  <div class="l-4">
+    <AdminTripMonitor bind:graphData {focus} />
+  </div>
+  <div class="r-2">
+    <AdminEventLog bind:focus eventData={graphData} />
+  </div>
+  <div class="l-3">
+    <AdminTripTable bind:focus />
+  </div>
+  <div class="r-3">
+    <AdminPastTripTable bind:focus />
   </div>
 </div>
 
@@ -54,9 +62,41 @@
     position: relative;
     overflow-x: hidden;
     overflow-y: scroll;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 400px 1fr;
     height: calc(var(--game-window-height) - 60px);
     background-image: url("/images/texture-5.png");
     background-size: 200px;
+
+    .l-4 {
+      grid-column: 1 / 10;
+      grid-row: 1 / 4;
+    }
+
+    .r-2 {
+      grid-column: 10 / 13;
+      grid-row: 1 / 2;
+    }
+
+    .l-3 {
+      grid-column: 1 / 8;
+      grid-row: 2 / 3;
+    }
+
+    .r-3 {
+      grid-column: 8 / 13;
+      grid-row: 2 / 3;
+    }
+
+    .right {
+      grid-column: 10 / 13;
+      grid-row: 1 / 3;
+    }
+
+    .all {
+      grid-column: 1 / 13;
+    }
   }
 
   .create-room-wrapper {

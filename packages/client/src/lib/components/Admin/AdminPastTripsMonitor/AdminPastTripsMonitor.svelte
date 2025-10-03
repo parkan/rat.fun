@@ -1,7 +1,6 @@
 <script lang="ts">
   import { derived } from "svelte/store"
-  import { playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
-  import { MultiTripGraph } from "$lib/components/Admin"
+  import { playerLiquidatedRooms } from "$lib/modules/state/stores"
 
   let { focus } = $props()
 
@@ -16,29 +15,19 @@
     if ($profitLoss === 0) return "neutral"
     return $profitLoss > 0 ? "upText" : "downText"
   })
-
-  $inspect("liquidated", $playerLiquidatedRooms)
-  $inspect("rooms", $playerRooms)
 </script>
 
-<div class="admin-trip-monitor">
-  <div class="p-l-overview">
-    <div class="top">
-      <p>Realized P&L</p>
-      {#if $liquidationValue && $investment}
-        <h1>
-          <span class="main {$portfolioClass}"
-            >{$profitLoss}
-            <span class="small">({(($liquidationValue / $investment) * 100).toFixed(2)}%)</span></span
-          >
-          <!-- {$liquidationValue / $investment} -->
-        </h1>
-      {:else}
-        <h1>None</h1>
-      {/if}
-    </div>
-  </div>
-</div>
+<p>Realized P&L</p>
+{#if $liquidationValue && $investment}
+  <h1>
+    <span class="main {$portfolioClass}"
+      >{$profitLoss}
+      <span class="small">({(($liquidationValue / $investment) * 100).toFixed(2)}%)</span></span
+    >
+  </h1>
+{:else}
+  <h1>None</h1>
+{/if}
 
 <style lang="scss">
   .admin-trip-monitor {

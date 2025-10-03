@@ -1,6 +1,6 @@
 <script lang="ts">
   import { derived } from "svelte/store"
-  import { playerActiveRooms, playerRooms } from "$lib/modules/state/stores"
+  import { playerActiveRooms, playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
   import { CreateRoom } from "$lib/components/Admin"
   import { BigButton } from "$lib/components/Shared"
   import { MultiTripGraph } from "$lib/components/Admin"
@@ -9,11 +9,12 @@
   import tippy from "tippy.js"
   let { modal } = getModalState()
 
-  let { focus } = $props()
+  let { focus, graphData = $bindable() } = $props()
 
+  let show = $state<"realised" | "unrealised">("unrealised")
   let clientHeight = $state(0)
-  let graphData = $state([])
 
+  // Unrealised
   const investment = derived(playerActiveRooms, $playerActiveRooms =>
     Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
   )
@@ -25,13 +26,28 @@
     if ($profitLoss === 0) return "neutral"
     return $profitLoss < 0 ? "downText" : "upText"
   })
-  const plSymbol = derived(portfolioClass, $pc =>
-    $pc === "neutral" ? "" : $pc === "upText" ? "+" : ""
-  )
+
   // Also shows -
   const plSymbolExplicit = derived(portfolioClass, $pc =>
     $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
   )
+
+  // Realised
+  const realInvestment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
+    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+  )
+  const realBalance = derived(playerLiquidatedRooms, $playerActiveRooms =>
+    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.liquidationValue), 0)
+  )
+  const realProfitLoss = derived([realBalance, realInvestment], ([$rb, $i]) => $rb - $i)
+  const realPortfolioClass = derived([realProfitLoss], ([$realProfitLoss]) => {
+    if ($realProfitLoss === 0) return "neutral"
+    return $realProfitLoss > 0 ? "upText" : "downText"
+  })
+
+  const toggle = () => {
+    show = show === "realised" ? "unrealised" : "realised"
+  }
 
   $effect(() => {
     tippy("[data-tippy-content]", {
@@ -49,30 +65,57 @@
 <div bind:clientHeight class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
-      {#if $balance && $investment}
-        <div class="main">
-          <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
-          <div class="content {$portfolioClass} glow">
-            <h1 data-tippy-content="Unrealised P&L" class="">
-              {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($profitLoss)}
-            </h1>
-            <span class="percentage"
+      {#if show === "unrealised"}
+        {#if $balance && $investment}
+          <div onclick={toggle} class="main">
+            <p>Unrealised P&L</p>
+            <span class="percentage {$portfolioClass} glow"
               >({$plSymbolExplicit}{(100 - ($balance / $investment) * 100).toFixed(2)}%)</span
             >
+            <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
+            <div class="content {$portfolioClass} glow">
+              <h1 data-tippy-content="Unrealised P&L" class="">
+                {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($profitLoss)}
+              </h1>
+            </div>
+          </div>
+        {:else}
+          <h1>None</h1>
+        {/if}
+      {:else if $realBalance && $realInvestment}
+        <div onclick={toggle} class="main">
+          <p>Realised P&L</p>
+          <span class="percentage {$realPortfolioClass} glow"
+            >({$plSymbolExplicit}{(100 - ($realBalance / $realInvestment) * 100).toFixed(2)}%)</span
+          >
+          <span class="unit {$realPortfolioClass}">{CURRENCY_SYMBOL}</span>
+          <div class="content {$realPortfolioClass} glow">
+            <h1 data-tippy-content="Realised P&L" class="">
+              {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($realProfitLoss)}
+            </h1>
           </div>
         </div>
-        <!-- {$balance / $investment} -->
       {:else}
         <h1>None</h1>
       {/if}
     </div>
     <div class="bottom-left">
-      <p>Portfolio</p>
-      <h2 class="{$portfolioClass} glow">{CURRENCY_SYMBOL}{$balance}</h2>
+      {#if show === "unrealised"}
+        <p>Portfolio</p>
+        <h2 class="{$portfolioClass} glow">{CURRENCY_SYMBOL}{$balance}</h2>
+      {:else}
+        <p>Portfolio</p>
+        <h2 class="{$realPortfolioClass} glow">{CURRENCY_SYMBOL}{$realBalance}</h2>
+      {/if}
     </div>
     <div class="bottom-right">
-      <p>Invested</p>
-      <h2>{CURRENCY_SYMBOL}{$investment}</h2>
+      {#if show === "unrealised"}
+        <p>Invested</p>
+        <h2>{CURRENCY_SYMBOL}{$investment}</h2>
+      {:else}
+        <p>Invested</p>
+        <h2>{CURRENCY_SYMBOL}{$realInvestment}</h2>
+      {/if}
     </div>
 
     <div class="full-width-bottom">
@@ -130,10 +173,18 @@
 
     .main {
       background: rgba(0, 0, 0, 0.5);
-      border-radius: 4px;
-      padding: 2rem 1.8rem 1rem;
+      padding: 1rem;
       position: relative;
       overflow: hidden;
+      height: 100%;
+
+      p {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 1rem 1rem;
+        display: inline-block;
+      }
 
       .unit {
         top: 50%;
@@ -171,20 +222,27 @@
     h1 {
       font-family: var(--special-font-stack);
       font-size: 60px;
-      margin: 2rem 1rem;
+      margin: 0;
+      height: 100%;
+      line-height: 100%;
+      vertical-align: middle;
       width: 100%;
       text-align: center;
     }
     .percentage {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: 1rem;
+      right: 1rem;
       display: inline-block;
     }
     h2 {
       font-family: var(--special-font-stack);
       font-size: 2rem;
-      margin: 1.2rem 1rem;
+      display: inline-block;
+      text-align: center;
+      width: 100%;
+      margin: 0;
+      // margin: 0 1rem;
     }
 
     .p-l-overview {
@@ -192,25 +250,30 @@
       width: 500px;
       height: 400px;
       display: grid;
-      padding: 0 1rem;
-      position: relative;
-      grid-template-columns: repeat(1fr, 2);
-      grid-template-rows: repeat(1fr, 2);
       gap: 1rem;
+      // padding: 0 1rem;
+      position: relative;
+      grid-template-columns: repeat(200px, 2);
+      grid-template-rows: repeat(1fr, 2);
 
       .top {
         grid-column: 1/3;
-        padding: 0.2rem;
-        margin-top: 1rem;
+        height: 100%;
+        min-height: 120px;
+
+        .main {
+          display: flex;
+          flex-flow: column nowrap;
+          justify-content: center;
+        }
       }
 
       .full-width-bottom {
         grid-column: 1/3;
-        margin: 0 -1rem;
       }
       .bottom-left,
       .bottom-right {
-        padding: 0.2rem;
+        width: 100%;
         margin: 0;
         background: rgba(0, 0, 0, 0.2);
 
@@ -230,4 +293,8 @@
       align-items: center;
     }
   }
+  // .p-l-events {
+  //   width: 400px;
+  //   height: var(--game-window-height);
+  // }
 </style>
