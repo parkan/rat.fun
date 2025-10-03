@@ -72,18 +72,6 @@
 
     yScaleData = [...profitLossOverTime]
 
-    // Include focused trip data if available
-    if (focus && plots[focus]) {
-      const focusedPlot = plots[focus]
-      const initialCost = focusedPlot.data[0]?.value || 0
-      const focusedProfitLoss = focusedPlot.data.map(point => ({
-        time: point.time,
-        value: point.value - initialCost,
-        meta: point.meta
-      }))
-      yScaleData.push(...focusedProfitLoss)
-    }
-
     maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
     minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
 
@@ -182,8 +170,6 @@
     Object.values(trips).reduce((sum, trip) => sum + Number(trip.balance || 0), 0)
   )
 
-  let currentProfitLoss = $derived(totalBalance - totalInvestment)
-
   // Combine all data points from all trips and sort by time (used across multiple derived values)
   let allData = $derived.by(() => {
     const allPlots = Object.values(plots)
@@ -237,6 +223,7 @@
       profitLossData.push({
         time: i,
         value: profitLoss,
+        tripId: point.tripId,
         eventType: point.eventType,
         meta: { ...point.meta, balance: currentBalance, investment: currentInvestment }
       })
@@ -344,6 +331,7 @@
                 {#if point.eventType === "trip_death"}
                   <circle
                     fill="var(--color-grey-light)"
+                    stroke={focus === point.tripId ? "white" : ""}
                     r="5"
                     cx={xScale(point.time)}
                     cy={yScale(point.value)}
@@ -351,6 +339,7 @@
                 {:else if point.eventType === "trip_liquidated"}
                   <circle
                     fill="var(--color-grey-light)"
+                    stroke={focus === point.tripId ? "white" : ""}
                     r="5"
                     cx={xScale(point.time)}
                     cy={yScale(point.value)}
@@ -358,6 +347,7 @@
                 {:else if point.eventType === "trip_created"}
                   <circle
                     fill="var(--color-grey-light)"
+                    stroke={focus === point.tripId ? "white" : ""}
                     r="5"
                     cx={xScale(point.time)}
                     cy={yScale(point.value)}
@@ -365,6 +355,7 @@
                 {:else}
                   <circle
                     fill="var(--color-grey-light)"
+                    stroke={focus === point.tripId ? "white" : ""}
                     r="5"
                     cx={xScale(point.time)}
                     cy={yScale(point.value)}
@@ -381,6 +372,7 @@
                       : yScale(lastPoint.value) - candleHeight}
                     width={candleWidth}
                     height={candleHeight}
+                    stroke={focus === point.tripId ? "white" : ""}
                     fill={point.value < lastPoint.value
                       ? "var(--graph-color-down)"
                       : "var(--graph-color-up)"}
@@ -389,36 +381,6 @@
                 {/if}
               </g>
             {/each}
-
-            <!-- Focused trip profit/loss line -->
-            {#if focus && plots[focus]}
-              {@const focusedPlot = plots[focus]}
-              {@const initialCost = focusedPlot.data[0]?.value || 0}
-              {@const focusedProfitLoss = focusedPlot.data.map(point => ({
-                time: point.time,
-                value: point.value - initialCost,
-                meta: point.meta
-              }))}
-
-              <path
-                d={line()
-                  .x(d => xScale(d.time))
-                  .y(d => yScale(d.value))(focusedProfitLoss)}
-                stroke="white"
-                stroke-width={3}
-                fill="none"
-              />
-
-              {#each focusedProfitLoss as point (point.time)}
-                <circle
-                  fill={point.value >= 0 ? "var(--color-value-up)" : "var(--color-value-down)"}
-                  r="5"
-                  cx={xScale(point.time)}
-                  cy={yScale(point.value)}
-                  data-tippy-content={`${focus} Profit/Loss: ${CURRENCY_SYMBOL}${point.value.toFixed(2)}`}
-                ></circle>
-              {/each}
-            {/if}
           </g>
         {/if}
       </svg>
