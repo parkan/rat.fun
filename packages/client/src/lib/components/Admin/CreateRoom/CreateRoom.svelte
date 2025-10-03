@@ -190,6 +190,7 @@
 
   .create-room {
     height: 100%;
+    width: 600px;
     display: flex;
     flex-flow: column nowrap;
     background-image: url("/images/texture-3.png");

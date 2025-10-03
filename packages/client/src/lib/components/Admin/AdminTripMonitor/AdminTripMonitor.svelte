@@ -1,9 +1,13 @@
 <script lang="ts">
   import { derived } from "svelte/store"
   import { playerActiveRooms, playerRooms } from "$lib/modules/state/stores"
+  import { CreateRoom } from "$lib/components/Admin"
+  import { BigButton } from "$lib/components/Shared"
   import { MultiTripGraph } from "$lib/components/Admin"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
   import tippy from "tippy.js"
+  let { modal } = getModalState()
 
   let { focus } = $props()
 
@@ -36,10 +40,15 @@
   })
 </script>
 
+{#snippet createTrip()}
+  <div class="create-room-wrapper">
+    <CreateRoom ondone={modal.close} />
+  </div>
+{/snippet}
+
 <div bind:clientHeight class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
-      <h3>Active trips</h3>
       {#if $balance && $investment}
         <div class="main">
           <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
@@ -64,6 +73,15 @@
     <div class="bottom-right">
       <p>Invested</p>
       <h2>{CURRENCY_SYMBOL}{$investment}</h2>
+    </div>
+
+    <div class="full-width-bottom">
+      <BigButton
+        text="Create trip"
+        onclick={() => {
+          modal.set(createTrip)
+        }}
+      />
     </div>
   </div>
   <div class="p-l-graph">
@@ -170,13 +188,11 @@
     }
 
     .p-l-overview {
-      padding-left: 2rem;
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-      padding-right: 1rem;
       min-width: 500px;
       width: 500px;
+      height: 400px;
       display: grid;
+      padding: 0 1rem;
       position: relative;
       grid-template-columns: repeat(1fr, 2);
       grid-template-rows: repeat(1fr, 2);
@@ -185,6 +201,12 @@
       .top {
         grid-column: 1/3;
         padding: 0.2rem;
+        margin-top: 1rem;
+      }
+
+      .full-width-bottom {
+        grid-column: 1/3;
+        margin: 0 -1rem;
       }
       .bottom-left,
       .bottom-right {

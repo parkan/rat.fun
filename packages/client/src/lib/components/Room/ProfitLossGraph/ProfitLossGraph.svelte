@@ -63,7 +63,7 @@
 
     const maxValue = Number(max(profitLossData, d => +d.value) ?? 0)
     const minValue = Number(min(profitLossData, d => +d.value) ?? 0)
-    const fraction = (maxValue - minValue) / 10
+    const fraction = (maxValue - minValue) / 12
 
     return scaleLinear()
       .domain([minValue - fraction, maxValue + fraction])
