@@ -3,14 +3,16 @@
   import type { EnterRoomReturnValue } from "@server/modules/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
-  import { LogItem } from "$lib/components/GameRun"
+  import { LogItem, LogHeader } from "$lib/components/GameRun"
 
   let {
     result,
-    onComplete
+    onComplete,
+    onReplay
   }: {
     result: EnterRoomReturnValue | null
     onComplete: () => void
+    onReplay?: () => void
   } = $props()
 
   // Element
@@ -25,7 +27,7 @@
   $effect(() => {
     if (result && !mergedLog) {
       mergedLog = mergeLog(result)
-      totalItems = mergedLog.length
+      totalItems = mergedLog.length + 1 // +1 for the header
     }
   })
 
@@ -56,9 +58,21 @@
       logTimeline.play()
     }
   }
+
+  function replayTimeline() {
+    // Call the replay callback if provided
+    if (onReplay) {
+      onReplay()
+    }
+    logTimeline.restart()
+  }
+
+  // Expose replay function to parent component
+  export { replayTimeline }
 </script>
 
-<div class="log" bind:this={logElement}>
+<div class="log-container" bind:this={logElement}>
+  <LogHeader onTimeline={addToTimeline} />
   {#if mergedLog && mergedLog.length > 0}
     {#each mergedLog as logEntry, i (i)}
       <LogItem {logEntry} onTimeline={addToTimeline} delay={0} />
@@ -67,7 +81,7 @@
 </div>
 
 <style lang="scss">
-  .log {
+  .log-container {
     margin-bottom: 0;
     padding: 10px;
     border-top: none;

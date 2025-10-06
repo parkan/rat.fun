@@ -72,7 +72,8 @@ export function generateTripSetupOutput() {
       color: "white",
       duration: 500,
       backgroundColor: "red",
-      loaderCharacters: "#"
+      loaderCharacters: "#",
+      delayAfter: 100
     },
     {
       type: "text",

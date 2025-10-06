@@ -46,7 +46,7 @@
   }
 
   const onmouseenter = () => {
-    playSound("ratfunUI", "hover")
+    playSound("ratfunUI", "hover2")
   }
 </script>
 

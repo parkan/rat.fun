@@ -6,13 +6,28 @@ export const ratfunUI: SoundAssets = {
     author: "leo",
     volume: 1
   },
+  type2: {
+    src: "/sounds/ratfun/ui/type2.wav",
+    author: "leo",
+    volume: 1
+  },
+  lineHit: {
+    src: "/sounds/ratfun/ui/line-hit.wav",
+    author: "leo",
+    volume: 1
+  },
   tick: {
     src: "/sounds/ratfun/ui/tick.wav",
     author: "leo",
     volume: 0.6
   },
   hover: {
-    src: "/sounds/ratfun/ui/hover.wav",
+    src: "/sounds/ratfun/ui/hover/hover-1.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  hover2: {
+    src: "/sounds/ratfun/ui/hover/hover-2.mp3",
     author: "leo",
     volume: 0.5
   },
@@ -45,5 +60,15 @@ export const ratfunUI: SoundAssets = {
     src: "/sounds/ratfun/ui/dropDown-up.wav",
     author: "leo",
     volume: 0.5
+  },
+  ratRelief: {
+    src: "/sounds/ratfun/ui/rat-relief.mp3",
+    author: "leo",
+    volume: 1
+  },
+  boing: {
+    src: "/sounds/ratfun/ui/boing.mp3",
+    author: "leo",
+    volume: 5
   }
 }

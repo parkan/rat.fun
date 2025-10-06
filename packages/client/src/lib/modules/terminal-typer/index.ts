@@ -1,4 +1,5 @@
 import type { TerminalOutputUnit } from "./types.js"
+import { playSound } from "$lib/modules/sound"
 
 const DEFAULT_TYPE_SPEED = 10
 const DEFAULT_DELAY_AFTER = 500
@@ -52,11 +53,13 @@ async function typeText(
   // If duration is 0, output everything at once
   if (duration === 0) {
     addTextToLine(targetElement, content, color, backgroundColor)
+    playSound("ratfunUI", "lineHit")
     return
   }
 
   for (const char of content) {
     addChar(targetElement, char, color, backgroundColor)
+    playSound("ratfunUI", "type")
     await sleep(typeSpeed)
   }
 }
@@ -76,6 +79,7 @@ async function typeLoader(
   // First, output the content
   for (const char of content) {
     addChar(targetElement, char, color, backgroundColor)
+    playSound("ratfunUI", "type2")
     await sleep(typeSpeed)
   }
 

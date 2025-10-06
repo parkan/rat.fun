@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
+  import { playSound } from "$lib/modules/sound"
   import { rat, ratImageUrl } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import HealthBar from "./HealthBar.svelte"
@@ -40,7 +41,12 @@
 
     <!-- IMAGE -->
     <div class="image-container">
-      <img src={$ratImageUrl} alt={$rat.name} in:fade|global={{ duration: 400, delay: 300 }} />
+      <img
+        onclick={() => playSound("ratfunUI", "boing")}
+        src={$ratImageUrl}
+        alt={$rat.name}
+        in:fade|global={{ duration: 400, delay: 300 }}
+      />
     </div>
   {/if}
 </div>

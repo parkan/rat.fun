@@ -2,7 +2,7 @@
   import type { Outcome } from "@sanity-types"
   import { timeSince, addressToRatImage } from "$lib/modules/utils"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import OutcomeItem from "$lib/components/GameRun/TripReport/Log/OutcomeItem/OutcomeItem.svelte"
+  import OutcomeItem from "$lib/components/GameRun/TripReport/Log/LogItem/LogOutcomeList/LogOutcomeItem.svelte"
 
   let { outcome }: { outcome: Outcome } = $props()
 </script>

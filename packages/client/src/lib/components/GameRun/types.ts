@@ -27,3 +27,17 @@ export type OutcomeDataStringMap = {
   name?: string
   id?: string
 }
+
+// Type for registered outcome elements
+export type RegisteredOutcome = {
+  node: HTMLElement
+  data: DOMStringMap | LogEntryFields
+}
+
+export type LogEntryFields = {
+  id?: string
+  name: string
+  value: number
+  action: string
+  type: string
+}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import type { Outcome } from "@sanity-types"
+  import { playSound } from "$lib/modules/sound"
   import type { Room as SanityRoom } from "@sanity-types"
 
   import { onMount } from "svelte"
@@ -48,7 +49,7 @@
 
 <div class="game-room-preview">
   <!-- Back Button -->
-  <a class="back-button" href="/">
+  <a class="back-button" href="/" onclick={() => playSound("ratfunUI", "boing")}>
     <div>Back</div>
   </a>
 
