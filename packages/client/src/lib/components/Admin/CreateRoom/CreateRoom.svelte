@@ -10,7 +10,13 @@
   import { MIN_ROOM_CREATION_COST } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
 
-  let { ondone } = $props()
+  let {
+    ondone,
+    onsubmit
+  }: {
+    ondone: () => void
+    onsubmit?: (data: { prompt: string; cost: number }) => void
+  } = $props()
 
   let roomDescription: string = $state("")
   let busy: boolean = $state(false)
@@ -71,6 +77,8 @@
           "room description"
         )
       }
+      // Notify parent before sending
+      onsubmit?.({ prompt: roomDescription, cost: flooredRoomCreationCost })
       await sendCreateRoom(roomDescription, flooredRoomCreationCost)
       ondone()
     } catch (error) {
@@ -81,10 +89,8 @@
   }
 </script>
 
-<div class="create-room" class:collapsed={$collapsed}>
-  {#if busy}
-    <p>Loading...</p>
-  {:else}
+{#if !busy}
+  <div class="create-room" class:collapsed={$collapsed}>
     <div class="controls">
       <!-- ROOM DESCRIPTION -->
       <div class="form-group">
@@ -165,8 +171,8 @@
     <div class="actions">
       <BigButton text="Create trip" cost={flooredRoomCreationCost} {disabled} onclick={onClick} />
     </div>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style lang="scss">
   input::-webkit-outer-spin-button,

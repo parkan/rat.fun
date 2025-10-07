@@ -1,16 +1,19 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { SmallButton } from "$lib/components/Shared"
-  import { ProfitLossGraph } from "$lib/components/Room"
-  import { goto } from "$app/navigation"
+  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
   import { playerActiveRooms } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
-  import { blocksToReadableTime } from "$lib/modules/utils"
-  import { blockNumber } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
+  import { SmallButton } from "$lib/components/Shared"
+  import CreateRoom from "$lib/components/Admin/CreateRoom/CreateRoom.svelte"
+  import { busy } from "$lib/modules/action-manager/index.svelte"
+
+  import AdminTripTableRow from "./AdminTripTableRow.svelte"
 
   let { focus = $bindable() } = $props()
+
+  let { modal } = getModalState()
+  let pendingRoom = $state<{ prompt: string; cost: number } | null>(null)
 
   let sortFunction = $state(entriesChronologically)
 
@@ -54,60 +57,73 @@
   })
 </script>
 
+{#snippet createRoomModal()}
+  <CreateRoom
+    onsubmit={(data: { prompt: string; cost: number }) => {
+      modal.hide()
+      pendingRoom = data
+    }}
+    ondone={() => {
+      pendingRoom = null
+    }}
+  />
+{/snippet}
+
 <div class="admin-trip-table-container">
   {#if roomList?.length > 0}
     <table class="admin-trip-table">
       <thead>
         <tr>
           <th><!-- Trip --></th>
-          <th>Slopamine ({CURRENCY_SYMBOL})</th>
-          <th>P&L</th>
+          <th>Visits</th>
+          <th>Profit</th>
           <th>Age</th>
           <th>Spark</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
+        <!-- Loading row for pending room creation -->
+        {#if busy.CreateRoom.current !== 0 && pendingRoom && !roomList
+            .map(r => r[1].prompt)
+            .includes(pendingRoom.prompt)}
+          <tr class="simple-row loading-row">
+            <td class="cell-description">
+              <p class="single-line">{pendingRoom.prompt}</p>
+            </td>
+            <td class="cell-balance">0</td>
+            <td class="cell-profit-loss">0</td>
+            <td class="cell-age">0</td>
+            <td class="cell-graph">
+              <div class="mini-graph loading-graph"></div>
+            </td>
+            <td class="cell-actions"> </td>
+          </tr>
+        {/if}
+        <!-- --- -->
         {#each roomList as roomEntry (roomEntry[0])}
-          {@const room = roomEntry[1]}
-          {@const plotData = plots[roomEntry[0]]}
-          <tr
-            onmouseenter={() => {
+          <AdminTripTableRow
+            id={roomEntry[0]}
+            data={plots[roomEntry[0]]}
+            room={roomEntry[1]}
+            onpointerenter={() => {
               focus = roomEntry[0]
             }}
-            onmouseleave={() => {
+            onpointerleave={() => {
               focus = ""
             }}
-            onclick={() => {
-              goto("/admin/" + roomEntry[0], { noScroll: false })
-            }}
-            class="simple-row"
-          >
-            <td class="cell-description">{room.prompt}</td>
-            <td class="cell-balance">{room.balance}</td>
-            <td class="cell-profit-loss">{room.balance - room.roomCreationCost}</td>
-            <td class="cell-age">
-              {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
-            </td>
-            <td class="cell-graph">
-              {#if plotData}
-                <div class="mini-graph">
-                  <ProfitLossGraph
-                    smallIcons
-                    height={100}
-                    {plotData}
-                    isEmpty={plotData.length === 0}
-                  />
-                </div>
-              {:else}
-                <div class="mini-graph" />
-              {/if}
-            </td>
-            <td class="cell-actions">
-              <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-            </td>
-          </tr>
+          />
         {/each}
+        <tr>
+          <td class="button-row" colspan="6">
+            <SmallButton
+              text="Create Room"
+              onclick={() => {
+                modal.set(createRoomModal)
+              }}
+            />
+          </td>
+        </tr>
       </tbody>
     </table>
   {:else}
@@ -121,7 +137,7 @@
   .admin-trip-table-container {
     width: 100%;
     background: black;
-    height: 400px;
+    height: 100%;
     overflow-y: scroll;
     position: relative;
   }
@@ -152,48 +168,51 @@
     }
   }
 
-  .mini-graph {
-    width: 200px;
-    height: 100px;
-    background: #222;
+  .loading {
+    height: 24px;
+    width: 100%;
+    background: red;
+    display: block;
   }
 
-  .simple-row {
-    * {
-      border: none;
-      outline: none;
-      border-width: 0;
-      border-bottom: 1px solid #555;
+  .loading-row {
+    opacity: 0.6;
+    background: #111;
+    pointer-events: none;
+
+    .loading-graph {
+      height: 24px;
+      width: 100%;
+      background: repeating-linear-gradient(90deg, #333 0px, #444 10px, #333 20px);
+      animation: loading-shimmer 1s infinite linear;
     }
-    &:hover {
-      background: #222;
-      cursor: pointer;
+
+    .loading-text {
+      font-size: 12px;
     }
-    td {
-      overflow: hidden;
-      margin: 0;
-      vertical-align: top;
+  }
+
+  @keyframes loading-shimmer {
+    0% {
+      background-position: 0 0;
     }
-    .cell-description {
-      padding: 0.6rem 0.5rem;
-      // min-width: 500px;
+    100% {
+      background-position: 20px 0;
     }
-    .cell-balance {
-      width: 120px;
-      // background: red;
-    }
-    .cell-profit-loss {
-      width: 120px;
-    }
-    .cell-age {
-      width: 120px;
-    }
-    .cell-graph {
-      max-width: 200px;
-    }
-    .cell-actions {
-      max-width: 200px;
-      height: 102px;
-    }
+  }
+
+  .cell-description {
+    padding: 0 6px;
+  }
+
+  .single-line {
+    margin: 0;
+    padding: 0;
+    border: none;
+    max-width: 100%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>

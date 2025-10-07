@@ -18,7 +18,7 @@
   .right-column {
     position: relative;
     overflow-x: hidden;
-    height: calc(var(--game-window-height) - 60px);
+    height: var(--game-window-main-height);
     background-image: url("/images/texture-5.png");
     background-size: 200px;
   }

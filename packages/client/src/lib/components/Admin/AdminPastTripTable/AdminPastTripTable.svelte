@@ -9,6 +9,7 @@
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
+  import AdminTripTableRow from "../AdminTripTable/AdminTripTableRow.svelte"
 
   let { focus = $bindable() } = $props()
 
@@ -61,56 +62,31 @@
       <thead>
         <tr>
           <th><!-- Trip --></th>
-          <th>Slopamine ({CURRENCY_SYMBOL})</th>
-          <th>P&L</th>
-          <th>Lifespan</th>
+          <th>Visits</th>
+          <th>Profit</th>
+          <th>Age</th>
           <th>Spark</th>
-          <th><!-- Action --></th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
+        <!-- Adding new table entry -->
+        <tr class="simple-row">
+          <td colspan="5"></td>
+        </tr>
+        <!-- --- -->
         {#each roomList as roomEntry (roomEntry[0])}
-          {@const room = roomEntry[1]}
-          {@const plotData = plots[roomEntry[0]]}
-          <tr
-            onmouseenter={() => {
+          <AdminTripTableRow
+            id={roomEntry[0]}
+            data={plots[roomEntry[0]]}
+            room={roomEntry[1]}
+            onpointerenter={() => {
               focus = roomEntry[0]
             }}
-            onmouseleave={() => {
+            onpointerleave={() => {
               focus = ""
             }}
-            onclick={() => {
-              goto("/admin/" + roomEntry[0], { noScroll: false })
-            }}
-            class="simple-row"
-          >
-            <td class="cell-description">{room.prompt}</td>
-            <td class="cell-balance">{room.balance}</td>
-            <td class="cell-profit-loss">
-              {(room?.liquidationValue || 0) - room.roomCreationCost}
-              <!-- {room?.liquidationValue - room.roomCreationCost} -->
-            </td>
-            <td class="cell-age">
-              {blocksToReadableTime(Number(room.liquidationBlock) - Number(room.creationBlock))}
-            </td>
-            <td class="cell-graph">
-              {#if plotData}
-                <div class="mini-graph">
-                  <ProfitLossGraph
-                    smallIcons
-                    height={80}
-                    {plotData}
-                    isEmpty={plotData.length === 0}
-                  />
-                </div>
-              {:else}
-                <div class="mini-graph" />
-              {/if}
-            </td>
-            <td class="cell-actions">
-              <SmallButton text="View history" onclick={() => {}}></SmallButton>
-            </td>
-          </tr>
+          />
         {/each}
       </tbody>
     </table>
@@ -124,8 +100,8 @@
 <style lang="scss">
   .admin-trip-table-container {
     width: 100%;
-    background: black;
-    height: 400px;
+    background: rgba(30, 30, 30, 1);
+    height: 100%;
     overflow-y: scroll;
     position: relative;
   }

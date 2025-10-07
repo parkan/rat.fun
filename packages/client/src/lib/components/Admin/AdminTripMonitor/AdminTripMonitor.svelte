@@ -1,7 +1,6 @@
 <script lang="ts">
   import { derived } from "svelte/store"
   import { playerActiveRooms, playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
-  import { CreateRoom } from "$lib/components/Admin"
   import { BigButton } from "$lib/components/Shared"
   import { MultiTripGraph } from "$lib/components/Admin"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
@@ -60,19 +59,14 @@
   })
 </script>
 
-{#snippet createTrip()}
-  <div class="create-room-wrapper">
-    <CreateRoom ondone={modal.close} />
-  </div>
-{/snippet}
-
 <div bind:clientHeight class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
       {#if show === "unrealised"}
         {#if $balance && $investment}
-          <div onclick={toggle} class="main">
-            <p>Unrealised P&L</p>
+          <!-- Unrealised -->
+          <div class="main">
+            <p>Unrealised Profit</p>
             <span class="percentage {$portfolioClass} glow"
               >({$plSymbolExplicit}{(100 - ($balance / $investment) * 100).toFixed(2)}%)</span
             >
@@ -88,23 +82,27 @@
             <h1>None</h1>
           </div>
         {/if}
-      {:else if $realBalance && $realInvestment}
-        <div onclick={toggle} class="main">
-          <p>Realised P&L</p>
-          <span class="percentage {$realPortfolioClass} glow"
-            >({$realPlSymbolExplicit}{(100 - ($realBalance / $realInvestment) * 100).toFixed(
-              2
-            )}%)</span
-          >
-          <span class="unit {$realPortfolioClass}">{CURRENCY_SYMBOL}</span>
-          <div class="content {$realPortfolioClass} glow">
-            <h1 data-tippy-content="Realised P&L" class="">
-              {$realPlSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($realProfitLoss)}
-            </h1>
+        {#if $realBalance && $realInvestment}
+          <!-- Realised -->
+          <div class="main">
+            <p>Realised Profit</p>
+            <span class="percentage {$realPortfolioClass} glow"
+              >({$realPlSymbolExplicit}{(100 - ($realBalance / $realInvestment) * 100).toFixed(
+                2
+              )}%)</span
+            >
+            <span class="unit offset {$realPortfolioClass}">{CURRENCY_SYMBOL}</span>
+            <div class="content {$realPortfolioClass} glow">
+              <h1 data-tippy-content="Realised P&L" class="">
+                {$realPlSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($realProfitLoss)}
+              </h1>
+            </div>
           </div>
-        </div>
-      {:else}
-        <h1>None</h1>
+        {:else}
+          <div class="main">
+            <h1>None</h1>
+          </div>
+        {/if}
       {/if}
     </div>
     <div class="bottom-left">
@@ -124,15 +122,6 @@
         <p>Invested</p>
         <h2>{CURRENCY_SYMBOL}{$realInvestment}</h2>
       {/if}
-    </div>
-
-    <div class="full-width-bottom">
-      <BigButton
-        text="Create trip"
-        onclick={() => {
-          modal.set(createTrip)
-        }}
-      />
     </div>
   </div>
   <div class="p-l-graph">
@@ -179,27 +168,26 @@
       margin: 2rem 1rem;
     }
 
+    p {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 1rem 1rem;
+      display: inline-block;
+    }
+
     .main {
       background: rgba(0, 0, 0, 0.5);
       padding: 1rem;
       position: relative;
       overflow: hidden;
-      height: 100%;
+      height: 120px;
       display: flex;
       justify-content: center;
       align-items: center;
 
-      p {
-        position: absolute;
-        top: 0;
-        left: 0;
-        margin: 1rem 1rem;
-        display: inline-block;
-      }
-
       .unit {
         top: 50%;
-        left: 50%;
         position: absolute;
         font-size: 240px;
         padding: 5px;
@@ -215,8 +203,17 @@
 
         vertical-align: sub;
         display: inline-block;
-        transform: translate(-100%, -50%) rotate(-5deg) scale(2, 2);
         filter: blur(4px) opacity(0.4);
+
+        &:not(.offset) {
+          left: 0;
+          transform: translate(50%, -50%) rotate(-5deg) scale(2, 2);
+        }
+
+        &.offset {
+          right: 0;
+          transform: translate(-50%, -50%) rotate(5deg) scale(2, 2);
+        }
       }
       .content {
         position: relative;
@@ -250,25 +247,27 @@
       display: inline-block;
       text-align: center;
       width: 100%;
-      margin: 0;
+      margin-bottom: 2.5rem;
       // margin: 0 1rem;
     }
 
     .p-l-overview {
       min-width: 500px;
       width: 500px;
-      height: 400px;
       display: grid;
-      gap: 1rem;
       // padding: 0 1rem;
       position: relative;
+      padding: 0 1rem;
       grid-template-columns: repeat(200px, 2);
-      grid-template-rows: repeat(1fr, 2);
+      grid-template-rows: repeat(1fr, 3);
 
       .top {
         grid-column: 1/3;
         height: 100%;
         min-height: 120px;
+        display: flex;
+        flex-flow: column nowrap;
+        gap: 1rem;
 
         .main {
           display: flex;
@@ -284,11 +283,12 @@
       .bottom-right {
         width: 100%;
         margin: 0;
+        height: 120px;
+        display: flex;
         background: rgba(0, 0, 0, 0.2);
-
-        p {
-          margin: 1.2rem 1rem;
-        }
+        position: relative;
+        justify-content: center;
+        align-items: flex-end;
       }
     }
 

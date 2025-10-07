@@ -23,10 +23,13 @@ export const getModalState = () => {
 
   const closeModal = () => setState(null)
 
+  const hideModal = () => (showModal = false)
+
   return {
     modal: {
       set: setState,
       close: closeModal,
+      hide: hideModal,
       setConfig: setConfig,
       get config() {
         return modalConfig

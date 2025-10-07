@@ -97,13 +97,6 @@
 </script>
 
 <div class="room-graph">
-  <div class="y-axis">
-    <!-- <small class="label">Value</small> -->
-  </div>
-  <div class="x-axis">
-    <!-- <small class="label">Time</small> -->
-  </div>
-
   {#if isEmpty}
     <div style:height="{height}px" class="no-data">
       <span>NO DATA</span>
@@ -113,17 +106,6 @@
       {#if profitLossData && width && xScale && yScale && lineGenerator}
         <svg {width} {height}>
           <g transform="translate({padding.left}, {padding.top})">
-            <!-- Zero line for reference -->
-            <line
-              x1="0"
-              y1={yScale(0)}
-              x2={innerWidth}
-              y2={yScale(0)}
-              stroke="var(--color-grey-mid)"
-              stroke-width="1"
-              stroke-dasharray="2,2"
-            />
-
             <!-- Profit/loss line -->
             <path
               d={lineGenerator(profitLossData)}
@@ -131,16 +113,6 @@
               stroke-width={2}
               fill="none"
             />
-
-            {#each profitLossData as point (point.time)}
-              <circle
-                fill={point.value >= 0 ? "var(--color-value-up)" : "var(--color-value-down)"}
-                r={smallIcons ? 3 : 5}
-                cx={xScale(point.time)}
-                cy={yScale(point.value)}
-                data-tippy-content={generateTooltipContent(point)}
-              ></circle>
-            {/each}
           </g>
         </svg>
       {/if}
@@ -175,14 +147,12 @@
   .y-axis {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    border-right: 1px solid var(--color-grey-mid);
     width: 30px;
     height: 100%;
     position: absolute;
   }
 
   .x-axis {
-    border-bottom: 1px solid var(--color-grey-mid);
     width: 100%;
     height: 30px;
     position: absolute;

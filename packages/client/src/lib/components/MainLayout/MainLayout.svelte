@@ -21,7 +21,7 @@
     width: 100%;
     height: var(--game-window-height);
     display: grid;
-    grid-template-rows: 60px 1fr;
+    grid-template-rows: 60px var(--game-window-main-height);
     grid-template-columns: calc(var(--game-window-width) * 0.46) 1fr calc(
         var(--game-window-width) * 0.46
       );
@@ -31,12 +31,12 @@
       grid-row: 2 / 3;
       grid-column: 1 / 4;
       position: relative;
-      overflow: hidden;
+      height: var(--game-window-main-height);
     }
 
     .main-area-inner {
       width: 100%;
-      height: calc(var(--game-window-height) - 60px);
+      height: 100%;
       display: grid;
       position: relative;
       grid-row: 2 / 3;

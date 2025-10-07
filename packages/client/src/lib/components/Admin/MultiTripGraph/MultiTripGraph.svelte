@@ -28,7 +28,7 @@
   let limit = $state(50)
   let timeWindow = $state<"1m" | "1h" | "1d" | "1w" | "all_time" | "events">("events")
 
-  const padding = { top: 0, right: 0, bottom: 0, left: 0 }
+  const padding = { top: 0, right: 12, bottom: 0, left: 12 }
 
   let innerWidth = $derived(width - padding.left - padding.right)
   let innerHeight = $derived(height - padding.top - padding.bottom)

@@ -39,6 +39,7 @@
 
   --game-window-width: calc(min(100vw, 1920px) - 30px);
   --game-window-height: calc(100vh - 30px);
+  --game-window-main-height: calc(var(--game-window-height) - 60px);
 
   --graph-color-up: rgba(100, 255, 200, 1);
   --graph-color-down: rgba(230, 30, 0, 1);
@@ -164,6 +165,13 @@ button {
   background: var(--color-value-down);
   color: var(--black);
   padding: 2px;
+}
+
+.border-warning {
+  border-right: 12px solid;
+  border-image-slice: 6;
+
+  border-image-source: repeating-linear-gradient(-45deg, #111, #111 10px, #333 10px, #333 20px);
 }
 
 .warning {

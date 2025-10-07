@@ -42,7 +42,7 @@
   <div class="r-2">
     <AdminEventLog bind:focus eventData={graphData} />
   </div>
-  <div class="l-3">
+  <div class="l-3 border-warning">
     <AdminTripTable bind:focus />
   </div>
   <div class="r-3">
@@ -64,8 +64,8 @@
     overflow-y: scroll;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 400px 1fr;
-    height: calc(var(--game-window-height) - 60px);
+    grid-template-rows: 400px calc(var(--game-window-main-height) - 400px);
+    height: var(--game-window-main-height);
     background-image: url("/images/texture-5.png");
     background-size: 200px;
 
@@ -80,12 +80,12 @@
     }
 
     .l-3 {
-      grid-column: 1 / 8;
+      grid-column: 1 / 7;
       grid-row: 2 / 3;
     }
 
     .r-3 {
-      grid-column: 8 / 13;
+      grid-column: 7 / 13;
       grid-row: 2 / 3;
     }
 
