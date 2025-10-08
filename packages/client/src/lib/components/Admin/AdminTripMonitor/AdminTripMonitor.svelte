@@ -129,7 +129,7 @@
       padding: 1rem;
       position: relative;
       overflow: hidden;
-      height: 120px;
+      height: 154px;
       display: flex;
       justify-content: center;
       align-items: center;

@@ -2,7 +2,14 @@
   import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
   import { derived } from "svelte/store"
   import { playerActiveRooms, profitLoss } from "$lib/modules/state/stores"
-  import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
+  import {
+    entriesChronologically,
+    entriesChronologicallyDesc,
+    entriesByProfit,
+    entriesByProfitDesc,
+    entriesByVisit,
+    entriesByVisitDesc
+  } from "$lib/components/Room/RoomListing/sortFunctions"
   import { staticContent } from "$lib/modules/content"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
@@ -10,7 +17,11 @@
 
   let { focus = $bindable(), pendingTrip } = $props()
 
-  let sortFunction = $state(entriesChronologically)
+  let sortDirection = $state<"asc" | "desc">("asc")
+  let sortFunction = $state(
+    sortDirection === "asc" ? entriesChronologically : entriesChronologicallyDesc
+  )
+  let sortFunctionName = $derived(sortFunction.name)
 
   let plots: Record<string, PlotPoint[]> = $derived.by(() => {
     const result = Object.fromEntries(
@@ -55,19 +66,41 @@
     if ($profitLoss === 0) return "neutral"
     return $profitLoss > 0 ? "upText" : "downText"
   })
+
+  const sortByVisit = () => {
+    sortFunction = sortDirection === "asc" ? entriesByVisit : entriesByVisitDesc
+    sortDirection = sortDirection === "asc" ? "desc" : "asc"
+  }
+  const sortByProfit = () => {
+    sortFunction = sortDirection === "asc" ? entriesByProfit : entriesByProfitDesc
+    sortDirection = sortDirection === "asc" ? "desc" : "asc"
+  }
+  const sortByAge = () => {
+    sortFunction = sortDirection === "asc" ? entriesChronologically : entriesChronologicallyDesc
+    sortDirection = sortDirection === "asc" ? "desc" : "asc"
+  }
 </script>
 
 <div class="admin-trip-table-container">
   <p class="table-summary">
-    Active trips <span class={$portfolioClass}>({CURRENCY_SYMBOL}{$profitLoss})</span>
+    Active trips <span class={$portfolioClass}
+      >({#if $profitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs($profitLoss)})</span
+    >
   </p>
   <table class="admin-trip-table">
     <thead>
       <tr>
         <th><!-- Trip --></th>
-        <th>Visits</th>
-        <th>Profit</th>
-        <th>Age</th>
+        <th onclick={sortByVisit}
+          >Visits&nbsp;{#if sortFunctionName === "entriesByVisit"}▼{:else if sortFunctionName === "entriesByVisitDesc"}▲{:else}&nbsp;{/if}</th
+        >
+        <th>Balance</th>
+        <th onclick={sortByProfit}
+          >Profit&nbsp;{#if sortFunctionName === "entriesByProfit"}▼{:else if sortFunctionName === "entriesByProfitDesc"}▲{:else}&nbsp;{/if}</th
+        >
+        <!-- <th onclick={sortByAge}
+          >Age&nbsp;{#if sortFunctionName === "entriesChronologically"}▼{:else if sortFunctionName === "entriesChronologicallyDesc"}▲{:else}&nbsp;{/if}</th
+        > -->
         <th>Spark</th>
         <th>Actions</th>
       </tr>
@@ -120,7 +153,7 @@
   }
 
   .table-summary {
-    padding: 0 6px;
+    padding: 0 10px;
   }
 
   .no-data {

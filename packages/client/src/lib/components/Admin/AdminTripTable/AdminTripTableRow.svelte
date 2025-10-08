@@ -1,19 +1,20 @@
 <script lang="ts">
   import { SmallButton } from "$lib/components/Shared"
-  import { RoomConfirmLiquidation } from "$lib/components/Room"
   import { ProfitLossGraph } from "$lib/components/Room"
   import { goto } from "$app/navigation"
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
-  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
 
   let { room, data, id, onpointerenter, onpointerleave } = $props()
 
+  const untaxed = (value: number) =>
+    Math.floor((Number(value) * 100) / (100 - Number($gamePercentagesConfig.taxationCloseRoom)))
+
   let profitLoss = $derived(
     room.liquidationBlock
-      ? room.liquidationValue - room.roomCreationCost
-      : room.balance - room.roomCreationCost
+      ? untaxed(Number(room.liquidationValue)) - Number(room.roomCreationCost)
+      : Number(room.balance) - Number(room.roomCreationCost)
   )
   let liquidated = $derived(room.liquidationBlock)
   let profitLossClass = $derived(profitLoss == 0 ? "" : profitLoss > 0 ? "up" : "down")
@@ -30,14 +31,26 @@
   <td class="cell-description">
     <p class="single-line">{room.prompt}</p>
   </td>
-  <td class="cell-balance">{room.visitCount}</td>
-  <td class="cell-profit-loss {profitLossClass}">{profitLoss}</td>
-  <td class="cell-age">
+  <td class="cell-visits">{room.visitCount}</td>
+  <td class="cell-profit">
     {#if liquidated}
-      {$gamePercentagesConfig.taxationCloseRoom}
+      <span>
+        {untaxed(room.liquidationValue)}
+      </span>
+      <span class="grey">
+        ({room.roomCreationCost})
+      </span>
     {:else}
-      {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
+      <span>
+        {room.balance}
+      </span>
+      <span class="grey">
+        ({room.roomCreationCost})
+      </span>
     {/if}
+  </td>
+  <td class="cell-tax-or-age {profitLossClass}">
+    {profitLoss}
   </td>
   <td class="cell-graph">
     {#if data}
@@ -48,10 +61,9 @@
       <div class="mini-graph" />
     {/if}
   </td>
-  <td class="cell-actions">
-    {#if liquidated}
-      {blocksToReadableTime(Number(room.liquidationBlock) - Number(room.creationBlock))}
-    {:else}
+
+  {#if !liquidated}
+    <td class="cell-action-or-age">
       <SmallButton
         text="Liquidate"
         onmouseup={e => {
@@ -59,8 +71,8 @@
           goto("/admin/" + id + "?liquidate", { noScroll: false })
         }}
       ></SmallButton>
-    {/if}
-  </td>
+    </td>
+  {/if}
 </tr>
 
 <style lang="scss">
@@ -101,23 +113,23 @@
       padding: 0 6px;
       // min-width: 500px;
     }
-    .cell-balance {
+    .cell-visits {
       width: 120px;
       text-align: right;
       // background: red;
     }
-    .cell-profit-loss {
+    .cell-profit {
       width: 120px;
       text-align: right;
     }
-    .cell-age {
+    .cell-tax-or-age {
       width: 120px;
       text-align: right;
     }
     .cell-graph {
       max-width: 200px;
     }
-    .cell-actions {
+    .cell-action-or-age {
       max-width: 200px;
       height: 100%;
     }
@@ -128,6 +140,10 @@
 
     .down {
       color: var(--graph-color-down);
+    }
+
+    .grey {
+      color: grey;
     }
   }
 </style>
