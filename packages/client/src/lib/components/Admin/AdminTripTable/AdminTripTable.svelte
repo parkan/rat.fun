@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
-  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
-  import { playerActiveRooms } from "$lib/modules/state/stores"
+  import { derived } from "svelte/store"
+  import { playerActiveRooms, profitLoss } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
   import { staticContent } from "$lib/modules/content"
-  import { busy } from "$lib/modules/action-manager/index.svelte"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   import AdminTripTableRow from "./AdminTripTableRow.svelte"
 
@@ -50,9 +50,17 @@
 
     return entries.sort(sortFunction)
   })
+
+  const portfolioClass = derived([profitLoss], ([$profitLoss]) => {
+    if ($profitLoss === 0) return "neutral"
+    return $profitLoss > 0 ? "upText" : "downText"
+  })
 </script>
 
 <div class="admin-trip-table-container">
+  <p class="table-summary">
+    Active trips <span class={$portfolioClass}>({CURRENCY_SYMBOL}{$profitLoss})</span>
+  </p>
   <table class="admin-trip-table">
     <thead>
       <tr>
@@ -112,6 +120,10 @@
     table-layout: fixed;
     /* justify-content: center; */
     /* align-items: center; */
+  }
+
+  .table-summary {
+    padding: 0 6px;
   }
 
   .no-data {
@@ -179,5 +191,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .downText {
+    color: red;
+  }
+
+  .upText {
+    color: #78ee72;
   }
 </style>

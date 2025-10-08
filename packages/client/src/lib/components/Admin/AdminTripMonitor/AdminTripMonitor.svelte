@@ -1,46 +1,30 @@
 <script lang="ts">
   import { derived } from "svelte/store"
-  import { playerActiveRooms, playerLiquidatedRooms, playerRooms } from "$lib/modules/state/stores"
-  import { BigButton, SmallButton } from "$lib/components/Shared"
+  import {
+    balance,
+    investment,
+    profitLoss,
+    portfolioClass,
+    realisedProfitLoss,
+    playerRooms
+  } from "$lib/modules/state/stores"
+  import { BigButton } from "$lib/components/Shared"
   import { ProfitLossHistoryGraph } from "$lib/components/Admin"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
   import tippy from "tippy.js"
 
   let { focus, focusEvent, graphData = $bindable(), onCreateRoomClick } = $props()
-  let { modal } = getModalState()
 
   let clientHeight = $state(0)
-
-  // Unrealised
-  const investment = derived(playerActiveRooms, $playerActiveRooms =>
-    Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
-  )
-  const balance = derived(playerActiveRooms, $playerActiveRooms =>
-    Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.balance), 0)
-  )
-  const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
-  const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
-    if ($profitLoss === 0) return "neutral"
-    return $profitLoss < 0 ? "downText" : "upText"
-  })
 
   // Also shows -
   const plSymbolExplicit = derived(portfolioClass, $pc =>
     $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
   )
 
-  // Realised
-  const realInvestment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
-  )
-  const realBalance = derived(playerLiquidatedRooms, $playerActiveRooms =>
-    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.liquidationValue), 0)
-  )
-  const realProfitLoss = derived([realBalance, realInvestment], ([$rb, $i]) => $rb - $i)
-  const realPortfolioClass = derived([realProfitLoss], ([$realProfitLoss]) => {
-    if ($realProfitLoss === 0) return "neutral"
-    return $realProfitLoss > 0 ? "upText" : "downText"
+  const realPortfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
+    if ($realisedProfitLoss === 0) return "neutral"
+    return $realisedProfitLoss > 0 ? "upText" : "downText"
   })
 
   const realPlSymbolExplicit = derived(realPortfolioClass, $pc =>
@@ -91,8 +75,8 @@
   </div>
   <div class="p-l-graph">
     <ProfitLossHistoryGraph
-      trips={$playerRooms}
       bind:graphData
+      trips={$playerRooms}
       height={clientHeight}
       {focus}
       {focusEvent}

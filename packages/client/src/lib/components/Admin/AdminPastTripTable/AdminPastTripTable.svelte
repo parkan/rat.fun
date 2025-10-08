@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Room/ProfitLossGraph/types"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { SmallButton } from "$lib/components/Shared"
-  import { ProfitLossGraph } from "$lib/components/Room"
-  import { goto } from "$app/navigation"
-  import { playerLiquidatedRooms } from "$lib/modules/state/stores"
+  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
+  import { playerLiquidatedRooms, realisedProfitLoss } from "$lib/modules/state/stores"
+  import { derived } from "svelte/store"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
-  import { blocksToReadableTime } from "$lib/modules/utils"
-  import { blockNumber } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+
   import AdminTripTableRow from "../AdminTripTable/AdminTripTableRow.svelte"
 
   let { focus = $bindable() } = $props()
@@ -54,9 +51,17 @@
 
     return entries.sort(sortFunction)
   })
+
+  const portfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
+    if ($realisedProfitLoss === 0) return "neutral"
+    return $realisedProfitLoss > 0 ? "upText" : "downText"
+  })
 </script>
 
 <div class="admin-trip-table-container">
+  <p class="table-summary">
+    Liquidated trips <span class={$portfolioClass}>({CURRENCY_SYMBOL}{$realisedProfitLoss})</span>
+  </p>
   {#if roomList?.length > 0}
     <table class="admin-trip-table">
       <thead>
@@ -174,5 +179,17 @@
     .cell-actions {
       max-width: 200px;
     }
+  }
+
+  .table-summary {
+    padding: 0 6px;
+  }
+
+  .downText {
+    color: red;
+  }
+
+  .upText {
+    color: #78ee72;
   }
 </style>

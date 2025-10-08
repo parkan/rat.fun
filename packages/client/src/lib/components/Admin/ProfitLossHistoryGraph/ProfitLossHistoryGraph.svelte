@@ -171,7 +171,7 @@
             time: time || o.time,
             valueChange: valueChange, // Store the change, not accumulated value
             eventType: o.eventType,
-            meta: { ...sanityRoomContent }
+            meta: { ...sanityRoomContent, ...o }
           }
         })
 

@@ -17,7 +17,7 @@
 </script>
 
 {#snippet ratVisitEvent(p)}
-  <Icon name="Paw" width={10} /> {p.meta.ratName} visited trip #{p.meta.index}
+  <Icon name="Paw" width={10} /> {p.meta.ownerName} sent {p.meta.ratName} to trip #{p.meta.index}
 {/snippet}
 
 {#snippet tripLiquidated(p)}
