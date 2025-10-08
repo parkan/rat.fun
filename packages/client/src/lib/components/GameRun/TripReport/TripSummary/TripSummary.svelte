@@ -30,7 +30,7 @@
       timeline.fromTo(
         summaryContainer,
         { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+        { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }
       )
 
       // Pass timeline to parent
