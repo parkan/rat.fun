@@ -97,33 +97,19 @@
 </script>
 
 <div class="room-graph">
-  <div class="y-axis">
-    <!-- <small class="label">Value</small> -->
-  </div>
-  <div class="x-axis">
-    <!-- <small class="label">Time</small> -->
-  </div>
-
   {#if isEmpty}
     <div style:height="{height}px" class="no-data">
       <span>NO DATA</span>
     </div>
   {:else}
     <div class="graph" bind:clientWidth={width}>
-      {#if profitLossData && width && xScale && yScale && lineGenerator}
+      {#if profitLossData?.length === 1}
+        <div style:height="{height}px" class="no-data">
+          <span>NO DATA</span>
+        </div>
+      {:else if profitLossData && width && xScale && yScale && lineGenerator}
         <svg {width} {height}>
           <g transform="translate({padding.left}, {padding.top})">
-            <!-- Zero line for reference -->
-            <line
-              x1="0"
-              y1={yScale(0)}
-              x2={innerWidth}
-              y2={yScale(0)}
-              stroke="var(--color-grey-mid)"
-              stroke-width="1"
-              stroke-dasharray="2,2"
-            />
-
             <!-- Profit/loss line -->
             <path
               d={lineGenerator(profitLossData)}
@@ -131,16 +117,6 @@
               stroke-width={2}
               fill="none"
             />
-
-            {#each profitLossData as point (point.time)}
-              <circle
-                fill={point.value >= 0 ? "var(--color-value-up)" : "var(--color-value-down)"}
-                r={smallIcons ? 3 : 5}
-                cx={xScale(point.time)}
-                cy={yScale(point.value)}
-                data-tippy-content={generateTooltipContent(point)}
-              ></circle>
-            {/each}
           </g>
         </svg>
       {/if}
@@ -156,17 +132,17 @@
     width: 100%;
 
     span {
-      background: var(--color-death);
+      background: var(--black);
       padding: 2px;
-      color: var(--background);
+      color: var(--color-death);
     }
   }
 
   .room-graph {
     width: 100%;
-    height: 100%;
+    height: 24px;
     position: relative;
-    background-size: 20px 20px;
+    background-size: 11px 11px;
     background-image:
       linear-gradient(to right, var(--color-grey-dark) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-grey-dark) 1px, transparent 1px);
@@ -175,14 +151,12 @@
   .y-axis {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    border-right: 1px solid var(--color-grey-mid);
     width: 30px;
     height: 100%;
     position: absolute;
   }
 
   .x-axis {
-    border-bottom: 1px solid var(--color-grey-mid);
     width: 100%;
     height: 30px;
     position: absolute;

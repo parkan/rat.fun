@@ -87,7 +87,7 @@
 <style lang="scss">
   .rat-box {
     display: flex;
-    height: calc(var(--game-window-height) - 60px);
+    height: var(--game-window-main-height);
     width: 100%;
     overflow: hidden;
   }

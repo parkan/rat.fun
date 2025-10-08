@@ -186,3 +186,26 @@ export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]
       $ratInventory.reduce((acc, item) => acc + (item?.value ? Number(item.value) : 0), 0) // Inventory
   return totalValue
 })
+
+export const investment = derived(playerActiveRooms, $playerActiveRooms =>
+  Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+)
+export const balance = derived(playerActiveRooms, $playerActiveRooms =>
+  Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.balance), 0)
+)
+export const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
+export const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
+  if ($profitLoss === 0) return "neutral"
+  return $profitLoss < 0 ? "downText" : "upText"
+})
+
+export const realisedInvestment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
+  Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+)
+export const realisedBalance = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
+  Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.liquidationValue), 0)
+)
+export const realisedProfitLoss = derived(
+  [realisedBalance, realisedInvestment],
+  ([$rb, $i]) => $rb - $i
+)

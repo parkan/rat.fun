@@ -70,7 +70,7 @@
   .content {
     position: relative;
     overflow-y: scroll;
-    height: calc(var(--game-window-height) - 60px);
+    height: var(--game-window-main-height);
     height: var(--game-window-height);
     max-height: 100%;
   }

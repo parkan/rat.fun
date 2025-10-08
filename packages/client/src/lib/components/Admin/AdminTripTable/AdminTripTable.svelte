@@ -1,16 +1,14 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { SmallButton } from "$lib/components/Shared"
-  import { ProfitLossGraph } from "$lib/components/Room"
-  import { goto } from "$app/navigation"
-  import { playerActiveRooms } from "$lib/modules/state/stores"
+  import { derived } from "svelte/store"
+  import { playerActiveRooms, profitLoss } from "$lib/modules/state/stores"
   import { entriesChronologically } from "$lib/components/Room/RoomListing/sortFunctions"
-  import { blocksToReadableTime } from "$lib/modules/utils"
-  import { blockNumber } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
-  let { focus = $bindable() } = $props()
+  import AdminTripTableRow from "./AdminTripTableRow.svelte"
+
+  let { focus = $bindable(), pendingTrip } = $props()
 
   let sortFunction = $state(entriesChronologically)
 
@@ -52,85 +50,77 @@
 
     return entries.sort(sortFunction)
   })
+
+  const portfolioClass = derived([profitLoss], ([$profitLoss]) => {
+    if ($profitLoss === 0) return "neutral"
+    return $profitLoss > 0 ? "upText" : "downText"
+  })
 </script>
 
 <div class="admin-trip-table-container">
-  {#if roomList?.length > 0}
-    <table class="admin-trip-table">
-      <thead>
-        <tr>
-          <th><!-- Trip --></th>
-          <th>Slopamine ({CURRENCY_SYMBOL})</th>
-          <th>P&L</th>
-          <th>Age</th>
-          <th>Spark</th>
-          <th>Actions</th>
+  <p class="table-summary">
+    Active trips <span class={$portfolioClass}>({CURRENCY_SYMBOL}{$profitLoss})</span>
+  </p>
+  <table class="admin-trip-table">
+    <thead>
+      <tr>
+        <th><!-- Trip --></th>
+        <th>Visits</th>
+        <th>Profit</th>
+        <th>Age</th>
+        <th>Spark</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Loading row for pending room creation -->
+      {#if pendingTrip && !roomList.map(r => r[1].prompt).includes(pendingTrip.prompt)}
+        <tr class="simple-row loading-row">
+          <td class="cell-description">
+            <p class="single-line">{pendingTrip.prompt}</p>
+          </td>
+          <td class="cell-balance">0</td>
+          <td class="cell-profit-loss">0</td>
+          <td class="cell-age">0</td>
+          <td class="cell-graph">
+            <div class="mini-graph loading-graph"></div>
+          </td>
+          <td class="cell-actions"> </td>
         </tr>
-      </thead>
-      <tbody>
-        {#each roomList as roomEntry (roomEntry[0])}
-          {@const room = roomEntry[1]}
-          {@const plotData = plots[roomEntry[0]]}
-          <tr
-            onmouseenter={() => {
-              focus = roomEntry[0]
-            }}
-            onmouseleave={() => {
-              focus = ""
-            }}
-            onclick={() => {
-              goto("/admin/" + roomEntry[0], { noScroll: false })
-            }}
-            class="simple-row"
-          >
-            <td class="cell-description">{room.prompt}</td>
-            <td class="cell-balance">{room.balance}</td>
-            <td class="cell-profit-loss">{room.balance - room.roomCreationCost}</td>
-            <td class="cell-age">
-              {blocksToReadableTime(Number($blockNumber) - Number(room.creationBlock))}
-            </td>
-            <td class="cell-graph">
-              {#if plotData}
-                <div class="mini-graph">
-                  <ProfitLossGraph
-                    smallIcons
-                    height={100}
-                    {plotData}
-                    isEmpty={plotData.length === 0}
-                  />
-                </div>
-              {:else}
-                <div class="mini-graph" />
-              {/if}
-            </td>
-            <td class="cell-actions">
-              <SmallButton text="Liquidate" onclick={() => {}}></SmallButton>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  {:else}
-    <div class="no-data">
-      <span>NO DATA</span>
-    </div>
-  {/if}
+      {/if}
+      <!-- --- -->
+      {#each roomList as roomEntry (roomEntry[0])}
+        <AdminTripTableRow
+          id={roomEntry[0]}
+          data={plots[roomEntry[0]]}
+          room={roomEntry[1]}
+          onpointerenter={() => {
+            focus = roomEntry[0]
+          }}
+          onpointerleave={() => {
+            focus = ""
+          }}
+        />
+      {/each}
+    </tbody>
+  </table>
 </div>
 
 <style lang="scss">
   .admin-trip-table-container {
     width: 100%;
     background: black;
-    height: 400px;
+    height: 100%;
     overflow-y: scroll;
     position: relative;
   }
   .admin-trip-table {
     width: 100%;
-    background: black;
     table-layout: fixed;
-    /* justify-content: center; */
-    /* align-items: center; */
+  }
+
+  .table-summary {
+    padding: 0 6px;
   }
 
   .no-data {
@@ -152,48 +142,59 @@
     }
   }
 
-  .mini-graph {
-    width: 200px;
-    height: 100px;
-    background: #222;
+  .loading {
+    height: 24px;
+    width: 100%;
+    background: red;
+    display: block;
   }
 
-  .simple-row {
-    * {
-      border: none;
-      outline: none;
-      border-width: 0;
-      border-bottom: 1px solid #555;
+  .loading-row {
+    opacity: 0.6;
+    background: #111;
+    pointer-events: none;
+
+    .loading-graph {
+      height: 24px;
+      width: 100%;
+      background: repeating-linear-gradient(90deg, #333 0px, #444 10px, #333 20px);
+      animation: loading-shimmer 1s infinite linear;
     }
-    &:hover {
-      background: #222;
-      cursor: pointer;
+
+    .loading-text {
+      font-size: 12px;
     }
-    td {
-      overflow: hidden;
-      margin: 0;
-      vertical-align: top;
+  }
+
+  @keyframes loading-shimmer {
+    0% {
+      background-position: 0 0;
     }
-    .cell-description {
-      padding: 0.6rem 0.5rem;
-      // min-width: 500px;
+    100% {
+      background-position: 20px 0;
     }
-    .cell-balance {
-      width: 120px;
-      // background: red;
-    }
-    .cell-profit-loss {
-      width: 120px;
-    }
-    .cell-age {
-      width: 120px;
-    }
-    .cell-graph {
-      max-width: 200px;
-    }
-    .cell-actions {
-      max-width: 200px;
-      height: 102px;
-    }
+  }
+
+  .cell-description {
+    padding: 0 6px;
+  }
+
+  .single-line {
+    margin: 0;
+    padding: 0;
+    border: none;
+    max-width: 100%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .downText {
+    color: red;
+  }
+
+  .upText {
+    color: #78ee72;
   }
 </style>

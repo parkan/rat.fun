@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Icon } from "$lib/components/Shared"
-  import { timeSince, addressToRatImage } from "$lib/modules/utils"
+  import { timeSince } from "$lib/modules/utils"
+  import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
   import tippy from "tippy.js"
 
   let { eventData, focus = $bindable() } = $props()
@@ -16,7 +17,7 @@
 </script>
 
 {#snippet ratVisitEvent(p)}
-  <Icon name="Paw" width={10} /> {p.meta.ratName} visited trip #{p.meta.index}
+  <Icon name="Paw" width={10} /> {p.meta.ownerName} sent {p.meta.ratName} to trip #{p.meta.index}
 {/snippet}
 
 {#snippet tripLiquidated(p)}
@@ -32,12 +33,13 @@
 {/snippet}
 
 <div class="admin-event-log">
-  {#each eventData.toReversed() as point}
+  {#each eventData.toReversed().filter(p => p.eventType !== "baseline") as point}
     <p
-      data-tippy-content={"createNote(point)"}
-      onpointerenter={() => (focus = point.tripId)}
-      onpointerleave={() => (focus = "")}
+      data-tippy-content={point.meta.index}
+      onpointerenter={() => ($focusEvent = point.index)}
+      onpointerleave={() => ($focusEvent = -1)}
       class="event"
+      class:focus={$focusEvent === point.index}
     >
       {#if point.eventType === "trip_visit"}
         {@render ratVisitEvent(point)}
@@ -48,9 +50,14 @@
       {:else if point.eventType === "trip_death"}
         {@render ratDied(point)}
       {/if}
-      <span class="meta">{timeSince(new Date(point.time).getTime())} ago</span>
+      <span class="meta">{timeSince(new Date(point.time).getTime())}</span>
     </p>
   {/each}
+  <p class="event">
+    You unlocked the panel <span class="meta"
+      >{timeSince(new Date($adminUnlockedAt).getTime())}</span
+    >
+  </p>
 </div>
 
 <style lang="scss">
@@ -69,7 +76,7 @@
       margin: 0;
 
       cursor: pointer;
-      &:hover {
+      &.focus {
         background: black;
       }
     }
