@@ -18,6 +18,7 @@
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
   import { staticContent } from "$lib/modules/content"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import tippy from "tippy.js"
 
   import AdminTripTableRow from "../AdminTripTable/AdminTripTableRow.svelte"
 
@@ -94,20 +95,32 @@
 
   let fees = $derived($realisedProfitLoss - $untaxedRealisedProfitLoss)
 
-  const portfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
+  const portfolioClass = derived([untaxedRealisedProfitLoss], ([$untaxedRealisedProfitLoss]) => {
+    if ($untaxedRealisedProfitLoss === 0) return "neutral"
+    return $untaxedRealisedProfitLoss > 0 ? "upText" : "downText"
+  })
+
+  const feeClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
     if ($realisedProfitLoss === 0) return "neutral"
     return $realisedProfitLoss > 0 ? "upText" : "downText"
+  })
+
+  $effect(() => {
+    tippy("[data-tippy-content]", {
+      followCursor: true,
+      allowHTML: true
+    })
   })
 </script>
 
 <div class="admin-trip-table-container">
   <p class="table-summary">
     Liquidated trips <span class={$portfolioClass}
-      >({#if $realisedProfitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs(
+      >({#if $untaxedRealisedProfitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs(
         $untaxedRealisedProfitLoss
       )})</span
     >
-    <span class={$portfolioClass}>Fee: {Math.abs(fees)}</span>
+    <span>Fee: <span class={$feeClass}>{CURRENCY_SYMBOL}{Math.abs(fees)}</span></span>
   </p>
   {#if roomList?.length > 0}
     <table class="admin-trip-table">

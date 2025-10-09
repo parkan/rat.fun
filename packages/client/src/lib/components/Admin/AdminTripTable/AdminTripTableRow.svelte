@@ -33,20 +33,11 @@
   </td>
   <td class="cell-visits">{room.visitCount}</td>
   <td class="cell-profit">
-    {#if liquidated}
-      <span>
-        {untaxed(room.liquidationValue)}
-      </span>
-      <span class="grey">
-        ({room.roomCreationCost})
+    {#if liquidated}<span> {untaxed(room.liquidationValue)}</span><span class="grey"
+        >/{room.roomCreationCost}
       </span>
     {:else}
-      <span>
-        {room.balance}
-      </span>
-      <span class="grey">
-        ({room.roomCreationCost})
-      </span>
+      <span>{room.balance}</span><span class="grey">/{room.roomCreationCost} </span>
     {/if}
   </td>
   <td class="cell-tax-or-age {profitLossClass}">

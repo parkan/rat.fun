@@ -99,8 +99,6 @@
       Object.entries(trips).map(([tripId, trip]) => {
         let sanityRoomContent = $staticContent?.rooms?.find(r => r.title == tripId)
 
-        console.log("Start with sanity content: ", sanityRoomContent)
-
         const outcomes = $staticContent?.outcomes?.filter(o => o.roomId == tripId) || []
 
         // Sort the outcomes in order of creation
@@ -163,8 +161,6 @@
         const data = dataPoints.map((o, i) => {
           const time = new Date(o?._createdAt).getTime()
           const valueChange = o?.roomValueChange || 0
-
-          console.log("Data construction: ", sanityRoomContent)
 
           return {
             time: time || o.time,
@@ -282,7 +278,6 @@
   }
 
   const toggleSource = () => {
-    console.log("TOGGLE SOURCE")
     if (limit === 50 && allData.length > 50) {
       limit = allData.length
     } else {
@@ -362,7 +357,6 @@
               <g
                 onpointerenter={() => {
                   $focusEvent = point.index
-                  console.log("pointer enter", $focusEvent)
                 }}
                 onpointerleave={() => ($focusEvent = -1)}
                 data-tippy-content={generateTooltipContent(point)}
