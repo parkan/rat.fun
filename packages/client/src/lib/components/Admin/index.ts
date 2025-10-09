@@ -1,4 +1,5 @@
 export { default as AdminTripPreview } from "./AdminTripPreview/AdminTripPreview.svelte"
+export { default as AdminTripPreviewHeader } from "./AdminTripPreview/AdminTripPreviewHeader.svelte"
 export { default as CreateTrip } from "./CreateTrip/CreateTrip.svelte"
 export { default as AdminTripItem } from "./AdminTripItem/AdminTripItem.svelte"
 export { default as AdminTripMonitor } from "./AdminTripMonitor/AdminTripMonitor.svelte"
@@ -7,4 +8,3 @@ export { default as AdminTripTable } from "./AdminTripTable/AdminTripTable.svelt
 export { default as AdminPastTripTable } from "./AdminPastTripTable/AdminPastTripTable.svelte"
 export { default as AdminEventLog } from "./AdminEventLog/AdminEventLog.svelte"
 export { default as ProfitLossHistoryGraph } from "./ProfitLossHistoryGraph/ProfitLossHistoryGraph.svelte"
-export { default as SingleTripProfitLossGraph } from "./SingleTripProfitLossGraph/SingleTripProfitLossGraph.svelte"
