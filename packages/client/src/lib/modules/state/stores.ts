@@ -98,9 +98,9 @@ export const rats = derived(
   entities,
   $entities => filterByEntitytype($entities, ENTITY_TYPE.RAT) as Rats
 )
-export const rooms = derived(
+export const trips = derived(
   entities,
-  $entities => filterByEntitytype($entities, ENTITY_TYPE.ROOM) as Rooms
+  $entities => filterByEntitytype($entities, ENTITY_TYPE.TRIP) as Trips
 )
 export const items = derived(
   entities,
@@ -123,22 +123,22 @@ export const player = derived(
   ([$entities, $playerId]) => $entities[$playerId] as Player
 )
 
-export const othersRooms = derived(
-  [playerId, rooms],
-  ([$playerId, $rooms]) => filterByOthers($rooms, $playerId) as Rooms
+export const othersTrips = derived(
+  [playerId, trips],
+  ([$playerId, $trips]) => filterByOthers($trips, $playerId) as Trips
 )
 
-export const playerRooms = derived(
-  [playerId, rooms],
-  ([$playerId, $rooms]) => filterByPlayer($rooms, $playerId) as Rooms
+export const playerTrips = derived(
+  [playerId, trips],
+  ([$playerId, $trips]) => filterByPlayer($trips, $playerId) as Trips
 )
 
-export const playerActiveRooms = derived([playerRooms], ([$playerRooms]) => {
-  return filterActive($playerRooms) as Rooms
+export const playerActiveTrips = derived([playerTrips], ([$playerTrips]) => {
+  return filterActive($playerTrips) as Trips
 })
 
-export const playerLiquidatedRooms = derived([playerRooms], ([$playerRooms]) => {
-  return filterLiquidated($playerRooms) as Rooms
+export const playerLiquidatedTrips = derived([playerTrips], ([$playerTrips]) => {
+  return filterLiquidated($playerTrips) as Trips
 })
 
 // Player does not and have never had a rat
@@ -187,11 +187,11 @@ export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]
   return totalValue
 })
 
-export const investment = derived(playerActiveRooms, $playerActiveRooms =>
-  Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+export const investment = derived(playerActiveTrips, $playerActiveTrips =>
+  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
 )
-export const balance = derived(playerActiveRooms, $playerActiveRooms =>
-  Object.values($playerActiveRooms).reduce((a, b) => a + Number(b.balance), 0)
+export const balance = derived(playerActiveTrips, $playerActiveTrips =>
+  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.balance), 0)
 )
 export const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
 export const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
@@ -200,24 +200,24 @@ export const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $bal
 })
 
 const untaxed = (value: number) =>
-  Math.floor((Number(value) * 100) / (100 - Number(get(gamePercentagesConfig).taxationCloseRoom)))
+  Math.floor((Number(value) * 100) / (100 - Number(get(gamePercentagesConfig).taxationCloseTrip)))
 
-export const realisedInvestment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-  Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+export const realisedInvestment = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
 )
-export const realisedBalance = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-  Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.liquidationValue), 0)
+export const realisedBalance = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.liquidationValue), 0)
 )
 export const realisedProfitLoss = derived(
   [realisedBalance, realisedInvestment],
   ([$rb, $i]) => $rb - $i
 )
 
-export const untaxedRealisedInvestment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-  Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+export const untaxedRealisedInvestment = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
 )
-export const untaxedRealisedBalance = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-  Object.values($playerLiquidatedRooms).reduce((a, b) => a + untaxed(Number(b.liquidationValue)), 0)
+export const untaxedRealisedBalance = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+  Object.values($playerLiquidatedTrips).reduce((a, b) => a + untaxed(Number(b.liquidationValue)), 0)
 )
 export const untaxedRealisedProfitLoss = derived(
   [untaxedRealisedBalance, untaxedRealisedInvestment],

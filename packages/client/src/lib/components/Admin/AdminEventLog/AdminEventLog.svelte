@@ -37,7 +37,7 @@
     <a
       onpointerup={e => {
         if (point.eventType === "trip_visit" || point.eventType === "trip_death") {
-          goto(`/admin/${point.meta.roomId}`)
+          goto(`/admin/${point.meta.tripId}`)
         }
       }}
       class="event"

@@ -22,7 +22,7 @@ export function wagmiConfig(): Config<typeof chains, typeof transports> {
       overrideIsMetaMask: false
     }),
     metaMask(),
-    walletConnect({ projectId: PUBLIC_WALLET_CONNECT_PROJECT_ID }),
+    walletConnect({ projectId: PUBLIC_WALLET_CONNECT_PROJECT_ID })
   )
 
   // If we're in an iframe, include the SafeConnector

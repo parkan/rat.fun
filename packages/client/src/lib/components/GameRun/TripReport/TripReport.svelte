@@ -3,11 +3,11 @@
   import { Log, TripSummary } from "$lib/components/GameRun"
   import { playSound } from "$lib/modules/sound"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import type { EnterRoomReturnValue } from "@server/modules/types"
+  import type { EnterTripReturnValue } from "@server/modules/types"
   import { Howl } from "howler"
   import { gsap } from "gsap"
 
-  let { result }: { result: EnterRoomReturnValue | null } = $props()
+  let { result }: { result: EnterTripReturnValue | null } = $props()
 
   let backgroundMusic: Howl | undefined = $state()
 

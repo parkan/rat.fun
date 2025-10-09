@@ -6,14 +6,14 @@
     profitLoss,
     portfolioClass,
     realisedProfitLoss,
-    playerRooms
+    playerTrips
   } from "$lib/modules/state/stores"
   import { BigButton } from "$lib/components/Shared"
   import { ProfitLossHistoryGraph } from "$lib/components/Admin"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import tippy from "tippy.js"
 
-  let { focus, graphData = $bindable(), onCreateRoomClick } = $props()
+  let { focus, graphData = $bindable(), onCreateTripClick } = $props()
 
   let clientHeight = $state(0)
 
@@ -69,11 +69,11 @@
       <h2>{CURRENCY_SYMBOL}{$investment}</h2>
     </div>
     <div class="full-width-bottom">
-      <BigButton text="Create Room" onclick={onCreateRoomClick} />
+      <BigButton text="Create Trip" onclick={onCreateTripClick} />
     </div>
   </div>
   <div class="p-l-graph">
-    <ProfitLossHistoryGraph bind:graphData trips={$playerRooms} height={clientHeight} {focus} />
+    <ProfitLossHistoryGraph bind:graphData trips={$playerTrips} height={clientHeight} {focus} />
   </div>
 </div>
 

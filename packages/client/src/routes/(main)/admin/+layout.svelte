@@ -8,7 +8,7 @@
   import {
     AdminEventLog,
     AdminTripMonitor,
-    CreateRoom,
+    CreateTrip,
     AdminTripTable,
     AdminPastTripTable
   } from "$lib/components/Admin"
@@ -27,8 +27,8 @@
   $effect(() => {
     if ($player) {
       if (!$player.masterKey) {
-        if (page.route.id === "/(main)/admin/[roomId]") {
-          goto(`/${page.params.roomId}`)
+        if (page.route.id === "/(main)/admin/[tripId]") {
+          goto(`/${page.params.tripId}`)
         } else {
           goto("/")
         }
@@ -39,8 +39,8 @@
 
 <SEO prependTitle="ADMIN" />
 
-{#snippet createRoomModal()}
-  <CreateRoom
+{#snippet createTripModal()}
+  <CreateTrip
     onsubmit={(data: PendingTrip) => {
       modal.hide()
       // Set pending state
@@ -60,8 +60,8 @@
     <AdminTripMonitor
       bind:graphData
       {focus}
-      onCreateRoomClick={() => {
-        modal.set(createRoomModal)
+      onCreateTripClick={() => {
+        modal.set(createTripModal)
       }}
     />
   </div>
@@ -125,12 +125,12 @@
     }
   }
 
-  .create-room-wrapper {
+  .create-trip-wrapper {
     width: 600px;
     z-index: 99;
   }
 
-  .create-room-button {
+  .create-trip-button {
     width: 100%;
     height: 80px;
   }

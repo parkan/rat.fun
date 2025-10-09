@@ -1,22 +1,22 @@
 <script lang="ts">
   import { SmallButton } from "$lib/components/Shared"
-  import { ProfitLossGraph } from "$lib/components/Room"
+  import { ProfitLossGraph } from "$lib/components/Trip"
   import { goto } from "$app/navigation"
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
-  let { room, data, id, onpointerenter, onpointerleave } = $props()
+  let { trip, data, id, onpointerenter, onpointerleave } = $props()
 
   const untaxed = (value: number) =>
-    Math.floor((Number(value) * 100) / (100 - Number($gamePercentagesConfig.taxationCloseRoom)))
+    Math.floor((Number(value) * 100) / (100 - Number($gamePercentagesConfig.taxationCloseTrip)))
 
   let profitLoss = $derived(
-    room.liquidationBlock
-      ? untaxed(Number(room.liquidationValue)) - Number(room.roomCreationCost)
-      : Number(room.balance) - Number(room.roomCreationCost)
+    trip.liquidationBlock
+      ? untaxed(Number(trip.liquidationValue)) - Number(trip.tripCreationCost)
+      : Number(trip.balance) - Number(trip.tripCreationCost)
   )
-  let liquidated = $derived(room.liquidationBlock)
+  let liquidated = $derived(trip.liquidationBlock)
   let profitLossClass = $derived(profitLoss == 0 ? "" : profitLoss > 0 ? "up" : "down")
 </script>
 
@@ -29,15 +29,15 @@
   class="simple-row"
 >
   <td class="cell-description">
-    <p class="single-line">{room.prompt}</p>
+    <p class="single-line">{trip.prompt}</p>
   </td>
-  <td class="cell-visits">{room.visitCount}</td>
+  <td class="cell-visits">{trip.visitCount}</td>
   <td class="cell-profit">
-    {#if liquidated}<span> {untaxed(room.liquidationValue)}</span><span class="grey"
-        >/{room.roomCreationCost}
+    {#if liquidated}<span> {untaxed(trip.liquidationValue)}</span><span class="grey"
+        >/{trip.tripCreationCost}
       </span>
     {:else}
-      <span>{room.balance}</span><span class="grey">/{room.roomCreationCost} </span>
+      <span>{trip.balance}</span><span class="grey">/{trip.tripCreationCost} </span>
     {/if}
   </td>
   <td class="cell-tax-or-age {profitLossClass}">
