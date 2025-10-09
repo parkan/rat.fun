@@ -353,6 +353,19 @@
             />
 
             {#each profitLossOverTime as point, i (point.time)}
+              <!-- If the candle is selected, draw a line through it -->
+              {#if $focusEvent === point.index}
+                <line
+                  x1={xScale(point.time)}
+                  y1={0}
+                  x2={xScale(point.time)}
+                  y2={height}
+                  stroke="var(--color-grey-mid)"
+                  stroke-width="2"
+                  stroke-dasharray="2,2"
+                />
+              {/if}
+
               {@const lastPoint = profitLossOverTime?.[i - 1]}
               <g
                 onpointerenter={() => {
