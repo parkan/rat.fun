@@ -3,13 +3,25 @@
   import { timeSince } from "$lib/modules/utils"
   import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
   import { goto } from "$app/navigation"
-  import tippy from "tippy.js"
+  import tippy, { followCursor } from "tippy.js"
+  // For the follow cursor effect
+  import "tippy.js/dist/backdrop.css"
+  import "tippy.js/animations/shift-away.css"
 
   let { eventData, focus = $bindable() } = $props()
+
+  const tooltipContent = p => {
+    if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
+      return p.meta.readableLog.split(",").join("\n<br>")
+    } else {
+      return p.ownerName
+    }
+  }
 
   $effect(() => {
     tippy("[data-tippy-content]", {
       followCursor: true,
+      plugins: [followCursor],
       allowHTML: true
     })
   })
@@ -34,6 +46,7 @@
 
 <div class="admin-event-log">
   {#each eventData.toReversed().filter(p => p.eventType !== "baseline") as point}
+    <!-- svelte-ignore a11y_missing_attribute -->
     <a
       onpointerup={e => {
         if (point.eventType === "trip_visit" || point.eventType === "trip_death") {
@@ -41,7 +54,7 @@
         }
       }}
       class="event"
-      data-tippy-content={point.meta.index}
+      data-tippy-content={tooltipContent(point)}
       onpointerenter={() => ($focusEvent = point.index)}
       onpointerleave={() => ($focusEvent = -1)}
       class:focus={$focusEvent === point.index}

@@ -10,7 +10,8 @@ export const queries = {
   trips: '*[_type == "trip" && worldAddress == $worldAddress]',
   outcomes: `*[_type == "outcome" && worldAddress == $worldAddress] {
     ...,
-    "trip": *[_type == "trip" && _id == ^.tripId][0]
+    "trip": *[_type == "trip" && _id == ^.tripId][0],
+    "readableLog": array::join(log[]{event}.event, ", ")
   }`,
   worldEvents:
     '*[_type == "worldEvent" && worldAddress == $worldAddress] | order(activationDateTime asc)', // filter by activationDateTime upcoming, sort by activationDate soonest first
