@@ -45,7 +45,7 @@
     // Check if player is already spawned
     if (
       isSpawned ||
-      (page.route.id === "/(main)/(game)/[roomId]" && !page.url.searchParams.has("spawn"))
+      (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn"))
     ) {
       // Connected and spawned - finish spawn process
       spawned()

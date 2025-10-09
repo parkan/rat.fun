@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
+  import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
   import { onMount, onDestroy } from "svelte"
@@ -23,7 +23,7 @@
     height = 400,
     graphData = $bindable<PlotPoint[]>()
   }: {
-    trips: Room[]
+    trips: Trip[]
     focus: string
     height: number
     graphData: PlotPoint[]
@@ -93,35 +93,35 @@
       .range([innerHeight, 0])
   })
 
-  /** All plots for the rooms */
+  /** All plots for the trips */
   let plots: Record<string, { data: PlotPoint[]; line: any }> = $derived.by(() => {
     const result = Object.fromEntries(
       Object.entries(trips).map(([tripId, trip]) => {
-        let sanityRoomContent = $staticContent?.rooms?.find(r => r.title == tripId)
+        let sanityTripContent = $staticContent?.trips?.find(r => r.title == tripId)
 
-        const outcomes = $staticContent?.outcomes?.filter(o => o.roomId == tripId) || []
+        const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
         // Sort the outcomes in order of creation
         outcomes.sort((a, b) => {
           return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
         })
 
-        const roomOutcomes = outcomes.reverse()
-        const initialTime = new Date(sanityRoomContent?._createdAt).getTime()
+        const tripOutcomes = outcomes.reverse()
+        const initialTime = new Date(sanityTripContent?._createdAt).getTime()
 
         const initialPoint = {
           time: initialTime,
-          roomValue: Number(trip.roomCreationCost),
-          roomValueChange: 0,
-          meta: sanityRoomContent,
-          _createdAt: sanityRoomContent?._createdAt,
+          tripValue: Number(trip.tripCreationCost),
+          tripValueChange: 0,
+          meta: sanityTripContent,
+          _createdAt: sanityTripContent?._createdAt,
           eventType: "trip_created"
         }
 
         // Build the data array with initial point and outcomes
         const dataPoints = [
           initialPoint,
-          ...roomOutcomes.map(outcome => ({
+          ...tripOutcomes.map(outcome => ({
             ...outcome,
             eventType: outcome?.ratValue == 0 ? "trip_death" : "trip_visit"
           }))
@@ -134,23 +134,23 @@
             Number($blockNumber)
           )
 
-          // Get the last absolute room value before liquidation
-          const lastRoomValue = dataPoints[dataPoints.length - 1]?.roomValue || 0
+          // Get the last absolute trip value before liquidation
+          const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
 
           const taxed = Number(trip.liquidationValue)
-          const tax = $gamePercentagesConfig.taxationCloseRoom
+          const tax = $gamePercentagesConfig.taxationCloseTrip
           const untaxed = Math.floor(
             (Number(trip.liquidationValue) * 100) /
-              (100 - Number($gamePercentagesConfig.taxationCloseRoom))
+              (100 - Number($gamePercentagesConfig.taxationCloseTrip))
           )
-          const liquidationValueChange = Number(trip.roomCreationCost) - untaxed
+          const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
 
-          // Liquidation: you get back the room value (before tax) and close the position
-          // The change is +roomValue to cancel out the accumulated room value
+          // Liquidation: you get back the trip value (before tax) and close the position
+          // The change is +tripValue to cancel out the accumulated trip value
           dataPoints.push({
             _createdAt: new Date(liquidationTime).toISOString(),
-            roomValue: lastRoomValue,
-            roomValueChange: liquidationValueChange, // Add back the room value (closing position)
+            tripValue: lastTripValue,
+            tripValueChange: liquidationValueChange, // Add back the trip value (closing position)
             liquidationBlock: trip.liquidationBlock,
             prompt: "Liquidation",
             eventType: "trip_liquidated"
@@ -160,7 +160,7 @@
         // Map data points to store value changes (not accumulated yet)
         const data = dataPoints.map((o, i) => {
           const time = new Date(o?._createdAt).getTime()
-          const valueChange = o?.roomValueChange || 0
+          const valueChange = o?.tripValueChange || 0
 
           console.log(o)
 
@@ -169,7 +169,7 @@
             valueChange: valueChange, // Store the change, not accumulated value
             eventType: o.eventType,
             meta: {
-              ...sanityRoomContent,
+              ...sanityTripContent,
               ...o
             }
           }
@@ -202,7 +202,7 @@
       plot.data.map((point, index) => ({
         ...point,
         tripId: Object.keys(plots)[plotIndex],
-        roomCreationCost: Object.values(trips)[plotIndex]?.roomCreationCost || 0
+        tripCreationCost: Object.values(trips)[plotIndex]?.tripCreationCost || 0
       }))
     )
 

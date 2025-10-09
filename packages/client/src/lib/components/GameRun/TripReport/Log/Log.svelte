@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MergedLogEntry } from "$lib/components/GameRun/types"
-  import type { EnterRoomReturnValue } from "@server/modules/types"
+  import type { EnterTripReturnValue } from "@server/modules/types"
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
   import { LogItem, LogHeader } from "$lib/components/GameRun"
@@ -9,7 +9,7 @@
     result,
     onTimeline
   }: {
-    result: EnterRoomReturnValue | null
+    result: EnterTripReturnValue | null
     onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
   } = $props()
 

@@ -73,7 +73,7 @@ declare global {
     owner?: mudComponents["Owner"]
     prompt?: mudComponents["Prompt"]
     index?: mudComponents["Index"]
-    roomCreationCost?: mudComponents["RoomCreationCost"]
+    tripCreationCost?: mudComponents["TripCreationCost"]
     visitCount?: mudComponents["VisitCount"]
     killCount?: mudComponents["KillCount"]
     tripCount?: mudComponents["TripCount"]
@@ -112,9 +112,9 @@ declare global {
     creationBlock: mudComponents["CreationBlock"]
   }
 
-  type Room = {
+  type Trip = {
     [key: string]: number | bigint | ENTITY_TYPE | string | boolean
-    entityType: ENTITY_TYPE.ROOM
+    entityType: ENTITY_TYPE.TRIP
     owner: mudComponents["Owner"]
     index: mudComponents["Index"]
     balance: mudComponents["Balance"]
@@ -124,7 +124,7 @@ declare global {
     killCount: mudComponents["KillCount"]
     creationBlock: mudComponents["CreationBlock"]
     lastVisitBlock: mudComponents["LastVisitBlock"]
-    roomCreationCost: mudComponents["RoomCreationCost"]
+    tripCreationCost: mudComponents["TripCreationCost"]
   }
 
   type Item = {
@@ -149,8 +149,8 @@ declare global {
     [index: string]: Rat
   }
 
-  type Rooms = {
-    [index: string]: Room
+  type Trips = {
+    [index: string]: Trip
   }
 
   type Items = {

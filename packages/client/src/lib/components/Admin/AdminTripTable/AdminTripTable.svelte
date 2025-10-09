@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Room/RoomGraph/types"
+  import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
   import { derived } from "svelte/store"
-  import { playerActiveRooms, profitLoss } from "$lib/modules/state/stores"
+  import { playerActiveTrips, profitLoss } from "$lib/modules/state/stores"
   import {
     entriesChronologically,
     entriesChronologicallyDesc,
@@ -9,7 +9,7 @@
     entriesByProfitDesc,
     entriesByVisit,
     entriesByVisitDesc
-  } from "$lib/components/Room/RoomListing/sortFunctions"
+  } from "$lib/components/Trip/TripListing/sortFunctions"
   import { staticContent } from "$lib/modules/content"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
@@ -25,39 +25,39 @@
 
   let plots: Record<string, PlotPoint[]> = $derived.by(() => {
     const result = Object.fromEntries(
-      roomList.map(([roomId, room]) => {
-        let sanityRoomContent = $staticContent?.rooms?.find(r => r.title == roomId)
+      tripList.map(([tripId, trip]) => {
+        let sanityTripContent = $staticContent?.trips?.find(r => r.title == tripId)
 
-        const outcomes = $staticContent?.outcomes?.filter(o => o.roomId == roomId) || []
+        const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
         // Sort the outcomes in order of creation
         outcomes.sort((a, b) => {
           return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
         })
-        const roomOutcomes = outcomes.reverse()
+        const tripOutcomes = outcomes.reverse()
         const value = [
           {
             time: 0,
-            roomValue: Number(room.roomCreationCost),
-            meta: sanityRoomContent
+            tripValue: Number(trip.tripCreationCost),
+            meta: sanityTripContent
           },
-          ...roomOutcomes
+          ...tripOutcomes
         ].map((o, i) => {
           return {
             time: i,
-            value: o?.roomValue || 0,
+            value: o?.tripValue || 0,
             meta: o
           }
         })
 
         // Map the values
-        return [roomId, value]
+        return [tripId, value]
       })
     )
     return result
   })
 
-  let roomList = $derived.by(() => {
-    let entries = Object.entries($playerActiveRooms)
+  let tripList = $derived.by(() => {
+    let entries = Object.entries($playerActiveTrips)
 
     return entries.sort(sortFunction)
   })
@@ -106,8 +106,8 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Loading row for pending room creation -->
-      {#if pendingTrip && !roomList.map(r => r[1].prompt).includes(pendingTrip.prompt)}
+      <!-- Loading row for pending trip creation -->
+      {#if pendingTrip && !tripList.map(r => r[1].prompt).includes(pendingTrip.prompt)}
         <tr class="simple-row loading-row">
           <td class="cell-description">
             <p class="single-line">{pendingTrip.prompt}</p>
@@ -122,13 +122,13 @@
         </tr>
       {/if}
       <!-- --- -->
-      {#each roomList as roomEntry (roomEntry[0])}
+      {#each tripList as tripEntry (tripEntry[0])}
         <AdminTripTableRow
-          id={roomEntry[0]}
-          data={plots[roomEntry[0]]}
-          room={roomEntry[1]}
+          id={tripEntry[0]}
+          data={plots[tripEntry[0]]}
+          trip={tripEntry[1]}
           onpointerenter={() => {
-            focus = roomEntry[0]
+            focus = tripEntry[0]
           }}
           onpointerleave={() => {
             focus = ""

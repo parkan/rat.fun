@@ -1,14 +1,14 @@
 <script lang="ts">
   import { derived } from "svelte/store"
-  import { playerLiquidatedRooms } from "$lib/modules/state/stores"
+  import { playerLiquidatedTrips } from "$lib/modules/state/stores"
 
   let { focus } = $props()
 
-  const investment = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.roomCreationCost), 0)
+  const investment = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+    Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
   )
-  const liquidationValue = derived(playerLiquidatedRooms, $playerLiquidatedRooms =>
-    Object.values($playerLiquidatedRooms).reduce((a, b) => a + Number(b.liquidationValue || 0), 0)
+  const liquidationValue = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
+    Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.liquidationValue || 0), 0)
   )
   const profitLoss = derived([liquidationValue, investment], ([$lv, $i]) => $lv - $i)
   const portfolioClass = derived([profitLoss], ([$profitLoss]) => {

@@ -55,17 +55,17 @@
   /* Layout: Top Bar */
   --top-bar-height: 60px;
 
-  /* Layout: Your Rooms */
+  /* Layout: Your Trips */
   --world-prompt-box-height: 80px;
   --pane-switch-height: 60px;
-  --create-room-button-height: 80px;
+  --create-trip-button-height: 80px;
 
-  /* Layout: Room Item */
-  --room-item-height: 260px;
-  --room-item-padding: 10px;
-  --room-item-image-height: 240px;
+  /* Layout: Trip Item */
+  --trip-item-height: 260px;
+  --trip-item-padding: 10px;
+  --trip-item-image-height: 240px;
 
-  /* Layout: Room Result */
+  /* Layout: Trip Result */
   --info-box-height: 260px;
 
   /* Sizing */

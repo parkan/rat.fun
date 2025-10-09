@@ -28,4 +28,4 @@ import { VisitCount } from "./tables/VisitCount.sol";
 import { KillCount } from "./tables/KillCount.sol";
 import { TripCount } from "./tables/TripCount.sol";
 import { Prompt } from "./tables/Prompt.sol";
-import { RoomCreationCost } from "./tables/RoomCreationCost.sol";
+import { TripCreationCost } from "./tables/TripCreationCost.sol";

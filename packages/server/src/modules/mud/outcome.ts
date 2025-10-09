@@ -1,14 +1,14 @@
 import { OutcomeReturnValue, ItemChange } from "@modules/types"
-import { Rat, Room } from "@modules/types"
+import { Rat, Trip } from "@modules/types"
 
 /**
  * Parse the LLM outcome into the arguments for the onchain calculation
  * @param rat
- * @param room
+ * @param trip
  * @param outcome
  * @returns The arguments for the onchain calculation
  */
-export function createOutcomeCallArgs(rat: Rat, room: Room, outcome: OutcomeReturnValue) {
+export function createOutcomeCallArgs(rat: Rat, trip: Trip, outcome: OutcomeReturnValue) {
   // The onchain calculation deals with a single balance transfer value
   const balanceTransfersSum =
     (outcome?.balanceTransfers ?? []).reduce((acc, curr) => acc + curr.amount, 0) ?? 0
@@ -27,7 +27,7 @@ export function createOutcomeCallArgs(rat: Rat, room: Room, outcome: OutcomeRetu
         return { name: c.name.slice(0, 48), value: Math.abs(c.value) }
       }) ?? []
 
-  return [rat.id, room.id, balanceTransfersSum, itemsToRemoveFromRat, itemsToAddToRat]
+  return [rat.id, trip.id, balanceTransfersSum, itemsToRemoveFromRat, itemsToAddToRat]
 }
 
 /**
