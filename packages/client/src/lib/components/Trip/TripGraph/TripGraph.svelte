@@ -134,7 +134,11 @@
             {/if}
 
             {#each plotData as point (point.time)}
-              <Tooltip content={generateTooltipContent(point)} svg={true} props={{ allowHTML: true }}>
+              <Tooltip
+                content={generateTooltipContent(point)}
+                svg={true}
+                props={{ allowHTML: true }}
+              >
                 <g>
                   {#if !point?.meta?.tripValueChange || point?.meta?.tripValueChange === 0}
                     <circle

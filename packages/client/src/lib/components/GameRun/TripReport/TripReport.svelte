@@ -4,7 +4,6 @@
   import { Log, TripSummary } from "$lib/components/GameRun"
   import { playSound } from "$lib/modules/sound"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import { Howl } from "howler"
   import { gsap } from "gsap"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
@@ -64,9 +63,9 @@
         console.log("Log timeline duration:", logTimeline.duration())
       }
 
-      // Add summary timeline after log completes
+      // Add summary timeline after log completes with delay
       if (summaryTimeline) {
-        rootTimeline.add(summaryTimeline)
+        rootTimeline.add(summaryTimeline, ">+0.3")
         console.log("Summary timeline duration:", summaryTimeline.duration())
       }
 
@@ -93,8 +92,7 @@
 
   const teardownTripReport = () => {
     // Stop background music
-    if (backgroundMusic) {
-      console.log(3)
+    if ($backgroundMusic) {
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }

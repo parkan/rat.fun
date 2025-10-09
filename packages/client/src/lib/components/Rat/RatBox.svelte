@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { rat, playerIsBroke, tokenAllowanceApproved } from "$lib/modules/state/stores"
-  import { Howl } from "howler"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { playSound } from "$lib/modules/sound"
   import {
@@ -55,7 +54,6 @@
   onDestroy(() => {
     // Stop background music
     if ($backgroundMusic) {
-      console.log(5)
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }

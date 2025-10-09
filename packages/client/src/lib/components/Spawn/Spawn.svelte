@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte"
   import { page } from "$app/state"
-  import { Howl } from "howler"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SPAWN_STATE } from "$lib/modules/ui/enums"
@@ -95,7 +94,7 @@
     }
 
     // HACK
-    // Wait a bit some whatever is needed for the shader to start is loaded...
+    // Wait a bit for whatever is needed for the shader to start is loaded...
     await new Promise(resolve => setTimeout(resolve, 1000))
     shaderManager.setShader("clouds")
   })
@@ -103,7 +102,6 @@
   onDestroy(() => {
     // Stop background music
     if ($backgroundMusic) {
-      console.log(6)
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }
