@@ -108,13 +108,13 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: grayscale(1);
+        // filter: grayscale(1);
         mix-blend-mode: screen;
         cursor: grab;
         transition: transform 0.2s ease;
 
         &:active {
-          transform: scale(0.9);
+          transform: scale(1.9);
           transition: transform 0.2s ease;
         }
       }

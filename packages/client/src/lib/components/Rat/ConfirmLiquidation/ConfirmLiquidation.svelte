@@ -48,7 +48,8 @@
     .confirm-liquidation-text {
       width: 80%;
       padding-bottom: 10px;
-      color: var(--foreground);
+      color: black;
+      background: rgb(243, 45, 0);
     }
 
     .button-container {

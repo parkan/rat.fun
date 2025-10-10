@@ -75,14 +75,14 @@
 
 <style lang="scss">
   .event {
-    background: var(--color-secondary);
     margin: 0;
     padding: 0;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80px;
+    flex-direction: column;
+    width: 90%;
 
     .image {
       width: 200px;
@@ -91,6 +91,12 @@
         width: 100%;
         height: 100%;
       }
+    }
+
+    .event-text {
+      font-size: var(--font-size-large);
+      font-family: var(--special-font-stack);
+      margin-bottom: 20px;
     }
 
     .button-container {

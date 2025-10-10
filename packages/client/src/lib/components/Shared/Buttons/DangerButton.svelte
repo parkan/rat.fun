@@ -1,6 +1,7 @@
 <script lang="ts">
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
+  import ShaderBackground from "../ShaderRenderer/ShaderBackground.svelte"
 
   let {
     text,
@@ -26,7 +27,12 @@
 
 <Tooltip content={tippyText}>
   <button class:disabled {onmouseup} {onmousedown}>
-    <span class="button-text">{text}</span>
+    <div class="button-content">
+      <span class="button-text">{text}</span>
+    </div>
+    <div class="canvas-container">
+      <ShaderBackground shaderKey="plasmaOptimized" />
+    </div>
   </button>
 </Tooltip>
 
@@ -34,19 +40,42 @@
   button {
     width: 100%;
     height: 100%;
+    background: var(--color-alert-priority);
     border: none;
     border-style: outset;
     border-width: 10px;
     border-color: rgba(0, 0, 0, 0.5);
-    background: var(--color-alert-priority);
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    border-radius: 40px;
 
-    .button-text {
-      font-size: var(--font-size-normal);
-      font-family: var(--label-font-stack);
+    .button-content {
+      z-index: 2;
+      position: relative;
+      color: white;
+
+      .button-text {
+        font-size: var(--font-size-large);
+        font-family: var(--label-font-stack);
+      }
+    }
+
+    .canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      border-radius: 40px;
+      overflow: hidden;
     }
 
     &:hover {
-      background: var(--color-death);
+      background: var(--color-alert-priority-light);
     }
 
     &:active {

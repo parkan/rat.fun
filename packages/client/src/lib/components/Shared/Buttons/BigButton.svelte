@@ -2,6 +2,7 @@
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import ShaderBackground from "../ShaderRenderer/ShaderBackground.svelte"
 
   let {
     text,
@@ -31,10 +32,15 @@
 
 <Tooltip content={tippyText}>
   <button class:disabled {onmouseup} {onmousedown}>
-    <span class="button-text">{text}</span>
-    {#if cost}
-      <span class="button-cost">({CURRENCY_SYMBOL}{cost})</span>
-    {/if}
+    <div class="button-content">
+      <span class="button-text">{text}</span>
+      {#if cost}
+        <span class="button-cost">({CURRENCY_SYMBOL}{cost})</span>
+      {/if}
+    </div>
+    <div class="canvas-container">
+      <ShaderBackground shaderKey="plasma" />
+    </div>
   </button>
 </Tooltip>
 
@@ -47,14 +53,39 @@
     border-style: outset;
     border-width: 10px;
     border-color: rgba(0, 0, 0, 0.5);
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    border-radius: 40px;
 
-    .button-text {
-      font-size: var(--font-size-normal);
-      font-family: var(--label-font-stack);
+    .button-content {
+      z-index: 2;
+      position: relative;
+      color: white;
+
+      .button-text {
+        font-size: var(--font-size-extra-large);
+        font-family: var(--label-font-stack);
+      }
+
+      .button-cost {
+        font-size: var(--font-size-normal);
+      }
     }
 
-    .button-cost {
-      font-size: var(--font-size-normal);
+    .canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      border-radius: 40px;
+      overflow: hidden;
+
+      // opacity: 0.5;
     }
 
     &:hover {

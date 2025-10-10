@@ -77,9 +77,6 @@
       />
     {/if}
   </div>
-
-  <!-- <TripPreviewGraph {trip} {tripOutcomes} {sanityTripContent} /> -->
-  <!-- <TripPreviewEventLog {tripId} {tripOutcomes} /> -->
 </div>
 
 <style lang="scss">
@@ -97,6 +94,7 @@
       border-bottom: var(--default-border-style);
       flex-shrink: 0;
       overflow: hidden;
+      height: 200px;
     }
 
     .trip-prompt {
@@ -108,7 +106,7 @@
     }
 
     .trip-bottom {
-      height: var(--liquidate-rat-height);
+      height: 200px;
       width: 100%;
       border-top: var(--default-border-style);
       flex-shrink: 0;

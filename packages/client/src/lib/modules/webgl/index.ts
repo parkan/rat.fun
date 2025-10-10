@@ -315,6 +315,14 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
       cancelAnimationFrame(this.animationId)
       this.animationId = undefined
     }
+
+    if (this.gl && this.program) {
+      this.gl.deleteShader(this.vertexShader)
+      this.gl.deleteShader(this.fragmentShader)
+      this.gl.deleteProgram(this.program)
+      this.gl.deleteBuffer(this.positionBuffer)
+      this.uniformLocations.clear()
+    }
   }
 }
 

@@ -149,27 +149,6 @@
           font-size: var(--font-size-normal);
         }
 
-        // &.balance {
-        //   background: var(--color-value);
-        //   color: var(--background);
-        //   padding: 5px;
-        //   height: auto;
-        //   flex: 1;
-        //   display: flex;
-        //   flex-direction: column;
-        //   align-items: center;
-        //   justify-content: center;
-
-        //   &.depleted {
-        //     background: var(--color-death);
-        //     color: var(--background);
-        //   }
-
-        //   .value {
-        //     font-size: var(--font-size-normal);
-        //   }
-        // }
-
         &.index {
           color: var(--color-grey-mid);
         }

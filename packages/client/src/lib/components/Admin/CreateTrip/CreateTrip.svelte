@@ -341,7 +341,6 @@
           font-family: var(--typewriter-font-stack);
           font-size: var(--font-size-normal);
           color: var(--foreground);
-          font-weight: bold;
         }
       }
     }

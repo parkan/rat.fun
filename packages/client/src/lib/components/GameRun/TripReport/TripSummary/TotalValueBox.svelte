@@ -64,11 +64,14 @@
     gsap.set(changeElement, { opacity: 0 })
   }
 
+  // No animation if the total value is the same
+  const duration = newTotalValue === initialTotalValue ? 0 : 2
+
   const main = () => {
     // Animate the count up/down using GSAP's textContent
     timeline.to(valueElement, {
       textContent: newTotalValue,
-      duration: 2,
+      duration,
       snap: { textContent: 1 }
     })
 

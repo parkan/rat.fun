@@ -83,7 +83,8 @@
     padding: 5px;
     color: var(--background);
     max-width: 60%;
+    line-height: 1em;
     font-family: var(--special-font-stack);
-    font-size: var(--font-size-normal);
+    font-size: var(--font-size-large);
   }
 </style>

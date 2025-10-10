@@ -65,7 +65,7 @@
 
       // Add summary timeline after log completes with delay
       if (summaryTimeline) {
-        rootTimeline.add(summaryTimeline) // ">+0.3"
+        rootTimeline.add(summaryTimeline, ">+0.4") //
         console.log("Summary timeline duration:", summaryTimeline.duration())
       }
 

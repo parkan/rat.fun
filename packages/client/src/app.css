@@ -78,13 +78,13 @@
   --dashed-border-style: 1px dashed var(--color-border);
 
   /* Typography */
-  --typewriter-font-stack: monospace;
-  --special-font-stack: monospace;
-  --display-font-stack: monospace;
-  --label-font-stack: monospace;
+  --typewriter-font-stack: "Workbench", monospace;
+  --special-font-stack: "Xanh Mono", monospace;
+  --display-font-stack: "Syne Mono", monospace;
+  --label-font-stack: "Xanh Mono", monospace;
   --font-size-very-small: 9px;
   --font-size-small: 11px;
-  --font-size-normal: 14px;
+  --font-size-normal: 18px;
   --font-size-medium: 20px;
   --font-size-large: 26px;
   --font-size-extra-large: 48px;

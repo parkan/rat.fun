@@ -118,7 +118,7 @@
         .trip-image {
           line-height: 0;
           width: 100%;
-          filter: grayscale(100%);
+          mix-blend-mode: multiply;
 
           img {
             display: block;
@@ -126,7 +126,6 @@
             height: 100%;
             aspect-ratio: 1/1;
             object-fit: cover;
-            mix-blend-mode: screen;
           }
         }
       }

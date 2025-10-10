@@ -75,15 +75,15 @@
 
     .timer {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      font-size: var(--font-size-normal);
+      top: 10px;
+      right: 10px;
+      font-size: 10px;
       font-family: monospace;
       background: var(--color-alert);
       color: var(--background);
-      padding: 10px 20px;
+      padding: 5px 21px;
       border-radius: 8px;
-      min-width: 120px;
+      min-width: 80px;
       text-align: center;
 
       &.critical {

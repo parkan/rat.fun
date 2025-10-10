@@ -58,7 +58,7 @@
     transition: background-color 0.2s ease;
 
     &.hovered {
-      background: var(--color-grey-mid);
+      background: white;
     }
 
     &.disabled {

@@ -14,7 +14,7 @@
 
     const newConfig = shaders[shaderKey as keyof typeof shaders]?.config
     if (newConfig) {
-      shaderManager.setShader(shaderKey, shaders[shaderKey as keyof typeof shaders], newConfig)
+      shaderManager.setShader(shaderKey)
     }
   }
 

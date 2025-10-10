@@ -47,11 +47,14 @@
     gsap.set(changeElement, { opacity: 0 })
   }
 
+  // No animation if the balance is the same
+  const duration = newBalance === initialBalance ? 0 : 2
+
   const main = () => {
     // Animate the count up/down using GSAP's textContent
     timeline.to(valueElement, {
       textContent: newBalance,
-      duration: 2,
+      duration,
       snap: { textContent: 1 }
     })
 

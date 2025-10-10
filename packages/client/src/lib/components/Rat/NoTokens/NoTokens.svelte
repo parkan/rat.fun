@@ -62,13 +62,13 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translateX(-50%) translateY(0);
+      transform: translateX(-50%) translateY(-50%);
       overflow: hidden;
-      width: 80%;
+      width: 90%;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 80px;
+      height: 200px;
     }
   }
 </style>
