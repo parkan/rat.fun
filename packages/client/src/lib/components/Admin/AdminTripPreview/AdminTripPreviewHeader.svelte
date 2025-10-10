@@ -21,7 +21,7 @@
     {#key $lastUpdated}
       {#if sanityTripContent?.image?.asset}
         <img
-          src={urlFor(sanityTripContent?.image)?.width?.(600)?.height(600)?.url() ?? ""}
+          src={urlFor(sanityTripContent?.image)?.width?.(200)?.height(200)?.url() ?? ""}
           alt={`trip #${trip.index}`}
         />
       {:else}
@@ -110,7 +110,7 @@
 
     .image {
       aspect-ratio: 1/1;
-      width: 50%;
+      width: 20%;
       line-height: 0;
       cursor: pointer;
 

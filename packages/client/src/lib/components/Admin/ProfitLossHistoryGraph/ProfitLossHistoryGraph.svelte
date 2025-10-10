@@ -1,10 +1,7 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
-  import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
-  import { onMount, onDestroy } from "svelte"
-
-  import { playSound } from "$lib/modules/sound"
+  import { onMount } from "svelte"
 
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
@@ -268,13 +265,13 @@
   }
 
   // Setup real-time updates
-  onMount(() => {
-    const interval = setInterval(() => {
-      currentTime = Date.now()
-    }, 1000)
+  // onMount(() => {
+  //   const interval = setInterval(() => {
+  //     currentTime = Date.now()
+  //   }, 1000)
 
-    return () => clearInterval(interval)
-  })
+  //   return () => clearInterval(interval)
+  // })
 </script>
 
 <div class="profit-loss-graph">

@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import { derived } from "svelte/store"
+  import { Tween } from "svelte/motion"
+  import { playSound } from "$lib/modules/sound"
   import {
     balance,
     investment,
@@ -16,6 +19,10 @@
 
   let clientHeight = $state(0)
 
+  let previousProfitLoss = $state<null | number>(null)
+  let tweenedActiveProfit = new Tween($balance / $investment)
+  let tweenedProfitLoss = new Tween($profitLoss, { duration: 2000 })
+
   const plSymbolExplicit = derived(portfolioClass, $pc =>
     $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
   )
@@ -28,32 +35,45 @@
   const realPlSymbolExplicit = derived(realPortfolioClass, $pc =>
     $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
   )
+
+  onMount(() => {
+    const unsubscribe = profitLoss.subscribe(newValue => {
+      if (typeof previousProfitLoss === "number") {
+        if (newValue > previousProfitLoss) {
+          playSound("ratfunUI", "countUp")
+          tweenedProfitLoss.set(newValue, { duration: 3000 })
+        } else {
+          if (newValue !== 0) {
+            playSound("ratfunUI", "countDown")
+          }
+          tweenedProfitLoss.set(newValue, { duration: 2000 })
+        }
+      }
+      previousProfitLoss = newValue
+    })
+
+    return () => unsubscribe()
+  })
 </script>
 
 <div bind:clientHeight class="admin-trip-monitor">
   <div class="p-l-overview">
     <div class="top">
-      {#if $balance && $investment}
-        <!-- Unrealised -->
-        <div class="main">
-          <p>Active Profit</p>
-          <span class="percentage {$portfolioClass} glow"
-            >({$plSymbolExplicit}{(100 - ($balance / $investment) * 100).toFixed(2)}%)</span
-          >
-          <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
-          <div class="content {$portfolioClass} glow">
-            <Tooltip content="Unrealised P&L">
-              <h1 class="">
-                {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs($profitLoss)}
-              </h1>
-            </Tooltip>
-          </div>
+      <!-- Unrealised -->
+      <div class="main">
+        <p>Active Profit</p>
+        <span class="percentage {$portfolioClass} glow"
+          >({$plSymbolExplicit}{(100 - tweenedActiveProfit.current * 100).toFixed(2)}%)</span
+        >
+        <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
+        <div class="content {$portfolioClass} glow">
+          <Tooltip content="Unrealised P&L">
+            <h1 class="">
+              {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs(Math.floor(tweenedProfitLoss.current))}
+            </h1>
+          </Tooltip>
         </div>
-      {:else}
-        <div class="main">
-          <h1>{$plSymbolExplicit}{CURRENCY_SYMBOL}0</h1>
-        </div>
-      {/if}
+      </div>
     </div>
     <div class="bottom-left">
       <p>Portfolio</p>

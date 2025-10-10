@@ -7,19 +7,25 @@
 
   let { eventData, focus = $bindable() } = $props()
 
-  const tooltipContent = p => {
-    console.log("calculating readableLog", p?.meta?.readableLog)
-    if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
-      return p?.meta?.readableLog?.split(",").join("\n<br>")
-    } else {
-      return p.ownerName
-    }
-  }
+  let data = $derived(eventData.toReversed().filter(p => p.eventType !== "baseline"))
+  let tooltipContent = $derived.by(() => {
+    return data.map(p => {
+      if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
+        return p?.meta?.readableLog?.split(",").join("\n<br>")
+      } else {
+        return p.ownerName
+      }
+    })
+  })
 </script>
 
 {#snippet ratVisitEvent(p)}
   <Icon name="Paw" address={p.meta.owner} width={10} />
   {p.meta.playerName} sent {p.meta.ratName} to trip #{p.meta.index}
+
+  <div class="log">
+    {p?.meta?.readableLog?.split(",").join("\n<br>")}
+  </div>
 {/snippet}
 
 {#snippet tripLiquidated(p)}
@@ -35,10 +41,10 @@
 {/snippet}
 
 <div class="admin-event-log">
-  {#each eventData.toReversed().filter(p => p.eventType !== "baseline") as point (point.index)}
+  {#each data as point, i (point.index)}
     <!-- svelte-ignore a11y_missing_attribute -->
     <Tooltip
-      content={tooltipContent(point)}
+      content={tooltipContent[i]}
       props={{ followCursor: true, plugins: [followCursor], allowHTML: true }}
     >
       <a
@@ -76,8 +82,10 @@
     height: 100%;
     max-height: 800px;
     overflow-y: scroll;
-    display: flex;
+    // display: flex;
     flex-flow: column nowrap;
+    align-items: start;
+    justify-content: flex-start;
     gap: 4px;
     padding: 4px;
 
@@ -85,6 +93,8 @@
       padding: 0;
       margin: 0;
       color: white;
+      display: block;
+      margin-bottom: 4px;
 
       cursor: pointer;
       &.focus {
