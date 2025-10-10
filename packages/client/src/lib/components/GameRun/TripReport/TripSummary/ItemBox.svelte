@@ -7,10 +7,12 @@
     onTimeline
   }: {
     result: EnterTripReturnValue
-    onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
+    onTimeline?: (timeline: ReturnType<typeof gsap.timeline>, offset: number | string) => void
   } = $props()
 
   let itemsElement = $state<HTMLDivElement | null>(null)
+
+  const empty = $derived(result.itemChanges?.length === 0)
 
   // Create timeline
   const timeline = gsap.timeline()
@@ -29,7 +31,7 @@
 
   const done = () => {
     if (timeline && onTimeline) {
-      onTimeline(timeline)
+      onTimeline(timeline, 0)
     }
   }
 
@@ -47,15 +49,24 @@
 </script>
 
 <!-- ITEMS -->
-<div class="items" bind:this={itemsElement}>
-  {#each result.itemChanges ?? [] as itemChange}
+<div class="items" bind:this={itemsElement} class:empty>
+  {#each result.itemChanges as itemChange}
     {itemChange.type}:{itemChange.name}:{itemChange.type === "add" ? "+" : "-"}{itemChange.value}
   {/each}
 </div>
 
 <style lang="scss">
   .items {
-    background: red;
-    padding: 20px;
+    border: 1px solid white;
+    border-bottom: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+
+    &.empty {
+      display: none;
+    }
   }
 </style>

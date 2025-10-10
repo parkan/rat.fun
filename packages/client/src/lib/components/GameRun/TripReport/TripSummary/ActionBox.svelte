@@ -11,7 +11,7 @@
     onTimeline
   }: {
     result: EnterTripReturnValue
-    onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
+    onTimeline?: (timeline: ReturnType<typeof gsap.timeline>, offset: number | string) => void
   } = $props()
 
   // Figure out if rat died or survived
@@ -38,7 +38,7 @@
 
   const done = () => {
     if (timeline && onTimeline) {
-      onTimeline(timeline)
+      onTimeline(timeline, 0)
     }
   }
 

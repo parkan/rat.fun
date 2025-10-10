@@ -2,6 +2,8 @@
   import type { EnterTripReturnValue } from "@server/modules/types"
   import { playSound } from "$lib/modules/sound"
   import { gsap } from "gsap"
+  import { frozenRat } from "$lib/components/GameRun/state.svelte"
+
   import HealthBox from "./HealthBox.svelte"
   import ItemBox from "./ItemBox.svelte"
   import TotalValueBox from "./TotalValueBox.svelte"
@@ -51,16 +53,16 @@
       {
         opacity: 1,
         y: 0,
-        duration: 0.6,
-        ease: "elastic.out"
+        duration: 1.0,
+        ease: "power4.out" // elastic.out
       },
       0
     )
   }
 
-  function addToTimeline(timeline: ReturnType<typeof gsap.timeline>) {
-    // Add child timelines at position 0 to start with the container animation
-    summaryTimeline.add(timeline, 0)
+  function addToTimeline(timeline: ReturnType<typeof gsap.timeline>, offset: number | string = 0) {
+    // Add child timelines at their specified offset position
+    summaryTimeline.add(timeline, offset)
     receivedTimelines++
 
     if (receivedTimelines === totalItems) {
@@ -93,10 +95,18 @@
 <div class="summary-container" bind:this={summaryContainer}>
   <!-- COLUMN 1 -->
   <div class="results">
-    <div class="result-text">
-      <HealthBox onTimeline={addToTimeline} />
+    <div class="results-inner">
+      <HealthBox
+        {result}
+        initialBalance={$frozenRat?.initialBalance ?? 0}
+        onTimeline={addToTimeline}
+      />
       <ItemBox {result} onTimeline={addToTimeline} />
-      <TotalValueBox {result} onTimeline={addToTimeline} />
+      <TotalValueBox
+        {result}
+        initialTotalValue={$frozenRat?.initialTotalValue ?? 0}
+        onTimeline={addToTimeline}
+      />
     </div>
   </div>
 
@@ -132,6 +142,11 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 20px;
+
+      .results-inner {
+        width: 100%;
+      }
     }
 
     .actions {
