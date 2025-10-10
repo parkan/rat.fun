@@ -90,7 +90,7 @@
     // And music might be started but onDestroy is not called
     // Only start music if the UI state has not already changed from SPAWNING
     if ($UIState === UI.SPAWNING) {
-      $backgroundMusic = playSound("ratfunMusic", "spawn")
+      $backgroundMusic = playSound("ratfunMusic", "spawn", true)
     }
 
     // HACK
