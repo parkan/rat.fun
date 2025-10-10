@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte"
+  import { onMount } from "svelte"
   import { gsap } from "gsap"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { tippy } from "svelte-tippy"
-  import { get } from "svelte/store"
   import { playSound } from "$lib/modules/sound"
 
   import CurrencySymbol from "$lib/components/Shared/CurrencySymbol/CurrencySymbol.svelte"
@@ -30,7 +29,7 @@
     }
 
     const isPositive = difference > 0
-    const duration = calculateDuration(difference)
+    const duration = 1 // Always 1 second
 
     console.log("duration", duration)
 
