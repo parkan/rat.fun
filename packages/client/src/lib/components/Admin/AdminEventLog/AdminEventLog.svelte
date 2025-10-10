@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { Icon, Tooltip } from "$lib/components/Shared"
+  import { Icon } from "$lib/components/Shared"
   import { timeSince } from "$lib/modules/utils"
   import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
-  import { goto } from "$app/navigation"
-  import { followCursor } from "tippy.js"
 
   let {
     eventData,
@@ -50,11 +48,6 @@
 
 <div class="admin-event-log">
   {#each data as point, i (point.index)}
-    <!-- svelte-ignore a11y_missing_attribute -->
-    <!-- <Tooltip
-      content={tooltipContent[i]}
-      props={{ followCursor: true, plugins: [followCursor], allowHTML: true }}
-    > -->
     <a
       class="event"
       href={point.eventType === "trip_visit" || point.eventType === "trip_death"

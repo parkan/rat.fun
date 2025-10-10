@@ -1,16 +1,14 @@
 <script lang="ts">
+  import { SignedNumber } from "$lib/components/Shared"
   import { TripProfitLossSpark } from "$lib/components/Trip"
   import { goto } from "$app/navigation"
 
-  let { trip, data, id, onpointerenter, onpointerleave } = $props()
+  let { trip, data, id } = $props()
 
   let profitLoss = $derived(Number(trip.liquidationValue) - Number(trip.tripCreationCost))
-  let profitLossClass = $derived(profitLoss == 0 ? "" : profitLoss > 0 ? "up" : "down")
 </script>
 
 <tr
-  {onpointerenter}
-  {onpointerleave}
   onmouseup={() => {
     goto("/admin/" + id, { noScroll: false })
   }}
@@ -23,8 +21,8 @@
   <td class="cell-profit">
     <span> {trip.liquidationValue}</span><span class="grey">/{trip.tripCreationCost} </span>
   </td>
-  <td class="cell-tax-or-age {profitLossClass}">
-    {profitLoss}
+  <td class="cell-profit">
+    <SignedNumber value={profitLoss} />
   </td>
   <td class="cell-graph">
     {#if data}
@@ -81,6 +79,10 @@
     .cell-profit {
       width: 120px;
       text-align: right;
+
+      :global(*) {
+        text-align: right;
+      }
     }
     .cell-tax-or-age {
       width: 120px;

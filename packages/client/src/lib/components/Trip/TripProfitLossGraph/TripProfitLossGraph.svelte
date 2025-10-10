@@ -461,14 +461,14 @@
   .y-axis {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    border-right: 1px solid var(--color-grey-mid);
+    // border-right: 1px solid var(--color-grey-mid);
     width: 30px;
     height: 100%;
     position: absolute;
   }
 
   .x-axis {
-    border-bottom: 1px solid var(--color-grey-mid);
+    // border-bottom: 1px solid var(--color-grey-mid);
     width: 100%;
     height: 30px;
     position: absolute;

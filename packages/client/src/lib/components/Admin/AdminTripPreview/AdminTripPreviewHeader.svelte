@@ -4,7 +4,6 @@
   import { urlFor } from "$lib/modules/content/sanity"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
   import { NoImage, ModalTarget } from "$lib/components/Shared"
-  import { TripPreviewPrompt } from "$lib/components/Trip"
   import AdminTripPreviewPrompt from "./AdminTripPreviewPrompt.svelte"
 
   let { trip, sanityTripContent }: { trip: Trip; sanityTripContent: any } = $props()
@@ -58,20 +57,20 @@
     {#if trip?.minRatValueToEnter > 0}
       <div class="row min-rat-value-to-enter">
         <div class="label">MIN RAT VALUE TO ENTER</div>
-        <div class="value">${trip?.minRatValueToEnter}</div>
+        <div class="value">{trip?.minRatValueToEnter}</div>
       </div>
     {/if}
     {#if $maxValuePerWin > 0}
       <div class="row max-value-per-win">
         <div class="label">MAX VALUE PER WIN</div>
-        <div class="value">${$maxValuePerWin}</div>
+        <div class="value">{$maxValuePerWin}</div>
       </div>
     {/if}
     <!-- BALANCE -->
     {#if !trip.liquidationBlock}
       <div class="row balance" class:depleted={Number(trip.balance) == 0}>
         <div class="label">BALANCE</div>
-        <div class="value">${trip.balance}</div>
+        <div class="value">{trip.balance}</div>
       </div>
     {/if}
   </div>
@@ -104,13 +103,12 @@
 <style lang="scss">
   .trip-preview-header {
     position: relative;
-    border-bottom: var(--default-border-style);
     display: flex;
     flex-direction: row;
 
     .background-image {
       position: absolute;
-      bottom: 0;
+      top: 0;
       right: 0;
       width: 400px;
       aspect-ratio: 1/1;
@@ -119,8 +117,8 @@
       mix-blend-mode: screen;
       transition: filter 5s ease;
       z-index: -1;
-      mask-image: radial-gradient(circle at bottom right, black 50%, transparent 70%);
-      -webkit-mask-image: radial-gradient(circle at bottom right, black 50%, transparent 70%);
+      mask-image: radial-gradient(circle at top right, black 50%, transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at top right, black 50%, transparent 70%);
     }
 
     .image {

@@ -5,6 +5,8 @@
   import { page } from "$app/state"
   import { player } from "$lib/modules/state/stores"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
+  import { focusEvent } from "$lib/modules/ui/state.svelte"
+
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
   import {
     AdminEventLog,
@@ -77,7 +79,7 @@
     />
   </div>
   <div class="r-2">
-    <AdminEventLog bind:focus eventData={graphData} />
+    <AdminEventLog bind:focus={$focusEvent} eventData={graphData} />
   </div>
   <div class="l-3 border-warning">
     <AdminTripTable bind:focus {pendingTrip} />

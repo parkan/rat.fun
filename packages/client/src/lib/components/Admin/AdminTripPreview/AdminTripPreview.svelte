@@ -65,6 +65,9 @@
 </a>
 {#if !liquidating}
   <div class="trip-inner-container" class:depleted={!showLiquidateButton}>
+    <div class="full">
+      <AdminTripPreviewHeader {sanityTripContent} {trip} />
+    </div>
     <div class="left">
       <TripProfitLossGraph behavior="click" {trip} {tripId} bind:graphData bind:focusEvent />
     </div>
@@ -83,10 +86,6 @@
           <AdminTripEventIntrospection {event} />
         {/key}
       </div>
-    </div>
-    <div class="full">
-      <p class="section-header">Trip information</p>
-      <AdminTripPreviewHeader {sanityTripContent} {trip} />
     </div>
     {#if showLiquidateButton}
       <div class="full">
@@ -124,7 +123,7 @@
     overflow-x: hidden;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 400px auto;
+    grid-template-rows: 1fr 400px auto;
     grid-auto-rows: 1fr;
 
     .section-header {
