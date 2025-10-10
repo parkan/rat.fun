@@ -6,7 +6,6 @@ import "../src/libraries/Libraries.sol";
 
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { WorldResourceIdInstance } from "@latticexyz/world/src/WorldResourceId.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DeployTest is BaseTest {
   using WorldResourceIdInstance for ResourceId;

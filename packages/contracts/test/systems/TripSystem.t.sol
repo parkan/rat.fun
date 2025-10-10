@@ -5,6 +5,7 @@ import "../../src/codegen/index.sol";
 import "../../src/libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../../src/codegen/common.sol";
 import { IERC20Errors } from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import { Item } from "../../src/structs.sol";
 
 contract TripSystemTest is BaseTest {
   function testCreateTrip() public {
@@ -247,6 +248,58 @@ contract TripSystemTest is BaseTest {
     vm.startPrank(bob);
     vm.expectRevert("not owner");
     world.ratfun__closeTrip(tripId);
+    vm.stopPrank();
+  }
+
+  function testCloseLowValueTrip() public {
+    setInitialBalance(alice);
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    bytes32 ratId = world.ratfun__createRat("roger");
+    vm.stopPrank();
+
+    prankAdmin();
+    // Trip balance: 1000
+    // Min value to enter trip: 10% of 1000 = 100
+    // Max value per win: 25% of 1000 = 250
+    bytes32 tripId = world.ratfun__createTrip(aliceId, bytes32(0), 1000, "test trip");
+    // Drain the trip in steps, because of maxValuePerWin restriction
+    // Transfer 250 tokens to rat
+    world.ratfun__applyOutcome(ratId, tripId, 250, new bytes32[](0), new Item[](0));
+    // Transfer another 250 tokens to rat
+    world.ratfun__applyOutcome(ratId, tripId, 250, new bytes32[](0), new Item[](0));
+    // Transfer another 250 tokens to rat
+    world.ratfun__applyOutcome(ratId, tripId, 250, new bytes32[](0), new Item[](0));
+    // Finally, transfer another 249 tokens to rat
+    world.ratfun__applyOutcome(ratId, tripId, 249, new bytes32[](0), new Item[](0));
+    vm.stopPrank();
+
+    assertEq(Balance.get(tripId), 1);
+
+    // Get balances before liquidation
+    uint256 adminBalanceBeforeLiquidation = LibWorld.erc20().balanceOf(GameConfig.getAdminAddress());
+    uint256 playerBalanceBeforeLiquidation = LibWorld.erc20().balanceOf(alice);
+
+    // Wait for cooldown
+    vm.roll(block.number + GameConfig.getCooldownCloseTrip() + 1);
+
+    vm.startPrank(alice);
+    world.ratfun__closeTrip(tripId);
+    vm.stopPrank();
+
+    // Value to player is 1
+    // Tax is 0
+
+    // Check that no tokens are transferred to admin
+    assertEq(LibWorld.erc20().balanceOf(GameConfig.getAdminAddress()), adminBalanceBeforeLiquidation);
+
+    // Check that 1 token is transferred back to player
+    assertEq(LibWorld.erc20().balanceOf(alice), playerBalanceBeforeLiquidation + 10 ** LibWorld.erc20().decimals());
+
+    // Liquidation value is gross value, before taxation
+    assertEq(LiquidationValue.get(tripId), 1);
+
     vm.stopPrank();
   }
 }

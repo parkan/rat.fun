@@ -150,4 +150,70 @@ contract RatSystemTest is BaseTest {
 
     vm.stopPrank();
   }
+
+  function testLiquidateLowValueRat() public {
+    setInitialBalance(alice);
+    vm.startPrank(alice);
+    bytes32 playerId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    bytes32 ratId = world.ratfun__createRat("roger");
+    vm.stopPrank();
+
+    setInitialBalance(bob);
+
+    // As bob
+    vm.startPrank(bob);
+    bytes32 bobId = world.ratfun__spawn("bob");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    prankAdmin();
+    // Trip balance: 1000
+    // Min value to enter trip: 10% of 1000 = 100
+    // Max value per win: 25% of 1000 = 250
+    bytes32 tripId = world.ratfun__createTrip(bobId, bytes32(0), 1000, "test trip");
+    // Only leave 1 health for the rat
+    world.ratfun__applyOutcome(ratId, tripId, int256(RAT_CREATION_COST - 1) * -1, new bytes32[](0), new Item[](0));
+    vm.stopPrank();
+
+    // Rat has no items
+    // Total value of rat == balance == 1
+    assertEq(Balance.get(ratId), 1);
+
+    // Get balances before liquidation
+    uint256 adminBalanceBeforeLiquidation = LibWorld.erc20().balanceOf(GameConfig.getAdminAddress());
+    uint256 playerBalanceBeforeLiquidation = LibWorld.erc20().balanceOf(alice);
+
+    vm.startPrank(alice);
+    world.ratfun__liquidateRat();
+    vm.stopPrank();
+
+    // Value to player is 1
+    // Tax is 0
+
+    // Check that no tokens are transferred to admin
+    assertEq(LibWorld.erc20().balanceOf(GameConfig.getAdminAddress()), adminBalanceBeforeLiquidation);
+
+    // Check that 1 token is transferred back to player
+    assertEq(LibWorld.erc20().balanceOf(alice), playerBalanceBeforeLiquidation + 10 ** LibWorld.erc20().decimals());
+
+    // Liquidation value is gross value, before taxation
+    assertEq(LiquidationValue.get(ratId), 1);
+
+    // Everything else is the same
+
+    assertEq(PastRats.length(playerId), 1);
+    assertEq(PastRats.getItem(playerId, 0), ratId);
+
+    assertEq(Liquidated.get(ratId), true);
+    assertEq(LiquidationBlock.get(ratId), block.number);
+
+    assertEq(LiquidationTaxPercentage.get(ratId), GamePercentagesConfig.getTaxationLiquidateRat());
+
+    // Global stats set
+    assertEq(WorldStats.getGlobalRatKillCount(), 1);
+    assertEq(WorldStats.getLastKilledRatBlock(), block.number);
+
+    vm.stopPrank();
+  }
 }

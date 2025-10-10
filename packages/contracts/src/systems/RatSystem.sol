@@ -13,6 +13,7 @@ import {
 } from "../codegen/index.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibUtils, LibRat, LibWorld } from "../libraries/Libraries.sol";
+import { console2 as console } from "forge-std/console2.sol";
 
 contract RatSystem is System {
   /**
@@ -74,9 +75,13 @@ contract RatSystem is System {
 
     // Withdraw tokens equal to rat value minus tax from pool to player
     // ERC-20 will check that pool has sufficient balance
-    LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
+    if (valueToPlayer > 0) {
+      LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
+    }
 
     // Withdraw tokens equal to tax from pool to admin
-    LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+    if (tax > 0) {
+      LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+    }
   }
 }

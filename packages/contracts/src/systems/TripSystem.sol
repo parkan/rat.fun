@@ -86,9 +86,13 @@ contract TripSystem is System {
 
     // Withdraw tokens equal to trip value from pool to player
     // ERC-20 will check that pool has sufficient balance
-    LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
+    if (valueToPlayer > 0) {
+      LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
+    }
 
     // Withdraw tokens equal to tax from pool to admin
-    LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+    if (tax > 0) {
+      LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+    }
   }
 }
