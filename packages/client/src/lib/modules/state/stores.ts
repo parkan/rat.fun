@@ -16,6 +16,7 @@ import {
   filterActive,
   filterLiquidated
 } from "./utils"
+import { addressToRatImage } from "$lib/modules/utils"
 import { staticContent } from "$lib/modules/content"
 import { playerERC20Balance, playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
 import { WORLD_OBJECT_ID } from "./constants"
@@ -171,9 +172,8 @@ export const ratInventory = derived(
 )
 
 export const ratImageUrl = derived([player], ([$player]) => {
-  return "/images/new-rat.png"
-  // if (!$player?.currentRat) return "/images/rat.png"
-  // return addressToRatImage($player.currentRat)
+  if (!$player?.currentRat) return "/images/rat.png"
+  return addressToRatImage($player.currentRat)
 })
 
 /**

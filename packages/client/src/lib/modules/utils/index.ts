@@ -559,7 +559,7 @@ export function addressToNumber(address: string, max: number): number {
  * @param maxRats The maximum number of rat images available (default: 50)
  * @returns A path string in the format "/images/rats/[number].png"
  */
-export function addressToRatImage(address: string, maxRats: number = 50): string {
+export function addressToRatImage(address: string, maxRats: number = 6): string {
   const ratNumber = addressToNumber(address, maxRats - 1) // -1 because we want 0-based indexing
   return `/images/rats/rat_${ratNumber}.png`
 }
