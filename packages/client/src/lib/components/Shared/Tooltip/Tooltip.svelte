@@ -27,3 +27,11 @@
     {@render children()}
   </span>
 {/if}
+
+<style lang="scss">
+  span,
+  g {
+    width: 100%;
+    height: 100%;
+  }
+</style>
