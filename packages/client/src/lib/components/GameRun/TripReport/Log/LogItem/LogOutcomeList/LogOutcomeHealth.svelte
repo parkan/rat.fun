@@ -1,8 +1,8 @@
 <script lang="ts">
   import { gsap } from "gsap"
-  import { updateFrozenState } from "$lib/components/GameRun/state.svelte"
+  import { updateProcessingState } from "$lib/components/GameRun/state.svelte"
   import { playSound } from "$lib/modules/sound"
-  import { frozenRat } from "$lib/components/GameRun/state.svelte"
+  import { processingRat } from "$lib/components/GameRun/state.svelte"
 
   let {
     value,
@@ -18,7 +18,7 @@
 
   let negative = $state(value < 0)
 
-  const isDead = $frozenRat && Number($frozenRat.balance) + value === 0
+  const isDead = $processingRat && Number($processingRat.balance) + value === 0
 
   // Timeline
   const timeline = gsap.timeline()
@@ -50,7 +50,7 @@
     }
 
     // State update
-    timeline.call(updateFrozenState, [
+    timeline.call(updateProcessingState, [
       {
         type: "balance",
         action: negative ? "reduce" : "increase",

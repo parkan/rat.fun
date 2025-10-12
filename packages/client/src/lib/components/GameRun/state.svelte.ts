@@ -9,18 +9,23 @@
  * - Stores current state
  * - Handles state transitions
  *
- * 2. The frozen rat and trip
- * - Freeze the state of the rat and trip
- * - Updates frozen state based on outcome
+ * 2. The frozen and processing rat and trip
+ * - Freeze the state of the rat and trip before trip is entered
+ * - Updates processing state based on outcome
  * - Handles DOM interactions
  */
 
 import { writable } from "svelte/store"
-import type { FrozenRat, FrozenTrip, OutcomeDataStringMap } from "./types"
+import type {
+  FrozenRat,
+  FrozenTrip,
+  ProcessingRat,
+  ProcessingTrip,
+  OutcomeDataStringMap
+} from "./types"
 import { ratTotalValue } from "$lib/modules/state/stores"
 import { get } from "svelte/store"
 import type { Hex } from "viem"
-import { addressToRatImage } from "$lib/modules/utils"
 import { errorHandler, InvalidStateTransitionError } from "$lib/modules/error-handling"
 
 /*
@@ -91,14 +96,26 @@ export const resetTripState = () => {
  * Frozen Rat and Trip
  * ─────────────────────────────────────────────
  * We freeze the rat and trip objects before entering a trip
- * to be able to gradually update their values without reactivity
+ * to compare for changes after the trip.
+ */
+
+/** Rat information frozen before entering a trip */
+export let frozenRat: FrozenRat | null = null
+/** Trip information frozen before entering a trip */
+export let frozenTrip: FrozenTrip | null = null
+
+/*
+ * ─────────────────────────────────────────────
+ * Processing Rat and Trip
+ * ─────────────────────────────────────────────
+ * Used to gradually update the rat and trip values without reactivity
  * from on-chain changes.
  */
 
-/** Trip information frozen before entering a trip */
-export const frozenTrip = writable<Partial<FrozenTrip> | null>(null)
-/** Rat information frozen before entering a trip */
-export const frozenRat = writable<Partial<FrozenRat> | null>(null)
+/** Rat state gradually updated during trip */
+export const processingRat = writable<ProcessingRat | null>(null)
+/** Trip state gradually updated during trip */
+export const processingTrip = writable<ProcessingTrip | null>(null)
 
 /**
  * Freezes the rat and trip objects before entering a trip
@@ -106,34 +123,58 @@ export const frozenRat = writable<Partial<FrozenRat> | null>(null)
  * @param trip The trip object
  * @param tripId The trip ID
  */
-export function freezeObjects(rat: Rat, trip: Trip, tripId: Hex, ratId: Hex) {
-  const preppedRat = structuredClone(rat) as FrozenRat
-  if (!preppedRat.inventory) preppedRat.inventory = []
-  preppedRat.image = addressToRatImage(ratId)
-  preppedRat.initialBalance = Number(rat.balance) // Used to calculate the rat value change in summary
-  preppedRat.initialTotalValue = Number(get(ratTotalValue)) // Used to calculate the rat value change in summary
-  frozenRat.set(preppedRat)
+export function freezeObjects(rat: Rat, trip: Trip, tripId: Hex) {
+  // Frozen Rat
+  const prepFrozenRat = structuredClone(rat) as FrozenRat
+  if (!prepFrozenRat.inventory) {
+    prepFrozenRat.inventory = []
+  }
+  prepFrozenRat.initialTotalValue = Number(get(ratTotalValue)) // Used to calculate the rat value change in summary
+  frozenRat = prepFrozenRat
 
-  const preppedTrip = structuredClone(trip) as FrozenTrip
-  preppedTrip.id = tripId
-  frozenTrip.set(preppedTrip)
+  // Frozen Trip
+  const prepFrozenTrip = structuredClone(trip) as FrozenTrip
+  prepFrozenTrip.id = tripId
+  frozenTrip = prepFrozenTrip
+
+  // Processing Rat
+  const prepProcessingRat = structuredClone(rat) as ProcessingRat
+  if (!prepProcessingRat.inventory) {
+    prepProcessingRat.inventory = []
+  }
+  processingRat.set(prepProcessingRat)
+
+  // Processing Trip
+  const prepProcessingTrip = structuredClone(trip) as ProcessingTrip
+  prepProcessingTrip.id = tripId
+  processingTrip.set(prepProcessingTrip)
 
   return {
-    frozenRat: preppedRat,
-    frozenTrip: preppedTrip
+    frozenRat: prepFrozenRat,
+    frozenTrip: prepFrozenTrip
   }
+}
+
+export function resetProcessingState() {
+  processingRat.set(null)
+  processingTrip.set(null)
+}
+
+export function resetFrozenState() {
+  frozenRat = null
+  frozenTrip = null
 }
 
 // ======= Route updates to frozen state =======
 
 /**
- * Updates the frozen state of the rat and trip based on the outcome
+ * Updates the processing state of the rat and trip based on the outcome
  * @param dataset The dataset of the outcome
  */
-export const updateFrozenState = (dataset: OutcomeDataStringMap) => {
+export const updateProcessingState = (dataset: OutcomeDataStringMap) => {
   const { type, action, value, name, id } = dataset
 
-  console.log("updateFrozenState", dataset)
+  console.log("updateProcessingState", dataset)
 
   if (!type || !action || value === undefined) {
     return
@@ -163,7 +204,7 @@ export const updateFrozenState = (dataset: OutcomeDataStringMap) => {
  */
 function changeBalance(balanceChange: number) {
   console.log("balanceChange", balanceChange)
-  frozenRat.update(rat => {
+  processingRat.update(rat => {
     if (!rat) return null
     rat.balance = BigInt(rat?.balance || 0) + BigInt(balanceChange)
     console.log("rat.balance", rat.balance)
@@ -171,7 +212,7 @@ function changeBalance(balanceChange: number) {
   })
 
   // Inverse rat balance change to get trip balance change
-  frozenTrip.update(trip => {
+  processingTrip.update(trip => {
     if (!trip) return null
     trip.balance = BigInt(trip?.balance || 0) - BigInt(balanceChange)
     return trip
@@ -186,7 +227,7 @@ function changeBalance(balanceChange: number) {
  * @param itemValue The value of the item
  */
 function addItem(itemName: string, itemValue: number) {
-  frozenRat.update(rat => {
+  processingRat.update(rat => {
     if (!rat) return null
     if (!rat.inventory) rat.inventory = []
     const newTempItem = {
@@ -199,7 +240,7 @@ function addItem(itemName: string, itemValue: number) {
 
   // Change trip balance
   // Items always have positive value
-  frozenTrip.update(trip => {
+  processingTrip.update(trip => {
     if (!trip) return null
     trip.balance = BigInt(trip?.balance || 0) - BigInt(itemValue)
     return trip
@@ -212,7 +253,7 @@ function addItem(itemName: string, itemValue: number) {
  * @param itemValue The value of the item
  */
 function removeItem(id: string, itemValue: number) {
-  frozenRat.update(rat => {
+  processingRat.update(rat => {
     if (!rat) return null
     rat.inventory = rat?.inventory?.filter(i => i !== id)
     return rat
@@ -220,7 +261,7 @@ function removeItem(id: string, itemValue: number) {
 
   // Change trip balance
   // Items always have positive value
-  frozenTrip.update(trip => {
+  processingTrip.update(trip => {
     if (!trip) return null
     trip.balance = BigInt(trip?.balance || 0) + BigInt(itemValue)
     return trip

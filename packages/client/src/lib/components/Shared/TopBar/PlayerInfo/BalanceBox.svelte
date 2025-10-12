@@ -37,7 +37,7 @@
     const timeline = gsap.timeline()
 
     timeline.call(() => {
-      playSound("ratfunUI", isPositive ? "countUp" : "countDown")
+      playSound("ratfunUI", isPositive ? "tokenPositive" : "tokenNegative")
     })
 
     // Add visual feedback for positive/negative changes

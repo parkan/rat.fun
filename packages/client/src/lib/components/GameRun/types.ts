@@ -8,12 +8,18 @@ export type TempItem = {
 
 export type FrozenRat = Rat & {
   inventory: Array<string | TempItem>
-  image: string
-  initialBalance: number
   initialTotalValue: number
 }
 
 export type FrozenTrip = Trip & {
+  id: Hex
+}
+
+export type ProcessingRat = Rat & {
+  inventory: Array<string | TempItem>
+}
+
+export type ProcessingTrip = Trip & {
   id: Hex
 }
 

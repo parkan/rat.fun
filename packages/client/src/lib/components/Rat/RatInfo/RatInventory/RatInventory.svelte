@@ -1,22 +1,26 @@
 <script lang="ts">
-  import { rat, ratInventory } from "$lib/modules/state/stores"
-  import { collapsed } from "$lib/modules/ui/state.svelte"
+  import { getRatInventory } from "$lib/modules/state/utils"
+
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
+
+  let { displayRat }: { displayRat: Rat | null } = $props()
+
+  let inventory = $derived(displayRat ? getRatInventory(displayRat) : [])
 
   const MAX_INVENTORY_SIZE = 6
 
   // Create array with actual items + empty slots to fill MAX_INVENTORY_SIZE slots
   const inventorySlots: (Item | null)[] = $derived.by(() => {
-    const actualItems = $ratInventory ?? []
+    const actualItems = inventory ?? []
     const emptySlots = Array(MAX_INVENTORY_SIZE - actualItems.length).fill(null)
     return [...actualItems, ...emptySlots]
   })
 </script>
 
 <div class="inventory">
-  {#if $rat}
-    <div class="inventory-container" class:collapsed={$collapsed}>
+  {#if displayRat}
+    <div class="inventory-container">
       <!-- INVENTORY GRID -->
       {#each inventorySlots as item, index}
         {#if item}
@@ -46,18 +50,12 @@
 
   .inventory-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
     gap: 6px;
     padding: 6px;
     flex-shrink: 0;
-    height: 100%;
     box-sizing: border-box;
-
-    &.collapsed {
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      height: 100%;
-    }
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    height: 100%;
   }
 </style>

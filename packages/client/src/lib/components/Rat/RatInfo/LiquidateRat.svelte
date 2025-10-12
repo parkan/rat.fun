@@ -1,8 +1,12 @@
 <script lang="ts">
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { DangerButton } from "$lib/components/Shared"
-  import { ratTotalValue } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { getRatTotalValue } from "$lib/modules/state/utils"
+
+  let { displayRat }: { displayRat: Rat | null } = $props()
+
+  let totalValue = $derived(displayRat ? getRatTotalValue(displayRat) : 0)
 
   const onClick = async () => {
     // RAT_BOX_STATE.HAS_RAT -> RAT_BOX_STATE.CONFIRM_LIQUIDATION
@@ -11,19 +15,21 @@
 </script>
 
 <div class="liquidate-rat">
-  <div class="total-value">
-    <!-- <div class="label">Total Value</div> -->
-    <div class="value">
-      <div>{CURRENCY_SYMBOL}{$ratTotalValue}</div>
+  {#if displayRat}
+    <div class="total-value">
+      <!-- <div class="label">Total Value</div> -->
+      <div class="value">
+        <div>{CURRENCY_SYMBOL}{totalValue}</div>
+      </div>
     </div>
-  </div>
-  <div class="action">
-    <DangerButton
-      text="Liquidate Rat"
-      tippyText="Liquidate rat to get the value added to your wallet"
-      onclick={onClick}
-    />
-  </div>
+    <div class="action">
+      <DangerButton
+        text="Liquidate Rat"
+        tippyText="Liquidate rat to get the value added to your wallet"
+        onclick={onClick}
+      />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">

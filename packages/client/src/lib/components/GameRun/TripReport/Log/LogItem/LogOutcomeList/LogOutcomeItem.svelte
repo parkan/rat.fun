@@ -1,6 +1,6 @@
 <script lang="ts">
   import { gsap } from "gsap"
-  import { updateFrozenState } from "$lib/components/GameRun/state.svelte"
+  import { updateProcessingState } from "$lib/components/GameRun/state.svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { playSound } from "$lib/modules/sound"
 
@@ -60,7 +60,7 @@
   // Stage 2: Main animation
   const main = () => {
     // State update
-    timeline.call(updateFrozenState, [
+    timeline.call(updateProcessingState, [
       {
         type: "item",
         action,

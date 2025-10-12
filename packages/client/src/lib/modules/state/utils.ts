@@ -10,6 +10,7 @@ import { ENTITY_TYPE } from "contracts/enums"
 import { players, gameConfig, gamePercentagesConfig } from "$lib/modules/state/stores"
 import { derived, get, Readable } from "svelte/store"
 import { PropertyChangeTimeoutError, StoreTimeoutError } from "$lib/modules/error-handling/errors"
+import { items } from "./stores"
 
 /**
  * Filters entities by entity type
@@ -101,6 +102,35 @@ export function getTripMinRatValueToEnter(tripCreationCost: number | bigint): Re
   return derived(gamePercentagesConfig, $gamePercentagesConfig => {
     return Math.floor((Number(tripCreationCost) * $gamePercentagesConfig.minRatValueToEnter) / 100)
   })
+}
+
+/**
+ * Gets the inventory of a rat
+ * @param rat The rat to get the inventory of
+ * @returns The inventory of the rat
+ */
+export function getRatInventory(rat: Rat) {
+  if (!rat) {
+    return [] as Item[]
+  }
+  const itemsStore = get(items)
+  return rat.inventory?.map(item => itemsStore[item]) ?? ([] as Item[])
+}
+
+/**
+ * Calculated total value of rat by adding up the balance and inventory value
+ * @param rat The rat to calculate the total value of
+ * @returns The total value of the rat
+ */
+export function getRatTotalValue(rat: Rat | null) {
+  if (!rat) {
+    return 0
+  }
+  const ratInventory = getRatInventory(rat)
+  const totalValue =
+    Number(rat.balance ?? 0) + // Balance
+    ratInventory.reduce((acc, item) => acc + (item?.value ? Number(item.value) : 0), 0) // Inventory
+  return totalValue
 }
 
 // * * * * * * * * * * * * * * * * *

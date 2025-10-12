@@ -98,13 +98,13 @@
     <div class="results-inner">
       <HealthBox
         {result}
-        initialBalance={$frozenRat?.initialBalance ?? 0}
+        initialBalance={Number(frozenRat?.balance ?? 0)}
         onTimeline={addToTimeline}
       />
       <ItemBox {result} onTimeline={addToTimeline} />
       <TotalValueBox
         {result}
-        initialTotalValue={$frozenRat?.initialTotalValue ?? 0}
+        initialTotalValue={frozenRat?.initialTotalValue ?? 0}
         onTimeline={addToTimeline}
       />
     </div>

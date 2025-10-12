@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { EnterTripReturnValue } from "@server/modules/types"
-  import { frozenRat } from "$lib/components/GameRun/state.svelte"
+  import { frozenRat, resetProcessingState } from "$lib/components/GameRun/state.svelte"
   import { goto } from "$app/navigation"
-  import { ratImageUrl } from "$lib/modules/state/stores"
+  import { ratImageUrl, rat } from "$lib/modules/state/stores"
   import { gsap } from "gsap"
   import { BigButton } from "$lib/components/Shared"
 
@@ -53,23 +53,28 @@
       run()
     }
   })
+
+  const comeDown = () => {
+    resetProcessingState()
+    // Old rat
+    console.log("frozenRat", frozenRat)
+    // New rat
+    console.log("$rat", $rat)
+    // Return to game
+    goto("/")
+  }
 </script>
 
 <div class="event" bind:this={eventElement}>
   <div class="image">
-    <img src={$ratImageUrl} alt={$frozenRat?.name} />
+    <img src={$ratImageUrl} alt={frozenRat?.name} />
   </div>
   <div class="event-text">
-    {$frozenRat?.name}
+    {frozenRat?.name}
     {statusText}
   </div>
   <div class="button-container">
-    <BigButton
-      text="COME DOWN"
-      onclick={() => {
-        goto("/")
-      }}
-    />
+    <BigButton text="COME DOWN" onclick={comeDown} />
   </div>
 </div>
 

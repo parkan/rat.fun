@@ -1,28 +1,30 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
-  import { rat, ratImageUrl } from "$lib/modules/state/stores"
+  import { ratImageUrl } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import HealthBar from "./HealthBar.svelte"
+
+  let { displayRat }: { displayRat: Rat | null } = $props()
 </script>
 
 <div class="rat-info-box">
-  {#if $rat}
+  {#if displayRat}
     <!-- INFO -->
     <div class="info-container">
       <!-- INDEX -->
       <div class="info-item">
-        <span class="index">RAT #{$rat.index}</span>
+        <span class="index">RAT #{displayRat.index}</span>
       </div>
 
       <!-- NAME -->
       <div class="info-item">
-        <span class="name">{$rat.name}</span>
+        <span class="name">{displayRat.name}</span>
       </div>
 
       <!-- HEALTHBAR -->
       <div class="info-item">
-        <HealthBar value={Number($rat.balance)} />
+        <HealthBar value={Number(displayRat.balance)} />
       </div>
 
       <!-- TRIP COUNT -->
@@ -34,7 +36,7 @@
         onclick={() => transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)}
       >
         <span>
-          Trip Count: {$rat.tripCount ?? 0}
+          Trip Count: {displayRat.tripCount ?? 0}
         </span>
       </div>
     </div>
@@ -48,7 +50,7 @@
         onclick={() => playSound("ratfunUI", "chirp")}
         src={$ratImageUrl}
         draggable={false}
-        alt={$rat.name}
+        alt={displayRat.name}
         in:fade|global={{ duration: 400, delay: 300 }}
       />
     </div>
