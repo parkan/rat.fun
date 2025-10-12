@@ -1,9 +1,12 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import { goto } from "$app/navigation"
   import { fly } from "svelte/transition"
   import { page } from "$app/state"
   import { player } from "$lib/modules/state/stores"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
+  import { focusEvent } from "$lib/modules/ui/state.svelte"
+
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
   import {
     AdminEventLog,
@@ -12,6 +15,8 @@
     AdminTripTable,
     AdminPastTripTable
   } from "$lib/components/Admin"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
+  import { playSound } from "$lib/modules/sound"
 
   type PendingTrip = { prompt: string; cost: number } | null
 
@@ -33,6 +38,14 @@
           goto("/")
         }
       }
+    }
+  })
+
+  onMount(() => {
+    if ($backgroundMusic?._src !== "/sounds/ratfun/music/admin.mp3") {
+      $backgroundMusic?.stop()
+      $backgroundMusic = undefined
+      $backgroundMusic = playSound("ratfunMusic", "admin", true)
     }
   })
 </script>
@@ -66,7 +79,7 @@
     />
   </div>
   <div class="r-2">
-    <AdminEventLog bind:focus eventData={graphData} />
+    <AdminEventLog bind:focus={$focusEvent} eventData={graphData} />
   </div>
   <div class="l-3 border-warning">
     <AdminTripTable bind:focus {pendingTrip} />
@@ -77,7 +90,7 @@
 </div>
 
 {#if children}
-  <div transition:fly|global={{ x: 800, opacity: 1 }} class="sidebar open">
+  <div transition:fly|global={{ x: 1000, opacity: 1, duration: 100 }} class="sidebar open">
     {@render children?.()}
   </div>
 {/if}
@@ -137,16 +150,16 @@
 
   .sidebar {
     position: fixed;
-    height: 100dvh;
-    width: 800px;
+    height: var(--game-window-main-height);
+    width: 1000px;
     overflow-x: hidden;
     z-index: 999;
-    top: 0;
+    top: 60px;
     right: 0;
     background: black;
     transform: translate(100%, 0);
     transition: transform 0.2s ease;
-    border-left: 1px solid var(--color-grey-mid);
+    border: 1px solid var(--color-grey-mid);
     &.open {
       transform: translate(0, 0);
     }

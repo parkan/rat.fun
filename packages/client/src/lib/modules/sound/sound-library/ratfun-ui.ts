@@ -19,7 +19,7 @@ export const ratfunUI: SoundAssets = {
   tick: {
     src: "/sounds/ratfun/ui/tick.wav",
     author: "leo",
-    volume: 0.6
+    volume: 1.0
   },
   hover: {
     src: "/sounds/ratfun/ui/hover/hover-1.mp3",
@@ -118,6 +118,41 @@ export const ratfunUI: SoundAssets = {
   },
   countDown: {
     src: "/sounds/ratfun/ui/count-down.mp3",
+    author: "leo",
+    volume: 1
+  },
+  healthPositive: {
+    src: "/sounds/ratfun/ui/health-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  healthNegative: {
+    src: "/sounds/ratfun/ui/health-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  itemPositive: {
+    src: "/sounds/ratfun/ui/item-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  itemNegative: {
+    src: "/sounds/ratfun/ui/item-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  tokenPositive: {
+    src: "/sounds/ratfun/ui/token-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  tokenNegative: {
+    src: "/sounds/ratfun/ui/token-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  panelIn: {
+    src: "/sounds/ratfun/ui/panel-in.mp3",
     author: "leo",
     volume: 1
   }

@@ -81,30 +81,30 @@
     "file": "test/systems/RatSystem.t.sol:RatSystemTest",
     "test": "testCreateRat",
     "name": "Create rat",
-    "gasUsed": 451965
+    "gasUsed": 451966
   },
   {
     "file": "test/systems/RatSystem.t.sol:RatSystemTest",
     "test": "testLiquidateRat",
     "name": "Liquidate rat",
-    "gasUsed": 394648
+    "gasUsed": 394689
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testCloseTrip",
     "name": "Close trip",
-    "gasUsed": 217433
+    "gasUsed": 217473
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testCreateTrip",
     "name": "Create trip",
-    "gasUsed": 448608
+    "gasUsed": 448609
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testLongTripPrompt",
     "name": "Create trip: long prompt",
-    "gasUsed": 585121
+    "gasUsed": 585122
   }
 ]

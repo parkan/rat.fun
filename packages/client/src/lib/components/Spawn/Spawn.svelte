@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte"
   import { page } from "$app/state"
-  import { Howl } from "howler"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SPAWN_STATE } from "$lib/modules/ui/enums"
@@ -17,6 +16,7 @@
   import { initWalletNetwork } from "$lib/initWalletNetwork"
   import { entryKitSession } from "$lib/modules/entry-kit/stores"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
 
   import Introduction from "$lib/components/Spawn/Introduction/Introduction.svelte"
   import ConnectWalletForm from "$lib/components/Spawn/ConnectWalletForm/ConnectWalletForm.svelte"
@@ -29,8 +29,6 @@
   }>()
 
   let currentState = $state<SPAWN_STATE>(SPAWN_STATE.INTRODUCTION)
-
-  let backgroundMusic: Howl | undefined = $state()
 
   const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
 
@@ -92,20 +90,20 @@
     // And music might be started but onDestroy is not called
     // Only start music if the UI state has not already changed from SPAWNING
     if ($UIState === UI.SPAWNING) {
-      backgroundMusic = playSound("ratfunMusic", "spawn")
+      $backgroundMusic = playSound("ratfunMusic", "spawn", true)
     }
 
     // HACK
-    // Wait a bit some whatever is needed for the shader to start is loaded...
+    // Wait a bit for whatever is needed for the shader to start is loaded...
     await new Promise(resolve => setTimeout(resolve, 1000))
     shaderManager.setShader("clouds")
   })
 
   onDestroy(() => {
     // Stop background music
-    if (backgroundMusic) {
-      backgroundMusic.stop()
-      backgroundMusic = undefined
+    if ($backgroundMusic) {
+      $backgroundMusic.stop()
+      $backgroundMusic = undefined
     }
   })
 </script>

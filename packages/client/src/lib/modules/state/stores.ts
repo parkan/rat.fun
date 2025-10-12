@@ -16,6 +16,7 @@ import {
   filterActive,
   filterLiquidated
 } from "./utils"
+import { addressToRatImage } from "$lib/modules/utils"
 import { staticContent } from "$lib/modules/content"
 import { playerERC20Balance, playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
 import { WORLD_OBJECT_ID } from "./constants"
@@ -171,13 +172,12 @@ export const ratInventory = derived(
 )
 
 export const ratImageUrl = derived([player], ([$player]) => {
-  return "/images/new-rat.png"
-  // if (!$player?.currentRat) return "/images/rat.png"
-  // return addressToRatImage($player.currentRat)
+  if (!$player?.currentRat) return "/images/rat.png"
+  return addressToRatImage($player.currentRat)
 })
 
 /**
- * Calculated by adding up the balance andinventory value
+ * Calculated by adding up the balance and inventory value
  */
 export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]) => {
   const totalValue = !$rat
@@ -188,12 +188,15 @@ export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]
 })
 
 export const investment = derived(playerActiveTrips, $playerActiveTrips =>
-  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
+  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.tripCreationCost ?? 0), 0)
 )
 export const balance = derived(playerActiveTrips, $playerActiveTrips =>
-  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.balance), 0)
+  Object.values($playerActiveTrips).reduce((a, b) => a + Number(b.balance ?? 0), 0)
 )
-export const profitLoss = derived([balance, investment], ([$b, $i]) => $b - $i)
+export const profitLoss = derived([balance, investment], ([$b, $i]) => {
+  console.log("P L calculation", $b, $i)
+  return $b - $i
+})
 export const portfolioClass = derived([profitLoss, balance], ([$profitLoss, $balance]) => {
   if ($profitLoss === 0) return "neutral"
   return $profitLoss < 0 ? "downText" : "upText"
@@ -210,16 +213,5 @@ export const realisedBalance = derived(playerLiquidatedTrips, $playerLiquidatedT
 )
 export const realisedProfitLoss = derived(
   [realisedBalance, realisedInvestment],
-  ([$rb, $i]) => $rb - $i
-)
-
-export const untaxedRealisedInvestment = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
-  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
-)
-export const untaxedRealisedBalance = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
-  Object.values($playerLiquidatedTrips).reduce((a, b) => a + untaxed(Number(b.liquidationValue)), 0)
-)
-export const untaxedRealisedProfitLoss = derived(
-  [untaxedRealisedBalance, untaxedRealisedInvestment],
   ([$rb, $i]) => $rb - $i
 )

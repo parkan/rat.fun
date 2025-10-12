@@ -1,6 +1,8 @@
 <script lang="ts">
   import "../app.css"
   import "tippy.js/dist/tippy.css"
+  import "tippy.js/dist/backdrop.css"
+  import "tippy.js/animations/shift-away.css"
 
   import type { LayoutProps, Snapshot } from "./$types"
   import { initSound } from "$lib/modules/sound"
@@ -30,10 +32,10 @@
   export const snapshot: Snapshot<string> = {
     capture: () =>
       JSON.stringify({
-        adminUnlockedAt: String($adminUnlockedAt)
+        adminUnlockedAt: $adminUnlockedAt
       }),
     restore: value => {
-      $adminUnlockedAt = Number(JSON.parse(value).adminUnlockedAt)
+      $adminUnlockedAt = JSON.parse(value).adminUnlockedAt
     }
   }
 

@@ -1,15 +1,13 @@
 <script lang="ts">
+  import type { EnterTripReturnValue } from "@server/modules/types"
   import { onMount, onDestroy } from "svelte"
   import { Log, TripSummary } from "$lib/components/GameRun"
   import { playSound } from "$lib/modules/sound"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import type { EnterTripReturnValue } from "@server/modules/types"
-  import { Howl } from "howler"
   import { gsap } from "gsap"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
 
-  let { result }: { result: EnterTripReturnValue | null } = $props()
-
-  let backgroundMusic: Howl | undefined = $state()
+  let { result }: { result: EnterTripReturnValue } = $props()
 
   // ** Root Timeline Management **
   const rootTimeline = gsap.timeline()
@@ -32,18 +30,47 @@
     checkAndBuildTimeline()
   }
 
+  // Helper function to serialize timeline structure
+  const serializeTimeline = (tl: any, depth = 0) => {
+    const indent = "  ".repeat(depth)
+    let output = `${indent}Timeline (dur: ${tl.duration()}, start: ${tl.startTime()})\n`
+
+    // Walk through children
+    let child = tl._first
+    while (child) {
+      if (child._targets && child._targets.length) {
+        // It's a tween
+        output += `${indent}  Tween (dur: ${child._dur}, start: ${child._start}, targets: ${child._targets.length})\n`
+      } else if (child.duration) {
+        // It's a nested timeline
+        output += serializeTimeline(child, depth + 1)
+      } else if (child._func) {
+        // It's a callback
+        output += `${indent}  Callback (start: ${child._start})\n`
+      }
+      child = child._next
+    }
+
+    return output
+  }
+
   // Build the root timeline when all child timelines are ready
   const checkAndBuildTimeline = () => {
     if (receivedTimelines === expectedTimelines) {
       // Add log timeline first
       if (logTimeline) {
         rootTimeline.add(logTimeline)
+        console.log("Log timeline duration:", logTimeline.duration())
       }
 
-      // Add summary timeline after log completes (with a delay)
+      // Add summary timeline after log completes with delay
       if (summaryTimeline) {
-        rootTimeline.add(summaryTimeline, "+=0.3")
+        rootTimeline.add(summaryTimeline) // ">+0.3"
+        console.log("Summary timeline duration:", summaryTimeline.duration())
       }
+
+      console.log("Root timeline total duration:", rootTimeline.duration())
+      console.log("\nTimeline Structure:\n" + serializeTimeline(rootTimeline))
 
       // Play the root timeline
       rootTimeline.play()
@@ -60,14 +87,19 @@
   const setupTripReport = () => {
     playSound("ratfunTransitions", "tripReportEnter")
     shaderManager.setShader("blank")
-    backgroundMusic = playSound("ratfunMusic", "tripReport", true)
+    $backgroundMusic = playSound("ratfunMusic", "tripReport", true)
   }
 
   const teardownTripReport = () => {
     // Stop background music
-    if (backgroundMusic) {
-      backgroundMusic.stop()
-      backgroundMusic = undefined
+    if ($backgroundMusic) {
+      $backgroundMusic.stop()
+      $backgroundMusic = undefined
+    }
+
+    // Stop animation
+    if (rootTimeline) {
+      rootTimeline.kill()
     }
   }
 

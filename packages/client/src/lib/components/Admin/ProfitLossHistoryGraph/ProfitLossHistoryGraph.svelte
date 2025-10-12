@@ -1,10 +1,7 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
-  import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
-  import { onMount, onDestroy } from "svelte"
-
-  import { playSound } from "$lib/modules/sound"
+  import { onMount } from "svelte"
 
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
@@ -14,8 +11,7 @@
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
-
-  import "tippy.js/dist/tippy.css" // optional for styling
+  import { Tooltip } from "$lib/components/Shared"
 
   let {
     trips,
@@ -47,25 +43,7 @@
   let xScale = $derived.by(() => {
     if (!allData.length || !innerWidth) return scaleTime()
 
-    const getRelevantDomainStart = () => {
-      switch (timeWindow) {
-        case "1m":
-          return currentTime - 1000 * 60
-        case "1h":
-          return currentTime - 1000 * 60 * 60
-        case "1d":
-          return currentTime - 1000 * 60 * 60 * 24
-        case "1w":
-          return currentTime - 1000 * 60 * 60 * 24 * 7
-        case "all_time":
-          return Number(min(allData, (d: PlotPoint) => d.time))
-        default:
-          return 0
-      }
-    }
-
-    const domainStart =
-      timeWindow === "events" ? getRelevantDomainStart() : new Date(getRelevantDomainStart())
+    const domainStart = 0
     const domainEnd =
       timeWindow === "events" ? Math.min(limit - 1, allData.length - 1) : new Date(currentTime) // Always go to current time
 
@@ -86,7 +64,7 @@
     maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
     minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
 
-    const fraction = (maxValue - minValue) / 12
+    const fraction = (maxValue - minValue) / 9
 
     return scaleLinear()
       .domain([minValue - fraction, maxValue + fraction])
@@ -137,12 +115,9 @@
           // Get the last absolute trip value before liquidation
           const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
 
-          const taxed = Number(trip.liquidationValue)
-          const tax = $gamePercentagesConfig.taxationCloseTrip
-          const untaxed = Math.floor(
-            (Number(trip.liquidationValue) * 100) /
-              (100 - Number($gamePercentagesConfig.taxationCloseTrip))
-          )
+          const untaxed = Number(trip.liquidationValue)
+          const tax = trip.t
+
           const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
 
           // Liquidation: you get back the trip value (before tax) and close the position
@@ -288,24 +263,6 @@
     }
     // TOggle the data source used
   }
-
-  // Setup real-time updates
-  onMount(() => {
-    backgroundMusic = playSound("ratfunMusic", "admin", true)
-    const interval = setInterval(() => {
-      currentTime = Date.now()
-    }, 1000)
-
-    return () => clearInterval(interval)
-  })
-
-  onDestroy(() => {
-    // Stop background music
-    if (backgroundMusic) {
-      backgroundMusic.stop()
-      backgroundMusic = undefined
-    }
-  })
 </script>
 
 <div class="profit-loss-graph">
@@ -370,12 +327,17 @@
               {/if}
 
               {@const lastPoint = profitLossOverTime?.[i - 1]}
+              <!-- <Tooltip
+                content={generateTooltipContent(point)}
+                svg={true}
+                props={{ allowHTML: true }}
+              > -->
               <g
                 onpointerenter={() => {
+                  console.log("focusing")
                   $focusEvent = point.index
                 }}
                 onpointerleave={() => ($focusEvent = -1)}
-                data-tippy-content={generateTooltipContent(point)}
               >
                 {#if point.eventType === "trip_death"}
                   <circle
@@ -428,14 +390,13 @@
                       height={candleHeight}
                       stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
                       stroke-width="2"
-                      fill={point.value < lastPoint.value
-                        ? "var(--graph-color-down)"
-                        : "var(--graph-color-up)"}
+                      fill={point.value < lastPoint.value ? "var(--color-down)" : "var(--color-up)"}
                     >
                     </rect>
                   {/if}
                 {/if}
               </g>
+              <!-- </Tooltip> -->
             {/each}
           </g>
         {/if}

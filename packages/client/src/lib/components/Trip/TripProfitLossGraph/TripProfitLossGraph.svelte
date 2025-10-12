@@ -2,12 +2,10 @@
   import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
-  import { onMount, onDestroy } from "svelte"
+  import { onMount } from "svelte"
 
-  import { playSound } from "$lib/modules/sound"
-
+  import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { focusEvent } from "$lib/modules/ui/state.svelte"
   import { blockNumberToTimestamp } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
   import { blockNumber } from "$lib/modules/network"
@@ -15,24 +13,24 @@
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
 
-  import "tippy.js/dist/tippy.css" // optional for styling
-
   let {
     trip,
     tripId,
     height = 400,
-    graphData = $bindable<PlotPoint[]>()
+    graphData = $bindable<PlotPoint[]>(),
+    focusEvent = $bindable(-1),
+    behavior = "hover"
   }: {
     trip: Trip
     tripId: string
     height?: number
     graphData?: PlotPoint[]
+    focusEvent: number
+    behavior?: "hover" | "click"
   } = $props()
 
   // Add reactive timestamp for real-time updates
   let currentTime = $state(Date.now())
-
-  let backgroundMusic: Howl | undefined = $state()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -86,7 +84,7 @@
     maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
     minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
 
-    const fraction = (maxValue - minValue) / 12
+    const fraction = (maxValue - minValue) / 9
 
     return scaleLinear()
       .domain([minValue - fraction, maxValue + fraction])
@@ -95,9 +93,9 @@
 
   /** Plot data for the single trip */
   let plotData = $derived.by(() => {
-    let sanityTripContent = staticContent?.trips?.find(r => r.title == tripId)
+    let sanityTripContent = $staticContent?.trips?.find(r => r.title == tripId)
 
-    const outcomes = staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
+    const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
     // Sort the outcomes in order of creation
     outcomes.sort((a, b) => {
@@ -247,20 +245,11 @@
 
   // Setup real-time updates
   onMount(() => {
-    backgroundMusic = playSound("ratfunMusic", "admin", true)
     const interval = setInterval(() => {
       currentTime = Date.now()
     }, 1000)
 
     return () => clearInterval(interval)
-  })
-
-  onDestroy(() => {
-    // Stop background music
-    if (backgroundMusic) {
-      backgroundMusic.stop()
-      backgroundMusic = undefined
-    }
   })
 </script>
 
@@ -313,67 +302,97 @@
 
             {#each profitLossOverTime as point, i (point.time)}
               {@const lastPoint = profitLossOverTime?.[i - 1]}
-              <g
-                onpointerenter={() => {
-                  $focusEvent = point.index
-                }}
-                onpointerleave={() => ($focusEvent = -1)}
-                data-tippy-content={generateTooltipContent(point)}
+
+              {#if focusEvent === point.index}
+                <line
+                  x1={xScale(point.time)}
+                  y1={0}
+                  x2={xScale(point.time)}
+                  y2={height}
+                  stroke="var(--color-grey-mid)"
+                  stroke-width="2"
+                  stroke-dasharray="4,4"
+                />
+              {/if}
+
+              <Tooltip
+                content={generateTooltipContent(point)}
+                svg={true}
+                props={{ allowHTML: true }}
               >
-                {#if point.eventType === "trip_death"}
-                  <circle
-                    fill="var(--color-grey-light)"
-                    stroke={$focusEvent === point.index ? "white" : ""}
-                    r="5"
-                    cx={xScale(point.time)}
-                    cy={yScale(point.value)}
-                  ></circle>
-                {:else if point.eventType === "trip_liquidated"}
-                  <circle
-                    fill="var(--color-grey-light)"
-                    stroke={$focusEvent === point.index ? "white" : ""}
-                    r="5"
-                    cx={xScale(point.time)}
-                    cy={yScale(point.value)}
-                  ></circle>
-                {:else if point.eventType === "trip_created"}
-                  <circle
-                    fill="var(--color-grey-light)"
-                    stroke={$focusEvent === point.index ? "white" : ""}
-                    r="5"
-                    cx={xScale(point.time)}
-                    cy={yScale(point.value)}
-                  ></circle>
-                {:else}
-                  <circle
-                    fill="var(--color-grey-light)"
-                    stroke={$focusEvent === point.index ? "white" : ""}
-                    r="5"
-                    cx={xScale(point.time)}
-                    cy={yScale(point.value)}
-                  ></circle>
-                {/if}
-                {#if lastPoint}
-                  {@const candleHeight = Math.abs(yScale(point.value) - yScale(lastPoint.value))}
-                  {@const candleWidth = innerWidth / 80}
-                  <!-- Draw "candle" -->
-                  {#if point.eventType === "trip_death" || point.eventType === "trip_visit"}
-                    <rect
-                      x={xScale(point.time) - candleWidth / 2}
-                      y={point.value < lastPoint.value
-                        ? yScale(lastPoint.value)
-                        : yScale(lastPoint.value) - candleHeight}
-                      width={candleWidth}
-                      height={candleHeight}
-                      stroke={$focusEvent === point.index ? "white" : ""}
-                      fill={point.value < lastPoint.value
-                        ? "var(--graph-color-down)"
-                        : "var(--graph-color-up)"}
-                    >
-                    </rect>
+                <g
+                  onpointerdown={() => {}}
+                  onpointerup={() => {
+                    if (behavior === "click") {
+                      focusEvent = point.index
+                    }
+                  }}
+                  onpointerenter={() => {
+                    if (behavior === "hover") {
+                      focusEvent = point.index
+                    }
+                  }}
+                  onpointerleave={() => {
+                    if (behavior === "hover") {
+                      focusEvent = -1
+                    }
+                  }}
+                >
+                  {#if point.eventType === "trip_death"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      stroke={focusEvent === point.index ? "white" : ""}
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else if point.eventType === "trip_liquidated"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      stroke={focusEvent === point.index ? "white" : ""}
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else if point.eventType === "trip_created"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      stroke={focusEvent === point.index ? "white" : ""}
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      stroke={focusEvent === point.index ? "white" : ""}
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
                   {/if}
-                {/if}
-              </g>
+                  {#if lastPoint}
+                    {@const candleHeight = Math.abs(yScale(point.value) - yScale(lastPoint.value))}
+                    {@const candleWidth = innerWidth / 80}
+                    <!-- Draw "candle" -->
+                    {#if point.eventType === "trip_death" || point.eventType === "trip_visit"}
+                      <rect
+                        x={xScale(point.time) - candleWidth / 2}
+                        y={point.value < lastPoint.value
+                          ? yScale(lastPoint.value)
+                          : yScale(lastPoint.value) - candleHeight}
+                        width={candleWidth}
+                        height={candleHeight}
+                        stroke={focusEvent === point.index ? "white" : ""}
+                        fill={point.value < lastPoint.value
+                          ? "var(--color-down)"
+                          : "var(--color-up)"}
+                      >
+                      </rect>
+                    {/if}
+                  {/if}
+                </g>
+              </Tooltip>
             {/each}
           </g>
         {/if}
@@ -442,14 +461,14 @@
   .y-axis {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    border-right: 1px solid var(--color-grey-mid);
+    // border-right: 1px solid var(--color-grey-mid);
     width: 30px;
     height: 100%;
     position: absolute;
   }
 
   .x-axis {
-    border-bottom: 1px solid var(--color-grey-mid);
+    // border-bottom: 1px solid var(--color-grey-mid);
     width: 100%;
     height: 30px;
     position: absolute;

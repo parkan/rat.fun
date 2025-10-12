@@ -2,27 +2,29 @@
   import { Icon } from "$lib/components/Shared"
   import { timeSince } from "$lib/modules/utils"
   import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
-  import { goto } from "$app/navigation"
-  import tippy, { followCursor } from "tippy.js"
-  // For the follow cursor effect
-  import "tippy.js/dist/backdrop.css"
-  import "tippy.js/animations/shift-away.css"
 
-  let { eventData, focus = $bindable() } = $props()
-
-  const tooltipContent = p => {
-    if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
-      return p.meta.readableLog.split(",").join("\n<br>")
-    } else {
-      return p.ownerName
-    }
-  }
+  let {
+    eventData,
+    focus = $bindable(),
+    localFocusEvent = $bindable(),
+    nosync = false,
+    behavior = "hover"
+  } = $props()
 
   $effect(() => {
-    tippy("[data-tippy-content]", {
-      followCursor: true,
-      plugins: [followCursor],
-      allowHTML: true
+    if (!nosync) {
+      $focusEvent = localFocusEvent
+    }
+  })
+
+  let data = $derived(eventData.toReversed().filter(p => p.eventType !== "baseline"))
+  let tooltipContent = $derived.by(() => {
+    return data.map(p => {
+      if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
+        return p?.meta?.readableLog?.split(",").join("\n<br>")
+      } else {
+        return p.ownerName
+      }
     })
   })
 </script>
@@ -45,19 +47,29 @@
 {/snippet}
 
 <div class="admin-event-log">
-  {#each eventData.toReversed().filter(p => p.eventType !== "baseline") as point}
-    <!-- svelte-ignore a11y_missing_attribute -->
+  {#each data as point, i (point.index)}
     <a
-      onpointerup={e => {
-        if (point.eventType === "trip_visit" || point.eventType === "trip_death") {
-          goto(`/admin/${point.meta.tripId}`)
+      class="event"
+      href={point.eventType === "trip_visit" || point.eventType === "trip_death"
+        ? `/admin/${point.meta.tripId}?focusId=${point.meta._id}`
+        : `/admin/${point.meta._id}`}
+      onpointerdown={() => {}}
+      onpointerup={() => {
+        if (behavior === "click") {
+          localFocusEvent = point.index
         }
       }}
-      class="event"
-      data-tippy-content={tooltipContent(point)}
-      onpointerenter={() => ($focusEvent = point.index)}
-      onpointerleave={() => ($focusEvent = -1)}
-      class:focus={$focusEvent === point.index}
+      onpointerenter={() => {
+        if (behavior === "hover") {
+          localFocusEvent = point.index
+        }
+      }}
+      onpointerleave={() => {
+        if (behavior === "hover") {
+          localFocusEvent = -1
+        }
+      }}
+      class:focus={localFocusEvent === point.index}
     >
       {#if point.eventType === "trip_visit"}
         {@render ratVisitEvent(point)}
@@ -70,6 +82,7 @@
       {/if}
       <span class="meta">{timeSince(new Date(point.time).getTime())}</span>
     </a>
+    <!-- </Tooltip> -->
   {/each}
   <p class="event">
     You unlocked the panel <span class="meta"
@@ -84,14 +97,19 @@
     height: 100%;
     max-height: 800px;
     overflow-y: scroll;
-    display: flex;
+    // display: flex;
     flex-flow: column nowrap;
+    align-items: start;
+    justify-content: flex-start;
     gap: 4px;
     padding: 4px;
 
     .event {
       padding: 0;
       margin: 0;
+      color: white;
+      display: block;
+      margin-bottom: 4px;
 
       cursor: pointer;
       &.focus {

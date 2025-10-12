@@ -51,8 +51,7 @@
 
 <div class="player-info">
   <!-- PLAYER STATS -->
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div
+  <button
     class="player-stats"
     bind:this={playerStatsElement}
     {onmousedown}
@@ -69,12 +68,12 @@
         class="inner-wrapper player"
       >
         <div class="avatar"></div>
-        <div class="value">{$player.name}</div>
+        <div class="value">{$player?.name ?? ""}</div>
       </div>
     </div>
     <!-- BALANCE -->
     <BalanceBox />
-  </div>
+  </button>
 </div>
 
 {#if showAccountDropdown}
@@ -90,6 +89,9 @@
       align-items: center;
       height: 100%;
       cursor: pointer;
+      border: 0;
+      outline: 0;
+      background: transparent;
 
       .stat-item {
         display: flex;

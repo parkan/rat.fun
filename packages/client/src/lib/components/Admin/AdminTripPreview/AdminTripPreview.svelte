@@ -9,15 +9,15 @@
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
-
   import {
-    TripPreviewHeader,
     TripPreviewPrompt,
-    TripPreviewGraph,
-    TripPreviewEventLog,
+    TripProfitLossGraph,
     TripConfirmLiquidation,
     LiquidateTrip
   } from "$lib/components/Trip"
+  import { AdminTripPreviewHeader, AdminTripEventIntrospection } from "$lib/components/Admin"
+  import { AdminEventLog } from "$lib/components/Admin"
+  import { playSound } from "$lib/modules/sound"
 
   let {
     tripId,
@@ -26,6 +26,8 @@
   }: { tripId: Hex; trip: Trip; sanityTripContent: SanityTrip } = $props()
 
   let tripOutcomes = $state<Outcome[]>()
+  let graphData = $state([])
+  let focusEvent = $state(-1)
 
   // Show liquidate button if:
   //  * - Trip is not depleted
@@ -36,8 +38,19 @@
     Number(trip.creationBlock) + $gameConfig.cooldownCloseTrip - Number($blockNumber)
   )
 
+  let event = $derived(graphData[focusEvent])
+
   onMount(() => {
+    const getEventIndexFromId = id => {
+      const index = graphData.findIndex(p => p?.meta?._id === id)
+      return index
+    }
     liquidating = page.url.searchParams.has("liquidate") && blockUntilUnlock <= 0
+    focusEvent = Number(page.url.searchParams.get("focusEvent")) || -1
+    if (page.url.searchParams.has("focusId")) {
+      focusEvent = getEventIndexFromId(page.url.searchParams.get("focusId"))
+    }
+
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
     // Sort the outcomes in order of creation
@@ -47,17 +60,43 @@
   })
 </script>
 
-<a class="back-button" href="/admin">Back</a>
+<a class="back-button" href="/admin" onclick={() => playSound("ratfunUI", "boing")}>
+  <div>Back</div>
+</a>
 {#if !liquidating}
   <div class="trip-inner-container" class:depleted={!showLiquidateButton}>
-    <TripPreviewGraph {trip} {tripOutcomes} {sanityTripContent} />
-    <TripPreviewPrompt {trip} />
-
+    <div class="full">
+      <AdminTripPreviewHeader {sanityTripContent} {trip} />
+    </div>
+    <div class="left">
+      <TripProfitLossGraph behavior="click" {trip} {tripId} bind:graphData bind:focusEvent />
+    </div>
+    <div class="right">
+      <AdminEventLog
+        behavior="click"
+        bind:localFocusEvent={focusEvent}
+        nosync
+        eventData={graphData}
+      />
+    </div>
+    <div class="full">
+      <p class="section-header">Flashbacks</p>
+      <div class="min-height">
+        {#key event?.meta?._id}
+          <AdminTripEventIntrospection {event} />
+        {/key}
+      </div>
+    </div>
     {#if showLiquidateButton}
-      <LiquidateTrip onclick={() => (liquidating = true)} {tripId} {trip} isOwnTripListing={true} />
+      <div class="full">
+        <LiquidateTrip
+          onclick={() => (liquidating = true)}
+          {tripId}
+          {trip}
+          isOwnTripListing={true}
+        />
+      </div>
     {/if}
-
-    <TripPreviewEventLog {tripId} {tripOutcomes} />
   </div>
 {:else}
   <TripConfirmLiquidation
@@ -82,6 +121,35 @@
     max-height: 100%;
     padding-bottom: calc(var(--pane-switch-height) + var(--world-prompt-box-height) + 20px);
     overflow-x: hidden;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 1fr 400px auto;
+    grid-auto-rows: 1fr;
+
+    .section-header {
+      padding: 0 8px;
+    }
+
+    .left {
+      grid-column: 1 / 9;
+    }
+    .right {
+      grid-column: 9 / 13;
+    }
+    .left-smol {
+      grid-column: 1 / 5;
+    }
+    .right-big {
+      grid-column: 5 / 13;
+    }
+
+    .full {
+      grid-column: 1 / 13;
+    }
+
+    .min-height {
+      height: 300px;
+    }
 
     &.depleted {
       filter: grayscale(0.8) contrast(0.7);
@@ -102,6 +170,7 @@
     text-transform: uppercase;
     background: var(--background-semi-transparent);
     z-index: 10;
+    text-align: center;
 
     &:hover {
       color: var(--white);
