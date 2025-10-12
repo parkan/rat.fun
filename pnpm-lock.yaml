@@ -79,6 +79,9 @@ importers:
       server:
         specifier: link:../../packages/server
         version: link:../../packages/server
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.6
       viem:
         specifier: 2.30.6
         version: 2.30.6(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.23.8)

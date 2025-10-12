@@ -16,6 +16,7 @@
     "contracts": "workspace:*",
     "dotenv": "^17.2.2",
     "server": "link:../../packages/server",
+    "tsx": "^4.20.3",
     "viem": "2.30.6",
     "vitest": "^3.2.4"
   }
