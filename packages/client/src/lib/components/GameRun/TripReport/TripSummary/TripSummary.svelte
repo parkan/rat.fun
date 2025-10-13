@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { EnterTripReturnValue } from "@server/modules/types"
   import { playSound } from "$lib/modules/sound"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
   import { gsap } from "gsap"
   import { frozenRat } from "$lib/components/GameRun/state.svelte"
 
@@ -19,6 +20,8 @@
 
   // Element
   let summaryContainer = $state<HTMLDivElement | null>(null)
+
+  const ratDead = $derived(result?.ratDead)
 
   // Track child timelines
   let receivedTimelines = 0
@@ -42,6 +45,10 @@
     summaryTimeline.call(
       () => {
         playSound("ratfunUI", "panelIn")
+        if (ratDead) {
+          const deathMusic = playSound("ratfunMusic", "death", true, true)
+          backgroundMusic.set(deathMusic)
+        }
       },
       [],
       0

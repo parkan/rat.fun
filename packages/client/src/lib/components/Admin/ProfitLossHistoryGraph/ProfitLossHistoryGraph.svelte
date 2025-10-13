@@ -1,34 +1,22 @@
 <script lang="ts">
   import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
-
-  import { onMount } from "svelte"
-
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
-  import { blockNumberToTimestamp } from "$lib/modules/utils"
-  import { staticContent } from "$lib/modules/content"
-  import { blockNumber } from "$lib/modules/network"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
-  import { Tooltip } from "$lib/components/Shared"
 
   let {
-    trips,
+    graphData,
     focus = $bindable(),
-    height = 400,
-    graphData = $bindable<PlotPoint[]>()
+    height = 400
   }: {
-    trips: Trip[]
+    graphData: PlotPoint[]
     focus: string
     height: number
-    graphData: PlotPoint[]
   } = $props()
 
   // Add reactive timestamp for real-time updates
   let currentTime = $state(Date.now())
-
-  let backgroundMusic: Howl | undefined = $state()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -41,11 +29,11 @@
   let innerHeight = $derived(height - padding.top - padding.bottom)
 
   let xScale = $derived.by(() => {
-    if (!allData.length || !innerWidth) return scaleTime()
+    if (!graphData.length || !innerWidth) return scaleTime()
 
     const domainStart = 0
     const domainEnd =
-      timeWindow === "events" ? Math.min(limit - 1, allData.length - 1) : new Date(currentTime) // Always go to current time
+      timeWindow === "events" ? Math.min(limit - 1, graphData.length - 1) : new Date(currentTime) // Always go to current time
 
     if (timeWindow === "events") {
       return scaleLinear().domain([domainStart, domainEnd]).range([0, innerWidth])
@@ -55,7 +43,7 @@
   })
 
   let yScale = $derived.by(() => {
-    if (!allData.length || !innerHeight) return scaleLinear()
+    if (!graphData.length || !innerHeight) return scaleLinear()
 
     let yScaleData, maxValue, minValue
 
@@ -71,155 +59,15 @@
       .range([innerHeight, 0])
   })
 
-  /** All plots for the trips */
-  let plots: Record<string, { data: PlotPoint[]; line: any }> = $derived.by(() => {
-    const result = Object.fromEntries(
-      Object.entries(trips).map(([tripId, trip]) => {
-        let sanityTripContent = $staticContent?.trips?.find(r => r.title == tripId)
+  let isEmpty = $derived(graphData.length === 0)
 
-        const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
-
-        // Sort the outcomes in order of creation
-        outcomes.sort((a, b) => {
-          return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
-        })
-
-        const tripOutcomes = outcomes.reverse()
-        const initialTime = new Date(sanityTripContent?._createdAt).getTime()
-
-        const initialPoint = {
-          time: initialTime,
-          tripValue: Number(trip.tripCreationCost),
-          tripValueChange: 0,
-          meta: sanityTripContent,
-          _createdAt: sanityTripContent?._createdAt,
-          eventType: "trip_created"
-        }
-
-        // Build the data array with initial point and outcomes
-        const dataPoints = [
-          initialPoint,
-          ...tripOutcomes.map(outcome => ({
-            ...outcome,
-            eventType: outcome?.ratValue == 0 ? "trip_death" : "trip_visit"
-          }))
-        ]
-
-        // Add liquidation event if it exists
-        if (trip.liquidationBlock && trip.liquidationValue !== undefined && $blockNumber) {
-          const liquidationTime = blockNumberToTimestamp(
-            Number(trip.liquidationBlock),
-            Number($blockNumber)
-          )
-
-          // Get the last absolute trip value before liquidation
-          const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
-
-          const untaxed = Number(trip.liquidationValue)
-          const tax = trip.t
-
-          const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
-
-          // Liquidation: you get back the trip value (before tax) and close the position
-          // The change is +tripValue to cancel out the accumulated trip value
-          dataPoints.push({
-            _createdAt: new Date(liquidationTime).toISOString(),
-            tripValue: lastTripValue,
-            tripValueChange: liquidationValueChange, // Add back the trip value (closing position)
-            liquidationBlock: trip.liquidationBlock,
-            prompt: "Liquidation",
-            eventType: "trip_liquidated"
-          })
-        }
-
-        // Map data points to store value changes (not accumulated yet)
-        const data = dataPoints.map((o, i) => {
-          const time = new Date(o?._createdAt).getTime()
-          const valueChange = o?.tripValueChange || 0
-
-          return {
-            time: time || o.time,
-            valueChange: valueChange, // Store the change, not accumulated value
-            eventType: o.eventType,
-            meta: {
-              ...sanityTripContent,
-              ...o
-            }
-          }
-        })
-
-        const l = line()
-          .x(d => xScale(d.time))
-          .y(d => yScale(+d.value))
-
-        // Map the values
-        return [
-          tripId,
-          {
-            data,
-            line: l
-          }
-        ]
-      })
-    )
-    return result
-  })
-  let isEmpty = $derived(Object.values(plots).every(plot => plot.data.length === 0))
-
-  // Combine all data points from all trips and sort by time (used across multiple derived values)
-  let allData = $derived.by(() => {
-    const allPlots = Object.values(plots)
-    if (!allPlots.length) return []
-
-    const combinedData = allPlots.flatMap((plot, plotIndex) =>
-      plot.data.map((point, index) => ({
-        ...point,
-        tripId: Object.keys(plots)[plotIndex],
-        tripCreationCost: Object.values(trips)[plotIndex]?.tripCreationCost || 0
-      }))
-    )
-
-    // Sort by time
-    combinedData.sort((a, b) => a.time - b.time)
-
-    // Find the earliest time
-    const earliestTime = combinedData.length > 0 ? combinedData[0].time : Date.now()
-
-    // Add initial 0 point at the start
-    const dataWithBaseline = [
-      {
-        time: earliestTime - 1000, // 1 second before first event
-        value: 0,
-        valueChange: 0,
-        eventType: "baseline",
-        meta: {}
-      },
-      ...combinedData
-    ]
-
-    // Now accumulate the value changes globally and add index
-    let runningBalance = 0
-    return dataWithBaseline.map((point, index) => {
-      runningBalance += point.valueChange || 0
-      return {
-        ...point,
-        index,
-        value: runningBalance
-      }
-    })
-  })
-
-  $effect(() => {
-    graphData = allData
-  })
-
-  // Limited version of allData for display
-  let limitedData = $derived([...allData].slice(-limit, allData.length))
+  // Limited version of graphData for display
+  let limitedData = $derived([...graphData].slice(-limit, graphData.length))
 
   let profitLossOverTime = $derived.by(() => {
     if (!limitedData.length) return []
 
-    // The P/L is already calculated in allData.value from accumulating valueChanges
+    // The P/L is already calculated in graphData.value from accumulating valueChanges
     return limitedData.map((point, i) => ({
       time: i,
       index: point.index,
@@ -230,38 +78,38 @@
     }))
   })
 
-  const generateTooltipContent = (point: PlotPoint) => {
-    const mapping = {
-      trip_created: "Created trip",
-      trip_liquidated: "Liquidated trip",
-      trip_death: "Rat died",
-      trip_visit: "Rat visited",
-      unknown: ""
-    }
-    const eventType = point.eventType || "unknown"
-    const eventTypeLabel = mapping[eventType]
+  // const generateTooltipContent = (point: PlotPoint) => {
+  //   const mapping = {
+  //     trip_created: "Created trip",
+  //     trip_liquidated: "Liquidated trip",
+  //     trip_death: "Rat died",
+  //     trip_visit: "Rat visited",
+  //     unknown: ""
+  //   }
+  //   const eventType = point.eventType || "unknown"
+  //   const eventTypeLabel = mapping[eventType]
 
-    let toolTipContent = `<div><strong>${eventTypeLabel}</strong><br/>`
+  //   let toolTipContent = `<div><strong>${eventTypeLabel}</strong><br/>`
 
-    const valueChangeClass = point.value
-      ? point.value > 0
-        ? "tooltip-value-positive"
-        : "tooltip-value-negative"
-      : "tooltip-value"
-    let explicitSymbol =
-      valueChangeClass === "tooltip-value" ? "" : valueChangeClass.includes("positive") ? "+" : "-"
-    toolTipContent += `P/L: <span class="${valueChangeClass}">${explicitSymbol}${CURRENCY_SYMBOL}${Math.abs(point.value || 0)}</span></div>`
+  //   const valueChangeClass = point.value
+  //     ? point.value > 0
+  //       ? "tooltip-value-positive"
+  //       : "tooltip-value-negative"
+  //     : "tooltip-value"
+  //   let explicitSymbol =
+  //     valueChangeClass === "tooltip-value" ? "" : valueChangeClass.includes("positive") ? "+" : "-"
+  //   toolTipContent += `P/L: <span class="${valueChangeClass}">${explicitSymbol}${CURRENCY_SYMBOL}${Math.abs(point.value || 0)}</span></div>`
 
-    return toolTipContent
-  }
+  //   return toolTipContent
+  // }
 
+  // Toggle the data source used
   const toggleSource = () => {
-    if (limit === 50 && allData.length > 50) {
-      limit = allData.length
+    if (limit === 50 && graphData.length > 50) {
+      limit = graphData.length
     } else {
       limit = 50
     }
-    // TOggle the data source used
   }
 </script>
 
@@ -284,8 +132,8 @@
       </div>
       <div class="legend x">
         <button onclick={toggleSource} class="time-option" class:active={timeWindow === "events"}
-          >{#if limitedData.length === allData.length}All&nbsp;
-          {/if}events ({#if limitedData.length < allData.length}{limitedData.length}/{allData.length}{:else}{limitedData.length}{/if})
+          >{#if limitedData.length === graphData.length}All&nbsp;
+          {/if}events ({#if limitedData.length < graphData.length}{limitedData.length}/{graphData.length}{:else}{limitedData.length}{/if})
         </button>
       </div>
       <svg {width} {height}>

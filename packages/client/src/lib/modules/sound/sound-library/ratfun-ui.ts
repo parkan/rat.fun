@@ -31,6 +31,11 @@ export const ratfunUI: SoundAssets = {
     author: "leo",
     volume: 0.5
   },
+  glassTap: {
+    src: "/sounds/ratfun/ui/hover.wav",
+    author: "leo",
+    volume: 1
+  },
   bigButtonDown: {
     src: "/sounds/ratfun/ui/bigButton-down.wav",
     author: "leo",

@@ -13,11 +13,20 @@
   } from "$lib/modules/state/stores"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
-  let { graphData = $bindable(), onCreateTripClick } = $props()
+  let { onCreateTripClick }: { onCreateTripClick: () => void } = $props()
 
   let tweenedProfitLoss = new Tween($profitLoss, { duration: 2000 })
   let tweenedActiveProfit = new Tween($balance / $investment)
   let previousProfitLoss = $state<null | number>(null)
+
+  const plSymbolExplicit = derived(portfolioClass, $pc =>
+    $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
+  )
+
+  const realPortfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
+    if ($realisedProfitLoss === 0) return "neutral"
+    return $realisedProfitLoss > 0 ? "upText" : "downText"
+  })
 
   onMount(() => {
     const unsubscribe = profitLoss.subscribe(newValue => {
@@ -37,38 +46,6 @@
 
     return () => unsubscribe()
   })
-
-  const plSymbolExplicit = derived(portfolioClass, $pc =>
-    $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
-  )
-
-  const realPortfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
-    if ($realisedProfitLoss === 0) return "neutral"
-    return $realisedProfitLoss > 0 ? "upText" : "downText"
-  })
-
-  const realPlSymbolExplicit = derived(realPortfolioClass, $pc =>
-    $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
-  )
-
-  onMount(() => {
-    const unsubscribe = profitLoss.subscribe(newValue => {
-      if (typeof previousProfitLoss === "number") {
-        if (newValue > previousProfitLoss) {
-          // playSound("ratfunUI", "countUp")
-          tweenedProfitLoss.set(newValue, { duration: 3000 })
-        } else {
-          if (newValue !== 0) {
-            // playSound("ratfunUI", "countDown")
-          }
-          tweenedProfitLoss.set(newValue, { duration: 2000 })
-        }
-      }
-      previousProfitLoss = newValue
-    })
-
-    return () => unsubscribe()
-  })
 </script>
 
 <div class="profit-loss-overview">
@@ -76,9 +53,9 @@
     <!-- Unrealised -->
     <div class="main">
       <p>Active Profit</p>
-      <span class="percentage {$portfolioClass} glow"
-        >({$plSymbolExplicit}{(100 - tweenedActiveProfit.current * 100).toFixed(2)}%)</span
-      >
+      <span class="percentage {$portfolioClass} glow">
+        ({$plSymbolExplicit}{(100 - tweenedActiveProfit.current * 100).toFixed(2)}%)
+      </span>
       <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
       <div class="content {$portfolioClass} glow">
         <Tooltip content="Unrealised P&L">
@@ -111,6 +88,7 @@
     grid-template-columns: repeat(200px, 2);
     grid-template-rows: repeat(1fr, 3);
     width: 100%;
+    overflow: hidden;
   }
   .top {
     grid-column: 1/3;

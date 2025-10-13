@@ -3,46 +3,54 @@
   import { TripProfitLossSpark } from "$lib/components/Trip"
   import { goto } from "$app/navigation"
 
-  let { trip, data, id } = $props()
+  let { trip, data, id, onpointerenter, onpointerleave } = $props()
 
   let profitLoss = $derived(Number(trip.liquidationValue) - Number(trip.tripCreationCost))
+
+  const onmouseup = () => {
+    goto("/admin/" + id, { noScroll: false })
+  }
 </script>
 
-<tr
-  onmouseup={() => {
-    goto("/admin/" + id, { noScroll: false })
-  }}
-  class="simple-row"
->
-  <td class="cell-description">
+<tr {onmouseup} {onpointerenter} {onpointerleave} class="active-trip-table-item">
+  <!-- Index -->
+  <td class="cell-index">{Number(trip.index)}</td>
+  <!-- Prompt -->
+  <td class="cell-prompt">
     <p class="single-line">{trip.prompt}</p>
   </td>
+  <!-- Visits -->
   <td class="cell-visits">{trip.visitCount}</td>
-  <td class="cell-profit">
-    <span> {trip.liquidationValue}</span><span class="grey">/{trip.tripCreationCost} </span>
+  <!-- Liquidation -->
+  <td class="cell-balance">
+    <span>{trip.liquidationValue}</span><span class="grey">/{trip.tripCreationCost} </span>
   </td>
+  <!-- Profit -->
   <td class="cell-profit">
     <SignedNumber value={profitLoss} />
   </td>
-  <td class="cell-graph">
+  <!-- Spark -->
+  <td class="cell-spark">
     {#if data}
       <div class="mini-graph">
         <TripProfitLossSpark smallIcons height={24} plotData={data} isEmpty={data.length === 0} />
       </div>
     {:else}
-      <div class="mini-graph" />
+      <div class="mini-graph"></div>
     {/if}
   </td>
-  <td class="cell-action-or-age"></td>
 </tr>
 
 <style lang="scss">
-  .simple-row {
+  .active-trip-table-item {
     height: 24px;
+    font-size: var(--font-size-small);
 
     td {
       vertical-align: middle;
       line-height: 24px;
+      border-bottom: 1px solid rgb(59, 59, 59);
+      border-right: 1px dashed rgb(59, 59, 59);
     }
 
     .single-line {
@@ -61,47 +69,51 @@
       outline: none;
       border-width: 0;
     }
+
     &:hover {
       cursor: pointer;
+      background-color: rgb(59, 59, 59);
     }
+
     td {
       overflow: hidden;
       margin: 0;
       vertical-align: top;
+      padding-right: 1ch;
     }
-    .cell-description {
+
+    .cell-index {
+      text-align: center;
+      width: 40px;
+    }
+
+    .cell-prompt {
       padding: 0 6px;
     }
+
     .cell-visits {
+      text-align: right;
+      width: 60px;
+    }
+
+    .cell-balance {
       width: 120px;
       text-align: right;
+      width: 80px;
     }
+
     .cell-profit {
       width: 120px;
       text-align: right;
+      width: 60px;
 
       :global(*) {
         text-align: right;
       }
     }
-    .cell-tax-or-age {
-      width: 120px;
-      text-align: right;
-    }
-    .cell-graph {
-      max-width: 200px;
-    }
-    .cell-action-or-age {
-      max-width: 200px;
-      height: 100%;
-    }
 
-    .up {
-      color: var(--color-up);
-    }
-
-    .down {
-      color: var(--color-down);
+    .cell-spark {
+      width: 80px;
     }
 
     .grey {

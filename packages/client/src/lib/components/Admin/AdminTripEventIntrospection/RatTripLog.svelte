@@ -225,7 +225,7 @@
 
   // Left Panel: Summary
   .summary-panel {
-    width: 400px;
+    width: 100%;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;

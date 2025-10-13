@@ -3,54 +3,67 @@
   import { TripProfitLossSpark } from "$lib/components/Trip"
   import { goto } from "$app/navigation"
 
-  let { trip, data, id } = $props()
+  let { trip, data, id, onpointerenter, onpointerleave } = $props()
+
+  console.log(trip)
 
   let profitLoss = $derived(Number(trip.balance) - Number(trip.tripCreationCost))
+
+  // Go to trip preview
+  const rowOnmouseup = () => {
+    goto("/admin/" + id, { noScroll: false })
+  }
+
+  // Start liquidation
+  const liquidateButtonOnmouseup = (e: MouseEvent) => {
+    e.stopPropagation()
+    goto("/admin/" + id + "?liquidate", { noScroll: false })
+  }
 </script>
 
-<tr
-  onmouseup={() => {
-    goto("/admin/" + id, { noScroll: false })
-  }}
-  class="simple-row"
->
-  <td class="cell-description">
+<tr onmouseup={rowOnmouseup} {onpointerenter} {onpointerleave} class="active-trip-table-item">
+  <!-- Index -->
+  <td class="cell-index">{Number(trip.index)}</td>
+  <!-- Prompt -->
+  <td class="cell-prompt">
     <p class="single-line">{trip.prompt}</p>
   </td>
+  <!-- Visits -->
   <td class="cell-visits">{trip.visitCount}</td>
-  <td class="cell-profit">
+  <!-- Balance -->
+  <td class="cell-balance">
     <span>{trip.balance}</span><span class="grey">/{trip.tripCreationCost} </span>
   </td>
+  <!-- Profit -->
   <td class="cell-profit">
     <SignedNumber value={profitLoss} />
   </td>
-  <td class="cell-graph">
+  <!-- Spark -->
+  <td class="cell-spark">
     {#if data}
       <div class="mini-graph">
         <TripProfitLossSpark smallIcons height={24} plotData={data} isEmpty={data.length === 0} />
       </div>
     {:else}
-      <div class="mini-graph" />
+      <div class="mini-graph"></div>
     {/if}
   </td>
-  <td class="cell-action-or-age">
-    <SmallButton
-      text="Liquidate"
-      onmouseup={e => {
-        e.stopPropagation()
-        goto("/admin/" + id + "?liquidate", { noScroll: false })
-      }}
-    ></SmallButton>
+  <!-- Action -->
+  <td class="cell-action">
+    <SmallButton text="Liquidate" onmouseup={liquidateButtonOnmouseup}></SmallButton>
   </td>
 </tr>
 
 <style lang="scss">
-  .simple-row {
+  .active-trip-table-item {
     height: 24px;
+    font-size: var(--font-size-small);
 
     td {
       vertical-align: middle;
       line-height: 24px;
+      border-bottom: 1px solid rgb(59, 59, 59);
+      border-right: 1px dashed rgb(59, 59, 59);
     }
 
     .single-line {
@@ -69,40 +82,57 @@
       outline: none;
       border-width: 0;
     }
+
     &:hover {
       cursor: pointer;
+      background-color: rgb(59, 59, 59);
     }
+
     td {
       overflow: hidden;
       margin: 0;
       vertical-align: top;
+      padding-right: 1ch;
     }
-    .cell-description {
+
+    .cell-index {
+      text-align: center;
+      width: 40px;
+    }
+
+    .cell-prompt {
       padding: 0 6px;
     }
+
     .cell-visits {
+      text-align: right;
+      width: 60px;
+    }
+
+    .cell-balance {
       width: 120px;
       text-align: right;
+      width: 80px;
     }
+
     .cell-profit {
       width: 120px;
       text-align: right;
+      width: 60px;
 
       :global(*) {
         text-align: right;
       }
     }
 
-    .cell- .cell-tax-or-age {
-      width: 120px;
-      text-align: right;
+    .cell-spark {
+      width: 80px;
     }
-    .cell-graph {
-      max-width: 200px;
-    }
-    .cell-action-or-age {
-      max-width: 200px;
+
+    .cell-action {
+      width: 100px;
       height: 100%;
+      padding-right: 0;
     }
 
     .up {

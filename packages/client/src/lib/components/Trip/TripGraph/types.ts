@@ -10,6 +10,7 @@ export type PlotPoint = {
   eventType?: string
   meta:
     | Outcome
+    | Trip
     | {
         time?: number
         tripValue?: number

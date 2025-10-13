@@ -7,7 +7,7 @@
   import PaneSwitch from "./PaneSwitch.svelte"
   import WorldEvent from "./WorldEvent.svelte"
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
-  import GlobalStats from "./GlobalStats.svelte"
+  // import GlobalStats from "./GlobalStats.svelte"
 
   const isAdminView = $derived(page.route?.id?.includes("/(main)/admin") ?? false)
 </script>
@@ -15,9 +15,9 @@
 <div class="top-bar">
   <PlayerInfo />
   <div class="right">
-    {#if isAdminView && $worldStats}
+    <!-- {#if isAdminView && $worldStats}
       <GlobalStats />
-    {/if}
+    {/if} -->
     {#if $activeWorldEvent}
       <WorldEvent />
     {:else if $upcomingWorldEvent}

@@ -6,6 +6,14 @@
   import HealthBar from "./HealthBar.svelte"
 
   let { displayRat }: { displayRat: Rat | null } = $props()
+
+  const onmousedown = () => {
+    playSound("ratfunUI", "glassTap")
+  }
+
+  const onmouseup = () => {
+    playSound("ratfunUI", "chirp")
+  }
 </script>
 
 <div class="rat-info-box">
@@ -47,7 +55,8 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <img
         role="button"
-        onclick={() => playSound("ratfunUI", "chirp")}
+        {onmousedown}
+        {onmouseup}
         src={$ratImageUrl}
         draggable={false}
         alt={displayRat.name}

@@ -54,7 +54,7 @@
         <div class="value">{trip?.killCount}</div>
       </div>
     {/if}
-    {#if trip?.minRatValueToEnter > 0}
+    {#if (trip?.minRatValueToEnter ?? 0) > 0}
       <div class="row min-rat-value-to-enter">
         <div class="label">MIN RAT VALUE TO ENTER</div>
         <div class="value">{trip?.minRatValueToEnter}</div>

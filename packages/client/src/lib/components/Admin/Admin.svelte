@@ -1,0 +1,266 @@
+<script lang="ts">
+  import { onMount } from "svelte"
+  import type { PlotPoint } from "$lib/components/Trip/TripGraph/types"
+  import { playerTrips } from "$lib/modules/state/stores"
+  import { focusEvent } from "$lib/modules/ui/state.svelte"
+  import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
+  import { playSound } from "$lib/modules/sound"
+  import { blockNumberToTimestamp } from "$lib/modules/utils"
+  import { staticContent } from "$lib/modules/content"
+  import { blockNumber } from "$lib/modules/network"
+
+  import {
+    AdminEventLog,
+    CreateTrip,
+    AdminActiveTripTable,
+    AdminPastTripTable,
+    ProfitLossHistoryGraph,
+    ProfitLossOverview
+  } from "$lib/components/Admin"
+
+  type PendingTrip = { prompt: string; cost: number } | null
+
+  let { modal } = getModalState()
+
+  let focus = $state("")
+  let pendingTrip = $state<PendingTrip>(null)
+  let clientHeight = $state(0)
+
+  // Data processing logic moved from ProfitLossHistoryGraph
+  let graphData = $derived.by(() => {
+    const trips = Object.values($playerTrips)
+    if (!trips.length) return []
+
+    const combinedData: PlotPoint[] = []
+
+    trips.forEach(trip => {
+      const tripId = Object.keys($playerTrips).find(key => $playerTrips[key] === trip) || ""
+      let sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
+
+      const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
+
+      // Sort the outcomes in order of creation
+      outcomes.sort((a, b) => {
+        return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
+      })
+
+      const tripOutcomes = outcomes.reverse()
+      const initialTime = new Date(sanityTripContent?._createdAt).getTime()
+
+      const initialPoint = {
+        time: initialTime,
+        tripValue: Number(trip.tripCreationCost),
+        tripValueChange: 0,
+        meta: sanityTripContent,
+        _createdAt: sanityTripContent?._createdAt,
+        eventType: "trip_created"
+      }
+
+      // Build the data array with initial point and outcomes
+      const dataPoints = [
+        initialPoint,
+        ...tripOutcomes.map(outcome => ({
+          ...outcome,
+          eventType: outcome?.ratValue == 0 ? "trip_death" : "trip_visit"
+        }))
+      ]
+
+      // Add liquidation event if it exists
+      if (trip.liquidationBlock && trip.liquidationValue !== undefined && $blockNumber) {
+        const liquidationTime = blockNumberToTimestamp(
+          Number(trip.liquidationBlock),
+          Number($blockNumber)
+        )
+
+        // Get the last absolute trip value before liquidation
+        const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
+
+        const untaxed = Number(trip.liquidationValue)
+        const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
+
+        // Liquidation: you get back the trip value (before tax) and close the position
+        dataPoints.push({
+          _createdAt: new Date(liquidationTime).toISOString(),
+          tripValue: lastTripValue,
+          tripValueChange: liquidationValueChange,
+          liquidationBlock: trip.liquidationBlock,
+          prompt: "Liquidation",
+          eventType: "trip_liquidated"
+        })
+      }
+
+      // Map data points to PlotPoint format
+      const tripData = dataPoints.map((o, i) => {
+        const time = new Date(o?._createdAt).getTime()
+        const valueChange = o?.tripValueChange || 0
+
+        return {
+          time: time || o.time,
+          valueChange: valueChange,
+          eventType: o.eventType,
+          tripId: tripId,
+          tripCreationCost: Number(trip.tripCreationCost),
+          meta: {
+            ...sanityTripContent,
+            ...o
+          }
+        } as PlotPoint
+      })
+
+      combinedData.push(...tripData)
+    })
+
+    // Sort by time
+    combinedData.sort((a, b) => a.time - b.time)
+
+    // Find the earliest time
+    const earliestTime = combinedData.length > 0 ? combinedData[0].time : Date.now()
+
+    // Add initial 0 point at the start
+    const dataWithBaseline = [
+      {
+        time: earliestTime - 1000, // 1 second before first event
+        value: 0,
+        valueChange: 0,
+        eventType: "baseline",
+        tripId: "",
+        tripCreationCost: 0,
+        meta: {}
+      } as PlotPoint,
+      ...combinedData
+    ]
+
+    // Now accumulate the value changes globally and add index
+    let runningBalance = 0
+    return dataWithBaseline.map((point, index) => {
+      runningBalance += point.valueChange || 0
+      return {
+        ...point,
+        index,
+        value: runningBalance
+      }
+    })
+  })
+
+  onMount(() => {
+    $backgroundMusic?.stop()
+    $backgroundMusic = playSound("ratfunMusic", "admin", true)
+  })
+</script>
+
+{#snippet createTripModal()}
+  <CreateTrip
+    onsubmit={(data: PendingTrip) => {
+      modal.hide()
+      // Set pending state
+      pendingTrip = data
+    }}
+    ondone={() => {
+      // Clear pending state with some delay, so it can be replaced in the list with style
+      setTimeout(() => {
+        pendingTrip = null
+      }, 2000)
+    }}
+  />
+{/snippet}
+
+<div class="admin-container">
+  <!-- Top row -->
+  <div class="admin-row top">
+    <!-- Trip monitor -->
+    <div class="trip-monitor-container" bind:clientHeight>
+      <div class="p-l-overview">
+        <ProfitLossOverview
+          onCreateTripClick={() => {
+            modal.set(createTripModal)
+          }}
+        />
+      </div>
+      <div class="p-l-graph">
+        <ProfitLossHistoryGraph {graphData} height={clientHeight} {focus} />
+      </div>
+    </div>
+    <!-- Event log -->
+    <div class="event-log-container">
+      <AdminEventLog {graphData} bind:focus={$focusEvent} />
+    </div>
+  </div>
+  <!-- Bottom row -->
+  <div class="admin-row bottom">
+    <!-- Active trips -->
+    <div class="active-trip-table-container">
+      <AdminActiveTripTable bind:focus {pendingTrip} />
+    </div>
+    <!-- Divider -->
+    <div class="admin-divider warning-mute"></div>
+    <!-- Past trips -->
+    <div class="past-trip-table-container">
+      <AdminPastTripTable bind:focus />
+    </div>
+  </div>
+</div>
+
+<style lang="scss">
+  .admin-container {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: var(--game-window-main-height);
+    width: var(--game-window-width);
+    background-image: url("/images/texture-5.png");
+    background-size: 200px;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+
+    .admin-row {
+      height: 50%;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+    }
+
+    .trip-monitor-container {
+      width: calc(100% - 300px);
+      height: 100%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      .p-l-overview {
+        min-width: 500px;
+        width: 500px;
+        height: 100%;
+      }
+
+      .p-l-graph {
+        height: 100%;
+        width: 100%;
+        background: #222;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .event-log-container {
+      height: 100%;
+      width: 300px;
+    }
+
+    .active-trip-table-container {
+      width: calc(50% - 20px);
+    }
+
+    .past-trip-table-container {
+      width: calc(50% - 20px);
+    }
+
+    .admin-divider {
+      width: 40px;
+    }
+  }
+</style>

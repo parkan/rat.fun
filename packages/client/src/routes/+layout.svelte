@@ -45,8 +45,6 @@
 
   walletTypeStore.set(walletType)
 
-  $inspect($staticContent)
-
   // Called when loading is complete
   const loaded = async () => {
     try {

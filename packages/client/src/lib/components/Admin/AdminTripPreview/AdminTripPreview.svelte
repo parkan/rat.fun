@@ -9,12 +9,7 @@
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
-  import {
-    TripPreviewPrompt,
-    TripProfitLossGraph,
-    TripConfirmLiquidation,
-    LiquidateTrip
-  } from "$lib/components/Trip"
+  import { TripProfitLossGraph, TripConfirmLiquidation, LiquidateTrip } from "$lib/components/Trip"
   import { AdminTripPreviewHeader, AdminTripEventIntrospection } from "$lib/components/Admin"
   import { AdminEventLog } from "$lib/components/Admin"
   import { playSound } from "$lib/modules/sound"
@@ -72,12 +67,7 @@
       <TripProfitLossGraph behavior="click" {trip} {tripId} bind:graphData bind:focusEvent />
     </div>
     <div class="right">
-      <AdminEventLog
-        behavior="click"
-        bind:localFocusEvent={focusEvent}
-        nosync
-        eventData={graphData}
-      />
+      <AdminEventLog {graphData} behavior="click" bind:localFocusEvent={focusEvent} nosync />
     </div>
     <div class="full">
       <p class="section-header">Flashbacks</p>

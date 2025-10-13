@@ -93,7 +93,7 @@
 
   /** Plot data for the single trip */
   let plotData = $derived.by(() => {
-    let sanityTripContent = $staticContent?.trips?.find(r => r.title == tripId)
+    let sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
 
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 

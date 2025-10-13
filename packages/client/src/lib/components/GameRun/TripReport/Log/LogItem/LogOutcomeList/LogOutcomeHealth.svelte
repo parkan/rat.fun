@@ -4,6 +4,7 @@
   import { playSound } from "$lib/modules/sound"
   import { processingRat } from "$lib/components/GameRun/state.svelte"
   import { HEALTH_SYMBOL } from "$lib/modules/ui/constants"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
 
   let {
     value,
@@ -91,6 +92,9 @@
 
     if (isDead) {
       timeline.call(() => {
+        // Stop background music
+        $backgroundMusic?.stop()
+        // Play death sound
         playSound("ratfunUI", "ratDeath")
       })
       timeline.to(valueElement, {

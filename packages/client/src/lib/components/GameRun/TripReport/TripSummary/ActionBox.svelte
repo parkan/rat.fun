@@ -2,7 +2,7 @@
   import type { EnterTripReturnValue } from "@server/modules/types"
   import { frozenRat, resetProcessingState } from "$lib/components/GameRun/state.svelte"
   import { goto } from "$app/navigation"
-  import { ratImageUrl, rat } from "$lib/modules/state/stores"
+  import { ratImageUrl } from "$lib/modules/state/stores"
   import { gsap } from "gsap"
   import { BigButton } from "$lib/components/Shared"
 
@@ -17,6 +17,7 @@
   // Figure out if rat died or survived
   const ratDead = $derived(result?.ratDead)
   const statusText = $derived(ratDead ? "DIED" : "SURVIVED")
+  const buttonText = $derived(ratDead ? "MOVE ON" : "COME DOWN")
 
   // Elements
   let eventElement = $state<HTMLDivElement | null>(null)
@@ -70,7 +71,7 @@
     {statusText}
   </div>
   <div class="button-container">
-    <BigButton text="COME DOWN" onclick={comeDown} />
+    <BigButton text={buttonText} onclick={comeDown} />
   </div>
 </div>
 

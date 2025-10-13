@@ -17,7 +17,7 @@
 
   let { modal } = getModalState()
 
-  let sanityTripContent = $derived($staticContent.trips.find(r => r.title == tripId))
+  let sanityTripContent = $derived($staticContent.trips.find(r => r._id == tripId))
 
   let confirming = $state(false)
   let liquidationMessage = $state("CONFIRM TRIP LIQUIDATION")

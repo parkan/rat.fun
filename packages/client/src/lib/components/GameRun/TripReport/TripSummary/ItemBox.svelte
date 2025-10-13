@@ -16,7 +16,7 @@
 
   const ratDead = $derived(result.ratDead)
 
-  // If krat is dead we show all items as removed, so we are not empty
+  // If rat is dead we show all items as removed, so we are not empty
   const empty = $derived(!ratDead && result.itemChanges?.length === 0)
 
   // No items are added if the rat is dead

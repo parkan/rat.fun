@@ -32,5 +32,10 @@ export const ratfunMusic: SoundAssets = {
     src: "/sounds/ratfun/music/trip-report.mp3",
     author: "leo",
     volume: BASE_MUSIC_VOLUME
+  },
+  death: {
+    src: "/sounds/ratfun/music/death.mp3",
+    author: "leo",
+    volume: 0.7
   }
 }
