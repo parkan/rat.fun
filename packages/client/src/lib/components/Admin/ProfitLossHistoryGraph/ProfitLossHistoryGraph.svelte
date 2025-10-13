@@ -72,7 +72,9 @@
       time: i,
       index: point.index,
       value: point.value, // Use the already accumulated value
+      valueChange: point.valueChange,
       tripId: point.tripId,
+      tripCreationCost: point.tripCreationCost,
       eventType: point.eventType,
       meta: point.meta
     }))

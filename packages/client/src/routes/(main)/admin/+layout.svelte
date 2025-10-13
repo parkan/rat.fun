@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { fly } from "svelte/transition"
+  import { fly, fade } from "svelte/transition"
   import { page } from "$app/state"
   import { player } from "$lib/modules/state/stores"
 
@@ -28,7 +28,11 @@
 <Admin />
 
 {#if page.route.id !== "/(main)/admin"}
-  <div transition:fly|global={{ x: 1000, opacity: 1, duration: 100 }} class="sidebar open">
+  <div
+    in:fly|global={{ x: 500, opacity: 1, duration: 300 }}
+    out:fade|global={{ duration: 200 }}
+    class="sidebar open"
+  >
     {@render children?.()}
   </div>
 {/if}

@@ -3,6 +3,7 @@
   import { SignedNumber } from "$lib/components/Shared"
   import { TripProfitLossSpark } from "$lib/components/Admin"
   import { goto } from "$app/navigation"
+  import { playSound } from "$lib/modules/sound"
 
   let {
     trip,
@@ -20,12 +21,13 @@
 
   let profitLoss = $derived(Number(trip.liquidationValue) - Number(trip.tripCreationCost))
 
-  const onmouseup = () => {
+  const onmousedown = () => {
+    playSound("ratfunUI", "panelIn")
     goto("/admin/" + id, { noScroll: false })
   }
 </script>
 
-<tr {onmouseup} {onpointerenter} {onpointerleave} class="active-trip-table-item">
+<tr {onmousedown} {onpointerenter} {onpointerleave} class="active-trip-table-item">
   <!-- Index -->
   <td class="cell-index">{Number(trip.index)}</td>
   <!-- Prompt -->

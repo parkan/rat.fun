@@ -44,7 +44,7 @@
       })
 
       const tripOutcomes = outcomes.reverse()
-      const initialTime = new Date(sanityTripContent?._createdAt).getTime()
+      const initialTime = new Date(sanityTripContent?._createdAt ?? "").getTime()
 
       const initialPoint = {
         time: initialTime,
@@ -90,12 +90,14 @@
 
       // Map data points to PlotPoint format
       const tripData = dataPoints.map((o, i) => {
-        const time = new Date(o?._createdAt).getTime()
+        const time = new Date(o?._createdAt || 0).getTime()
         const valueChange = o?.tripValueChange || 0
 
         return {
-          time: time || o.time,
+          time: time,
+          value: 0, // Will be set later in accumulation
           valueChange: valueChange,
+          index: 0, // Will be set later
           eventType: o.eventType,
           tripId: tripId,
           tripCreationCost: Number(trip.tripCreationCost),

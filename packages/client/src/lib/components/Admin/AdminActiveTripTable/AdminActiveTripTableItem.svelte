@@ -3,6 +3,7 @@
   import { SmallButton, SignedNumber } from "$lib/components/Shared"
   import { TripProfitLossSpark } from "$lib/components/Admin"
   import { goto } from "$app/navigation"
+  import { playSound } from "$lib/modules/sound"
 
   let {
     trip,
@@ -21,18 +22,19 @@
   let profitLoss = $derived(Number(trip.balance) - Number(trip.tripCreationCost))
 
   // Go to trip preview
-  const rowOnmouseup = () => {
+  const rowOnMouseDown = () => {
+    playSound("ratfunUI", "panelIn")
     goto("/admin/" + id, { noScroll: false })
   }
 
   // Start liquidation
-  const liquidateButtonOnmouseup = (e: MouseEvent) => {
+  const liquidateButtonOnMouseUp = (e: MouseEvent) => {
     e.stopPropagation()
     goto("/admin/" + id + "?liquidate", { noScroll: false })
   }
 </script>
 
-<tr onmouseup={rowOnmouseup} {onpointerenter} {onpointerleave} class="active-trip-table-item">
+<tr onmousedown={rowOnMouseDown} {onpointerenter} {onpointerleave} class="active-trip-table-item">
   <!-- Index -->
   <td class="cell-index">{Number(trip.index)}</td>
   <!-- Prompt -->
@@ -61,7 +63,7 @@
   </td>
   <!-- Action -->
   <td class="cell-action">
-    <SmallButton text="Liquidate" onmouseup={liquidateButtonOnmouseup}></SmallButton>
+    <SmallButton text="Liquidate" onmouseup={liquidateButtonOnMouseUp}></SmallButton>
   </td>
 </tr>
 

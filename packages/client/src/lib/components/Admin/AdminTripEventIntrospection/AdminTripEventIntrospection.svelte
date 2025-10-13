@@ -2,10 +2,6 @@
   import type { PlotPoint } from "$lib/components/Admin/types"
   import RatTripLog from "./RatTripLog.svelte"
   let { event }: { event: PlotPoint } = $props()
-
-  let randomVoids = ["Nothing", "Patience", "Void", "Nothing to see here", "...", ":eye:"]
-
-  let randomVoid = randomVoids[Math.floor(Math.random() * randomVoids.length)]
 </script>
 
 <div class="introspection">
@@ -13,7 +9,7 @@
     <RatTripLog result={event.meta} />
   {:else}
     <div class="empty">
-      <p class="void glow">{randomVoid}</p>
+      <p class="void glow">NO DATA</p>
     </div>
   {/if}
 </div>

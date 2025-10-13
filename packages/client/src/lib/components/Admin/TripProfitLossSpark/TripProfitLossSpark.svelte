@@ -75,8 +75,8 @@
   )
 
   const generateTooltipContent = (point: PlotPoint) => {
-    const balance = point.meta?.balance || 0
-    const investment = point.meta?.investment || 0
+    const balance = (point.meta as Trip)?.balance || 0
+    const investment = (point.meta as Trip)?.investment || 0
     return `<div>Balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${balance.toFixed(2)}</span><br/>Investment: <span class="tooltip-value">${CURRENCY_SYMBOL}${investment.toFixed(2)}</span><br/>P/L: <span class="tooltip-value ${point.value >= 0 ? "tooltip-value-positive" : "tooltip-value-negative"}">${CURRENCY_SYMBOL}${point.value.toFixed(2)}</span></div>`
   }
 </script>
