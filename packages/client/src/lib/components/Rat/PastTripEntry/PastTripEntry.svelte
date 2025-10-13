@@ -1,6 +1,6 @@
 <script lang="ts">
   import { staticContent } from "$lib/modules/content"
-  import { TripopediaEntry } from "$lib/components/Tripopedia"
+  import { FlashbackEntry } from "$lib/components/Flashback"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
 
   let { outcomeId }: { outcomeId: string } = $props()
@@ -13,7 +13,7 @@
   <button class="back-button" onclick={() => transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)}>
     Go Back
   </button>
-  <TripopediaEntry {trip} {result} />
+  <FlashbackEntry {trip} {result} />
 </div>
 
 <style lang="scss">
