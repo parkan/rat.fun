@@ -90,7 +90,6 @@
     )
 
     if (isDead) {
-      console.log("Rat is dead")
       timeline.call(() => {
         playSound("ratfunUI", "ratDeath")
       })

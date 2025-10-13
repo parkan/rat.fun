@@ -35,7 +35,6 @@ export { default as WorldEventPopup } from "./WorldEventPopup/WorldEventPopup.sv
 export { default as CenterBar } from "./CenterBar/CenterBar.svelte"
 export { default as CharacterCounter } from "./CharacterCounter/CharacterCounter.svelte"
 export { default as NoImage } from "./NoImage/NoImage.svelte"
-export { default as NumberGoing } from "./NumberGoing/NumberGoing.svelte"
 
 /* Utility Components */
 export { default as SEO } from "./SEO/SEO.svelte"

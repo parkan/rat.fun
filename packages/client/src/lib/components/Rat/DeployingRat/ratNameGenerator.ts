@@ -23,6 +23,7 @@ export const firstNameFragments = [
   "Max",
   "Buddy",
   "NoSleep",
+  "Tarmac",
   "Princess",
   "MeatBag",
   "Toothy",

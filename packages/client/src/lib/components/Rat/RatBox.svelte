@@ -25,6 +25,7 @@
 
   onMount(() => {
     shaderManager.setShader("clouds", "inverted")
+    // ????
     if ($backgroundMusic?._src !== "/sounds/ratfun/music/main.mp3") {
       $backgroundMusic?.stop()
       $backgroundMusic = undefined

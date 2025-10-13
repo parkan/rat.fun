@@ -56,10 +56,6 @@
 
   const comeDown = () => {
     resetProcessingState()
-    // Old rat
-    console.log("frozenRat", frozenRat)
-    // New rat
-    console.log("$rat", $rat)
     // Return to game
     goto("/")
   }
