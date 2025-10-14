@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import RatTripLog from "./RatTripLog.svelte"
-  let { event }: { event: PlotPoint } = $props()
+  let { event }: { event: TripEvent } = $props()
 </script>
 
 <div class="introspection">

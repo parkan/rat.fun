@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
@@ -10,7 +10,7 @@
     focus = $bindable(),
     height = 400
   }: {
-    graphData: PlotPoint[]
+    graphData: TripEvent[]
     focus: string
     height: number
   } = $props()
@@ -49,8 +49,8 @@
 
     yScaleData = [...profitLossOverTime]
 
-    maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
-    minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
+    maxValue = Number(max(yScaleData, (d: TripEvent) => +d.value) ?? 0)
+    minValue = Number(min(yScaleData, (d: TripEvent) => +d.value) ?? 0)
 
     const fraction = (maxValue - minValue) / 9
 
@@ -80,7 +80,7 @@
     }))
   })
 
-  // const generateTooltipContent = (point: PlotPoint) => {
+  // const generateTooltipContent = (point: TripEvent) => {
   //   const mapping = {
   //     trip_created: "Created trip",
   //     trip_liquidated: "Liquidated trip",

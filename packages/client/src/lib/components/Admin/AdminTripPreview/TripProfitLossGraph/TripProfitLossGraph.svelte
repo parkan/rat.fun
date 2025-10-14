@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { gamePercentagesConfig } from "$lib/modules/state/stores"
 
   import { onMount } from "svelte"
@@ -17,14 +17,14 @@
     trip,
     tripId,
     height = 400,
-    graphData = $bindable<PlotPoint[]>(),
+    graphData = $bindable<TripEvent[]>(),
     focusEvent = $bindable(-1),
     behavior = "hover"
   }: {
     trip: Trip
     tripId: string
     height?: number
-    graphData?: PlotPoint[]
+    graphData?: TripEvent[]
     focusEvent: number
     behavior?: "hover" | "click"
   } = $props()
@@ -56,7 +56,7 @@
         case "1w":
           return currentTime - 1000 * 60 * 60 * 24 * 7
         case "all_time":
-          return Number(min(allData, (d: PlotPoint) => d.time))
+          return Number(min(allData, (d: TripEvent) => d.time))
         default:
           return 0
       }
@@ -81,8 +81,8 @@
 
     yScaleData = [...profitLossOverTime]
 
-    maxValue = Number(max(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
-    minValue = Number(min(yScaleData, (d: PlotPoint) => +d.value) ?? 0)
+    maxValue = Number(max(yScaleData, (d: TripEvent) => +d.value) ?? 0)
+    minValue = Number(min(yScaleData, (d: TripEvent) => +d.value) ?? 0)
 
     const fraction = (maxValue - minValue) / 9
 
@@ -91,8 +91,8 @@
       .range([innerHeight, 0])
   })
 
-  /** Plot data for the single trip */
-  let plotData = $derived.by(() => {
+  /** Plotting data for the single trip */
+  let tripEventData = $derived.by(() => {
     let sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
 
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
@@ -107,8 +107,8 @@
 
     const initialPoint = {
       time: initialTime,
-      tripValue: Number(trip.tripCreationCost),
-      tripValueChange: -Number(trip.tripCreationCost), // Initial investment is negative
+      value: Number(trip.tripCreationCost),
+      valueChange: -Number(trip.tripCreationCost), // Initial investment is negative
       meta: sanityTripContent,
       _createdAt: sanityTripContent?._createdAt,
       eventType: "trip_created"
@@ -131,7 +131,7 @@
       )
 
       // Get the last absolute trip value before liquidation
-      const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
+      const lastValue = dataPoints[dataPoints.length - 1]?.value || 0
 
       const taxed = Number(trip.liquidationValue)
       const tax = $gamePercentagesConfig.taxationCloseTrip
@@ -142,21 +142,23 @@
       const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
 
       // Liquidation: you get back the trip value (before tax) and close the position
-      // The change is +tripValue to cancel out the accumulated trip value
+      // The change is +value to cancel out the accumulated trip value
       dataPoints.push({
         _createdAt: new Date(liquidationTime).toISOString(),
-        tripValue: lastTripValue,
-        tripValueChange: liquidationValueChange, // Add back the trip value (closing position)
-        liquidationBlock: trip.liquidationBlock,
-        prompt: "Liquidation",
-        eventType: "trip_liquidated"
+        value: lastValue,
+        valueChange: liquidationValueChange, // Add back the trip value (closing position)
+        // liquidationBlock: trip.liquidationBlock,
+        eventType: "trip_liquidated",
+        meta: {
+          prompt: "Liquidation"
+        }
       })
     }
 
     // Map data points to store value changes (not accumulated yet)
     return dataPoints.map((o, i) => {
       const time = new Date(o?._createdAt).getTime()
-      const valueChange = o?.tripValueChange || 0
+      const valueChange = o?.valueChange || 0
 
       return {
         time: time || o.time,
@@ -167,15 +169,15 @@
     })
   })
 
-  let isEmpty = $derived(plotData.length === 0)
+  let isEmpty = $derived(tripEventData.length === 0)
 
   // Accumulate value changes for the single trip
   let allData = $derived.by(() => {
-    if (!plotData.length) return []
+    if (!tripEventData.length) return []
 
     // Accumulate the value changes and add index
     let runningBalance = 0
-    return plotData.map((point, index) => {
+    return tripEventData.map((point, index) => {
       runningBalance += point.valueChange || 0
       return {
         ...point,
@@ -208,7 +210,7 @@
     }))
   })
 
-  const generateTooltipContent = (point: PlotPoint) => {
+  const generateTooltipContent = (point: TripEvent) => {
     const mapping = {
       trip_created: "Created trip",
       trip_liquidated: "Liquidated trip",

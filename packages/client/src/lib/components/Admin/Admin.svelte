@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import type { PlotPoint, PendingTrip } from "$lib/components/Admin/types"
+  import { type TripEvent, type PendingTrip, TRIP_EVENT_TYPE } from "$lib/components/Admin/types"
   import { playerTrips } from "$lib/modules/state/stores"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
@@ -10,14 +10,12 @@
   import { staticContent } from "$lib/modules/content"
   import { blockNumber } from "$lib/modules/network"
 
-  import {
-    AdminEventLog,
-    CreateTrip,
-    AdminActiveTripTable,
-    AdminPastTripTable,
-    ProfitLossHistoryGraph,
-    ProfitLossOverview
-  } from "$lib/components/Admin"
+  import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
+  import CreateTrip from "$lib/components/Admin/CreateTrip/CreateTrip.svelte"
+  import AdminActiveTripTable from "$lib/components/Admin/AdminActiveTripTable/AdminActiveTripTable.svelte"
+  import AdminPastTripTable from "$lib/components/Admin/AdminPastTripTable/AdminPastTripTable.svelte"
+  import ProfitLossHistoryGraph from "$lib/components/Admin/ProfitLossHistoryGraph/ProfitLossHistoryGraph.svelte"
+  import ProfitLossOverview from "$lib/components/Admin/ProfitLossOverview/ProfitLossOverview.svelte"
 
   let { modal } = getModalState()
 
@@ -30,12 +28,11 @@
     const trips = Object.values($playerTrips)
     if (!trips.length) return []
 
-    const combinedData: PlotPoint[] = []
+    const combinedData: TripEvent[] = []
 
     trips.forEach(trip => {
       const tripId = Object.keys($playerTrips).find(key => $playerTrips[key] === trip) || ""
       let sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
-
       const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
       // Sort the outcomes in order of creation
@@ -46,23 +43,39 @@
       const tripOutcomes = outcomes.reverse()
       const initialTime = new Date(sanityTripContent?._createdAt ?? "").getTime()
 
-      const initialPoint = {
-        time: initialTime,
-        tripValue: Number(trip.tripCreationCost),
-        tripValueChange: 0,
-        meta: sanityTripContent,
-        _createdAt: sanityTripContent?._createdAt,
-        eventType: "trip_created"
-      }
-
       // Build the data array with initial point and outcomes
-      const dataPoints = [
-        initialPoint,
-        ...tripOutcomes.map(outcome => ({
-          ...outcome,
-          eventType: outcome?.ratValue == 0 ? "trip_death" : "trip_visit"
-        }))
-      ]
+      const tripData: TripEvent[] = []
+
+      // Add creation event
+      tripData.push({
+        time: initialTime,
+        value: 0, // Will be set later in accumulation
+        valueChange: -Number(trip.tripCreationCost), // Cost of creating trip
+        index: 0, // Will be set later
+        tripId: tripId,
+        tripCreationCost: Number(trip.tripCreationCost),
+        eventType: TRIP_EVENT_TYPE.CREATION,
+        meta: sanityTripContent ?? {}
+      })
+
+      // Add visit/death events from outcomes
+      tripOutcomes.forEach(outcome => {
+        const outcomeTime = new Date(outcome._createdAt).getTime()
+        const previousTripValue = outcome.previousTripValue || 0
+        const currentTripValue = outcome.tripValue || 0
+        const valueChange = currentTripValue - previousTripValue
+
+        tripData.push({
+          time: outcomeTime,
+          value: 0, // Will be set later in accumulation
+          valueChange: valueChange,
+          index: 0, // Will be set later
+          tripId: tripId,
+          tripCreationCost: Number(trip.tripCreationCost),
+          eventType: outcome?.ratValue == 0 ? TRIP_EVENT_TYPE.DEATH : TRIP_EVENT_TYPE.VISIT,
+          meta: outcome
+        })
+      })
 
       // Add liquidation event if it exists
       if (trip.liquidationBlock && trip.liquidationValue !== undefined && $blockNumber) {
@@ -71,42 +84,27 @@
           Number($blockNumber)
         )
 
-        // Get the last absolute trip value before liquidation
-        const lastTripValue = dataPoints[dataPoints.length - 1]?.tripValue || 0
+        // Get the last trip value before liquidation
+        const lastOutcome = tripOutcomes[tripOutcomes.length - 1]
+        const finalTripValue = lastOutcome?.tripValue || 0
 
         const untaxed = Number(trip.liquidationValue)
-        const liquidationValueChange = Number(trip.tripCreationCost) - untaxed
+        const liquidationValueChange = untaxed - finalTripValue
 
         // Liquidation: you get back the trip value (before tax) and close the position
-        dataPoints.push({
-          _createdAt: new Date(liquidationTime).toISOString(),
-          tripValue: lastTripValue,
-          tripValueChange: liquidationValueChange,
-          liquidationBlock: trip.liquidationBlock,
-          prompt: "Liquidation",
-          eventType: "trip_liquidated"
-        })
-      }
-
-      // Map data points to PlotPoint format
-      const tripData = dataPoints.map((o, i) => {
-        const time = new Date(o?._createdAt || 0).getTime()
-        const valueChange = o?.tripValueChange || 0
-
-        return {
-          time: time,
+        tripData.push({
+          time: liquidationTime,
           value: 0, // Will be set later in accumulation
-          valueChange: valueChange,
+          valueChange: liquidationValueChange,
           index: 0, // Will be set later
-          eventType: o.eventType,
           tripId: tripId,
           tripCreationCost: Number(trip.tripCreationCost),
+          eventType: TRIP_EVENT_TYPE.LIQUIDATION,
           meta: {
-            ...sanityTripContent,
-            ...o
+            ...trip
           }
-        } as PlotPoint
-      })
+        })
+      }
 
       combinedData.push(...tripData)
     })
@@ -123,11 +121,10 @@
         time: earliestTime - 1000, // 1 second before first event
         value: 0,
         valueChange: 0,
-        eventType: "baseline",
         tripId: "",
         tripCreationCost: 0,
         meta: {}
-      } as PlotPoint,
+      } as TripEvent,
       ...combinedData
     ]
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { SmallButton, SignedNumber } from "$lib/components/Shared"
   import { TripProfitLossSpark } from "$lib/components/Admin"
   import { goto } from "$app/navigation"
@@ -13,7 +13,7 @@
     onpointerleave
   }: {
     trip: Trip
-    data: PlotPoint[]
+    data: TripEvent[]
     id: string
     onpointerenter: () => void
     onpointerleave: () => void

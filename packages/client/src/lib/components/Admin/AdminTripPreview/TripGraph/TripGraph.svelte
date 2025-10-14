@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max } from "d3-array"
@@ -11,7 +11,7 @@
     plotData,
     isEmpty = false,
     height = 300
-  }: { smallIcons?: boolean; plotData: PlotPoint[]; isEmpty: boolean; height?: number } = $props()
+  }: { smallIcons?: boolean; plotData: TripEvent[]; isEmpty: boolean; height?: number } = $props()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -30,7 +30,7 @@
     // Use the first point's time as the domain start, max time as the end
     // Handle the case where there's only one data point
     const domainStart = plotData[0].time
-    const domainEnd = max(plotData, (d: PlotPoint) => d.time)
+    const domainEnd = max(plotData, (d: TripEvent) => d.time)
     const finalDomainEnd =
       domainEnd !== undefined && domainEnd > domainStart ? domainEnd : domainStart + 1 // Add a minimal duration if only one point or max isn't greater
 
@@ -41,7 +41,7 @@
     if (!plotData || plotData.length === 0 || !innerHeight) return null // Use innerHeight here
 
     // Ensure the domain includes 0 and accommodates the highest value + buffer
-    const maxValue = max(plotData, (d: PlotPoint) => +d.value) ?? 0
+    const maxValue = max(plotData, (d: TripEvent) => +d.value) ?? 0
     return scaleLinear()
       .domain([0, Math.max(plotData[0].value * 2, maxValue)])
       .range([innerHeight, 0]) // Use innerHeight
@@ -51,9 +51,9 @@
   // which will be our line.
   let lineGenerator = $derived(
     xScale && yScale
-      ? line<PlotPoint>()
-          .x((d: PlotPoint) => xScale(d.time))
-          .y((d: PlotPoint) => yScale(+d.value))
+      ? line<TripEvent>()
+          .x((d: TripEvent) => xScale(d.time))
+          .y((d: TripEvent) => yScale(+d.value))
       : // .curve(curveBasis)
         null
   )
@@ -71,23 +71,23 @@
       {
         time: domain[0].getTime(),
         value: firstValue,
-        meta: { time: domain[0].getTime(), tripValue: firstValue, meta: {} }
+        meta: { time: domain[0].getTime(), value: firstValue, meta: {} }
       }, // Point at the start of the domain
       {
         time: domain[1].getTime(),
         value: firstValue,
-        meta: { time: domain[1].getTime(), tripValue: firstValue, meta: {} }
+        meta: { time: domain[1].getTime(), value: firstValue, meta: {} }
       } // Point at the end of the domain
     ]
   })
 
-  const generateTooltipContent = (point: PlotPoint) => {
-    let toolTipContent = `<div>Trip balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${point?.meta?.tripValue}</span>`
+  const generateTooltipContent = (point: TripEvent) => {
+    let toolTipContent = `<div>Trip balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${point?.meta?.value}</span>`
 
-    if (point?.meta?.tripValueChange) {
+    if (point?.meta?.valueChange) {
       const valueChangeClass =
-        point.meta.tripValueChange > 0 ? "tooltip-value-positive" : "tooltip-value-negative"
-      toolTipContent += `<br/>Change: <span class="${valueChangeClass}">${point?.meta?.tripValueChange}</span></div>`
+        point.meta.valueChange > 0 ? "tooltip-value-positive" : "tooltip-value-negative"
+      toolTipContent += `<br/>Change: <span class="${valueChangeClass}">${point?.meta?.valueChange}</span></div>`
     }
 
     return toolTipContent
@@ -139,14 +139,14 @@
                 props={{ allowHTML: true }}
               >
                 <g>
-                  {#if !point?.meta?.tripValueChange || point?.meta?.tripValueChange === 0}
+                  {#if !point?.meta?.valueChange || point?.meta?.valueChange === 0}
                     <circle
                       fill="var(--color-value)"
                       r={smallIcons ? 3 : 6}
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
                     ></circle>
-                  {:else if point?.meta?.tripValueChange > 0}
+                  {:else if point?.meta?.valueChange > 0}
                     <polygon
                       transform="translate({xScale(point.time)}, {yScale(
                         point.value

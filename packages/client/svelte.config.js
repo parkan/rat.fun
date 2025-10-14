@@ -15,6 +15,7 @@ const config = {
       strict: false
     }),
     alias: {
+      contracts: "../contracts",
       "@server/*": "../server/src/*",
       "@sanity-types": "../cms-public/sanity.types"
     }

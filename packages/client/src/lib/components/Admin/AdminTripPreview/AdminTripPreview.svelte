@@ -9,14 +9,12 @@
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
-  import {
-    AdminTripPreviewHeader,
-    AdminTripEventIntrospection,
-    TripProfitLossGraph,
-    TripConfirmLiquidation,
-    LiquidateTrip
-  } from "$lib/components/Admin"
-  import { AdminEventLog } from "$lib/components/Admin"
+  import AdminTripPreviewHeader from "$lib/components/Admin/AdminTripPreview/AdminTripPreviewHeader.svelte"
+  import AdminTripEventIntrospection from "$lib/components/Admin/AdminTripEventIntrospection/AdminTripEventIntrospection.svelte"
+  import TripProfitLossGraph from "$lib/components/Admin/AdminTripPreview/TripProfitLossGraph/TripProfitLossGraph.svelte"
+  import TripConfirmLiquidation from "$lib/components/Admin/AdminTripPreview/TripConfirmLiquidation/TripConfirmLiquidation.svelte"
+  import LiquidateTrip from "$lib/components/Admin/AdminTripPreview/LiquidateTrip.svelte"
+  import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
   import { playSound } from "$lib/modules/sound"
 
   let {
