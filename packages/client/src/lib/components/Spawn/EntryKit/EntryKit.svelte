@@ -19,6 +19,7 @@
   import { entryKitButton } from "$lib/modules/entry-kit/stores"
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
+  import { errorHandler } from "$lib/modules/error-handling"
 
   let rootEl: HTMLElement
 
@@ -41,7 +42,11 @@
 
   // ???
   $effect(() => {
-    const root = createRoot(rootEl)
+    const root = createRoot(rootEl, {
+      onCaughtError: error => errorHandler(error),
+      onRecoverableError: error => errorHandler(error),
+      onUncaughtError: error => errorHandler(error)
+    })
     const config = wagmiConfig()
 
     import("@latticexyz/entrykit/internal").then(({ EntryKitProvider }) => {
