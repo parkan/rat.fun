@@ -4,7 +4,7 @@
   import "tippy.js/dist/backdrop.css"
   import "tippy.js/animations/shift-away.css"
 
-  import { sdk } from '@farcaster/miniapp-sdk';
+  import { sdk } from "@farcaster/miniapp-sdk"
 
   import type { LayoutProps, Snapshot } from "./$types"
   import { initSound } from "$lib/modules/sound"
