@@ -11,12 +11,12 @@
 
   const enterAdmin = () => {
     playSound("ratfunTransitions", "adminEnter")
-    shaderManager.setShader("blank")
+    shaderManager.unsetShader()
   }
 
   const exitAdmin = () => {
     playSound("ratfunTransitions", "adminExit")
-    shaderManager.setShader("clouds", "inverted")
+    shaderManager.setShader("clouds", true)
   }
 </script>
 

@@ -43,6 +43,14 @@
     justify-content: center;
     align-items: center;
 
+    .loading {
+      font-size: var(--font-size-normal);
+      font-family: var(--typewriter-font-stack);
+      color: black;
+      background: orangered;
+      padding: 10px;
+    }
+
     .button-container {
       position: absolute;
       top: 50%;

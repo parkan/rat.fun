@@ -24,7 +24,7 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import { Shader, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
+  import { ShaderGlobal, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
@@ -105,7 +105,7 @@
   {/if}
 
   {#if browser}
-    <Shader />
+    <ShaderGlobal />
   {/if}
   <!-- {#if $UIState !== UI.LOADING}
   {/if} -->

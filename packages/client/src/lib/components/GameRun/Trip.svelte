@@ -55,7 +55,7 @@
   }
 
   onMount(() => {
-    shaderManager.setShader("blank")
+    shaderManager.unsetShader()
     resetTripState()
 
     // Clean the URL
@@ -65,7 +65,7 @@
 
     // Freeze the rat and trip to be able to gradually update their values without reactivity
     // from on-chain changes.
-    freezeObjects($rat, trip, tripId, $player.currentRat)
+    freezeObjects($rat, trip, tripId)
 
     // Process the trip entry
     processTripEntry()

@@ -114,10 +114,6 @@ vec3 crtChromaticAberration(vec2 uv, vec3 color) {
   float g = mix(skyColorG.g, 1.0, cloudsG * 0.9);
   float b = mix(skyColorB.b, 1.0, cloudsB * 0.9);
   
-  // Invert each channel
-  r = 1.0 - r;
-  g = 1.0 - g;
-  b = 1.0 - b;
   
   return vec3(r, g, b);
 }
@@ -130,6 +126,11 @@ void main() {
   
   // Apply remaining CRT effects
   color *= crtScanlines(uv);
+  
+  // Apply inversion if enabled
+  if (u_invert) {
+    color = vec3(1.0) - color;
+  }
   
   gl_FragColor = vec4(color, 1.0);
 } 

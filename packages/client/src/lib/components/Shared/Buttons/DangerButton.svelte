@@ -1,7 +1,7 @@
 <script lang="ts">
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
-  import ShaderBackground from "../ShaderRenderer/ShaderBackground.svelte"
+  import { ShaderLocal } from "$lib/components/Shared"
 
   let {
     text,
@@ -31,7 +31,7 @@
       <span class="button-text">{text}</span>
     </div>
     <div class="canvas-container">
-      <ShaderBackground shaderKey="plasmaOptimized" />
+      <ShaderLocal shaderKey="plasmaOptimized" />
     </div>
   </button>
 </Tooltip>

@@ -6,18 +6,9 @@
 
   let { shaderKey }: { shaderKey: keyof typeof shaders } = $props()
 
-  const localShaderManager = createShaderManager(shaders.blank.config)
+  const localShaderManager = createShaderManager()
 
   let canvasElement = $state<HTMLCanvasElement>()
-  let uniformValues = $derived(localShaderManager.uniformValues)
-
-  // Tick the shader ??
-  $effect(() => {
-    if (localShaderManager) {
-      uniformValues
-      localShaderManager.updateUniforms()
-    }
-  })
 
   onMount(() => {
     if (canvasElement) {
@@ -28,7 +19,7 @@
   })
 
   onDestroy(() => {
-    console.log("destroying shader manager")
+    console.log("destroying local shader manager")
     localShaderManager.destroy()
   })
 </script>

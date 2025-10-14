@@ -2,7 +2,7 @@ precision mediump float;
 
 uniform float u_time;
 uniform vec2 u_resolution;
-uniform float u_invert;
+uniform bool u_invert;
 
 // Simple hash function for noise
 float hash(vec2 p){
@@ -48,7 +48,9 @@ void main(){
   vec3 color=vec3(noise);
   color=mix(vec3(.1,.3,.8),vec3(.8,.2,.1),color);
   
-  color=mix(color,vec3(1.)-color,u_invert);
+  if (u_invert) {
+    color = vec3(1.0) - color;
+  }
   
   gl_FragColor=vec4(color,1.);
 }

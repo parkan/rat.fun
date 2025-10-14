@@ -2,6 +2,7 @@ precision mediump float;
 
 uniform float u_time;
 uniform vec2 u_resolution;
+uniform bool u_invert;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
@@ -15,5 +16,10 @@ void main() {
   float plasma = sin(combined) * 0.5 + 0.5;
   
   vec3 color = vec3(plasma * 1.0, plasma * 0.0, plasma * 0.0);
+  
+  if (u_invert) {
+    color = vec3(1.0) - color;
+  }
+  
   gl_FragColor = vec4(color, 1.0);
 } 

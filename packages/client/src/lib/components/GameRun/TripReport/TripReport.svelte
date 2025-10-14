@@ -86,7 +86,7 @@
 
   const setupTripReport = () => {
     playSound("ratfunTransitions", "tripReportEnter")
-    shaderManager.setShader("blank")
+    shaderManager.unsetShader()
     $backgroundMusic = playSound("ratfunMusic", "tripReport", true)
   }
 

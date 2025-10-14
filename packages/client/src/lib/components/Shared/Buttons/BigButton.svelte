@@ -2,7 +2,7 @@
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import ShaderBackground from "../ShaderRenderer/ShaderBackground.svelte"
+  import { ShaderLocal } from "$lib/components/Shared"
 
   let {
     text,
@@ -39,7 +39,7 @@
       {/if}
     </div>
     <div class="canvas-container">
-      <ShaderBackground shaderKey="plasma" />
+      <ShaderLocal shaderKey="plasma" />
     </div>
   </button>
 </Tooltip>
