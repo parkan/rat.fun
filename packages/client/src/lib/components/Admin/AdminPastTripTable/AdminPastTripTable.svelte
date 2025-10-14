@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { playerLiquidatedTrips, realisedProfitLoss } from "$lib/modules/state/stores"
   import { derived } from "svelte/store"
   import {
@@ -42,7 +42,7 @@
     return entries.sort(sortFunction)
   })
 
-  let plots: Record<string, PlotPoint[]> = $derived.by(() => {
+  let plots: Record<string, TripEvent[]> = $derived.by(() => {
     return createPlotsFromTripList(tripList, $staticContent)
   })
 

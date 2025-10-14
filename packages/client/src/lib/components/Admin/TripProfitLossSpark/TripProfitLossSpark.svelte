@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
@@ -10,7 +10,7 @@
     plotData,
     isEmpty = false,
     height = 300
-  }: { smallIcons?: boolean; plotData: PlotPoint[]; isEmpty: boolean; height?: number } = $props()
+  }: { smallIcons?: boolean; plotData: TripEvent[]; isEmpty: boolean; height?: number } = $props()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -45,7 +45,7 @@
     // Use the first point's time as the domain start, max time as the end
     // Handle the case where there's only one data point
     const domainStart = plotData[0].time
-    const domainEnd = max(plotData, (d: PlotPoint) => d.time)
+    const domainEnd = max(plotData, (d: TripEvent) => d.time)
     const finalDomainEnd =
       domainEnd !== undefined && domainEnd > domainStart ? domainEnd : domainStart + 1 // Add a minimal duration if only one point or max isn't greater
 
@@ -68,13 +68,13 @@
   // which will be our line.
   let lineGenerator = $derived(
     xScale && yScale
-      ? line<PlotPoint>()
-          .x((d: PlotPoint) => xScale(d.time))
-          .y((d: PlotPoint) => yScale(+d.value))
+      ? line<TripEvent>()
+          .x((d: TripEvent) => xScale(d.time))
+          .y((d: TripEvent) => yScale(+d.value))
       : null
   )
 
-  const generateTooltipContent = (point: PlotPoint) => {
+  const generateTooltipContent = (point: TripEvent) => {
     const balance = (point.meta as Trip)?.balance || 0
     const investment = (point.meta as Trip)?.investment || 0
     return `<div>Balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${balance.toFixed(2)}</span><br/>Investment: <span class="tooltip-value">${CURRENCY_SYMBOL}${investment.toFixed(2)}</span><br/>P/L: <span class="tooltip-value ${point.value >= 0 ? "tooltip-value-positive" : "tooltip-value-negative"}">${CURRENCY_SYMBOL}${point.value.toFixed(2)}</span></div>`

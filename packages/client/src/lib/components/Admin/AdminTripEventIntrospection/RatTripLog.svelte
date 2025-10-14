@@ -164,8 +164,8 @@
 
         <div class="summary-row">
           <span class="label">Trip Value</span>
-          <span class="value" class:positive={result.tripValueChange > 0}>
-            {result.tripValue} (+{result.tripValueChange})
+          <span class="value" class:positive={result.valueChange > 0}>
+            {result.value} (+{result.valueChange})
           </span>
         </div>
       </div>

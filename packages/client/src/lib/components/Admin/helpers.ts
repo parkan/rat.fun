@@ -1,4 +1,4 @@
-import type { PlotPoint } from "$lib/components/Admin/types"
+import type { TripEvent } from "$lib/components/Admin/types"
 import type { StaticContent } from "$lib/modules/content"
 import type { Trip as SanityTrip, Outcome as SanityOutcome } from "@sanity-types"
 
@@ -11,7 +11,7 @@ import type { Trip as SanityTrip, Outcome as SanityOutcome } from "@sanity-types
 export function createPlotsFromTripList(
   tripList: [string, Trip][],
   staticContent: StaticContent
-): Record<string, PlotPoint[]> {
+): Record<string, TripEvent[]> {
   return Object.fromEntries(
     tripList.map(([tripId, trip]) => {
       // Get sanity content for all trips
@@ -31,14 +31,14 @@ export function createPlotsFromTripList(
       const value = [
         {
           time: 0,
-          tripValue: Number(trip.tripCreationCost),
+          value: Number(trip.tripCreationCost),
           meta: sanityTripContent
         },
         ...tripOutcomes
       ].map((o, i) => {
         return {
           time: i,
-          value: o?.tripValue || 0,
+          value: o?.value || 0,
           index: i,
           tripId: tripId,
           tripCreationCost: Number(trip.tripCreationCost),

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PlotPoint } from "$lib/components/Admin/types"
+  import type { TripEvent } from "$lib/components/Admin/types"
   import { timeSince } from "$lib/modules/utils"
   import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
 
@@ -12,7 +12,7 @@
     nosync = false,
     behavior = "hover"
   }: {
-    graphData: PlotPoint[]
+    graphData: TripEvent[]
     focus?: number
     localFocusEvent?: number
     nosync?: boolean
@@ -28,19 +28,7 @@
     }
   }
 
-  let data = $derived((graphData ?? []).toReversed().filter(p => p.eventType !== "baseline"))
-
-  $inspect(data)
-
-  // let tooltipContent = $derived.by(() => {
-  //   return data.map(p => {
-  //     if (p.eventType === "trip_visit" || p.eventType === "trip_death") {
-  //       return p?.meta?.readableLog?.split(",").join("\n<br>")
-  //     } else {
-  //       return p.ownerName
-  //     }
-  //   })
-  // })
+  let data = $derived((graphData ?? []).toReversed().filter(p => !!p.eventType)) // filters baseline event
 </script>
 
 <div class="admin-event-log">
