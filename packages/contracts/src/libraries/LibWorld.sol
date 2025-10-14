@@ -24,7 +24,7 @@ import {
   RATS_KILLED_FOR_ADMIN_ACCESS
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
-import { SlopERC20 } from "../external/SlopERC20.sol";
+import { RatERC20 } from "../external/RatERC20.sol";
 import { GamePool } from "../external/GamePool.sol";
 
 library LibWorld {
@@ -119,8 +119,8 @@ library LibWorld {
   /**
    * @notice Get the erc20 token contract used by the world
    */
-  function erc20() internal view returns (SlopERC20) {
-    return SlopERC20(ExternalAddressesConfig.getErc20Address());
+  function erc20() internal view returns (RatERC20) {
+    return RatERC20(ExternalAddressesConfig.getErc20Address());
   }
 
   /**

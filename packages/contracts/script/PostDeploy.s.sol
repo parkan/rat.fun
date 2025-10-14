@@ -17,7 +17,7 @@ import { devSystem, DevSystem } from "../src/codegen/systems/DevSystemLib.sol";
 
 import { LibWorld, LibTrip } from "../src/libraries/Libraries.sol";
 
-import { SlopERC20 } from "../src/external/SlopERC20.sol";
+import { RatERC20 } from "../src/external/RatERC20.sol";
 import { GamePool } from "../src/external/GamePool.sol";
 import { MainSale } from "../src/external/MainSale.sol";
 import { SalePlaceholder } from "../src/external/SalePlaceholder.sol";
@@ -49,7 +49,7 @@ contract PostDeploy is Script {
     address treasuryAddress = vm.addr(deployerPrivateKey);
 
     // Deploy ERC-20
-    SlopERC20 erc20 = new SlopERC20(address(mainSale), serviceAddress, treasuryAddress);
+    RatERC20 erc20 = new RatERC20(address(mainSale), serviceAddress, treasuryAddress);
     // Deploy GamePool
     GamePool gamePool = new GamePool(world, erc20);
     // Initialize MainSale
@@ -117,7 +117,7 @@ contract PostDeploy is Script {
       usdUsdcPriceAggregator = address(new MockV3Aggregator(8, 99988988));
       // For local usdc reuse the custom token, minting a bunch to the deployer
       address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
-      usdcAddress = address(new SlopERC20(deployer, deployer, deployer));
+      usdcAddress = address(new RatERC20(deployer, deployer, deployer));
     } else {
       revert("unsupported chainid");
     }

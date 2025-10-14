@@ -21,7 +21,7 @@ uint256 constant SERVICE_AMOUNT = 9_000_000; // 9M
 uint256 constant TREASURY_AMOUNT = 9_000_000; // 9M
 uint256 constant LIQUIDITY_AMOUNT = 8_000_000; // 8M
 
-contract SlopERC20 is ERC20, ERC20Burnable {
+contract RatERC20 is ERC20, ERC20Burnable {
   constructor(address mainSaleAddress, address serviceAddress, address treasuryAddress) ERC20("Slopamine", "RAT") {
     // Mint the total supply
     _mint(mainSaleAddress, MAIN_SALE_AMOUNT * 10 ** decimals());
