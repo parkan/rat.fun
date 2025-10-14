@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   let {
     item,
@@ -13,6 +14,15 @@
   let busy = $state(false)
   let isHovered = $state(false)
 
+  // Determine rarity class based on value
+  const getRarityClass = (value: bigint | number) => {
+    const numValue = typeof value === "bigint" ? Number(value) : value
+    if (numValue >= 100) return "holographic"
+    if (numValue >= 50) return "gold"
+    if (numValue >= 20) return "holographic"
+    return "copper"
+  }
+
   const onMouseEnter = () => {
     playSound("ratfunUI", "hover")
     isHovered = true
@@ -24,7 +34,7 @@
 </script>
 
 <div
-  class="list-item"
+  class="inventory-item {getRarityClass(item.value)}"
   class:disabled={busy}
   class:hovered={isHovered}
   in:fade|global={{ duration: 100, delay: index * 50 }}
@@ -37,40 +47,41 @@
     <!-- NAME -->
     <div class="name">{item.name}</div>
     <!-- VALUE -->
-    <span class="value" class:negative={item.value < 0}>${item.value}</span>
+    <span class="value">{CURRENCY_SYMBOL}{item.value}</span>
   </div>
 </div>
 
 <style lang="scss">
-  .list-item {
-    font-size: var(--font-size-normal);
+  .inventory-item {
+    font-size: var(--font-size-large);
+    font-family: var(--label-font-stack);
     display: flex;
-    background: var(--color-grey-light);
+    background: rgba(200, 200, 200, 0.9);
     color: var(--background);
     padding: 5px;
     justify-content: center;
     align-items: center;
-    border: none;
     outline: none;
     width: 100%;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &.hovered {
-      background: white;
-    }
+    position: relative;
+    overflow: hidden;
+    border: 10px inset rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease;
+    border-radius: 10px;
 
     &.disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
+    &:hover {
+      transform: translateY(-5px);
+    }
+
     .value {
-      color: var(--color-success);
-      &.negative {
-        color: var(--color-death);
-      }
+      font-family: var(--typewriter-font-stack);
+      font-size: var(--font-size-normal);
+      // color: green;
     }
   }
 
