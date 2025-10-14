@@ -1,22 +1,31 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { ready, loadingPercentage } from "$lib/modules/network"
+  import { ready } from "$lib/modules/network"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
+  import { terminalTyper } from "$lib/modules/terminal-typer/index"
+  import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { gsap } from "gsap"
 
-  const { environment, loaded = () => {} } = $props<{
+  const {
+    environment,
+    loaded = () => {},
+    minimumDuration = 2000
+  }: {
     environment: ENVIRONMENT
     loaded: () => void
-  }>()
+    minimumDuration?: number
+  } = $props()
 
-  let innerElement: HTMLDivElement
+  let loadingElement: HTMLDivElement
+  let terminalBoxElement: HTMLDivElement
+  let minimumDurationComplete = $state(false)
 
-  // Wait for chain sync to complete
+  // Wait for both chain sync and minimum duration to complete
   $effect(() => {
-    if ($ready) {
+    if ($ready && minimumDurationComplete) {
       // ??? Explain what this does
       initEntities()
       // We are loaded. Animate the component out...
@@ -26,11 +35,26 @@
 
   const animateOut = async () => {
     const tl = gsap.timeline()
-    tl.to(innerElement, {
+
+    tl.to(terminalBoxElement, {
       opacity: 0,
-      duration: 1,
-      delay: 1
+      duration: 0
     })
+
+    // Create strobe effect: 5 cycles of 0.05s each
+    for (let i = 0; i < 5; i++) {
+      tl.to(loadingElement, {
+        background: "white",
+        duration: 0.05, // Half cycle for on
+        delay: 0
+      })
+      tl.to(loadingElement, {
+        background: "transparent",
+        duration: 0.05, // Half cycle for off
+        delay: 0
+      })
+    }
+
     tl.call(() => {
       loaded()
     })
@@ -41,50 +65,43 @@
     // When sync is complete, the ready store is set to true
     // We listen to for this in the $effect above
     await initPublicNetwork(environment)
+
+    // Start the minimum duration timer
+    setTimeout(() => {
+      minimumDurationComplete = true
+    }, minimumDuration)
+
+    // Run the terminal typer
+    if (terminalBoxElement) {
+      terminalTyper(terminalBoxElement, generateLoadingOutput())
+    }
   })
 </script>
 
-<div class="loading">
-  <div class="inner" bind:this={innerElement}>
-    <img src="/images/logo.png" alt="logo" />
-    <div class="message">
-      {#if $ready}
-        <span class="highlight ready">All systems ready</span>
-      {:else}
-        <span class="highlight">Booting machine: {$loadingPercentage}%</span>
-      {/if}
-    </div>
-  </div>
+<div class="loading" bind:this={loadingElement}>
+  <!-- <div class="inner" bind:this={innerElement}> -->
+  <!-- <img src="/images/logo.png" alt="logo" /> -->
+  <div class="terminal-box" bind:this={terminalBoxElement}></div>
+  <!-- </div> -->
 </div>
 
 <style lang="scss">
   .loading {
-    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: var(--foreground);
+    font-size: var(--font-size-normal);
+    width: 100vw;
+    height: 100vh;
 
-    .inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .terminal-box {
+      font-size: var(--font-size-normal);
+      width: 100%;
       height: 100%;
-
-      img {
-        height: 160px;
-      }
-
-      .message {
-        margin-top: 20px;
-
-        .highlight {
-          background: var(--foreground);
-          color: var(--background);
-          padding: 5px;
-
-          &.ready {
-            background: var(--color-alert-priority);
-          }
-        }
-      }
+      max-width: 800px;
+      text-align: left;
+      word-break: break-all;
     }
   }
 </style>

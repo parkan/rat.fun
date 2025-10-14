@@ -39,6 +39,9 @@
     position: relative;
     background-image: url("/images/texture-2.png");
     background-size: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     .button-container {
       position: absolute;
