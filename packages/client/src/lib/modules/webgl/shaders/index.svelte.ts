@@ -8,6 +8,7 @@ import { plasmaOptimized } from "./plasma-optimized"
 import { clouds } from "./clouds"
 import { colorCyclingPlasma } from "./color-cycling-plasma"
 import { vortex } from "./vortex"
+import { swirlyNoise } from "./swirly-noise"
 
 const shaders = {
   copy,
@@ -16,7 +17,8 @@ const shaders = {
   plasmaOptimized,
   clouds,
   colorCyclingPlasma,
-  vortex
+  vortex,
+  swirlyNoise
 }
 
 /**

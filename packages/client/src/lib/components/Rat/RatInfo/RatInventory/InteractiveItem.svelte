@@ -18,7 +18,7 @@
     const numValue = typeof value === "bigint" ? Number(value) : value
     if (numValue >= 100) return "holographic"
     if (numValue >= 50) return "gold"
-    if (numValue >= 20) return "holographic"
+    if (numValue >= 20) return "silver"
     return "copper"
   }
 
