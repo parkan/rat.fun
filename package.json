@@ -39,9 +39,6 @@
     "node": "^20",
     "pnpm": "^10"
   },
-  "resolutions": {
-    "brace-expansion": "2.0.1"
-  },
   "packageManager": "pnpm@10.18.0",
   "pnpm": {
     "onlyBuiltDependencies": [
