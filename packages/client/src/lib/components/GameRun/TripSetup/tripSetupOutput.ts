@@ -13,7 +13,7 @@ export function generateTripSetupOutput() {
     {
       type: "loader",
       content: "",
-      duration: 500,
+      duration: 400,
       color: "black",
       backgroundColor: "yellow",
       loaderCharacters: "!",
@@ -21,10 +21,19 @@ export function generateTripSetupOutput() {
     },
     {
       type: "text",
-      content: "WARNING WARNING WARNING WARNING WARNING WARNING WARNING",
+      content: "WARNING",
+      duration: 0,
       color: "black",
       backgroundColor: "yellow",
-      duration: 0,
+      delayAfter: 50
+    },
+    {
+      type: "loader",
+      content: "",
+      duration: 400,
+      color: "black",
+      backgroundColor: "yellow",
+      loaderCharacters: "!",
       delayAfter: 50
     },
     {
@@ -70,7 +79,7 @@ export function generateTripSetupOutput() {
     },
     {
       type: "text",
-      content: "ALL EVENTS REPORTED ARE SUBJECTIVE TO THE RAT",
+      content: "ALL EVENTS HAPPEN INSIDE THE SKULL OF THE RAT",
       color: "black",
       backgroundColor: "yellow",
       duration: 0,
