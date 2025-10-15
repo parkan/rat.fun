@@ -117,7 +117,7 @@
           <input
             class="cost-display"
             onblur={e => {
-              const value = Number(e.target.value)
+              const value = Number((e.target as HTMLInputElement).value)
               if (value < MIN_TRIP_CREATION_COST || value > $playerERC20Balance) {
                 tripCreationCost = Math.min(
                   $playerERC20Balance,
@@ -192,6 +192,8 @@
     background-image: url("/images/texture-3.png");
     background-size: 200px;
     justify-content: space-between;
+    border: 1px solid var(--color-grey-mid);
+    padding: 10px;
 
     .controls {
       display: flex;
@@ -347,7 +349,7 @@
       flex-flow: column nowrap;
       gap: 12px;
       overflow: hidden;
-      height: 80px;
+      height: 160px;
     }
   }
 </style>

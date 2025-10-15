@@ -70,7 +70,7 @@
   const teardownTripReport = () => {
     // Stop background music
     if ($backgroundMusic) {
-      console.log("stopping background music")
+      // console.log("stopping background music")
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }

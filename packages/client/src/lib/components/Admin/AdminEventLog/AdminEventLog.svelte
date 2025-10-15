@@ -2,6 +2,7 @@
   import type { TripEvent } from "$lib/components/Admin/types"
   import { timeSince } from "$lib/modules/utils"
   import { adminUnlockedAt, focusEvent } from "$lib/modules/ui/state.svelte"
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
 
   import AdminEventLogItem from "./AdminEventLogItem.svelte"
 
@@ -28,7 +29,10 @@
     }
   }
 
-  let data = $derived((graphData ?? []).toReversed().filter(p => !!p.eventType)) // filters baseline event
+  // Filter out baseline event
+  let data = $derived(
+    (graphData ?? []).toReversed().filter(p => p.eventType !== TRIP_EVENT_TYPE.BASELINE)
+  )
 </script>
 
 <div class="admin-event-log">

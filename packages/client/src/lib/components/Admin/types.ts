@@ -1,21 +1,51 @@
 import type { Outcome as SanityOutcome, Trip as SanityTrip } from "@sanity-types"
+import type { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
 
 export type PendingTrip = { prompt: string; cost: number } | null
 
-export enum TRIP_EVENT_TYPE {
-  VISIT = "trip_visit",
-  DEATH = "trip_death",
-  CREATION = "trip_created",
-  LIQUIDATION = "trip_liquidated"
-}
-
-export type TripEvent = {
+export type TripEventShared = {
+  eventType: TRIP_EVENT_TYPE
   time: number
   value: number
-  valueChange?: number
+  valueChange: number
   index: number
   tripId: string
   tripCreationCost: number
-  eventType?: TRIP_EVENT_TYPE
-  meta?: Partial<SanityOutcome> | Partial<SanityTrip>
 }
+
+// ???
+export type TripEventBaseline = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.BASELINE
+  meta: undefined
+}
+
+// VISIT => meta is SanityOutcome
+export type TripEventVisit = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.VISIT
+  meta: SanityOutcome
+}
+
+// DEATH => meta is SanityOutcome
+export type TripEventDeath = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.DEATH
+  meta: SanityOutcome
+}
+
+// CREATION => meta is SanityTrip
+export type TripEventCreation = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.CREATION
+  meta: SanityTrip
+}
+
+// LIQUIDATION => meta is SanityTrip
+export type TripEventLiquidation = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.LIQUIDATION
+  meta: SanityTrip
+}
+
+export type TripEvent =
+  | TripEventBaseline
+  | TripEventVisit
+  | TripEventDeath
+  | TripEventCreation
+  | TripEventLiquidation

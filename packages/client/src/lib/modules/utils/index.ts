@@ -7,6 +7,8 @@
 
 import { Hex } from "viem"
 import { JSONParseError } from "../error-handling/errors"
+import { get } from "svelte/store"
+import { blockNumber as blockNumberStore } from "$lib/modules/network"
 
 const BLOCKTIME = 2
 
@@ -237,11 +239,11 @@ export function blocksToReadableTime(blocks: number): string {
  * Works backwards from the current block number and current time
  * Assumes BLOCKTIME = 2 seconds per block
  * @param blockNumber The historical block number to convert
- * @param currentBlockNumber The current block number
  * @returns The approximate timestamp in milliseconds (Unix epoch)
  */
-export function blockNumberToTimestamp(blockNumber: number, currentBlockNumber: number): number {
+export function blockNumberToTimestamp(blockNumber: number): number {
   const currentTime = Date.now()
+  const currentBlockNumber = Number(get(blockNumberStore) ?? 0)
   const blocksDiff = currentBlockNumber - blockNumber
   const millisecondsDiff = blocksToSeconds(blocksDiff) * 1000
   return currentTime - millisecondsDiff

@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { type TripEvent, TRIP_EVENT_TYPE } from "$lib/components/Admin/types"
+  import type {
+    TripEventVisit,
+    TripEventDeath,
+    TripEventLiquidation,
+    TripEventCreation
+  } from "$lib/components/Admin/types"
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
   import { Icon } from "$lib/components/Shared"
   import { timeSince } from "$lib/modules/utils"
 
@@ -9,7 +15,7 @@
     localFocusEvent,
     setLocalFocusEvent
   }: {
-    point: TripEvent
+    point: TripEventVisit | TripEventDeath | TripEventLiquidation | TripEventCreation
     behavior?: "hover" | "click"
     localFocusEvent?: number
     setLocalFocusEvent: (index: number) => void
@@ -17,11 +23,18 @@
 
   const focus = $derived(localFocusEvent === point.index)
 
-  const href = $derived(
-    point.eventType === TRIP_EVENT_TYPE.VISITED || point.eventType === TRIP_EVENT_TYPE.DEATH
-      ? `/admin/${point.meta?.tripId}?focusId=${point.meta._id}`
-      : `/admin/${point.meta._id}`
-  )
+  const href = $derived.by(() => {
+    // For visit and death events, meta is SanityOutcome
+    if (point.eventType === TRIP_EVENT_TYPE.VISIT || point.eventType === TRIP_EVENT_TYPE.DEATH) {
+      return `/admin/${point.meta?.tripId}?focusId=${point.meta._id}`
+    } else if (
+      point.eventType === TRIP_EVENT_TYPE.LIQUIDATION ||
+      point.eventType === TRIP_EVENT_TYPE.CREATION
+    ) {
+      // For liquidation and creation events, meta is SanityTrip
+      return `/admin/${point.meta._id}`
+    }
+  })
 
   const onpointerdown = () => {
     // ...
@@ -46,22 +59,22 @@
   }
 </script>
 
-{#snippet ratVisitEvent(p: TripEvent)}
-  <Icon name="Paw" address={(p.meta as Trip).owner} width={10} />
-  {(p.meta as Trip).playerName} sent {(p.meta as Trip).ratName} to trip #{(p.meta as Trip).index}
+{#snippet ratVisitEvent(p: TripEventVisit | TripEventDeath)}
+  <Icon name="Paw" address={p.meta?.playerName} width={10} />
+  {p.meta?.playerName} sent {p.meta?.ratName} to trip #{p.meta?.tripIndex}
 {/snippet}
 
-{#snippet tripLiquidated(p: TripEvent)}
-  <Icon width={10} name="Handshake" fill="white" /> You liquidated trip #{(p.meta as Trip).index}
-{/snippet}
-
-{#snippet ratDied(p: TripEvent)}
+{#snippet ratDied(p: TripEventDeath)}
   <Icon width={10} name="Cross" fill="white" />
-  {(p.meta as Trip).ratName} died tripping #{(p.meta as Trip).index}
+  {p.meta?.ratName} died tripping #{p.meta?.tripIndex}
 {/snippet}
 
-{#snippet tripCreated(p: TripEvent)}
-  <Icon width={10} name="Asterisk" fill="white" /> You created trip #{(p.meta as Trip).index}
+{#snippet tripLiquidated(p: TripEventLiquidation)}
+  <Icon width={10} name="Handshake" fill="white" /> You liquidated trip #{p.meta?.index}
+{/snippet}
+
+{#snippet tripCreated(p: TripEventCreation)}
+  <Icon width={10} name="Asterisk" fill="white" /> You created trip #{p.meta?.index}
 {/snippet}
 
 <a class="event" {href} {onpointerdown} {onpointerup} {onpointerenter} {onpointerleave} class:focus>

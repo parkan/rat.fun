@@ -8,14 +8,14 @@
   } = $props()
 </script>
 
-<tr class="active-trip-table-item loading-row">
+<tr class="pending-trip-table-item loading-row">
   <td class="cell-index">-</td>
-  <td class="cell-description">
+  <td class="cell-prompt">
     <p class="single-line">{pendingTrip?.prompt ?? ""}</p>
   </td>
   <td class="cell-balance">0</td>
   <td class="cell-profit">0</td>
-  <td class="cell-graph">
+  <td class="cell-spark">
     <div class="mini-graph loading-graph"></div>
   </td>
   <td class="cell-actions"> </td>
@@ -35,7 +35,7 @@
     }
   }
 
-  .active-trip-table-item {
+  .pending-trip-table-item {
     height: 24px;
     font-size: var(--font-size-small);
 
@@ -76,11 +76,6 @@
       padding: 0 6px;
     }
 
-    .cell-visits {
-      text-align: right;
-      width: 60px;
-    }
-
     .cell-balance {
       width: 120px;
       text-align: right;
@@ -101,21 +96,9 @@
       width: 80px;
     }
 
-    .cell-action {
+    .cell-actions {
       width: 100px;
       height: 100%;
-    }
-
-    .up {
-      color: var(--color-up);
-    }
-
-    .down {
-      color: var(--color-down);
-    }
-
-    .grey {
-      color: grey;
     }
   }
 

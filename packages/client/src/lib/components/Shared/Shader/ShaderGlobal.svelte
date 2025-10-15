@@ -14,7 +14,7 @@
   })
 
   onDestroy(() => {
-    console.log("destroying global shader manager")
+    // console.log("destroying global shader manager")
     shaderManager.destroy()
   })
 </script>
