@@ -6,51 +6,168 @@
 
   let { onComplete }: { onComplete: () => void } = $props()
 
-  let containerElement: HTMLDivElement | null = $state(null)
+  let logoElement: HTMLDivElement | null = $state(null)
+  let layer4Element: HTMLDivElement | null = $state(null)
+  let layer3Element: HTMLDivElement | null = $state(null)
+  let layer2Element: HTMLDivElement | null = $state(null)
+  let layer1Element: HTMLDivElement | null = $state(null)
 
   const exitTimeline = gsap.timeline()
+  const enterTimeline = gsap.timeline()
 
   onMount(() => {
-    gsap.set(".logo img", {
+    // Starting states
+    enterTimeline.set([layer1Element, layer2Element, layer3Element, layer4Element], {
+      scale: 0,
+      rotation: 0
+    })
+
+    enterTimeline.set(logoElement, {
       opacity: 0
     })
 
-    gsap.to(".logo img", {
-      opacity: 0.8,
-      duration: 0.3,
-      ease: "power2.out"
-    })
+    // Fade in whole logo
+    enterTimeline.to(
+      logoElement,
+      {
+        duration: 0.7,
+        opacity: 0.7,
+        ease: "power2.out"
+      },
+      "0.5"
+    )
+
+    // Animate in spiral layer
+    enterTimeline.to(
+      layer1Element,
+      {
+        scale: 1,
+        duration: 0.5,
+        ease: "power2.out"
+      },
+      "0.5"
+    )
+
+    // Scale in text layers
+    enterTimeline.to(
+      [layer2Element, layer4Element],
+      {
+        duration: 0.7,
+        scale: 1,
+        ease: "bounce.out(2.5)"
+      },
+      "0.5"
+    )
+
+    // Scale in mascot layer
+    enterTimeline.to(
+      layer3Element,
+      {
+        duration: 1,
+        scale: 1,
+        ease: "bounce.out(2.5)"
+      },
+      "0.5"
+    )
   })
 
-  const onClick = () => {
+  const onmouseup = () => {
     playSound("ratfunUI", "logoClick")
 
-    exitTimeline.play()
+    // Fade out text layers
+    exitTimeline.to(
+      [layer2Element, layer4Element],
+      {
+        opacity: 0,
+        duration: 0.1,
+        ease: "power2.out"
+      },
+      "0"
+    )
 
-    exitTimeline.set(".logo img", {
-      opacity: 1,
-      scale: 0.9
-    })
-
-    exitTimeline.to(".logo img", {
-      opacity: 0,
-      scale: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    })
+    // Animate out whole logo
+    exitTimeline.to(
+      logoElement,
+      {
+        scale: 0,
+        duration: 0.7,
+        rotation: 360,
+        ease: "power2.out"
+      },
+      "0"
+    )
 
     exitTimeline.call(onComplete)
   }
 
   const onmousedown = () => {
     playSound("ratfunUI", "smallButtonDown")
+
+    gsap.to(logoElement, {
+      scale: 1.2,
+      duration: 0.2,
+      ease: "power2.out"
+    })
+  }
+
+  const onmouseenter = () => {
+    playSound("ratfunUI", "smallButtonDown")
+
+    // Animate highlight on mascot layer
+    gsap.to(layer3Element, {
+      scale: 1.2,
+      rotation: -10,
+      duration: 0.2,
+      ease: "expo.out"
+    })
+
+    // Animate background layer
+    // gsap.to([layer1Element], {
+    //   rotation: 10,
+    //   duration: 0.1,
+    //   ease: "power2.out"
+    // })
+  }
+
+  const onmouseleave = () => {
+    playSound("ratfunUI", "smallButtonUp")
+
+    // Reset mascot layer
+    gsap.to(layer3Element, {
+      scale: 1,
+      rotation: 0,
+      duration: 0.2,
+      ease: "power2.out"
+    })
+
+    // Reset background layer
+    // gsap.to([layer1Element], {
+    //   rotation: 0,
+    //   duration: 0.1,
+    //   ease: "power2.out"
+    // })
   }
 </script>
 
-<div class="outer-container" bind:this={containerElement}>
-  <button class="inner-container" onclick={onClick} {onmousedown}>
-    <div class="logo" in:fade|global={{ duration: 500 }}>
-      <img src="/images/logo8.png" draggable={false} alt="RAT.FUN" />
+<div class="outer-container">
+  <button {onmouseenter} {onmouseleave} {onmouseup} {onmousedown}>
+    <div class="logo" bind:this={logoElement}>
+      <!-- LAYER 4-->
+      <div class="layer layer-4" bind:this={layer4Element}>
+        <img src="/images/logo/logo-layer-4.png" draggable={false} alt="RAT.FUN" />
+      </div>
+      <!-- LAYER 3-->
+      <div class="layer layer-3" bind:this={layer3Element}>
+        <img src="/images/logo/logo-layer-3.png" draggable={false} alt="RAT.FUN" />
+      </div>
+      <!-- LAYER 2-->
+      <div class="layer layer-2" bind:this={layer2Element}>
+        <img src="/images/logo/logo-layer-2.png" draggable={false} alt="RAT.FUN" />
+      </div>
+      <!-- LAYER 1 -->
+      <div class="layer layer-1" bind:this={layer1Element}>
+        <img src="/images/logo/logo-layer-1.png" draggable={false} alt="RAT.FUN" />
+      </div>
     </div>
   </button>
 </div>
@@ -64,15 +181,6 @@
     justify-content: center;
     color: white;
 
-    .inner-container {
-      display: flex;
-      flex-flow: column nowrap;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      color: var(--background);
-    }
-
     button {
       background: none;
       border: none;
@@ -80,13 +188,43 @@
       cursor: pointer;
       outline: none;
       mix-blend-mode: screen;
+      height: fit-content;
+      width: fit-content;
 
-      img {
+      .logo {
+        position: relative;
         width: 600px;
-        max-width: 100dvw;
-        height: 100%;
+        max-width: 80dvw;
+        aspect-ratio: 1/1;
         object-fit: contain;
-        opacity: 0.8;
+
+        .layer {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+
+          &.layer-1 {
+            z-index: 1;
+          }
+          &.layer-2 {
+            z-index: 2;
+          }
+          &.layer-3 {
+            z-index: 3;
+          }
+          &.layer-4 {
+            z-index: 4;
+          }
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
       }
     }
   }
