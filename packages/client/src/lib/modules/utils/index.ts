@@ -440,6 +440,7 @@ export function truncateString(str: string, maxLength: number) {
 
 /**
  * Replace unsafe characters with a placeholder
+ * Used to avoid tickery with hidden/non-human readable characters in trip prompts
  * @param input The string to render
  * @param placeholder The placeholder to use if the string is unsafe
  * @param renderCodepoints Whether to render codepoints

@@ -1,22 +1,16 @@
 import { ShaderManager } from "./ShaderManager.svelte"
 
 // Re-export all shaders from their respective folders
-import { copy } from "./copy"
-import { noise } from "./noise"
 import { plasma } from "./plasma"
 import { plasmaOptimized } from "./plasma-optimized"
 import { clouds } from "./clouds"
-import { colorCyclingPlasma } from "./color-cycling-plasma"
 import { vortex } from "./vortex"
 import { swirlyNoise } from "./swirly-noise"
 
 const shaders = {
-  copy,
-  noise,
   plasma,
   plasmaOptimized,
   clouds,
-  colorCyclingPlasma,
   vortex,
   swirlyNoise
 }

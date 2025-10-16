@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
+  import { fade } from "svelte/transition"
   import { player } from "$lib/modules/state/stores"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
   import { sendCreateRat } from "$lib/modules/action-manager/index.svelte"
@@ -13,13 +14,15 @@
   import { refetchBalance } from "$lib/modules/erc20Listener"
   import { playSound } from "$lib/modules/sound"
 
-  import { LockButton } from "$lib/components/Shared"
+  import { LockButton, SmallSpinner } from "$lib/components/Shared"
 
   // Pre-generate the final name
   const { firstName, lastName, number } = generateRatName()
   const finalName = `${firstName}_${lastName}_${number}`
 
   let deploymentDone = $state(false)
+  let waitingForDeployment = $state(false)
+
   let currentSlot = $state(0) // 0, 1, 2 for the three slots
   let slot0Stopped = $state(false)
   let slot1Stopped = $state(false)
@@ -138,6 +141,7 @@
     if (deploymentDone) {
       done()
     } else {
+      waitingForDeployment = true
       // User finished slot machine before deployment, wait for deployment
       const checkInterval = setInterval(() => {
         if (deploymentDone) {
@@ -189,6 +193,12 @@
       {/if}
     </div>
   </div>
+
+  {#if waitingForDeployment}
+    <div class="getting-rat-message" in:fade={{ duration: 200 }}>
+      Getting your rat... <SmallSpinner soundOn />
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -230,6 +240,17 @@
           }
         }
       }
+    }
+
+    .getting-rat-message {
+      position: absolute;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px;
+      font-size: var(--font-size-normal);
+      color: var(--background);
+      background: orangered;
     }
   }
 </style>

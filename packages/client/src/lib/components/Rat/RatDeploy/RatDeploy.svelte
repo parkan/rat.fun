@@ -23,18 +23,22 @@
 </script>
 
 <div class="deploy-rat">
-  <div class="button-container">
-    {#if $player}
-      <BigButton
-        id="buy_rat"
-        text="Buy rat"
-        cost={Number($gameConfig?.ratCreationCost)}
-        {disabled}
-        onclick={onClick}
-      />
-    {:else}
-      <BigButton text="Spawn" onclick={onSpawnClick} />
-    {/if}
+  <div class="inner-container">
+    <div class="mascot-container">
+      <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+    </div>
+    <div class="button-container">
+      {#if $player}
+        <BigButton
+          text="Buy rat"
+          cost={Number($gameConfig?.ratCreationCost)}
+          {disabled}
+          onclick={onClick}
+        />
+      {:else}
+        <BigButton text="Spawn" onclick={onSpawnClick} />
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -48,18 +52,38 @@
     position: relative;
     background-image: url("/images/texture-2.png");
     background-size: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-    .button-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%);
-      overflow: hidden;
-      width: 90%;
+    .inner-container {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 200px;
+      justify-content: center;
+      width: 100%;
+      margin-top: -80px;
+
+      .mascot-container {
+        width: 300px;
+        height: 300px;
+        margin-bottom: 20px;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+
+      .button-container {
+        overflow: hidden;
+        width: 90%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
     }
   }
 </style>

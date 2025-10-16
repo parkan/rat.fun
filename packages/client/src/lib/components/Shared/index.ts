@@ -12,6 +12,9 @@ export { default as Circle } from "./Graphics/Circle.svelte"
 export { default as Cross } from "./Graphics/Cross.svelte"
 export { default as Xed } from "./Graphics/Xed.svelte"
 
+/* Marquee */
+export { default as Marquee } from "./Marquee/Marquee.svelte"
+
 /* Shader */
 export { default as ShaderGlobal } from "./Shader/ShaderGlobal.svelte"
 export { default as ShaderLocal } from "./Shader/ShaderLocal.svelte"

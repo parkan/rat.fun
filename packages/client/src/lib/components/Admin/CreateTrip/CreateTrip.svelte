@@ -10,6 +10,7 @@
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { MIN_TRIP_CREATION_COST } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
+  import { onMount } from "svelte"
 
   let {
     ondone,
@@ -21,6 +22,7 @@
 
   let tripDescription: string = $state("")
   let busy: boolean = $state(false)
+  let textareaElement: HTMLTextAreaElement | null = $state(null)
 
   // Prompt has to be between 1 and MAX_TRIP_PROMPT_LENGTH characters
   let invalidTripDescriptionLength = $derived(
@@ -86,6 +88,13 @@
     }
     tripDescription = ""
   }
+
+  onMount(() => {
+    // Focus the textarea when the component mounts
+    if (textareaElement) {
+      textareaElement.focus()
+    }
+  })
 </script>
 
 {#if !busy}
@@ -107,6 +116,7 @@
           {placeholder}
           oninput={typeHit}
           bind:value={tripDescription}
+          bind:this={textareaElement}
         ></textarea>
       </div>
 
