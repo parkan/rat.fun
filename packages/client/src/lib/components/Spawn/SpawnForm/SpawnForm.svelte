@@ -114,7 +114,7 @@
       flex-flow: column nowrap;
       align-items: center;
       justify-content: center;
-      width: 800px;
+      width: 600px;
       max-width: 90dvw;
 
       p {
@@ -122,19 +122,15 @@
         background: var(--background);
         color: var(--foreground);
         padding: 10px;
+        text-align: center;
       }
 
       .form {
         display: flex;
         width: 100%;
-
-        @media (max-width: 700px) {
-          flex-wrap: wrap;
-        }
+        flex-wrap: wrap;
 
         input {
-          height: 100%;
-          width: 300px;
           margin-right: 10px;
           font-size: var(--font-size-large);
           padding: 10px;
@@ -146,12 +142,10 @@
           text-transform: uppercase;
           border-bottom: var(--default-border-style);
           outline: none;
-
-          @media (max-width: 700px) {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 20px;
-          }
+          width: 100%;
+          height: 100px;
+          margin-bottom: 20px;
+          text-align: center;
 
           &::placeholder {
             color: var(--color-grey-light);
@@ -160,7 +154,7 @@
 
         .button-container {
           width: 100%;
-          height: 100px;
+          height: 120px;
         }
       }
 

@@ -94,11 +94,7 @@
   {#if $UIState === UI.LOADING}
     <Loading {environment} {loaded} />
   {:else if $UIState === UI.SPAWNING}
-    <div class="context-main">
-      <main>
-        <Spawn {walletType} {spawned} />
-      </main>
-    </div>
+    <Spawn {walletType} {spawned} />
   {:else}
     <div class="context-main">
       {@render children?.()}
@@ -137,14 +133,6 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  main {
-    width: var(--game-window-width);
-    height: var(--game-window-height);
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .bg {

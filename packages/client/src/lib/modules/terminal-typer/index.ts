@@ -5,13 +5,29 @@ const DEFAULT_TYPE_SPEED = 10
 const DEFAULT_DELAY_AFTER = 500
 const DEFAULT_LOADER_DURATION = 3000
 
-export async function terminalTyper(targetElement: HTMLElement, units: TerminalOutputUnit[]) {
-  for (const unit of units) {
-    await typeUnit(targetElement, unit)
+export function terminalTyper(targetElement: HTMLElement, units: TerminalOutputUnit[]) {
+  let isStopped = false
+
+  const controller = {
+    stop: () => {
+      isStopped = true
+    },
+    promise: (async () => {
+      for (const unit of units) {
+        if (isStopped) break
+        await typeUnit(targetElement, unit, () => isStopped)
+      }
+    })()
   }
+
+  return controller
 }
 
-async function typeUnit(targetElement: HTMLElement, unit: TerminalOutputUnit) {
+async function typeUnit(
+  targetElement: HTMLElement,
+  unit: TerminalOutputUnit,
+  isStopped: () => boolean
+) {
   const typeSpeed = unit.typeSpeed ?? DEFAULT_TYPE_SPEED
   const delayAfter = unit.delayAfter ?? DEFAULT_DELAY_AFTER
 
@@ -22,9 +38,10 @@ async function typeUnit(targetElement: HTMLElement, unit: TerminalOutputUnit) {
       typeSpeed,
       unit.color,
       unit.backgroundColor,
-      unit.duration
+      unit.duration,
+      isStopped
     )
-    await sleep(delayAfter)
+    if (!isStopped()) await sleep(delayAfter)
   } else if (unit.type === "loader") {
     await typeLoader(
       targetElement,
@@ -33,9 +50,10 @@ async function typeUnit(targetElement: HTMLElement, unit: TerminalOutputUnit) {
       typeSpeed,
       unit.color,
       unit.backgroundColor,
-      unit.loaderCharacters ?? ""
+      unit.loaderCharacters ?? "",
+      isStopped
     )
-    await sleep(delayAfter)
+    if (!isStopped()) await sleep(delayAfter)
   }
 }
 
@@ -45,7 +63,8 @@ async function typeText(
   typeSpeed: number,
   color: string,
   backgroundColor: string,
-  duration?: number
+  duration: number | undefined,
+  isStopped: () => boolean
 ) {
   // Start new line
   addLine(targetElement, "text")
@@ -58,6 +77,7 @@ async function typeText(
   }
 
   for (const char of content) {
+    if (isStopped()) break
     addChar(targetElement, char, color, backgroundColor)
     playSound("ratfunUI", "type")
     await sleep(typeSpeed)
@@ -71,15 +91,16 @@ async function typeLoader(
   typeSpeed: number,
   color: string,
   backgroundColor: string,
-  loaderCharacters: string
+  loaderCharacters: string,
+  isStopped: () => boolean
 ) {
   // Start new line
   addLine(targetElement, "loader")
 
-  // First, output the content
+  // First, output the content with sound effects
   for (const char of content) {
+    if (isStopped()) return
     addChar(targetElement, char, color, backgroundColor)
-    playSound("ratfunUI", "type2")
     await sleep(typeSpeed)
   }
 
@@ -92,7 +113,7 @@ async function typeLoader(
   const startTime = Date.now()
   let currentLoaderContent = ""
 
-  while (Date.now() - startTime < duration) {
+  while (Date.now() - startTime < duration && !isStopped()) {
     // Clear current line content
     const currentLine = targetElement.lastElementChild as HTMLElement
     if (currentLine) {
@@ -101,14 +122,26 @@ async function typeLoader(
 
     // Re-add the content
     for (const char of content) {
+      if (isStopped()) return
       addChar(targetElement, char, color, backgroundColor)
     }
 
-    // Add loader characters repeatedly
-    currentLoaderContent += loaderCharacters
+    // Add all accumulated loader characters
     addTextToLine(targetElement, currentLoaderContent, color, backgroundColor)
 
-    await sleep(typeSpeed)
+    // Add loader characters repeatedly with sound effects
+    for (const char of loaderCharacters) {
+      if (isStopped()) return
+      currentLoaderContent += char
+      addChar(targetElement, char, color, backgroundColor)
+      playSound("ratfunUI", "type3")
+      await sleep(typeSpeed)
+
+      // Check if we've exceeded duration after each character
+      if (Date.now() - startTime >= duration) {
+        break
+      }
+    }
   }
 }
 

@@ -20,6 +20,7 @@
   } = $props()
 
   let minimumDurationComplete = $state(false)
+  let typer = $state<{ stop: () => void }>()
 
   // Elements
   let loadingElement: HTMLDivElement
@@ -31,6 +32,12 @@
     if ($ready && minimumDurationComplete) {
       // ??? Explain what this does
       initEntities()
+
+      console.log("typer", typer)
+      // Stop the terminal typer
+      if (typer?.stop) {
+        typer.stop()
+      }
       // We are loaded. Animate the component out...
       animateOut()
     }
@@ -90,7 +97,7 @@
 
     // Run the terminal typer
     if (terminalBoxElement) {
-      terminalTyper(terminalBoxElement, generateLoadingOutput())
+      typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
   })
 </script>

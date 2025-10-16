@@ -11,6 +11,11 @@ export const ratfunUI: SoundAssets = {
     author: "leo",
     volume: 1
   },
+  type3: {
+    src: "/sounds/ratfun/ui/click_11.mp3",
+    author: "leo",
+    volume: 1
+  },
   lineHit: {
     src: "/sounds/ratfun/ui/line-hit.wav",
     author: "leo",
@@ -175,5 +180,10 @@ export const ratfunUI: SoundAssets = {
     src: "/sounds/ratfun/ui/counter-end.mp3",
     author: "leo",
     volume: 3
+  },
+  logoIn: {
+    src: "/sounds/ratfun/ui/logo-in.mp3",
+    author: "leo",
+    volume: 1
   }
 }

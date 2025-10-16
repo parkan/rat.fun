@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { fade } from "svelte/transition"
   import gsap from "gsap"
   import { playSound } from "$lib/modules/sound"
 
@@ -12,10 +11,14 @@
   let layer2Element: HTMLDivElement | null = $state(null)
   let layer1Element: HTMLDivElement | null = $state(null)
 
+  let isAnimating = $state(false)
+
   const exitTimeline = gsap.timeline()
   const enterTimeline = gsap.timeline()
 
   onMount(() => {
+    isAnimating = true
+
     // Starting states
     enterTimeline.set([layer1Element, layer2Element, layer3Element, layer4Element], {
       scale: 0,
@@ -25,6 +28,15 @@
     enterTimeline.set(logoElement, {
       opacity: 0
     })
+
+    // Play sound
+    enterTimeline.call(
+      () => {
+        playSound("ratfunUI", "logoIn")
+      },
+      [],
+      "0.5"
+    )
 
     // Fade in whole logo
     enterTimeline.to(
@@ -69,14 +81,22 @@
       },
       "0.5"
     )
+
+    // Animation complete
+    enterTimeline.call(() => {
+      isAnimating = false
+    })
   })
 
   const onmouseup = () => {
+    if (isAnimating) return
+
+    isAnimating = true
     playSound("ratfunUI", "logoClick")
 
-    // Fade out text layers
+    // Fade out text and mascot layers
     exitTimeline.to(
-      [layer2Element, layer4Element],
+      [layer2Element, layer4Element, layer3Element],
       {
         opacity: 0,
         duration: 0.1,
@@ -101,6 +121,8 @@
   }
 
   const onmousedown = () => {
+    if (isAnimating) return
+
     playSound("ratfunUI", "smallButtonDown")
 
     gsap.to(logoElement, {
@@ -111,6 +133,8 @@
   }
 
   const onmouseenter = () => {
+    if (isAnimating) return
+
     playSound("ratfunUI", "smallButtonDown")
 
     // Animate highlight on mascot layer
@@ -130,6 +154,8 @@
   }
 
   const onmouseleave = () => {
+    if (isAnimating) return
+
     playSound("ratfunUI", "smallButtonUp")
 
     // Reset mascot layer
@@ -150,7 +176,7 @@
 </script>
 
 <div class="outer-container">
-  <button {onmouseenter} {onmouseleave} {onmouseup} {onmousedown}>
+  <button {onmouseenter} {onmouseleave} {onmouseup} {onmousedown} class:animating={isAnimating}>
     <div class="logo" bind:this={logoElement}>
       <!-- LAYER 4-->
       <div class="layer layer-4" bind:this={layer4Element}>
@@ -190,6 +216,10 @@
       mix-blend-mode: screen;
       height: fit-content;
       width: fit-content;
+
+      &.animating {
+        pointer-events: none;
+      }
 
       .logo {
         position: relative;

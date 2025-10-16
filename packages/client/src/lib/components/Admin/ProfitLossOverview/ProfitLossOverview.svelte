@@ -145,13 +145,13 @@
     }
 
     .portfolio-container {
-      height: 100px;
+      height: 80px;
       display: flex;
       flex-flow: row nowrap;
 
       .portfolio-box {
         width: 50%;
-        height: 100px;
+        height: 100%;
         display: flex;
         background: rgba(0, 0, 0, 0.2);
         position: relative;
