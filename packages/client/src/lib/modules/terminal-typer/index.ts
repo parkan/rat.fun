@@ -72,7 +72,7 @@ async function typeText(
   // If duration is 0, output everything at once
   if (duration === 0) {
     addTextToLine(targetElement, content, color, backgroundColor)
-    playSound("ratfunUI", "lineHit")
+    playSound("ratfunUI", "terminalHit")
     return
   }
 
@@ -97,12 +97,9 @@ async function typeLoader(
   // Start new line
   addLine(targetElement, "loader")
 
-  // First, output the content with sound effects
-  for (const char of content) {
-    if (isStopped()) return
-    addChar(targetElement, char, color, backgroundColor)
-    await sleep(typeSpeed)
-  }
+  // Output the content all at once
+  addTextToLine(targetElement, content, color, backgroundColor)
+  playSound("ratfunUI", "terminalHit")
 
   // If duration is 0, output everything at once
   if (duration === 0) {
@@ -121,10 +118,7 @@ async function typeLoader(
     }
 
     // Re-add the content
-    for (const char of content) {
-      if (isStopped()) return
-      addChar(targetElement, char, color, backgroundColor)
-    }
+    addTextToLine(targetElement, content, color, backgroundColor)
 
     // Add all accumulated loader characters
     addTextToLine(targetElement, currentLoaderContent, color, backgroundColor)

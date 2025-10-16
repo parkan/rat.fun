@@ -85,6 +85,7 @@
 
   /* Typography */
   --typewriter-font-stack: "Workbench", monospace;
+  --button-font-stack: "Michroma", sans-serif;
   --special-font-stack: "Xanh Mono", monospace;
   --label-font-stack: "Xanh Mono", monospace;
   --font-size-very-small: 9px;

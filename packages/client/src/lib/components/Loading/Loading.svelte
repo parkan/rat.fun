@@ -5,6 +5,7 @@
   import { initEntities } from "$lib/modules/systems/initEntities"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
+  import { playSound } from "$lib/modules/sound"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { gsap } from "gsap"
@@ -33,7 +34,6 @@
       // ??? Explain what this does
       initEntities()
 
-      console.log("typer", typer)
       // Stop the terminal typer
       if (typer?.stop) {
         typer.stop()
@@ -51,6 +51,10 @@
     tl.to(terminalBoxElement, {
       opacity: 0,
       duration: 0
+    })
+
+    tl.call(() => {
+      playSound("ratfunUI", "strobe")
     })
 
     // Create strobe effect: 16 cycles of 1/60s (1 frame each at 60fps)

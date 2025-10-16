@@ -21,7 +21,7 @@
 
 <div class="no-allowance">
   {#if busy}
-    <div class="loading">Approving allowance <SmallSpinner /></div>
+    <div class="loading">Approving allowance <SmallSpinner soundOn /></div>
   {:else}
     <div class="button-container">
       <BigButton text="Approve max allowance" disabled={busy} onclick={onClick} />

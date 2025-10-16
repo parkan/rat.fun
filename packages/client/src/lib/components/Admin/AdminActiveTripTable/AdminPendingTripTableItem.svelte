@@ -10,7 +10,7 @@
 </script>
 
 <tr class="pending-trip-table-item loading-row">
-  <td class="cell-index"><SmallSpinner /></td>
+  <td class="cell-index"><SmallSpinner soundOn /></td>
   <td class="cell-prompt">
     <p class="single-line">{pendingTrip?.prompt ?? ""}</p>
   </td>

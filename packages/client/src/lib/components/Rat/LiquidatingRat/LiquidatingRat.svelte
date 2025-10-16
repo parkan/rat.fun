@@ -34,7 +34,7 @@
 </script>
 
 <div class="liquidating-rat">
-  <div class="loading">KILLING IN PROGRESS <SmallSpinner /></div>
+  <div class="loading">KILLING IN PROGRESS <SmallSpinner soundOn /></div>
 </div>
 
 <style lang="scss">

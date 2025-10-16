@@ -63,7 +63,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 80px;
+      height: 120px;
     }
   }
 </style>

@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { onMount, tick } from "svelte"
   import gsap from "gsap"
   import { playSound } from "$lib/modules/sound"
+  import { UIState } from "$lib/modules/ui/state.svelte"
+  import { UI } from "$lib/modules/ui/enums"
 
   let { onComplete }: { onComplete: () => void } = $props()
 
@@ -13,10 +15,10 @@
 
   let isAnimating = $state(false)
 
+  const enterTimeline = gsap.timeline({ paused: true })
   const exitTimeline = gsap.timeline()
-  const enterTimeline = gsap.timeline()
 
-  onMount(() => {
+  onMount(async () => {
     isAnimating = true
 
     // Starting states
@@ -86,6 +88,14 @@
     enterTimeline.call(() => {
       isAnimating = false
     })
+
+    // Due to how the loading/spawning sequence currently works
+    // we will pass through here before the UI state is updated
+    // we wait for the next tick to ensure the UI state is updated
+    await tick()
+    if ($UIState === UI.SPAWNING) {
+      enterTimeline.play()
+    }
   })
 
   const onmouseup = () => {

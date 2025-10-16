@@ -187,8 +187,6 @@
     })
   })
 
-  $inspect("graphData", graphData)
-
   onMount(() => {
     $backgroundMusic?.stop()
     $backgroundMusic = playSound("ratfunMusic", "admin", true)

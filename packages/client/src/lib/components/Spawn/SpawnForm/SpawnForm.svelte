@@ -3,11 +3,12 @@
   import gsap from "gsap"
   import { onMount } from "svelte"
 
-  import { BigButton } from "$lib/components/Shared"
   import { player } from "$lib/modules/state/stores"
   import { typeHit } from "$lib/modules/sound"
   import { InputValidationError } from "$lib/modules/error-handling/errors"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
+
+  import { BigButton } from "$lib/components/Shared"
   import SmallSpinner from "$lib/components/Shared/Loaders/SmallSpinner.svelte"
 
   const { onComplete = () => {} } = $props<{
@@ -19,6 +20,7 @@
 
   let buttonElement: HTMLDivElement | null = $state(null)
   let textElement: HTMLDivElement | null = $state(null)
+  let inputElement: HTMLInputElement | null = $state(null)
   const timeline = gsap.timeline()
 
   async function submitForm() {
@@ -63,7 +65,13 @@
     })
     timeline.to(buttonElement, {
       opacity: 1,
-      duration: 0.4
+      duration: 0.4,
+      onComplete: () => {
+        // Focus the input after the animation completes
+        if (inputElement) {
+          inputElement.focus()
+        }
+      }
     })
   })
 </script>
@@ -71,7 +79,7 @@
 <div class="outer-container">
   <div class="inner-container">
     {#if busy}
-      <div class="loader">Issuing member card <SmallSpinner /></div>
+      <div class="loader">Issuing member card <SmallSpinner soundOn /></div>
     {:else}
       <!-- INTRO TEXT -->
       <div class="text" bind:this={textElement}>
@@ -85,6 +93,7 @@
           type="text"
           placeholder="YOUR NAME"
           bind:value={name}
+          bind:this={inputElement}
           onkeydown={e => {
             typeHit()
             if (e.key === "Enter") {

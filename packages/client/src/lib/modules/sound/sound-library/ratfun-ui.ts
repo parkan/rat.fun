@@ -12,7 +12,7 @@ export const ratfunUI: SoundAssets = {
     volume: 1
   },
   type3: {
-    src: "/sounds/ratfun/ui/click_11.mp3",
+    src: "/sounds/ratfun/ui/tick.wav",
     author: "leo",
     volume: 1
   },
@@ -183,6 +183,16 @@ export const ratfunUI: SoundAssets = {
   },
   logoIn: {
     src: "/sounds/ratfun/ui/logo-in.mp3",
+    author: "leo",
+    volume: 0.2
+  },
+  terminalHit: {
+    src: "/sounds/ratfun/ui/leo-front-ui/front_ui_12.wav",
+    author: "leo",
+    volume: 1
+  },
+  strobe: {
+    src: "/sounds/ratfun/ui/strobe.mp3",
     author: "leo",
     volume: 1
   }
