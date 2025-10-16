@@ -3,8 +3,9 @@
   import { onMount } from "svelte"
   import { typeHit } from "$lib/modules/sound"
   import { HEALTH_SYMBOL } from "$lib/modules/ui/constants"
+  import type { Outcome } from "@sanity-types"
 
-  let { result }: { result: any } = $props()
+  let { result }: { result: Outcome } = $props()
 
   // Merge log with outcomes
   type MergedLogEntry = {
@@ -56,7 +57,6 @@
   let logEntryElements: HTMLDivElement[] = []
 
   onMount(() => {
-    console.log(result)
     // Animate log entries in sequence
     const timeline = gsap.timeline()
 
@@ -92,7 +92,7 @@
     logEntryElements.forEach((el, i) => {
       if (el) {
         gsap.set(el, { opacity: 0, y: 10 })
-        timeline.call(typeHit, null, 0.2 + i * 0.05)
+        timeline.call(typeHit, undefined, 0.2 + i * 0.05)
         timeline.to(
           el,
           {
@@ -118,9 +118,9 @@
         <div class="summary-row">
           <span class="label">Status</span>
           <span class="value">
-            {#if result.ratDead}
+            {#if result.ratValue === 0}
               <span class="status-dead">Dead</span>
-            {:else if result.tripDepleted}
+            {:else if result.tripValue === 0}
               <span class="status-depleted">Depleted</span>
             {:else}
               <span>Active</span>
@@ -133,11 +133,11 @@
           <span
             class="value"
             class:negative={(result.balanceTransfers || []).reduce(
-              (sum, bt) => sum + bt.amount,
+              (sum, bt) => sum + (bt.amount ?? 0),
               0
             ) < 0}
           >
-            {(result.balanceTransfers || []).reduce((sum, bt) => sum + bt.amount, 0)}
+            {(result.balanceTransfers || []).reduce((sum, bt) => sum + (bt.amount ?? 0), 0)}
           </span>
         </div>
 
@@ -157,15 +157,17 @@
 
         <div class="summary-row">
           <span class="label">Rat Value</span>
-          <span class="value" class:negative={result.ratValueChange < 0}>
-            {result.ratValue} ({result.ratValueChange >= 0 ? "+" : ""}{result.ratValueChange})
+          <span class="value" class:negative={result.ratValueChange ?? 0 < 0}>
+            {result.ratValue} ({(result.ratValueChange ?? 0 >= 0)
+              ? "+"
+              : ""}{result.ratValueChange})
           </span>
         </div>
 
         <div class="summary-row">
           <span class="label">Trip Value</span>
-          <span class="value" class:positive={result.valueChange > 0}>
-            {result.value} (+{result.valueChange})
+          <span class="value" class:positive={result.ratValueChange ?? 0 > 0}>
+            {result.ratValue} (+{result.ratValueChange})
           </span>
         </div>
       </div>

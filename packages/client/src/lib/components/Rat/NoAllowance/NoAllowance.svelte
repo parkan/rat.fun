@@ -21,7 +21,7 @@
 
 <div class="no-allowance">
   {#if busy}
-    <div class="loading">Approving allowance <SmallSpinner /></div>
+    <div class="loading">Approving allowance <SmallSpinner soundOn /></div>
   {:else}
     <div class="button-container">
       <BigButton text="Approve max allowance" disabled={busy} onclick={onClick} />
@@ -42,6 +42,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .loading {
+      font-size: var(--font-size-normal);
+      font-family: var(--typewriter-font-stack);
+      color: black;
+      background: orangered;
+      padding: 10px;
+    }
 
     .button-container {
       position: absolute;

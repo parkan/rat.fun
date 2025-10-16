@@ -4,13 +4,7 @@
   import { Tween } from "svelte/motion"
   import { playSound } from "$lib/modules/sound"
   import { Tooltip, BigButton } from "$lib/components/Shared"
-  import {
-    balance,
-    investment,
-    profitLoss,
-    portfolioClass,
-    realisedProfitLoss
-  } from "$lib/modules/state/stores"
+  import { balance, investment, profitLoss, portfolioClass } from "$lib/modules/state/stores"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   let { onCreateTripClick }: { onCreateTripClick: () => void } = $props()
@@ -22,11 +16,6 @@
   const plSymbolExplicit = derived(portfolioClass, $pc =>
     $pc === "neutral" ? "" : $pc === "upText" ? "+" : "-"
   )
-
-  const realPortfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
-    if ($realisedProfitLoss === 0) return "neutral"
-    return $realisedProfitLoss > 0 ? "upText" : "downText"
-  })
 
   onMount(() => {
     const unsubscribe = profitLoss.subscribe(newValue => {
@@ -49,32 +38,40 @@
 </script>
 
 <div class="profit-loss-overview">
-  <div class="top">
-    <!-- Unrealised -->
-    <div class="main">
+  <!-- Profit -->
+  <div class="profit-container">
+    <!-- Active profit -->
+    <div class="profit-inner">
       <p>Active Profit</p>
-      <span class="percentage {$portfolioClass} glow">
+      <div class="percentage {$portfolioClass}">
         ({$plSymbolExplicit}{(100 - tweenedActiveProfit.current * 100).toFixed(2)}%)
-      </span>
-      <span class="unit {$portfolioClass}">{CURRENCY_SYMBOL}</span>
-      <div class="content {$portfolioClass} glow">
-        <Tooltip content="Unrealised P&L">
-          <h1 class="">
+      </div>
+      <div class="content {$portfolioClass}">
+        <Tooltip content="Active profit">
+          <div class="profit-amount">
             {$plSymbolExplicit}{CURRENCY_SYMBOL}{Math.abs(Math.floor(tweenedProfitLoss.current))}
-          </h1>
+          </div>
         </Tooltip>
       </div>
     </div>
   </div>
-  <div class="bottom-left">
-    <p>Portfolio</p>
-    <h2 class="{$portfolioClass} glow">{CURRENCY_SYMBOL}{$balance}</h2>
+  <!-- Portfolio -->
+  <div class="portfolio-container">
+    <div class="portfolio-box">
+      <p>Portfolio</p>
+      <div class="portfolio-amount {$portfolioClass}">
+        {CURRENCY_SYMBOL}{$balance}
+      </div>
+    </div>
+    <div class="portfolio-box">
+      <p>Invested</p>
+      <div class="portfolio-amount">
+        {CURRENCY_SYMBOL}{$investment}
+      </div>
+    </div>
   </div>
-  <div class="bottom-right">
-    <p>Invested</p>
-    <h2>{CURRENCY_SYMBOL}{$investment}</h2>
-  </div>
-  <div class="full-width-bottom">
+  <!-- Action -->
+  <div class="action-container">
     <BigButton text="Create Trip" onclick={onCreateTripClick} />
   </div>
 </div>
@@ -82,37 +79,95 @@
 <style lang="scss">
   .profit-loss-overview {
     position: relative;
-    padding: 1rem;
+    padding: 10px;
     height: 100%;
-    display: grid;
-    grid-template-columns: repeat(200px, 2);
-    grid-template-rows: repeat(1fr, 3);
     width: 100%;
     overflow: hidden;
-  }
-  .top {
-    grid-column: 1/3;
-    height: 100%;
-    min-height: 120px;
     display: flex;
-    flex-flow: column nowrap;
-    gap: 1rem;
-  }
+    flex-direction: column;
 
-  .full-width-bottom {
-    grid-column: 1/3;
-    height: 100px;
-  }
-  .bottom-left,
-  .bottom-right {
-    width: 100%;
-    margin: 0;
-    height: 120px;
-    display: flex;
-    background: rgba(0, 0, 0, 0.2);
-    position: relative;
-    justify-content: center;
-    align-items: flex-end;
+    .profit-container {
+      flex: 1;
+      display: flex;
+      flex-flow: column nowrap;
+
+      .profit-inner {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .unit {
+          top: 50%;
+          position: absolute;
+          font-size: 240px;
+          padding: 5px;
+          z-index: 0;
+
+          &.upText {
+            color: var(--color-up);
+          }
+
+          &.downText {
+            color: var(--color-down);
+          }
+
+          vertical-align: sub;
+          display: inline-block;
+          filter: blur(4px) opacity(0.4);
+
+          &:not(.offset) {
+            left: 0;
+            transform: translate(50%, -50%) rotate(-5deg) scale(2, 2);
+          }
+
+          &.offset {
+            right: 0;
+            transform: translate(-50%, -50%) rotate(5deg) scale(2, 2);
+          }
+        }
+        .content {
+          position: relative;
+          display: flex;
+          z-index: 1;
+        }
+
+        .calculations {
+          display: flex;
+          flex-flow: column nowrap;
+          justify-content: space-between;
+        }
+      }
+    }
+
+    .portfolio-container {
+      height: 80px;
+      display: flex;
+      flex-flow: row nowrap;
+
+      .portfolio-box {
+        width: 50%;
+        height: 100%;
+        display: flex;
+        background: rgba(0, 0, 0, 0.2);
+        position: relative;
+        justify-content: center;
+        align-items: center;
+
+        &:first-child {
+          border-right: 1px solid var(--color-border);
+        }
+      }
+    }
+
+    .action-container {
+      height: 160px;
+      padding-top: 10px;
+    }
   }
 
   .down {
@@ -124,10 +179,6 @@
   }
   .downText {
     color: red;
-
-    &.glow {
-      filter: drop-shadow(0px 0px 2px rgba(230, 30, 0, 1));
-    }
   }
 
   .upText {
@@ -137,95 +188,37 @@
       filter: drop-shadow(0px 0px 2px #78ee72);
     }
   }
-
-  h3 {
-    margin-bottom: 20px;
-  }
-  p {
-    color: var(--color-grey-light);
-    margin: 2rem 1rem;
-  }
-
   p {
     position: absolute;
-    top: 0;
-    left: 0;
-    margin: 1rem 1rem;
+    top: 10px;
+    left: 10px;
     display: inline-block;
-  }
-
-  .main {
-    background: rgba(0, 0, 0, 0.5);
-    padding: 1rem;
-    position: relative;
-    overflow: hidden;
-    height: 154px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .unit {
-      top: 50%;
-      position: absolute;
-      font-size: 240px;
-      padding: 5px;
-      z-index: 0;
-
-      &.upText {
-        color: var(--color-up);
-      }
-
-      &.downText {
-        color: var(--color-down);
-      }
-
-      vertical-align: sub;
-      display: inline-block;
-      filter: blur(4px) opacity(0.4);
-
-      &:not(.offset) {
-        left: 0;
-        transform: translate(50%, -50%) rotate(-5deg) scale(2, 2);
-      }
-
-      &.offset {
-        right: 0;
-        transform: translate(-50%, -50%) rotate(5deg) scale(2, 2);
-      }
-    }
-    .content {
-      position: relative;
-      display: flex;
-      z-index: 1;
-    }
-
-    .calculations {
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: space-between;
-    }
-  }
-  h1 {
-    font-family: var(--special-font-stack);
-    font-size: 60px;
+    color: var(--color-grey-light);
+    font-size: var(--font-size-small);
     margin: 0;
-    vertical-align: middle;
-    width: 100%;
-    text-align: center;
   }
+
   .percentage {
     position: absolute;
     top: 1rem;
     right: 1rem;
     display: inline-block;
   }
-  h2 {
+
+  .profit-amount {
     font-family: var(--special-font-stack);
-    font-size: 2rem;
+    font-size: 82px;
+    margin: 0;
+    vertical-align: middle;
+    width: 100%;
+    text-align: center;
+  }
+
+  .portfolio-amount {
+    font-family: var(--special-font-stack);
+    font-size: 42px;
     display: inline-block;
     text-align: center;
     width: 100%;
-    margin-bottom: 2.5rem;
-    // margin: 0 1rem;
   }
 </style>

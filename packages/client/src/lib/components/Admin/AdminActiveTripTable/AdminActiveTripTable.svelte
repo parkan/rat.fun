@@ -32,6 +32,7 @@
     return createPlotsFromTripList(tripList, $staticContent)
   })
 
+  // Why is the table not using the TripEvent[] data created in Admin.svelte?
   let tripList = $derived.by(() => {
     let entries = Object.entries($playerActiveTrips)
     return entries.sort(sortFunction)

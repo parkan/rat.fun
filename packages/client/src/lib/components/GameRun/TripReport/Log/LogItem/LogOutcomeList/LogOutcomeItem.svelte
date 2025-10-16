@@ -83,7 +83,7 @@
 
     // Count up/down value manually
     for (let i = 1; i < value; i++) {
-      const position = i === 1 ? "<" : `+=${stepDelay}`
+      const position = i === 1 ? ">-0.05" : `+=${stepDelay}`
       timeline.call(updateCountValue, [i], position)
     }
 

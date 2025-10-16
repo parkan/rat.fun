@@ -2,14 +2,13 @@
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import ShaderBackground from "../ShaderRenderer/ShaderBackground.svelte"
+  import { ShaderLocal } from "$lib/components/Shared"
 
   let {
     text,
     cost,
     tippyText,
     disabled = false,
-    id,
     onclick
   }: {
     text: string
@@ -39,7 +38,7 @@
       {/if}
     </div>
     <div class="canvas-container">
-      <ShaderBackground shaderKey="plasma" />
+      <ShaderLocal shaderKey="plasma" />
     </div>
   </button>
 </Tooltip>
@@ -52,7 +51,7 @@
     border: none;
     border-style: outset;
     border-width: 10px;
-    border-color: rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 0, 0, 0.3);
     position: relative;
     display: flex;
     flex-flow: column nowrap;
@@ -63,11 +62,24 @@
     .button-content {
       z-index: 2;
       position: relative;
+      // color: black;
       color: white;
 
       .button-text {
         font-size: var(--font-size-extra-large);
-        font-family: var(--label-font-stack);
+        font-family: var(--special-font-stack);
+        line-height: 1em;
+        // background: rgba(0, 0, 0, 0.4);
+        // padding-inline: 20px;
+        // border-radius: 5px;
+        // text-stroke: 2px black;
+        // -webkit-text-stroke: 2px black;
+        // -moz-text-stroke: 2px black;
+        // -ms-text-stroke: 2px black;
+        // -o-text-stroke: 2px black;
+
+        // font-weight: 900;
+        // mix-blend-mode: difference;
       }
 
       .button-cost {

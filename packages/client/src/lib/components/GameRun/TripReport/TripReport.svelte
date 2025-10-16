@@ -6,6 +6,7 @@
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { gsap } from "gsap"
   import { backgroundMusic } from "$lib/modules/sound/stores"
+  // import { serializeTimeline } from "./utils"
 
   let { result }: { result: EnterTripReturnValue } = $props()
 
@@ -28,30 +29,6 @@
     summaryTimeline = timeline
     receivedTimelines++
     checkAndBuildTimeline()
-  }
-
-  // Helper function to serialize timeline structure
-  const serializeTimeline = (tl: ReturnType<typeof gsap.timeline>, depth = 0) => {
-    const indent = "  ".repeat(depth)
-    let output = `${indent}Timeline (dur: ${tl.duration()}, start: ${tl.startTime()})\n`
-
-    // Walk through children
-    let child = tl._first
-    while (child) {
-      if (child._targets && child._targets.length) {
-        // It's a tween
-        output += `${indent}  Tween (dur: ${child._dur}, start: ${child._start}, targets: ${child._targets.length})\n`
-      } else if (child.duration) {
-        // It's a nested timeline
-        output += serializeTimeline(child, depth + 1)
-      } else if (child._func) {
-        // It's a callback
-        output += `${indent}  Callback (start: ${child._start})\n`
-      }
-      child = child._next
-    }
-
-    return output
   }
 
   // Build the root timeline when all child timelines are ready
@@ -86,13 +63,14 @@
 
   const setupTripReport = () => {
     playSound("ratfunTransitions", "tripReportEnter")
-    shaderManager.setShader("blank")
+    shaderManager.setShader("swirlyNoise")
     $backgroundMusic = playSound("ratfunMusic", "tripReport", true)
   }
 
   const teardownTripReport = () => {
     // Stop background music
     if ($backgroundMusic) {
+      // console.log("stopping background music")
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }

@@ -9,7 +9,7 @@
   let { outcome }: { outcome: OutcomeSanityDoc } = $props()
 
   let topic = $derived.by(() => {
-    if (outcome.ratBalance === 0) return "rat__death"
+    if (outcome.ratValue === 0) return "rat__death"
     return "trip__outcome"
   })
 

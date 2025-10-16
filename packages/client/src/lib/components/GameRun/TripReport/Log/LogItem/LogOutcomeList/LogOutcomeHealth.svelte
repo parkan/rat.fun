@@ -76,7 +76,7 @@
     const absValue = Math.abs(value)
     for (let i = 1; i <= absValue; i++) {
       const displayValue = negative ? -i : i
-      const position = i === 1 ? "<" : `+=${stepDelay}`
+      const position = i === 1 ? ">-0.05" : `+=${stepDelay}`
       timeline.call(updateCountValue, [displayValue], position)
     }
 

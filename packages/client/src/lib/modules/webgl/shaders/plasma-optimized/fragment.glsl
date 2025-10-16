@@ -1,19 +1,61 @@
 precision mediump float;
 
-uniform float u_time;
-uniform vec2 u_resolution;
+// ============================================================================
+// CONFIGURATION VARIABLES
+// ============================================================================
+
+// Plasma effect parameters (optimized single-layer version)
+#define RADIAL_FREQUENCY 30.0      // Controls radial wave frequency
+#define ANGULAR_FREQUENCY 8.0      // Controls angular wave frequency
+#define TIME_SPEED 3.5             // Controls overall animation speed
+
+// Color mixing weights for RGB channels (red-only effect)
+#define RED_WEIGHT 1.0
+#define GREEN_WEIGHT 0.0
+#define BLUE_WEIGHT 0.0
+
+// Precomputed constants for optimization
+#define HALF 0.5                   // 0.5 for sin() offset
+#define ONE 1.0                    // 1.0 for alpha channel
+
+// ============================================================================
+// UNIFORMS
+// ============================================================================
+
+uniform float u_time;        // Animation time
+uniform vec2 u_resolution;   // Screen resolution
+uniform bool u_invert;       // Whether to invert colors
+
+// ============================================================================
+// MAIN SHADER
+// ============================================================================
 
 void main() {
+  // Normalize fragment coordinates to [0,1] range
   vec2 uv = gl_FragCoord.xy / u_resolution;
-  vec2 p = (uv - 0.5) * 1.0;
   
-  float r = length(p);
-  float a = atan(p.y, p.x);
+  // Center coordinates around origin
+  vec2 p = uv - 0.5;
   
-  // Pre-calculate time values and combine all sin() calls into one
-  float combined = r * 30.0 + a * 8.0 + u_time * 3.5;
-  float plasma = sin(combined) * 0.5 + 0.5;
+  // Convert to polar coordinates
+  float r = length(p);       // Distance from center
+  float a = atan(p.y, p.x);  // Angle from center
   
-  vec3 color = vec3(plasma * 1.0, plasma * 0.0, plasma * 0.0);
-  gl_FragColor = vec4(color, 1.0);
+  // Precompute time phase to avoid redundant multiplication
+  float time_phase = u_time * TIME_SPEED;
+  
+  // Optimized plasma calculation: combine all wave components into single sin() call
+  // This reduces from 3 separate sin() calls to 1, improving performance
+  float combined = r * RADIAL_FREQUENCY + a * ANGULAR_FREQUENCY + time_phase;
+  float plasma = sin(combined) * HALF + HALF;
+  
+  // Apply color mixing (red-only effect for high contrast)
+  // Optimized: since GREEN_WEIGHT and BLUE_WEIGHT are 0.0, we can simplify
+  vec3 color = vec3(plasma, 0.0, 0.0);
+  
+  // Apply color inversion if enabled (optimized: use conditional assignment)
+  color = u_invert ? vec3(ONE) - color : color;
+  
+  // Output final color with full alpha
+  gl_FragColor = vec4(color, ONE);
 } 

@@ -1,57 +1,18 @@
-import { ShaderConfiguration, ShaderManager, ShaderModeConfig } from "./ShaderManager.svelte"
+import { ShaderManager } from "./ShaderManager.svelte"
 
 // Re-export all shaders from their respective folders
-import { main, type ShaderMode as MainMode } from "./main"
-import { copy, type ShaderMode as CopyMode } from "./copy"
-import { noise, type ShaderMode as NoiseMode } from "./noise"
-import { gradient, type ShaderMode as GradientMode } from "./gradient"
-import { waves, type ShaderMode as WavesMode } from "./waves"
-import { plasma, type ShaderMode as PlasmaMode } from "./plasma"
-import { plasmaHue, type ShaderMode as PlasmaHueMode } from "./plasma-hue"
-import { plasmaOptimized, type ShaderMode as PlasmaOptimizedMode } from "./plasma-optimized"
-import { clouds, type ShaderMode as CloudsMode } from "./clouds"
-import { zoomTunnel, type ShaderMode as ZoomTunnelMode } from "./zoom-tunnel"
-import { spiralVortex, type ShaderMode as SpiralVortexMode } from "./spiral-vortex"
-import { starspeed, type ShaderMode as StarSpeedMode } from "./starspeed"
-import {
-  colorCyclingPlasma,
-  type ShaderMode as ColorCyclingPlasmaMode
-} from "./color-cycling-plasma"
-import { checkerZoomer, type ShaderMode as CheckerZoomerMode } from "./checker-zoomer"
-import {
-  lissajousWarpField,
-  type ShaderMode as LissajousWarpFieldMode
-} from "./lissajous-warp-field"
-import {
-  kaleidoscopeTunnel,
-  type ShaderMode as KaleidoscopeTunnelMode
-} from "./kaleidoscope-tunnel"
-import { starfield, type ShaderMode as StarfieldMode } from "./starfield"
-import { ratfun, type ShaderMode as RatfunMode } from "./ratfun"
-import { vortex, type ShaderMode as VortexMode } from "./vortex"
-import { blank, type ShaderMode as BlankMode } from "./blank"
+import { plasma } from "./plasma"
+import { plasmaOptimized } from "./plasma-optimized"
+import { clouds } from "./clouds"
+import { vortex } from "./vortex"
+import { swirlyNoise } from "./swirly-noise"
 
 const shaders = {
-  main,
-  copy,
-  noise,
-  gradient,
-  waves,
   plasma,
   plasmaOptimized,
-  plasmaHue,
   clouds,
-  zoomTunnel,
-  spiralVortex,
-  colorCyclingPlasma,
-  checkerZoomer,
-  lissajousWarpField,
-  kaleidoscopeTunnel,
-  starfield,
-  starspeed,
-  ratfun,
   vortex,
-  blank
+  swirlyNoise
 }
 
 /**
@@ -59,39 +20,13 @@ const shaders = {
  */
 
 /**
- * Factory function for creating shader managers with configuration
+ * Factory function for creating shader managers
  */
-function createShaderManager<TMode extends string = string>(config: ShaderConfiguration<TMode>) {
-  return new ShaderManager(config)
-}
-
-type ShaderModes = {
-  Main: MainMode
-  Copy: CopyMode
-  Noise: NoiseMode
-  Gradient: GradientMode
-  Waves: WavesMode
-  Plasma: PlasmaMode
-  PlasmaHue: PlasmaHueMode
-  PlasmaOptimized: PlasmaOptimizedMode
-  Clouds: CloudsMode
-  ZoomTunnel: ZoomTunnelMode
-  SpiralVortex: SpiralVortexMode
-  ColorCyclingPlasma: ColorCyclingPlasmaMode
-  CheckerZoomer: CheckerZoomerMode
-  LissajousWarpField: LissajousWarpFieldMode
-  KaleidoscopeTunnel: KaleidoscopeTunnelMode
-  Starfield: StarfieldMode
-  StarSpeed: StarSpeedMode
-  RatFun: RatfunMode
-  Vortex: VortexMode
-  Blank: BlankMode
+function createShaderManager() {
+  return new ShaderManager()
 }
 
 export {
-  // Types
-  type ShaderConfiguration,
-  type ShaderModes,
   // Consts
   shaders,
   // Classes
@@ -100,4 +35,4 @@ export {
   createShaderManager
 }
 
-export const shaderManager = $state(createShaderManager(shaders.ratfun.config))
+export const shaderManager = $state(createShaderManager())

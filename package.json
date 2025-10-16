@@ -39,17 +39,10 @@
     "node": "^20",
     "pnpm": "^10"
   },
-  "resolutions": {
-    "brace-expansion": "2.0.1"
-  },
   "packageManager": "pnpm@10.18.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
-    ],
-    "overrides": {
-      "wagmi": "2.15.6",
-      "@tanstack/react-query": "5.81.5"
-    }
+    ]
   }
 }

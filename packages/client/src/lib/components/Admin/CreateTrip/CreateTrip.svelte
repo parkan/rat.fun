@@ -10,6 +10,7 @@
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { MIN_TRIP_CREATION_COST } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
+  import { onMount } from "svelte"
 
   let {
     ondone,
@@ -21,6 +22,7 @@
 
   let tripDescription: string = $state("")
   let busy: boolean = $state(false)
+  let textareaElement: HTMLTextAreaElement | null = $state(null)
 
   // Prompt has to be between 1 and MAX_TRIP_PROMPT_LENGTH characters
   let invalidTripDescriptionLength = $derived(
@@ -86,6 +88,13 @@
     }
     tripDescription = ""
   }
+
+  onMount(() => {
+    // Focus the textarea when the component mounts
+    if (textareaElement) {
+      textareaElement.focus()
+    }
+  })
 </script>
 
 {#if !busy}
@@ -107,6 +116,7 @@
           {placeholder}
           oninput={typeHit}
           bind:value={tripDescription}
+          bind:this={textareaElement}
         ></textarea>
       </div>
 
@@ -117,7 +127,7 @@
           <input
             class="cost-display"
             onblur={e => {
-              const value = Number(e.target.value)
+              const value = Number((e.target as HTMLInputElement).value)
               if (value < MIN_TRIP_CREATION_COST || value > $playerERC20Balance) {
                 tripCreationCost = Math.min(
                   $playerERC20Balance,
@@ -192,6 +202,8 @@
     background-image: url("/images/texture-3.png");
     background-size: 200px;
     justify-content: space-between;
+    border: 1px solid var(--color-grey-mid);
+    padding: 10px;
 
     .controls {
       display: flex;
@@ -347,7 +359,7 @@
       flex-flow: column nowrap;
       gap: 12px;
       overflow: hidden;
-      height: 80px;
+      height: 160px;
     }
   }
 </style>

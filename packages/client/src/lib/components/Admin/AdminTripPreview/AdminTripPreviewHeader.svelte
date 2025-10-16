@@ -52,7 +52,7 @@
         <div class="value">{trip?.killCount}</div>
       </div>
     {/if}
-    {#if (trip?.minRatValueToEnter ?? 0) > 0}
+    {#if Number(trip?.minRatValueToEnter ?? 0) > 0}
       <div class="row min-rat-value-to-enter">
         <div class="label">MIN RAT VALUE TO ENTER</div>
         <div class="value">{trip?.minRatValueToEnter}</div>
@@ -98,26 +98,8 @@
       -webkit-mask-image: radial-gradient(circle at top right, black 50%, transparent 70%);
     }
 
-    .image {
-      aspect-ratio: 1/1;
-      width: 300px;
-      line-height: 0;
-      cursor: pointer;
-
-      .image-placeholder {
-        width: 100%;
-        aspect-ratio: 1/1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-      }
-    }
-
     .prompt {
       width: 420px;
-      // aspect-ratio: 3 /4;
-      // height: 100%;
     }
 
     .info {
@@ -141,27 +123,6 @@
           font-family: var(--special-font-stack);
           font-size: var(--font-size-normal);
         }
-
-        // &.balance {
-        //   background: var(--color-value);
-        //   color: var(--background);
-        //   padding: 5px;
-        //   height: auto;
-        //   flex: 1;
-        //   display: flex;
-        //   flex-direction: column;
-        //   align-items: center;
-        //   justify-content: center;
-
-        //   &.depleted {
-        //     background: var(--color-death);
-        //     color: var(--background);
-        //   }
-
-        //   .value {
-        //     font-size: var(--font-size-normal);
-        //   }
-        // }
 
         &.index {
           color: var(--color-grey-mid);

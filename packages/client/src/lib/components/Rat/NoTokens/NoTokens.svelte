@@ -22,14 +22,10 @@
 
 <div class="no-tokens">
   {#if busy}
-    <div class="loading">Getting tokens <SmallSpinner /></div>
+    <div class="loading">Getting tokens <SmallSpinner soundOn /></div>
   {:else}
     <div class="button-container">
-      <BigButton
-        text="Get 2000 Slopamine ({CURRENCY_SYMBOL}) (free)"
-        disabled={busy}
-        onclick={onClick}
-      />
+      <BigButton text="Get 2000 $RAT" disabled={busy} onclick={onClick} />
     </div>
   {/if}
 </div>
@@ -47,6 +43,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .loading {
+      font-size: var(--font-size-normal);
+      font-family: var(--typewriter-font-stack);
+      color: black;
+      background: orangered;
+      padding: 10px;
+    }
 
     .button-container {
       position: absolute;

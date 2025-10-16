@@ -7,12 +7,7 @@
   let displayRat = $state<Rat | null>(null)
 
   const updateDisplayRat = async () => {
-    console.log("frozenRat", frozenRat)
-    console.log("rat", $rat)
-
     if (frozenRat) {
-      console.log("frozen rat found")
-
       // If we are coming back from a trip frozenRat is set
       displayRat = frozenRat
 
@@ -20,7 +15,6 @@
 
       displayRat = $rat
 
-      console.log("update display rat", displayRat)
       resetFrozenState()
     } else {
       // Otherwise we just get the newest values directly
@@ -59,6 +53,10 @@
       border-bottom: var(--default-border-style);
       overflow: hidden;
       height: 260px;
+
+      @media (max-width: 700px) {
+        height: 160px;
+      }
     }
 
     .rat-inventory {

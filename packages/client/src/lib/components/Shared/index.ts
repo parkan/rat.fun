@@ -11,11 +11,16 @@ export { default as ChatBox } from "./ChatBox/ChatBox.svelte"
 export { default as Circle } from "./Graphics/Circle.svelte"
 export { default as Cross } from "./Graphics/Cross.svelte"
 export { default as Xed } from "./Graphics/Xed.svelte"
-export { default as Shader } from "./ShaderRenderer/Shader.svelte"
-export { default as ShaderRenderer } from "./ShaderRenderer/ShaderRenderer.svelte"
-export { default as SimpleShader } from "./ShaderRenderer/SimpleShader.svelte"
+
+/* Marquee */
+export { default as Marquee } from "./Marquee/Marquee.svelte"
+
+/* Shader */
+export { default as ShaderGlobal } from "./Shader/ShaderGlobal.svelte"
+export { default as ShaderLocal } from "./Shader/ShaderLocal.svelte"
+
+/* Tooltip */
 export { default as Tooltip } from "./Tooltip/Tooltip.svelte"
-export { default as Icon } from "./Icons/Icon.svelte"
 
 /* Loaders */
 export { default as SmallSpinner } from "./Loaders/SmallSpinner.svelte"
@@ -27,7 +32,7 @@ export { default as VideoLoaderDuration } from "./Loaders/VideoLoaderDuration.sv
 export { default as Modal } from "./Modal/Modal.svelte"
 export { default as ModalTarget } from "./Modal/ModalTarget.svelte"
 
-/* Top Bar */
+/* Topbar */
 export { default as TopBar } from "./TopBar/TopBar.svelte"
 export { default as WorldEventPopup } from "./WorldEventPopup/WorldEventPopup.svelte"
 

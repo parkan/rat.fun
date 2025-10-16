@@ -40,11 +40,12 @@
 <style lang="scss">
   .sidebar {
     position: fixed;
-    height: var(--game-window-main-height);
-    width: 1000px;
+    height: calc(var(--game-window-main-height) + 1px); // To overlap the topbar border
+    width: 50%;
+    min-width: 600px;
     overflow-x: hidden;
     z-index: 999;
-    top: 60px;
+    top: 59px; // To overlap the topbar border
     right: 0;
     background: black;
     transform: translate(100%, 0);

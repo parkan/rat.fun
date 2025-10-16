@@ -76,7 +76,7 @@
       tripId: point.tripId,
       tripCreationCost: point.tripCreationCost,
       eventType: point.eventType,
-      meta: point.meta
+      meta: point.meta // undefined on TripEventBaseline
     }))
   })
 
@@ -184,7 +184,7 @@
               > -->
               <g
                 onpointerenter={() => {
-                  console.log("focusing")
+                  // console.log("focusing")
                   $focusEvent = point.index
                 }}
                 onpointerleave={() => ($focusEvent = -1)}

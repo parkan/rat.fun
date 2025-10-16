@@ -125,10 +125,7 @@
 
     // Add liquidation event if it exists
     if (trip.liquidationBlock && trip.liquidationValue !== undefined && $blockNumber) {
-      const liquidationTime = blockNumberToTimestamp(
-        Number(trip.liquidationBlock),
-        Number($blockNumber)
-      )
+      const liquidationTime = blockNumberToTimestamp(Number(trip.liquidationBlock))
 
       // Get the last absolute trip value before liquidation
       const lastValue = dataPoints[dataPoints.length - 1]?.value || 0

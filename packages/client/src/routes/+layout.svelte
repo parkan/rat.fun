@@ -4,13 +4,15 @@
   import "tippy.js/dist/backdrop.css"
   import "tippy.js/animations/shift-away.css"
 
+  import { sdk } from "@farcaster/miniapp-sdk"
+
   import type { LayoutProps, Snapshot } from "./$types"
   import { initSound } from "$lib/modules/sound"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { goto } from "$app/navigation"
   import { onMount } from "svelte"
-  import { initStaticContent, staticContent } from "$lib/modules/content"
+  import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, notificationsRead, adminUnlockedAt } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -24,7 +26,7 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import { Shader, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
+  import { ShaderGlobal, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
@@ -49,9 +51,12 @@
   const loaded = async () => {
     try {
       // Get content from CMS
-      await initStaticContent($publicNetwork.worldAddress)
+      // We do not wait, for faster loading time...
+      initStaticContent($publicNetwork.worldAddress)
       // Loading done. Set the UI state to spawning
       UIState.set(UI.SPAWNING)
+      // Signal readiness to base (farcaster) mini app framework
+      sdk.actions.ready()
     } catch (error) {
       errorHandler(error) // CMS error
       goto("/")
@@ -87,17 +92,9 @@
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
-    <div class="context-main">
-      <main>
-        <Loading {environment} {loaded} />
-      </main>
-    </div>
+    <Loading {environment} {loaded} />
   {:else if $UIState === UI.SPAWNING}
-    <div class="context-main">
-      <main>
-        <Spawn {walletType} {spawned} />
-      </main>
-    </div>
+    <Spawn {walletType} {spawned} />
   {:else}
     <div class="context-main">
       {@render children?.()}
@@ -105,10 +102,8 @@
   {/if}
 
   {#if browser}
-    <Shader />
+    <ShaderGlobal />
   {/if}
-  <!-- {#if $UIState !== UI.LOADING}
-  {/if} -->
 </div>
 
 {#if $activeWorldEvent && !notificationsRead.current.includes($activeWorldEvent.cmsId)}
@@ -138,14 +133,6 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  main {
-    width: var(--game-window-width);
-    height: var(--game-window-height);
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .bg {

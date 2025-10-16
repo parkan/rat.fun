@@ -12,36 +12,28 @@
   } = $props()
 
   let busy = $state(false)
-  let isHovered = $state(false)
 
   // Determine rarity class based on value
   const getRarityClass = (value: bigint | number) => {
     const numValue = typeof value === "bigint" ? Number(value) : value
     if (numValue >= 100) return "holographic"
     if (numValue >= 50) return "gold"
-    if (numValue >= 20) return "holographic"
+    if (numValue >= 20) return "silver"
     return "copper"
   }
 
   const onMouseEnter = () => {
-    playSound("ratfunUI", "hover")
-    isHovered = true
-  }
-
-  const onMouseLeave = () => {
-    isHovered = false
+    playSound("ratfunUI", "hover3")
   }
 </script>
 
 <div
   class="inventory-item {getRarityClass(item.value)}"
   class:disabled={busy}
-  class:hovered={isHovered}
   in:fade|global={{ duration: 100, delay: index * 50 }}
   role="button"
   tabindex="0"
   onmouseenter={onMouseEnter}
-  onmouseleave={onMouseLeave}
 >
   <div class="inner">
     <!-- NAME -->

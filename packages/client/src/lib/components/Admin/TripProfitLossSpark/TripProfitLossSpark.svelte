@@ -1,5 +1,10 @@
 <script lang="ts">
-  import type { TripEvent } from "$lib/components/Admin/types"
+  import type {
+    TripEventCreation,
+    TripEventLiquidation,
+    TripEventDeath,
+    TripEventVisit
+  } from "$lib/components/Admin/types"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
@@ -10,7 +15,12 @@
     plotData,
     isEmpty = false,
     height = 300
-  }: { smallIcons?: boolean; plotData: TripEvent[]; isEmpty: boolean; height?: number } = $props()
+  }: {
+    smallIcons?: boolean
+    plotData: (TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit)[]
+    isEmpty: boolean
+    height?: number
+  } = $props()
 
   // Layout setup
   let width = $state(0) // width will be set by the clientWidth
@@ -22,6 +32,7 @@
   let innerHeight = $derived(height - padding.top - padding.bottom)
 
   // Calculate profit/loss data (balance - initial investment)
+  // !!! Should be retyped?
   let profitLossData = $derived.by(() => {
     if (!plotData || plotData.length === 0) return []
 
@@ -45,7 +56,10 @@
     // Use the first point's time as the domain start, max time as the end
     // Handle the case where there's only one data point
     const domainStart = plotData[0].time
-    const domainEnd = max(plotData, (d: TripEvent) => d.time)
+    const domainEnd = max(
+      plotData,
+      (d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit) => d.time
+    )
     const finalDomainEnd =
       domainEnd !== undefined && domainEnd > domainStart ? domainEnd : domainStart + 1 // Add a minimal duration if only one point or max isn't greater
 
@@ -68,15 +82,21 @@
   // which will be our line.
   let lineGenerator = $derived(
     xScale && yScale
-      ? line<TripEvent>()
-          .x((d: TripEvent) => xScale(d.time))
-          .y((d: TripEvent) => yScale(+d.value))
+      ? line<TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit>()
+          .x((d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit) =>
+            xScale(d.time)
+          )
+          .y((d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit) =>
+            yScale(+d.value)
+          )
       : null
   )
 
-  const generateTooltipContent = (point: TripEvent) => {
-    const balance = (point.meta as Trip)?.balance || 0
-    const investment = (point.meta as Trip)?.investment || 0
+  const generateTooltipContent = (
+    point: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit
+  ) => {
+    const balance = point.meta?.balance || 0
+    const investment = point.meta?.investment || 0
     return `<div>Balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${balance.toFixed(2)}</span><br/>Investment: <span class="tooltip-value">${CURRENCY_SYMBOL}${investment.toFixed(2)}</span><br/>P/L: <span class="tooltip-value ${point.value >= 0 ? "tooltip-value-positive" : "tooltip-value-negative"}">${CURRENCY_SYMBOL}${point.value.toFixed(2)}</span></div>`
   }
 </script>

@@ -4,7 +4,7 @@
   import { derived } from "svelte/store"
   import {
     entriesChronologically,
-    entriesChronologicallyDesc,
+    // entriesChronologicallyDesc,
     entriesByRealisedProfit,
     entriesByRealisedProfitDesc,
     entriesByVisit,
@@ -26,17 +26,18 @@
     sortFunction = sortDirection === "asc" ? entriesByVisit : entriesByVisitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
+
   const sortByProfit = () => {
     sortFunction = sortDirection === "asc" ? entriesByRealisedProfit : entriesByRealisedProfitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
-  const sortByAge = () => {
-    sortFunction = sortDirection === "asc" ? entriesChronologically : entriesChronologicallyDesc
-    sortDirection = sortDirection === "asc" ? "desc" : "asc"
-  }
 
-  const sign = (num: number) => (num === 0 ? "" : num > 0 ? "+" : "-")
+  // const sortByAge = () => {
+  //   sortFunction = sortDirection === "asc" ? entriesChronologically : entriesChronologicallyDesc
+  //   sortDirection = sortDirection === "asc" ? "desc" : "asc"
+  // }
 
+  // Why is the table not using the TripEvent[] data created in Admin.svelte?
   let tripList = $derived.by(() => {
     let entries = Object.entries($playerLiquidatedTrips)
     return entries.sort(sortFunction)
@@ -46,25 +47,25 @@
     return createPlotsFromTripList(tripList, $staticContent)
   })
 
-  let taxes = $derived(
-    Math.ceil(
-      Object.values($playerLiquidatedTrips).reduce(
-        (total, trip) =>
-          total + (Number(trip.liquidationValue) * Number(trip.liquidationTaxPercentage)) / 100,
-        0
-      )
-    )
-  )
+  // let taxes = $derived(
+  //   Math.ceil(
+  //     Object.values($playerLiquidatedTrips).reduce(
+  //       (total, trip) =>
+  //         total + (Number(trip.liquidationValue) * Number(trip.liquidationTaxPercentage)) / 100,
+  //       0
+  //     )
+  //   )
+  // )
 
   const portfolioClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
     if ($realisedProfitLoss === 0) return "neutral"
     return $realisedProfitLoss > 0 ? "upText" : "downText"
   })
 
-  const taxClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
-    if ($realisedProfitLoss === 0) return "neutral"
-    return $realisedProfitLoss > 0 ? "upText" : "downText"
-  })
+  // const taxClass = derived([realisedProfitLoss], ([$realisedProfitLoss]) => {
+  //   if ($realisedProfitLoss === 0) return "neutral"
+  //   return $realisedProfitLoss > 0 ? "upText" : "downText"
+  // })
 </script>
 
 <div class="admin-trip-table-container">

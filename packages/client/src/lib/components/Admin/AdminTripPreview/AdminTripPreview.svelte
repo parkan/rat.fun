@@ -2,6 +2,7 @@
   import type { Hex } from "viem"
   import type { Outcome } from "@sanity-types"
   import type { Trip as SanityTrip } from "@sanity-types"
+  import type { TripEvent } from "$lib/components/Admin/types"
 
   import { gameConfig } from "$lib/modules/state/stores"
   import { blockNumber } from "$lib/modules/network"
@@ -24,7 +25,8 @@
   }: { tripId: Hex; trip: Trip; sanityTripContent: SanityTrip } = $props()
 
   let tripOutcomes = $state<Outcome[]>()
-  let graphData = $state([])
+  /// !!! Where is this set?
+  let graphData = $state<TripEvent[]>([])
   let focusEvent = $state(-1)
 
   // Show liquidate button if:
@@ -39,14 +41,14 @@
   let event = $derived(graphData[focusEvent])
 
   onMount(() => {
-    const getEventIndexFromId = id => {
+    const getEventIndexFromId = (id: string) => {
       const index = graphData.findIndex(p => p?.meta?._id === id)
       return index
     }
     liquidating = page.url.searchParams.has("liquidate") && blockUntilUnlock <= 0
     focusEvent = Number(page.url.searchParams.get("focusEvent")) || -1
     if (page.url.searchParams.has("focusId")) {
-      focusEvent = getEventIndexFromId(page.url.searchParams.get("focusId"))
+      focusEvent = getEventIndexFromId(page.url.searchParams.get("focusId")!)
     }
 
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []

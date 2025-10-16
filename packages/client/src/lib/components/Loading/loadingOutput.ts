@@ -8,7 +8,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -16,7 +16,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -24,7 +24,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -32,7 +32,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -40,7 +40,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -48,7 +48,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -57,13 +57,14 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 150
     },
     {
       type: "loader",
       content: "BOOTING SLOP MACHINE...",
       color: "orange",
-      duration: 3000,
+      duration: 10000,
+      typeSpeed: 20,
       backgroundColor: "green",
       loaderCharacters: "*"
     }

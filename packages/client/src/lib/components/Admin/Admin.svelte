@@ -1,6 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { type TripEvent, type PendingTrip, TRIP_EVENT_TYPE } from "$lib/components/Admin/types"
+  import type {
+    TripEventBaseline,
+    TripEventVisit,
+    TripEventDeath,
+    TripEventCreation,
+    TripEventLiquidation,
+    TripEvent,
+    PendingTrip
+  } from "$lib/components/Admin/types"
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
+
   import { playerTrips } from "$lib/modules/state/stores"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
@@ -8,7 +18,6 @@
   import { playSound } from "$lib/modules/sound"
   import { blockNumberToTimestamp } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
-  import { blockNumber } from "$lib/modules/network"
 
   import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
   import CreateTrip from "$lib/components/Admin/CreateTrip/CreateTrip.svelte"
@@ -31,8 +40,23 @@
     const combinedData: TripEvent[] = []
 
     trips.forEach(trip => {
+      // Get the trip id
       const tripId = Object.keys($playerTrips).find(key => $playerTrips[key] === trip) || ""
-      let sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
+
+      // Abort if no trip id is found
+      if (!tripId) {
+        return
+      }
+
+      // Get trip document from CMS data
+      const sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
+
+      // Abort if no trip content is found
+      if (!sanityTripContent) {
+        return
+      }
+
+      // Get outcomes for the trip
       const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
       // Sort the outcomes in order of creation
@@ -40,49 +64,74 @@
         return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
       })
 
+      // Reverse the outcomes
       const tripOutcomes = outcomes.reverse()
+
+      // Creation time of the trip
       const initialTime = new Date(sanityTripContent?._createdAt ?? "").getTime()
 
       // Build the data array with initial point and outcomes
       const tripData: TripEvent[] = []
 
-      // Add creation event
+      /***************************
+       * ADD CREATION EVENT
+       **************************/
       tripData.push({
+        eventType: TRIP_EVENT_TYPE.CREATION,
         time: initialTime,
         value: 0, // Will be set later in accumulation
         valueChange: -Number(trip.tripCreationCost), // Cost of creating trip
         index: 0, // Will be set later
         tripId: tripId,
         tripCreationCost: Number(trip.tripCreationCost),
-        eventType: TRIP_EVENT_TYPE.CREATION,
-        meta: sanityTripContent ?? {}
-      })
+        meta: sanityTripContent
+      } as TripEventCreation)
 
-      // Add visit/death events from outcomes
+      /***************************
+       * ADD VISIT/DEATH EVENTS
+       **************************/
       tripOutcomes.forEach(outcome => {
         const outcomeTime = new Date(outcome._createdAt).getTime()
-        const previousTripValue = outcome.previousTripValue || 0
+        const previousTripValue = outcome.previousTripValue || 0 // ???
         const currentTripValue = outcome.tripValue || 0
         const valueChange = currentTripValue - previousTripValue
 
-        tripData.push({
-          time: outcomeTime,
-          value: 0, // Will be set later in accumulation
-          valueChange: valueChange,
-          index: 0, // Will be set later
-          tripId: tripId,
-          tripCreationCost: Number(trip.tripCreationCost),
-          eventType: outcome?.ratValue == 0 ? TRIP_EVENT_TYPE.DEATH : TRIP_EVENT_TYPE.VISIT,
-          meta: outcome
-        })
+        let eventData = {} as TripEventDeath | TripEventVisit
+
+        if (outcome?.ratValue == 0) {
+          // Death
+          eventData = {
+            eventType: TRIP_EVENT_TYPE.DEATH,
+            time: outcomeTime,
+            value: 0, // Will be set later in accumulation
+            valueChange: valueChange,
+            index: 0, // Will be set later
+            tripId: tripId,
+            tripCreationCost: Number(trip.tripCreationCost),
+            meta: outcome
+          } as TripEventDeath
+        } else {
+          // Visit
+          eventData = {
+            eventType: TRIP_EVENT_TYPE.VISIT,
+            time: outcomeTime,
+            value: 0, // Will be set later in accumulation
+            valueChange: valueChange,
+            index: 0, // Will be set later
+            tripId: tripId,
+            tripCreationCost: Number(trip.tripCreationCost),
+            meta: outcome
+          } as TripEventVisit
+        }
+
+        tripData.push(eventData)
       })
 
-      // Add liquidation event if it exists
-      if (trip.liquidationBlock && trip.liquidationValue !== undefined && $blockNumber) {
-        const liquidationTime = blockNumberToTimestamp(
-          Number(trip.liquidationBlock),
-          Number($blockNumber)
-        )
+      /***************************
+       * ADD LIQUIDATION EVENT
+       **************************/
+      if (trip.liquidationBlock && trip.liquidationValue !== undefined) {
+        const liquidationTime = blockNumberToTimestamp(Number(trip.liquidationBlock))
 
         // Get the last trip value before liquidation
         const lastOutcome = tripOutcomes[tripOutcomes.length - 1]
@@ -93,17 +142,15 @@
 
         // Liquidation: you get back the trip value (before tax) and close the position
         tripData.push({
+          eventType: TRIP_EVENT_TYPE.LIQUIDATION,
           time: liquidationTime,
           value: 0, // Will be set later in accumulation
           valueChange: liquidationValueChange,
           index: 0, // Will be set later
           tripId: tripId,
           tripCreationCost: Number(trip.tripCreationCost),
-          eventType: TRIP_EVENT_TYPE.LIQUIDATION,
-          meta: {
-            ...trip
-          }
-        })
+          meta: sanityTripContent
+        } as TripEventLiquidation)
       }
 
       combinedData.push(...tripData)
@@ -118,13 +165,13 @@
     // Add initial 0 point at the start
     const dataWithBaseline = [
       {
+        eventType: TRIP_EVENT_TYPE.BASELINE,
         time: earliestTime - 1000, // 1 second before first event
         value: 0,
         valueChange: 0,
         tripId: "",
-        tripCreationCost: 0,
-        meta: {}
-      } as TripEvent,
+        tripCreationCost: 0
+      } as TripEventBaseline,
       ...combinedData
     ]
 

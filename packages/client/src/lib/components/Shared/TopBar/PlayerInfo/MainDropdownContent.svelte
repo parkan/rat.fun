@@ -48,7 +48,7 @@
         await sendBuyWithEth()
         // playSound("ratfunUI", "coins")
       }}
-      text="Buy Slopamine ({CURRENCY_SYMBOL})"
+      text="Buy $RAT"
     ></BigButton>
   </div>
 </div>
@@ -59,7 +59,7 @@
       display: flex;
       flex-flow: column nowrap;
       margin-bottom: 8px;
-      height: 80px;
+      height: 160px;
     }
 
     p {

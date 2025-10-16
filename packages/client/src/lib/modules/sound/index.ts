@@ -41,17 +41,18 @@ export function initSound(): void {
  * @param {string} category - The category of the sound.
  * @param {string} id - The id of the sound within the category.
  * @param {boolean} [loop=false] - Determines if the sound should loop.
- * @param {boolean} [fade=false] - Determines if the sound should have fade in/out effects.
+ * @param {boolean} [fadeIn=false] - Determines if the sound should have fade in/out effects.
  * @param {number} [pitch=1] - The pitch of the sound.
+ * @param {number} [delay=0] - The delay in milliseconds before the sound is played.
  * @returns {Howl | undefined} - The Howl object of the sound.
  */
 export function playSound(
   category: string,
   id: string,
   loop: boolean = false,
-  fade: boolean = false,
+  fadeIn: boolean = false,
   pitch: number = 1,
-  play: boolean = true // useful to just fetch the sound
+  delay: number = 0
 ): Howl | undefined {
   // Check if category exists
   if (!soundLibrary[category]) {
@@ -74,25 +75,25 @@ export function playSound(
     return undefined
   }
 
-  if (loop) {
-    sound.loop(true)
-  }
+  // Set loop state
+  sound.loop(loop)
 
-  if (fade) {
-    // Fade on begin and end
-    const FADE_TIME = 2000
+  // Set pitch
+  sound.rate(pitch)
 
-    // Init
-    sound.rate(pitch)
-    if (play) {
-      sound.play()
+  // Handle play timing and fade effects
+  const playWithDelay = () => {
+    sound.play()
+    if (fadeIn) {
+      const FADE_TIME = 2000
       sound.fade(0, soundLibrary[category][id].volume, FADE_TIME)
     }
+  }
+
+  if (delay > 0) {
+    setTimeout(playWithDelay, delay)
   } else {
-    sound.rate(pitch)
-    if (play) {
-      sound.play()
-    }
+    playWithDelay()
   }
 
   return sound

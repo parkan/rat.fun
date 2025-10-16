@@ -211,7 +211,7 @@ export const balance = derived(playerActiveTrips, $playerActiveTrips =>
 )
 
 export const profitLoss = derived([balance, investment], ([$b, $i]) => {
-  console.log("P L calculation", $b, $i)
+  // console.log("P L calculation", $b, $i)
   return $b - $i
 })
 

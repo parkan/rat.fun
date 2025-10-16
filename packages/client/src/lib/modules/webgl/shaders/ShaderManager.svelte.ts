@@ -1,4 +1,3 @@
-import { Tween } from "svelte/motion"
 import { WebGLGeneralRenderer } from "$lib/modules/webgl"
 import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
 
@@ -7,184 +6,125 @@ export type UniformType = "float" | "vec2" | "vec3" | "vec4" | "int" | "bool" | 
 export type UniformDefinition = {
   name: `u_${string}`
   type?: UniformType
-  value: Tween<number> | boolean | number | number[]
+  value: number | boolean | number[]
 }
 
-// Generic types for shader configuration
-export type ShaderModeConfig<TMode extends string = string> = Record<
-  TMode,
-  Record<string, number | boolean>
->
-
-export interface ShaderConfiguration<TMode extends string = string> {
-  modes: ShaderModeConfig<TMode>
-  tweens: Record<string, { value: number; duration: number }>
-  initialMode: TMode
-  getMode?: (page: import("@sveltejs/kit").Page) => string
-}
-
-export class ShaderManager<TMode extends string = string> {
-  private renderer: WebGLGeneralRenderer | null = null
-  private canvas: HTMLCanvasElement | null = null
+export class ShaderManager {
+  private _renderer: WebGLGeneralRenderer | null = null
+  private _canvas: HTMLCanvasElement | null = null
   private resizeTimeout: ReturnType<typeof setTimeout> | null = null
-  private currentMode = $state<TMode>()
-  private modes: ShaderModeConfig<TMode>
-  private tweens: Map<string, Tween<number>> = new Map()
-  private tweenConfigs: Record<string, any>
-  private booleanUniforms = $state<Record<string, boolean>>({})
+  private invert = $state<boolean>(false)
 
-  constructor(config: ShaderConfiguration<TMode>) {
-    this.modes = config.modes
-    this.currentMode = config.initialMode
-    this.tweenConfigs = config.tweens
-
-    // Store the provided tweens
-    Object.entries(config.tweens).forEach(([name, tween]) => {
-      this.tweens.set(name, new Tween(tween.value, { duration: tween.duration }))
-    })
-
-    // Initialize boolean uniforms by scanning all modes for non-tween values
-    const tweenNames = new Set(Object.keys(config.tweens))
-    const booleanUniformNames = new Set<string>()
-
-    Object.values(this.modes).forEach(mode => {
-      Object.entries(mode).forEach(([uniformName, value]) => {
-        if (!tweenNames.has(uniformName) && typeof value === "boolean") {
-          booleanUniformNames.add(uniformName)
-        }
-      })
-    })
-
-    // Initialize boolean uniforms with values from initial mode
-    const initialModeConfig = this.modes[config.initialMode]
-    booleanUniformNames.forEach(uniformName => {
-      const initialValue = initialModeConfig[uniformName] as boolean
-      this.booleanUniforms[uniformName] = initialValue !== undefined ? initialValue : false
-    })
+  constructor() {
+    // No initialization needed
   }
 
   /**
-   * Get current mode
+   * Get current invert state
    */
-  get mode(): TMode | undefined {
-    return this.currentMode
+  get isInverted(): boolean {
+    return this.invert
   }
 
   /**
-   * Get all available modes
+   * Get current renderer
    */
-  get availableModes(): TMode[] {
-    return Object.keys(this.modes) as TMode[]
+  get renderer(): WebGLGeneralRenderer | null {
+    return this._renderer
+  }
+
+  /**
+   * Set canvas for the shader manager
+   */
+  set canvas(newCanvas: HTMLCanvasElement | null) {
+    this._canvas = newCanvas
+    // If we have a renderer, update its canvas reference
+    if (this._renderer && newCanvas) {
+      this._renderer.canvas = newCanvas
+    }
   }
 
   /**
    * Get current uniform values (reactive)
    */
   get uniformValues(): Record<string, number | boolean> {
-    const values: Record<string, number | boolean> = {}
-    this.tweens.forEach((tween, name) => {
-      values[name] = tween.current
-    })
-    Object.entries(this.booleanUniforms).forEach(([name, value]) => {
-      values[name] = value
-    })
-    return values
+    return {
+      invert: this.invert
+    }
   }
 
   /**
    * Get uniform definitions for WebGL renderer
    */
   get uniformDefinitions(): UniformDefinition[] {
-    return Array.from(this.tweens.entries()).map(([name, tween]) => ({
-      name: `u_${name}`,
-      value: tween.current
-    }))
+    return [
+      {
+        name: "u_invert" as `u_${string}`,
+        value: this.invert
+      }
+    ]
   }
 
   /**
-   * Set new mode and transition uniforms
+   * Toggle invert state
    */
-  setMode(newMode: TMode, tweenDuration?: number) {
-    if (!this.modes[newMode]) {
-      console.warn(`Mode '${newMode}' not found in configuration`)
-      return
+  toggleInvert() {
+    this.invert = !this.invert
+    if (this.renderer) {
+      this.renderer.setUniform("u_invert", this.invert, "bool")
     }
+  }
 
-    this.currentMode = newMode
-    const modeConfig = this.modes[newMode]
-
-    // Update all tweens and boolean uniforms to new target values
-    Object.entries(modeConfig).forEach(([uniformName, targetValue]) => {
-      const tween = this.tweens.get(uniformName)
-      if (tween && typeof targetValue === "number") {
-        const config = this.tweenConfigs[uniformName]
-        // Handle tween-based uniforms
-        if (tweenDuration) {
-          tween.set(targetValue, { duration: tweenDuration })
-        } else {
-          tween.set(targetValue, { duration: config.duration })
-        }
-      } else if (typeof targetValue === "boolean") {
-        // Handle boolean uniforms
-        this.booleanUniforms[uniformName] = targetValue
-      }
-    })
+  /**
+   * Set invert state
+   */
+  setInvert(inverted: boolean) {
+    this.invert = inverted
+    if (this._renderer) {
+      this._renderer.setUniform("u_invert", this.invert, "bool")
+    }
   }
 
   /**
    * Set new shader programmatically
    */
-  setShader(shaderKey: string, mode?: string) {
+  setShader(shaderKey: string, inverted: boolean = false) {
     const shaderSource = shaders?.[shaderKey as keyof typeof shaders]
 
     if (!shaderSource) throw new Error("ShaderNotExistError")
 
-    const newConfig = shaderSource.config
+    // Set invert state
+    this.invert = inverted
 
     // Destroy current renderer
-    if (this.renderer) {
-      this.renderer.destroy()
-      this.renderer = null
+    if (this._renderer) {
+      this._renderer.destroy()
+      this._renderer = null
     }
 
-    // Update configuration
-    this.modes = newConfig.modes
-    this.currentMode = newConfig.initialMode
-    this.tweenConfigs = newConfig.tweens
-
-    // Clear existing tweens
-    this.tweens.clear()
-
-    // Create new tweens
-    Object.entries(newConfig.tweens).forEach(([name, tween]) => {
-      this.tweens.set(name, new Tween(tween.value, { duration: tween.duration }))
-    })
-
-    // Reinitialize boolean uniforms
-    const tweenNames = new Set(Object.keys(newConfig.tweens))
-    const booleanUniformNames = new Set<string>()
-
-    Object.values(this.modes).forEach(mode => {
-      Object.entries(mode).forEach(([uniformName, value]) => {
-        if (!tweenNames.has(uniformName) && typeof value === "boolean") {
-          booleanUniformNames.add(uniformName)
-        }
-      })
-    })
-
-    // Reset boolean uniforms
-    this.booleanUniforms = {}
-    const initialModeConfig = this.modes[newConfig.initialMode]
-    booleanUniformNames.forEach(uniformName => {
-      const initialValue = initialModeConfig[uniformName] as boolean
-      this.booleanUniforms[uniformName] = initialValue !== undefined ? initialValue : false
-    })
-
     // If we have a canvas, reinitialize the renderer
-    if (this.canvas) {
-      this.initializeRenderer(this.canvas, shaderSource)
-      if (mode) {
-        this.setMode(mode)
+    if (this._canvas) {
+      this.initializeRenderer(this._canvas, shaderSource)
+    }
+  }
+
+  /**
+   * Completely unset/disable the shader - destroys renderer and clears canvas
+   */
+  unsetShader() {
+    // Use destroy to clean up renderer and resources
+    this.destroy()
+
+    // Clear the WebGL canvas if it exists
+    if (this._canvas) {
+      const gl = this._canvas.getContext("webgl") || this._canvas.getContext("webgl2")
+      if (gl) {
+        // Set clear color to black and clear the canvas
+        gl.clearColor(0.0, 0.0, 0.0, 1.0)
+        gl.clear(gl.COLOR_BUFFER_BIT)
+
+        // Also clear the depth buffer if it exists
+        gl.clear(gl.DEPTH_BUFFER_BIT)
       }
     }
   }
@@ -195,9 +135,9 @@ export class ShaderManager<TMode extends string = string> {
   initializeRenderer(canvas: HTMLCanvasElement, shaderSource: any) {
     if (!canvas) return
 
-    this.canvas = canvas
+    this._canvas = canvas
 
-    // Convert tweens and boolean uniforms to initial uniform values
+    // Set up initial uniforms
     const initialUniforms: Record<
       string,
       {
@@ -206,29 +146,19 @@ export class ShaderManager<TMode extends string = string> {
       }
     > = {}
 
-    // Add tween-based uniforms
-    this.tweens.forEach((tween, name) => {
-      initialUniforms[`u_${name}`] = {
-        type: "float",
-        value: tween.current
-      }
-    })
-
-    // Add boolean uniforms
-    Object.entries(this.booleanUniforms).forEach(([name, value]) => {
-      initialUniforms[`u_${name}`] = {
-        type: "bool",
-        value: value
-      }
-    })
+    // Add invert uniform
+    initialUniforms["u_invert"] = {
+      type: "bool",
+      value: this.invert
+    }
 
     // Use the factory function from your WebGL module
-    this.renderer = new WebGLGeneralRenderer(canvas, {
+    this._renderer = new WebGLGeneralRenderer(canvas, {
       shader: shaderSource,
       uniforms: initialUniforms
     })
 
-    this.renderer.render()
+    this._renderer.render()
 
     // Set up resize handling
     window.addEventListener("resize", this.handleResize)
@@ -238,70 +168,10 @@ export class ShaderManager<TMode extends string = string> {
    * Update uniform values in the shader
    */
   updateUniforms() {
-    if (!this.renderer) return
+    if (!this._renderer) return
 
-    // Update tween-based uniforms
-    this.tweens.forEach((tween, name) => {
-      this.renderer!.setUniform(`u_${name}`, tween.current, "float")
-    })
-
-    // Update boolean uniforms
-    Object.entries(this.booleanUniforms).forEach(([name, value]) => {
-      this.renderer!.setUniform(`u_${name}`, value, "bool")
-    })
-  }
-
-  /**
-   * Add or update a uniform at runtime
-   */
-  addUniform(name: string, tween: Tween<number>) {
-    this.tweens.set(name, tween)
-
-    // Add to all modes with the current tween value if not already present
-    const currentValue = tween.current
-    Object.keys(this.modes).forEach(modeName => {
-      if (!(name in this.modes[modeName])) {
-        this.modes[modeName][name] = currentValue
-      }
-    })
-  }
-
-  /**
-   * Update uniform value for a specific mode
-   */
-  updateModeUniform(mode: TMode, uniformName: string, value: number) {
-    if (!this.modes[mode]) {
-      console.warn(`Mode '${mode}' not found`)
-      return
-    }
-
-    this.modes[mode][uniformName] = value
-
-    // If this is the current mode, update the tween immediately
-    if (mode === this.currentMode) {
-      const tween = this.tweens.get(uniformName)
-      if (tween) {
-        tween.set(value)
-      }
-    }
-  }
-
-  /**
-   * Update boolean uniform value immediately
-   */
-  updateBooleanUniform(uniformName: string, value: boolean) {
-    // Update the reactive boolean uniform
-    this.booleanUniforms[uniformName] = value
-
-    // Update all modes to maintain consistency
-    Object.keys(this.modes).forEach(modeName => {
-      this.modes[modeName][uniformName] = value
-    })
-
-    // Update the renderer immediately if available
-    if (this.renderer) {
-      this.renderer.setUniform(`u_${uniformName}`, value, "bool")
-    }
+    // Update invert uniform
+    this._renderer.setUniform("u_invert", this.invert, "bool")
   }
 
   /**
@@ -313,8 +183,8 @@ export class ShaderManager<TMode extends string = string> {
     }
 
     this.resizeTimeout = setTimeout(() => {
-      if (this.renderer) {
-        this.renderer.resize()
+      if (this._renderer) {
+        this._renderer.resize()
       }
     }, 100)
   }
@@ -323,9 +193,9 @@ export class ShaderManager<TMode extends string = string> {
    * Clean up resources
    */
   destroy() {
-    if (this.renderer) {
-      this.renderer.destroy()
-      this.renderer = null
+    if (this._renderer) {
+      this._renderer.destroy()
+      this._renderer = null
     }
 
     window.removeEventListener("resize", this.handleResize)

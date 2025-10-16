@@ -24,13 +24,9 @@
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
   onMount(() => {
-    shaderManager.setShader("clouds", "inverted")
-    // ????
-    if ($backgroundMusic?._src !== "/sounds/ratfun/music/main.mp3") {
-      $backgroundMusic?.stop()
-      $backgroundMusic = undefined
-      $backgroundMusic = playSound("ratfunMusic", "main", true)
-    }
+    shaderManager.setShader("clouds", true)
+    $backgroundMusic?.stop()
+    $backgroundMusic = playSound("ratfunMusic", "main", true)
 
     // Set state to RAT_BOX_STATE.INIT
     resetRatBoxState()
@@ -91,7 +87,11 @@
   .rat-box {
     display: flex;
     height: var(--game-window-main-height);
-    width: 100%;
+    width: var(--game-column-width);
     overflow: hidden;
+
+    @media (max-width: 700px) {
+      width: 100%;
+    }
   }
 </style>
