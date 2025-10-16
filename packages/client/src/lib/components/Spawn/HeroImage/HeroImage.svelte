@@ -6,34 +6,60 @@
 
   let { onComplete }: { onComplete: () => void } = $props()
 
+  let mascotElement = $state<HTMLDivElement | null>(null)
+  let textElement = $state<HTMLDivElement | null>(null)
   let buttonElement = $state<HTMLDivElement | null>(null)
-  let textElement = $state<HTMLParagraphElement | null>(null)
+
   const timeline = gsap.timeline()
 
   onMount(() => {
-    if (!buttonElement || !textElement) {
+    if (!mascotElement || !textElement || !buttonElement) {
       return
     }
 
     // Set initial opacity to 0
-    buttonElement.style.opacity = "0"
-    textElement.style.opacity = "0"
+    gsap.set([mascotElement, textElement, buttonElement], {
+      opacity: 0
+    })
 
-    timeline.to(textElement, {
-      opacity: 1,
-      duration: 0.4
-    })
-    timeline.to(buttonElement, {
-      opacity: 1,
-      duration: 0.4
-    })
+    // Staggered fade-in animations
+    timeline
+      .to(
+        mascotElement,
+        {
+          opacity: 1,
+          duration: 0.4
+        },
+        "0"
+      )
+      .to(
+        textElement,
+        {
+          opacity: 1,
+          duration: 0.3
+        },
+        "0.1"
+      )
+      .to(
+        buttonElement,
+        {
+          opacity: 1,
+          duration: 0.3
+        },
+        "0.2"
+      )
   })
 </script>
 
 <div class="outer-container">
   <div class="inner-container">
-    <p bind:this={textElement}>{$player?.name}, you are set!</p>
-    <div class="button" bind:this={buttonElement}>
+    <div class="mascot-container" bind:this={mascotElement}>
+      <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+    </div>
+    <div class="text-container" bind:this={textElement}>
+      {$player?.name}, you are set!
+    </div>
+    <div class="button-container" bind:this={buttonElement}>
       <BigButton text="ENJOY SKILLFULLY" onclick={onComplete} />
     </div>
   </div>
@@ -56,16 +82,28 @@
       width: 500px;
       max-width: 90dvw;
 
-      .button {
-        width: 100%;
-        height: 200px;
+      .mascot-container {
+        width: 300px;
+        height: 300px;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
       }
 
-      p {
+      .text-container {
         font-size: var(--font-size-large);
         background: var(--background);
         color: var(--foreground);
         padding: 10px;
+        margin-bottom: 20px;
+        margin-top: 20px;
+      }
+
+      .button-container {
+        width: 100%;
+        height: 200px;
       }
     }
   }

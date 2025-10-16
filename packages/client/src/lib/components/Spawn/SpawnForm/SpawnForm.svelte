@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import { sendSpawn } from "$lib/modules/action-manager/index.svelte"
   import gsap from "gsap"
-  import { onMount } from "svelte"
 
   import { player } from "$lib/modules/state/stores"
   import { typeHit } from "$lib/modules/sound"
@@ -18,9 +18,11 @@
   let name = $state("")
   let busy = $state(false)
 
-  let buttonElement: HTMLDivElement | null = $state(null)
+  let mascotElement: HTMLDivElement | null = $state(null)
   let textElement: HTMLDivElement | null = $state(null)
   let inputElement: HTMLInputElement | null = $state(null)
+  let buttonElement: HTMLDivElement | null = $state(null)
+
   const timeline = gsap.timeline()
 
   async function submitForm() {
@@ -51,26 +53,53 @@
   }
 
   onMount(() => {
-    if (!buttonElement || !textElement) {
+    if (!mascotElement || !textElement || !inputElement || !buttonElement) {
       return
     }
 
     // Set initial opacity to 0
-    buttonElement.style.opacity = "0"
-    textElement.style.opacity = "0"
-
-    timeline.to(textElement, {
-      opacity: 1,
-      duration: 0.4
+    gsap.set([mascotElement, textElement, inputElement, buttonElement], {
+      opacity: 0
     })
-    timeline.to(buttonElement, {
-      opacity: 1,
-      duration: 0.4,
-      onComplete: () => {
-        // Focus the input after the animation completes
-        if (inputElement) {
-          inputElement.focus()
-        }
+
+    // Staggered fade-in animations
+    timeline
+      .to(
+        mascotElement,
+        {
+          opacity: 1,
+          duration: 0.4
+        },
+        "0"
+      )
+      .to(
+        textElement,
+        {
+          opacity: 1,
+          duration: 0.3
+        },
+        "0.1"
+      )
+      .to(
+        inputElement,
+        {
+          opacity: 1,
+          duration: 0.3
+        },
+        "0.2"
+      )
+      .to(
+        buttonElement,
+        {
+          opacity: 1,
+          duration: 0.3
+        },
+        "0.3"
+      )
+
+    timeline.call(() => {
+      if (inputElement) {
+        inputElement.focus()
       }
     })
   })
@@ -81,9 +110,13 @@
     {#if busy}
       <div class="loader">Issuing member card <SmallSpinner soundOn /></div>
     {:else}
+      <!-- MASCOT -->
+      <div class="mascot-container" bind:this={mascotElement}>
+        <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+      </div>
       <!-- INTRO TEXT -->
       <div class="text" bind:this={textElement}>
-        <p>{$player?.name}ID checks out. You can enter. But we need your name to proceed.</p>
+        {$player?.name}ID checks out. You can enter. But we need your name.
       </div>
 
       <!-- FORM -->
@@ -126,12 +159,24 @@
       width: 600px;
       max-width: 90dvw;
 
-      p {
+      .mascot-container {
+        width: 300px;
+        height: 300px;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+
+      .text {
         font-size: var(--font-size-large);
         background: var(--background);
         color: var(--foreground);
         padding: 10px;
         text-align: center;
+        margin-bottom: 20px;
+        margin-top: 20px;
       }
 
       .form {
@@ -152,7 +197,7 @@
           border-bottom: var(--default-border-style);
           outline: none;
           width: 100%;
-          height: 100px;
+          height: 80px;
           margin-bottom: 20px;
           text-align: center;
 

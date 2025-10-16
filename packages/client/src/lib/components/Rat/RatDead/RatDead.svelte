@@ -35,8 +35,8 @@
     color: var(--background);
 
     .rat-dead-image {
-      width: 350px;
-      height: 350px;
+      width: 300px;
+      height: 300px;
 
       @media (max-width: 700px) {
         width: 160px;

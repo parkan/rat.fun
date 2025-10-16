@@ -8,7 +8,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -16,7 +16,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -24,7 +24,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -32,7 +32,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -40,7 +40,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -48,7 +48,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 100
     },
     {
       type: "text",
@@ -57,7 +57,7 @@ export function generateLoadingOutput() {
       color: "white",
       backgroundColor: "black",
       duration: 0,
-      delayAfter: 50
+      delayAfter: 150
     },
     {
       type: "loader",
