@@ -59,10 +59,9 @@ contract BaseTest is MudTest, GasReporter {
     initialBalance = LibWorld.erc20().balanceOf(_player);
     // Give player balance if 0
     if (initialBalance == 0) {
-      prankAdmin();
+      vm.prank(_player);
+      world.ratfun__giveCallerTokens();
       initialBalance = 2000 * 10 ** LibWorld.erc20().decimals();
-      LibWorld.erc20().transfer(_player, initialBalance);
-      vm.stopPrank();
     }
   }
 
