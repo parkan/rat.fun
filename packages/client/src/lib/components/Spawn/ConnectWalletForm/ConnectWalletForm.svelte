@@ -22,6 +22,55 @@
 
   const timeline = gsap.timeline()
 
+  function onEntrykitButtonClick() {
+    // !!! HACK
+    // Definitly not the best way to do this...
+
+    // Find the entrykit-button-container
+    const entrykitContainer = document.querySelector(".entrykit-button-container")
+    if (!entrykitContainer) {
+      console.error("entrykit-button-container not found")
+      return
+    }
+
+    // Find the first iframe within the container
+    const iframe = entrykitContainer.querySelector("iframe")
+    if (!iframe) {
+      console.error("iframe not found within entrykit-button-container")
+      return
+    }
+
+    // Wait for iframe to load, then find and click the first button
+    iframe.addEventListener(
+      "load",
+      () => {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+          if (!iframeDoc) {
+            console.error("Cannot access iframe content")
+            return
+          }
+
+          const firstButton = iframeDoc.querySelector("button")
+          if (firstButton) {
+            firstButton.click()
+            console.log("Clicked button in iframe")
+          } else {
+            console.error("No button found in iframe")
+          }
+        } catch (error) {
+          console.error("Error accessing iframe content:", error)
+        }
+      },
+      { once: true }
+    )
+
+    // If iframe is already loaded, try to access it immediately
+    if (iframe.contentDocument?.readyState === "complete") {
+      iframe.dispatchEvent(new Event("load"))
+    }
+  }
+
   onMount(() => {
     if (!messageElement) {
       return
@@ -50,7 +99,12 @@
   <div class="inner-container">
     <p bind:this={messageElement}>{message}</p>
     {#if walletType === WALLET_TYPE.ENTRYKIT}
-      <div bind:this={$entryKitButton}></div>
+      <div class="button-container" bind:this={buttonElement}>
+        <BigButton text="Connect EntryKit" onclick={onEntrykitButtonClick} />
+      </div>
+      <div class="entrykit-button-container">
+        <div bind:this={$entryKitButton}></div>
+      </div>
     {:else}
       <div class="button-container" bind:this={buttonElement}>
         <BigButton text="Connect Burner" onclick={onComplete} />
@@ -86,7 +140,14 @@
       .button-container {
         width: 100%;
         height: 200px;
+        margin-bottom: 20px;
       }
+
+      // .entrykit-button-container {
+      // opacity: 0;
+      // pointer-events: none;
+      // height: 0;
+      // }
     }
   }
 </style>
