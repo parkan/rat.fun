@@ -15,7 +15,7 @@
     "sanity"
   ],
   "dependencies": {
-    "@sanity/code-input": "^6.0.1",
+    "@sanity/code-input": "^6.0.3",
     "@sanity/vision": "^4.10.3",
     "easymde": "2.20.0",
     "react": "^19.2.0",
@@ -28,6 +28,6 @@
   "devDependencies": {
     "@sanity/eslint-config-studio": "^5.0.2",
     "@types/react": "^19.2.2",
-    "eslint": "^9.37.0"
+    "eslint": "^9.38.0"
   }
 }
