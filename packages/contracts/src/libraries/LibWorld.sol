@@ -35,12 +35,7 @@ library LibWorld {
    * @param gamePoolAddress The address of the game pool
    * @param serviceAddress The address of the service
    */
-  function init(
-    address _adminAddress,
-    address erc20Address,
-    address gamePoolAddress,
-    address serviceAddress
-  ) internal {
+  function init(address _adminAddress, address erc20Address, address gamePoolAddress, address serviceAddress) internal {
     bytes32 adminId = LibUtils.addressToEntityKey(_adminAddress);
 
     // Set game config

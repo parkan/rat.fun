@@ -59,12 +59,7 @@ contract PostDeploy is Script {
     GamePool gamePool = new GamePool(world, erc20);
 
     // Root namespace owner is admin
-    LibWorld.init(
-      NamespaceOwner.get(ROOT_NAMESPACE_ID),
-      address(erc20),
-      address(gamePool),
-      serviceAddress
-    );
+    LibWorld.init(NamespaceOwner.get(ROOT_NAMESPACE_ID), address(erc20), address(gamePool), serviceAddress);
     vm.stopBroadcast();
   }
 }
