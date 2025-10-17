@@ -1,7 +1,7 @@
 export enum ENVIRONMENT {
   DEVELOPMENT = "development",
-  BASE = "base",
-  BASE_SEPOLIA = "base-sepolia"
+  BASE_SEPOLIA = "base-sepolia",
+  BASE = "base"
 }
 
 export enum WALLET_TYPE {

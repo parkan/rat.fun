@@ -143,11 +143,11 @@
         margin-bottom: 20px;
       }
 
-      // .entrykit-button-container {
-      // opacity: 0;
-      // pointer-events: none;
-      // height: 0;
-      // }
+      .entrykit-button-container {
+        opacity: 0;
+        pointer-events: none;
+        height: 0;
+      }
     }
   }
 </style>
