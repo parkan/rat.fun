@@ -31,7 +31,7 @@
     // Set state to RAT_BOX_STATE.INIT
     resetRatBoxState()
 
-    // HACK: wait a little to allow to token balance to be updated
+    // HACK: wait a little to allow the token balance to update
     // to avoid having $playerIsBroke be true when it shouldn't
     await new Promise(resolve => setTimeout(resolve, 100))
 

@@ -6,7 +6,8 @@
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { gsap } from "gsap"
   import { backgroundMusic } from "$lib/modules/sound/stores"
-  // import { serializeTimeline } from "./utils"
+  import { environment } from "$lib/modules/network"
+  import { ENVIRONMENT } from "$lib/mud/enums"
 
   let { result }: { result: EnterTripReturnValue } = $props()
 
@@ -90,9 +91,11 @@
   })
 </script>
 
-<div class="replay-button-container">
-  <button onclick={replay}>Replay</button>
-</div>
+{#if $environment !== ENVIRONMENT.BASE}
+  <div class="replay-button-container">
+    <button onclick={replay}>Replay</button>
+  </div>
+{/if}
 
 <div class="trip-report-container">
   <!-- LOG -->
