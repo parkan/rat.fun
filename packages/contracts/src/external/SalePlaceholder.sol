@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { ResourceAccess } from "@latticexyz/world/src/codegen/tables/ResourceAccess.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RatERC20 } from "./RatERC20.sol";
 
 // TODO useful for distributing tokens for playtests, remove in production
 contract SalePlaceholder {
@@ -22,7 +23,7 @@ contract SalePlaceholder {
     _;
   }
 
-  function transferStartingTokens(RatERC20 erc20, address to) external onlyNamespace("ratfun") {
+  function transferStartingTokens(ERC20 erc20, address to) external onlyNamespace("ratfun") {
     erc20.transfer(to, 2000 * 10 ** erc20.decimals());
   }
 }

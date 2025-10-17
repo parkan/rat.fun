@@ -13,7 +13,6 @@ import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { errorHandler } from "$lib/modules/error-handling"
 import { refetchAllowance } from "$lib/modules/erc20Listener"
 import { TransactionError, WagmiConfigUnavailableError } from "../error-handling/errors"
-import mainSaleAbi from "contracts/out/MainSale.sol/MainSale.abi.json"
 
 /**
  * Executes an on-chain transaction.
@@ -40,15 +39,6 @@ export async function executeTransaction(
         abi: erc20Abi,
         functionName: "approve",
         args: params,
-        gas: 5000000n // TODO: Added to fix gas estimation. Change this.
-      })
-    } else if (systemId === WorldFunctions.BuyWithEth) {
-      tx = await client.writeContract({
-        address: get(externalAddressesConfig).mainSaleAddress,
-        abi: mainSaleAbi,
-        functionName: "buyWithEth",
-        args: params,
-        value: value,
         gas: 5000000n // TODO: Added to fix gas estimation. Change this.
       })
     } else {

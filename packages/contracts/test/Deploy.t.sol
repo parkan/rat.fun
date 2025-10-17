@@ -20,7 +20,7 @@ contract DeployTest is BaseTest {
   }
 
   function testERC20Supply() public view {
-    // NOTE! This should be 90M once the liquidity allocation is added
-    assertEq(LibWorld.erc20().totalSupply(), 82_000_000 * 1e18);
+    // NOTE! This should be 90M for the real token
+    assertEq(LibWorld.erc20().totalSupply(), 2_000_000 * 1e18);
   }
 }

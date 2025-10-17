@@ -9,7 +9,8 @@ import {
   Balance,
   Liquidated,
   LiquidationValue,
-  LiquidationTaxPercentage
+  LiquidationTaxPercentage,
+  ExternalAddressesConfig
 } from "../codegen/index.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibUtils, LibRat, LibWorld } from "../libraries/Libraries.sol";
@@ -79,9 +80,12 @@ contract RatSystem is System {
       LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
     }
 
-    // Withdraw tokens equal to tax from pool to admin
+    // Withdraw tokens equal to tax from pool to fee account
     if (tax > 0) {
-      LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+      LibWorld.gamePool().withdrawTokens(
+        ExternalAddressesConfig.getFeeAddress(),
+        tax * 10 ** LibWorld.erc20().decimals()
+      );
     }
   }
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {
   GameConfig,
   GamePercentagesConfig,
@@ -24,7 +25,6 @@ import {
   RATS_KILLED_FOR_ADMIN_ACCESS
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
-import { RatERC20 } from "../external/RatERC20.sol";
 import { GamePool } from "../external/GamePool.sol";
 
 library LibWorld {
@@ -33,17 +33,15 @@ library LibWorld {
    * @param _adminAddress The address of the admin
    * @param erc20Address The address of the erc20 token
    * @param gamePoolAddress The address of the game pool
-   * @param mainSaleAddress The address of the main sale
    * @param serviceAddress The address of the service
-   * @param usdcAddress The address of the usdc token
+   * @param feeAddress The address of the fee account
    */
   function init(
     address _adminAddress,
     address erc20Address,
     address gamePoolAddress,
-    address mainSaleAddress,
     address serviceAddress,
-    address usdcAddress
+    address feeAddress
   ) internal {
     bytes32 adminId = LibUtils.addressToEntityKey(_adminAddress);
 
@@ -73,9 +71,9 @@ library LibWorld {
       ExternalAddressesConfigData({
         erc20Address: erc20Address,
         gamePoolAddress: gamePoolAddress,
-        mainSaleAddress: mainSaleAddress,
+        mainSaleAddress: address(0),
         serviceAddress: serviceAddress,
-        usdcAddress: usdcAddress
+        feeAddress: feeAddress
       })
     );
 
@@ -119,8 +117,8 @@ library LibWorld {
   /**
    * @notice Get the erc20 token contract used by the world
    */
-  function erc20() internal view returns (RatERC20) {
-    return RatERC20(ExternalAddressesConfig.getErc20Address());
+  function erc20() internal view returns (ERC20) {
+    return ERC20(ExternalAddressesConfig.getErc20Address());
   }
 
   /**

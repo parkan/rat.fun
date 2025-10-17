@@ -53,7 +53,7 @@ export default defineWorld({
         gamePoolAddress: "address",
         mainSaleAddress: "address",
         serviceAddress: "address",
-        usdcAddress: "address"
+        feeAddress: "address"
       },
       codegen: {
         dataStruct: true
