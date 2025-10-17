@@ -2,12 +2,21 @@ import { Chain, http } from "viem"
 import { Config, createConfig, CreateConnectorFn } from "wagmi"
 import { coinbaseWallet, injected, safe, metaMask, walletConnect } from "wagmi/connectors"
 import { getDefaultConfig } from "connectkit"
-import { extendedBaseSepolia, extendedMudFoundry } from "$lib/mud/extendedChainConfigs"
+import {
+  extendedBase,
+  extendedBaseSepolia,
+  extendedMudFoundry
+} from "$lib/mud/extendedChainConfigs"
 import { PUBLIC_WALLET_CONNECT_PROJECT_ID } from "$env/static/public"
 
-export const chains = [extendedMudFoundry, extendedBaseSepolia] as const satisfies Chain[]
+export const chains = [
+  extendedBase,
+  extendedBaseSepolia,
+  extendedMudFoundry
+] as const satisfies Chain[]
 
 export const transports = {
+  [extendedBase.id]: http(),
   [extendedBaseSepolia.id]: http(),
   [extendedMudFoundry.id]: http()
 } as const
