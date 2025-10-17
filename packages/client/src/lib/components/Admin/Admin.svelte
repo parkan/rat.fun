@@ -80,7 +80,7 @@
         eventType: TRIP_EVENT_TYPE.CREATION,
         time: initialTime,
         value: 0, // Will be set later in accumulation
-        valueChange: -Number(trip.tripCreationCost), // Cost of creating trip
+        valueChange: 0, // Neutral
         index: 0, // Will be set later
         tripId: tripId,
         tripCreationCost: Number(trip.tripCreationCost),
@@ -90,9 +90,11 @@
       /***************************
        * ADD VISIT/DEATH EVENTS
        **************************/
-      tripOutcomes.forEach(outcome => {
+      tripOutcomes.forEach((outcome, i) => {
+        const previousTrip = tripOutcomes[i - 1]
+
         const outcomeTime = new Date(outcome._createdAt).getTime()
-        const previousTripValue = outcome.previousTripValue || 0 // ???
+        const previousTripValue = previousTrip?.tripValue || Number(trip.tripCreationCost) // Value from the previous trip, and if it's the first outcome, creation cost of the trip
         const currentTripValue = outcome.tripValue || 0
         const valueChange = currentTripValue - previousTripValue
 
@@ -137,8 +139,7 @@
         const lastOutcome = tripOutcomes[tripOutcomes.length - 1]
         const finalTripValue = lastOutcome?.tripValue || 0
 
-        const untaxed = Number(trip.liquidationValue)
-        const liquidationValueChange = untaxed - finalTripValue
+        const liquidationValueChange = Number(trip.liquidationValue) - finalTripValue
 
         // Liquidation: you get back the trip value (before tax) and close the position
         tripData.push({
