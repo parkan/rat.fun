@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { tokenAllowanceApproved } from "$lib/modules/state/stores"
   import { BigButton } from "$lib/components/Shared"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { sendGiveCallerTokens } from "$lib/modules/action-manager/index.svelte"
   import { SmallSpinner } from "$lib/components/Shared"
+  import { environment } from "$lib/modules/network"
+  import { ENVIRONMENT } from "$lib/mud/enums"
 
   let busy = $state(false)
 
@@ -23,6 +24,8 @@
 <div class="no-tokens">
   {#if busy}
     <div class="loading">Getting tokens <SmallSpinner soundOn /></div>
+  {:else if $environment == ENVIRONMENT.BASE}
+    <div class="notice">You do not have $RAT tokens. Come back later...</div>
   {:else}
     <div class="button-container">
       <BigButton text="Get 2000 $RAT" disabled={busy} onclick={onClick} />

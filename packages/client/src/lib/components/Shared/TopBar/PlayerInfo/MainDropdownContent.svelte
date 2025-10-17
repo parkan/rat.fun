@@ -3,9 +3,9 @@
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   // import { playSound } from "$lib/modules/sound"
-  import { sendBuyWithEth } from "$lib/modules/action-manager/index.svelte"
-  import { BigButton } from "$lib/components/Shared"
-  import { busy } from "$lib/modules/action-manager/index.svelte"
+  // import { sendBuyWithEth } from "$lib/modules/action-manager/index.svelte"
+  // import { BigButton } from "$lib/components/Shared"
+  // import { busy } from "$lib/modules/action-manager/index.svelte"
   import { shortenAddress } from "$lib/modules/utils"
 </script>
 
@@ -40,7 +40,7 @@
       </p>
     </div>
   {/if}
-  <div class="buy-button-container">
+  <!-- <div class="buy-button-container">
     <BigButton
       disabled={busy.BuyWithEth.current !== 0}
       tippyText="Buy some Slopamine ({CURRENCY_SYMBOL})"
@@ -50,7 +50,7 @@
       }}
       text="Buy $RAT"
     ></BigButton>
-  </div>
+  </div> -->
 </div>
 
 <style lang="scss">

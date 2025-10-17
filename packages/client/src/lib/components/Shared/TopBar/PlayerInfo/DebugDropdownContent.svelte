@@ -19,6 +19,7 @@
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { adminUnlockedAt } from "$lib/modules/ui/state.svelte"
+  import { ENVIRONMENT } from "$lib/mud/enums"
 
   const sendUnlockAdmin = async () => {
     await sendChatMessage("RatsRiseUp666")
@@ -74,24 +75,33 @@
     </p>
   </div>
   <div class="actions">
-    <SmallButton
-      disabled={busy.GiveCallerTokens.current !== 0}
-      tippyText="Request tokens from the contract"
-      onclick={async () => {
-        await sendGiveCallerTokens()
-        // playSound("ratfunUI", "coins")
-      }}
-      text="Get 2000 free slopamine ({CURRENCY_SYMBOL})"
-    ></SmallButton>
-    <SmallButton
-      disabled={busy.BuyWithEth.current !== 0}
-      tippyText="Buy some slopamine ({CURRENCY_SYMBOL})"
-      onclick={async () => {
-        await sendBuyWithEth()
-        // playSound("ratfunUI", "coins")
-      }}
-      text="Buy 1 Slopamine ({CURRENCY_SYMBOL}) for 0.001ETH"
-    ></SmallButton>
+    {#if $environment !== ENVIRONMENT.BASE}
+      <SmallButton
+        disabled={busy.GiveCallerTokens.current !== 0}
+        tippyText="Request tokens from the contract"
+        onclick={async () => {
+          await sendGiveCallerTokens()
+        }}
+        text="Get 2000 free slopamine ({CURRENCY_SYMBOL})"
+      ></SmallButton>
+      <SmallButton
+        disabled={busy.BuyWithEth.current !== 0}
+        tippyText="Buy some slopamine ({CURRENCY_SYMBOL})"
+        onclick={async () => {
+          await sendBuyWithEth()
+        }}
+        text="Buy 1 Slopamine ({CURRENCY_SYMBOL}) for 0.001ETH"
+      ></SmallButton>
+
+      <SmallButton
+        tippyText="Unlock admin mode"
+        onclick={async () => {
+          await sendUnlockAdmin()
+        }}
+        disabled={$player?.masterKey}
+        text="Unlock admin mode"
+      ></SmallButton>
+    {/if}
     <SmallButton
       disabled={busy.ApproveMax.current !== 0 || $tokenAllowanceApproved}
       tippyText="Allow the contract to spend on your behalf"
@@ -99,14 +109,6 @@
         await sendApproveMax()
       }}
       text="Approve max allowance"
-    ></SmallButton>
-    <SmallButton
-      tippyText="Unlock admin mode"
-      onclick={async () => {
-        await sendUnlockAdmin()
-      }}
-      disabled={$player?.masterKey}
-      text="Unlock admin mode"
     ></SmallButton>
   </div>
 </div>
