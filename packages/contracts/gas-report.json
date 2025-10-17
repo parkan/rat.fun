@@ -87,13 +87,13 @@
     "file": "test/systems/RatSystem.t.sol:RatSystemTest",
     "test": "testLiquidateRat",
     "name": "Liquidate rat",
-    "gasUsed": 414589
+    "gasUsed": 417421
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testCloseTrip",
     "name": "Close trip",
-    "gasUsed": 237373
+    "gasUsed": 240205
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",

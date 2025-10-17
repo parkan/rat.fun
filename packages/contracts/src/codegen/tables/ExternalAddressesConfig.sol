@@ -21,6 +21,7 @@ struct ExternalAddressesConfigData {
   address gamePoolAddress;
   address mainSaleAddress;
   address serviceAddress;
+  address feeAddress;
 }
 
 library ExternalAddressesConfig {
@@ -28,12 +29,12 @@ library ExternalAddressesConfig {
   ResourceId constant _tableId = ResourceId.wrap(0x746272617466756e000000000000000045787465726e616c4164647265737365);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0050040014141414000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0064050014141414140000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of ()
   Schema constant _keySchema = Schema.wrap(0x0000000000000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (address, address, address, address)
-  Schema constant _valueSchema = Schema.wrap(0x0050040061616161000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (address, address, address, address, address)
+  Schema constant _valueSchema = Schema.wrap(0x0064050061616161610000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -48,11 +49,12 @@ library ExternalAddressesConfig {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](4);
+    fieldNames = new string[](5);
     fieldNames[0] = "erc20Address";
     fieldNames[1] = "gamePoolAddress";
     fieldNames[2] = "mainSaleAddress";
     fieldNames[3] = "serviceAddress";
+    fieldNames[4] = "feeAddress";
   }
 
   /**
@@ -222,6 +224,44 @@ library ExternalAddressesConfig {
   }
 
   /**
+   * @notice Get feeAddress.
+   */
+  function getFeeAddress() internal view returns (address feeAddress) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
+    return (address(bytes20(_blob)));
+  }
+
+  /**
+   * @notice Get feeAddress.
+   */
+  function _getFeeAddress() internal view returns (address feeAddress) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
+    return (address(bytes20(_blob)));
+  }
+
+  /**
+   * @notice Set feeAddress.
+   */
+  function setFeeAddress(address feeAddress) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((feeAddress)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set feeAddress.
+   */
+  function _setFeeAddress(address feeAddress) internal {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((feeAddress)), _fieldLayout);
+  }
+
+  /**
    * @notice Get the full data.
    */
   function get() internal view returns (ExternalAddressesConfigData memory _table) {
@@ -256,9 +296,10 @@ library ExternalAddressesConfig {
     address erc20Address,
     address gamePoolAddress,
     address mainSaleAddress,
-    address serviceAddress
+    address serviceAddress,
+    address feeAddress
   ) internal {
-    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress);
+    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress, feeAddress);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -275,9 +316,10 @@ library ExternalAddressesConfig {
     address erc20Address,
     address gamePoolAddress,
     address mainSaleAddress,
-    address serviceAddress
+    address serviceAddress,
+    address feeAddress
   ) internal {
-    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress);
+    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress, feeAddress);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -295,7 +337,8 @@ library ExternalAddressesConfig {
       _table.erc20Address,
       _table.gamePoolAddress,
       _table.mainSaleAddress,
-      _table.serviceAddress
+      _table.serviceAddress,
+      _table.feeAddress
     );
 
     EncodedLengths _encodedLengths;
@@ -314,7 +357,8 @@ library ExternalAddressesConfig {
       _table.erc20Address,
       _table.gamePoolAddress,
       _table.mainSaleAddress,
-      _table.serviceAddress
+      _table.serviceAddress,
+      _table.feeAddress
     );
 
     EncodedLengths _encodedLengths;
@@ -333,7 +377,13 @@ library ExternalAddressesConfig {
   )
     internal
     pure
-    returns (address erc20Address, address gamePoolAddress, address mainSaleAddress, address serviceAddress)
+    returns (
+      address erc20Address,
+      address gamePoolAddress,
+      address mainSaleAddress,
+      address serviceAddress,
+      address feeAddress
+    )
   {
     erc20Address = (address(Bytes.getBytes20(_blob, 0)));
 
@@ -342,6 +392,8 @@ library ExternalAddressesConfig {
     mainSaleAddress = (address(Bytes.getBytes20(_blob, 40)));
 
     serviceAddress = (address(Bytes.getBytes20(_blob, 60)));
+
+    feeAddress = (address(Bytes.getBytes20(_blob, 80)));
   }
 
   /**
@@ -355,9 +407,13 @@ library ExternalAddressesConfig {
     EncodedLengths,
     bytes memory
   ) internal pure returns (ExternalAddressesConfigData memory _table) {
-    (_table.erc20Address, _table.gamePoolAddress, _table.mainSaleAddress, _table.serviceAddress) = decodeStatic(
-      _staticData
-    );
+    (
+      _table.erc20Address,
+      _table.gamePoolAddress,
+      _table.mainSaleAddress,
+      _table.serviceAddress,
+      _table.feeAddress
+    ) = decodeStatic(_staticData);
   }
 
   /**
@@ -386,9 +442,10 @@ library ExternalAddressesConfig {
     address erc20Address,
     address gamePoolAddress,
     address mainSaleAddress,
-    address serviceAddress
+    address serviceAddress,
+    address feeAddress
   ) internal pure returns (bytes memory) {
-    return abi.encodePacked(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress);
+    return abi.encodePacked(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress, feeAddress);
   }
 
   /**
@@ -401,9 +458,10 @@ library ExternalAddressesConfig {
     address erc20Address,
     address gamePoolAddress,
     address mainSaleAddress,
-    address serviceAddress
+    address serviceAddress,
+    address feeAddress
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress);
+    bytes memory _staticData = encodeStatic(erc20Address, gamePoolAddress, mainSaleAddress, serviceAddress, feeAddress);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

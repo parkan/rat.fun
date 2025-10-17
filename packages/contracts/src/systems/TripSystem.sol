@@ -11,7 +11,8 @@ import {
   Liquidated,
   LiquidationValue,
   LiquidationBlock,
-  LiquidationTaxPercentage
+  LiquidationTaxPercentage,
+  ExternalAddressesConfig
 } from "../codegen/index.sol";
 import { LibTrip, LibUtils, LibWorld } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
@@ -90,9 +91,12 @@ contract TripSystem is System {
       LibWorld.gamePool().withdrawTokens(_msgSender(), valueToPlayer * 10 ** LibWorld.erc20().decimals());
     }
 
-    // Withdraw tokens equal to tax from pool to admin
+    // Withdraw tokens equal to tax from pool to fee account
     if (tax > 0) {
-      LibWorld.gamePool().withdrawTokens(GameConfig.getAdminAddress(), tax * 10 ** LibWorld.erc20().decimals());
+      LibWorld.gamePool().withdrawTokens(
+        ExternalAddressesConfig.getFeeAddress(),
+        tax * 10 ** LibWorld.erc20().decimals()
+      );
     }
   }
 }

@@ -32,25 +32,45 @@ contract PostDeploy is Script {
     vm.startBroadcast(deployerPrivateKey);
 
     address serviceAddress;
+    address feeAddress;
 
+    // Only deploy DevSystem on local/test chains
     if (block.chainid == 31337 || block.chainid == 84532) {
-      // Local/test chains
-      // Deploy DevSystem
       bool systemExists = ResourceIds.getExists(devSystem.toResourceId());
       worldRegistrationSystem.registerSystem(devSystem.toResourceId(), new DevSystem(), true);
       // Register selectors if this is the first time deploying the system
       if (!systemExists) {
         worldRegistrationSystem.registerFunctionSelector(devSystem.toResourceId(), "giveCallerTokens()");
       }
-
       // Set testnet service address to a placeholder that freely distributes tokens
       serviceAddress = address(new SalePlaceholder(world));
+      //
+      feeAddress = vm.addr(deployerPrivateKey);
+    }
+
+    // * * * * * * * * *
+    // Set up addresses
+    // * * * * * * * * *
+    if (block.chainid == 31337) {
+      // __ Local
+      // Set service address to a placeholder that freely distributes tokens
+      serviceAddress = address(new SalePlaceholder(world));
+      // Set fee address to the deployer
+      feeAddress = vm.addr(deployerPrivateKey);
+    } else if (block.chainid == 84532) {
+      // __ Base sepolia testnet
+      // Set service address to a placeholder that freely distributes tokens
+      serviceAddress = address(new SalePlaceholder(world));
+      // Set fee address to separate address
+      feeAddress = vm.envAddress("FEE_ADDRESS");
     } else if (block.chainid == 8453) {
-      // Base mainnet
-      revert("TODO set mainnet service addresses if it is not the deployer");
-      //serviceAddress = vm.addr(deployerPrivateKey);
+      // __ Base mainnet
+      // Set service address to separate address
+      serviceAddress = vm.envAddress("SERVICE_ADDRESS");
+      // Set fee address to separate address
+      feeAddress = vm.envAddress("FEE_ADDRESS");
     } else {
-      revert("Unreconginzed chain");
+      revert("Unrecognized chain");
     }
 
     // Deploy temporary ERC-20
@@ -59,7 +79,7 @@ contract PostDeploy is Script {
     GamePool gamePool = new GamePool(world, erc20);
 
     // Root namespace owner is admin
-    LibWorld.init(NamespaceOwner.get(ROOT_NAMESPACE_ID), address(erc20), address(gamePool), serviceAddress);
+    LibWorld.init(NamespaceOwner.get(ROOT_NAMESPACE_ID), address(erc20), address(gamePool), serviceAddress, feeAddress);
     vm.stopBroadcast();
   }
 }

@@ -34,8 +34,15 @@ library LibWorld {
    * @param erc20Address The address of the erc20 token
    * @param gamePoolAddress The address of the game pool
    * @param serviceAddress The address of the service
+   * @param feeAddress The address of the fee account
    */
-  function init(address _adminAddress, address erc20Address, address gamePoolAddress, address serviceAddress) internal {
+  function init(
+    address _adminAddress,
+    address erc20Address,
+    address gamePoolAddress,
+    address serviceAddress,
+    address feeAddress
+  ) internal {
     bytes32 adminId = LibUtils.addressToEntityKey(_adminAddress);
 
     // Set game config
@@ -65,7 +72,8 @@ library LibWorld {
         erc20Address: erc20Address,
         gamePoolAddress: gamePoolAddress,
         mainSaleAddress: address(0),
-        serviceAddress: serviceAddress
+        serviceAddress: serviceAddress,
+        feeAddress: feeAddress
       })
     );
 

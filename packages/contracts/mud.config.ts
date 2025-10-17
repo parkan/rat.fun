@@ -52,7 +52,8 @@ export default defineWorld({
         erc20Address: "address",
         gamePoolAddress: "address",
         mainSaleAddress: "address",
-        serviceAddress: "address"
+        serviceAddress: "address",
+        feeAddress: "address"
       },
       codegen: {
         dataStruct: true
