@@ -8,8 +8,6 @@
 
   let { isAdminView }: { isAdminView: boolean } = $props()
 
-  const buttonText = $derived(isAdminView ? "X" : "CASHBOARD")
-
   const enterAdmin = () => {
     playSound("ratfunTransitions", "adminEnter")
     shaderManager.unsetShader()
@@ -24,7 +22,7 @@
 </script>
 
 <div class="mode-switch">
-  <ModeSwitchButton text={buttonText} onclick={isAdminView ? exitAdmin : enterAdmin} />
+  <ModeSwitchButton {isAdminView} onclick={isAdminView ? exitAdmin : enterAdmin} />
 </div>
 
 <style lang="scss">

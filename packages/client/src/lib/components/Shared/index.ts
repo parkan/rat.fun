@@ -9,9 +9,7 @@ export { default as BackButton } from "./Buttons/BackButton.svelte"
 export { default as ChatBox } from "./ChatBox/ChatBox.svelte"
 
 /* Graphics */
-export { default as Circle } from "./Graphics/Circle.svelte"
-export { default as Cross } from "./Graphics/Cross.svelte"
-export { default as Xed } from "./Graphics/Xed.svelte"
+export { default as X } from "./Graphics/X.svelte"
 
 /* Marquee */
 export { default as Marquee } from "./Marquee/Marquee.svelte"

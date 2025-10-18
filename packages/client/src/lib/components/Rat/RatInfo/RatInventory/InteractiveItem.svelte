@@ -46,7 +46,7 @@
 <style lang="scss">
   .inventory-item {
     font-size: var(--font-size-large);
-    font-family: var(--label-font-stack);
+    font-family: var(--special-font-stack);
     display: flex;
     background: rgba(200, 200, 200, 0.9);
     color: var(--background);

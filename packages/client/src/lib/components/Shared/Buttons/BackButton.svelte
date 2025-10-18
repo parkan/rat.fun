@@ -1,6 +1,7 @@
 <script lang="ts">
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
+  import { X } from "$lib/components/Shared"
 
   let {
     tippyText,
@@ -14,15 +15,21 @@
     onclick?: (e: MouseEvent) => void
   } = $props()
 
-  const onclickHandler = (e: MouseEvent) => {
+  const onpointerup = (e: MouseEvent) => {
     playSound("ratfunUI", "boing")
     onclick?.(e)
+  }
+
+  const onpointerdown = (e: MouseEvent) => {
+    playSound("ratfunUI", "smallButtonDown")
   }
 </script>
 
 <Tooltip content={tippyText}>
-  <button class={extraClass} class:disabled onpointerdown={onclickHandler}>
-    <span class="button-text">X</span>
+  <button class={extraClass} class:disabled {onpointerdown} {onpointerup}>
+    <div class="button-text">
+      <X />
+    </div>
   </button>
 </Tooltip>
 
@@ -41,11 +48,8 @@
     }
 
     .button-text {
-      font-size: var(--font-size-large);
-      font-family: var(--typewriter-font-stack);
-      line-height: 1em;
-      text-transform: uppercase;
-      color: rgb(63, 63, 63);
+      color: rgb(54, 54, 54);
+      height: 80%;
     }
 
     &:hover {

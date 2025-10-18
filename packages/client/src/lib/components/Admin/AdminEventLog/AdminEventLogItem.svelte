@@ -143,10 +143,13 @@
     padding: 0;
     margin: 0;
     color: white;
-    margin-bottom: 4px;
     cursor: pointer;
     font-size: var(--font-size-small);
     width: 100%;
+    margin-bottom: 4px;
+    font-family: var(--admin-font-stack);
+    padding-top: 2px;
+    padding-bottom: 4px;
 
     &.positive {
       background: rgba(0, 255, 0, 0.4);

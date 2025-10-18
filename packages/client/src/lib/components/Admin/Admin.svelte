@@ -225,8 +225,8 @@
       align-items: center;
 
       .p-l-overview {
-        min-width: 500px;
-        width: 500px;
+        min-width: 460px;
+        width: 460px;
         height: 100%;
       }
 
@@ -243,7 +243,7 @@
 
     .event-log-container {
       height: 100%;
-      width: 300px;
+      width: 320px;
     }
 
     .active-trip-table-container {

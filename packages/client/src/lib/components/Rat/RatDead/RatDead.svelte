@@ -53,7 +53,7 @@
 
     .rat-dead-text {
       font-size: var(--font-size-normal);
-      font-family: var(--label-font-stack);
+      font-family: var(--special-font-stack);
       color: var(--foreground);
     }
 

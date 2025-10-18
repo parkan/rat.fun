@@ -59,7 +59,7 @@
 
       .button-text {
         font-size: var(--font-size-large);
-        font-family: var(--label-font-stack);
+        font-family: var(--special-font-stack);
       }
     }
 

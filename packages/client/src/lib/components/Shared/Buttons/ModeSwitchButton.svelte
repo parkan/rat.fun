@@ -1,18 +1,14 @@
 <script lang="ts">
   import { playSound } from "$lib/modules/sound"
-  import { Tooltip } from "$lib/components/Shared"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  // import { ShaderLocal } from "$lib/components/Shared"
+  import { Tooltip, X } from "$lib/components/Shared"
 
   let {
-    text,
-    cost,
+    isAdminView,
     tippyText,
     disabled = false,
     onclick
   }: {
-    text: string
-    cost?: number
+    isAdminView: boolean
     tippyText?: string
     disabled?: boolean
     id?: string
@@ -31,15 +27,13 @@
 
 <Tooltip content={tippyText}>
   <button class:disabled {onmouseup} {onmousedown}>
-    <div class="button-content">
-      <span class="button-text">{text}</span>
-      {#if cost}
-        <span class="button-cost">({CURRENCY_SYMBOL}{cost})</span>
-      {/if}
-    </div>
-    <!-- <div class="canvas-container">
-      <ShaderLocal shaderKey="plasma" />
-    </div> -->
+    {#if isAdminView}
+      <div class="button-icon">
+        <X />
+      </div>
+    {:else}
+      <span class="button-text">CASHBOARD</span>
+    {/if}
   </button>
 </Tooltip>
 
@@ -58,32 +52,19 @@
     align-items: center;
     justify-content: center;
 
-    .button-content {
+    .button-text {
+      font-size: var(--font-size-large);
+      font-family: var(--special-font-stack);
+      line-height: 1em;
       z-index: 2;
       position: relative;
-      color: black;
-
-      .button-text {
-        font-size: var(--font-size-large);
-        font-family: var(--special-font-stack);
-        line-height: 1em;
-      }
-
-      .button-cost {
-        font-size: var(--font-size-normal);
-      }
+      color: rgb(54, 54, 54);
     }
 
-    .canvas-container {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .button-icon {
       width: 100%;
-      height: 100%;
-      z-index: 1;
-      overflow: hidden;
-
-      // opacity: 0.5;
+      height: 60%;
+      color: rgb(54, 54, 54);
     }
 
     &:hover {

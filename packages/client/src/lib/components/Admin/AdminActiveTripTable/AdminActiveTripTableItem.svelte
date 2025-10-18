@@ -71,6 +71,7 @@
   .active-trip-table-item {
     height: 24px;
     font-size: var(--font-size-small);
+    font-family: var(--admin-font-stack);
 
     td {
       vertical-align: middle;

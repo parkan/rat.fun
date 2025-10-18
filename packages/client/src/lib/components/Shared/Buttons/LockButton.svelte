@@ -4,7 +4,6 @@
 
   let {
     text,
-    cost,
     tippyText,
     disabled = false,
     extraClass = "",
@@ -12,7 +11,6 @@
     onclick
   }: {
     text: string
-    cost?: number
     tippyText?: string
     disabled?: boolean
     extraClass?: string
@@ -34,9 +32,6 @@
 <Tooltip content={tippyText}>
   <button class={extraClass} class:disabled onmouseup={onmouseupHandler} {onmousedown}>
     <span class="button-text">{text}</span>
-    {#if cost}
-      <span class="button-cost">({cost})</span>
-    {/if}
   </button>
 </Tooltip>
 
@@ -56,19 +51,11 @@
 
     .button-text {
       font-size: var(--font-size-normal);
-      font-family: var(--label-font-stack);
-    }
-
-    .button-cost {
-      font-size: var(--font-size-normal);
+      font-family: var(--special-font-stack);
     }
 
     &:hover {
       background: var(--color-alert-priority-light);
-
-      &.red {
-        background: var(--color-death-light);
-      }
     }
 
     &:active {
@@ -79,10 +66,6 @@
       position: relative;
       top: -2px;
       color: white;
-
-      &.red {
-        background: var(--color-death-muted);
-      }
     }
 
     &.disabled {

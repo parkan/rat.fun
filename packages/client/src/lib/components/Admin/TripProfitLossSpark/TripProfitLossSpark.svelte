@@ -5,7 +5,6 @@
     TripEventDeath,
     TripEventVisit
   } from "$lib/components/Admin/types"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { scaleLinear } from "d3-scale"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
@@ -60,8 +59,11 @@
   let lineGenerator = $derived(
     xScale && yScale
       ? line<TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit>()
-          .x((d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit, i: number) =>
-            xScale(i)
+          .x(
+            (
+              d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit,
+              i: number
+            ) => xScale(i)
           )
           .y((d: TripEventCreation | TripEventLiquidation | TripEventDeath | TripEventVisit) =>
             yScale(+d.value)
