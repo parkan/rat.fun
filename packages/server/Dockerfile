@@ -30,6 +30,7 @@ COPY pnpm-lock.yaml ./
 COPY package.json ./
 COPY packages ./packages
 COPY --from=builder /app/packages/server/dist ./packages/server/dist
+COPY packages/server/static ./packages/server/static
 
 # Create non-root user first
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001

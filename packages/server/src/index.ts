@@ -3,6 +3,7 @@ import formbody from "@fastify/formbody"
 import cors from "@fastify/cors"
 import websocket from "@fastify/websocket"
 import compress from "@fastify/compress"
+import * as path from "path"
 
 import { errorHandler } from "@modules/error-handling"
 import { initializeSentry, closeSentry } from "@modules/sentry"
@@ -23,6 +24,11 @@ const fastify = Fastify({
     }
   }
 })
+
+// Process image with sharp
+const noisePath = path.resolve(process.cwd(), "static", "assets", "noise.png")
+console.log("Looking for noise.png at:", noisePath)
+console.log("Current working directory:", process.cwd())
 
 // Register plugins
 fastify.register(websocket)

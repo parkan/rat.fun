@@ -5,12 +5,9 @@ import type { FileOutput } from "replicate"
 import sharp from "sharp"
 import { ReplicateError } from "@modules/error-handling/errors"
 import * as path from "path"
-import { fileURLToPath } from "url"
 
 import dotenv from "dotenv"
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 dotenv.config()
 
 const client = new Replicate({
@@ -41,7 +38,7 @@ export const generateImage = async (prompt: string, templateImages: ResolvedTemp
     SD: {
       image,
       prompt: makePrompt(prompt),
-      cfg: 1.3,
+      cfg: 1.5,
       aspect_ratio: "1:1",
       output_format: "webp",
       output_quality: 100,
@@ -127,23 +124,18 @@ export const generateImage = async (prompt: string, templateImages: ResolvedTemp
     }
 
     // Process image with sharp
+    const noisePath = path.resolve(process.cwd(), "static", "assets", "noise.png")
+    console.log("Looking for noise.png at:", noisePath)
+    console.log("Current working directory:", process.cwd())
+
     const processedBuffer = await sharp(buffer)
       // Merge with noise texture first
       .composite([
         {
-          input: await sharp(path.join(__dirname, "noise.png"))
-            .modulate({ brightness: 0.3 })
-            .toBuffer(),
+          input: await sharp(noisePath).modulate({ brightness: 0.3 }).toBuffer(),
           blend: "overlay"
         }
       ])
-      // Add coarse grain before sharp modulation
-      // .convolve({
-      //   width: 3,
-      //   height: 3,
-      //   kernel: [-1, -1, -1, -1, 9, -1, -1, -1, -1]
-      // })
-      // .linear(1.5, 20) // Contrast: 1.5x multiplier, Brightness: +20 offset
       .modulate({
         saturation: 2,
         hue: Math.floor(Math.random() * 360)
