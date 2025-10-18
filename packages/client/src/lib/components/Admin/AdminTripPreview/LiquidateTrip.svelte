@@ -4,10 +4,11 @@
   import { blockNumber } from "$lib/modules/network"
   import { staticContent, lastUpdated } from "$lib/modules/content"
   import { urlFor } from "$lib/modules/content/sanity"
-  import { ModalTarget, NoImage, VideoLoader, DangerButton } from "$lib/components/Shared"
   import { busy, sendLiquidateTrip } from "$lib/modules/action-manager/index.svelte"
   import { sendLiquidateTripMessage } from "$lib/modules/off-chain-sync"
   import { errorHandler } from "$lib/modules/error-handling"
+
+  import { ModalTarget, NoImage, DangerButton, SmallSpinner } from "$lib/components/Shared"
 
   let {
     trip,
@@ -44,7 +45,9 @@
 {#snippet confirmLiquidation()}
   <div class="confirmation-modal danger">
     {#if busy.CloseTrip.current !== 0}
-      <VideoLoader progress={busy.CloseTrip} />
+      <div class="loading">
+        Liquidating trip <SmallSpinner soundOn />
+      </div>
     {:else}
       <div class="content">
         <div class="trip-image">

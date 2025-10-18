@@ -25,8 +25,6 @@ export { default as Tooltip } from "./Tooltip/Tooltip.svelte"
 /* Loaders */
 export { default as SmallSpinner } from "./Loaders/SmallSpinner.svelte"
 export { default as Spinner } from "./Loaders/Spinner.svelte"
-export { default as VideoLoader } from "./Loaders/VideoLoader.svelte"
-export { default as VideoLoaderDuration } from "./Loaders/VideoLoaderDuration.svelte"
 
 /* Modal */
 export { default as Modal } from "./Modal/Modal.svelte"

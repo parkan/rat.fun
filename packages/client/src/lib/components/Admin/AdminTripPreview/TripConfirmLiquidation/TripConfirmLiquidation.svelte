@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { BigButton, ValueBreakdown, VideoLoaderDuration } from "$lib/components/Shared"
   import type { Trip as SanityTrip } from "@sanity-types"
   import { sendLiquidateTrip } from "$lib/modules/action-manager/index.svelte"
   import { sendLiquidateTripMessage } from "$lib/modules/off-chain-sync"
+  import { BigButton, ValueBreakdown, SmallSpinner } from "$lib/components/Shared"
 
   let {
     trip,
@@ -23,7 +23,9 @@
 
 <div class="confirm-liquidation">
   {#if liquidating}
-    <VideoLoaderDuration duration={4000} />
+    <div class="loading">
+      Liquidating trip <SmallSpinner soundOn />
+    </div>
   {:else}
     <div class="confirm-liquidation-text">
       <h1>
@@ -65,6 +67,11 @@
       display: flex;
       flex-direction: row;
       gap: 10px;
+    }
+
+    .loading {
+      background: orangered;
+      padding: 10px;
     }
   }
 </style>
