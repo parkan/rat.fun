@@ -2,7 +2,7 @@
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { ShaderLocal } from "$lib/components/Shared"
+  // import { ShaderLocal } from "$lib/components/Shared"
 
   let {
     text,
@@ -37,9 +37,9 @@
         <span class="button-cost">({CURRENCY_SYMBOL}{cost})</span>
       {/if}
     </div>
-    <div class="canvas-container">
+    <!-- <div class="canvas-container">
       <ShaderLocal shaderKey="plasma" />
-    </div>
+    </div> -->
   </button>
 </Tooltip>
 
@@ -50,14 +50,13 @@
     background: var(--color-alert-priority);
     border: none;
     border-style: outset;
-    border-width: 10px;
+    border-width: 5px;
     border-color: rgba(0, 0, 0, 0.3);
     position: relative;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
-    border-radius: 40px;
 
     .button-content {
       z-index: 2;
@@ -65,7 +64,7 @@
       color: white;
 
       .button-text {
-        font-size: var(--font-size-extra-large);
+        font-size: var(--font-size-large);
         font-family: var(--special-font-stack);
         line-height: 1em;
       }
@@ -82,7 +81,6 @@
       width: 100%;
       height: 100%;
       z-index: 1;
-      border-radius: 40px;
       overflow: hidden;
 
       // opacity: 0.5;

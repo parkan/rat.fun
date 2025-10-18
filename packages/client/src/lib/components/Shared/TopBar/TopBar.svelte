@@ -1,13 +1,12 @@
 <script lang="ts">
   import { page } from "$app/state"
-  import { player, worldStats, activeWorldEvent } from "$lib/modules/state/stores"
+  import { player, activeWorldEvent } from "$lib/modules/state/stores"
   import { upcomingWorldEvent } from "$lib/modules/content"
 
   import PlayerInfo from "./PlayerInfo/PlayerInfo.svelte"
-  import PaneSwitch from "./PaneSwitch.svelte"
+  import ModeSwitch from "./ModeSwitch.svelte"
   import WorldEvent from "./WorldEvent.svelte"
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
-  // import GlobalStats from "./GlobalStats.svelte"
 
   const isAdminView = $derived(page.route?.id?.includes("/(main)/admin") ?? false)
 </script>
@@ -15,16 +14,13 @@
 <div class="top-bar">
   <PlayerInfo />
   <div class="right">
-    <!-- {#if isAdminView && $worldStats}
-      <GlobalStats />
-    {/if} -->
     {#if $activeWorldEvent}
       <WorldEvent />
     {:else if $upcomingWorldEvent}
       <WorldEventCountdown />
     {/if}
     {#if $player?.masterKey}
-      <PaneSwitch {isAdminView} />
+      <ModeSwitch {isAdminView} />
     {/if}
   </div>
 </div>

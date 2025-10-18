@@ -12,7 +12,7 @@
     justify-content: center;
     align-items: center;
     border-bottom: var(--default-border-style);
-    height: var(--pane-switch-height);
+    height: var(--mode-switch-height);
     width: 400px;
     background: var(--color-grey-mid);
     position: relative;

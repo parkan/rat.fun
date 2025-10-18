@@ -118,7 +118,7 @@
     min-height: 0;
     height: 100%;
     max-height: 100%;
-    padding-bottom: calc(var(--pane-switch-height) + var(--world-prompt-box-height) + 20px);
+    padding-bottom: calc(var(--mode-switch-height) + var(--world-prompt-box-height) + 20px);
     overflow-x: hidden;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
