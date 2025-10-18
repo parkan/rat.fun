@@ -14,6 +14,8 @@
   <td class="cell-prompt">
     <p class="single-line">{pendingTrip?.prompt ?? ""}</p>
   </td>
+  <td class="cell-visits"><SmallSpinner /></td>
+  <td class="cell-kills"><SmallSpinner /></td>
   <td class="cell-balance"><SmallSpinner /></td>
   <td class="cell-profit"><SmallSpinner /></td>
   <td class="cell-spark">

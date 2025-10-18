@@ -42,7 +42,9 @@
     <p class="single-line">{trip.prompt}</p>
   </td>
   <!-- Visits -->
-  <td class="cell-visits">{trip.visitCount}</td>
+  <td class="cell-visits">{Number(trip.visitCount ?? ß)}</td>
+  <!-- Kills -->
+  <td class="cell-kills">{Number(trip.killCount ?? 0)}</td>
   <!-- Balance -->
   <td class="cell-balance">
     <span>{trip.balance}</span><span class="grey">/{trip.tripCreationCost} </span>
@@ -119,6 +121,11 @@
     }
 
     .cell-visits {
+      text-align: right;
+      width: 60px;
+    }
+
+    .cell-kills {
       text-align: right;
       width: 60px;
     }

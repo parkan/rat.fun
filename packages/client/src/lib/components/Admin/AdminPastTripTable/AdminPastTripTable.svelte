@@ -69,8 +69,10 @@
         <th class="cell-visits" onclick={sortByVisit}>
           {#if sortFunctionName === "entriesByVisit"}▼{:else if sortFunctionName === "entriesByVisitDesc"}▲{/if}&nbsp;Visits
         </th>
+        <!-- Kills -->
+        <th class="cell-kills">Kills</th>
         <!-- Liquidation -->
-        <th class="cell-balance">Liquidation</th>
+        <th class="cell-balance">Balance</th>
         <!-- Profit -->
         <th class="cell-profit" onclick={sortByProfit}>
           {#if sortFunctionName === "entriesByRealisedProfit"}▼{:else if sortFunctionName === "entriesByRealisedProfitDesc"}▲{/if}&nbsp;Profit
@@ -147,6 +149,11 @@
   }
 
   .cell-visits {
+    text-align: right;
+    width: 60px;
+  }
+
+  .cell-kills {
     text-align: right;
     width: 60px;
   }

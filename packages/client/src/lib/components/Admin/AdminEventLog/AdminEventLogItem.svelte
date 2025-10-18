@@ -165,7 +165,7 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      height: 10px;
+      min-height: 10px;
     }
 
     &.focus {

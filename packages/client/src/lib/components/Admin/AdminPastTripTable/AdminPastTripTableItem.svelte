@@ -35,7 +35,9 @@
     <p class="single-line">{trip.prompt}</p>
   </td>
   <!-- Visits -->
-  <td class="cell-visits">{trip.visitCount}</td>
+  <td class="cell-visits">{Number(trip.visitCount ?? 0)}</td>
+  <!-- Kills -->
+  <td class="cell-kills">{Number(trip.killCount ?? 0)}</td>
   <!-- Liquidation -->
   <td class="cell-balance">
     {#if trip.liquidated}
@@ -103,6 +105,11 @@
     }
 
     .cell-visits {
+      text-align: right;
+      width: 60px;
+    }
+
+    .cell-kills {
       text-align: right;
       width: 60px;
     }
