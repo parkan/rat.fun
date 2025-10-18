@@ -317,11 +317,27 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
     }
 
     if (this.gl && this.program) {
-      this.gl.deleteShader(this.vertexShader)
-      this.gl.deleteShader(this.fragmentShader)
-      this.gl.deleteProgram(this.program)
-      this.gl.deleteBuffer(this.positionBuffer)
-      this.uniformLocations.clear()
+      try {
+        // Check if WebGL context is still valid
+        const isContextLost = this.gl.isContextLost()
+        if (!isContextLost) {
+          this.gl.deleteShader(this.vertexShader)
+          this.gl.deleteShader(this.fragmentShader)
+          this.gl.deleteProgram(this.program)
+          this.gl.deleteBuffer(this.positionBuffer)
+        }
+      } catch (error) {
+        // WebGL context may be lost or invalid, ignore cleanup errors
+        console.warn("WebGL cleanup failed (context may be lost):", error)
+      } finally {
+        this.uniformLocations.clear()
+        // Clear references to prevent further operations
+        this.gl = null as any
+        this.program = null as any
+        this.vertexShader = null as any
+        this.fragmentShader = null as any
+        this.positionBuffer = null as any
+      }
     }
   }
 }

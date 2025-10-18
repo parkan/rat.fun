@@ -11,7 +11,7 @@
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { goto } from "$app/navigation"
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, notificationsRead, adminUnlockedAt } from "$lib/modules/ui/state.svelte"
@@ -27,6 +27,7 @@
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import { ShaderGlobal, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
+  import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
@@ -85,6 +86,11 @@
     document.querySelector(".preloader")?.remove()
 
     initSound()
+  })
+
+  onDestroy(() => {
+    // Clean up global shader manager when the app unmounts
+    shaderManager.destroy()
   })
 </script>
 

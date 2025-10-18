@@ -152,16 +152,21 @@ export class ShaderManager {
       value: this.invert
     }
 
-    // Use the factory function from your WebGL module
-    this._renderer = new WebGLGeneralRenderer(canvas, {
-      shader: shaderSource,
-      uniforms: initialUniforms
-    })
+    try {
+      // Use the factory function from your WebGL module
+      this._renderer = new WebGLGeneralRenderer(canvas, {
+        shader: shaderSource,
+        uniforms: initialUniforms
+      })
 
-    this._renderer.render()
+      this._renderer.render()
 
-    // Set up resize handling
-    window.addEventListener("resize", this.handleResize)
+      // Set up resize handling
+      window.addEventListener("resize", this.handleResize)
+    } catch (error) {
+      console.error("Failed to initialize WebGL renderer:", error)
+      this._renderer = null
+    }
   }
 
   /**
