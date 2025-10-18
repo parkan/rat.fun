@@ -66,12 +66,21 @@ async function routes(fastify: FastifyInstance) {
         socket.on("close", async () => {
           delete wsConnections[playerId] // Clean up connection
           // Broadcast updated client list to all connected clients
-          await broadcast({
-            id: uuidv4(),
-            topic: "clients__update",
-            message: Object.keys(wsConnections),
-            timestamp: Date.now()
-          })
+          try {
+            await broadcast({
+              id: uuidv4(),
+              topic: "clients__update",
+              message: Object.keys(wsConnections),
+              timestamp: Date.now()
+            })
+          } catch (error) {
+            console.error("Error broadcasting client update on close:", error)
+          }
+        })
+
+        socket.on("error", (error: Error) => {
+          console.error(`WebSocket error for player ${playerId}:`, error)
+          delete wsConnections[playerId]
         })
       } catch (error) {
         handleWebSocketError(error, socket as unknown as WebSocket)

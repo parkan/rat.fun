@@ -95,6 +95,8 @@ async function routes(fastify: FastifyInstance) {
         )) as EventsReturnValue
         console.timeEnd("–– Event LLM")
 
+        console.log("eventResults", eventResults)
+
         // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
         console.time("–– Chain")
         const {
@@ -124,6 +126,8 @@ async function routes(fastify: FastifyInstance) {
         )) as CorrectionReturnValue
         console.timeEnd("–– Correction LLM")
 
+        console.log("correctedEvents", correctedEvents)
+
         // Create and broadcast outcome message
         const outcomeMessage = createOutcomeMessage(
           player,
@@ -132,7 +136,12 @@ async function routes(fastify: FastifyInstance) {
           trip,
           validatedOutcome
         )
-        await broadcast(outcomeMessage)
+        try {
+          await broadcast(outcomeMessage)
+        } catch (error) {
+          console.error("Failed to broadcast outcome message:", error)
+          // Don't fail the request if broadcast fails
+        }
 
         console.time("–– CMS write")
 
@@ -158,6 +167,11 @@ async function routes(fastify: FastifyInstance) {
           outcomeId: outcomeDocument._id,
           itemChanges: validatedOutcome.itemChanges,
           balanceTransfers: validatedOutcome.balanceTransfers,
+          debuggingInfo: eventResults.outcome?.debuggingInfo ?? {
+            internalText: "No debugging info available",
+            randomSeed: 0,
+            batchId: 0
+          },
           ratDead: newRatBalance == 0,
           tripDepleted: newTripValue == 0
         }

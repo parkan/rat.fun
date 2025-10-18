@@ -94,12 +94,12 @@
       ></SmallButton>
 
       <SmallButton
-        tippyText="Unlock admin mode"
+        tippyText="Unlock cashboard"
         onclick={async () => {
           await sendUnlockAdmin()
         }}
         disabled={$player?.masterKey}
-        text="Unlock admin mode"
+        text="Unlock cashboard"
       ></SmallButton>
     {/if}
     <SmallButton
