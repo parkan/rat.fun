@@ -61,7 +61,7 @@
     .button-content {
       z-index: 2;
       position: relative;
-      color: white;
+      color: black;
 
       .button-text {
         font-size: var(--font-size-large);

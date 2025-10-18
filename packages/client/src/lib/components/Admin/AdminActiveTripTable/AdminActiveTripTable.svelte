@@ -32,12 +32,14 @@
   })
 
   const sortByVisit = () => {
-    sortFunction = sortDirection === "asc" ? sortFunctions.entriesByVisit : sortFunctions.entriesByVisitDesc
+    sortFunction =
+      sortDirection === "asc" ? sortFunctions.entriesByVisit : sortFunctions.entriesByVisitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
 
   const sortByProfit = () => {
-    sortFunction = sortDirection === "asc" ? sortFunctions.entriesByProfit : sortFunctions.entriesByProfitDesc
+    sortFunction =
+      sortDirection === "asc" ? sortFunctions.entriesByProfit : sortFunctions.entriesByProfitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
 </script>
@@ -47,7 +49,7 @@
     <div class="left">Active trips</div>
     <div class="right">
       Profit:
-      <span class={$portfolioClass}>
+      <span class="profit-value {$portfolioClass}">
         {#if $profitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs($profitLoss)}
       </span>
     </div>
@@ -192,4 +194,15 @@
   .upText {
     color: #78ee72;
   }
+
+  // .profit-value {
+  //   &.upText {
+  //     color: black;
+  //     background: #78ee72;
+  //   }
+  //   &.downText {
+  //     color: black;
+  //     background: red;
+  //   }
+  // }
 </style>

@@ -5,3 +5,9 @@ export enum TRIP_EVENT_TYPE {
   CREATION = "trip_created",
   LIQUIDATION = "trip_liquidated"
 }
+
+export enum VALUE_CHANGE_DIRECTION {
+  POSITIVE = "positive",
+  NEGATIVE = "negative",
+  NEUTRAL = "neutral"
+}

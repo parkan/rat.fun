@@ -4,6 +4,7 @@
   import { player, playerId, rat } from "$lib/modules/state/stores"
 
   import PastTripListItem from "./PastTripListItem.svelte"
+  import { BackButton } from "$lib/components/Shared"
 
   let pastTrips = $derived(
     $staticContent.outcomes
@@ -14,12 +15,16 @@
         return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime()
       })
   )
+
+  const onBackButtonClick = () => {
+    transitionTo(RAT_BOX_STATE.HAS_RAT)
+  }
 </script>
 
 <div class="past-trip-list">
-  <button class="back-button" onclick={() => transitionTo(RAT_BOX_STATE.HAS_RAT)}>
-    <div>Back</div>
-  </button>
+  <div class="back-button-container">
+    <BackButton onclick={onBackButtonClick} />
+  </div>
   <div class="past-trip-list-container">
     {#each pastTrips as trip}
       <PastTripListItem {trip} />
@@ -31,27 +36,13 @@
   .past-trip-list {
     width: 100%;
     background-image: url("/images/texture-2.png");
-
-    .back-button {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-grey-light);
-      outline: none;
-      border: none;
+    .back-button-container {
+      display: block;
       border-bottom: 1px solid var(--color-grey-mid);
-      padding: 0 12px;
+      position: sticky;
       height: 60px;
-      font-family: var(--typewriter-font-stack);
-      font-size: var(--font-size-large);
-      text-transform: uppercase;
-      background: var(--background-semi-transparent);
-      flex-shrink: 0;
-
-      &:hover {
-        color: var(--white);
-      }
+      top: 0;
+      z-index: 10;
     }
 
     .past-trip-list-container {

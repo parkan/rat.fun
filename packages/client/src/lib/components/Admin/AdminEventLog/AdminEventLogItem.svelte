@@ -5,7 +5,7 @@
     TripEventLiquidation,
     TripEventCreation
   } from "$lib/components/Admin/types"
-  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
+  import { TRIP_EVENT_TYPE, VALUE_CHANGE_DIRECTION } from "$lib/components/Admin/enums"
   import { SignedNumber } from "$lib/components/Shared"
   import { timeSince } from "$lib/modules/utils"
 
@@ -22,6 +22,14 @@
     localFocusEvent?: number
     setLocalFocusEvent: (index: number) => void
   } = $props()
+
+  let valueChangeDirection = $derived(
+    point.valueChange > 0
+      ? VALUE_CHANGE_DIRECTION.POSITIVE
+      : point.valueChange < 0
+        ? VALUE_CHANGE_DIRECTION.NEGATIVE
+        : VALUE_CHANGE_DIRECTION.NEUTRAL
+  )
 
   const focus = $derived(localFocusEvent === point.index)
 
@@ -57,11 +65,17 @@
       setLocalFocusEvent(-1)
     }
   }
+
+  const onpointerdown = () => {
+    // if (behavior === "click") {
+    //   setLocalFocusEvent(point.index)
+    // }
+  }
 </script>
 
 {#snippet ratVisitEvent(p: TripEventVisit | TripEventDeath)}
   <span class="event-message">
-    <span class="event-icon">*</span>
+    <span class="event-icon">→</span>
     {p.meta?.playerName} sent {p.meta?.ratName} to trip #{p.meta?.tripIndex}
   </span>
   <div class="event-valuechange">
@@ -71,7 +85,7 @@
 
 {#snippet ratDied(p: TripEventDeath)}
   <span class="event-message">
-    <span class="event-icon">*</span>
+    <span class="event-icon">✝</span>
     {p.meta?.ratName} died tripping #{p.meta?.tripIndex}
   </span>
   <div class="event-valuechange">
@@ -99,7 +113,15 @@
   </div>
 {/snippet}
 
-<a class="event" {href} {onpointerdown} {onpointerup} {onpointerenter} {onpointerleave} class:focus>
+<a
+  class="event {valueChangeDirection}"
+  {href}
+  {onpointerdown}
+  {onpointerup}
+  {onpointerenter}
+  {onpointerleave}
+  class:focus
+>
   <Tooltip content={timeStamp}>
     <div class="event-content">
       {#if point.eventType === "trip_visit"}
@@ -125,6 +147,16 @@
     cursor: pointer;
     font-size: var(--font-size-small);
     width: 100%;
+
+    &.positive {
+      background: rgba(0, 255, 0, 0.4);
+    }
+    &.negative {
+      background: rgba(255, 0, 0, 0.4);
+    }
+    &.neutral {
+      background: rgba(255, 255, 0, 0.4);
+    }
 
     .event-content {
       display: flex;

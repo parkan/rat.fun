@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import type { Outcome } from "@sanity-types"
-  import { playSound } from "$lib/modules/sound"
   import type { Trip as SanityTrip } from "@sanity-types"
+  import { goto } from "$app/navigation"
 
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
@@ -16,6 +16,8 @@
     EnterTripButton,
     NoRatWarning
   } from "$lib/components/Trip"
+
+  import { BackButton } from "$lib/components/Shared"
 
   let {
     tripId,
@@ -37,6 +39,10 @@
   //  * - Rat does not exist or is dead
   let showNoRatWarning = $derived($rat?.dead)
 
+  const onBackButtonClick = () => {
+    goto("/")
+  }
+
   onMount(() => {
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
@@ -49,9 +55,9 @@
 
 <div class="game-trip-preview">
   <!-- Back Button -->
-  <a class="back-button" href="/" onclick={() => playSound("ratfunUI", "boing")}>
-    <div>Back</div>
-  </a>
+  <div class="back-button-container">
+    <BackButton onclick={onBackButtonClick} />
+  </div>
 
   <!-- Header -->
   <div class="trip-header">
@@ -116,22 +122,13 @@
     }
   }
 
-  .back-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-grey-light);
+  .back-button-container {
+    display: block;
     border-bottom: 1px solid var(--color-grey-mid);
-    padding: 0 12px;
+    position: sticky;
     height: 60px;
-    font-family: var(--typewriter-font-stack);
-    font-size: var(--font-size-large);
-    text-transform: uppercase;
-    background: var(--background-semi-transparent);
-    flex-shrink: 0;
-
-    &:hover {
-      color: var(--white);
-    }
+    top: 0;
+    z-index: 10;
+    background: red;
   }
 </style>

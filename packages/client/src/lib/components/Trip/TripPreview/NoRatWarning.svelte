@@ -8,7 +8,7 @@
 
 <style lang="scss">
   .no-rat-warning {
-    background: red;
+    background: rgba(255, 0, 0, 0.8);
     color: var(--foreground);
     text-align: center;
     height: 100%;

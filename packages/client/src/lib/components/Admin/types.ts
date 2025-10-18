@@ -13,7 +13,7 @@ export type TripEventShared = {
   tripCreationCost: number
 }
 
-// ???
+// Used to draw baseline in the graph
 export type TripEventBaseline = TripEventShared & {
   eventType: TRIP_EVENT_TYPE.BASELINE
   meta: undefined

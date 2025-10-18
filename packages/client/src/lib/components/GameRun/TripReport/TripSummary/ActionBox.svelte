@@ -87,16 +87,18 @@
     width: 90%;
 
     .image {
-      width: 200px;
-      height: 200px;
+      width: 180px;
+      height: 180px;
+      margin-bottom: 10px;
       img {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
     }
 
     .event-text {
-      font-size: var(--font-size-large);
+      font-size: var(--font-size-extra-large);
       font-family: var(--special-font-stack);
       margin-bottom: 20px;
 

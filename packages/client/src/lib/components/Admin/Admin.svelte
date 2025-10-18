@@ -6,8 +6,7 @@
   import {
     playerTrips,
     playerNonDepletedTrips,
-    playerDepletedTrips,
-    player
+    playerDepletedTrips
   } from "$lib/modules/state/stores"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
@@ -190,7 +189,6 @@
       <AdminPastTripTable
         bind:focus
         tripList={pastTripsList}
-        plots={allSparkPlots}
         bind:sortFunction={pastTripsSortFunction}
         bind:sortDirection={pastTripsSortDirection}
       />

@@ -1,19 +1,15 @@
 <script lang="ts">
-  import type { TripEvent } from "$lib/components/Admin/types"
   import { SignedNumber } from "$lib/components/Shared"
-  import { TripProfitLossSpark } from "$lib/components/Admin"
   import { goto } from "$app/navigation"
   import { playSound } from "$lib/modules/sound"
 
   let {
     trip,
-    data,
     id,
     onpointerenter,
     onpointerleave
   }: {
     trip: Trip
-    data: TripEvent[]
     id: string
     onpointerenter: () => void
     onpointerleave: () => void
@@ -51,16 +47,6 @@
   <!-- Profit -->
   <td class="cell-profit">
     <SignedNumber value={profitLoss} />
-  </td>
-  <!-- Spark -->
-  <td class="cell-spark">
-    {#if data}
-      <div class="mini-graph">
-        <TripProfitLossSpark smallIcons height={24} plotData={data} isEmpty={data.length === 0} />
-      </div>
-    {:else}
-      <div class="mini-graph"></div>
-    {/if}
   </td>
 </tr>
 
@@ -133,10 +119,6 @@
       :global(*) {
         text-align: right;
       }
-    }
-
-    .cell-spark {
-      width: 80px;
     }
 
     .grey {

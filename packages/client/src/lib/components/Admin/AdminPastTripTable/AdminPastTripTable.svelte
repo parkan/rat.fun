@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { TripEvent } from "$lib/components/Admin/types"
   import { realisedProfitLoss } from "$lib/modules/state/stores"
   import { derived } from "svelte/store"
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
@@ -10,13 +9,11 @@
   let {
     focus = $bindable(),
     tripList,
-    plots,
     sortFunction = $bindable(),
     sortDirection = $bindable()
   }: {
     focus: string
     tripList: [string, Trip][]
-    plots: Record<string, TripEvent[]>
     sortFunction: (a: [string, Trip], b: [string, Trip]) => number
     sortDirection: "asc" | "desc"
   } = $props()
@@ -24,12 +21,16 @@
   let sortFunctionName = $derived(sortFunction.name)
 
   const sortByVisit = () => {
-    sortFunction = sortDirection === "asc" ? sortFunctions.entriesByVisit : sortFunctions.entriesByVisitDesc
+    sortFunction =
+      sortDirection === "asc" ? sortFunctions.entriesByVisit : sortFunctions.entriesByVisitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
 
   const sortByProfit = () => {
-    sortFunction = sortDirection === "asc" ? sortFunctions.entriesByRealisedProfit : sortFunctions.entriesByRealisedProfitDesc
+    sortFunction =
+      sortDirection === "asc"
+        ? sortFunctions.entriesByRealisedProfit
+        : sortFunctions.entriesByRealisedProfitDesc
     sortDirection = sortDirection === "asc" ? "desc" : "asc"
   }
 
@@ -37,6 +38,14 @@
     if ($realisedProfitLoss === 0) return "neutral"
     return $realisedProfitLoss > 0 ? "upText" : "downText"
   })
+
+  const onpointerenter = (id: string) => {
+    focus = id
+  }
+
+  const onpointerleave = () => {
+    focus = ""
+  }
 </script>
 
 <div class="admin-trip-table-container">
@@ -66,22 +75,15 @@
         <th class="cell-profit" onclick={sortByProfit}>
           {#if sortFunctionName === "entriesByRealisedProfit"}▼{:else if sortFunctionName === "entriesByRealisedProfitDesc"}▲{/if}&nbsp;Profit
         </th>
-        <!-- Spark -->
-        <th class="cell-spark"></th>
       </tr>
     </thead>
     <tbody>
       {#each tripList as tripEntry (tripEntry[0])}
         <AdminPastTripTableItem
           id={tripEntry[0]}
-          data={plots[tripEntry[0]]}
           trip={tripEntry[1]}
-          onpointerenter={() => {
-            focus = tripEntry[0]
-          }}
-          onpointerleave={() => {
-            focus = ""
-          }}
+          onpointerenter={() => onpointerenter(tripEntry[0])}
+          {onpointerleave}
         />
       {/each}
     </tbody>

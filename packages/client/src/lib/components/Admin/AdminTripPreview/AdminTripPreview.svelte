@@ -10,13 +10,15 @@
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
+
   import AdminTripPreviewHeader from "$lib/components/Admin/AdminTripPreview/AdminTripPreviewHeader.svelte"
   import AdminTripEventIntrospection from "$lib/components/Admin/AdminTripEventIntrospection/AdminTripEventIntrospection.svelte"
   import TripProfitLossGraph from "$lib/components/Admin/AdminTripPreview/TripProfitLossGraph/TripProfitLossGraph.svelte"
   import TripConfirmLiquidation from "$lib/components/Admin/AdminTripPreview/TripConfirmLiquidation/TripConfirmLiquidation.svelte"
   import LiquidateTrip from "$lib/components/Admin/AdminTripPreview/LiquidateTrip.svelte"
   import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
-  import { playSound } from "$lib/modules/sound"
+
+  import { BackButton } from "$lib/components/Shared"
 
   let {
     tripId,
@@ -26,6 +28,7 @@
   }: { tripId: Hex; trip: Trip; liquidating?: boolean; sanityTripContent: SanityTrip } = $props()
 
   let tripOutcomes = $state<Outcome[]>()
+
   /// !!! Where is this set?
   let graphData = $state<TripEvent[]>([])
   let focusEvent = $state(-1)
@@ -33,11 +36,16 @@
   // Show liquidate button if:
   //  * - Trip is not depleted
   let showLiquidateButton = $derived(trip.balance > 0)
+
   let blockUntilUnlock = $derived(
     Number(trip.creationBlock) + $gameConfig.cooldownCloseTrip - Number($blockNumber)
   )
 
   let event = $derived(graphData[focusEvent])
+
+  const onBackButtonClick = () => {
+    goto("/admin")
+  }
 
   onMount(() => {
     const getEventIndexFromId = (id: string) => {
@@ -58,9 +66,9 @@
   })
 </script>
 
-<a class="back-button" href="/admin" onclick={() => playSound("ratfunUI", "boing")}>
-  <div>Back</div>
-</a>
+<div class="back-button-container">
+  <BackButton onclick={onBackButtonClick} />
+</div>
 {#if !liquidating}
   <div class="trip-inner-container" class:depleted={!showLiquidateButton}>
     <div class="full">
@@ -149,24 +157,12 @@
     }
   }
 
-  .back-button {
+  .back-button-container {
     display: block;
-    color: var(--color-grey-light);
     border-bottom: 1px solid var(--color-grey-mid);
-    padding: 0 12px;
     position: sticky;
     height: 60px;
     top: 0;
-    line-height: 60px;
-    font-family: var(--typewriter-font-stack);
-    font-size: var(--font-size-large);
-    text-transform: uppercase;
-    background: var(--background-semi-transparent);
     z-index: 10;
-    text-align: center;
-
-    &:hover {
-      color: var(--white);
-    }
   }
 </style>
