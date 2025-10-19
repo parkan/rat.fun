@@ -65,6 +65,19 @@ function createServerErrorResponse(reply: FastifyReply, request: FastifyRequest,
  * Centralized error handler for Fastify
  */
 export function errorHandler(error: FastifyError, request: FastifyRequest, reply: FastifyReply) {
+  // Handle specific timeout and connection errors
+  if (error.message.includes("premature close") || error.message.includes("Premature close")) {
+    // Log as info since this is often due to client disconnection
+    request.log.info({
+      error: error.message,
+      url: request.url,
+      method: request.method,
+      code: "CLIENT_DISCONNECTED",
+      msg: `CLIENT_DISCONNECTED: ${error.message}`
+    })
+    return // Don't send response as connection is already closed
+  }
+
   // Log the error with a proper message for the one-line logger
   const errorCode = error instanceof AppError ? error.code : "UNKNOWN_ERROR"
   const errorMessage = `${errorCode}: ${error.message}`

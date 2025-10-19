@@ -128,21 +128,6 @@ async function routes(fastify: FastifyInstance) {
 
         console.log("correctedEvents", correctedEvents)
 
-        // Create and broadcast outcome message
-        const outcomeMessage = createOutcomeMessage(
-          player,
-          rat,
-          newRatBalance,
-          trip,
-          validatedOutcome
-        )
-        try {
-          await broadcast(outcomeMessage)
-        } catch (error) {
-          console.error("Failed to broadcast outcome message:", error)
-          // Don't fail the request if broadcast fails
-        }
-
         console.time("–– CMS write")
 
         const outcomeDocument = await writeOutcomeToCMS(
@@ -176,7 +161,27 @@ async function routes(fastify: FastifyInstance) {
           tripDepleted: newTripValue == 0
         }
 
+        console.log("Sending response to client...")
         reply.send(response)
+        console.log("Response sent successfully")
+
+        // Create and broadcast outcome message AFTER response is sent
+        console.log("Creating outcome message for broadcast...")
+        const outcomeMessage = createOutcomeMessage(
+          player,
+          rat,
+          newRatBalance,
+          trip,
+          validatedOutcome
+        )
+        console.log("Outcome message created, attempting broadcast...")
+        try {
+          await broadcast(outcomeMessage)
+          console.log("Broadcast completed successfully")
+        } catch (error) {
+          console.error("Failed to broadcast outcome message:", error)
+          // Don't fail the request if broadcast fails
+        }
       } catch (error) {
         throw error
       }

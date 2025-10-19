@@ -22,7 +22,11 @@ const fastify = Fastify({
     transport: {
       target: "@fastify/one-line-logger"
     }
-  }
+  },
+  // Increase timeout for long-running requests like trip/enter
+  requestTimeout: 40000, // 40 seconds
+  keepAliveTimeout: 5000, // 5 seconds
+  bodyLimit: 1048576 // 1MB
 })
 
 // Process image with sharp
