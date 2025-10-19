@@ -7,6 +7,7 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { Mascot } from "$lib/components/Shared"
 
   // Not enough balance
   let disabled = $derived(($playerERC20Balance ?? 0) < Number($gameConfig?.ratCreationCost ?? 0))
@@ -25,7 +26,7 @@
 <div class="deploy-rat">
   <div class="inner-container">
     <div class="mascot-container">
-      <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+      <Mascot entranceOn={true} smallDanceOn={true} />
     </div>
     <div class="button-container">
       {#if $player}
@@ -66,14 +67,9 @@
       margin-top: -80px;
 
       .mascot-container {
-        width: 300px;
-        height: 300px;
+        width: 400px;
+        height: 400px;
         margin-bottom: 20px;
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
       }
 
       .button-container {

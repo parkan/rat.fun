@@ -98,7 +98,7 @@
       // HACK
       // Wait a bit for whatever is needed for the shader to start is loaded...
       // await new Promise(resolve => setTimeout(resolve, 100))
-      shaderManager.setShader("clouds")
+      shaderManager.setShader("clouds", true)
     }
   })
 

@@ -11,6 +11,9 @@ export { default as ChatBox } from "./ChatBox/ChatBox.svelte"
 /* Graphics */
 export { default as X } from "./Graphics/X.svelte"
 
+/* Mascot */
+export { default as Mascot } from "./Mascot/Mascot.svelte"
+
 /* Marquee */
 export { default as Marquee } from "./Marquee/Marquee.svelte"
 

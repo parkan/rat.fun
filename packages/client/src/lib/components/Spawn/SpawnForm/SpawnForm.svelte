@@ -8,8 +8,7 @@
   import { InputValidationError } from "$lib/modules/error-handling/errors"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
 
-  import { BigButton } from "$lib/components/Shared"
-  import SmallSpinner from "$lib/components/Shared/Loaders/SmallSpinner.svelte"
+  import { BigButton, Mascot, SmallSpinner } from "$lib/components/Shared"
 
   const { onComplete = () => {} } = $props<{
     onComplete: (name: string) => void
@@ -19,7 +18,7 @@
   let busy = $state(false)
 
   let mascotElement: HTMLDivElement | null = $state(null)
-  let textElement: HTMLDivElement | null = $state(null)
+  // let textElement: HTMLDivElement | null = $state(null)
   let inputElement: HTMLInputElement | null = $state(null)
   let buttonElement: HTMLDivElement | null = $state(null)
 
@@ -53,12 +52,12 @@
   }
 
   onMount(() => {
-    if (!mascotElement || !textElement || !inputElement || !buttonElement) {
+    if (!mascotElement || !inputElement || !buttonElement) {
       return
     }
 
     // Set initial opacity to 0
-    gsap.set([mascotElement, textElement, inputElement, buttonElement], {
+    gsap.set([mascotElement, inputElement, buttonElement], {
       opacity: 0
     })
 
@@ -72,14 +71,14 @@
         },
         "0"
       )
-      .to(
-        textElement,
-        {
-          opacity: 1,
-          duration: 0.3
-        },
-        "0.1"
-      )
+      // .to(
+      //   textElement,
+      //   {
+      //     opacity: 1,
+      //     duration: 0.3
+      //   },
+      //   "0.1"
+      // )
       .to(
         inputElement,
         {
@@ -112,12 +111,12 @@
     {:else}
       <!-- MASCOT -->
       <div class="mascot-container" bind:this={mascotElement}>
-        <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+        <Mascot entranceOn={true} bigDanceOn={true} />
       </div>
       <!-- INTRO TEXT -->
-      <div class="text" bind:this={textElement}>
+      <!-- <div class="text" bind:this={textElement}>
         {$player?.name}ID checks out. You can enter. But we need your name.
-      </div>
+      </div> -->
 
       <!-- FORM -->
       <div class="form" bind:this={buttonElement}>
@@ -162,11 +161,6 @@
       .mascot-container {
         width: 300px;
         height: 300px;
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
       }
 
       .text {
@@ -183,6 +177,7 @@
         display: flex;
         width: 100%;
         flex-wrap: wrap;
+        margin-top: 20px;
 
         input {
           margin-right: 10px;

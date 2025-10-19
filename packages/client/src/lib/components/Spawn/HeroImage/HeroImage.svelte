@@ -2,7 +2,7 @@
   import { onMount } from "svelte"
   import { player } from "$lib/modules/state/stores"
   import gsap from "gsap"
-  import { BigButton } from "$lib/components/Shared"
+  import { BigButton, Mascot } from "$lib/components/Shared"
 
   let { onComplete }: { onComplete: () => void } = $props()
 
@@ -54,7 +54,7 @@
 <div class="outer-container">
   <div class="inner-container">
     <div class="mascot-container" bind:this={mascotElement}>
-      <img src="/images/mascot.png" alt="Mascot" draggable={false} />
+      <Mascot smallDanceOn={true} />
     </div>
     <div class="text-container" bind:this={textElement}>
       {$player?.name}, you are set!
@@ -85,11 +85,6 @@
       .mascot-container {
         width: 300px;
         height: 300px;
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
       }
 
       .text-container {
