@@ -1,17 +1,17 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
-  import { focusEvent } from "$lib/modules/ui/state.svelte"
+  import { focusEvent, focusTrip } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
   import { scaleTime, scaleLinear } from "d3-scale"
+
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
 
   let {
     graphData,
-    focus = $bindable(),
     height = 400
   }: {
     graphData: TripEvent[]
-    focus: string
     height: number
   } = $props()
 
@@ -140,6 +140,9 @@
             />
 
             {#each profitLossOverTime as point, i (point.time)}
+              {@const focus =
+                $focusEvent === point.index || (point.tripId === $focusTrip && $focusEvent === -1)}
+
               <!-- If the candle is selected, draw a line through it -->
               {#if $focusEvent === point.index}
                 <line
@@ -161,15 +164,24 @@
               > -->
               <g
                 onpointerenter={() => {
-                  // console.log("focusing")
+                  $focusTrip = point.tripId
                   $focusEvent = point.index
                 }}
-                onpointerleave={() => ($focusEvent = -1)}
+                onpointerdown={() => {
+                  // Play sound
+                }}
+                onpointerup={() => {
+                  goto(`/cashboard/${point.tripId}?focusId=${point?.meta?._id || ""}`)
+                }}
+                onpointerleave={() => {
+                  $focusTrip = ""
+                  $focusEvent = -1
+                }}
               >
                 {#if point.eventType === "trip_death"}
                   <circle
                     fill="var(--color-grey-light)"
-                    stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
+                    stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
                     cx={xScale(point.time)}
@@ -178,7 +190,7 @@
                 {:else if point.eventType === "trip_liquidated"}
                   <circle
                     fill="var(--color-grey-light)"
-                    stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
+                    stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
                     cx={xScale(point.time)}
@@ -187,7 +199,7 @@
                 {:else if point.eventType === "trip_created"}
                   <circle
                     fill="var(--color-grey-light)"
-                    stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
+                    stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
                     cx={xScale(point.time)}
@@ -196,7 +208,7 @@
                 {:else}
                   <circle
                     fill="var(--color-grey-light)"
-                    stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
+                    stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
                     cx={xScale(point.time)}
@@ -215,7 +227,7 @@
                         : yScale(lastPoint.value) - candleHeight}
                       width={candleWidth}
                       height={candleHeight}
-                      stroke={focus === point.tripId || $focusEvent === point.index ? "white" : ""}
+                      stroke={focus ? "white" : ""}
                       stroke-width="2"
                       fill={point.value < lastPoint.value ? "var(--color-down)" : "var(--color-up)"}
                     >

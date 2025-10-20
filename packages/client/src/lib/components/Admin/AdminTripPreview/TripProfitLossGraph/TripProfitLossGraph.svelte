@@ -8,20 +8,19 @@
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
   import { calculateProfitLossForTrip } from "../../helpers"
+  import { focusEvent } from "$lib/modules/ui/state.svelte"
 
   let {
     trip,
     tripId,
     height = 400,
     graphData = $bindable<TripEvent[]>(),
-    focusEvent = $bindable(-1),
     behavior = "hover"
   }: {
     trip: Trip
     tripId: string
     height?: number
     graphData?: TripEvent[]
-    focusEvent: number
     behavior?: "hover" | "click"
   } = $props()
 
@@ -213,7 +212,7 @@
             {#each profitLossOverTime as point, i (point.time)}
               {@const lastPoint = profitLossOverTime?.[i - 1]}
 
-              {#if focusEvent === point.index}
+              {#if $focusEvent === point.index}
                 <line
                   x1={xScale(point.time)}
                   y1={0}
@@ -234,24 +233,24 @@
                   onpointerdown={() => {}}
                   onpointerup={() => {
                     if (behavior === "click") {
-                      focusEvent = point.index
+                      $focusEvent = point.index
                     }
                   }}
                   onpointerenter={() => {
                     if (behavior === "hover") {
-                      focusEvent = point.index
+                      $focusEvent = point.index
                     }
                   }}
                   onpointerleave={() => {
                     if (behavior === "hover") {
-                      focusEvent = -1
+                      $focusEvent = -1
                     }
                   }}
                 >
                   {#if point.eventType === "trip_death"}
                     <circle
                       fill="var(--color-grey-light)"
-                      stroke={focusEvent === point.index ? "white" : ""}
+                      stroke={$focusEvent === point.index ? "white" : ""}
                       r="5"
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
@@ -259,7 +258,7 @@
                   {:else if point.eventType === "trip_liquidated"}
                     <circle
                       fill="var(--color-grey-light)"
-                      stroke={focusEvent === point.index ? "white" : ""}
+                      stroke={$focusEvent === point.index ? "white" : ""}
                       r="5"
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
@@ -267,7 +266,7 @@
                   {:else if point.eventType === "trip_created"}
                     <circle
                       fill="var(--color-grey-light)"
-                      stroke={focusEvent === point.index ? "white" : ""}
+                      stroke={$focusEvent === point.index ? "white" : ""}
                       r="5"
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
@@ -275,7 +274,7 @@
                   {:else}
                     <circle
                       fill="var(--color-grey-light)"
-                      stroke={focusEvent === point.index ? "white" : ""}
+                      stroke={$focusEvent === point.index ? "white" : ""}
                       r="5"
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
@@ -293,7 +292,7 @@
                           : yScale(lastPoint.value) - candleHeight}
                         width={candleWidth}
                         height={candleHeight}
-                        stroke={focusEvent === point.index ? "white" : ""}
+                        stroke={$focusEvent === point.index ? "white" : ""}
                         fill={point.value < lastPoint.value
                           ? "var(--color-down)"
                           : "var(--color-up)"}
