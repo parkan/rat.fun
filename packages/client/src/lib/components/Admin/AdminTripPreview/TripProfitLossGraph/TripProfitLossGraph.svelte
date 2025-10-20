@@ -143,7 +143,6 @@
   }
 
   const toggleSource = () => {
-    console.log("TOGGLE SOURCE")
     if (limit === 50 && allData.length > 50) {
       limit = allData.length
     } else {

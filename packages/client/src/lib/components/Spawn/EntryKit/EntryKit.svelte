@@ -4,7 +4,7 @@
   import { get } from "svelte/store"
 
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
-  import { getEnvironment } from "$lib/modules/network"
+  import { environment as environmentStore } from "$lib/modules/network"
 
   import { page } from "$app/state"
   import { createElement, useSyncExternalStore } from "react"
@@ -23,8 +23,7 @@
 
   let rootEl: HTMLElement
 
-  const environment = getEnvironment()
-  const networkConfig = getNetworkConfig(environment, page.url)
+  const networkConfig = getNetworkConfig($environmentStore, page.url)
   const queryClient = new QueryClient()
 
   let lastConnectedAddress = $state("")

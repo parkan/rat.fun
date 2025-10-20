@@ -80,8 +80,6 @@
     }))
   })
 
-  $inspect(profitLossOverTime)
-
   // Toggle the data source used
   const toggleSource = () => {
     if (limit === 50 && graphData.length > 50) {

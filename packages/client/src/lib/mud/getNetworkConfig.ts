@@ -8,11 +8,13 @@ import { getBurnerPrivateKey } from "@latticexyz/common"
 import { getChain, getWorldFromChainId } from "./utils"
 import { ENVIRONMENT } from "./enums"
 import { MUDChain } from "@latticexyz/common/chains"
-import { WorldAddressNotFoundError } from "$lib/modules/error-handling/errors"
+import { WorldAddressNotFoundError, ChainNotFoundError } from "$lib/modules/error-handling/errors"
 
-export function getNetworkConfig(environment: ENVIRONMENT, url?: URL) {
+export function getNetworkConfig(environment: ENVIRONMENT, url: URL) {
   // Use provided URL or fallback to empty search params for SSR
   const searchParams = url?.searchParams
+
+  // console.log("searchParams", searchParams)
 
   // Default to local development chain
   let chainId = 31337
@@ -30,6 +32,10 @@ export function getNetworkConfig(environment: ENVIRONMENT, url?: URL) {
   }
 
   const chain = getChain(chainId)
+
+  if (!chain) {
+    throw new ChainNotFoundError(chainId.toString())
+  }
 
   /*
    * Get the address of the World. If you want to use a
@@ -55,7 +61,10 @@ export function getNetworkConfig(environment: ENVIRONMENT, url?: URL) {
     : (world?.blockNumber ?? -1) // -1 will attempt to find the block number from RPC
 
   let indexerUrl = (chain as MUDChain).indexerUrl
+  // console.log("searchParams", searchParams)
+  // console.log('searchParams?.has("disableIndexer")', searchParams?.has("disableIndexer"))
   if (searchParams?.has("disableIndexer")) {
+    // console.log("indexer disabled")
     indexerUrl = undefined
   }
 

@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { ready } from "$lib/modules/network"
+  import { page } from "$app/state"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
   import { playSound } from "$lib/modules/sound"
+  import { blockNumber, loadingMessage, loadingPercentage, ready } from "$lib/modules/network"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
   import { gsap } from "gsap"
@@ -92,7 +93,7 @@
     // This sets up the public network and listens to the SyncProgress component
     // When sync is complete, the ready store is set to true
     // We listen to for this in the $effect above
-    await initPublicNetwork(environment)
+    await initPublicNetwork(environment, page.url)
 
     // Start the minimum duration timer
     setTimeout(() => {
@@ -107,6 +108,12 @@
 </script>
 
 <div class="loading" bind:this={loadingElement}>
+  <div class="status-box">
+    <div>BlockNumber: {$blockNumber}</div>
+    <div>LoadingMsg: {$loadingMessage}</div>
+    <div>Loading%: {$loadingPercentage}</div>
+    <div>Ready? {$ready}</div>
+  </div>
   <div class="mc-logo" bind:this={logoElement}>
     <img src="/images/logo.png" alt="Moving Castles GmbH" />
   </div>
@@ -147,6 +154,16 @@
         height: 100%;
         object-fit: contain;
       }
+    }
+
+    .status-box {
+      position: fixed;
+      top: 0;
+      right: 0;
+      padding: 10px;
+      background: yellow;
+      font-size: 10px;
+      color: black;
     }
   }
 </style>

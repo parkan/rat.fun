@@ -20,7 +20,7 @@ const MODEL = {
 
 const makePrompt = (prompt: string) => {
   // const randomPrompts = pickRandomMultiple(PROMPTS, 2).join(" ")
-  const postFix = "rat-faced, 4K, highly detailed, high contrast,  extreme fisheye distortion"
+  const postFix = "rat-faced, 4K, highly detailed, high contrast, extreme fisheye distortion"
   return `SCENE: ${prompt}. STYLE: ${postFix}`
 }
 

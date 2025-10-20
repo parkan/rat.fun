@@ -131,6 +131,12 @@ export class ChainConfigError extends BlockchainError {
   }
 }
 
+export class ChainNotFoundError extends BlockchainError {
+  constructor(chainId: string) {
+    super("CHAIN_NOT_FOUND", "Chain configuration error", `Chain ${chainId} is not configured`)
+  }
+}
+
 export class WorldAddressNotFoundError extends BlockchainError {
   constructor(chainId: string) {
     super(
@@ -408,6 +414,7 @@ export type ExpectedError =
   | UserRejectedTransactionError
   | GasEstimationError
   | ContractCallError
+  | ChainNotFoundError
   | ChainConfigError
   | WorldAddressNotFoundError
   | WagmiConfigUnavailableError

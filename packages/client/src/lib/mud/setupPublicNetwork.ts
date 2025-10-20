@@ -24,8 +24,9 @@ import mudConfig from "contracts/mud.config"
 
 export type SetupPublicNetworkResult = Awaited<ReturnType<typeof setupPublicNetwork>>
 
-export async function setupPublicNetwork(environment: ENVIRONMENT) {
-  const networkConfig = getNetworkConfig(environment)
+export async function setupPublicNetwork(environment: ENVIRONMENT, url: URL) {
+  // console.log("setupPublicNetwork", environment, url)
+  const networkConfig = getNetworkConfig(environment, url)
 
   /*
    * Create a viem public (read only) client
@@ -52,6 +53,8 @@ export async function setupPublicNetwork(environment: ENVIRONMENT) {
   } as const satisfies ClientConfig
 
   const publicClient = createPublicClient(clientOptions)
+
+  // console.log("networkConfig.indexerUrl", networkConfig.indexerUrl)
 
   const resolvedConfig = {
     world,

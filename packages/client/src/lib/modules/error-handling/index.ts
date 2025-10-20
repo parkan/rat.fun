@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/sveltekit"
+import { get } from "svelte/store"
+import { environment as environmentStore } from "$lib/modules/network"
 import { PUBLIC_SENTRY_DSN } from "$env/static/public"
-import { getEnvironment } from "$lib/modules/network"
 import { version } from "$app/environment"
 import { AppError, type ExpectedError } from "./errors"
 import { toastManager } from "$lib/modules/ui/toasts.svelte"
@@ -90,7 +91,6 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
  */
 export function initializeSentry(): void {
   const dsn = PUBLIC_SENTRY_DSN
-  const environment = getEnvironment()
   const release = version // Sveltekit assigned version number
   const tracesSampleRate = parseFloat(import.meta.env.SENTRY_TRACES_SAMPLE_RATE || "0.1")
   const profilesSampleRate = parseFloat(import.meta.env.SENTRY_PROFILES_SAMPLE_RATE || "0.1")
@@ -102,11 +102,11 @@ export function initializeSentry(): void {
 
   Sentry.init({
     dsn,
-    environment,
+    environment: get(environmentStore),
     release,
     tracesSampleRate,
     profilesSampleRate
   })
 
-  // console.log(`Sentry initialized for environment: ${environment}`)
+  console.log(`Sentry initialized for environment: ${get(environmentStore)}`)
 }
