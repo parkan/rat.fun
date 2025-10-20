@@ -4,10 +4,6 @@ export const extendedMudFoundry = {
   ...mudFoundry,
   rpcUrls: {
     ...mudFoundry.rpcUrls
-    // default: {
-    //   http: ["https://anvil.tunnel.offchain.dev"],
-    //   webSocket: ["wss://anvil.tunnel.offchain.dev"]
-    // }
   },
   contracts: {
     paymaster: {

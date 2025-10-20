@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { schema } from "@routes/trip/enter/schema"
+import { Hex } from "viem"
 
 import dotenv from "dotenv"
 dotenv.config()
@@ -35,12 +36,16 @@ import { verifyRequest } from "@modules/signature"
 
 // CMS
 import { getSystemPrompts } from "@modules/cms/private"
-import { writeOutcomeToCMS } from "@modules/cms/public"
+import { writeOutcomeToCMS, updateTripFactor, getTripFactor } from "@modules/cms/public"
 
 // Validation
 import { validateInputData } from "./validation"
 
-import { Hex } from "viem"
+// Error handling
+import { handleBackgroundError } from "@modules/error-handling"
+
+// Trip factor
+import { calculateTripFactor } from "@modules/trip-factor/calculateTripFactor"
 
 // Initialize LLM: Anthropic
 const llmClient = getLLMClient(ANTHROPIC_API_KEY)
@@ -53,12 +58,18 @@ async function routes(fastify: FastifyInstance) {
     opts,
     async (request: FastifyRequest<{ Body: SignedRequest<EnterTripRequestBody> }>, reply) => {
       try {
+        // Start main processing timer
+        const startProcessingTime = performance.now()
+
         const { tripId, ratId } = request.body.data
 
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = await verifyRequest(request.body)
 
+        // * * * * * * * * * * * * * * * * * *
         // Get onchain data
+        // * * * * * * * * * * * * * * * * * *
+
         console.time("–– Get on chain data")
         const { trip, rat, player, gamePercentagesConfig, worldEvent } = (await getEnterTripData(
           ratId,
@@ -67,15 +78,24 @@ async function routes(fastify: FastifyInstance) {
         )) as Required<EnterTripData>
         console.timeEnd("–– Get on chain data")
 
-        // Validate input data
+        // * * * * * * * * * * * * * * * * * *
+        // Validate data
+        // * * * * * * * * * * * * * * * * * *
+
         validateInputData(player, rat, trip, gamePercentagesConfig)
 
+        // * * * * * * * * * * * * * * * * * *
         // Get system prompts from CMS
+        // * * * * * * * * * * * * * * * * * *
+
         console.time("–– CMS")
         const { combinedSystemPrompt, correctionSystemPrompt } = await getSystemPrompts()
         console.timeEnd("–– CMS")
 
-        // Call event model
+        // * * * * * * * * * * * * * * * * * *
+        // Construct event messages
+        // * * * * * * * * * * * * * * * * * *
+
         console.time("–– Construct event messages")
         const eventMessages = await constructEventMessages(
           rat,
@@ -84,6 +104,10 @@ async function routes(fastify: FastifyInstance) {
           worldEvent
         )
         console.timeEnd("–– Construct event messages")
+
+        // * * * * * * * * * * * * * * * * * *
+        // Call event model
+        // * * * * * * * * * * * * * * * * * *
 
         console.time("–– Event LLM")
         const eventResults = (await callModel(
@@ -97,6 +121,10 @@ async function routes(fastify: FastifyInstance) {
 
         console.log("eventResults", eventResults)
 
+        // * * * * * * * * * * * * * * * * * *
+        // Apply outcome onchain
+        // * * * * * * * * * * * * * * * * * *
+
         // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
         console.time("–– Chain")
         const {
@@ -108,6 +136,10 @@ async function routes(fastify: FastifyInstance) {
           ratValueChange
         } = await systemCalls.applyOutcome(rat, trip, eventResults.outcome)
         console.timeEnd("–– Chain")
+
+        // * * * * * * * * * * * * * * * * * *
+        // Construct correction messages
+        // * * * * * * * * * * * * * * * * * *
 
         // The event log might now not reflect the actual outcome.
         // Run it through the LLM again to get the corrected event log.
@@ -126,30 +158,85 @@ async function routes(fastify: FastifyInstance) {
         )) as CorrectionReturnValue
         console.timeEnd("–– Correction LLM")
 
-        console.log("correctedEvents", correctedEvents)
+        // Calculate main processing time
+        const mainProcessingTime = performance.now() - startProcessingTime
 
-        console.time("–– CMS write")
+        // * * * * * * * * * * * * * * * * * *
+        // Background actions
+        // * * * * * * * * * * * * * * * * * *
 
-        const outcomeDocument = await writeOutcomeToCMS(
-          network.worldContract?.address ?? "0x0",
-          player,
-          trip,
-          rat,
-          newTripValue,
-          tripValueChange,
-          newRatValue,
-          ratValueChange,
-          correctedEvents,
-          validatedOutcome,
-          eventResults.outcome?.debuggingInfo
-        )
+        const backgroundActions = async () => {
+          console.time("–– Background actions")
+          try {
+            // * * * * * * * * * * * * * * * * * *
+            // Calculate trip factor
+            // * * * * * * * * * * * * * * * * * *
 
-        console.timeEnd("–– CMS write")
+            const oldTripFactor = (await getTripFactor(tripId)) ?? 0.5
+            console.log("oldTripFactor", oldTripFactor)
+            const newTripFactor = calculateTripFactor(
+              oldTripFactor,
+              tripValueChange,
+              newRatBalance == 0
+            )
+            console.log("newTripFactor", newTripFactor)
+            updateTripFactor(tripId, newTripFactor)
+            console.log("Trip factor written to CMS")
+
+            // * * * * * * * * * * * * * * * * * *
+            // Write outcome to CMS
+            // * * * * * * * * * * * * * * * * * *
+
+            writeOutcomeToCMS(
+              network.worldContract?.address ?? "0x0",
+              player,
+              trip,
+              rat,
+              newTripValue,
+              tripValueChange,
+              newRatValue,
+              ratValueChange,
+              correctedEvents,
+              validatedOutcome,
+              mainProcessingTime,
+              eventResults.outcome?.debuggingInfo
+            )
+
+            // * * * * * * * * * * * * * * * * * *
+            // Create outcome message and broadcast
+            // * * * * * * * * * * * * * * * * * *
+
+            console.log("Creating outcome message for broadcast...")
+            const outcomeMessage = createOutcomeMessage(
+              player,
+              rat,
+              newRatBalance,
+              trip,
+              validatedOutcome
+            )
+            console.log("Outcome message created, attempting broadcast...")
+
+            // Fire-and-forget: don't await the broadcast
+            broadcast(outcomeMessage)
+              .then(() => console.log("Broadcast completed successfully"))
+              .catch(error => console.error("Failed to broadcast outcome message:", error))
+          } catch (error) {
+            handleBackgroundError(error, "Trip Entry - CMS & WebSocket")
+          } finally {
+            console.timeEnd("–– Background actions")
+          }
+        }
+
+        // Start the background process without awaiting
+        backgroundActions()
+
+        // * * * * * * * * * * * * * * * * * *
+        // Construct and send response to client
+        // * * * * * * * * * * * * * * * * * *
 
         const response: EnterTripReturnValue = {
           id: ratId as Hex,
           log: correctedEvents.log ?? [],
-          outcomeId: outcomeDocument._id,
           itemChanges: validatedOutcome.itemChanges,
           balanceTransfers: validatedOutcome.balanceTransfers,
           debuggingInfo: eventResults.outcome?.debuggingInfo ?? {
@@ -162,23 +249,6 @@ async function routes(fastify: FastifyInstance) {
         }
 
         console.log("Sending response to client...")
-
-        // Create and broadcast outcome message in background (fire-and-forget)
-        console.log("Creating outcome message for broadcast...")
-        const outcomeMessage = createOutcomeMessage(
-          player,
-          rat,
-          newRatBalance,
-          trip,
-          validatedOutcome
-        )
-        console.log("Outcome message created, attempting broadcast...")
-
-        // Fire-and-forget: don't await the broadcast
-        broadcast(outcomeMessage)
-          .then(() => console.log("Broadcast completed successfully"))
-          .catch((error) => console.error("Failed to broadcast outcome message:", error))
-
         // Send response and return immediately to close connection properly
         return reply.send(response)
       } catch (error) {

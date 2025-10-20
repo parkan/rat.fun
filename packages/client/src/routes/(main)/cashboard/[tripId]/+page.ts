@@ -2,18 +2,17 @@ import type { PageLoad } from "./$types"
 import { loadData } from "$lib/modules/content/sanity"
 import { queries } from "$lib/modules/content/sanity/groq"
 import { errorHandler, CMSError } from "$lib/modules/error-handling"
-import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
-import { getEnvironmentFromUrl } from "$lib/modules/network"
+import { getWorldAddress } from "$lib/mud/getWorldAddress"
+import { environment as environmentStore } from "$lib/modules/network"
+import { get } from "svelte/store"
 
 export const load: PageLoad = async ({ params, url }) => {
   try {
-    // Get the worldAddress from the network config
-    const environment = getEnvironmentFromUrl(url)
-    const networkConfig = getNetworkConfig(environment, url)
+    const worldAddress = getWorldAddress(get(environmentStore))
 
     const tripContent = await loadData(queries.singleTrip, {
       id: params.tripId,
-      worldAddress: networkConfig.worldAddress
+      worldAddress
     })
     const liquidating = url.searchParams.has("liquidate") || false
 

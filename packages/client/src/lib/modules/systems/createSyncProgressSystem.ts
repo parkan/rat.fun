@@ -4,10 +4,21 @@ import { SyncStep } from "@latticexyz/store-sync"
 
 export function createSyncProgressSystem() {
   const subscription = get(publicNetwork).components.SyncProgress.update$.subscribe(update => {
-    loadingMessage.set(update.value[0]?.message ?? "Loading")
-    loadingPercentage.set(Number(update.value[0]?.percentage.toFixed(0) ?? 0))
+    const currentValue = update.value[0]
 
-    if (update.value[0]?.step === SyncStep.LIVE) {
+    if (!currentValue) {
+      console.error("SYNC ERROR")
+      return
+    }
+
+    loadingMessage.set(currentValue.message ?? "Loading")
+    loadingPercentage.set(Number(currentValue.percentage.toFixed(0) ?? 0))
+
+    // console.log("SYNC:", update)
+    // console.log("currentValue.step =>", currentValue.step)
+
+    // || currentValue.percentage === 100
+    if (currentValue.step === SyncStep.LIVE) {
       ready.set(true)
       subscription.unsubscribe()
     }

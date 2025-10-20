@@ -160,6 +160,13 @@ export default {
       readOnly: true
     },
     {
+      title: "Main processing time",
+      name: "mainProcessingTime",
+      type: "number",
+      readOnly: true,
+      validation: (Rule: any) => Rule.required()
+    },
+    {
       title: "Slug",
       name: "slug",
       type: "slug",

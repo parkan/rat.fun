@@ -1,5 +1,3 @@
-import { ResolvedTemplateImages } from "@modules/types"
-import { pickRandom } from "@modules/utils"
 import Replicate from "replicate"
 import type { FileOutput } from "replicate"
 import sharp from "sharp"
@@ -20,7 +18,7 @@ const MODEL = {
 
 const makePrompt = (prompt: string) => {
   // const randomPrompts = pickRandomMultiple(PROMPTS, 2).join(" ")
-  const postFix = "rat-faced, 4K, highly detailed, high contrast,  extreme fisheye distortion"
+  const postFix = "rat-faced, 4K, highly detailed, high contrast, extreme fisheye distortion"
   return `SCENE: ${prompt}. STYLE: ${postFix}`
 }
 
@@ -30,13 +28,9 @@ const makePrompt = (prompt: string) => {
  * @param templateImages - The template images to use for the image
  * @returns The generated image
  */
-export const generateImage = async (prompt: string, templateImages: ResolvedTemplateImages) => {
-  // Pick a random image from tripImages
-  const image = templateImages?.tripImages ? pickRandom(templateImages.tripImages) : undefined
-
+export const generateImage = async (prompt: string) => {
   const INPUT = {
     SD: {
-      image,
       prompt: makePrompt(prompt),
       cfg: 1.5,
       aspect_ratio: "1:1",

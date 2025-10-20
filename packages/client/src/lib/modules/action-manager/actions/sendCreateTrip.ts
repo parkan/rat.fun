@@ -5,7 +5,7 @@ import { approve } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
 import type { CreateTripRequestBody, CreateTripReturnValue } from "@server/modules/types"
 import { signRequest } from "$lib/modules/signature"
-import { getEnvironment } from "$lib/modules/network"
+import { environment as environmentStore } from "$lib/modules/network"
 import { ENVIRONMENT } from "$lib/mud/enums"
 import {
   PUBLIC_DEVELOPMENT_SERVER_HOST,
@@ -25,7 +25,6 @@ const DEFAULT_TIMING = 4000
 export async function sendCreateTrip(tripPrompt: string, tripCreationCost: number) {
   const _externalAddressesConfig = get(externalAddressesConfig)
   const _playerERC20Allowance = get(playerERC20Allowance)
-  const environment = getEnvironment()
 
   if (busy.CreateTrip.current !== 0) return
   busy.CreateTrip.set(0.99, { duration: DEFAULT_TIMING })
@@ -38,7 +37,7 @@ export async function sendCreateTrip(tripPrompt: string, tripCreationCost: numbe
 
     let url = ""
 
-    switch (environment) {
+    switch (get(environmentStore)) {
       case ENVIRONMENT.BASE_SEPOLIA:
         url = `https://${PUBLIC_BASE_SEPOLIA_SERVER_HOST}/trip/create`
         break

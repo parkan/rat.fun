@@ -14,7 +14,6 @@ export async function spawnOrGetRoom(network: SetupNetworkReturnType) {
   // Return the first room with a positive balance
   for (const roomId of ownedRoomIds) {
     const balance = getComponentValue(network.components.Balance, roomId)?.value ?? 0n
-    console.log("room balance", balance)
     if (balance > 0n) {
       return roomId
     }

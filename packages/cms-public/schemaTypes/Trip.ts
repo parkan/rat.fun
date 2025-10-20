@@ -53,6 +53,13 @@ export default {
       validation: (Rule: any) => Rule.required()
     },
     {
+      title: "Trip factor",
+      name: "tripFactor",
+      type: "number",
+      readOnly: true,
+      validation: (Rule: any) => Rule.required()
+    },
+    {
       title: "Slug",
       name: "slug",
       type: "slug",

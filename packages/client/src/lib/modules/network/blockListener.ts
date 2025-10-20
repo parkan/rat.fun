@@ -7,6 +7,7 @@ const TIMEOUT = 60000
 
 export function initBlockListener() {
   get(publicNetwork).latestBlock$.subscribe(block => {
+    // console.log("block", Number(block.number), block)
     // Show a error message if we haven't received a block in a while
     clearTimeout(blockTimeout)
     blockTimeout = window.setTimeout(() => errorHandler(new BlockTimeoutError()), TIMEOUT)

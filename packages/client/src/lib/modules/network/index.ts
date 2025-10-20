@@ -1,9 +1,7 @@
-import { writable, get } from "svelte/store"
-import { browser } from "$app/environment"
+import { writable } from "svelte/store"
 import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
 import { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
-import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
-import { page } from "$app/state"
+import { ENVIRONMENT, WALLET_TYPE, SALE_STATUS } from "$lib/mud/enums"
 
 // ----------------------------------------------------------------------------
 
@@ -18,63 +16,49 @@ export const ready = writable(false)
 export const loadingMessage = writable("Loading started")
 export const loadingPercentage = writable(0)
 
-// Persistent stores
-export const environment = writable<ENVIRONMENT>() // important to be undefined first
-export const walletType = writable<WALLET_TYPE>() // same
+export const environment = writable<ENVIRONMENT>(ENVIRONMENT.UNKNOWN)
+export const walletType = writable<WALLET_TYPE>(WALLET_TYPE.UNKNOWN)
+export const saleStatus = writable<SALE_STATUS>(SALE_STATUS.UNKNOWN)
 
 // ----------------------------------------------------------------------------
-
+/**
+ * Get the chain/environment the client is accessing from the URL
+ * Should only be called once per session.
+ * @param url - The URL the client is accessed on
+ * @returns The chain/environment the client is accessing
+ */
 export const getEnvironmentFromUrl = (url: URL) => {
   const hostname = url.hostname
+  const networkParam = url.searchParams.get("network")
+  console.log("getEnvironmentFromUrl", hostname, networkParam)
 
-  if (hostname.includes("sepolia") || url.searchParams.has("sepolia")) {
-    return ENVIRONMENT.BASE_SEPOLIA
-  } else if (hostname === "rat.fun" || url.searchParams.has("mainnet")) {
+  if (hostname === "rat.fun" || networkParam === "base") {
     return ENVIRONMENT.BASE
+  } else if (hostname === "base-sepolia.rat.fun" || networkParam === "base-sepolia") {
+    return ENVIRONMENT.BASE_SEPOLIA
   } else {
     return ENVIRONMENT.DEVELOPMENT
   }
 }
 
-export const getEnvironment = (): ENVIRONMENT => {
-  if (browser) {
-    const storedEnvironment = get(environment)
-    if (storedEnvironment) {
-      return storedEnvironment
-    }
-  }
-
-  const urlEnvironment = getEnvironmentFromUrl(page.url)
-  environment.set(urlEnvironment)
-  return urlEnvironment
-}
-
+/**
+ * Get the wallet type the client is using from the URL
+ * Should only be called once per session.
+ * @param url - The URL the client is accessed on
+ * @returns The wallet type the client is using
+ */
 export const getWalletTypeFromUrl = (url: URL) => {
   const hostname = url.hostname
+  const walletTypeParam = url.searchParams.get("walletType")
+  console.log("getWalletTypeFromUrl", hostname, walletTypeParam)
 
   if (
-    hostname.includes("entrykit") ||
-    url.searchParams.has("entrykit") ||
-    hostname.includes("sepolia") || // wallet is always entrykit if we do sepolia
-    url.searchParams.has("sepolia") ||
     hostname === "rat.fun" ||
-    url.searchParams.has("mainnet")
+    hostname === "base-sepolia.rat.fun" ||
+    walletTypeParam === "entrykit"
   ) {
     return WALLET_TYPE.ENTRYKIT
+  } else {
+    return WALLET_TYPE.BURNER
   }
-
-  return WALLET_TYPE.BURNER
-}
-
-export const getWalletType = () => {
-  if (browser) {
-    const storedWalletType = get(walletType)
-    if (storedWalletType) {
-      return storedWalletType
-    }
-  }
-
-  const urlWalletType = getWalletTypeFromUrl(page.url)
-  walletType.set(urlWalletType)
-  return urlWalletType
 }

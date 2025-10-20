@@ -4,7 +4,7 @@
   import { get } from "svelte/store"
 
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
-  import { getEnvironment } from "$lib/modules/network"
+  import { environment as environmentStore } from "$lib/modules/network"
 
   import { page } from "$app/state"
   import { createElement, useSyncExternalStore } from "react"
@@ -23,8 +23,7 @@
 
   let rootEl: HTMLElement
 
-  const environment = getEnvironment()
-  const networkConfig = getNetworkConfig(environment, page.url)
+  const networkConfig = getNetworkConfig($environmentStore, page.url)
   const queryClient = new QueryClient()
 
   let lastConnectedAddress = $state("")
@@ -40,12 +39,18 @@
     }
   }
 
+  // TODO remove temporary error handler
+  function _errorHandler(error: unknown) {
+    console.error("EntryKit error:", error)
+    errorHandler(error)
+  }
+
   // ???
   $effect(() => {
     const root = createRoot(rootEl, {
-      onCaughtError: error => errorHandler(error),
-      onRecoverableError: error => errorHandler(error),
-      onUncaughtError: error => errorHandler(error)
+      onCaughtError: error => _errorHandler(error),
+      onRecoverableError: error => _errorHandler(error),
+      onUncaughtError: error => _errorHandler(error)
     })
     const config = wagmiConfig()
 

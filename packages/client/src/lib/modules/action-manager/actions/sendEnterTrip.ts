@@ -1,5 +1,6 @@
 import { busy } from "../index.svelte"
-import { getEnvironment } from "$lib/modules/network"
+import { get } from "svelte/store"
+import { environment as environmentStore } from "$lib/modules/network"
 import { ENVIRONMENT } from "$lib/mud/enums"
 import { signRequest } from "$lib/modules/signature"
 import type { EnterTripRequestBody, EnterTripReturnValue } from "@server/modules/types"
@@ -19,8 +20,6 @@ const DEFAULT_TIMING = 4000
  * @param ratId The ID of the rat to enter the trip with
  */
 export async function sendEnterTrip(tripId: string, ratId: string) {
-  const environment = getEnvironment()
-
   if (busy.EnterTrip.current !== 0) {
     return null
   }
@@ -31,7 +30,7 @@ export async function sendEnterTrip(tripId: string, ratId: string) {
 
   let url = ""
 
-  switch (environment) {
+  switch (get(environmentStore)) {
     case ENVIRONMENT.BASE_SEPOLIA:
       url = `https://${PUBLIC_BASE_SEPOLIA_SERVER_HOST}/trip/enter`
       break

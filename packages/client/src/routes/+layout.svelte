@@ -21,7 +21,11 @@
   import { websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { EMPTY_ID } from "$lib/modules/state/constants"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { walletType as walletTypeStore } from "$lib/modules/network"
+  import {
+    environment as environmentStore,
+    walletType as walletTypeStore
+  } from "$lib/modules/network"
+  import { entryKitSession } from "$lib/modules/entry-kit/stores"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -42,11 +46,7 @@
     }
   }
 
-  let { children, data }: LayoutProps = $props()
-
-  const { environment, walletType } = data
-
-  walletTypeStore.set(walletType)
+  let { children }: LayoutProps = $props()
 
   // Called when loading is complete
   const loaded = async () => {
@@ -64,6 +64,8 @@
     }
   }
 
+  $inspect($entryKitSession)
+
   // Called when spawning is complete
   const spawned = () => {
     UIState.set(UI.READY)
@@ -77,7 +79,7 @@
   // Init of chain sync when player is ready
   $effect(() => {
     if ($playerId && $playerId !== EMPTY_ID && !$websocketConnected) {
-      initOffChainSync(data.environment, $playerId)
+      initOffChainSync($environmentStore, $playerId)
     }
   })
 
@@ -98,9 +100,9 @@
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
-    <Loading {environment} {loaded} />
+    <Loading environment={$environmentStore} {loaded} />
   {:else if $UIState === UI.SPAWNING}
-    <Spawn {walletType} {spawned} />
+    <Spawn walletType={$walletTypeStore} {spawned} />
   {:else}
     <div class="context-main">
       {@render children?.()}

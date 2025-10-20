@@ -3,18 +3,17 @@ import { loadData } from "$lib/modules/content/sanity"
 import { queries } from "$lib/modules/content/sanity/groq"
 import { redirect } from "@sveltejs/kit"
 import { errorHandler, CMSError } from "$lib/modules/error-handling"
-import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
-import { getEnvironmentFromUrl } from "$lib/modules/network"
+import { getWorldAddress } from "$lib/mud/getWorldAddress"
+import { environment as environmentStore } from "$lib/modules/network"
+import { get } from "svelte/store"
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ params }) => {
   try {
-    // Get the worldAddress from the network config
-    const environment = getEnvironmentFromUrl(url)
-    const networkConfig = getNetworkConfig(environment, url)
+    const worldAddress = getWorldAddress(get(environmentStore))
 
     const tripContent = await loadData(queries.singleTrip, {
       id: params.tripId,
-      worldAddress: networkConfig.worldAddress
+      worldAddress
     })
 
     return {

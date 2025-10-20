@@ -125,6 +125,7 @@ export type Outcome = {
   ratValue?: number
   ratValueChange?: number
   debuggingInfo?: string
+  mainProcessingTime?: number
   slug?: Slug
 }
 
@@ -152,6 +153,7 @@ export type Trip = {
     crop?: SanityImageCrop
     _type: "image"
   }
+  tripFactor?: number
   slug?: Slug
 }
 

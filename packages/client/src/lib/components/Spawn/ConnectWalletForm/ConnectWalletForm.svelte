@@ -47,7 +47,6 @@
           const firstButton = iframeDoc.querySelector("button")
           if (firstButton) {
             firstButton.click()
-            console.log("Clicked button in iframe")
           } else {
             console.error("No button found in iframe")
           }
