@@ -78,7 +78,8 @@
     </div>
     <!-- MAX WIN -->
     <div class="trip-info-max-win">
-      <span class="max-win">Max Win: {CURRENCY_SYMBOL}{$maxValuePerWin}</span>
+      <div class="max-win">Max Win: {CURRENCY_SYMBOL}{$maxValuePerWin}</div>
+      <div class="trip-factor">Trip Factor: {sanityTripContent?.tripFactor ?? "N/A"}</div>
     </div>
   </div>
 </a>

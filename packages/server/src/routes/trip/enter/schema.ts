@@ -38,9 +38,6 @@ export const schema = {
             }
           }
         },
-        outcomeId: {
-          type: "string"
-        },
         itemChanges: {
           type: "array",
           items: {
@@ -75,7 +72,7 @@ export const schema = {
         ratDead: { type: "boolean" },
         tripDepleted: { type: "boolean" }
       },
-      required: ["log", "outcomeId", "itemChanges", "balanceTransfers", "ratDead", "tripDepleted"]
+      required: ["log", "itemChanges", "balanceTransfers", "ratDead", "tripDepleted"]
     },
     403: {
       type: "object",

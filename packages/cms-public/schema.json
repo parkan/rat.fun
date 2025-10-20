@@ -689,6 +689,13 @@
         },
         "optional": true
       },
+      "mainProcessingTime": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "slug": {
         "type": "objectAttribute",
         "value": {
@@ -842,6 +849,13 @@
               }
             }
           }
+        },
+        "optional": true
+      },
+      "tripFactor": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
         },
         "optional": true
       },

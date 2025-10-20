@@ -8,7 +8,7 @@ dotenv.config()
 import { CreateTripRequestBody, SignedRequest } from "@modules/types"
 
 // CMS
-import { writeTripToCMS, updateTripWithImage, getTemplateImages } from "@modules/cms/public"
+import { writeTripToCMS, updateTripWithImage } from "@modules/cms/public"
 
 // MUD
 import { systemCalls, network } from "@modules/mud/initMud"
@@ -47,27 +47,37 @@ async function routes(fastify: FastifyInstance) {
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = await verifyRequest(request.body)
 
+        // * * * * * * * * * * * * * * * * * *
         // Get onchain data
+        // * * * * * * * * * * * * * * * * * *
+
         const { gameConfig, player } = await getCreateTripData(playerId)
 
+        // * * * * * * * * * * * * * * * * * *
         // Validate data
+        // * * * * * * * * * * * * * * * * * *
+
         validateInputData(gameConfig, player, tripPrompt, tripCreationCost)
 
-        // Get template images from CMS
-        console.time("–– CMS")
-        const templateImages = await getTemplateImages()
-        console.timeEnd("–– CMS")
+        // * * * * * * * * * * * * * * * * * *
+        // Generate unique trip ID
+        // * * * * * * * * * * * * * * * * * *
 
-        // We need to generate a unique ID here
         // Doing it onchain does not allow us to use it to connect the trip to the image
         const tripId = generateRandomBytes32()
 
+        // * * * * * * * * * * * * * * * * * *
         // Create trip onchain
+        // * * * * * * * * * * * * * * * * * *
+
         console.time("–– Chain call")
         await systemCalls.createTrip(playerId, tripId, tripCreationCost, tripPrompt)
         console.timeEnd("–– Chain call")
 
-        // Write trip text data to CMS immediately
+        // * * * * * * * * * * * * * * * * * *
+        // Write trip text data to CMS
+        // * * * * * * * * * * * * * * * * * *
+
         console.time("–– CMS text write")
         const resolvedNetwork = await network
         const worldAddress = resolvedNetwork.worldContract?.address ?? "0x0"
@@ -75,27 +85,34 @@ async function routes(fastify: FastifyInstance) {
         await writeTripToCMS(worldAddress, tripIndex, tripId, tripPrompt, player)
         console.timeEnd("–– CMS text write")
 
-        // Start image generation and CMS image update in the background
-        const handleImageGeneration = async () => {
-          console.time("–– Image generation")
+        // * * * * * * * * * * * * * * * * * *
+        // Background actions
+        // * * * * * * * * * * * * * * * * * *
+
+        const backgroundActions = async () => {
+          console.time("–– Background actions")
           try {
+            // Broadcast trip creation message
+            broadcast(createTripCreationMessage(tripId, player))
+
             // Get the image data
-            const imageBuffer = await generateImage(tripPrompt, templateImages)
+            const imageBuffer = await generateImage(tripPrompt)
 
             // Update the trip document with the image
             await updateTripWithImage(tripId, imageBuffer)
           } catch (error) {
-            handleBackgroundError(error, "Trip Creation - Image Generation & CMS")
+            handleBackgroundError(error, "Trip Creation - Image Generation, CMS & WebSocket")
           } finally {
-            console.timeEnd("–– Image generation")
+            console.timeEnd("–– Background actions")
           }
         }
 
         // Start the background process without awaiting
-        handleImageGeneration()
+        backgroundActions()
 
-        // Broadcast trip creation message
-        await broadcast(createTripCreationMessage(tripId, player))
+        // * * * * * * * * * * * * * * * * * *
+        // Send response to client
+        // * * * * * * * * * * * * * * * * * *
 
         reply.send({
           success: true,

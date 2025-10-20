@@ -36,7 +36,7 @@
 
   const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
 
-  async function connectBurner() {
+  async function checkForBurnerWallet() {
     const wallet = setupBurnerWalletNetwork($publicNetwork)
     const isSpawned = initWalletNetwork(
       wallet,
@@ -58,10 +58,7 @@
   }
 
   const onWalletConnectionComplete = () => {
-    if (walletType === WALLET_TYPE.ENTRYKIT) {
-      // This is now just here for the burner. Entrykit is moved to $effect call below
-    } else {
-      // Burner
+    if (walletType === WALLET_TYPE.BURNER) {
       currentState = SPAWN_STATE.SPAWN_FORM
     }
   }
@@ -70,6 +67,7 @@
   // ???
   $effect(() => {
     if ($entryKitSession) {
+      console.log("IN EFFECT:entryKitSession", $entryKitSession)
       if ($entryKitSession?.account?.client && $entryKitSession.userAddress) {
         const wallet = setupWalletNetwork($publicNetwork, $entryKitSession)
         const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
@@ -84,9 +82,8 @@
   })
 
   onMount(async () => {
-    // ???
     if (walletType === WALLET_TYPE.BURNER) {
-      connectBurner()
+      checkForBurnerWallet()
     }
 
     // HACK

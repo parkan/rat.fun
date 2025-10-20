@@ -25,6 +25,7 @@
     environment as environmentStore,
     walletType as walletTypeStore
   } from "$lib/modules/network"
+  import { entryKitSession } from "$lib/modules/entry-kit/stores"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -62,6 +63,8 @@
       goto("/")
     }
   }
+
+  $inspect($entryKitSession)
 
   // Called when spawning is complete
   const spawned = () => {

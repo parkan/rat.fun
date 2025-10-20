@@ -87,7 +87,6 @@ export type CorrectionReturnValue = {
 
 export type OutcomeReturnValue = {
   id?: string
-  outcomeId: string
   itemChanges: ItemChange[]
   balanceTransfers: BalanceTransfer[]
   debuggingInfo: DebuggingInfo
@@ -226,16 +225,4 @@ export type NonceDatabaseSchema = {
 
 export interface WebSocketInterface {
   send: (data: string) => void
-}
-
-/*
- * ─────────────────────────────────────────────
- * CMS Types
- * ─────────────────────────────────────────────
- */
-
-import type { TemplateImages } from "@sanity-public-cms-types"
-
-export type ResolvedTemplateImages = Omit<TemplateImages, "tripImages"> & {
-  tripImages?: string[]
 }
