@@ -14,19 +14,14 @@ export const ssr = false
 export const prerender = false
 
 export const load: LayoutLoad = async ({ url }) => {
-  console.log("layout url", url)
-  console.log("PRE environmentStore", get(environmentStore))
-  console.log("PREwalletTypeStore", get(walletTypeStore))
-  console.log("PRE saleStatusStore", get(saleStatusStore))
-
   let environment: ENVIRONMENT = get(environmentStore)
   let walletType: WALLET_TYPE = get(walletTypeStore)
   let saleStatus: SALE_STATUS = get(saleStatusStore)
 
-  // ************
+  // *****************************
   // We only want to get the environment and and wallet type once in a session
   // the url and particularly the searchparams are unreliable
-  // ************
+  // *****************************
 
   if (environment === ENVIRONMENT.UNKNOWN) {
     environment = getEnvironmentFromUrl(url)
@@ -45,8 +40,4 @@ export const load: LayoutLoad = async ({ url }) => {
     // Set the sale status store
     saleStatusStore.set(saleStatus)
   }
-
-  console.log("POST environmentStore", get(environmentStore))
-  console.log("POST walletTypeStore", get(walletTypeStore))
-  console.log("POST saleStatusStore", get(saleStatusStore))
 }

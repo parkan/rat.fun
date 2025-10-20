@@ -23,8 +23,7 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import {
     environment as environmentStore,
-    walletType as walletTypeStore,
-    saleStatus as saleStatusStore
+    walletType as walletTypeStore
   } from "$lib/modules/network"
 
   // Components
