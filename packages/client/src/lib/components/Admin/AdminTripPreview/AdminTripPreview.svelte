@@ -76,7 +76,7 @@
       <AdminTripPreviewHeader {sanityTripContent} {trip} />
     </div>
     <div class="left">
-      <TripProfitLossGraph behavior="click" {trip} {tripId} bind:graphData />
+      <TripProfitLossGraph behavior="click" {trip} {tripId} />
     </div>
     <div class="right">
       <AdminEventLog {graphData} behavior="click" hideUnlockEvent />

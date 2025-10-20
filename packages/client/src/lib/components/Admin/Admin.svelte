@@ -78,13 +78,15 @@
   // Data processing logic moved from ProfitLossHistoryGraph
   let graphData = $derived.by(() => {
     const trips = Object.values($playerTrips)
-    if (!trips.length) return []
+    if (!trips.length) {
+      console.log("no trips", performance.now())
+      return []
+    }
 
     const combinedData: TripEvent[] = []
 
     trips.forEach(trip => {
       const tripId = Object.keys($playerTrips).find(key => $playerTrips[key] === trip) || ""
-
       const sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
 
       if (!sanityTripContent) return
@@ -116,6 +118,10 @@
 
     // Now accumulate the value changes globally and add index
     let runningBalance = 0
+
+    // Return data now
+    console.log("trips", dataWithBaseline.length, performance.now())
+
     return dataWithBaseline.map((point, index) => {
       runningBalance += point.valueChange || 0
       return {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
+  import { SignedNumber } from "$lib/components/Shared"
   import type { TripEvent, PendingTrip } from "$lib/components/Admin/types"
   import { derived } from "svelte/store"
   import { profitLoss } from "$lib/modules/state/stores"
@@ -48,9 +49,7 @@
     <div class="left">Active trips</div>
     <div class="right">
       Profit:
-      <span class="profit-value {$portfolioClass}">
-        {#if $profitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs($profitLoss)}
-      </span>
+      <SignedNumber withCurrency withTween value={$profitLoss} />
     </div>
   </div>
   <table class="admin-trip-table">

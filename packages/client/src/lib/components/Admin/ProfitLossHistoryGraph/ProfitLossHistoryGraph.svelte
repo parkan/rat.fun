@@ -3,7 +3,9 @@
   import { focusEvent, focusTrip } from "$lib/modules/ui/state.svelte"
   import { goto } from "$app/navigation"
   import { scaleTime, scaleLinear } from "d3-scale"
-
+  import { drawReverse } from "$lib/modules/transitions"
+  import { page } from "$app/state"
+  import { draw, fade } from "svelte/transition"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
 
@@ -59,7 +61,7 @@
       .range([innerHeight, 0])
   })
 
-  let isEmpty = $derived(graphData.length === 0)
+  let isEmpty = $derived(graphData.length <= 1)
 
   // Limited version of graphData for display
   let limitedData = $derived([...graphData].slice(-limit, graphData.length))
@@ -80,7 +82,60 @@
     }))
   })
 
-  $inspect(profitLossOverTime)
+  let focusedPoints = $derived(
+    $focusTrip !== "" && $focusEvent === -1
+      ? profitLossOverTime.filter(point => point.tripId === $focusTrip)
+      : []
+  )
+
+  let leftMostPoint = $derived.by(() => {
+    if (!focusedPoints.length) return null
+    return focusedPoints.reduce((left, point) =>
+      xScale(point.time) < xScale(left.time) ? point : left
+    )
+  })
+
+  let rightMostPoint = $derived.by(() => {
+    if (!focusedPoints.length) return null
+    return focusedPoints.reduce((right, point) =>
+      xScale(point.time) > xScale(right.time) ? point : right
+    )
+  })
+
+  let focusedBoundingBox = $derived({
+    x: Math.min(...focusedPoints.map(point => xScale(point.time))),
+    width:
+      Math.max(...focusedPoints.map(point => xScale(point.time))) -
+      Math.min(...focusedPoints.map(point => xScale(point.time))),
+    y: Math.min(...focusedPoints.map(point => yScale(point.value))),
+    height:
+      Math.max(...focusedPoints.map(point => yScale(point.value))) -
+      Math.min(...focusedPoints.map(point => yScale(point.value))),
+    left: leftMostPoint ? xScale(leftMostPoint.time) : 0,
+    leftY: leftMostPoint ? yScale(leftMostPoint.value) : 0,
+    right: rightMostPoint ? xScale(rightMostPoint.time) : 0,
+    rightY: rightMostPoint ? yScale(rightMostPoint.value) : 0
+  })
+
+  let topPath = $derived(
+    `M ${focusedBoundingBox.left} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.y} L ${
+      focusedBoundingBox.x + focusedBoundingBox.width
+    } ${focusedBoundingBox.y} L ${
+      focusedBoundingBox.x + focusedBoundingBox.width
+    } ${focusedBoundingBox.rightY} L ${focusedBoundingBox.right} ${focusedBoundingBox.rightY}`
+  )
+
+  let bottomPath = $derived(
+    `M ${focusedBoundingBox.left} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${
+      focusedBoundingBox.y + focusedBoundingBox.height
+    } L ${focusedBoundingBox.x + focusedBoundingBox.width} ${
+      focusedBoundingBox.y + focusedBoundingBox.height
+    } L ${
+      focusedBoundingBox.x + focusedBoundingBox.width
+    } ${focusedBoundingBox.rightY} L ${focusedBoundingBox.right} ${focusedBoundingBox.rightY}`
+  )
+
+  let boundingBoxKey = $derived($focusTrip + "-" + focusedPoints.length + "-" + topPath)
 
   // Toggle the data source used
   const toggleSource = () => {
@@ -113,6 +168,7 @@
         <button onclick={toggleSource} class="time-option" class:active={timeWindow === "events"}
           >{#if limitedData.length === graphData.length}All&nbsp;
           {/if}events ({#if limitedData.length < graphData.length}{limitedData.length}/{graphData.length}{:else}{limitedData.length}{/if})
+          {focusedBoundingBox.x}
         </button>
       </div>
       <svg {width} {height}>
@@ -138,10 +194,45 @@
               stroke-width={2}
               fill="none"
             />
+            <!-- line through selected points -->
+            <!-- Doesn't make too much sense, because it is actually not showing a real development -->
+            {#if focusedPoints.length > 0}
+              <!-- <path
+                d={line()
+                  .x(d => xScale(d.time))
+                  .y(d => yScale(d.value))(focusedPoints)}
+                stroke="white"
+                stroke-width={2}
+                fill="none"
+              /> -->
+            {/if}
+
+            <!-- Box around the points if multiple datapoints are selected -->
+            {#key boundingBoxKey}
+              <!-- Top path: left-most point → top-left corner → top-right corner → right-most point -->
+              <path
+                d={topPath}
+                fill="none"
+                stroke="var(--color-grey-mid)"
+                stroke-width="3"
+                in:draw|global={{ duration: 200 }}
+                out:drawReverse={{ duration: 200 }}
+              />
+              <!-- Bottom path: left-most point → bottom-left corner → bottom-right corner → right-most point -->
+              <path
+                d={bottomPath}
+                fill="none"
+                stroke="var(--color-grey-mid)"
+                stroke-width="3"
+                in:draw|global={{ duration: 200 }}
+                out:drawReverse={{ duration: 200 }}
+              />
+            {/key}
 
             {#each profitLossOverTime as point, i (point.time)}
               {@const focus =
                 $focusEvent === point.index || (point.tripId === $focusTrip && $focusEvent === -1)}
+              {@const lastPoint = profitLossOverTime?.[i - 1]}
 
               <!-- If the candle is selected, draw a line through it -->
               {#if $focusEvent === point.index}
@@ -156,7 +247,6 @@
                 />
               {/if}
 
-              {@const lastPoint = profitLossOverTime?.[i - 1]}
               <!-- <Tooltip
                 content={generateTooltipContent(point)}
                 svg={true}
@@ -174,13 +264,16 @@
                   goto(`/cashboard/${point.tripId}?focusId=${point?.meta?._id || ""}`)
                 }}
                 onpointerleave={() => {
-                  $focusTrip = ""
-                  $focusEvent = -1
+                  if (!page.route?.id?.includes("/cashboard/[tripId]")) {
+                    $focusTrip = ""
+                    $focusEvent = -1
+                  }
                 }}
               >
                 {#if point.eventType === "trip_death"}
                   <circle
-                    fill="var(--color-grey-light)"
+                    paint-order="stroke"
+                    fill={focus ? "white" : "var(--color-grey-light)"}
                     stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
@@ -189,7 +282,8 @@
                   ></circle>
                 {:else if point.eventType === "trip_liquidated"}
                   <circle
-                    fill="var(--color-grey-light)"
+                    paint-order="stroke"
+                    fill={focus ? "white" : "var(--color-grey-light)"}
                     stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
@@ -198,7 +292,8 @@
                   ></circle>
                 {:else if point.eventType === "trip_created"}
                   <circle
-                    fill="var(--color-grey-light)"
+                    paint-order="stroke"
+                    fill={focus ? "white" : "var(--color-grey-light)"}
                     stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
@@ -207,7 +302,8 @@
                   ></circle>
                 {:else}
                   <circle
-                    fill="var(--color-grey-light)"
+                    paint-order="stroke"
+                    fill={focus ? "white" : "var(--color-grey-light)"}
                     stroke={focus ? "white" : ""}
                     stroke-width="2"
                     r="5"
@@ -227,6 +323,7 @@
                         : yScale(lastPoint.value) - candleHeight}
                       width={candleWidth}
                       height={candleHeight}
+                      paint-order="stroke"
                       stroke={focus ? "white" : ""}
                       stroke-width="2"
                       fill={point.value < lastPoint.value ? "var(--color-down)" : "var(--color-up)"}

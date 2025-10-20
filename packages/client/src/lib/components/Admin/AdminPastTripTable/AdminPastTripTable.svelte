@@ -2,8 +2,9 @@
   import { realisedProfitLoss } from "$lib/modules/state/stores"
   import { focusTrip, focusEvent } from "$lib/modules/ui/state.svelte"
   import { derived } from "svelte/store"
+  import { SignedNumber } from "$lib/components/Shared"
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  // import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   import AdminPastTripTableItem from "../AdminPastTripTable/AdminPastTripTableItem.svelte"
 
@@ -54,9 +55,7 @@
     <div class="left">Liquidated trips</div>
     <div class="right">
       Profit:
-      <span class={$portfolioClass}>
-        {#if $realisedProfitLoss < 0}-{/if}{CURRENCY_SYMBOL}{Math.abs($realisedProfitLoss)}
-      </span>
+      <SignedNumber withCurrency value={$realisedProfitLoss} />
     </div>
   </div>
   <table class="admin-trip-table">

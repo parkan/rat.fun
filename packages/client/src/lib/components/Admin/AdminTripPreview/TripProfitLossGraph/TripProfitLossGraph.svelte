@@ -14,13 +14,11 @@
     trip,
     tripId,
     height = 400,
-    graphData = $bindable<TripEvent[]>(),
     behavior = "hover"
   }: {
     trip: Trip
     tripId: string
     height?: number
-    graphData?: TripEvent[]
     behavior?: "hover" | "click"
   } = $props()
 
@@ -95,10 +93,6 @@
     })
   })
 
-  $effect(() => {
-    graphData = allData
-  })
-
   // Limited version of allData for display
   let limitedData = $derived([...allData].slice(-limit, allData.length))
 
@@ -148,7 +142,6 @@
     } else {
       limit = 50
     }
-    // TOggle the data source used
   }
 
   // Setup real-time updates
