@@ -17,22 +17,23 @@ const MODEL = {
 }
 
 const makePrompt = (prompt: string) => {
-  // const randomPrompts = pickRandomMultiple(PROMPTS, 2).join(" ")
-  const postFix = "rat-faced, 4K, highly detailed, high contrast, extreme fisheye distortion"
-  return `SCENE: ${prompt}. STYLE: ${postFix}`
+  const postFix =
+    "rat-faced, 4K, highly detailed, high contrast, clear foreground motif, extreme fisheye distortion"
+  return `${prompt}. AESTHETIC: ${postFix}`
 }
 
 /**
  * Generate an image using Replicate
  * @param prompt - The prompt for the image
- * @param templateImages - The template images to use for the image
  * @returns The generated image
  */
 export const generateImage = async (prompt: string) => {
   const INPUT = {
     SD: {
       prompt: makePrompt(prompt),
-      cfg: 1.5,
+      negative_prompt:
+        "text, signs, video game, illustration, manga, comic, cartoon, anime,drawing, sketch, line art, flat color, abstract, minimalistic, flat, flat shading, flat lighting",
+      cfg: 1,
       aspect_ratio: "1:1",
       output_format: "webp",
       output_quality: 100,

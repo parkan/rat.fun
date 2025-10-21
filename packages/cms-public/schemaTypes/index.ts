@@ -1,7 +1,6 @@
 import Trip from "./Trip"
 import Outcome from "./Outcome"
-import TemplateImages from "./TemplateImages"
-import RatImages from "./RatImages"
 import WorldEvent from "./WorldEvent"
+import RatImages from "./RatImages"
 
-export const schemaTypes = [Trip, Outcome, TemplateImages, WorldEvent, RatImages]
+export const schemaTypes = [Trip, Outcome, WorldEvent, RatImages]

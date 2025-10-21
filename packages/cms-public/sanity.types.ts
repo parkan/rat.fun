@@ -62,28 +62,6 @@ export type WorldEvent = {
   }
 }
 
-export type TemplateImages = {
-  _id: string
-  _type: "templateImages"
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  tripImages?: Array<{
-    asset?: {
-      _ref: string
-      _type: "reference"
-      _weak?: boolean
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset"
-    }
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    _type: "image"
-    _key: string
-  }>
-}
-
 export type Outcome = {
   _id: string
   _type: "outcome"
@@ -103,10 +81,6 @@ export type Outcome = {
     event?: string
     _key: string
   }>
-  balanceTransfer?: {
-    logStep?: number
-    amount?: number
-  }
   balanceTransfers?: Array<{
     logStep?: number
     amount?: number
@@ -278,7 +252,6 @@ export type SanityAssetSourceData = {
 export type AllSanitySchemaTypes =
   | RatImages
   | WorldEvent
-  | TemplateImages
   | Outcome
   | Trip
   | SanityImagePaletteSwatch
