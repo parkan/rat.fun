@@ -3,6 +3,7 @@
   import "tippy.js/dist/tippy.css"
   import "tippy.js/dist/backdrop.css"
   import "tippy.js/animations/shift-away.css"
+  import { ENVIRONMENT } from "$lib/mud/enums"
 
   import Introduction from "$lib/components/Spawn/Introduction/Introduction.svelte"
 
@@ -47,6 +48,10 @@
   if (browser && !import.meta.env.DEV) {
     initializeSentry()
   }
+
+  let environmentOptions = $state(
+    ["development", "base-sepolia", "base"].sort((a, b) => (a === $environmentStore ? -1 : 1))
+  )
 </script>
 
 <svelte:window
@@ -69,11 +74,28 @@
 {:else}
   <div class="context-main">
     <header style:height="{height.current}px" class="menu">
-      {#if height.current > 40}
-        <Introduction height={height.current} />
-      {:else}
-        rat.fun
-      {/if}
+      <div>
+        {#if height.current > 40}
+          <Introduction height={height.current} />
+        {:else}
+          <div>
+            <a href="/"> rat.fun </a>
+            <select
+              bind:value={$environmentStore}
+              onchange={() => {
+                console.log("switch environments", $environmentStore)
+                UIState.set(UI.LOADING)
+              }}
+            >
+              {#each environmentOptions as option}
+                <option value={option}>
+                  {option}
+                </option>
+              {/each}
+            </select>
+          </div>
+        {/if}
+      </div>
       <div class="play-link">
         {#if height.current > 40}
           <BigButton
@@ -127,6 +149,6 @@
     position: sticky;
     top: 0;
     left: 0;
-    border-bottom: 1px solid white;
+    font-weight: bold;
   }
 </style>

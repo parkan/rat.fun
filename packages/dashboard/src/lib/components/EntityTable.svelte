@@ -59,14 +59,17 @@
     display: none;
   }
 
+  details {
+    border-bottom: 1px solid white;
+  }
+
   .table-title {
     display: flex;
     justify-content: space-between;
     font-family: var(--typewriter-font-stack);
-    margin-bottom: 0.5rem;
-    padding: 0 4px;
+    padding: 4px;
     font-weight: bold;
-    border-bottom: 1px solid white;
+    border-top: 1px solid white;
     cursor: pointer;
     user-select: none;
   }

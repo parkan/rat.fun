@@ -5,7 +5,6 @@
   import { initEntities } from "$lib/modules/systems/initEntities"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
-  import { playSound } from "$lib/modules/sound"
   import { blockNumber, loadingMessage, loadingPercentage, ready } from "$lib/modules/network"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
@@ -48,8 +47,6 @@
   const strobeColors = ["#ff0000", "#00ff00", "#0000ff"]
 
   const startStrobe = () => {
-    playSound("ratfunUI", "strobe")
-
     strobeTimeline = gsap.timeline({ repeat: -1 })
 
     // Create strobe effect: 3 color cycles that repeat indefinitely
