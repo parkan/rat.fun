@@ -161,16 +161,7 @@
       .mascot-container {
         width: 300px;
         height: 300px;
-      }
-
-      .text {
-        font-size: var(--font-size-large);
-        background: var(--background);
-        color: var(--foreground);
-        padding: 10px;
-        text-align: center;
-        margin-bottom: 20px;
-        margin-top: 20px;
+        pointer-events: none;
       }
 
       .form {

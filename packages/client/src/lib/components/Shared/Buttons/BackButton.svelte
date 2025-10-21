@@ -29,6 +29,16 @@
   <button class={extraClass} class:disabled {onpointerdown} {onpointerup}>
     <div class="button-text">
       <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
+      <X />
     </div>
   </button>
 </Tooltip>
@@ -50,6 +60,11 @@
     .button-text {
       color: rgb(54, 54, 54);
       height: 80%;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     &:hover {

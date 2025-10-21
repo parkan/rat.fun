@@ -34,6 +34,7 @@
           text="Buy rat"
           cost={Number($gameConfig?.ratCreationCost)}
           {disabled}
+          extraBig={true}
           onclick={onClick}
         />
       {:else}
@@ -49,7 +50,7 @@
     color: var(--white);
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     background-image: url("/images/texture-2.png");
     background-size: 200px;
@@ -65,11 +66,15 @@
       justify-content: center;
       width: 100%;
       margin-top: -80px;
+      overflow: visible;
+      position: relative;
 
       .mascot-container {
         width: 400px;
         height: 400px;
         margin-bottom: 20px;
+        overflow: visible;
+        position: relative;
       }
 
       .button-container {

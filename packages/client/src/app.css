@@ -94,6 +94,7 @@
   --font-size-medium: 20px;
   --font-size-large: 26px;
   --font-size-extra-large: 48px;
+  --font-size-super-large: 64px;
 
   /** Layers */
   --z-background: 0;
