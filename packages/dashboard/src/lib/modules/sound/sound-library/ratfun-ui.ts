@@ -1,0 +1,199 @@
+import type { SoundAssets } from "../types.js"
+
+export const ratfunUI: SoundAssets = {
+  type: {
+    src: "/sounds/ratfun/ui/type.mp3",
+    author: "leo",
+    volume: 1
+  },
+  type2: {
+    src: "/sounds/ratfun/ui/type2.wav",
+    author: "leo",
+    volume: 1
+  },
+  type3: {
+    src: "/sounds/ratfun/ui/tick.wav",
+    author: "leo",
+    volume: 1
+  },
+  lineHit: {
+    src: "/sounds/ratfun/ui/line-hit.wav",
+    author: "leo",
+    volume: 1
+  },
+  tick: {
+    src: "/sounds/ratfun/ui/tick.wav",
+    author: "leo",
+    volume: 1.0
+  },
+  hover: {
+    src: "/sounds/ratfun/ui/hover/hover-1.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  hover2: {
+    src: "/sounds/ratfun/ui/hover/hover-2.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  hover3: {
+    src: "/sounds/ratfun/ui/hover-3.wav",
+    author: "leo",
+    volume: 0.5
+  },
+  glassTap: {
+    src: "/sounds/ratfun/ui/hover.wav",
+    author: "leo",
+    volume: 1
+  },
+  bigButtonDown: {
+    src: "/sounds/ratfun/ui/bigButton-down.wav",
+    author: "leo",
+    volume: 1
+  },
+  bigButtonUp: {
+    src: "/sounds/ratfun/ui/bigButton-up.wav",
+    author: "leo",
+    volume: 1
+  },
+  smallButtonDown: {
+    src: "/sounds/ratfun/ui/smallButton-down.wav",
+    author: "leo",
+    volume: 1
+  },
+  smallButtonUp: {
+    src: "/sounds/ratfun/ui/smallButton-up.wav",
+    author: "leo",
+    volume: 0.5
+  },
+  dropDownDown: {
+    src: "/sounds/ratfun/ui/dropDown-down.wav",
+    author: "leo",
+    volume: 1
+  },
+  dropDownUp: {
+    src: "/sounds/ratfun/ui/dropDown-up.wav",
+    author: "leo",
+    volume: 0.5
+  },
+  ratRelief: {
+    src: "/sounds/ratfun/ui/rat-relief.mp3",
+    author: "leo",
+    volume: 0.6
+  },
+  boing: {
+    src: "/sounds/ratfun/ui/boing.mp3",
+    author: "leo",
+    volume: 1
+  },
+  chirp: {
+    src: "/sounds/ratfun/ui/chirp-4.mp3",
+    author: "leo",
+    volume: 0.6
+  },
+  positive: {
+    src: "/sounds/ratfun/ui/positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  negative: {
+    src: "/sounds/ratfun/ui/chirp-1.mp3",
+    author: "leo",
+    volume: 1
+  },
+  ratHello: {
+    src: "/sounds/ratfun/ui/rat-hello.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  ratDeath: {
+    src: "/sounds/ratfun/ui/rat-death.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  wheelTick: {
+    src: "/sounds/ratfun/ui/wheel-tick.wav",
+    author: "leo",
+    volume: 1
+  },
+  wheelLock: {
+    src: "/sounds/ratfun/ui/wheel-lock.wav",
+    author: "leo",
+    volume: 1
+  },
+  logoClick: {
+    src: "/sounds/ratfun/ui/logo-click.mp3",
+    author: "leo",
+    volume: 0.5
+  },
+  countUp: {
+    src: "/sounds/ratfun/ui/count-up.mp3",
+    author: "leo",
+    volume: 1
+  },
+  countDown: {
+    src: "/sounds/ratfun/ui/count-down.mp3",
+    author: "leo",
+    volume: 1
+  },
+  healthPositive: {
+    src: "/sounds/ratfun/ui/health-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  healthNegative: {
+    src: "/sounds/ratfun/ui/health-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  itemPositive: {
+    src: "/sounds/ratfun/ui/item-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  itemNegative: {
+    src: "/sounds/ratfun/ui/item-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  tokenPositive: {
+    src: "/sounds/ratfun/ui/token-positive.mp3",
+    author: "leo",
+    volume: 1
+  },
+  tokenNegative: {
+    src: "/sounds/ratfun/ui/token-negative.mp3",
+    author: "leo",
+    volume: 1
+  },
+  panelIn: {
+    src: "/sounds/ratfun/ui/panel-in.mp3",
+    author: "leo",
+    volume: 1
+  },
+  counterTick: {
+    src: "/sounds/ratfun/ui/counter-tick.mp3",
+    author: "leo",
+    volume: 3
+  },
+  counterEnd: {
+    src: "/sounds/ratfun/ui/counter-end.mp3",
+    author: "leo",
+    volume: 3
+  },
+  logoIn: {
+    src: "/sounds/ratfun/ui/logo-in.mp3",
+    author: "leo",
+    volume: 0.2
+  },
+  terminalHit: {
+    src: "/sounds/ratfun/ui/leo-front-ui/front_ui_12.wav",
+    author: "leo",
+    volume: 1
+  },
+  strobe: {
+    src: "/sounds/ratfun/ui/strobe.mp3",
+    author: "leo",
+    volume: 1
+  }
+}

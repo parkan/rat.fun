@@ -2,17 +2,20 @@ procs:
   client:
     cwd: packages/client
     shell: pnpm run dev
+  dashboard:
+    cwd: packages/dashboard
+    shell: pnpm run dev
   contracts:
     cwd: packages/contracts
     shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
+  server:
+    cwd: packages/server
+    shell: pnpm dev
   cms-public:
     cwd: packages/cms-public
     shell: pnpm dev
   cms-private:
     cwd: packages/cms-private
-    shell: pnpm dev
-  server:
-    cwd: packages/server
     shell: pnpm dev
   anvil:
     cwd: packages/contracts
