@@ -125,10 +125,7 @@ body {
 
 body,
 html {
-  background: black;
-  color: white;
-  font-family: var(--typewriter-font-stack);
-  font-size: var(--font-size-small);
+  background: white;
   margin: 0;
   padding: 0;
   overscroll-behavior-y: none;
@@ -140,7 +137,6 @@ hr {
 }
 
 button {
-  font-family: var(--typewriter-font-stack);
   cursor: pointer;
   user-select: none;
 }

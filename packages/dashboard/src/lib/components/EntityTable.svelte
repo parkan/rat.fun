@@ -66,7 +66,6 @@
   .table-title {
     display: flex;
     justify-content: space-between;
-    font-family: var(--typewriter-font-stack);
     padding: 4px;
     font-weight: bold;
     border-top: 1px solid white;

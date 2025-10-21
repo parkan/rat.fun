@@ -84,7 +84,8 @@
               bind:value={$environmentStore}
               onchange={() => {
                 console.log("switch environments", $environmentStore)
-                UIState.set(UI.LOADING)
+                window.location.href = `/?network=${$environmentStore}`
+                // UIState.set(UI.LOADING)
               }}
             >
               {#each environmentOptions as option}
@@ -128,12 +129,6 @@
     padding: 4px;
     display: flex;
     justify-content: space-between;
-    font-family: var(--typewriter-font-stack);
-    background: black;
-
-    a {
-      color: white;
-    }
 
     .play-link {
       width: 400px;
