@@ -50,7 +50,7 @@
   * * * * * * * * * * * * * */
 
   /* Layout: Game window */
-  --game-center-bar-width: 60px;
+  --game-center-bar-width: 90px;
   --game-center-bar-phone-height: 60px;
   --game-column-width: calc(50% - var(--game-center-bar-width) / 2);
 

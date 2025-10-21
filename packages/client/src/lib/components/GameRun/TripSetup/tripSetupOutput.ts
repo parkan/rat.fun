@@ -140,7 +140,7 @@ export function generateTripSetupOutput() {
       type: "loader",
       content: "",
       color: "orange",
-      duration: 1000,
+      duration: 4000,
       backgroundColor: "green",
       loaderCharacters: "*"
     }

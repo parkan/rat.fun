@@ -117,7 +117,7 @@
     }
 
     &:hover {
-      background-color: var(--background);
+      background-color: rgba(0, 0, 0, 0.8);
 
       .trip-image {
         transform: scale(1.05);

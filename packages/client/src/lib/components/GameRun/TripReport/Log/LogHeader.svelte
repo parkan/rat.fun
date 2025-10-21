@@ -46,11 +46,12 @@
 
     .header {
       display: inline-block;
-      background: var(--color-grey-light);
-      padding: 5px;
-      color: var(--background);
+      background: var(--background-semi-transparent);
+      color: var(--foreground);
+      border: 1px solid var(--foreground);
+      padding: 10px;
       max-width: 60%;
-      font-family: var(--special-font-stack);
+      font-family: var(--typewriter-font-stack);
     }
   }
 </style>

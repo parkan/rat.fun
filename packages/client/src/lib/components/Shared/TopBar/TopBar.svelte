@@ -8,11 +8,20 @@
   import WorldEvent from "./WorldEvent.svelte"
   import WorldEventCountdown from "./WorldEventCountdown.svelte"
 
+  import { Marquee } from "$lib/components/Shared"
+
   const isAdminView = $derived(page.route?.id?.includes("/(main)/cashboard") ?? false)
 </script>
 
 <div class="top-bar">
   <PlayerInfo />
+  <div class="marquee-container">
+    <Marquee
+      text="THERE IS NO LUCK. ONLY SKILL. THERE ARE NO BAD TRIPS, ONLY BAD RATS."
+      direction="left"
+      speed={30}
+    />
+  </div>
   <div class="right">
     {#if $activeWorldEvent}
       <WorldEvent />
@@ -40,9 +49,21 @@
     grid-column: 1 / span 3;
     display: flex;
     font-size: var(--font-size-small);
-  }
 
-  .right {
-    display: flex;
+    .marquee-container {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      width: 100px;
+      height: 100%;
+      opacity: 0.2;
+      font-size: var(--font-size-large);
+      text-transform: uppercase;
+    }
+
+    .right {
+      display: flex;
+    }
   }
 </style>
