@@ -84,19 +84,10 @@ export default {
       ]
     },
     {
-      title: "Balance transfer",
-      name: "balanceTransfer",
-      type: "object",
-      readOnly: true,
-      fields: [
-        { type: "number", name: "logStep" },
-        { type: "number", name: "amount" }
-      ]
-    },
-    {
       title: "Balance transfers",
       name: "balanceTransfers",
       type: "array",
+      readOnly: true,
       of: [
         {
           type: "object",

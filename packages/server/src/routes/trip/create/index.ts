@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
 import { schema } from "@routes/trip/create/schema"
 import dotenv from "dotenv"
+import fs from "fs"
+import path from "path"
 
 dotenv.config()
 
@@ -102,6 +104,18 @@ async function routes(fastify: FastifyInstance) {
             await updateTripWithImage(tripId, imageBuffer)
           } catch (error) {
             handleBackgroundError(error, "Trip Creation - Image Generation, CMS & WebSocket")
+
+            // Read default trip image static folder
+            const defaultTripImagePath = path.resolve(
+              process.cwd(),
+              "static",
+              "assets",
+              "default-trip-image.png"
+            )
+            const defaultTripImage = fs.readFileSync(defaultTripImagePath)
+
+            // Update the trip document with the default image
+            await updateTripWithImage(tripId, defaultTripImage)
           } finally {
             console.timeEnd("–– Background actions")
           }

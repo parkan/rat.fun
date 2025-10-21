@@ -25,7 +25,6 @@ const makePrompt = (prompt: string) => {
 /**
  * Generate an image using Replicate
  * @param prompt - The prompt for the image
- * @param templateImages - The template images to use for the image
  * @returns The generated image
  */
 export const generateImage = async (prompt: string) => {

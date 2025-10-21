@@ -28,16 +28,6 @@ export default (S: any) =>
         ),
       S.divider(),
       S.listItem()
-        .title("Template images")
-        .icon(MdImage)
-        .child(
-          S.editor()
-            .id("template-images")
-            .schemaType("templateImages")
-            .documentId("template-images")
-        ),
-      S.divider(),
-      S.listItem()
         .title("Rat images")
         .icon(MdChat)
         .child(S.editor().id("rat-images").schemaType("ratImages").documentId("rat-images"))

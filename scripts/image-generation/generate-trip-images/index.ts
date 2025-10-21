@@ -94,7 +94,6 @@ interface GenerationLog {
 /**
  * Generate an image using Replicate (matches server module structure)
  * @param prompt - The prompt for the image
- * @param templateImages - The template images to use for the image
  * @param skipSharpProcessing - Whether to skip sharp image processing
  * @returns The generated image buffer and metadata
  */
