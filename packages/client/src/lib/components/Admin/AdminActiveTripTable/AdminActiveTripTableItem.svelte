@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
-  import { SmallButton, SignedNumber } from "$lib/components/Shared"
+  import { SmallButton, SignedNumber, Tooltip } from "$lib/components/Shared"
   import { TripProfitLossSpark } from "$lib/components/Admin"
   import { goto } from "$app/navigation"
   import { playSound } from "$lib/modules/sound"
@@ -46,7 +46,9 @@
   <td class="cell-index">{Number(trip.index)}</td>
   <!-- Prompt -->
   <td class="cell-prompt">
-    <p class="single-line">{trip.prompt}</p>
+    <Tooltip content={trip.prompt}>
+      <p class="single-line">{trip.prompt}</p>
+    </Tooltip>
   </td>
   <!-- Visits -->
   <td class="cell-visits">{Number(trip.visitCount ?? ß)}</td>

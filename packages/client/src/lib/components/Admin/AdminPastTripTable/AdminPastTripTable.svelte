@@ -170,21 +170,4 @@
     text-align: right;
     width: 60px;
   }
-
-  .cell-spark {
-    width: 80px;
-  }
-
-  .cell-action {
-    width: 100px;
-    height: 100%;
-  }
-
-  .downText {
-    color: red;
-  }
-
-  .upText {
-    color: #78ee72;
-  }
 </style>
