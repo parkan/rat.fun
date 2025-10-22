@@ -8,24 +8,22 @@
 
   const {
     environment,
-    loaded = () => {},
-    minimumDuration = 1500
+    loaded = () => {}
   }: {
     environment: ENVIRONMENT
     loaded: () => void
-    minimumDuration?: number
   } = $props()
-
-  let minimumDurationComplete = $state(false)
 
   // Wait for both chain sync and minimum duration to complete
   $effect(() => {
-    if ($ready && minimumDurationComplete) {
+    if ($ready) {
       // ??? Explain what this does
       initEntities()
 
-      // Return
-      loaded()
+      setTimeout(() => {
+        // Return
+        loaded()
+      }, 1000)
     }
   })
 
@@ -34,20 +32,31 @@
     // When sync is complete, the ready store is set to true
     // We listen to for this in the $effect above
     await initPublicNetwork(environment, page.url)
-
-    // Start the minimum duration timer
-    setTimeout(() => {
-      minimumDurationComplete = true
-    }, minimumDuration)
   })
 </script>
 
 <div class="loading">
   <div class="status-box">
-    <div>BlockNumber: {$blockNumber}</div>
-    <div>LoadingMsg: {$loadingMessage}</div>
-    <div>Loading%: {$loadingPercentage}</div>
-    <div>Ready? {$ready}</div>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label">BlockNumber:</td>
+          <td>{$blockNumber}</td>
+        </tr>
+        <tr>
+          <td class="label">Message:</td>
+          <td>{$loadingMessage}</td>
+        </tr>
+        <tr>
+          <td class="label">Loading:</td>
+          <td>{$loadingPercentage}%</td>
+        </tr>
+        <tr>
+          <td class="label">Ready?</td>
+          <td>{$ready}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -64,14 +73,44 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
     .status-box {
-      width: 400px;
-      height: 200px;
-      padding: 10px;
-      background: yellow;
-      font-size: 10px;
-      color: black;
-      font-size: var(--font-size-large);
+      width: 600px;
+      padding: 1rem;
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+      font-size: var(--font-size-normal);
+      color: var(--foreground);
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+
+      td {
+        padding: 0.25rem;
+        border: 1px solid #ccc;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        white-space: nowrap;
+        max-width: 0;
+        color: black;
+
+        &.label {
+          font-weight: bold;
+        }
+      }
+
+      tr:nth-child(even) {
+        background-color: white;
+      }
+
+      tr:nth-child(odd) {
+        background-color: #f9f9f9;
+      }
     }
   }
 </style>
