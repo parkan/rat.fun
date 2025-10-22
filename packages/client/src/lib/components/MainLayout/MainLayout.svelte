@@ -33,6 +33,7 @@
       height: 100%;
       display: flex;
       position: relative;
+      overflow: visible;
       @media (max-width: 700px) {
         flex-direction: column;
       }

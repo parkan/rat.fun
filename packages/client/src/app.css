@@ -50,7 +50,7 @@
   * * * * * * * * * * * * * */
 
   /* Layout: Game window */
-  --game-center-bar-width: 60px;
+  --game-center-bar-width: 90px;
   --game-center-bar-phone-height: 60px;
   --game-column-width: calc(50% - var(--game-center-bar-width) / 2);
 
@@ -94,6 +94,7 @@
   --font-size-medium: 20px;
   --font-size-large: 26px;
   --font-size-extra-large: 48px;
+  --font-size-super-large: 64px;
 
   /** Layers */
   --z-background: 0;
@@ -114,7 +115,7 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
   overscroll-behavior-y: none;
-  user-select: none;
+  /* user-select: none; */
   -webkit-tap-highlight-color: transparent; /* Remove touch overlay */
   -webkit-touch-callout: none; /* Disable callout on iOS */
 }

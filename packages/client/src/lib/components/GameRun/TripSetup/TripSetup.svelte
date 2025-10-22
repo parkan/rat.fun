@@ -20,7 +20,7 @@
     staticTripContent: SanityTrip | undefined
   } = $props()
 
-  const SETUP_DURATION = 5000
+  const SETUP_DURATION = 6000
 
   onMount(async () => {
     $backgroundMusic = playSound("ratfunMusic", "tripSetup", true)
@@ -58,10 +58,12 @@
     color: var(--foreground);
     font-size: var(--font-size-normal);
     background: rgba(0, 0, 0, 0.1);
+    user-select: none;
 
     .terminal-box {
       font-size: var(--font-size-normal);
       width: calc(100% - 30px);
+      max-width: 800px;
       height: calc(100% - 40px);
     }
   }

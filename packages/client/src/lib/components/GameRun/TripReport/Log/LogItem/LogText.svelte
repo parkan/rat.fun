@@ -80,6 +80,7 @@
   .log-text {
     display: inline-block;
     background: var(--color-grey-light);
+
     padding: 5px;
     color: var(--background);
     max-width: 60%;

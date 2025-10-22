@@ -9,12 +9,14 @@
     cost,
     tippyText,
     disabled = false,
+    extraBig = false,
     onclick
   }: {
     text: string
     cost?: number
     tippyText?: string
     disabled?: boolean
+    extraBig?: boolean
     id?: string
     onclick: () => void
   } = $props()
@@ -30,7 +32,7 @@
 </script>
 
 <Tooltip content={tippyText}>
-  <button class:disabled {onmouseup} {onmousedown}>
+  <button class:disabled class:extraBig {onmouseup} {onmousedown}>
     <div class="button-content">
       <span class="button-text">{text}</span>
       {#if cost}
@@ -104,6 +106,14 @@
       pointer-events: none;
       opacity: 0.5;
       cursor: default;
+    }
+
+    &.extraBig {
+      .button-content {
+        .button-text {
+          font-size: var(--font-size-super-large);
+        }
+      }
     }
   }
 </style>

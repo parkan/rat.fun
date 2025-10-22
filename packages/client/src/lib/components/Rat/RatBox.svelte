@@ -92,7 +92,9 @@
     display: flex;
     height: var(--game-window-main-height);
     width: var(--game-column-width);
-    overflow: hidden;
+    position: relative;
+    z-index: 100;
+    overflow: visible;
 
     @media (max-width: 700px) {
       width: 100%;

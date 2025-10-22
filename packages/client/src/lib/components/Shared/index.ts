@@ -14,6 +14,9 @@ export { default as X } from "./Graphics/X.svelte"
 /* Mascot */
 export { default as Mascot } from "./Mascot/Mascot.svelte"
 
+/* Logo */
+export { default as Logo } from "./Logo/Logo.svelte"
+
 /* Marquee */
 export { default as Marquee } from "./Marquee/Marquee.svelte"
 

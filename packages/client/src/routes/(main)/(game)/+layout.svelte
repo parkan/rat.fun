@@ -17,7 +17,7 @@
 <style lang="scss">
   .right-column {
     position: relative;
-    overflow-x: hidden;
+    overflow: visible;
     height: 100%;
     background-image: url("/images/texture-5.png");
     background-size: 200px;

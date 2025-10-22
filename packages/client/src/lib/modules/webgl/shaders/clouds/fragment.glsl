@@ -5,18 +5,18 @@ precision mediump float;
 // ============================================================================
 
 // CRT effect parameters
-#define SCANLINE_INTENSITY 0.1     // Intensity of horizontal scanlines
-#define SCANLINE_SPEED 0.01        // Speed of scanline animation
-#define CHROMATIC_ABERRATION 0.0002 // Amount of chromatic aberration
-#define CHROMATIC_ABERRATION_SCALED 0.02 // Pre-scaled aberration value
+#define SCANLINE_INTENSITY 0.1            // Intensity of horizontal scanlines
+#define SCANLINE_SPEED 0.015              // Speed of scanline animation
+#define CHROMATIC_ABERRATION 0.0002       // Amount of chromatic aberration
+#define CHROMATIC_ABERRATION_SCALED 0.02  // Pre-scaled aberration value
 
 // Sky gradient colors
 #define SKY_COLOR_TOP_R 1.0        // Top sky color - Red component
 #define SKY_COLOR_TOP_G 0.2        // Top sky color - Green component  
 #define SKY_COLOR_TOP_B 0.5        // Top sky color - Blue component
-#define SKY_COLOR_BOTTOM_R 0.0     // Bottom sky color - Red component
-#define SKY_COLOR_BOTTOM_G 0.0     // Bottom sky color - Green component
-#define SKY_COLOR_BOTTOM_B 0.0     // Bottom sky color - Blue component
+#define SKY_COLOR_BOTTOM_R 0.6     // Bottom sky color - Red component
+#define SKY_COLOR_BOTTOM_G 0.6     // Bottom sky color - Green component
+#define SKY_COLOR_BOTTOM_B 0.6     // Bottom sky color - Blue component
 
 // Cloud layer scaling factors
 #define CLOUD_SCALE_1 1.0          // Primary cloud layer scale
@@ -50,6 +50,9 @@ precision mediump float;
 #define HASH_CONST_1 127.1         // Hash function constant 1
 #define HASH_CONST_2 311.7         // Hash function constant 2
 #define HASH_MULTIPLIER 43758.5453 // Hash function multiplier
+
+// Brightness control
+#define BRIGHTNESS 1.0             // Overall brightness multiplier (0.0 = black, 1.0 = normal, >1.0 = brighter)
 
 // Precomputed constants for optimization
 #define HALF 0.5                   // 0.5 for sin() offset
@@ -203,6 +206,9 @@ void main() {
   
   // Apply color inversion if enabled (optimized: use conditional assignment)
   color = u_invert ? vec3(ONE) - color : color;
+  
+  // Apply brightness control
+  color *= BRIGHTNESS;
   
   // Output final color with full alpha
   gl_FragColor = vec4(color, ONE);
