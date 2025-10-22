@@ -32,9 +32,9 @@ export const getEnvironmentFromUrl = (url: URL) => {
   const networkParam = url.searchParams.get("network")
   console.log("getEnvironmentFromUrl", hostname, networkParam)
 
-  if (hostname === "rat.fun" || networkParam === "base") {
+  if (hostname === "dashboard.rat.fun" || networkParam === "base") {
     return ENVIRONMENT.BASE
-  } else if (hostname === "base-sepolia.rat.fun" || networkParam === "base-sepolia") {
+  } else if (hostname === "dashboard-base-sepolia.rat.fun" || networkParam === "base-sepolia") {
     return ENVIRONMENT.BASE_SEPOLIA
   } else {
     return ENVIRONMENT.DEVELOPMENT
