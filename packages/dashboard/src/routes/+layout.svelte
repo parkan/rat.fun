@@ -18,10 +18,7 @@
   import { UI } from "$lib/modules/ui/enums"
   import { errorHandler } from "$lib/modules/error-handling"
   import { BigButton } from "$lib/components/Shared"
-  import {
-    environment as environmentStore,
-    walletType as walletTypeStore
-  } from "$lib/modules/network"
+  import { environment as environmentStore } from "$lib/modules/network"
 
   import Loading from "$lib/components/Loading/Loading.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
@@ -48,10 +45,6 @@
   if (browser && !import.meta.env.DEV) {
     initializeSentry()
   }
-
-  let environmentOptions = $state(
-    ["development", "base-sepolia", "base"].sort((a, b) => (a === $environmentStore ? -1 : 1))
-  )
 </script>
 
 <svelte:window
@@ -80,20 +73,6 @@
         {:else}
           <div>
             <a href="/"> rat.fun </a>
-            <select
-              bind:value={$environmentStore}
-              onchange={() => {
-                console.log("switch environments", $environmentStore)
-                window.location.href = `/?network=${$environmentStore}`
-                // UIState.set(UI.LOADING)
-              }}
-            >
-              {#each environmentOptions as option}
-                <option value={option}>
-                  {option}
-                </option>
-              {/each}
-            </select>
           </div>
         {/if}
       </div>

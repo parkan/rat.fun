@@ -44,26 +44,6 @@
     }
   })
 
-  const strobeColors = ["#ff0000", "#00ff00", "#0000ff"]
-
-  const startStrobe = () => {
-    strobeTimeline = gsap.timeline({ repeat: -1 })
-
-    // Create strobe effect: 3 color cycles that repeat indefinitely
-    for (let i = 0; i < 3; i++) {
-      strobeTimeline.to(loadingElement, {
-        background: strobeColors[i % strobeColors.length],
-        duration: 0,
-        delay: 1 / 60
-      })
-      strobeTimeline.to(loadingElement, {
-        background: "transparent",
-        duration: 0,
-        delay: 1 / 60
-      })
-    }
-  }
-
   const animateOut = async () => {
     // Stop the strobe
     if (strobeTimeline) {
@@ -91,9 +71,6 @@
   }
 
   onMount(async () => {
-    // Start the strobe effect immediately
-    startStrobe()
-
     // This sets up the public network and listens to the SyncProgress component
     // When sync is complete, the ready store is set to true
     // We listen to for this in the $effect above
