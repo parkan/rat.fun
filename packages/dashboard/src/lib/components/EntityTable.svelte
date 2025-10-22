@@ -203,6 +203,7 @@
                       </button>
                     {/if}
                   {:else if column.key === "prompt"}
+                    <!-- Show tooltip on prompt -->
                     <Tooltip content={entity[column.key] ?? ""}>
                       {entity[column.key] ?? ""}
                     </Tooltip>
@@ -296,6 +297,9 @@
     text-align: center;
     line-height: 1em;
     visibility: hidden;
+    font-size: 8px;
+    position: relative;
+    top: -1px;
   }
 
   th.sortable.active .sort-indicator {

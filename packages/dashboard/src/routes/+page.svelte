@@ -4,29 +4,30 @@
   import EntityTable from "$lib/components/EntityTable.svelte"
 
   const playerColumns: ColumnConfig[] = [
-    { key: "creationBlock", displayName: "Created" },
+    { key: "creationBlock", displayName: "Create @" },
     { key: "name", displayName: "Name" },
     { key: "balance", displayName: "Balance" },
     { key: "currentRat", displayName: "Current Rat" },
-    { key: "pastRatsCount", displayName: "Past Rats #" },
+    { key: "pastRatsCount", displayName: "Past Rats" },
     { key: "masterKey", displayName: "Cashboard unlocked" }
   ]
 
   const ratColumns: ColumnConfig[] = [
-    { key: "creationBlock", displayName: "Created" },
+    { key: "creationBlock", displayName: "Create @" },
     { key: "name", displayName: "Name", priority: true },
     { key: "balance", displayName: "Balance" },
     { key: "owner", displayName: "Owner" },
+    { key: "tripCount", displayName: "Trips" },
     { key: "dead", displayName: "Dead" },
     { key: "inventory", displayName: "Inventory", priority: true },
     { key: "liquidated", displayName: "Liq." },
-    { key: "liquidationValue", displayName: "Liq. Val." },
-    { key: "liquidationBlock", displayName: "Liq. @" }
+    { key: "liquidationBlock", displayName: "Liq. @" },
+    { key: "liquidationValue", displayName: "Liq. Val." }
     // { key: "liquidationTaxPercentage", displayName: "Tax %" }
   ]
 
   const tripColumns: ColumnConfig[] = [
-    { key: "creationBlock", displayName: "Created" },
+    { key: "creationBlock", displayName: "Create @" },
     { key: "owner", displayName: "Owner" },
     { key: "balance", displayName: "Balance" },
     { key: "prompt", displayName: "Prompt", priority: true },
@@ -35,8 +36,8 @@
     { key: "lastVisitBlock", displayName: "Last Visit" },
     { key: "tripCreationCost", displayName: "Cost" },
     { key: "liquidated", displayName: "Liq." },
-    { key: "liquidationValue", displayName: "Liq. Val." },
-    { key: "liquidationBlock", displayName: "Liq. @" }
+    { key: "liquidationBlock", displayName: "Liq. @" },
+    { key: "liquidationValue", displayName: "Liq. Val." }
     // { key: "liquidationTaxPercentage", displayName: "Tax %" }
   ]
 
