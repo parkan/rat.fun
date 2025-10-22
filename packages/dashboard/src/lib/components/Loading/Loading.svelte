@@ -4,14 +4,12 @@
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
   import { blockNumber, loadingMessage, loadingPercentage, ready } from "$lib/modules/network"
-
   import { ENVIRONMENT } from "$lib/mud/enums"
-  import { gsap } from "gsap"
 
   const {
     environment,
     loaded = () => {},
-    minimumDuration = 500
+    minimumDuration = 1500
   }: {
     environment: ENVIRONMENT
     loaded: () => void
@@ -19,12 +17,6 @@
   } = $props()
 
   let minimumDurationComplete = $state(false)
-  let typer = $state<{ stop: () => void }>()
-  let strobeTimeline: gsap.core.Timeline | null = null
-
-  // Elements
-  let loadingElement: HTMLDivElement
-  let logoElement: HTMLDivElement
 
   // Wait for both chain sync and minimum duration to complete
   $effect(() => {
@@ -32,40 +24,10 @@
       // ??? Explain what this does
       initEntities()
 
-      // Stop the terminal typer
-      if (typer?.stop) {
-        typer.stop()
-      }
-      // We are loaded. Animate the component out...
-      animateOut()
+      // Return
+      loaded()
     }
   })
-
-  const animateOut = async () => {
-    // Stop the strobe
-    if (strobeTimeline) {
-      strobeTimeline.kill()
-      strobeTimeline = null
-    }
-
-    const tl = gsap.timeline()
-
-    tl.to(logoElement, {
-      opacity: 1,
-      duration: 0,
-      delay: 0
-    })
-
-    tl.to(loadingElement, {
-      background: "black",
-      duration: 0,
-      delay: 5 / 60
-    })
-
-    tl.call(() => {
-      loaded()
-    })
-  }
 
   onMount(async () => {
     // This sets up the public network and listens to the SyncProgress component
@@ -80,17 +42,13 @@
   })
 </script>
 
-<div class="loading" bind:this={loadingElement}>
+<div class="loading">
   <div class="status-box">
     <div>BlockNumber: {$blockNumber}</div>
     <div>LoadingMsg: {$loadingMessage}</div>
     <div>Loading%: {$loadingPercentage}</div>
     <div>Ready? {$ready}</div>
   </div>
-  <div class="mc-logo" bind:this={logoElement}>
-    <img src="/images/logo.png" alt="Moving Castles GmbH" />
-  </div>
-  <!-- <div class="terminal-box" bind:this={terminalBoxElement}></div> -->
 </div>
 
 <style lang="scss">
@@ -103,40 +61,17 @@
     width: 100vw;
     height: 100vh;
     z-index: var(--z-top);
-
-    .terminal-box {
-      font-size: var(--font-size-normal);
-      width: 100%;
-      height: 100%;
-      max-width: 800px;
-      text-align: left;
-      // word-break: break-all;
-      padding: 20px;
-    }
-
-    .mc-logo {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100px;
-      opacity: 0;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
     .status-box {
-      position: fixed;
-      top: 0;
-      right: 0;
+      width: 400px;
+      height: 200px;
       padding: 10px;
       background: yellow;
       font-size: 10px;
       color: black;
+      font-size: var(--font-size-large);
     }
   }
 </style>
