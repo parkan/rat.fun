@@ -1,19 +1,11 @@
 <script lang="ts">
-  import { rat, playerIsBroke } from "$lib/modules/state/stores"
+  import { rat } from "$lib/modules/state/stores"
   import { BigButton } from "$lib/components/Shared"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { sendApproveMax } from "$lib/modules/action-manager/index.svelte"
   import { SmallSpinner } from "$lib/components/Shared"
 
   let busy = $state(false)
-
-  $effect(() => {
-    if (!$playerIsBroke) {
-      // HACK: for some reason we might end up here without actually being broke
-      // Move on if player got tokens
-      transitionTo(RAT_BOX_STATE.NO_RAT)
-    }
-  })
 
   const onClick = async () => {
     busy = true

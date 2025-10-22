@@ -2,7 +2,7 @@ import { get } from "svelte/store"
 import { gameConfig } from "$lib/modules/state/stores"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
 import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
-import { createRat, approve } from "$lib/modules/on-chain-transactions"
+import { createRat, approveMax } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
 import { RatError } from "$lib/modules/error-handling/errors"
 
@@ -21,7 +21,7 @@ export async function sendCreateRat(name: string) {
   // Approve
   try {
     if (_playerERC20Allowance < _gameConfig.ratCreationCost) {
-      await approve(_externalAddressesConfig.gamePoolAddress, _gameConfig.ratCreationCost)
+      await approveMax(_externalAddressesConfig.gamePoolAddress)
     }
     await createRat(name)
   } catch (e) {

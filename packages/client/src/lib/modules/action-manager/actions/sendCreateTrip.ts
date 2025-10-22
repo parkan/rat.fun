@@ -1,7 +1,7 @@
 import { get } from "svelte/store"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
 import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
-import { approve } from "$lib/modules/on-chain-transactions"
+import { approveMax } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
 import type { CreateTripRequestBody, CreateTripReturnValue } from "@server/modules/types"
 import { signRequest } from "$lib/modules/signature"
@@ -32,7 +32,7 @@ export async function sendCreateTrip(tripPrompt: string, tripCreationCost: numbe
   // Approve
   try {
     if (_playerERC20Allowance < tripCreationCost) {
-      await approve(_externalAddressesConfig.gamePoolAddress, BigInt(tripCreationCost))
+      await approveMax(_externalAddressesConfig.gamePoolAddress)
     }
 
     let url = ""
