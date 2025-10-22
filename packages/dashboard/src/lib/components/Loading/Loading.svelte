@@ -3,8 +3,6 @@
   import { page } from "$app/state"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
-  import { terminalTyper } from "$lib/modules/terminal-typer/index"
-  import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
   import { blockNumber, loadingMessage, loadingPercentage, ready } from "$lib/modules/network"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
@@ -13,7 +11,7 @@
   const {
     environment,
     loaded = () => {},
-    minimumDuration = 2000
+    minimumDuration = 500
   }: {
     environment: ENVIRONMENT
     loaded: () => void
@@ -26,7 +24,6 @@
 
   // Elements
   let loadingElement: HTMLDivElement
-  let terminalBoxElement: HTMLDivElement
   let logoElement: HTMLDivElement
 
   // Wait for both chain sync and minimum duration to complete
