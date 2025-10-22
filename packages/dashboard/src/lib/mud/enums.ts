@@ -5,12 +5,6 @@ export enum ENVIRONMENT {
   BASE = "base"
 }
 
-export enum WALLET_TYPE {
-  UNKNOWN = "unknown",
-  BURNER = "burner",
-  ENTRYKIT = "entrykit"
-}
-
 export enum SALE_STATUS {
   UNKNOWN = "unknown",
   TESTING = "testing",

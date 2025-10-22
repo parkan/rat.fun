@@ -1,75 +1,176 @@
 <script lang="ts">
+  import type { ColumnConfig } from "$lib/components/types"
   import { players, rats, trips, items } from "$lib/modules/state/stores"
   import EntityTable from "$lib/components/EntityTable.svelte"
 
-  const playerKeys = [
-    // "entityType",
-    "name",
-    "balance",
-    "currentRat",
-    "pastRats",
-    "creationBlock"
-    // "masterKey"
+  const playerColumns: ColumnConfig[] = [
+    { key: "name", displayName: "Name" },
+    { key: "balance", displayName: "Balance" },
+    { key: "currentRat", displayName: "Current Rat" },
+    { key: "pastRatsCount", displayName: "Past Rats #" },
+    { key: "masterKey", displayName: "Cashboard unlocked" },
+    { key: "creationBlock", displayName: "Created" }
   ]
-  const ratKeys = [
-    // "entityType",
-    "name",
-    // "index",
-    "balance",
-    "owner",
-    "dead",
-    "inventory",
-    "creationBlock",
-    "liquidated",
-    "liquidationValue",
-    "liquidationBlock",
-    "liquidationTaxPercentage"
+
+  const ratColumns: ColumnConfig[] = [
+    { key: "name", displayName: "Name", priority: true },
+    { key: "balance", displayName: "Balance" },
+    { key: "owner", displayName: "Owner" },
+    { key: "dead", displayName: "Dead" },
+    { key: "inventory", displayName: "Inventory", priority: true },
+    { key: "creationBlock", displayName: "Created @" },
+    { key: "liquidated", displayName: "Liq." },
+    { key: "liquidationValue", displayName: "Liq. Val." },
+    { key: "liquidationBlock", displayName: "Liq. @" }
+    // { key: "liquidationTaxPercentage", displayName: "Tax %" }
   ]
-  const tripKeys = [
-    // "entityType",
-    "owner",
-    // "index",
-    "balance",
-    // "name",
-    "prompt",
-    "visitCount",
-    "killCount",
-    "creationBlock",
-    "lastVisitBlock",
-    "tripCreationCost",
-    "liquidated",
-    "liquidationValue",
-    "liquidationBlock",
-    "liquidationTaxPercentage"
+
+  const tripColumns: ColumnConfig[] = [
+    { key: "owner", displayName: "Owner" },
+    { key: "balance", displayName: "Balance" },
+    { key: "prompt", displayName: "Prompt", priority: true },
+    { key: "visitCount", displayName: "Visits" },
+    { key: "killCount", displayName: "Kills" },
+    { key: "creationBlock", displayName: "Created @" },
+    { key: "lastVisitBlock", displayName: "Last Visit" },
+    { key: "tripCreationCost", displayName: "Cost" },
+    { key: "liquidated", displayName: "Liq." },
+    { key: "liquidationValue", displayName: "Liq. Val." },
+    { key: "liquidationBlock", displayName: "Liq. @" },
+    { key: "liquidationTaxPercentage", displayName: "Tax %" }
   ]
-  const itemKeys = [
-    // "entityType",
-    "name",
-    "value"
+
+  const itemColumns: ColumnConfig[] = [
+    { key: "name", displayName: "Name", priority: true },
+    { key: "value", displayName: "Value", priority: true }
   ]
+
+  const dedupedItemColumns: ColumnConfig[] = [
+    { key: "name", displayName: "Name" },
+    { key: "count", displayName: "Count" },
+    { key: "valueRange", displayName: "Value range" }
+  ]
+
+  let processedPlayers = $derived.by(() => {
+    const tempPlayers = $players
+
+    // Add pastRatsCount property to each player
+    Object.values(tempPlayers).forEach(player => {
+      player.pastRatsCount = player.pastRats?.length || 0
+    })
+
+    return tempPlayers
+  })
+
+  let processedRats = $derived.by(() => {
+    return $rats
+  })
+
+  let processedTrips = $derived.by(() => {
+    return $trips
+  })
+
+  let processedItems = $derived.by(() => {
+    return $items
+  })
+
+  let dedupedItems = $derived.by(() => {
+    const tempItems = Object.values($items)
+    const groupedItems = new Map<string, { name: string; count: number; values: number[] }>()
+
+    // Group items by name
+    tempItems.forEach(item => {
+      const name = item.name || "Unknown"
+      if (!groupedItems.has(name)) {
+        groupedItems.set(name, {
+          name,
+          count: 0,
+          values: []
+        })
+      }
+
+      const group = groupedItems.get(name)!
+      group.count++
+      if (item.value !== undefined) {
+        group.values.push(Number(item.value))
+      }
+    })
+
+    // Convert to deduped items with calculated properties
+    const deduped = Array.from(groupedItems.values()).map((group, index) => {
+      const minValue = group.values.length > 0 ? Math.min(...group.values) : 0
+      const maxValue = group.values.length > 0 ? Math.max(...group.values) : 0
+
+      return {
+        id: `deduped-${index}`,
+        name: group.name,
+        count: group.count,
+        valueRange: minValue === maxValue ? `${minValue}` : `${minValue}-${maxValue}`
+      }
+    })
+
+    // Convert array back to object format for EntityTable
+    const dedupedItemsObj: Record<string, any> = {}
+    deduped.forEach((item, index) => {
+      dedupedItemsObj[`deduped-${index}`] = item
+    })
+
+    return dedupedItemsObj
+  })
 </script>
 
-<EntityTable
-  title="{Object.values($players).length} players"
-  entities={$players}
-  keys={playerKeys}
-  entityType="PLAYER"
-/>
-<EntityTable
-  title="{Object.values($rats).length} rats"
-  entities={$rats}
-  keys={ratKeys}
-  entityType="RAT"
-/>
-<EntityTable
-  title="{Object.values($trips).length} trips"
-  entities={$trips}
-  keys={tripKeys}
-  entityType="TRIP"
-/>
-<EntityTable
-  title="{Object.values($items).length} items"
-  entities={$items}
-  keys={itemKeys}
-  entityType="ITEM"
-/>
+<!-- PLAYERS -->
+<div class="section">
+  <div class="section-header">
+    <h2>PLAYERS ({Object.values(processedPlayers).length})</h2>
+  </div>
+  <EntityTable entities={processedPlayers} columns={playerColumns} entityType="PLAYER" />
+</div>
+
+<!-- RATS -->
+<div class="section">
+  <div class="section-header">
+    <h2>RATS ({Object.values(processedRats).length})</h2>
+  </div>
+  <EntityTable entities={processedRats} columns={ratColumns} entityType="RAT" />
+</div>
+
+<!-- TRIPS -->
+<div class="section">
+  <div class="section-header">
+    <h2>TRIPS ({Object.values(processedTrips).length})</h2>
+  </div>
+  <EntityTable entities={processedTrips} columns={tripColumns} entityType="TRIP" />
+</div>
+
+<!-- DEDUPED ITEMS -->
+<div class="section">
+  <div class="section-header">
+    <h2>DEDUPED ITEMS ({Object.values(dedupedItems).length})</h2>
+  </div>
+  <EntityTable entities={dedupedItems} columns={dedupedItemColumns} entityType="ITEM" />
+</div>
+
+<!-- ALLITEMS -->
+<div class="section">
+  <div class="section-header">
+    <h2>ALL ITEMS ({Object.values(processedItems).length})</h2>
+  </div>
+  <EntityTable entities={processedItems} columns={itemColumns} entityType="ITEM" />
+</div>
+
+<style lang="scss">
+  .section {
+    margin-bottom: 2rem;
+
+    .section-header {
+      margin-bottom: 1rem;
+      background: lightgray;
+      padding: 10px;
+
+      h2 {
+        margin: 0;
+      }
+    }
+  }
+</style>

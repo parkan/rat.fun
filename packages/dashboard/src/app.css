@@ -114,7 +114,6 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
   overscroll-behavior-y: none;
-  user-select: none;
   -webkit-tap-highlight-color: transparent; /* Remove touch overlay */
   -webkit-touch-callout: none; /* Disable callout on iOS */
 }
@@ -138,14 +137,6 @@ hr {
 
 button {
   cursor: pointer;
-  user-select: none;
-}
-
-.priority {
-  background: var(--color-alert-priority) !important;
-  color: var(--white) !important;
-  border: none;
-  transition: all 0.2s ease;
 }
 
 .center-tooltip {

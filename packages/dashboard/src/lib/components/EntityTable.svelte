@@ -1,25 +1,19 @@
 <script lang="ts">
+  import type { EntityMap, ColumnConfig } from "./types"
   import { entities as allEntities } from "$lib/modules/state/stores"
   import { ENTITY_TYPE } from "contracts/enums"
 
-  type EntityMap = {
-    [key: string]: any
-  }
-
   const {
-    title,
     entities,
-    keys,
+    columns,
     entityType
   }: {
-    title: string
     entities: EntityMap
-    keys: string[]
+    columns: ColumnConfig[]
     entityType?: string
   } = $props()
 
   const entriesArray = $derived(Object.entries(entities))
-  let isOpen = $state(true)
 
   // Fields that reference other entities by ID
   const ENTITY_REFERENCE_FIELDS = ["currentRat", "owner", "pastRats", "inventory"]
@@ -40,21 +34,17 @@
   }
 
   /**
-   * Format cell value - if it's an entity reference, show the name
+   * Get display name for a column
    */
-  function formatCellValue(key: string, value: any): string {
-    if (value === null || value === undefined) return ""
+  function getDisplayName(column: ColumnConfig): string {
+    return column.displayName
+  }
 
-    if (isEntityReferenceField(key)) {
-      // Handle arrays (like pastRats, inventory)
-      if (Array.isArray(value)) {
-        return value.map(id => getEntityName(id)).join(", ")
-      }
-      // Handle single reference (like currentRat, owner)
-      return getEntityName(value)
-    }
-
-    return String(value)
+  /**
+   * Check if a column has priority
+   */
+  function isPriorityColumn(column: ColumnConfig): boolean {
+    return column.priority === true
   }
 
   /**
@@ -62,12 +52,23 @@
    */
   function scrollToEntity(entityId: string) {
     console.log("entity iid", entityId)
+
+    // Remove any existing active classes first
+    document.querySelectorAll("tr.active").forEach(el => {
+      el.classList.remove("active")
+    })
+
     const element1 = document.querySelector(`[data-entity-address="${entityId}"]`)
     console.log("element", element1)
 
     if (element1) {
       element1.classList.add("active")
       element1.scrollIntoView({ behavior: "smooth" })
+
+      // Remove active class after animation completes
+      setTimeout(() => {
+        element1.classList.remove("active")
+      }, 3000)
     } else {
       const entity = $allEntities[entityId]
       if (!entity || !entity.entityType) return
@@ -82,47 +83,43 @@
   }
 </script>
 
-<details bind:open={isOpen} data-entity-type={entityType}>
-  <summary class="table-title">
-    <span>
-      {title}
-    </span>
-    <span class="toggle">{isOpen ? "-" : "+"}</span>
-  </summary>
-
+<div data-entity-type={entityType}>
   <div class="table-wrapper">
     <table>
       {#if entriesArray.length > 0}
         <thead>
           <tr>
-            {#each keys as key}
-              <th>{key}</th>
+            {#each columns as column}
+              <th class:priority={isPriorityColumn(column)}>{getDisplayName(column)}</th>
             {/each}
           </tr>
         </thead>
         <tbody>
           {#each entriesArray as [id, entity], index (id)}
             <tr class:even={index % 2 === 0} data-entity-address={id}>
-              {#each keys as key}
-                <td>
-                  {#if isEntityReferenceField(key) && entity[key]}
-                    {#if Array.isArray(entity[key])}
+              {#each columns as column}
+                <td class:priority={isPriorityColumn(column)}>
+                  {#if isEntityReferenceField(column.key) && entity[column.key]}
+                    {#if Array.isArray(entity[column.key])}
                       <div class="entity-links">
-                        {#each entity[key] as entityId, idx}
+                        {#each entity[column.key] as entityId, idx}
                           <button class="entity-link" onclick={() => scrollToEntity(entityId)}>
                             {getEntityName(entityId)}
                           </button>
-                          {#if idx < entity[key].length - 1},
+                          {#if idx < entity[column.key].length - 1},
                           {/if}
                         {/each}
                       </div>
                     {:else}
-                      <button class="entity-link" onclick={() => scrollToEntity(entity[key])}>
-                        {getEntityName(entity[key])}
+                      <button
+                        class="entity-link"
+                        onclick={() => scrollToEntity(entity[column.key])}
+                      >
+                        {getEntityName(entity[column.key])}
                       </button>
                     {/if}
                   {:else}
-                    {entity[key] ?? ""}
+                    {entity[column.key] ?? ""}
                   {/if}
                 </td>
               {/each}
@@ -132,7 +129,7 @@
       {:else}
         <tbody>
           <tr>
-            <td colspan={keys.length} class="no-data">
+            <td colspan={columns.length} class="no-data">
               <span>NO DATA</span>
             </td>
           </tr>
@@ -140,36 +137,9 @@
       {/if}
     </table>
   </div>
-</details>
+</div>
 
 <style lang="scss">
-  details > summary {
-    list-style: none;
-  }
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  details {
-    border-bottom: 1px solid white;
-  }
-
-  .table-title {
-    display: flex;
-    justify-content: space-between;
-    padding: 40px 4px 4px 4px;
-    font-weight: bold;
-    border-top: 1px solid white;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .toggle {
-    display: inline-block;
-    width: 1.5rem;
-    text-align: center;
-  }
-
   .table-wrapper {
     width: 100%;
     max-width: 100vw;
@@ -195,6 +165,14 @@
     word-break: break-word;
     white-space: nowrap;
     max-width: 0;
+  }
+
+  /* Priority columns get more space */
+  th.priority,
+  td.priority {
+    min-width: 200px;
+    max-width: 300px;
+    width: 25%;
   }
 
   th {
@@ -226,5 +204,10 @@
 
   .entity-links {
     display: inline;
+  }
+
+  /* Highlight active/selected entity row */
+  :global(tr.active) {
+    background-color: #e3f2fd !important;
   }
 </style>

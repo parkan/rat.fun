@@ -33,8 +33,6 @@
   }
 </script>
 
-<svelte:window />
-
 {#if $UIState === UI.LOADING}
   <Loading
     environment={$environmentStore}
@@ -46,9 +44,10 @@
   <div class="context-main">
     <header class="menu">
       <div>
-        <h2>
-          <a href="/">rat.fun dashboard: {$environmentStore}</a>
-        </h2>
+        <h1>
+          <a href="/">RAT.FUN DASHBOARD: {$environmentStore}</a>
+        </h1>
+        <hr />
       </div>
     </header>
     <div class="content">
@@ -63,6 +62,7 @@
   .context-main {
     // display: none;
     width: 100vw;
+    padding: 20px;
   }
 
   .menu {
