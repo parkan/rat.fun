@@ -5,6 +5,8 @@
   import { goto } from "$app/navigation"
   import { playSound } from "$lib/modules/sound"
   import { focusTrip } from "$lib/modules/ui/state.svelte"
+  import { gameConfig } from "$lib/modules/state/stores"
+  import { blockNumber } from "$lib/modules/network"
 
   let {
     trip,
@@ -33,6 +35,11 @@
     e.stopPropagation()
     goto("/cashboard/" + id + "?liquidate", { noScroll: false })
   }
+
+  // Cooldown until trip can be liquidated
+  let blockUntilUnlock = $derived(
+    Number(trip.creationBlock) + $gameConfig.cooldownCloseTrip - Number($blockNumber)
+  )
 </script>
 
 <tr
@@ -74,7 +81,11 @@
   </td>
   <!-- Action -->
   <td class="cell-action">
-    <SmallButton text="Liquidate" onmouseup={liquidateButtonOnMouseUp}></SmallButton>
+    <SmallButton
+      disabled={blockUntilUnlock > 0}
+      text={blockUntilUnlock <= 0 ? `Liquidate` : `Wait ${blockUntilUnlock} blocks`}
+      onmouseup={liquidateButtonOnMouseUp}
+    ></SmallButton>
   </td>
 </tr>
 

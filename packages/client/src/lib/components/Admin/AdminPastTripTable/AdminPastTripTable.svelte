@@ -136,6 +136,9 @@
     border-right: 1px dashed rgb(59, 59, 59);
     height: 24px;
     padding-right: 1ch;
+    position: sticky;
+    top: 0;
+    background: black;
   }
 
   .cell-index {

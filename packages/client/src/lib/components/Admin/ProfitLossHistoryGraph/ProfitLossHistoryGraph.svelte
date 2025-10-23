@@ -209,8 +209,7 @@
 
             <!-- Box around the points if multiple datapoints are selected -->
             {#key boundingBoxKey}
-              <!-- Top path: left-most point → top-left corner → top-right corner → right-most point -->
-              <path
+              <!-- <path
                 d={topPath}
                 fill="none"
                 stroke="var(--color-grey-mid)"
@@ -218,7 +217,6 @@
                 in:draw|global={{ duration: 200 }}
                 out:drawReverse={{ duration: 200 }}
               />
-              <!-- Bottom path: left-most point → bottom-left corner → bottom-right corner → right-most point -->
               <path
                 d={bottomPath}
                 fill="none"
@@ -226,7 +224,7 @@
                 stroke-width="3"
                 in:draw|global={{ duration: 200 }}
                 out:drawReverse={{ duration: 200 }}
-              />
+              /> -->
             {/key}
 
             {#each profitLossOverTime as point, i (point.time)}

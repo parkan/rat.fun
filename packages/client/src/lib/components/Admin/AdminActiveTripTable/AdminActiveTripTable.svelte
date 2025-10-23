@@ -53,7 +53,7 @@
     </div>
   </div>
   <table class="admin-trip-table">
-    <thead>
+    <thead class="trip-table-header">
       <tr>
         <!-- Index -->
         <th class="cell-index">#</th>
@@ -116,6 +116,14 @@
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
+    position: relative;
+
+    th {
+      position: sticky;
+      top: 0;
+
+      background: black;
+    }
   }
 
   .table-summary {
@@ -124,6 +132,9 @@
     justify-content: space-between;
     font-size: var(--font-size-normal);
     font-family: var(--special-font-stack);
+    // position: sticky;
+    // top: 0;
+    // background: #000;
   }
 
   .no-data {

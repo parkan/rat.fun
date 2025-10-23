@@ -25,9 +25,11 @@
   }
 
   const onmouseupHandler = (e: MouseEvent) => {
-    playSound("ratfunUI", "smallButtonUp")
-    onmouseup?.(e)
-    onclick?.(e)
+    if (!disabled) {
+      playSound("ratfunUI", "smallButtonUp")
+      onmouseup?.(e)
+      onclick?.(e)
+    }
   }
 </script>
 
