@@ -52,6 +52,13 @@
   <td class="cell-profit">
     <SignedNumber value={profitLoss} />
   </td>
+  <td class="cell-liquidated">
+    {#if trip.liquidated}
+      Liquidation
+    {:else}
+      Depletion
+    {/if}
+  </td>
 </tr>
 
 <style lang="scss">
@@ -131,6 +138,10 @@
       :global(*) {
         text-align: right;
       }
+    }
+
+    .cell-liquidated {
+      text-align: center;
     }
 
     .grey {

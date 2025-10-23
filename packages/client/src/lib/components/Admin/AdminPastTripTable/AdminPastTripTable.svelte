@@ -77,6 +77,7 @@
         <th class="cell-profit" onclick={sortByProfit}>
           {#if sortFunctionName === "entriesByRealisedProfit"}▼{:else if sortFunctionName === "entriesByRealisedProfitDesc"}▲{/if}&nbsp;Profit
         </th>
+        <th class="cell-liquidated">Foreclosure</th>
       </tr>
     </thead>
     <tbody>
@@ -172,5 +173,9 @@
     width: 120px;
     text-align: right;
     width: 60px;
+  }
+
+  .cell-liquidated {
+    width: 100px;
   }
 </style>
