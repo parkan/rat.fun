@@ -110,11 +110,15 @@
 
 <div class="container">
   <div class="marquee-container top" in:fade|global={{ duration: 200, delay: 1000 }}>
-    <Marquee text={topMarqueeText} direction="left" speed={30} />
+    <Marquee speed={5} numberOfCopies={10} direction="left">
+      <p class="marquee-text">{topMarqueeText}</p>
+    </Marquee>
   </div>
 
   <div class="marquee-container bottom" in:fade|global={{ duration: 200, delay: 1000 }}>
-    <Marquee text={bottomMarqueeText} direction="right" speed={30} />
+    <Marquee speed={5} numberOfCopies={10} direction="right">
+      <p class="marquee-text">{bottomMarqueeText}</p>
+    </Marquee>
   </div>
 
   <div class="content">
@@ -163,6 +167,13 @@
       font-size: var(--font-size-normal);
       font-family: var(--typewriter-font-stack);
       text-transform: uppercase;
+
+      .marquee-text {
+        padding: 0;
+        margin: 0;
+        height: 40px;
+        line-height: 40px;
+      }
 
       &.top {
         top: 0;

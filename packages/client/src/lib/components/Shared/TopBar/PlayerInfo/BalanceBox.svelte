@@ -84,30 +84,27 @@
 </script>
 
 <!-- BALANCE -->
-<Tooltip content="This is available tokens in your wallet">
-  <div class="stat-item balance" bind:this={containerElement}>
-    <div class="inner-wrapper">
+<div class="stat-item balance" bind:this={containerElement}>
+  <div class="inner-wrapper">
+    <Tooltip content="This is available tokens in your wallet">
       <div class="value">
-        <span>
-          <CurrencySymbol />
-          <span bind:this={balanceElement}>
-            <!-- {$playerERC20Balance} -->
-          </span>
-        </span>
+        <CurrencySymbol />
+        <span bind:this={balanceElement} />
       </div>
-    </div>
+    </Tooltip>
   </div>
-</Tooltip>
+</div>
 
 <style lang="scss">
   .stat-item {
     display: flex;
     height: 100%;
     line-height: var(--top-bar-height);
-    border: 0;
     background: transparent;
     border-right: var(--default-border-style);
     color: var(--foreground);
+    padding: 0;
+    background: red;
 
     &.balance {
       background: var(--color-value);

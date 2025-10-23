@@ -16,11 +16,9 @@
 <div class="top-bar">
   <PlayerInfo />
   <div class="marquee-container">
-    <Marquee
-      text="THERE IS NO LUCK. ONLY SKILL. THERE ARE NO BAD TRIPS, ONLY BAD RATS."
-      direction="left"
-      speed={30}
-    />
+    <Marquee numberOfCopies={3} direction="left">
+      <p class="text">THERE IS NO LUCK. ONLY SKILL. THERE ARE NO BAD TRIPS, ONLY BAD RATS.</p>
+    </Marquee>
   </div>
   <div class="right">
     {#if $activeWorldEvent}
@@ -60,6 +58,13 @@
       opacity: 0.2;
       font-size: var(--font-size-large);
       text-transform: uppercase;
+
+      .text {
+        height: var(--top-bar-height);
+        line-height: var(--top-bar-height);
+        margin: 0;
+        padding: 0;
+      }
     }
 
     .right {

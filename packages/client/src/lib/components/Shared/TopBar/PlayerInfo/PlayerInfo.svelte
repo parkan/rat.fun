@@ -82,14 +82,19 @@
 
 <style lang="scss">
   .player-info {
+    width: 200px;
+
     .player-stats {
       display: flex;
+      justify-content: space-between;
       align-items: center;
       height: 100%;
+      width: 100%;
       cursor: pointer;
       border: 0;
       outline: 0;
       background: transparent;
+      padding: 0;
 
       .stat-item {
         display: flex;
@@ -97,8 +102,9 @@
         line-height: var(--top-bar-height);
         border: 0;
         background: transparent;
-        border-right: var(--default-border-style);
+        // border-right: var(--default-border-style);
         color: var(--foreground);
+        padding: 8px;
 
         &.name {
           font-size: var(--font-size-small);

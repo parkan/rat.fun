@@ -121,7 +121,6 @@
     th {
       position: sticky;
       top: 0;
-
       background: black;
     }
   }
