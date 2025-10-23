@@ -32,7 +32,7 @@
   // Wait for both chain sync and minimum duration to complete
   $effect(() => {
     if ($ready && minimumDurationComplete) {
-      // ??? Explain what this does
+      // Initializes and synchronises MUD entities with our state variables
       initEntities()
 
       // Stop the terminal typer

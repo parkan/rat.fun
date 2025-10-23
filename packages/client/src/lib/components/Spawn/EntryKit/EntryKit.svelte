@@ -45,8 +45,9 @@
     errorHandler(error)
   }
 
-  // ???
+  // Initialize and mount a React component tree into the Svelte app
   $effect(() => {
+    // 1. Create a root
     const root = createRoot(rootEl, {
       onCaughtError: error => _errorHandler(error),
       onRecoverableError: error => _errorHandler(error),
@@ -54,6 +55,9 @@
     })
     const config = wagmiConfig()
 
+    // 2. Create the needed Entrykit component.
+    // The second argument are props
+    // with component children defined in the third argument
     import("@latticexyz/entrykit/internal").then(({ EntryKitProvider }) => {
       const entrykit = createElement(
         EntryKitProvider,
@@ -90,6 +94,8 @@
         ]
       )
 
+      // 3. Create the providers our Entrykit component depends on and wrap them around.
+      // not sure why this is not default in Entrykit :shrug:
       const providers = createElement(
         WagmiProvider,
         { config },
@@ -101,6 +107,7 @@
           entrykit
         )
       )
+      // 4. Finally render the entire structure
       root.render(providers)
     })
 
@@ -108,6 +115,7 @@
   })
 </script>
 
+<!-- Sweet HTML -->
 <div bind:this={rootEl} class="root"></div>
 
 <style>

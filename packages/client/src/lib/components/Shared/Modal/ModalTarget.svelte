@@ -17,11 +17,6 @@
 
   let { modal } = getModalState()
 
-  // ???
-  $effect(() => {
-    if (!modal.show) onclose?.()
-  })
-
   onMount(() => {
     if (fullscreen) {
       modal.setConfig({ fullscreen: true })

@@ -17,8 +17,7 @@
   }
 
   const onSpawnClick = async () => {
-    // ???
-    // await goto("?spawn")
+    // Triggers the Spawn flow, defined in @Spawn.svelte
     UIState.set(UI.SPAWNING)
   }
 </script>

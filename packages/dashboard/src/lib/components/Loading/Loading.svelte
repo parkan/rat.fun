@@ -17,7 +17,7 @@
   // Wait for both chain sync and minimum duration to complete
   $effect(() => {
     if ($ready) {
-      // ??? Explain what this does
+      // Initialise and synchronise onchain entities with Svelte
       initEntities()
 
       setTimeout(() => {
