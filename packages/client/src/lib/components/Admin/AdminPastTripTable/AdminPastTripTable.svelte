@@ -77,7 +77,7 @@
         <th class="cell-profit" onclick={sortByProfit}>
           {#if sortFunctionName === "entriesByRealisedProfit"}▼{:else if sortFunctionName === "entriesByRealisedProfitDesc"}▲{/if}&nbsp;Profit
         </th>
-        <th class="cell-liquidated">Foreclosure</th>
+        <th class="cell-liquidated">CoD</th>
       </tr>
     </thead>
     <tbody>

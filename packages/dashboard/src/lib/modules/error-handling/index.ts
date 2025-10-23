@@ -3,6 +3,8 @@ import { toastManager } from "$lib/modules/ui/toasts.svelte"
 import { parseViemError } from "./viemErrorParser"
 export * from "./errors"
 
+type SeverityLevel = "error" | "info" | "warning" | "success" | undefined
+
 export function errorHandler(error: ExpectedError | unknown, message = "") {
   let processedError: ExpectedError | unknown = error
 
@@ -50,7 +52,7 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
     }
   }
 
-  toastManager.add({ message: errorMessage, type: severity })
+  toastManager.add({ message: errorMessage, type: severity as SeverityLevel })
 
   // Log the error to the console
   console.error(processedError)
