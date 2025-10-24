@@ -6,7 +6,7 @@
 
   import type { LayoutProps } from "./$types"
   import { goto } from "$app/navigation"
-  import { initStaticContent } from "$lib/modules/content"
+  import { initStaticContent, staticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -31,6 +31,29 @@
       goto("/")
     }
   }
+
+  // let ratTotalDistributedValue = $derived.by(() => {
+  //   if ($staticContent.outcomes) {
+  //     console.log("START")
+  //     return $staticContent.outcomes.reduce((a, current) => {
+  //       console.log("Rat value change : ", current?.ratValueChange, a)
+  //       if (current)
+  //       return a + current?.ratValueChange || 0
+  //     }, 0)
+  //   } else {
+  //     return 0
+  //   }
+  // })
+
+  // let tripTotalDistributedValue = $derived.by(() => {
+  //   if ($staticContent.outcomes) {
+  //     return $staticContent.outcomes.reduce((a, current) => {
+  //       return a + current?.tripValueChange || 0
+  //     }, 0)
+  //   } else {
+  //     return 0
+  //   }
+  // })
 </script>
 
 {#if $UIState === UI.LOADING}
@@ -45,6 +68,10 @@
     <header class="menu">
       <div>
         <h1>RAT.FUN DASHBOARD: {$environmentStore}</h1>
+        <hr />
+      </div>
+      <div>
+        <!-- <h1>RATS: {ratTotalDistributedValue} / TRIPS: {tripTotalDistributedValue}</h1> -->
         <hr />
       </div>
     </header>

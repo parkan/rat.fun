@@ -3,6 +3,8 @@
   import { players, rats, trips, items } from "$lib/modules/state/stores"
   import EntityTable from "$lib/components/EntityTable.svelte"
 
+  // Amounts distributed from
+
   const playerColumns: ColumnConfig[] = [
     { key: "creationBlock", displayName: "Create @" },
     { key: "name", displayName: "Name" },
@@ -149,6 +151,8 @@
 
     return dedupedItemsObj
   })
+
+  // Show aggregated values distributed to rats and to trips (by outcomes)
 </script>
 
 <!-- PLAYERS -->
