@@ -2,7 +2,7 @@
   import type { EnterTripReturnValue } from "@server/modules/types"
   import { frozenRat, resetProcessingState } from "$lib/components/GameRun/state.svelte"
   import { goto } from "$app/navigation"
-  import { ratImageUrl } from "$lib/modules/state/stores"
+  import { Rat } from "$lib/components/Rat"
   import { gsap } from "gsap"
   import { BigButton } from "$lib/components/Shared"
 
@@ -64,7 +64,7 @@
 
 <div class="event" bind:this={eventElement}>
   <div class="image">
-    <img src={$ratImageUrl} alt={frozenRat?.name} />
+    <Rat />
   </div>
   <div class="event-text" class:dead={ratDead}>
     {frozenRat?.name}
@@ -87,9 +87,11 @@
     width: 90%;
 
     .image {
-      width: 180px;
-      height: 180px;
+      width: 260px;
+      height: 260px;
       margin-bottom: 10px;
+      position: absolute;
+      transform: translate(0, -100%);
       img {
         width: 100%;
         height: 100%;

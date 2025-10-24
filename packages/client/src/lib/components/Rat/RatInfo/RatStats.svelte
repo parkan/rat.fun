@@ -53,7 +53,7 @@
 
     <!-- IMAGE -->
     <div class="image-container">
-      <!-- <Rat /> -->
+      <Rat />
       {#if $ratImageUrl}
         <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->

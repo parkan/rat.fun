@@ -1,6 +1,6 @@
 <script lang="ts">
   import { rat } from "$lib/modules/state/stores"
-  import { ratImageUrl } from "$lib/modules/state/stores"
+  import { Rat } from "$lib/components/Rat"
   import { BigButton } from "$lib/components/Shared"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
 
@@ -12,7 +12,7 @@
 
 <div class="rat-dead">
   <div class="rat-dead-image">
-    <img src={$ratImageUrl} alt="Rat Dead" />
+    <Rat />
   </div>
   <div class="rat-dead-text">
     <h1>{$rat?.name} is dead</h1>
@@ -35,8 +35,8 @@
     color: var(--background);
 
     .rat-dead-image {
-      width: 300px;
-      height: 300px;
+      width: 260px;
+      height: 260px;
 
       @media (max-width: 700px) {
         width: 160px;

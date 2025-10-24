@@ -6,7 +6,7 @@
  *  https://www.sanity.io/docs/groq
  */
 
-const ratImages = '*[_id == "rat-images"][0]'
+const ratImages = '*[_id == "rat-images"][0]{ ... }'
 const trips = '*[_type == "trip" && worldAddress == $worldAddress]'
 const outcomes = `*[_type == "outcome" && worldAddress == $worldAddress] {
   ...,
