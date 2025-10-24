@@ -3,7 +3,7 @@ import { transactionQueue } from "@latticexyz/common/actions"
 
 import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
-import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
+import { disconnect, getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import { getChain } from "$lib/mud/utils"
 import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { WagmiConfigUnavailableError } from "../error-handling/errors"
@@ -20,6 +20,15 @@ export async function getEstablishedConnectorClient() {
     throw new WagmiConfigUnavailableError()
   }
   return await getConnectorClient(wagmiConfig)
+}
+
+export async function disconnectWallet() {
+  const wagmiConfig = get(wagmiConfigStateful)
+  if (!wagmiConfig) {
+    // Not connected, nothing to do
+    return
+  }
+  await disconnect(wagmiConfig)
 }
 
 /**
