@@ -73,7 +73,7 @@ export const loadData = async (query: string, params: any) => {
   try {
     const res = await client.fetch(query, params)
     if (res === null) {
-      return Promise.reject(new CMSError("Content not found", null))
+      return false
     }
     // Sanitize the data to ensure it's serializable for SvelteKit
     return sanitizeSanityData(res)

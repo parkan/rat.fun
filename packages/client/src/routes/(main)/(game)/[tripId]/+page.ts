@@ -18,7 +18,7 @@ export const load: PageLoad = async ({ params }) => {
 
     return {
       tripId: params.tripId,
-      tripContent
+      tripContent: tripContent
     }
   } catch (err) {
     console.error(err)
