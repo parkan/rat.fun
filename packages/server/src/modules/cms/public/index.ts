@@ -272,12 +272,29 @@ export async function updateStatistics(
       // Therefore we correct the initial value to be the inverse of the sum of tripValueChange
       const initialRatValue = -initialTripValue
 
+      const allOutcomes = await publicSanityClient.fetch(
+        `*[_type == "outcome" && worldAddress == $worldAddress]{ratValueChange, tripValueChange}`,
+        { worldAddress }
+      )
+
+      let totalBalance = 0
+      let totalThroughput = 0
+
+      allOutcomes.forEach(outcome => {
+        const { ratValueChange, tripValueChange } = outcome
+        totalBalance += ratValueChange + tripValueChange
+        // Throughput is the absolute value moved (use rat side to avoid double-counting)
+        totalThroughput += Math.abs(ratValueChange)
+      })
+
       const document = (await publicSanityClient.create({
         _type: "statistics",
         worldAddress,
         title: worldAddress,
         ratTotalBalance: initialRatValue + ratValueChange,
-        tripTotalBalance: initialTripValue + tripValueChange
+        tripTotalBalance: initialTripValue + tripValueChange,
+        totalBalance: totalBalance,
+        totalThroughput: totalThroughput
       })) as StatisticsDoc
 
       console.warn(

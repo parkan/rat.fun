@@ -6,17 +6,19 @@
     className = "",
     withCurrency = false,
     withTween = false,
-    hideZero = false
+    hideZero = false,
+    noColor = false
   }: {
     value: number
     className?: string
     withCurrency?: boolean
     hideZero?: boolean
     withTween?: boolean
+    noColor?: boolean
   } = $props()
 
   let sign = $derived(value == 0 ? "" : value > 0 ? "+" : "-")
-  let colorClass = $derived(value == 0 ? "" : value > 0 ? "up" : "down")
+  let colorClass = $derived(noColor ? "" : value == 0 ? "" : value > 0 ? "up" : "down")
   let tweenedValue = new Tween(value, { duration: withTween ? 1000 : 0 })
 
   $effect(() => {
