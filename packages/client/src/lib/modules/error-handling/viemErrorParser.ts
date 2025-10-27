@@ -121,9 +121,7 @@ export function parseViemError(error: BaseError): ExpectedError {
     if (revertData) {
       const decoded = decodeRevertData(revertData)
       if (decoded) {
-        revertReason = revertReason
-          ? `${revertReason} (${decoded})`
-          : decoded
+        revertReason = revertReason ? `${revertReason} (${decoded})` : decoded
       }
     }
 
