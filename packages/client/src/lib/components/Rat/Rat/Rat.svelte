@@ -40,7 +40,7 @@
       )
         return false
 
-      const image = ratImagesDocument[key].find((_, i) => i == num).asset
+      const image = ratImagesDocument[key].find((_, i) => i == num)?.asset
       if (image) {
         const result = urlFor(image)
         if (!result) return false
