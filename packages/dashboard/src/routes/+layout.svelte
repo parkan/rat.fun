@@ -49,12 +49,31 @@
         <hr />
       </div>
       <div>
-        <h1>
-          <SignedNumber value={$staticContent?.statistics?.ratTotalBalance || 0} /> (RATS) <SignedNumber
-            value={$staticContent?.statistics?.tripTotalBalance || 0}
-          /> (TRIPS)
+        <h1 class="numbers">
+          <span class="top">
+            <SignedNumber
+              withTween
+              value={$staticContent?.statistics?.ratTotalBalance || 0}
+            /><small>rats</small>
+            <SignedNumber
+              withTween
+              value={$staticContent?.statistics?.tripTotalBalance || 0}
+            /><small>trips</small>
+          </span>
+          <span class="bottom">
+            <!-- balance as a percentage of throughput -->
+            {#if $staticContent?.statistics?.totalThroughput && $staticContent?.statistics?.totalThroughput > 0}
+              {(
+                Math.abs(
+                  $staticContent.statistics.totalBalance / $staticContent.statistics.totalThroughput
+                ) * 100
+              ).toFixed(2)}%
+            {:else}
+              0.00%
+            {/if}
+            <small>imbalance</small>
+          </span>
         </h1>
-        <hr />
       </div>
     </header>
     <div class="content">
@@ -83,5 +102,20 @@
     // top: 0;
     // left: 0;
     font-weight: bold;
+  }
+
+  .numbers {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+
+    small {
+      vertical-align: super;
+      color: grey;
+    }
+
+    .top {
+      border-bottom: 1px solid black;
+    }
   }
 </style>

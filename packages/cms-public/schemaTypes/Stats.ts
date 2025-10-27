@@ -29,22 +29,22 @@ export default {
       type: "number",
       readOnly: true,
       validation: (Rule: any) => Rule.required()
+    },
+    // Net balance (rats + trips) - should be near zero if system is balanced
+    {
+      title: "Total balance",
+      name: "totalBalance",
+      type: "number",
+      readOnly: true,
+      validation: (Rule: any) => Rule.required()
+    },
+    // Total absolute value moved through the system
+    {
+      title: "Total throughput",
+      name: "totalThroughput",
+      type: "number",
+      readOnly: true,
+      validation: (Rule: any) => Rule.required()
     }
-    // {
-    //   title: "Rat total spend",
-    //   name: "ratTotalSpend",
-    //   type: "number",
-    //   description: "Total amount spent on rats",
-    //   readOnly: true,
-    //   validation: (Rule: any) => Rule.required()
-    // },
-    // {
-    //   title: "Trip total spend",
-    //   name: "tripTotalSpend",
-    //   type: "number",
-    //   description: "Total amount spent on rats",
-    //   readOnly: true,
-    //   validation: (Rule: any) => Rule.required()
-    // }
   ]
 }
