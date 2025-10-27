@@ -28,7 +28,7 @@
   let images = $derived(
     numbers.map((num, i) => {
       const key = fields[i]
-      console.log(key, num, $staticContent.ratImages)
+      // console.log(key, num, $staticContent.ratImages)
       const ratImagesDocument = $staticContent.ratImages
 
       if (
@@ -45,7 +45,7 @@
         const result = urlFor(image)
         if (!result) return false
         const src = result.width(260).url()
-        console.log("source", src)
+        // console.log("source", src)
         return src
       } else {
         console.warn("error: no asset for ", key)
