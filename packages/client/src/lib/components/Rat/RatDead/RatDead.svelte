@@ -12,7 +12,7 @@
 
 <div class="rat-dead">
   <div class="rat-dead-image">
-    <Rat />
+    <Rat inert />
   </div>
   <div class="rat-dead-text">
     <h1>{$rat?.name} is dead</h1>
@@ -37,6 +37,8 @@
     .rat-dead-image {
       width: 260px;
       height: 260px;
+      transform: rotate(90deg);
+      filter: grayscale(1);
 
       @media (max-width: 700px) {
         width: 160px;

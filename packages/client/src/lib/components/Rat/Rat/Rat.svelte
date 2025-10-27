@@ -2,22 +2,25 @@
   import { player, playerAddress } from "$lib/modules/state/stores"
   import { addressToRatParts } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
+  import { playSound } from "$lib/modules/sound"
   import { urlFor } from "$lib/modules/content/sanity"
   import { NoImage } from "$lib/components/Shared"
-  import { Tween, Spring } from "svelte/motion"
+  import { Spring } from "svelte/motion"
 
   type RatAnimation = "idle" | "appearance" | "survived" | "died" | "dead"
 
   let {
-    animation = "idle"
+    animation = "idle",
+    inert = false
   }: {
     animation: RatAnimation
+    inert?: boolean
   } = $props()
 
   let rect = $state<DOMRect>()
   let isDragging = $state(false)
 
-  const fields = ["ratBodies", "ratEars", "ratArms", "ratHeads"]
+  const fields = ["ratBodies", "ratArms", "ratHeads", "ratEars"]
 
   const emptyImage = new Image(1, 1)
 
@@ -73,12 +76,14 @@
   ]
   let transforms = $derived([
     `scale(${bodyScale.current}) rotate(${headTilt.current / 2}deg)`,
-    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${earsTilt.current}deg)`,
     `scale(${armsScale.current}) rotate(${armsTilt.current}deg) translateY(${armsTranslate.current}px)`,
-    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${headTilt.current}deg)`
+    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${earsTilt.current}deg)`,
+    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${earsTilt.current}deg)`
   ])
 
   const onmousedown = e => {
+    if (inert) return false
+    playSound("ratfunUI", "bigButtonDown")
     isDragging = true
     rect = e.currentTarget.getBoundingClientRect()
     bodyScale.set(0.8)
@@ -88,18 +93,20 @@
   }
 
   const onmousemove = e => {
-    if (!isDragging || !rect?.left) return
+    if (!isDragging || !rect?.left || inert) return
 
     const movementX = e.pageX - rect.left - rect.width / 2
     const movementY = e.pageY - rect.top - rect.height / 2
-    headTweenX.set(Math.min(movementX / 2, 30))
-    headTweenY.set(Math.min(movementY / 2, 30))
+    headTweenX.set(movementX / 2)
+    headTweenY.set(movementY / 2)
     headTilt.set(movementX / 20)
     armsTilt.set(movementX / 10)
     earsTilt.set(movementX / 10)
   }
 
   const onmouseup = e => {
+    if (inert) return false
+    playSound("ratfunUI", "ratRelief")
     isDragging = false
     headScale.set(1)
     headTweenX.set(0)
@@ -114,7 +121,9 @@
   }
 </script>
 
-<div {onmousedown} {onmousemove} {onmouseup} class="rat-container">
+<svelte:body {onmousemove} {onmouseup} />
+
+<div {onmousedown} class="rat-container">
   {#if !images.some(image => false)}
     {#each images as src, i}
       <div class="layer {fields[i]} {animation}">
@@ -141,6 +150,7 @@
     -moz-user-drag: none;
     -o-user-drag: none;
     user-drag: none;
+    user-select: none;
   }
 
   .layer {
