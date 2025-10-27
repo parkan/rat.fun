@@ -40,11 +40,15 @@ function calculateTotalRatValue(rat: Rat) {
   if (!rat) return 0
 
   const balanceValue = Number(rat.balance ?? 0)
+  let inventoryValue = 0
 
-  const inventoryValue = (rat.inventory ?? []).reduce(
-    (acc, item) => acc + (Number(item?.value) ?? 0),
-    0
-  )
+  // Rat is not dead, count the inventory
+  if (balanceValue !== 0) {
+    inventoryValue = (rat.inventory ?? []).reduce(
+      (acc, item) => acc + (Number(item?.value) ?? 0),
+      0
+    )
+  }
 
   return balanceValue + inventoryValue
 }
