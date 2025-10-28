@@ -2,6 +2,7 @@
   import { onMount } from "svelte"
   import { derived } from "svelte/store"
   import { Tween } from "svelte/motion"
+  import { busy } from "$lib/modules/action-manager/index.svelte"
   import { playSound } from "$lib/modules/sound"
   import { Tooltip, BigButton } from "$lib/components/Shared"
   import { balance, investment, profitLoss, portfolioClass } from "$lib/modules/state/stores"
@@ -58,21 +59,25 @@
   <!-- Portfolio -->
   <div class="portfolio-container">
     <div class="portfolio-box">
-      <p>Portfolio</p>
-      <div class="portfolio-amount">
-        {CURRENCY_SYMBOL}{$balance}
-      </div>
-    </div>
-    <div class="portfolio-box">
       <p>Invested</p>
       <div class="portfolio-amount">
         {CURRENCY_SYMBOL}{$investment}
       </div>
     </div>
+    <div class="portfolio-box">
+      <p>Portfolio</p>
+      <div class="portfolio-amount">
+        {CURRENCY_SYMBOL}{$balance}
+      </div>
+    </div>
   </div>
   <!-- Action -->
   <div class="action-container">
-    <BigButton text="Create Trip" onclick={onCreateTripClick} />
+    <BigButton
+      disabled={busy.CreateTrip.current > 0}
+      text="Create Trip"
+      onclick={onCreateTripClick}
+    />
   </div>
 </div>
 

@@ -4,6 +4,7 @@ import type {
   TripEventDeath,
   TripEventCreation,
   TripEventLiquidation,
+  TripEventDepletion,
   TripEvent
 } from "$lib/components/Admin/types"
 import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
@@ -95,22 +96,9 @@ export function calculateProfitLossForTrip(
   /***************************
    * ADD LIQUIDATION EVENT
    **************************/
-  if (
-    (trip.liquidationBlock && trip.liquidationValue !== undefined) ||
-    (Number(trip.balance) === 0 && !excludeLiquidation)
-  ) {
-    let liquidationTime = 0
-    let liquidationValueChange = 0
-
-    if (trip.liquidated) {
-      liquidationTime = blockNumberToTimestamp(Number(trip.liquidationBlock))
-      liquidationValueChange = Number(trip.tripCreationCost) - Number(trip.liquidationValue)
-    } else {
-      // get previous outcome
-      const lastOutcome = outcomes?.[outcomes.length - 1]
-      liquidationTime = new Date(lastOutcome?._createdAt)?.getTime() + 1 || 1
-      liquidationValueChange = Number(trip.tripCreationCost)
-    }
+  if (trip.liquidationBlock && trip.liquidationValue !== undefined) {
+    const liquidationTime = blockNumberToTimestamp(Number(trip.liquidationBlock))
+    const liquidationValueChange = Number(trip.tripCreationCost) - Number(trip.liquidationValue)
 
     // Liquidation: you get back the trip value (before tax) and close the position
     tripData.push({
@@ -123,6 +111,23 @@ export function calculateProfitLossForTrip(
       tripCreationCost: Number(trip.tripCreationCost),
       meta: sanityTripContent
     } as TripEventLiquidation)
+  } else if (Number(trip.balance) === 0 && !excludeLiquidation) {
+    // get previous outcome
+    const lastOutcome = outcomes?.[outcomes.length - 1]
+    const depletionTime = new Date(lastOutcome?._createdAt)?.getTime() + 1 || 1
+    const depletionValueChange = Number(trip.tripCreationCost)
+
+    // Liquidation: you get back the trip value (before tax) and close the position
+    tripData.push({
+      eventType: TRIP_EVENT_TYPE.DEPLETED,
+      time: depletionTime,
+      value: 0, // Will be set later in accumulation
+      valueChange: depletionValueChange,
+      index: 0, // Will be set later
+      tripId: tripId,
+      tripCreationCost: Number(trip.tripCreationCost),
+      meta: sanityTripContent
+    } as TripEventDepletion)
   }
 
   return tripData

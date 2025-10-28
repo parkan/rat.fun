@@ -3,7 +3,7 @@
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { getTripMaxValuePerWin, getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { CharacterCounter, BigButton } from "$lib/components/Shared"
-  import { sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
+  import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
@@ -21,7 +21,6 @@
   } = $props()
 
   let tripDescription: string = $state("")
-  let busy: boolean = $state(false)
   let textareaElement: HTMLTextAreaElement | null = $state(null)
 
   // Prompt has to be between 1 and MAX_TRIP_PROMPT_LENGTH characters
@@ -50,7 +49,7 @@
   // - Player has insufficient balance
   const disabled = $derived(
     invalidTripDescriptionLength ||
-      busy ||
+      busy.CreateTrip.current !== 0 ||
       !$maxValuePerWin ||
       !$minRatValueToEnter ||
       flooredTripCreationCost < MIN_TRIP_CREATION_COST ||
@@ -61,7 +60,6 @@
     "You're creating a trip that can modify items, and tokens of rats that enter. Your trip balance decreases whenever a rat gains something, and increases when your trip takes something. You can withdraw remaining balance from your trip."
 
   async function onClick() {
-    busy = true
     try {
       // Validate trip description before sending
       if (!tripDescription || tripDescription.trim() === "") {
@@ -97,7 +95,7 @@
   })
 </script>
 
-{#if !busy}
+{#if busy.CreateTrip.current === 0}
   <div class="create-trip" class:collapsed={$collapsed}>
     <div class="controls">
       <!-- TRIP DESCRIPTION -->
@@ -110,7 +108,7 @@
           />
         </label>
         <textarea
-          disabled={busy}
+          disabled={busy.CreateTrip.current !== 0}
           id="trip-description"
           rows={$collapsed ? 12 : 6}
           {placeholder}

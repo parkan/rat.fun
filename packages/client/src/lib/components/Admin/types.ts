@@ -43,9 +43,16 @@ export type TripEventLiquidation = TripEventShared & {
   meta: SanityTrip
 }
 
+// DEPLETION => meta is SanityTrip
+export type TripEventDepletion = TripEventShared & {
+  eventType: TRIP_EVENT_TYPE.DEPLETED
+  meta: SanityTrip
+}
+
 export type TripEvent =
   | TripEventBaseline
   | TripEventVisit
   | TripEventDeath
   | TripEventCreation
   | TripEventLiquidation
+  | TripEventDepletion

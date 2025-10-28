@@ -3,7 +3,8 @@
     TripEventVisit,
     TripEventDeath,
     TripEventLiquidation,
-    TripEventCreation
+    TripEventCreation,
+    TripEventDepletion
   } from "$lib/components/Admin/types"
   import { TRIP_EVENT_TYPE, VALUE_CHANGE_DIRECTION } from "$lib/components/Admin/enums"
   import { SignedNumber } from "$lib/components/Shared"
@@ -16,7 +17,12 @@
     point,
     behavior = "click"
   }: {
-    point: TripEventVisit | TripEventDeath | TripEventLiquidation | TripEventCreation
+    point:
+      | TripEventVisit
+      | TripEventDeath
+      | TripEventLiquidation
+      | TripEventCreation
+      | TripEventDepletion
     behavior?: "hover" | "click"
   } = $props()
 
@@ -100,7 +106,17 @@
     You liquidated trip #{p.meta?.index}
   </span>
   <div class="event-valuechange">
-    <SignedNumber hideZero value={p.valueChange} />
+    <!-- <SignedNumber hideZero value={p.valueChange} /> -->
+  </div>
+{/snippet}
+
+{#snippet tripDepleted(p: TripEventDepletion)}
+  <span class="event-message">
+    <span class="event-icon">*</span>
+    Trip #{p.meta?.index} got depleted
+  </span>
+  <div class="event-valuechange">
+    <!-- <SignedNumber hideZero value={p.valueChange} /> -->
   </div>
 {/snippet}
 
@@ -133,6 +149,8 @@
         {@render tripCreated(point)}
       {:else if point.eventType === "trip_death"}
         {@render ratDied(point)}
+      {:else if point.eventType === "trip_depleted"}
+        {@render tripDepleted(point)}
       {/if}
     </div>
   </Tooltip>

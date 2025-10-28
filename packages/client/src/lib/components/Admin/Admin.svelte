@@ -8,7 +8,7 @@
     playerNonDepletedTrips,
     playerDepletedTrips
   } from "$lib/modules/state/stores"
-  import { focusEvent } from "$lib/modules/ui/state.svelte"
+  import { busy } from "$lib/modules/action-manager/index.svelte"
   import { getModalState } from "$lib/components/Shared/Modal/state.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
   import { playSound } from "$lib/modules/sound"
@@ -162,6 +162,7 @@
       <div class="p-l-overview">
         <ProfitLossOverview
           onCreateTripClick={() => {
+            if (busy.CreateTrip.current !== 0) return
             modal.set(createTripModal)
           }}
         />
