@@ -33,6 +33,7 @@
     "@latticexyz/schema-type": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/store": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/world": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/world-module-callwithsignature": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/world-modules": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@openzeppelin/contracts": "^5.4.0"
   },
