@@ -1,8 +1,5 @@
 import { createClient } from "@sanity/client"
 
-import dotenv from "dotenv"
-dotenv.config()
-
 const PUBLIC_SANITY_CMS_ID = process.env.PUBLIC_SANITY_CMS_ID
 const PUBLIC_SANITY_CMS_TOKEN = process.env.PUBLIC_SANITY_CMS_TOKEN
 

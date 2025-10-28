@@ -5,7 +5,7 @@ import type {
   GamePercentagesConfig,
   WorldEvent
 } from "@modules/types"
-import { getComponentValue, Entity } from "@latticexyz/recs"
+import { getComponentValue, type Entity } from "@latticexyz/recs"
 import { network } from "@modules/mud/initMud"
 import { singletonEntity } from "@latticexyz/store-sync/recs"
 import { retryUntilResult } from "@modules/utils"

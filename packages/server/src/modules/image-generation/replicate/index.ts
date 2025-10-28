@@ -4,10 +4,6 @@ import sharp from "sharp"
 import { ReplicateError } from "@modules/error-handling/errors"
 import * as path from "path"
 
-import dotenv from "dotenv"
-
-dotenv.config()
-
 const client = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN
 })

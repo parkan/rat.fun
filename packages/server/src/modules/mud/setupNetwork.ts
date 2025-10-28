@@ -79,7 +79,7 @@ export async function setupNetwork(
   const clientOptions = {
     chain: networkConfig.chain,
     transport: transportObserver(transport ?? chainTransport(networkConfig.chain.rpcUrls.default)),
-    pollingInterval: 10000
+    pollingInterval: 1000
   } as const satisfies ClientConfig
 
   const publicClient = createPublicClient(clientOptions)
@@ -133,9 +133,15 @@ function chainTransport(rpcUrls: Chain["rpcUrls"][string]): Transport {
   const webSocketUrl = rpcUrls?.webSocket?.[0]
   const httpUrl = rpcUrls?.http[0]
 
+  let transport: Transport
+
   if (webSocketUrl) {
-    return httpUrl ? fallback([webSocket(webSocketUrl), http(httpUrl)]) : webSocket(webSocketUrl)
+    transport = httpUrl
+      ? fallback([webSocket(webSocketUrl), http(httpUrl)])
+      : webSocket(webSocketUrl)
+  } else {
+    transport = http(httpUrl)
   }
 
-  return http(httpUrl)
+  return transport
 }

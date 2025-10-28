@@ -1,10 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
 import { schema } from "@routes/trip/create/schema"
-import dotenv from "dotenv"
 import fs from "fs"
 import path from "path"
-
-dotenv.config()
 
 // Types
 import { CreateTripRequestBody, SignedRequest } from "@modules/types"

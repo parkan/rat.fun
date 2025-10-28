@@ -2,9 +2,9 @@
   "name": "server",
   "version": "1.0.0",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node --require dotenv/config dist/index.js",
     "build": "tsup",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx --require dotenv/config src/index.ts"
   },
   "exports": {
     ".": "./dist/index.js",

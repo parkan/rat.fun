@@ -2,9 +2,6 @@ import { FastifyInstance, FastifyRequest } from "fastify"
 import { schema } from "@routes/trip/enter/schema"
 import { Hex } from "viem"
 
-import dotenv from "dotenv"
-dotenv.config()
-
 // Types
 import {
   EnterTripData,

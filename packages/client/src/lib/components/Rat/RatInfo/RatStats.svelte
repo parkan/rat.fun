@@ -1,9 +1,9 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
-  import { ratImageUrl, player } from "$lib/modules/state/stores"
+  import { ratImageUrl } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
-  import { NoImage, Tooltip } from "$lib/components/Shared"
+  import { NoImage } from "$lib/components/Shared"
   import HealthBar from "./HealthBar.svelte"
   import { RatAvatar } from "$lib/components/Shared"
 
@@ -29,9 +29,7 @@
 
       <!-- NAME -->
       <div class="info-item">
-        <Tooltip content={$player.currentRat}>
-          <span class="name">{displayRat.name}</span>
-        </Tooltip>
+        <span class="name">{displayRat.name}</span>
       </div>
 
       <!-- HEALTHBAR -->
