@@ -54,20 +54,24 @@ export function filterLiquidated(trips: Trips): Trips {
 
 /**
  * Filters trips by depletion status
- * @param trips The trips to filter
+ * @param entities The entities to filter
  * @returns The filtered trips
  */
-export function filterDepleted(trips: Trips): Trips {
-  return Object.fromEntries(Object.entries(trips).filter(([, trip]) => Number(trip.balance) === 0))
+export function filterDepleted(entities: Trips | Rats): Trips | Rats {
+  return Object.fromEntries(
+    Object.entries(entities).filter(([, entity]) => Number(entity.balance) === 0)
+  )
 }
 
 /**
- * Filters trips by depletion status
- * @param trips The trips to filter
+ * Filters entities by depletion status
+ * @param entities The trips to filter
  * @returns The filtered trips
  */
-export function filterNonDepleted(trips: Trips): Trips {
-  return Object.fromEntries(Object.entries(trips).filter(([, trip]) => Number(trip.balance) > 0))
+export function filterNonDepleted(entities: Trips | Rats): Trips | Rats {
+  return Object.fromEntries(
+    Object.entries(entities).filter(([, entity]) => Number(entity.balance) > 0)
+  )
 }
 
 /**

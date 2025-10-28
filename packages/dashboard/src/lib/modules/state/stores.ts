@@ -8,7 +8,7 @@
 import { writable, derived } from "svelte/store"
 import { blockNumber } from "$lib/modules/network"
 import { ENTITY_TYPE } from "contracts/enums"
-import { filterByEntitytype } from "./utils"
+import { filterByEntitytype, filterDepleted, filterNonDepleted } from "./utils"
 import { staticContent } from "$lib/modules/content"
 import { WORLD_OBJECT_ID } from "./constants"
 
@@ -98,3 +98,10 @@ export const items = derived(
   entities,
   $entities => filterByEntitytype($entities, ENTITY_TYPE.ITEM) as Items
 )
+
+// Derived
+
+export const inactiveRats = derived(rats, $rats => filterDepleted($rats))
+export const activeRats = derived(rats, $rats => filterNonDepleted($rats))
+export const inactiveTrips = derived(trips, $trips => filterNonDepleted($trips))
+export const activeTrips = derived(trips, $trips => filterNonDepleted($trips))

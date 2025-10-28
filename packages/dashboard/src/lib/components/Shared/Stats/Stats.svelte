@@ -1,56 +1,56 @@
 <script lang="ts">
   import SignedNumber from "$lib/components/Shared/SignedNumber/SignedNumber.svelte"
+  import { activeRats, inactiveRats, activeTrips, inactiveTrips } from "$lib/modules/state/stores"
   import { staticContent } from "$lib/modules/content"
 </script>
 
 <div class="stats">
-  <div class="balance">
-    <h2 class="top">
-      <span class="label"> Rats </span>
-      <SignedNumber withTween value={$staticContent?.statistics?.ratTotalBalance || 0} /> /
-      <SignedNumber withTween value={$staticContent?.statistics?.tripTotalBalance || 0} />
-      <span class="label"> Trips </span>
-    </h2>
-    <h2>
-      <span class="label"> Throughput: </span>
-      <SignedNumber
-        noColor
-        withTween
-        hideSign
-        value={$staticContent?.statistics?.totalThroughput || 0}
-      />
-    </h2>
+  <div class="balance-container">
+    <div class="balance rats">
+      <h2 class="title">Rats</h2>
+      <h1>
+        *{Object.values($activeRats).length} / {Object.values($inactiveRats).length}†
+      </h1>
+      <h1 class="top">
+        <SignedNumber withTween value={$staticContent?.statistics?.ratTotalBalance || 0} />
+        {#if $staticContent?.statistics?.tripTotalBalance !== 0 && $staticContent?.statistics?.ratTotalBalance !== 0}
+          <span>
+            (<SignedNumber
+              noColor
+              withTween
+              value={(($staticContent?.statistics?.ratTotalBalance || 0) /
+                ($staticContent?.statistics?.tripTotalBalance || 0) -
+                1) *
+                100}
+            />%)
+          </span>
+        {/if}
+      </h1>
+    </div>
+    <div class="balance trips">
+      <h2 class="title">Trips</h2>
+      <h1>
+        *{Object.values($activeTrips).length} / {Object.values($inactiveTrips).length}†
+      </h1>
+      <h1 class="top">
+        <SignedNumber withTween value={$staticContent?.statistics?.tripTotalBalance || 0} />
+        {#if $staticContent?.statistics?.tripTotalBalance !== 0 && $staticContent?.statistics?.ratTotalBalance !== 0}
+          <span>
+            (<SignedNumber
+              noColor
+              withTween
+              value={(($staticContent?.statistics?.tripTotalBalance || 0) /
+                ($staticContent?.statistics?.ratTotalBalance || 0) -
+                1) *
+                -100}
+            />%)
+          </span>
+        {/if}
+      </h1>
+    </div>
   </div>
-  <p class="bottom">
-    {#if $staticContent.statistics.ratTotalBalance !== 0 && $staticContent.statistics.tripTotalBalance !== 0}
-      {#if Math.abs($staticContent.statistics.ratTotalBalance) > Math.abs($staticContent.statistics.tripTotalBalance)}
-        <SignedNumber
-          withTween
-          noColor
-          value={Math.abs(
-            ($staticContent.statistics.ratTotalBalance /
-              $staticContent.statistics.tripTotalBalance -
-              1) *
-              100
-          )}
-        />% <small>rats</small>
-      {:else}
-        <SignedNumber
-          withTween
-          noColor
-          value={Math.abs(
-            ($staticContent.statistics.tripTotalBalance /
-              $staticContent.statistics.ratTotalBalance -
-              1) *
-              100
-          )}
-        />% <small>trips</small>
-      {/if}
-    {:else}
-      0
-    {/if}
 
-    {#if $staticContent?.statistics?.totalThroughput && $staticContent?.statistics?.totalThroughput > 0}
+  <!-- {#if $staticContent?.statistics?.totalThroughput && $staticContent?.statistics?.totalThroughput > 0}
       {(
         Math.abs(
           $staticContent.statistics.totalBalance / $staticContent.statistics.totalThroughput
@@ -59,22 +59,53 @@
     {:else}
       0.00%
     {/if}
-    <small>imbalance</small>
-  </p>
+    <small>imbalance</small> -->
 </div>
 
 <style lang="scss">
   .stats {
-    height: 300px;
     display: flex;
-    flex-flow: column wrap;
+    gap: 1rem;
     justify-content: start;
+    margin-bottom: 1rem;
     // align-items: center;
 
     h1,
     h2,
     p {
       margin: 0;
+    }
+
+    .balance-container {
+      background: #eee;
+      border: 1px solid #ccc;
+      display: flex;
+      padding: 1rem;
+      gap: 1rem;
+
+      .balance {
+        width: 300px;
+        padding: 32px 8px;
+        background: white;
+        text-align: center;
+        position: relative;
+
+        &.rats {
+          h2.title {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+          }
+        }
+
+        &.trips {
+          h2.title {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+          }
+        }
+      }
     }
   }
 </style>
