@@ -18,7 +18,8 @@ export const load: PageLoad = async ({ params, url }) => {
 
     return {
       tripContent,
-      liquidating
+      liquidating,
+      tripId: params.tripId
     }
   } catch {
     errorHandler(new CMSError("Could not load data"))

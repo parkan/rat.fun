@@ -103,6 +103,7 @@
   </div>
 {:else}
   <TripConfirmLiquidation
+    {tripId}
     {trip}
     tripContent={sanityTripContent}
     onDone={async () => {

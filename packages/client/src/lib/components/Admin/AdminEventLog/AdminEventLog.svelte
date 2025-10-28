@@ -30,7 +30,7 @@
     <p class="event">
       You unlocked the cashboard
       <span class="meta">
-        {timeSince(new Date($adminUnlockedAt).getTime())}
+        {timeSince($adminUnlockedAt)}
       </span>
     </p>
   {/if}

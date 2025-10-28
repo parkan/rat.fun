@@ -37,10 +37,12 @@
 
   // Managed state
   export const snapshot: Snapshot<string> = {
-    capture: () =>
-      JSON.stringify({
+    capture: () => {
+      console.log("capture: ", $adminUnlockedAt)
+      return JSON.stringify({
         adminUnlockedAt: $adminUnlockedAt
-      }),
+      })
+    },
     restore: value => {
       $adminUnlockedAt = JSON.parse(value).adminUnlockedAt
     }

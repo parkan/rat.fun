@@ -5,18 +5,26 @@
   import { BigButton, ValueBreakdown, SmallSpinner } from "$lib/components/Shared"
 
   let {
+    tripId,
     trip,
     tripContent,
     onDone,
     onAbort
-  }: { trip: Trip; tripContent: SanityTrip; onDone: () => void; onAbort: () => void } = $props()
+  }: {
+    tripId: string
+    trip: Trip
+    tripContent: SanityTrip
+    onDone: () => void
+    onAbort: () => void
+  } = $props()
 
   let liquidating = $state(false)
 
   const onClickConfirm = async () => {
     liquidating = true
-    await sendLiquidateTrip(tripContent._id)
-    sendLiquidateTripMessage(tripContent._id)
+    console.log(tripContent)
+    await sendLiquidateTrip(tripId)
+    sendLiquidateTripMessage(tripId)
     onDone()
   }
 </script>
