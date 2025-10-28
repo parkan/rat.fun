@@ -84,6 +84,7 @@
     <div class="full">
       <p class="section-header">Flashbacks</p>
       <div class="min-height">
+        {$focusEvent}{graphData.length}
         {#key event?.meta?._id}
           <AdminTripEventIntrospection {event} />
         {/key}

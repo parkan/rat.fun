@@ -7,12 +7,14 @@
     withCurrency = false,
     withTween = false,
     hideZero = false,
+    hideSign = false,
     noColor = false
   }: {
     value: number
     className?: string
     withCurrency?: boolean
     hideZero?: boolean
+    hideSign?: boolean
     withTween?: boolean
     noColor?: boolean
   } = $props()
@@ -28,7 +30,9 @@
 
 <span class="signed-number {colorClass} {className}">
   {#if (hideZero && value !== 0) || !hideZero}
-    {sign}{#if withCurrency}{CURRENCY_SYMBOL}{/if}{Math.floor(Math.abs(tweenedValue.current))}
+    {#if !hideSign}{sign}{/if}{#if withCurrency}{CURRENCY_SYMBOL}{/if}{Math.floor(
+      Math.abs(tweenedValue.current)
+    )}
   {/if}
 </span>
 

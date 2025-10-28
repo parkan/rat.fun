@@ -13,7 +13,7 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { environment as environmentStore } from "$lib/modules/network"
 
-  import SignedNumber from "$lib/components/Shared/SignedNumber/SignedNumber.svelte"
+  import Stats from "$lib/components/Shared/Stats/Stats.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
@@ -48,54 +48,10 @@
         <h1>RAT.FUN DASHBOARD: {$environmentStore}</h1>
         <hr />
       </div>
-      <div>
-        <h1 class="numbers">
-          <span class="top">
-            <SignedNumber
-              withTween
-              value={$staticContent?.statistics?.ratTotalBalance || 0}
-            /><small>rats</small>
-            <SignedNumber
-              withTween
-              value={$staticContent?.statistics?.tripTotalBalance || 0}
-            /><small>trips</small>
-            <SignedNumber noColor value={$staticContent?.statistics?.totalThroughput || 0} /><small
-              >throughput</small
-            >
-          </span>
-          <span class="bottom">
-            {#if $staticContent.statistics.ratTotalBalance !== 0 && $staticContent.statistics.tripTotalBalance !== 0}
-              {#if Math.abs($staticContent.statistics.ratTotalBalance) > Math.abs($staticContent.statistics.tripTotalBalance)}
-                {Math.abs(
-                  ($staticContent.statistics.ratTotalBalance /
-                    $staticContent.statistics.tripTotalBalance -
-                    1) *
-                    100
-                )}% <small>rats</small>
-              {:else}
-                {Math.abs(
-                  ($staticContent.statistics.tripTotalBalance /
-                    $staticContent.statistics.ratTotalBalance -
-                    1) *
-                    100
-                )}% <small>trips</small>
-              {/if}
-            {/if}
-
-            {#if $staticContent?.statistics?.totalThroughput && $staticContent?.statistics?.totalThroughput > 0}
-              {(
-                Math.abs(
-                  $staticContent.statistics.totalBalance / $staticContent.statistics.totalThroughput
-                ) * 100
-              ).toFixed(2)}%
-            {:else}
-              0.00%
-            {/if}
-            <small>imbalance</small>
-          </span>
-        </h1>
-      </div>
     </header>
+    <div class="stats">
+      <Stats />
+    </div>
     <div class="content">
       {@render children?.()}
     </div>
