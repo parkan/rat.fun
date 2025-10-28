@@ -1,14 +1,22 @@
 <script lang="ts">
   import type { ColumnConfig } from "$lib/components/types"
-  import { players, rats, trips, items } from "$lib/modules/state/stores"
+  import {
+    playersWithERC20Balances,
+    rats,
+    trips,
+    items,
+    fetchPlayerERC20Balances
+  } from "$lib/modules/state/stores"
   import EntityTable from "$lib/components/EntityTable.svelte"
+  import { onMount } from "svelte"
 
   // Amounts distributed from
 
   const playerColumns: ColumnConfig[] = [
     { key: "creationBlock", displayName: "Create @" },
     { key: "name", displayName: "Name" },
-    { key: "balance", displayName: "Balance" },
+    { key: "erc20Balance", displayName: "ERC20 Balance" },
+    { key: "balance", displayName: "On-chain Balance" },
     { key: "currentRat", displayName: "Current Rat" },
     { key: "pastRatsCount", displayName: "Past Rats" },
     { key: "masterKey", displayName: "Cashboard unlocked" }
@@ -55,7 +63,7 @@
   ]
 
   let processedPlayers = $derived.by(() => {
-    const tempPlayers = $players
+    const tempPlayers = $playersWithERC20Balances
 
     // Add pastRatsCount property to each player
     Object.values(tempPlayers).forEach(player => {
@@ -63,6 +71,19 @@
     })
 
     return tempPlayers
+  })
+
+  // Fetch ERC20 balances on mount and periodically
+  onMount(() => {
+    // Initial fetch
+    fetchPlayerERC20Balances()
+
+    // Refresh every 5 seconds
+    const interval = setInterval(() => {
+      fetchPlayerERC20Balances()
+    }, 5000)
+
+    return () => clearInterval(interval)
   })
 
   let processedRats = $derived.by(() => {
