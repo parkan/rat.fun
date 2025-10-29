@@ -82,6 +82,8 @@ export async function setupNetwork(
     pollingInterval: 1000
   } as const satisfies ClientConfig
 
+  console.log("🔧 [MUD Setup] Polling interval configured:", clientOptions.pollingInterval, "ms")
+
   const publicClient = createPublicClient(clientOptions)
 
   /*
@@ -108,13 +110,48 @@ export async function setupNetwork(
    * to the viem publicClient to make RPC calls to fetch MUD
    * events from the chain.
    */
+  console.log("🗂️  [MUD Setup] Indexer URL:", networkConfig.indexerUrl || "not configured")
+
   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } = await syncToRecs({
     world,
     config: mudConfig,
     address: networkConfig.worldAddress as Hex,
     publicClient,
-    startBlock: BigInt(networkConfig.initialBlockNumber)
+    startBlock: BigInt(networkConfig.initialBlockNumber),
+    indexerUrl: networkConfig.indexerUrl
   })
+
+  // Add logging to track polling behavior
+  let lastPollTime = Date.now()
+  let blockUpdateCount = 0
+  let logUpdateCount = 0
+
+  latestBlock$.subscribe(block => {
+    const now = Date.now()
+    const timeSinceLastPoll = now - lastPollTime
+    blockUpdateCount++
+    console.log(
+      `📊 [Blockchain Poll] Block update #${blockUpdateCount} | ` +
+        `Block: ${block.number} | ` +
+        `Time since last: ${timeSinceLastPoll}ms | ` +
+        `Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
+    )
+    lastPollTime = now
+  })
+
+  storedBlockLogs$.subscribe(logs => {
+    if (logs.logs.length > 0) {
+      logUpdateCount++
+      console.log(
+        `📝 [Blockchain Logs] Log batch #${logUpdateCount} | ` +
+          `Events: ${logs.logs.length} | ` +
+          `Block: ${logs.blockNumber} | ` +
+          `Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
+      )
+    }
+  })
+
+  console.log("✅ [MUD Setup] Observable logging enabled")
 
   return {
     world,
@@ -135,11 +172,19 @@ function chainTransport(rpcUrls: Chain["rpcUrls"][string]): Transport {
 
   let transport: Transport
 
+  // Websocket is problematic due to memory spikes
+  // We currently rely on HTTP polling by not having the websocket ENV variable set
+  // Code is kept as is for the future...
   if (webSocketUrl) {
+    console.log("🔌 [MUD Transport] Using WEBSOCKET transport")
+    console.log("   WebSocket URL:", webSocketUrl)
+    console.log("   Fallback HTTP:", httpUrl || "none")
     transport = httpUrl
       ? fallback([webSocket(webSocketUrl), http(httpUrl)])
       : webSocket(webSocketUrl)
   } else {
+    console.log("🔌 [MUD Transport] Using HTTP POLLING transport")
+    console.log("   HTTP URL:", httpUrl)
     transport = http(httpUrl)
   }
 
