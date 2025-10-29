@@ -56,6 +56,7 @@ export async function getNetworkConfig(chainId: number) {
     chainId,
     chain,
     worldAddress,
-    initialBlockNumber
+    initialBlockNumber,
+    indexerUrl: chain.indexerUrl
   }
 }

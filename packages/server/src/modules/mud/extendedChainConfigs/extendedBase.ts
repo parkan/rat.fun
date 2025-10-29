@@ -16,5 +16,6 @@ export const extendedBase = {
         : baseConfig.rpcUrls.default.http,
       webSocket: RPC_WEBSOCKET_URL ? [RPC_WEBSOCKET_URL] : undefined
     }
-  }
+  },
+  indexerUrl: "https://base.rat-fun-indexer.com"
 } as const satisfies MUDChain
