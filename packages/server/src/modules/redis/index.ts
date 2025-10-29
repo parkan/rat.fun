@@ -182,17 +182,27 @@ class RedisStore {
   }
 }
 
-// Factory function to create the appropriate store
+// Singleton instance
+let storeInstance: InMemoryStore | RedisStore | null = null
+
+// Factory function to create the appropriate store (singleton pattern)
 export function createStore(): InMemoryStore | RedisStore {
+  // Return existing instance if already created
+  if (storeInstance) {
+    return storeInstance
+  }
+
   const redisUrl = process.env.REDIS_URL
 
   if (redisUrl) {
     console.log("Using Redis store")
-    return new RedisStore(redisUrl)
+    storeInstance = new RedisStore(redisUrl)
   } else {
     console.log("Using in-memory store for development")
-    return new InMemoryStore()
+    storeInstance = new InMemoryStore()
   }
+
+  return storeInstance
 }
 
 // Export types for convenience
