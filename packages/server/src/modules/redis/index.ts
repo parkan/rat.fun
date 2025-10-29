@@ -10,10 +10,16 @@ import {
 // In-memory storage for local development
 class InMemoryStore {
   private messages: OffChainMessage[] = []
-  private nonces: Record<number, boolean> = {}
+  private nonces: Map<number, number> = new Map() // Map<nonce, expirationTimestamp>
+  private readonly MAX_MESSAGES = 1000
+  private readonly NONCE_TTL_MS = 60000 // 60 seconds
 
   async storeMessage(message: OffChainMessage): Promise<OffChainMessage> {
     this.messages.push(message)
+    // Keep only last 1000 messages (same as Redis implementation)
+    if (this.messages.length > this.MAX_MESSAGES) {
+      this.messages = this.messages.slice(-this.MAX_MESSAGES)
+    }
     return message
   }
 
@@ -25,11 +31,32 @@ class InMemoryStore {
   }
 
   async storeNonce(nonce: number): Promise<void> {
-    this.nonces[nonce] = true
+    const expirationTime = Date.now() + this.NONCE_TTL_MS
+    this.nonces.set(nonce, expirationTime)
+    // Clean up expired nonces to prevent unbounded growth
+    this.cleanupExpiredNonces()
   }
 
   async hasNonce(nonce: number): Promise<boolean> {
-    return this.nonces[nonce] ?? false
+    const expirationTime = this.nonces.get(nonce)
+    if (!expirationTime) {
+      return false
+    }
+    // Check if nonce has expired
+    if (Date.now() > expirationTime) {
+      this.nonces.delete(nonce)
+      return false
+    }
+    return true
+  }
+
+  private cleanupExpiredNonces(): void {
+    const now = Date.now()
+    for (const [nonce, expirationTime] of this.nonces.entries()) {
+      if (now > expirationTime) {
+        this.nonces.delete(nonce)
+      }
+    }
   }
 }
 
