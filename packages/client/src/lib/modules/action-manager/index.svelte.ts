@@ -11,6 +11,7 @@ export { sendCreateTrip } from "./actions/sendCreateTrip"
 export { sendLiquidateRat } from "./actions/sendLiquidateRat"
 export { sendLiquidateTrip } from "./actions/sendLiquidateTrip"
 export { sendBuyWithEth } from "./actions/sendBuyWithEth"
+export { sendUnlockAdmin } from "./actions/sendUnlockAdmin"
 
 const DEFAULT_TIMINGS = {
   Spawn: 4000,

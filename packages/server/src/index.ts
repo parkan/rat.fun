@@ -12,6 +12,7 @@ import create from "@routes/trip/create"
 import wsConnect from "@routes/ws-connect"
 import ping from "@routes/test/ping"
 import healthz from "@routes/healthz"
+import unlockAdmin from "@routes/dev/unlock-admin"
 
 // Initialize Sentry before creating the Fastify instance
 initializeSentry()
@@ -46,6 +47,7 @@ fastify.register(create)
 fastify.register(wsConnect)
 fastify.register(ping)
 fastify.register(healthz)
+fastify.register(unlockAdmin)
 
 // Graceful shutdown handler
 const gracefulShutdown = async (signal: string) => {

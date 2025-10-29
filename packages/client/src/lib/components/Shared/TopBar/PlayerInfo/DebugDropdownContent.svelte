@@ -12,20 +12,14 @@
     sendGiveCallerTokens,
     sendApproveMax,
     sendBuyWithEth,
-    sendLiquidateRat
+    sendLiquidateRat,
+    sendUnlockAdmin
   } from "$lib/modules/action-manager/index.svelte"
-  import { sendChatMessage } from "$lib/modules/off-chain-sync"
   import { SmallButton } from "$lib/components/Shared"
   import { ENTITY_TYPE } from "contracts/enums"
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
-  import { adminUnlockedAt } from "$lib/modules/ui/state.svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
-
-  const sendUnlockAdmin = async () => {
-    await sendChatMessage("RatsRiseUp666")
-    $adminUnlockedAt = Date.now()
-  }
 </script>
 
 <div class="debug-dropdown-content">

@@ -134,7 +134,8 @@ async function sendMessageRequest(topic: OffChainMessage["topic"], data: Record<
  *****************/
 
 export async function sendChatMessage(message: string) {
-  sendMessageRequest("chat__message", { message })
+  console.log("disabled")
+  // sendMessageRequest("chat__message", { message })
 }
 
 /****************
@@ -142,7 +143,8 @@ export async function sendChatMessage(message: string) {
  *****************/
 
 export async function sendDeployRatMessage() {
-  sendMessageRequest("rat__deploy", {})
+  console.log("disabled")
+  // sendMessageRequest("rat__deploy", {})
 }
 
 /****************
@@ -150,7 +152,8 @@ export async function sendDeployRatMessage() {
  *****************/
 
 export async function sendLiquidateRatMessage(ratId: string) {
-  sendMessageRequest("rat__liquidate", { ratId })
+  console.log("disabled")
+  // sendMessageRequest("rat__liquidate", { ratId })
 }
 
 /****************
@@ -158,5 +161,6 @@ export async function sendLiquidateRatMessage(ratId: string) {
  *****************/
 
 export async function sendLiquidateTripMessage(tripId: string) {
-  sendMessageRequest("trip__liquidation", { tripId })
+  console.log("disabled")
+  // sendMessageRequest("trip__liquidation", { tripId })
 }
