@@ -15,42 +15,27 @@
     PastTripList,
     PastTripEntry
   } from "$lib/components/Rat"
-  import {
-    RAT_BOX_STATE,
-    ratBoxState,
-    transitionTo,
-    resetRatBoxState
-  } from "$lib/components/Rat/state.svelte"
+  import { RAT_BOX_STATE, getRatBoxState, transitionTo } from "$lib/components/Rat/state.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
+
+  let ratBoxState = getRatBoxState()
 
   onMount(async () => {
     shaderManager.setShader("clouds", true)
     $backgroundMusic?.stop()
     $backgroundMusic = playSound("ratfunMusic", "main", true)
 
-    // Set state to RAT_BOX_STATE.INIT
-    resetRatBoxState()
-
-    // HACK: wait a little to allow the token balance to update
-    // to avoid having $playerIsBroke be true when it shouldn't
-    // PROBLEM: this also delays the loading of the RatBox on all remount navigations...
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    console.log("$rat", $rat)
-
-    if ($rat) {
-      if ($rat.dead) {
-        transitionTo(RAT_BOX_STATE.NO_RAT)
-      } else {
-        transitionTo(RAT_BOX_STATE.HAS_RAT)
-      }
-    } else {
+    if (!$rat) {
       if ($playerIsBroke) {
         transitionTo(RAT_BOX_STATE.NO_TOKENS)
       } else if ($tokenAllowanceApproved === false) {
         transitionTo(RAT_BOX_STATE.NO_ALLOWANCE)
       } else {
         transitionTo(RAT_BOX_STATE.NO_RAT)
+      }
+    } else {
+      if ($rat.dead) {
+        transitionTo(RAT_BOX_STATE.DEAD_RAT)
       }
     }
   })

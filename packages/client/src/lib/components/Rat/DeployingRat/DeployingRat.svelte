@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
-  import { player } from "$lib/modules/state/stores"
+  import { player, rat } from "$lib/modules/state/stores"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
   import { sendCreateRat } from "$lib/modules/action-manager/index.svelte"
   import { generateRatName, lastNameFragments, firstNameFragments } from "./ratNameGenerator"
@@ -17,8 +17,9 @@
   import { LockButton, SmallSpinner } from "$lib/components/Shared"
 
   // Pre-generate the final name
-  const { firstName, lastName, number } = generateRatName()
-  const finalName = `${firstName}_${lastName}_${number}`
+  const initialName = generateRatName()
+  let { firstName, lastName, ratNumber } = $state(initialName)
+  let finalName = $derived(`${firstName}_${lastName}_${ratNumber}`)
 
   let deploymentDone = $state(false)
   let waitingForDeployment = $state(false)
@@ -41,7 +42,7 @@
 
   let firstNameInterval: ReturnType<typeof setInterval> | null = null
   let lastNameInterval: ReturnType<typeof setInterval> | null = null
-  let numberInterval: ReturnType<typeof setInterval> | null = null
+  let ratNumberInterval: ReturnType<typeof setInterval> | null = null
   let slotMachineTimeout: ReturnType<typeof setTimeout> | null = null
   let checkInterval: ReturnType<typeof setInterval> | null = null
 
@@ -80,7 +81,7 @@
       }
     }, 100)
 
-    numberInterval = setInterval(() => {
+    ratNumberInterval = setInterval(() => {
       if (!slot2Stopped) {
         const newNumber = getRandomNumberAvoidingPrevious(100, 999, previousNumber)
         numberDisplay = newNumber
@@ -104,8 +105,8 @@
       lastNameDisplay = lastName
     } else if (slotIndex === 2) {
       slot2Stopped = true
-      clearInterval(numberInterval!)
-      numberDisplay = number.toString()
+      clearInterval(ratNumberInterval!)
+      numberDisplay = ratNumber.toString()
     }
 
     // Move to next slot
@@ -123,12 +124,20 @@
   }
 
   async function startDeployment() {
-    const oldRatId = $player?.currentRat ?? ""
+    // Check if the rat was already made, and we are just waiting for the user to click buttons
+    if ($rat) {
+      if ($rat.balance > 0 && !$rat.dead) {
+        ;[firstName, lastName, ratNumber] = $rat.name.split("_")
+        console.log(firstName, lastName, ratNumber)
+        deploymentDone = true
+        return // return before calling create rat
+      }
+    }
     await sendCreateRat(finalName)
 
     try {
       // Make sure new rat is available to avoid flash of old info
-      await waitForPropertyChange(player, "currentRat", oldRatId, 10000)
+      // await waitForPropertyChange(player, "currentRat", oldRatId, 10000)
       sendDeployRatMessage()
       deploymentDone = true
     } catch (error) {
@@ -182,9 +191,9 @@
       clearInterval(lastNameInterval)
       lastNameInterval = null
     }
-    if (numberInterval) {
-      clearInterval(numberInterval)
-      numberInterval = null
+    if (ratNumberInterval) {
+      clearInterval(ratNumberInterval)
+      ratNumberInterval = null
     }
     if (slotMachineTimeout) {
       clearTimeout(slotMachineTimeout)

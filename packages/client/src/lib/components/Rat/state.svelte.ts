@@ -113,6 +113,10 @@ export const resetRatBoxState = () => {
   ratBoxState.errorMessage = null
 }
 
+export const setRatBoxState = (state: RAT_BOX_STATE) => {
+  ratBoxState.state = state
+}
+
 let itemState = $state("")
 const itemDerived = $derived.by(() => {
   const values = get(items)
@@ -132,3 +136,5 @@ export const getItemState = () => {
     }
   }
 }
+
+export const getRatBoxState = () => ratBoxState

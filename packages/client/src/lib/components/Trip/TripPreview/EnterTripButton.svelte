@@ -21,8 +21,9 @@
       text={`Rat value too low (at least ${Number($minRatValueToEnter)})`}
       onclick={onClick}
     />
+  {:else}
+    <BigButton {disabled} text="Send rat to trip" onclick={onClick} />
   {/if}
-  <BigButton {disabled} text="Send rat to trip" onclick={onClick} />
 </div>
 
 <style>

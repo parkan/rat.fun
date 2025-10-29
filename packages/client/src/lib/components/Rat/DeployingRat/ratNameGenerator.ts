@@ -100,6 +100,6 @@ export const lastNameFragments = [
 export function generateRatName() {
   const firstName = getRandomElement(firstNameFragments)
   const lastName = getRandomElement(lastNameFragments)
-  const number = getRandomNumber(100, 999)
-  return { firstName, lastName, number }
+  const ratNumber = getRandomNumber(100, 999)
+  return { firstName, lastName, ratNumber }
 }

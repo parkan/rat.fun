@@ -9,6 +9,9 @@
   import { rat, ratTotalValue } from "$lib/modules/state/stores"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
+  import { getRatBoxState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+
+  let ratBoxState = getRatBoxState()
 
   import {
     TripPreviewHeader,
@@ -33,11 +36,13 @@
   //  * - Trip is not depleted
   //  * - Rat exists and is alive
   //  * - TODO: rat has min value to enter
-  let showEnterButton = $derived((trip?.balance ?? 0) > 0 && !$rat?.dead)
+  let showEnterButton = $derived(
+    (trip?.balance ?? 0) > 0 && !$rat?.dead && ratBoxState.state !== RAT_BOX_STATE.DEPLOYING_RAT
+  )
 
   // Show no rat warning if:
   //  * - Rat does not exist or is dead
-  let showNoRatWarning = $derived($rat?.dead)
+  let showNoRatWarning = $derived($rat?.dead || ratBoxState.state === RAT_BOX_STATE.DEPLOYING_RAT)
 
   const onBackButtonClick = () => {
     goto("/")
