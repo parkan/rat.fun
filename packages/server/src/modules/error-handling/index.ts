@@ -187,39 +187,6 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
 }
 
 /**
- * Handle WebSocket errors and send appropriate messages
- */
-export function handleWebSocketError(error: unknown, socket: WebSocket): void {
-  console.error("WebSocket Error:", error)
-
-  const baseResponse = {
-    error: error instanceof Error ? error.message : String(error),
-    code: error instanceof AppError ? error.code : "UNKNOWN_ERROR",
-    timestamp: Date.now()
-  }
-
-  const errorMessage = {
-    topic: "error",
-    ...baseResponse
-  }
-
-  // Capture WebSocket errors in Sentry
-  if (error instanceof Error) {
-    captureError(error, {
-      context: "websocket",
-      errorCode: error instanceof AppError ? error.code : "UNKNOWN_ERROR"
-    })
-  } else {
-    captureMessage(`WebSocket Error: ${String(error)}`, "error", {
-      context: "websocket",
-      errorType: typeof error
-    })
-  }
-
-  socket.send(JSON.stringify(errorMessage))
-}
-
-/**
  * Handle errors in background processes (outside of main request context)
  */
 export function handleBackgroundError(error: unknown, context: string): void {

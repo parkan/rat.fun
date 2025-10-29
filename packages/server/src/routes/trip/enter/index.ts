@@ -12,10 +12,6 @@ import {
   EnterTripRequestBody
 } from "@modules/types"
 
-// WebSocket
-import { broadcast } from "@modules/websocket"
-import { createOutcomeMessage } from "@modules/websocket/constructMessages"
-
 // LLM
 import { constructEventMessages, constructCorrectionMessages } from "@modules/llm/constructMessages"
 
@@ -189,27 +185,8 @@ async function routes(fastify: FastifyInstance) {
               mainProcessingTime,
               eventResults.outcome?.debuggingInfo
             )
-
-            // * * * * * * * * * * * * * * * * * *
-            // Create outcome message and broadcast
-            // * * * * * * * * * * * * * * * * * *
-
-            // console.log("Creating outcome message for broadcast...")
-            const outcomeMessage = createOutcomeMessage(
-              player,
-              rat,
-              newRatBalance,
-              trip,
-              validatedOutcome
-            )
-            // console.log("Outcome message created, attempting broadcast...")
-
-            // Fire-and-forget: don't await the broadcast
-            broadcast(outcomeMessage).catch(error =>
-              console.error("Failed to broadcast outcome message:", error)
-            )
           } catch (error) {
-            handleBackgroundError(error, "Trip Entry - CMS & WebSocket")
+            handleBackgroundError(error, "Trip Entry - CMS")
           } finally {
             console.timeEnd("–– Background actions")
           }

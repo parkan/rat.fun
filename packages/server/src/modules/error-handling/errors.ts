@@ -10,20 +10,6 @@ export class AppError extends Error {
 }
 
 // ============================================================================
-// WebSocket Errors
-// ============================================================================
-
-export class WebSocketError extends AppError {
-  constructor(
-    code: string = "WEBSOCKET_ERROR",
-    errorType: string = "WebSocket error",
-    message: string
-  ) {
-    super(code, errorType, message)
-  }
-}
-
-// ============================================================================
 // CMS Errors
 // ============================================================================
 

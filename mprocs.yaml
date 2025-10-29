@@ -11,6 +11,9 @@ procs:
   server:
     cwd: packages/server
     shell: pnpm dev
+  websocket-server:
+    cwd: packages/websocket-server
+    shell: pnpm dev
   cms-public:
     cwd: packages/cms-public
     shell: pnpm dev

@@ -23,10 +23,6 @@ import { verifyRequest } from "@modules/signature"
 // Validation
 import { validateInputData } from "./validation"
 
-// WebSocket
-import { broadcast } from "@modules/websocket"
-import { createTripCreationMessage } from "@modules/websocket/constructMessages"
-
 // Utils
 import { generateRandomBytes32, withTimeout } from "@modules/utils"
 
@@ -91,9 +87,6 @@ async function routes(fastify: FastifyInstance) {
         const backgroundActions = async () => {
           console.time("–– Background actions")
           try {
-            // Broadcast trip creation message
-            broadcast(createTripCreationMessage(tripId, player))
-
             // Get the image data with timeout (30 seconds)
             const imageBuffer = await withTimeout(
               generateImage(tripPrompt),
@@ -104,7 +97,7 @@ async function routes(fastify: FastifyInstance) {
             // Update the trip document with the image
             await updateTripWithImage(tripId, imageBuffer)
           } catch (error) {
-            handleBackgroundError(error, "Trip Creation - Image Generation, CMS & WebSocket")
+            handleBackgroundError(error, "Trip Creation - Image Generation & CMS")
 
             // Read default trip image static folder
             const defaultTripImagePath = path.resolve(
