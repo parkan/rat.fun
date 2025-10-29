@@ -4,6 +4,7 @@
   import { lastUpdated, staticContent } from "$lib/modules/content"
   import { urlFor } from "$lib/modules/content/sanity"
   import { NoImage } from "$lib/components/Shared"
+  import { lightboxState } from "$lib/modules/ui/state.svelte"
 
   let { trip, sanityTripContent, tripId }: { trip: Trip; sanityTripContent: any; tripId?: Hex } =
     $props()
@@ -28,6 +29,24 @@
       return ""
     }
   })
+
+  let tripLightBoxUrl = $derived.by(() => {
+    const image = tripContentFromStore?.image
+    if (image) {
+      const result = urlFor(image)
+      if (result === "") {
+        return result
+      } else {
+        return result.width(1920).auto("format").url()
+      }
+    } else {
+      return ""
+    }
+  })
+
+  const openLightbox = () => {
+    lightboxState.open(tripLightBoxUrl, `trip #${trip.index}`)
+  }
 </script>
 
 <div class="trip-preview-header">
@@ -38,7 +57,7 @@
     <div class="trip-image">
       {#key $lastUpdated}
         {#if tripImageUrl}
-          <img src={tripImageUrl} alt={`trip #${trip.index}`} />
+          <img onclick={openLightbox} src={tripImageUrl} alt={`trip #${trip.index}`} />
         {:else}
           <NoImage />
         {/if}
@@ -115,6 +134,7 @@
           border-radius: 20px;
           border: 5px solid rgba(255, 255, 255, 0.2);
           overflow: hidden;
+          cursor: pointer;
 
           img {
             display: block;

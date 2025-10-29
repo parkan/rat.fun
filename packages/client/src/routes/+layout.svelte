@@ -14,7 +14,12 @@
   import { onMount, onDestroy } from "svelte"
   import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
-  import { UIState, notificationsRead, adminUnlockedAt } from "$lib/modules/ui/state.svelte"
+  import {
+    UIState,
+    notificationsRead,
+    adminUnlockedAt,
+    lightboxState
+  } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { initOffChainSync } from "$lib/modules/off-chain-sync"
   import { playerId, activeWorldEvent } from "$lib/modules/state/stores"
@@ -30,7 +35,13 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import { ShaderGlobal, Modal, ModalTarget, WorldEventPopup } from "$lib/components/Shared"
+  import {
+    ShaderGlobal,
+    Modal,
+    ModalTarget,
+    WorldEventPopup,
+    Lightbox
+  } from "$lib/components/Shared"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
@@ -133,6 +144,10 @@
 <EntryKit />
 <Modal />
 <Toasts />
+
+{#if lightboxState.isOpen}
+  <Lightbox src={lightboxState.src} alt={lightboxState.alt} onClose={() => lightboxState.close()} />
+{/if}
 
 <style lang="scss">
   .context-main {

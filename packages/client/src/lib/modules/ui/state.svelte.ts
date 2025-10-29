@@ -1,6 +1,7 @@
 import { writable } from "svelte/store"
 import { UI } from "./enums"
 import { LocalStorage } from "$lib/modules/state/local.svelte"
+import { LightboxState } from "$lib/modules/lightbox/lightbox.svelte"
 
 export const UIState = writable(UI.LOADING)
 
@@ -14,3 +15,5 @@ export const adminUnlockedAt = writable(Date.now())
 
 export const focusEvent = writable(-1)
 export const focusTrip = writable("")
+
+export const lightboxState = new LightboxState()

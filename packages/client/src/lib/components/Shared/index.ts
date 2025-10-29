@@ -33,6 +33,9 @@ export { default as ShaderLocal } from "./Shader/ShaderLocal.svelte"
 /* Tooltip */
 export { default as Tooltip } from "./Tooltip/Tooltip.svelte"
 
+/* Lightbox */
+export { default as Lightbox } from "./Lightbox/Lightbox.svelte"
+
 /* Loaders */
 export { default as SmallSpinner } from "./Loaders/SmallSpinner.svelte"
 
