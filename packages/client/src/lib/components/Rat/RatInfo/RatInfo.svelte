@@ -1,29 +1,13 @@
 <script lang="ts">
   import { rat } from "$lib/modules/state/stores"
-  import { frozenRat, resetFrozenState } from "$lib/components/GameRun/state.svelte"
-  import { onMount } from "svelte"
   import { RatStats, RatInventory, LiquidateRat } from "$lib/components/Rat"
 
   // Sync display rat to on-chain rat
   let displayRat = $state<Rat | null>(null)
 
-  const updateDisplayRat = async () => {
-    if (frozenRat) {
-      // If we are coming back from a trip frozenRat is set
-      displayRat = frozenRat
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      displayRat = $rat
-
-      resetFrozenState()
-    } else {
-      // Otherwise we just get the newest values directly
-      displayRat = $rat
-    }
-  }
-
-  onMount(updateDisplayRat)
+  $effect(() => {
+    displayRat = $rat
+  })
 </script>
 
 <div class="rat-info">
