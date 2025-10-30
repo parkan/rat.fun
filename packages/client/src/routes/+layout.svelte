@@ -21,14 +21,13 @@
     lightboxState
   } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
-  import { activeWorldEvent, rat } from "$lib/modules/state/stores"
+  import { activeWorldEvent, rat, ratInventory } from "$lib/modules/state/stores"
   import { errorHandler } from "$lib/modules/error-handling"
   import {
     environment as environmentStore,
     walletType as walletTypeStore
   } from "$lib/modules/network"
   import { getRatState } from "$lib/components/Rat/state.svelte"
-  import { getRatInventory } from "$lib/modules/state/utils"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -50,30 +49,35 @@
   // Managed state
   export const snapshot: Snapshot<string> = {
     capture: () => {
+      console.log("capture")
       const currentState = {
         adminUnlockedAt: $adminUnlockedAt,
         ratBoxState: ratState.state.current,
         ratBoxBalance: Number($rat?.balance) ?? 100,
-        ratBoxInventorySize: getRatInventory($rat)?.length ?? 0
+        ratBoxInventory: $ratInventory || []
       }
       console.log(performance.now(), page.route.id, currentState)
 
-      if (page.route.id.includes("tripping")) {
+      if (page?.route?.id?.includes("tripping")) {
         // Do nothing
       } else {
         return JSON.stringify(currentState)
       }
     },
     restore: value => {
+      console.log("restore!")
       const parsedValue = JSON.parse(value)
       $adminUnlockedAt = parsedValue.adminUnlockedAt
       ratState.state.transitionTo(parsedValue.ratBoxState)
       if (parsedValue?.ratBoxBalance) {
-        ratState.balance.set(BigInt(parsedValue.ratBoxBalance))
+        console.log("set")
+        ratState.balance.set(Number(parsedValue.ratBoxBalance))
       }
-      if (parsedValue?.ratBoxInventorySize) {
-        ratState.inventorySize.set(parsedValue?.ratBoxInventorySize ?? 0)
+      if (parsedValue?.ratBoxInventory) {
+        ratState.inventory.set(parsedValue?.ratBoxInventory || [])
       }
+
+      console.log("restored balance", ratState.balance.current)
     }
   }
 

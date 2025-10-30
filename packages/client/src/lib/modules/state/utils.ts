@@ -141,13 +141,9 @@ export function getRatInventory(rat: Rat | null, delay?: number) {
  * @param rat The rat to calculate the total value of
  * @returns The total value of the rat
  */
-export function getRatTotalValue(rat: Rat | null) {
-  if (!rat) {
-    return 0
-  }
-  const ratInventory = getRatInventory(rat)
+export function getRatTotalValue(balance: BigInt | number, ratInventory: Item[]) {
   const totalValue =
-    Number(rat.balance ?? 0) + // Balance
+    Number(balance) + // Balance
     ratInventory.reduce((acc, item) => acc + (item?.value ? Number(item.value) : 0), 0) // Inventory
   return totalValue
 }
@@ -289,4 +285,16 @@ export function waitForStoreChange<T>(
       }
     })
   })
+}
+
+export function convertBigIntsToNumbers<T>(obj: T): T {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj === "bigint") return Number(obj) as T
+  if (Array.isArray(obj)) return obj.map(convertBigIntsToNumbers) as T
+  if (typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [key, convertBigIntsToNumbers(value)])
+    ) as T
+  }
+  return obj
 }

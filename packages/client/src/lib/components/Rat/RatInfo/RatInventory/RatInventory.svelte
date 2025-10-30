@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { getRatInventory } from "$lib/modules/state/utils"
-  import { rat } from "$lib/modules/state/stores"
+  import { onMount } from "svelte"
+  import { rat, ratInventory } from "$lib/modules/state/stores"
+  import { getRatState } from "$lib/components/Rat/state.svelte"
 
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
 
-  let inventory = $derived<Item[]>($rat ? getRatInventory($rat) : [])
+  // Compare inventories with rat State size comparison and add some delay
+  let ratState = getRatState()
 
   const MAX_INVENTORY_SIZE = 6
-  const emptySlots = Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null)
+  let emptySlots = $state(
+    Array(MAX_INVENTORY_SIZE - (ratState.inventory.current?.length || 0)).fill(null)
+  )
 
-  let inventorySlots = $state([...inventory, ...emptySlots])
+  let inventorySlots = $state([...ratState.inventory.current, ...emptySlots])
 
-  $effect(() => {
-    // Fill the inventory slots after 1s
+  onMount(() => {
     setTimeout(() => {
-      // console.log("after 2s")
-      inventorySlots = [
-        ...inventory,
-        ...Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null)
-      ]
-    }, 1000)
+      emptySlots = Array(MAX_INVENTORY_SIZE - ($ratInventory?.length || 0)).fill(null)
+      inventorySlots = [...$ratInventory, ...emptySlots]
+    }, 3000)
   })
 </script>
 

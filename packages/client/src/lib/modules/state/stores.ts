@@ -16,7 +16,9 @@ import {
   filterActive,
   filterLiquidated,
   filterDepleted,
-  filterNonDepleted
+  filterNonDepleted,
+  convertBigIntsToNumbers,
+  getRatTotalValue
 } from "./utils"
 import { addressToNumber } from "$lib/modules/utils"
 import { staticContent } from "$lib/modules/content"
@@ -177,9 +179,12 @@ export const tokenAllowanceApproved = derived(
 
 export const rat = derived([player, rats], ([$player, $rats]) => $rats[$player?.currentRat] as Rat)
 
-export const ratInventory = derived(
-  [rat, items],
-  ([$rat, $items]) => $rat?.inventory?.map(item => $items[item]) ?? ([] as Item[])
+export const ratInventory = derived([rat, items], ([$rat, $items]) =>
+  convertBigIntsToNumbers($rat?.inventory?.map(item => $items[item]) ?? ([] as Item[]))
+)
+
+export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]) =>
+  getRatTotalValue($rat?.balance ?? 0, $ratInventory)
 )
 
 export const ratImageUrl = derived([player, staticContent], ([$player, $staticContent]) => {
@@ -199,17 +204,6 @@ export const ratImageUrl = derived([player, staticContent], ([$player, $staticCo
   } else {
     return ""
   }
-})
-
-/**
- * Calculated by adding up the balance and inventory value
- */
-export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]) => {
-  const totalValue = !$rat
-    ? 0
-    : Number($rat.balance ?? 0) + // Balance
-      $ratInventory.reduce((acc, item) => acc + (item?.value ? Number(item.value) : 0), 0) // Inventory
-  return totalValue
 })
 
 // * * * * * * * * * * * * * * * * *

@@ -1,19 +1,24 @@
 <script lang="ts">
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { DangerButton } from "$lib/components/Shared"
-  import { rat } from "$lib/modules/state/stores"
-  import { getRatState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { rat, ratTotalValue } from "$lib/modules/state/stores"
   import { getRatTotalValue } from "$lib/modules/state/utils"
+  import { getRatState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { Tween } from "svelte/motion"
-
-  let totalValue = $derived($rat ? getRatTotalValue($rat) : 0)
-  const tweenedValue = new Tween(totalValue)
 
   let ratState = getRatState()
 
+  const initialValue = getRatTotalValue(ratState.balance.current, ratState.inventory.current)
+
+  // Define the comparison
+  let current = $state(initialValue)
+  let target = $derived(Number($rat.balance))
+
+  const tweenedValue = new Tween(current)
+
   $effect(() => {
-    if (totalValue !== tweenedValue.current) {
-      tweenedValue.set(totalValue, { delay: 2000 })
+    if (target != current) {
+      tweenedValue.set(target, { delay: 4000, duration: 2000 })
     }
   })
 

@@ -1,6 +1,6 @@
 import { errorHandler } from "$lib/modules/error-handling"
 import { InvalidStateTransitionError } from "$lib/modules/error-handling/errors"
-import { rat } from "$lib/modules/state/stores"
+import { rat, ratInventory } from "$lib/modules/state/stores"
 import { get } from "svelte/store"
 
 /**
@@ -40,8 +40,8 @@ export enum RAT_BOX_STATE {
 
 // Local state
 let ratBoxState = $state<RAT_BOX_STATE>(RAT_BOX_STATE.INIT)
-let ratBoxBalance = $state<number | BigInt>(Number(get(rat)?.balance) ?? 0)
-let ratBoxInventorySize = $state<number>(0)
+let ratBoxBalance = $state<number>(0)
+let ratBoxInventory = $state<any[]>([])
 
 /**
  * Defines valid state transitions between rat box states
@@ -111,8 +111,8 @@ export const getRatState = () => {
     setRatBoxState(newState)
   }
 
-  const setRatBoxInventorySize = (inventory: number) => {
-    ratBoxInventorySize = inventory
+  const setRatBoxInventory = (inventory: any[]) => {
+    ratBoxInventory = inventory
   }
 
   return {
@@ -129,10 +129,10 @@ export const getRatState = () => {
         return ratBoxBalance
       }
     },
-    inventorySize: {
-      set: setRatBoxInventorySize,
+    inventory: {
+      set: setRatBoxInventory,
       get current() {
-        return ratBoxInventorySize
+        return ratBoxInventory
       }
     }
   }

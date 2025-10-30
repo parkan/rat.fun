@@ -6,10 +6,11 @@
 
   let ratState = getRatState()
 
-  let current = $derived(Number(ratState.balance.current))
+  // Define the comparison
+  let current = $derived(ratState?.balance?.current ?? 0)
   let target = $derived(Number($rat.balance))
 
-  const tweenedValue = new Tween(current, { delay: 1000 })
+  const tweenedValue = new Tween(current, { duration: 0 })
 
   // Health 0-25 => 1
   // Health 26-50 => 2
@@ -18,7 +19,9 @@
   let healthLevel = $derived(Math.floor(tweenedValue.current / 25))
 
   $effect(() => {
-    tweenedValue.set(target)
+    if (target != current) {
+      tweenedValue.set(target, { duration: 2000 })
+    }
   })
 </script>
 
