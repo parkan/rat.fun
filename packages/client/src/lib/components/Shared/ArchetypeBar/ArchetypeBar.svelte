@@ -5,22 +5,14 @@
   let { content }: { content: SanityTrip } = $props()
 
   let height = $state(112)
-  let total = $derived(
-    content
-      ? Object.keys(content).reduce((a, b) => {
-          if (b?.includes("archetype")) {
-            console.log(content[b])
-            return a + content[b]
-          }
-          return a
-        }, 0)
-      : 0
-  )
 
   let itemAdd = $state(content?.archetypeItemAdd ?? 0)
   let itemRemove = $state(content?.archetypeItemRemove ?? 0)
   let balanceAdd = $state(content?.archetypeBalanceAdd ?? 0)
   let balanceRemove = $state(content?.archetypeBalanceRemove ?? 0)
+
+  // Sum explicit typed fields to avoid dynamic string indexing on `content`
+  let total = $derived(itemAdd + itemRemove + balanceAdd + balanceRemove)
 </script>
 
 <div class="archetype-bar" style:height="{height}px">
