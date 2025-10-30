@@ -28,7 +28,10 @@ async function routes(fastify: FastifyInstance, options: object) {
       const store = createStore()
       if (process.env.REDIS_URL) {
         // Only test Redis if REDIS_URL is configured
-        await store.getMessages(1) // Just try to get the latest message
+        // Test with a health check nonce
+        const testNonce = Date.now()
+        await store.storeNonce(testNonce)
+        await store.hasNonce(testNonce)
         health.services.redis.status = "healthy"
       } else {
         health.services.redis.status = "not-configured"
