@@ -1,7 +1,11 @@
 <script lang="ts">
   import { BackButton } from "$lib/components/Shared"
 
-  let { src, alt = "", onClose = () => {} } = $props()
+  let {
+    src,
+    alt = "",
+    onClose = () => {}
+  }: { src: string; alt?: string; onClose: () => void } = $props()
 
   let imageElement = $state<HTMLImageElement>()
   let containerElement = $state<HTMLDivElement>()
@@ -25,10 +29,18 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div bind:this={containerElement} onclick={handleContainerClick} class="lightbox-container">
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div
+  bind:this={containerElement}
+  onclick={handleContainerClick}
+  role="button"
+  tabindex="0"
+  aria-label="Close lightbox"
+  class="lightbox-container"
+>
   <img bind:this={imageElement} {src} {alt} class="lightbox-image" draggable="false" />
   <div class="close-button">
-    <BackButton extraClass="full-width" onclick={close} />
+    <BackButton onclick={close} />
   </div>
 </div>
 
@@ -50,22 +62,18 @@
   .lightbox-image {
     width: 100%;
     height: 100%;
-    max-height: 100%;
-    max-width: 100%;
+    max-height: 90%;
+    max-width: 90%;
     object-fit: contain;
+    margin-top: 40px;
   }
 
   .close-button {
-    height: 60px;
-    width: 100dvh;
-    transform-origin: top left;
-    transform: translate(100%, 0) rotate(90deg);
     position: absolute;
-    right: 0;
     top: 0;
-
-    :global(.full-width) {
-      width: 100dvh;
-    }
+    left: 0;
+    z-index: 10001;
+    height: 60px;
+    width: 100%;
   }
 </style>
