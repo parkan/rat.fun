@@ -1,13 +1,11 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
-  import { ratImageUrl } from "$lib/modules/state/stores"
+  import { rat, ratImageUrl } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { NoImage } from "$lib/components/Shared"
   import HealthBar from "./HealthBar.svelte"
   import { RatAvatar } from "$lib/components/Shared"
-
-  let { displayRat }: { displayRat: Rat | null } = $props()
 
   const onmousedown = () => {
     playSound("ratfunUI", "glassTap")
@@ -19,39 +17,39 @@
 </script>
 
 <div class="rat-stats">
-  {#if displayRat}
+  {#if $rat}
     <!-- INFO -->
     <div class="info-container">
       <!-- INDEX -->
       <div class="info-item index-container">
-        <span class="index">RAT #{displayRat.index}</span>
+        <span class="index">RAT #{$rat.index}</span>
       </div>
 
       <!-- NAME -->
       <div class="info-item">
-        <span class="name">{displayRat.name}</span>
+        <span class="name">{$rat.name}</span>
       </div>
 
       <!-- HEALTHBAR -->
       <div class="info-item">
-        <HealthBar value={Number(displayRat.balance)} />
+        <HealthBar value={Number($rat.balance)} />
       </div>
 
       <!-- TRIP COUNT -->
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <div
         class="info-item trip-count"
-        class:disabled={!displayRat?.tripCount}
+        class:disabled={!$rat?.tripCount}
         role="button"
         tabindex="0"
         onclick={() => {
-          if (displayRat.tripCount > 0) {
+          if ($rat.tripCount > 0) {
             transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)
           }
         }}
       >
         <span>
-          Trips: {displayRat.tripCount ?? 0}
+          Trips: {$rat.tripCount ?? 0}
         </span>
       </div>
     </div>
@@ -68,7 +66,7 @@
           {onmouseup}
           src={$ratImageUrl}
           draggable={false}
-          alt={displayRat.name}
+          alt={$rat?.name}
           in:fade|global={{ duration: 400, delay: 300 }}
         />
       {:else}

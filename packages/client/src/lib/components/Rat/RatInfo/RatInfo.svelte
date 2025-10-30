@@ -1,27 +1,19 @@
 <script lang="ts">
-  import { rat } from "$lib/modules/state/stores"
   import { RatStats, RatInventory, LiquidateRat } from "$lib/components/Rat"
-
-  // Sync display rat to on-chain rat
-  let displayRat = $state<Rat | null>(null)
-
-  $effect(() => {
-    displayRat = $rat
-  })
 </script>
 
 <div class="rat-info">
   <!-- Stats -->
   <div class="rat-stats">
-    <RatStats {displayRat} />
+    <RatStats />
   </div>
   <!-- Inventory -->
   <div class="rat-inventory">
-    <RatInventory {displayRat} />
+    <RatInventory />
   </div>
   <!-- Liquidate -->
   <div class="rat-liquidate">
-    <LiquidateRat {displayRat} />
+    <LiquidateRat />
   </div>
 </div>
 

@@ -1,17 +1,18 @@
 <script lang="ts">
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { DangerButton } from "$lib/components/Shared"
+  import { rat } from "$lib/modules/state/stores"
   import { transitionTo, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { getRatTotalValue } from "$lib/modules/state/utils"
   import { Tween } from "svelte/motion"
 
-  let { displayRat }: { displayRat: Rat | null } = $props()
-
-  let totalValue = $derived(displayRat ? getRatTotalValue(displayRat) : 0)
+  let totalValue = $derived($rat ? getRatTotalValue($rat) : 0)
   const tweenedValue = new Tween(totalValue)
 
   $effect(() => {
-    tweenedValue.set(totalValue, { delay: 2000 })
+    if (totalValue !== tweenedValue.current) {
+      tweenedValue.set(totalValue, { delay: 2000 })
+    }
   })
 
   const onClick = async () => {
@@ -21,7 +22,7 @@
 </script>
 
 <div class="liquidate-rat">
-  {#if displayRat}
+  {#if $rat}
     <div class="total-value">
       <!-- <div class="label">Total Value</div> -->
       <div class:glow={tweenedValue.current !== tweenedValue.target} class="value">

@@ -1,12 +1,11 @@
 <script lang="ts">
   import { getRatInventory } from "$lib/modules/state/utils"
+  import { rat } from "$lib/modules/state/stores"
 
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
 
-  let { displayRat }: { displayRat: Rat | null } = $props()
-
-  let inventory = $derived<Item[]>(displayRat ? getRatInventory(displayRat) : [])
+  let inventory = $derived<Item[]>($rat ? getRatInventory($rat) : [])
 
   const MAX_INVENTORY_SIZE = 6
   const emptySlots = Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null)
@@ -26,7 +25,7 @@
 </script>
 
 <div class="inventory">
-  {#if displayRat}
+  {#if $rat}
     <div class="inventory-container">
       <!-- INVENTORY GRID -->
       {#each inventorySlots as item, index (index)}
