@@ -1,25 +1,30 @@
 <script lang="ts">
   import { HEALTH_SYMBOL } from "$lib/modules/ui/constants"
   import { Tween } from "svelte/motion"
+  import { rat } from "$lib/modules/state/stores"
+  import { getRatState } from "$lib/components/Rat/state.svelte"
 
-  let { value }: { value: number } = $props()
+  let ratState = getRatState()
+
+  let current = $derived(Number(ratState.balance.current))
+  let target = $derived(Number($rat.balance))
+
+  const tweenedValue = new Tween(current, { delay: 1000 })
 
   // Health 0-25 => 1
   // Health 26-50 => 2
   // Health 51-75 => 3
   // Health 76-> => 4
-  let healthLevel = $derived(Math.floor(value / 25))
-
-  const tweenedValue = new Tween(value)
+  let healthLevel = $derived(Math.floor(tweenedValue.current / 25))
 
   $effect(() => {
-    tweenedValue.set(value)
+    tweenedValue.set(target)
   })
 </script>
 
 <div class="health-bar">
   <div class="health-bar-inner">
-    <span class="health-bar-inner-value">{HEALTH_SYMBOL} {value}</span>
+    <span class="health-bar-inner-value">{HEALTH_SYMBOL} {Math.floor(tweenedValue.current)}</span>
     <div
       class="health-bar-inner-fill"
       style:width={`${Math.floor(tweenedValue.current)}%`}

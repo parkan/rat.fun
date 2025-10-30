@@ -34,7 +34,7 @@
 
       <!-- HEALTHBAR -->
       <div class="info-item">
-        <HealthBar value={Number($rat.balance)} />
+        <HealthBar />
       </div>
 
       <!-- TRIP COUNT -->

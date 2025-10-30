@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { rat, playerIsBroke, tokenAllowanceApproved } from "$lib/modules/state/stores"
+  import { getRatInventory } from "$lib/modules/state/utils"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { playSound } from "$lib/modules/sound"
   import {
@@ -59,6 +60,15 @@
   })
 </script>
 
+<!-- <div>
+  State: {ratState.state.current}
+</div>
+<div>
+  Balance: {ratState.balance.current}: {$rat.balance}
+</div>
+<div>
+  ItemCount: {ratState.inventorySize.current}: {getRatInventory($rat)?.length ?? 0}
+</div> -->
 <div class="rat-box">
   {#if ratState.state.current === RAT_BOX_STATE.NO_RAT}
     <RatDeploy />
