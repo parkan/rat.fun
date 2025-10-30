@@ -10,7 +10,7 @@
 
   // Define the comparison
   let current = $state(initialValue)
-  let target = $derived(Number($rat.balance))
+  let target = $derived($ratTotalValue)
 
   const tweenedValue = new Tween(current)
 
