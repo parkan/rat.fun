@@ -31,7 +31,7 @@
     environment as environmentStore,
     walletType as walletTypeStore
   } from "$lib/modules/network"
-  import { getRatBoxState, setRatBoxState } from "$lib/components/Rat/state.svelte"
+  // import { getRatBoxState, setRatBoxState } from "$lib/components/Rat/state.svelte"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
@@ -47,20 +47,20 @@
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
 
-  let ratBoxState = getRatBoxState()
+  // let ratBoxState = getRatBoxState()
 
   // Managed state
   export const snapshot: Snapshot<string> = {
     capture: () => {
       return JSON.stringify({
-        adminUnlockedAt: $adminUnlockedAt,
-        ratBoxStateState: ratBoxState.state
+        adminUnlockedAt: $adminUnlockedAt
+        // ratBoxStateState: ratBoxState.state
       })
     },
     restore: value => {
       const parsedValue = JSON.parse(value)
       $adminUnlockedAt = parsedValue.adminUnlockedAt
-      setRatBoxState(parsedValue.ratBoxStateState)
+      // setRatBoxState(parsedValue.ratBoxStateState)
     }
   }
 

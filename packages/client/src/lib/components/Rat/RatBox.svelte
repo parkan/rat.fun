@@ -12,18 +12,25 @@
     RatDead,
     NoTokens,
     NoAllowance,
-    PastTripList,
-    PastTripEntry
+    PastTripList
   } from "$lib/components/Rat"
-  import { RAT_BOX_STATE, getRatBoxState, transitionTo } from "$lib/components/Rat/state.svelte"
+  import {
+    RAT_BOX_STATE,
+    resetRatBoxState,
+    ratBoxState,
+    transitionTo
+  } from "$lib/components/Rat/state.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
-  let ratBoxState = getRatBoxState()
+  $inspect("ratBoxState.state", ratBoxState.state)
 
   onMount(async () => {
     shaderManager.setShader("clouds", true)
     $backgroundMusic?.stop()
     $backgroundMusic = playSound("ratfunMusic", "main", true)
+
+    // Set state to RAT_BOX_STATE.INIT
+    resetRatBoxState()
 
     if (!$rat) {
       if ($playerIsBroke) {
@@ -35,7 +42,11 @@
       }
     } else {
       if ($rat.dead) {
-        transitionTo(RAT_BOX_STATE.DEAD_RAT)
+        // If ratBox is remounted we want to go directly to "buy rat" screen
+        transitionTo(RAT_BOX_STATE.NO_RAT)
+      } else {
+        // Alive rat found
+        transitionTo(RAT_BOX_STATE.HAS_RAT)
       }
     }
   })
@@ -68,9 +79,7 @@
     <NoAllowance />
   {:else if ratBoxState.state === RAT_BOX_STATE.PAST_TRIP_LIST}
     <PastTripList />
-  {:else if ratBoxState.state === RAT_BOX_STATE.PAST_TRIP_ENTRY}
-    <PastTripEntry />
-  {:else if ratBoxState.state === RAT_BOX_STATE.ERROR}
+  {:else}
     error
   {/if}
 </div>
