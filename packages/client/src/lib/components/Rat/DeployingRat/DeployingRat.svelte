@@ -170,6 +170,11 @@
     // Resume erc20 balance listener
     erc20BalanceListenerActive.set(true)
     playSound("ratfunUI", "ratHello")
+    // Await rat store to be the same as this current rat
+    if ($rat.name !== finalName) {
+      await waitForPropertyChange(rat, "name", finalName, 10000)
+    }
+    await new Promise(res => setTimeout(res, 1000))
     // Transition to has rat state
     transitionTo(RAT_BOX_STATE.HAS_RAT)
   }
