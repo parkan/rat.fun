@@ -1,11 +1,5 @@
-import type { Snapshot } from "./$types"
-import { get } from "svelte/store"
 import { errorHandler } from "$lib/modules/error-handling"
 import { InvalidStateTransitionError } from "$lib/modules/error-handling/errors"
-import { page } from "$app/state"
-import { rat, ratInventory } from "$lib/modules/state/stores"
-import { adminUnlockedAt } from "$lib/modules/ui/state.svelte"
-import { environment } from "$lib/modules/network"
 
 /**
  * ========================================
@@ -90,12 +84,7 @@ const VALID_TRANSITIONS: Record<RAT_BOX_STATE, RAT_BOX_STATE[]> = {
   [RAT_BOX_STATE.ERROR]: []
 }
 
-const setRatBoxBalance = (balance: number | BigInt) => {
-  ratBoxBalance = Number(balance)
-}
-
 const setRatBoxState = (state: RAT_BOX_STATE) => {
-  console.log("Setting rbs", state)
   ratBoxState = state
 }
 
@@ -114,10 +103,6 @@ const transitionTo = (newState: RAT_BOX_STATE) => {
   setRatBoxState(newState)
 }
 
-const setRatBoxInventory = (inventory: any[]) => {
-  ratBoxInventory = inventory
-}
-
 // Export singleton instance instead of factory function
 export const ratState = {
   state: {
@@ -126,78 +111,5 @@ export const ratState = {
     get current() {
       return ratBoxState
     }
-  },
-  balance: {
-    set: setRatBoxBalance,
-    get current() {
-      return ratBoxBalance
-    }
-  },
-  inventory: {
-    set: setRatBoxInventory,
-    get current() {
-      return ratBoxInventory
-    }
-  }
-}
-
-// Keep for backwards compatibility if needed
-export const getRatState = () => ratState
-
-// Managed state
-export const capture = () => {
-  console.log("capture")
-  const _rat = get(rat)
-  const _ratInventory = get(ratInventory)
-  const currentEnv = get(environment)
-  console.log("capture", _rat, _ratInventory)
-
-  const currentState = {
-    environment: currentEnv,
-    adminUnlockedAt: get(adminUnlockedAt),
-    ratBoxState: ratState.state.current,
-    ratBoxBalance: Number(_rat?.balance ?? ratState.balance.current ?? 0),
-    ratBoxInventory: _ratInventory || ratState.inventory.current || []
-  }
-
-  if (page?.route?.id?.includes("tripping")) {
-  } else {
-    return JSON.stringify(currentState)
-  }
-}
-
-export const restore = value => {
-  console.log("restore!", value)
-  const parsedValue = JSON.parse(value)
-  const currentEnv = get(environment)
-
-  // Only restore if the snapshot is from the same environment
-  if (parsedValue.environment !== currentEnv) {
-    console.log(
-      `Skipping restore: snapshot is from ${parsedValue.environment}, current env is ${currentEnv}`
-    )
-    return
-  }
-
-  // Restore admin state
-  adminUnlockedAt.set(parsedValue.adminUnlockedAt)
-
-  // Restore rat state - must happen before components mount
-  if (parsedValue.ratBoxState) {
-    console.log("restored state", parsedValue.ratBoxState)
-    ratState.state.set(parsedValue.ratBoxState)
-  }
-
-  // Always set balance, even if 0
-  const balanceValue = Number(parsedValue.ratBoxBalance ?? 0)
-  if (!isNaN(balanceValue)) {
-    ratState.balance.set(balanceValue)
-    console.log("restored balance", balanceValue)
-  }
-
-  // Restore inventory
-  if (Array.isArray(parsedValue.ratBoxInventory)) {
-    ratState.inventory.set(parsedValue.ratBoxInventory)
-    console.log("restored inventory", parsedValue.ratBoxInventory.length, "items")
   }
 }

@@ -1,30 +1,32 @@
 <script lang="ts">
-  import { onMount } from "svelte"
-  import { rat, ratInventory } from "$lib/modules/state/stores"
-  import { ratState } from "$lib/components/Rat/state.svelte"
+  import { getRatInventory } from "$lib/modules/state/utils"
 
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
 
-  console.log($state.snapshot(ratState.inventory.current))
+  let { displayRat }: { displayRat: Rat | null } = $props()
+
+  let inventory = $derived<Item[]>(displayRat ? getRatInventory(displayRat) : [])
 
   const MAX_INVENTORY_SIZE = 6
-  let emptySlots = $state(
-    Array(MAX_INVENTORY_SIZE - (ratState.inventory.current?.length || 0)).fill(null)
-  )
+  const emptySlots = Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null)
 
-  let inventorySlots = $state([...ratState.inventory.current, ...emptySlots])
+  let inventorySlots = $state([...inventory, ...emptySlots])
 
-  onMount(() => {
+  $effect(() => {
+    // Fill the inventory slots after 1s
     setTimeout(() => {
-      emptySlots = Array(MAX_INVENTORY_SIZE - ($ratInventory?.length || 0)).fill(null)
-      inventorySlots = [...$ratInventory, ...emptySlots]
-    }, 3000)
+      // console.log("after 2s")
+      inventorySlots = [
+        ...inventory,
+        ...Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null)
+      ]
+    }, 1000)
   })
 </script>
 
 <div class="inventory">
-  {#if $rat}
+  {#if displayRat}
     <div class="inventory-container">
       <!-- INVENTORY GRID -->
       {#each inventorySlots as item, index (index)}

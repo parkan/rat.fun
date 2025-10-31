@@ -4,7 +4,6 @@ import { environment } from "$lib/modules/network"
 import { ENVIRONMENT } from "$lib/mud/enums"
 import { PUBLIC_DEVELOPMENT_SERVER_HOST } from "$env/static/public"
 import { errorHandler } from "$lib/modules/error-handling"
-import { adminUnlockedAt } from "$lib/modules/ui/state.svelte"
 
 /**
  * Unlock admin/cashboard privileges for the current player
@@ -39,9 +38,6 @@ export async function sendUnlockAdmin() {
       console.error("Failed to unlock admin:", error)
       return
     }
-
-    adminUnlockedAt.set(Date.now())
-    // console.log("Admin privileges granted")
   } catch (e) {
     errorHandler(e)
   }

@@ -1,44 +1,52 @@
 <script lang="ts">
-  import { rat } from "$lib/modules/state/stores"
+  import { fade } from "svelte/transition"
+  import { playSound } from "$lib/modules/sound"
+  import { ratImageUrl } from "$lib/modules/state/stores"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { NoImage } from "$lib/components/Shared"
   import HealthBar from "./HealthBar.svelte"
   import { RatAvatar } from "$lib/components/Shared"
+
+  let { displayRat }: { displayRat: Rat | null } = $props()
+
+  const onmousedown = () => {
+    playSound("ratfunUI", "glassTap")
+  }
+
+  const onmouseup = () => {
+    playSound("ratfunUI", "chirp")
+  }
 </script>
 
 <div class="rat-stats">
-  {#if $rat}
+  {#if displayRat}
     <!-- INFO -->
     <div class="info-container">
       <!-- INDEX -->
       <div class="info-item index-container">
-        <span class="index">RAT #{$rat.index}</span>
+        <span class="index">RAT #{displayRat.index}</span>
       </div>
 
       <!-- NAME -->
       <div class="info-item">
-        <span class="name">{$rat.name}</span>
+        <span class="name">{displayRat.name}</span>
       </div>
 
       <!-- HEALTHBAR -->
       <div class="info-item">
-        <HealthBar />
+        <HealthBar value={Number(displayRat.balance)} />
       </div>
 
       <!-- TRIP COUNT -->
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <div
         class="info-item trip-count"
-        class:disabled={!$rat?.tripCount}
         role="button"
         tabindex="0"
-        onclick={() => {
-          if ($rat?.tripCount ?? 0 > 0) {
-            ratState.state.transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)
-          }
-        }}
+        onclick={() => ratState.state.transitionTo(RAT_BOX_STATE.PAST_TRIP_LIST)}
       >
         <span>
-          Trips: {$rat.tripCount ?? 0}
+          Trips: {displayRat.tripCount ?? 0}
         </span>
       </div>
     </div>
@@ -55,6 +63,7 @@
     width: 100%;
     height: 100%;
     border-right: none;
+    overflow: visible;
     display: flex;
     background-image: url("/images/texture-5.png");
     background-size: 100px;
@@ -62,7 +71,8 @@
 
     .info-container {
       width: calc(100% - 260px);
-      overflow: hidden;
+      overflow: visible;
+
       @media (max-width: 700px) {
         width: auto;
         flex: 1;
@@ -100,11 +110,6 @@
           font-size: var(--font-size-normal);
           cursor: pointer;
 
-          &:hover:not(.disabled) {
-            background: white;
-            color: black;
-          }
-
           @media (max-width: 700px) {
             display: none;
           }
@@ -115,12 +120,26 @@
       width: 260px;
       height: 100%;
       border-left: var(--default-border-style);
-      overflow: visible;
       position: relative;
       z-index: 10;
 
       @media (max-width: 700px) {
         width: auto;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        // filter: grayscale(1);
+        // mix-blend-mode: screen;
+        cursor: grab;
+        transition: transform 0.2s ease;
+
+        &:active {
+          transform: scale(1.9);
+          transition: transform 0.2s ease;
+        }
       }
     }
   }

@@ -141,9 +141,13 @@ export function getRatInventory(rat: Rat | null, delay?: number) {
  * @param rat The rat to calculate the total value of
  * @returns The total value of the rat
  */
-export function getRatTotalValue(balance: BigInt | number, ratInventory: Item[]) {
+export function getRatTotalValue(rat: Rat | null) {
+  if (!rat) {
+    return 0
+  }
+  const ratInventory = getRatInventory(rat)
   const totalValue =
-    Number(balance) + // Balance
+    Number(rat.balance ?? 0) + // Balance
     ratInventory.reduce((acc, item) => acc + (item?.value ? Number(item.value) : 0), 0) // Inventory
   return totalValue
 }

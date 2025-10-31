@@ -183,9 +183,7 @@ export const ratInventory = derived([rat, items], ([$rat, $items]) =>
   convertBigIntsToNumbers($rat?.inventory?.map(item => $items[item]) ?? ([] as Item[]))
 )
 
-export const ratTotalValue = derived([rat, ratInventory], ([$rat, $ratInventory]) =>
-  getRatTotalValue($rat?.balance ?? 0, $ratInventory)
-)
+export const ratTotalValue = derived([rat, ratInventory], ([$rat]) => getRatTotalValue($rat))
 
 export const ratImageUrl = derived([player, staticContent], ([$player, $staticContent]) => {
   if (!$player?.currentRat || !$staticContent?.ratImages?.ratImages?.length) {

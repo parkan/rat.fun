@@ -1,36 +1,26 @@
 <script lang="ts">
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { DangerButton } from "$lib/components/Shared"
-  import { rat, ratTotalValue } from "$lib/modules/state/stores"
-  import { getRatTotalValue } from "$lib/modules/state/utils"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { getRatTotalValue } from "$lib/modules/state/utils"
   import { Tween } from "svelte/motion"
 
-  const initialValue = getRatTotalValue(ratState.balance.current, ratState.inventory.current)
+  let { displayRat }: { displayRat: Rat | null } = $props()
 
-  // Define the comparison
-  let current = $state(initialValue)
-  let target = $derived($ratTotalValue)
-
-  const tweenedValue = new Tween(current)
+  let totalValue = $derived(displayRat ? getRatTotalValue(displayRat) : 0)
+  const tweenedValue = new Tween(totalValue)
 
   $effect(() => {
-    if (target != current) {
-      tweenedValue.set(target, {
-        delay: 4000 + ratState.inventory.current.length * 1000,
-        duration: 2000
-      })
-    }
+    tweenedValue.set(totalValue, { delay: 2000 })
   })
 
   const onClick = async () => {
-    // RAT_BOX_STATE.HAS_RAT -> RAT_BOX_STATE.CONFIRM_LIQUIDATION
     ratState.state.transitionTo(RAT_BOX_STATE.CONFIRM_LIQUIDATION)
   }
 </script>
 
 <div class="liquidate-rat">
-  {#if $rat}
+  {#if displayRat}
     <div class="total-value">
       <!-- <div class="label">Total Value</div> -->
       <div class:glow={tweenedValue.current !== tweenedValue.target} class="value">

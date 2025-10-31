@@ -37,9 +37,6 @@
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
-  import { capture, restore } from "$lib/components/Rat/state.svelte"
-
-  export const snapshot: Snapshot<string> = { capture, restore }
 
   let { children }: LayoutProps = $props()
 
@@ -68,13 +65,6 @@
   if (browser && !import.meta.env.DEV) {
     initializeSentry()
   }
-
-  // Init of chain sync when player is ready
-  // $effect(() => {
-  //   if ($playerId && $playerId !== EMPTY_ID && !$websocketConnected) {
-  //     initOffChainSync($environmentStore, $playerId)
-  //   }
-  // })
 
   onMount(async () => {
     // Remove preloader

@@ -1,7 +1,5 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
-  import { timeSince } from "$lib/modules/utils"
-  import { adminUnlockedAt } from "$lib/modules/ui/state.svelte"
   import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
 
   import AdminEventLogItem from "./AdminEventLogItem.svelte"
@@ -27,12 +25,7 @@
     <AdminEventLogItem {point} {behavior} />
   {/each}
   {#if !hideUnlockEvent}
-    <p class="event">
-      You unlocked the cashboard
-      <span class="meta">
-        {timeSince($adminUnlockedAt)}
-      </span>
-    </p>
+    <p class="event">You unlocked the cashboard</p>
   {/if}
 </div>
 
