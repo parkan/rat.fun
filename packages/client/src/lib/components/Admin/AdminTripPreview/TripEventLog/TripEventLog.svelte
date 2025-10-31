@@ -1,9 +1,9 @@
 <script lang="ts">
+  import OutcomeMessage from "./OutcomeMessage.svelte"
   import type { Outcome } from "@sanity-types"
   import { onMount, onDestroy } from "svelte"
   import { client } from "$lib/modules/content/sanity"
   import { queries } from "$lib/modules/content/sanity/groq"
-  import OutcomeMessage from "./OutcomeMessage.svelte"
   import { publicNetwork } from "$lib/modules/network"
   import { staticContent } from "$lib/modules/content"
   import { errorHandler, CMSError } from "$lib/modules/error-handling"

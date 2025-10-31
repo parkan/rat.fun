@@ -46,6 +46,7 @@ export { default as ModalTarget } from "./Modal/ModalTarget.svelte"
 /* Topbar */
 export { default as TopBar } from "./TopBar/TopBar.svelte"
 export { default as WorldEventPopup } from "./WorldEventPopup/WorldEventPopup.svelte"
+export { default as ModeSwitchButton } from "./Buttons/ModeSwitchButton.svelte"
 
 /* Layout Components */
 export { default as CenterBar } from "./CenterBar/CenterBar.svelte"

@@ -1,15 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { player } from "$lib/modules/state/stores"
+  import { player, shouldUnlockAdmin, showAdminUnlockModal } from "$lib/modules/state/stores"
   import { sendLiquidateRat } from "$lib/modules/action-manager/index.svelte"
   import { sendLiquidateRatMessage } from "$lib/modules/off-chain-sync"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
   import { refetchBalance } from "$lib/modules/erc20Listener"
+  import { get } from "svelte/store"
 
   import { SmallSpinner } from "$lib/components/Shared"
-
-  
 
   onMount(async () => {
     // playSound("ratfunUI", "ratDeath")
@@ -31,6 +30,11 @@
 
     // RAT_BOX_STATE.LIQUIDATING_RAT -> RAT_BOX_STATE.DEAD_RAT
     ratState.state.transitionTo(RAT_BOX_STATE.DEAD_RAT)
+
+    // Check if admin should be unlocked
+    if ($shouldUnlockAdmin) {
+      showAdminUnlockModal.set(true)
+    }
   })
 </script>
 

@@ -26,6 +26,7 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
+  import { AdminUnlockModal } from "$lib/components/Admin"
   import {
     ShaderGlobal,
     Modal,
@@ -108,6 +109,8 @@
     content={worldEventContent}
   ></ModalTarget>
 {/if}
+
+<AdminUnlockModal />
 
 <EntryKit />
 <Modal />

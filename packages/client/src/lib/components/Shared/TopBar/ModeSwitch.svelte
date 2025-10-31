@@ -5,8 +5,11 @@
   import { goto } from "$app/navigation"
 
   import ModeSwitchButton from "../Buttons/ModeSwitchButton.svelte"
+  import ShaderLocal from "../Shader/ShaderLocal.svelte"
 
   let { isAdminView }: { isAdminView: boolean } = $props()
+
+  let firstAppearance = $state(true)
 
   const enterAdmin = () => {
     playSound("ratfunTransitions", "adminEnter")
