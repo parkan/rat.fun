@@ -229,15 +229,35 @@ export const portfolioClass = derived([profitLoss], ([$profitLoss]) => {
 const untaxed = (value: number) =>
   Math.floor((Number(value) * 100) / (100 - Number(get(gamePercentagesConfig).taxationCloseTrip)))
 
-export const realisedInvestment = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
-  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
+export const realisedInvestment = derived(playerDepletedTrips, $playerDepletedTrips =>
+  Object.values($playerDepletedTrips).reduce((a, b) => a + Number(b.tripCreationCost), 0)
 )
 
-export const realisedBalance = derived(playerLiquidatedTrips, $playerLiquidatedTrips =>
-  Object.values($playerLiquidatedTrips).reduce((a, b) => a + Number(b.liquidationValue), 0)
+export const realisedBalance = derived(playerDepletedTrips, $playerDepletedTrips =>
+  Object.values($playerDepletedTrips).reduce(
+    (a, b) => a + (b?.liquidated ? Number(b.liquidationValue) : Number(b.tripCreationCost)),
+    0
+  )
 )
 
 export const realisedProfitLoss = derived(
   [realisedBalance, realisedInvestment],
   ([$rb, $i]) => $rb - $i
+)
+
+// * * * * * * * * * * * * * * * * *
+// ADMIN UNLOCK MODAL
+// * * * * * * * * * * * * * * * * *
+
+export const showAdminUnlockModal = writable(false)
+
+export const shouldUnlockAdmin = derived(
+  [player, gameConfig],
+  ([$player, $gameConfig]) => {
+    if (!$player || !$gameConfig) return false
+    const pastRatsCount = $player.pastRats?.length ?? 0
+    const requiredCount = $gameConfig.ratsKilledForAdminAccess
+    // Only trigger when exactly reaching the threshold
+    return pastRatsCount === requiredCount
+  }
 )

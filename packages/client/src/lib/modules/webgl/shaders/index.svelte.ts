@@ -5,6 +5,7 @@ import { plasma } from "./plasma"
 import { plasmaOptimized } from "./plasma-optimized"
 import { clouds } from "./clouds"
 import { vortex } from "./vortex"
+import { magic } from "./magic"
 import { swirlyNoise } from "./swirly-noise"
 import { black } from "./black"
 import { tripProcessing } from "./trip-processing"
@@ -14,6 +15,7 @@ const shaders = {
   plasmaOptimized,
   clouds,
   vortex,
+  magic,
   swirlyNoise,
   black,
   tripProcessing

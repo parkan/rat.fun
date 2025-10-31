@@ -32,5 +32,8 @@ export { default as ProfitLossHistoryGraph } from "./ProfitLossHistoryGraph/Prof
 // Profit & loss overview
 export { default as ProfitLossOverview } from "./ProfitLossOverview/ProfitLossOverview.svelte"
 
+// Admin unlock component
+export { default as AdminUnlockModal } from "./AdminUnlockModal/AdminUnlockModal.svelte"
+
 // Main admin component
 export { default as Admin } from "./Admin.svelte"
