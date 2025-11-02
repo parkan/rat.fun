@@ -334,7 +334,7 @@
     background: var(--color-grey-light);
     padding: 5px;
     color: var(--background);
-    max-width: 60%;
+    max-width: 100%;
     font-family: var(--special-font-stack);
     font-size: var(--font-size-normal);
   }

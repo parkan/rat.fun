@@ -3,6 +3,7 @@
   import { player, ratTotalValue } from "$lib/modules/state/stores"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { goto } from "$app/navigation"
+  import { backgroundMusic } from "$lib/modules/sound/stores"
   import { BigButton } from "$lib/components/Shared"
 
   let { tripId, trip, disabled }: { tripId: Hex; trip: Trip; disabled: boolean } = $props()
@@ -10,6 +11,8 @@
   let minRatValueToEnter = getTripMinRatValueToEnter(trip.tripCreationCost)
 
   const onClick = async () => {
+    $backgroundMusic?.stop()
+    backgroundMusic.set(undefined)
     await goto(`/${tripId}/tripping?enter=true&rat=${$player.currentRat}&t=${Date.now()}`)
   }
 </script>

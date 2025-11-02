@@ -40,6 +40,7 @@
   })
 
   onDestroy(() => {
+    console.log("onDestroy RatBox")
     // Stop background music
     if ($backgroundMusic) {
       $backgroundMusic.stop()
