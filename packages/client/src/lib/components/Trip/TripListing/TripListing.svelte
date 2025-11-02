@@ -2,16 +2,20 @@
   import type { Hex } from "viem"
   import { get } from "svelte/store"
   import { fade } from "svelte/transition"
-  import { trips, playerIsNew } from "$lib/modules/state/stores"
+  import { beforeNavigate, afterNavigate } from "$app/navigation"
+  import { trips, playerIsNew, rat, ratTotalValue } from "$lib/modules/state/stores"
+  import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
   import { filterTrips, filterDepletedTrips } from "./filterFunctions"
   import { blockNumber } from "$lib/modules/network"
-  import { TripItem } from "$lib/components/Trip"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import { TripItem, TripHeader } from "$lib/components/Trip"
 
   let sortFunction = $state(entriesChronologically)
   let showDepletedTrips = false
   let textFilter = $state("")
   let lastChecked = $state<number>(Number(get(blockNumber)))
+  let scrollContainer: HTMLDivElement | null = $state(null)
 
   const updateTrips = () => {
     lastChecked = Number(get(blockNumber))
@@ -33,9 +37,71 @@
       return tripList
     }
   })
+
+  // Calculate eligibility for each trip
+  type TripWithEligibility = [string, Trip, boolean, string, number]
+
+  let tripsWithEligibility = $derived.by((): TripWithEligibility[] => {
+    return activeList.map(([tripId, trip]) => {
+      // Check if rat value is high enough
+      const minRatValue = get(getTripMinRatValueToEnter(trip.tripCreationCost))
+      if ($ratTotalValue < minRatValue || $rat?.dead == true) {
+        return [
+          tripId,
+          trip,
+          false,
+          `Rat value of ${CURRENCY_SYMBOL}${minRatValue} required`,
+          minRatValue
+        ]
+      }
+
+      // Trip is eligible
+      return [tripId, trip, true, "", 0]
+    })
+  })
+
+  // Sort trips: eligible first, then ineligible sorted by min rat value (ascending)
+  let sortedTrips = $derived.by(() => {
+    return [...tripsWithEligibility].sort((a, b) => {
+      // a[2] and b[2] are the eligible boolean
+      // If both are eligible or both ineligible, sort by min rat value
+      if (a[2] === b[2]) {
+        // Both eligible - keep current order
+        if (a[2]) return 0
+        // Both ineligible - sort by min rat value (ascending)
+        return a[4] - b[4]
+      }
+      // Eligible trips first
+      return a[2] ? -1 : 1
+    })
+  })
+
+  // Count eligible trips
+  let eligibleCount = $derived(tripsWithEligibility.filter(t => t[2]).length)
+
+  // Scroll position preservation
+  const SCROLL_KEY = "trip-listing-scroll-position"
+
+  beforeNavigate(navigation => {
+    // Save scroll position before navigating away
+    if (scrollContainer && navigation.to?.route.id !== "/(main)/(game)") {
+      sessionStorage.setItem(SCROLL_KEY, scrollContainer.scrollTop.toString())
+    }
+  })
+
+  afterNavigate(navigation => {
+    // Restore scroll position when coming back
+    if (scrollContainer && navigation.from?.route.id?.includes("[tripId]")) {
+      const savedPosition = sessionStorage.getItem(SCROLL_KEY)
+      if (savedPosition) {
+        scrollContainer.scrollTop = parseInt(savedPosition, 10)
+      }
+    }
+  })
 </script>
 
-<div class="content">
+<div class="content" bind:this={scrollContainer}>
+  <TripHeader hasRat={!$rat?.dead == true} {eligibleCount} totalCount={tripList.length} />
   <div class:animated={false} class="trip-listing" in:fade|global={{ duration: 300 }}>
     {#if $playerIsNew}
       <div class="new-player-message">
@@ -55,8 +121,13 @@
           </button>
         {/key}
       {/if}
-      {#each activeList as tripEntry (tripEntry[0])}
-        <TripItem tripId={tripEntry[0] as Hex} trip={tripEntry[1]} />
+      {#each sortedTrips as tripEntry (tripEntry[0])}
+        <TripItem
+          tripId={tripEntry[0] as Hex}
+          trip={tripEntry[1]}
+          disabled={!tripEntry[2]}
+          overlayText={tripEntry[3]}
+        />
       {/each}
     {:else}
       <div class="empty-listing">
@@ -87,7 +158,7 @@
 
   .new-player-message {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
     background-color: rgba(0, 0, 0, 0.5);
     border: none;
     outline: none;
@@ -109,6 +180,7 @@
     max-height: 100%;
     inset: 0;
     width: 100%;
+    padding-top: 60px;
 
     &.animated {
       transition: transform 0.2s ease 0.1s;

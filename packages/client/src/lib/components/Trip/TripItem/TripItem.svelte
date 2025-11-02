@@ -8,7 +8,17 @@
   import { NoImage } from "$lib/components/Shared"
   import TripItemStats from "./TripItemStats/TripItemStats.svelte"
 
-  let { tripId, trip }: { tripId: Hex; trip: Trip } = $props()
+  let {
+    tripId,
+    trip,
+    disabled = false,
+    overlayText = ""
+  }: {
+    tripId: Hex
+    trip: Trip
+    disabled?: boolean
+    overlayText?: string
+  } = $props()
 
   let sanityTripContent: SanityTrip | undefined = $derived(
     $staticContent?.trips?.find(r => r._id.trim() == tripId.trim()) ?? undefined
@@ -52,11 +62,17 @@
 <a
   href="/{tripId}"
   class="trip-listing-item"
-  class:disabled={Number(trip.balance) == 0}
+  class:disabled={Number(trip.balance) == 0 || disabled}
+  class:not-clickable={disabled}
   {onmouseup}
   {onmousedown}
   {onmouseenter}
 >
+  {#if disabled && overlayText}
+    <div class="overlay">
+      <div class="overlay-text">{overlayText}</div>
+    </div>
+  {/if}
   <!-- COLUMN LEFT -->
   <div class="column left">
     <div class="trip-image">
@@ -94,11 +110,17 @@
     width: 100%;
     color: var(--foreground);
     text-align: left;
+    position: relative;
     // overflow: hidden;
     background: var(--background-semi-transparent);
 
     &.disabled {
-      opacity: 0.5;
+      opacity: 0.7;
+    }
+
+    &.not-clickable {
+      pointer-events: none;
+      cursor: default;
     }
 
     &:hover {
@@ -106,6 +128,27 @@
 
       .trip-image {
         transform: scale(1.05);
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: var(--z-mid);
+      pointer-events: none;
+
+      .overlay-text {
+        font-family: var(--typewriter-font-stack);
+        font-size: var(--font-size-large);
+        color: var(--foreground);
+        text-align: center;
+        padding: 20px;
+        background: var(--color-alert);
+        color: var(--background);
       }
     }
 

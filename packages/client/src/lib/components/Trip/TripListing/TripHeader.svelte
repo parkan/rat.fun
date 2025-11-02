@@ -1,0 +1,52 @@
+<script lang="ts">
+  let {
+    hasRat,
+    eligibleCount,
+    totalCount
+  }: { hasRat: boolean; eligibleCount: number; totalCount: number } = $props()
+</script>
+
+<div class="trip-header">
+  <div class="header-text">
+    {#if !hasRat}
+      Buy rat to select trip.
+    {:else}
+      Select a trip. <span class="trips-count">
+        {eligibleCount}/{totalCount} trip{totalCount === 0 || totalCount > 1 ? "s" : ""} available.
+      </span>
+    {/if}
+  </div>
+</div>
+
+<style lang="scss">
+  .trip-header {
+    line-height: 60px;
+    height: 60px;
+    border-bottom: var(--default-border-style);
+    border-right: var(--default-border-style);
+    padding-inline: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    position: fixed;
+    top: 59px; // Below top bar
+    width: var(--game-column-width);
+    z-index: var(--z-high);
+    background: var(--background-semi-transparent);
+
+    @media (max-width: 700px) {
+      width: 100%;
+    }
+  }
+
+  .header-text {
+    font-size: var(--font-size-normal);
+    font-family: var(--typewriter-font-stack);
+    color: var(--foreground);
+  }
+
+  .trips-count {
+    color: var(--color-alert);
+  }
+</style>
