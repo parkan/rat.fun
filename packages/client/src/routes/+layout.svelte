@@ -27,8 +27,8 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import { AdminUnlockModal } from "$lib/components/Admin"
   import {
+    AdminUnlockModal,
     ShaderGlobal,
     // WorldEventPopup,
     Lightbox

@@ -8,7 +8,6 @@
   import { ENVIRONMENT } from "$lib/mud/enums"
 
   let busy = $state(false)
-  
 
   const onClick = async () => {
     busy = true

@@ -5,8 +5,6 @@
   import { BackButton } from "$lib/components/Shared"
   import { FlashbackEntry } from "$lib/components/Flashback"
 
-  
-
   let { outcomeId }: { outcomeId: string } = $props()
 
   let result = $derived($staticContent.outcomes.find(o => o._id == outcomeId))

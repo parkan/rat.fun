@@ -6,7 +6,6 @@
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
   import { refetchBalance } from "$lib/modules/erc20Listener"
-  import { get } from "svelte/store"
 
   import { SmallSpinner } from "$lib/components/Shared"
 

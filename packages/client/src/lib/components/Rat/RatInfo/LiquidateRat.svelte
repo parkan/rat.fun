@@ -9,8 +9,6 @@
   let { displayRat }: { displayRat: Rat | null } = $props()
 
   const initialValue = displayRat ? getRatTotalValue(displayRat) : getRatTotalValue($rat)
-  console.log("displayRat", $state.snapshot(displayRat))
-  console.log("initial value", initialValue)
   const tweenedValue = new Tween(initialValue)
   let playing = $state(false)
 

@@ -1,19 +1,10 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
-  import { playSound } from "$lib/modules/sound"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import HealthBar from "./HealthBar.svelte"
   import { RatAvatar } from "$lib/components/Shared"
 
   let { displayRat }: { displayRat: Rat | null } = $props()
-
-  const onmousedown = () => {
-    playSound("ratfunUI", "glassTap")
-  }
-
-  const onmouseup = () => {
-    playSound("ratfunUI", "chirp")
-  }
 </script>
 
 <div class="rat-stats">

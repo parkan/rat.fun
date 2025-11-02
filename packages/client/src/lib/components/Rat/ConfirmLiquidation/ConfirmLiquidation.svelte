@@ -4,8 +4,6 @@
   import { BigButton, ValueBreakdown } from "$lib/components/Shared"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
 
-  
-
   const onClickConfirm = () => {
     // RAT_BOX_STATE.CONFIRM_LIQUIDATION -> RAT_BOX_STATE.LIQUIDATING_RAT
     ratState.state.transitionTo(RAT_BOX_STATE.LIQUIDATING_RAT)

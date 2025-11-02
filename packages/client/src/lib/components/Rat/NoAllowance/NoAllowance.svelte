@@ -7,8 +7,6 @@
 
   let busy = $state(false)
 
-  
-
   const onClick = async () => {
     busy = true
     await sendApproveMax()

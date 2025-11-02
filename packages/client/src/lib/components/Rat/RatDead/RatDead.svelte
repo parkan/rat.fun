@@ -44,13 +44,6 @@
         width: 160px;
         height: 160px;
       }
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        filter: grayscale(1);
-      }
     }
 
     .rat-dead-text {

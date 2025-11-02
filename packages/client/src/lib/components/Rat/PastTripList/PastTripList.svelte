@@ -6,8 +6,6 @@
   import PastTripListItem from "./PastTripListItem.svelte"
   import { BackButton } from "$lib/components/Shared"
 
-  
-
   let pastTrips = $derived(
     $staticContent.outcomes
       .filter(

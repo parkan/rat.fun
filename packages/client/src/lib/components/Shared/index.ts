@@ -53,3 +53,6 @@ export { default as NoImage } from "./NoImage/NoImage.svelte"
 export { default as SEO } from "./SEO/SEO.svelte"
 export { default as ValueBreakdown } from "./ValueBreakdown/ValueBreakdown.svelte"
 export { default as SignedNumber } from "./SignedNumber/SignedNumber.svelte"
+
+// Admin unlock component
+export { default as AdminUnlockModal } from "./AdminUnlockModal/AdminUnlockModal.svelte"
