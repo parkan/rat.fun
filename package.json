@@ -6,8 +6,8 @@
     "url": "https://github.com/Moving-Castles/rat.fun.git"
   },
   "scripts": {
-    "build": "pnpm recursive run build",
-    "build:client": "pnpm --filter 'client' run build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 pnpm recursive run build",
+    "build:client": "NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter 'client' run build",
     "dev": "mprocs",
     "dev:client": "pnpm --filter 'client' run dev",
     "dev:contracts": "pnpm --filter 'contracts' run dev",
