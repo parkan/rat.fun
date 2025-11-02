@@ -2,10 +2,10 @@
   import { Tooltip } from "$lib/components/Shared"
   let { trip }: { trip: Trip } = $props()
 
-  const TOO_FEW_VISITS_THRESHOLD = 1
+  const RISK_PROFILE_THRESHOLD = 4 // visits
 
   const calculateRisk = (trip: Trip) => {
-    if (Number(trip.visitCount) < TOO_FEW_VISITS_THRESHOLD) {
+    if (Number(trip.visitCount) < RISK_PROFILE_THRESHOLD) {
       return "UNCLEAR"
     }
 
