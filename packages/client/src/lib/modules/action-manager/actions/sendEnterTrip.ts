@@ -50,7 +50,7 @@ export async function sendEnterTrip(tripId: string, ratId: string) {
 
   // Set up timeout with AbortController (45 seconds to allow for server processing time)
   const controller = new AbortController()
-  const timeoutId = setTimeout(controller.abort, 45000)
+  const timeoutId = setTimeout(() => controller.abort(), 45000)
 
   try {
     const response = await fetch(url, {
