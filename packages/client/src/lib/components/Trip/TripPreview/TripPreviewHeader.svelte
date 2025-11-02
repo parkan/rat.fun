@@ -1,17 +1,22 @@
 <script lang="ts">
   import type { Hex } from "viem"
-  import { getTripMaxValuePerWin, getTripOwnerName } from "$lib/modules/state/utils"
+  import {
+    getTripMaxValuePerWin,
+    getTripMinRatValueToEnter,
+    getTripOwnerName
+  } from "$lib/modules/state/utils"
   import { lastUpdated, staticContent } from "$lib/modules/content"
   import { urlFor } from "$lib/modules/content/sanity"
   import { NoImage } from "$lib/components/Shared"
   import { lightboxState } from "$lib/modules/ui/state.svelte"
   import { blocksToReadableTime } from "$lib/modules/utils"
   import { blockNumber } from "$lib/modules/network"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
-  let { trip, sanityTripContent, tripId }: { trip: Trip; sanityTripContent: any; tripId?: Hex } =
-    $props()
+  let { trip, tripId }: { trip: Trip; tripId?: Hex } = $props()
 
   const maxValuePerWin = getTripMaxValuePerWin(trip.tripCreationCost, trip.balance)
+  const minRatValueToEnter = getTripMinRatValueToEnter(trip.tripCreationCost)
 
   // Get trip content from staticContent store instead of props
   let tripContentFromStore = $derived(
@@ -76,7 +81,7 @@
     </div>
     <!-- OWNER -->
     <div class="row">
-      <div class="label">Creator</div>
+      <div class="label">CREATOR</div>
       <div class="value">{getTripOwnerName(trip)}</div>
     </div>
     <!-- LAST VISIT BLOCK -->
@@ -98,21 +103,25 @@
       <div class="label">KILLS</div>
       <div class="value">{trip?.killCount ?? 0}</div>
     </div>
+    <!-- CREATION COST -->
+    <div class="row creation-cost">
+      <div class="label">CREATION COST</div>
+      <div class="value">{CURRENCY_SYMBOL}{trip.tripCreationCost}</div>
+    </div>
     <!-- BALANCE -->
     <div class="row balance" class:depleted={Number(trip.balance) == 0}>
       <div class="label">BALANCE</div>
-      <div class="value">${trip.balance}</div>
+      <div class="value">{CURRENCY_SYMBOL}{trip.balance}</div>
     </div>
-    <!-- {#if trip?.minRatValueToEnter > 0}
-      <div class="row min-rat-value-to-enter">
-        <div class="label">MIN RAT VALUE TO ENTER</div>
-        <div class="value">${trip?.minRatValueToEnter}</div>
-      </div>
-    {/if} -->
+    <!-- MIN RAT VALUE TO ENTER -->
+    <div class="row min-rat-value-to-enter">
+      <div class="label">MIN RAT VALUE TO ENTER</div>
+      <div class="value">{CURRENCY_SYMBOL}{$minRatValueToEnter ?? 0}</div>
+    </div>
     {#if $maxValuePerWin > 0}
       <div class="row max-value-per-win">
         <div class="label">MAX VALUE PER WIN</div>
-        <div class="value">${$maxValuePerWin}</div>
+        <div class="value">{CURRENCY_SYMBOL}{$maxValuePerWin}</div>
       </div>
     {/if}
   </div>

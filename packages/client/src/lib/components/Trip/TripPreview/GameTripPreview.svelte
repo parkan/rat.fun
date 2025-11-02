@@ -68,7 +68,7 @@
 
   <!-- Header -->
   <div class="trip-header">
-    <TripPreviewHeader {trip} {sanityTripContent} {tripId} />
+    <TripPreviewHeader {trip} {tripId} />
   </div>
 
   <!-- Prompt -->

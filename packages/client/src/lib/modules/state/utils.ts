@@ -118,6 +118,8 @@ export function getTripMaxValuePerWin(
 
 export function getTripMinRatValueToEnter(tripCreationCost: number | bigint): Readable<number> {
   return derived(gamePercentagesConfig, $gamePercentagesConfig => {
+    // $gamePercentagesConfig.minRatValueToEnter is a percentage
+    // Minimum rat value is that percentage of the trip creation cost
     return Math.floor((Number(tripCreationCost) * $gamePercentagesConfig.minRatValueToEnter) / 100)
   })
 }
