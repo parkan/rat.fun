@@ -94,12 +94,10 @@
       <div class="value">{trip.visitCount}</div>
     </div>
     <!-- KILL COUNT -->
-    {#if trip?.killCount > 0}
-      <div class="row kill-count">
-        <div class="label">KILLS</div>
-        <div class="value">{trip?.killCount}</div>
-      </div>
-    {/if}
+    <div class="row kill-count">
+      <div class="label">KILLS</div>
+      <div class="value">{trip?.killCount ?? 0}</div>
+    </div>
     <!-- BALANCE -->
     <div class="row balance" class:depleted={Number(trip.balance) == 0}>
       <div class="label">BALANCE</div>
