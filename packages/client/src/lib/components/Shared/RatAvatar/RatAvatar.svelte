@@ -4,8 +4,7 @@
   import { staticContent } from "$lib/modules/content"
   import { playSound } from "$lib/modules/sound"
   import { NoImage } from "$lib/components/Shared"
-  import { Tween } from "svelte/motion"
-  import { bounceOut } from "svelte/easing"
+  import gsap from "gsap"
 
   type RatAnimation = "idle" | "appearance" | "survived" | "died" | "dead"
 
@@ -17,86 +16,73 @@
     inert?: boolean
   } = $props()
 
-  let rect = $state<DOMRect>()
-  let isDragging = $state(false)
-
-  const fields = ["ratBodies", "ratArms", "ratHeads", "ratEars"]
-
   let images = $derived(addressToRatParts($player?.currentRat, $staticContent?.ratImages))
 
-  let [
-    bodyScale,
-    headTweenX,
-    headTweenY,
-    headScale,
-    headTilt,
-    earsTilt,
-    armsScale,
-    armsTilt,
-    armsTranslate
-  ] = [
-    new Tween(1, { duration: 150 }),
-    new Tween(0, { duration: 150 }),
-    new Tween(0, { duration: 150 }),
-    new Tween(1, { duration: 100, easing: bounceOut }),
-    new Tween(1, { duration: 150 }),
-    new Tween(1, { duration: 150 }),
-    new Tween(1, { duration: 150 }),
-    new Tween(1, { duration: 150 }),
-    new Tween(0, { duration: 150 })
-  ]
-
-  let transforms = $derived([
-    `scale(${bodyScale.current}) rotate(${headTilt.current / 2}deg)`,
-    `scale(${armsScale.current}) rotate(${armsTilt.current}deg) translateY(${armsTranslate.current}px)`,
-    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${earsTilt.current}deg)`,
-    `translateX(${headTweenX.current}px) translateY(${headTweenY.current}px) scale(${headScale.current}) rotate(${earsTilt.current}deg)`
-  ])
+  // Element references for GSAP
+  let bodyElement: HTMLDivElement | null = $state(null)
+  let armsElement: HTMLDivElement | null = $state(null)
+  let headElement: HTMLDivElement | null = $state(null)
+  let earsElement: HTMLDivElement | null = $state(null)
 
   const onmousedown = (e: MouseEvent) => {
     if (inert) return false
+    if (!bodyElement || !armsElement || !headElement || !earsElement) return false
     playSound("ratfunUI", "glassTap")
-    isDragging = true
-    rect = e.currentTarget ? (e.currentTarget as HTMLElement).getBoundingClientRect() : undefined
-    bodyScale.set(0.8)
-    armsScale.set(1.1)
-    headScale.set(2)
-    armsTranslate.set(45)
 
-    const movementX = e.pageX - rect.left - rect.width / 2
-    const movementY = e.pageY - rect.top - rect.height / 2
-    headTweenX.set(movementX)
-    headTweenY.set(movementY)
-    headTilt.set(movementX / 20)
-    armsTilt.set(movementX / 10)
-    earsTilt.set(movementX / 10)
+    // Calculate click position relative to container center
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    // const movementX = (e.pageX - rect.left - rect.width / 2) / 5
+    // const movementY = (e.pageY - rect.top - rect.height / 2) / 5
 
+    // Animate head and ears with scale and directional movement
+    gsap.to([headElement, earsElement], {
+      scale: 1.2,
+      rotation: 10,
+      // x: movementX,
+      // y: movementY,
+      duration: 0.2,
+      ease: "elastic.out(1.5)"
+    })
+
+    // Reset after 600ms (matching Mascot's timing)
     setTimeout(() => {
-      headScale.set(1)
-      headTweenX.set(0)
-      headTweenY.set(0)
-      headTilt.set(0)
-      armsScale.set(1)
-      armsTilt.set(1)
-      earsTilt.set(1)
-      bodyScale.set(1)
-      headScale.set(1)
-      armsTranslate.set(0)
-    }, 200)
+      gsap.to([headElement, earsElement], {
+        scale: 1,
+        rotation: 0,
+        x: 0,
+        y: 0,
+        duration: 0.2,
+        ease: "elastic.out(1.5)"
+      })
+
+      gsap.to(armsElement, {
+        scale: 1,
+        y: 0,
+        duration: 0.2,
+        ease: "elastic.out(1.5)"
+      })
+    }, 600)
   }
 </script>
 
-<svelte:body {onmousemove} {onmouseup} />
-
 <div {onmousedown} class="rat-container" role="button" tabindex="0">
-  {#if (images ?? []).every(image => image.length > 0)}
-    {#each images as src, i}
-      <div class="layer {fields[i]} {animation}">
-        <div class="interactions" style:transform={transforms[i]}>
-          <img draggable="false" class="inner" src={src || ""} alt="" />
-        </div>
-      </div>
-    {/each}
+  {#if images && images.every(image => image.length > 0)}
+    <!-- BODY -->
+    <div class="layer ratBodies {animation}" bind:this={bodyElement}>
+      <img draggable="false" class="inner" src={images[0]} alt="" />
+    </div>
+    <!-- ARMS -->
+    <div class="layer ratArms {animation}" bind:this={armsElement}>
+      <img draggable="false" class="inner" src={images[1]} alt="" />
+    </div>
+    <!-- HEAD -->
+    <div class="layer ratHeads {animation}" bind:this={headElement}>
+      <img draggable="false" class="inner" src={images[2]} alt="" />
+    </div>
+    <!-- EARS -->
+    <div class="layer ratEars {animation}" bind:this={earsElement}>
+      <img draggable="false" class="inner" src={images[3]} alt="" />
+    </div>
   {:else}
     <NoImage />
   {/if}
@@ -107,7 +93,6 @@
     width: 260px;
     height: 260px;
     display: block;
-    // background: red;
     position: relative;
     cursor: grab;
     user-select: none;
@@ -118,50 +103,27 @@
     width: 260px;
     inset: 0;
 
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     &.ratBodies {
       transform-origin: 50% 100%;
-
-      .interactions {
-        transform-origin: 50% 100%;
-      }
     }
 
     &.ratArms {
       transform-origin: 50% 100%;
-
-      .interactions {
-        transform-origin: 50% 100%;
-      }
     }
 
     &.ratEars,
     &.ratHeads {
       // transform-origin: 50% 150%;
-
-      .interactions {
-        transform-origin: 50% 20%;
-      }
-
-      &.survived {
-        animation: bobbleHead 1s ease infinite;
-      }
     }
   }
 
   img {
     pointer-events: none;
-  }
-
-  @keyframes bobbleHead {
-    0%,
-    100% {
-      transform: rotate(0deg) translate(0, 0) scale(1);
-    }
-    33% {
-      transform: rotate(4deg) translate(-12px, 0) scale(1.1);
-    }
-    66% {
-      transform: rotate(3deg) translate(12px, 0) scale(1.1);
-    }
   }
 </style>

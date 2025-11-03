@@ -607,7 +607,7 @@ function indexToImageUrl(
   if (!result) {
     return ""
   }
-  return result.width(260).url()
+  return result.width(360).url()
 }
 
 /**
