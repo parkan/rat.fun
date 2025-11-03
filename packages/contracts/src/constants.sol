@@ -9,7 +9,7 @@ uint32 constant MIN_TRIP_PROMPT_LENGTH = 10;
 
 uint32 constant COOLDOWN_CLOSE_TRIP = 60; // About 2 minutes
 
-uint32 constant RATS_KILLED_FOR_ADMIN_ACCESS = 5;
+uint32 constant RATS_KILLED_FOR_ADMIN_ACCESS = 1;
 
 uint32 constant MAX_VALUE_PER_WIN_PERCENTAGE = 25; // 25%
 uint32 constant MIN_RAT_VALUE_TO_ENTER_PERCENTAGE = 10; // 10%

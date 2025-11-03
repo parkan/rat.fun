@@ -3,7 +3,7 @@
   import { get } from "svelte/store"
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
-  import { trips, playerIsNew, rat, ratTotalValue } from "$lib/modules/state/stores"
+  import { trips, rat, ratTotalValue } from "$lib/modules/state/stores"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
   import { filterTrips, filterDepletedTrips } from "./filterFunctions"
@@ -101,13 +101,9 @@
 </script>
 
 <div class="content" bind:this={scrollContainer}>
-  <TripHeader hasRat={!$rat?.dead == true} {eligibleCount} totalCount={tripList.length} />
+  <TripHeader hasRat={$rat && !$rat.dead == true} {eligibleCount} totalCount={tripList.length} />
   <div class:animated={false} class="trip-listing" in:fade|global={{ duration: 300 }}>
-    {#if $playerIsNew}
-      <div class="new-player-message">
-        <div>Buy your first rat to start tripping.</div>
-      </div>
-    {:else if activeList.length > 0}
+    {#if activeList.length > 0}
       {#if activeList.length < tripList.length}
         {#key tripList.length}
           <button
