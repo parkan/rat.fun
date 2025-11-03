@@ -35,6 +35,13 @@ export async function constructEventMessages(
   messages.push({ role: "user", content: `RatName: ${rat.name}` })
   messages.push({ role: "user", content: `RatInventory: ${JSON.stringify(rat.inventory)}` })
   messages.push({ role: "user", content: `RatSlopamineBalance: ${rat.balance}` })
+
+  // Random seed: 0.00 - 1.00
+  const randomSeed = Math.floor(Math.random() * 101) / 100
+  messages.push({ role: "user", content: `randomSeed: ${randomSeed}` })
+
+  console.log("randomSeed", randomSeed)
+
   return messages
 }
 
