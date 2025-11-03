@@ -27,7 +27,14 @@ export function mergeLog(result: EnterTripReturnValue): MergedLogEntry[] {
     }
 
     // Item changes
-    const itemChanges = (result?.itemChanges || []).filter(iC => iC.logStep === i)
+    const itemChanges = (result?.itemChanges || [])
+      .filter(iC => iC.logStep === i)
+      .sort((a, b) => {
+        // Sort so "remove" comes before "add"
+        if (a.type === "remove" && b.type === "add") return -1
+        if (a.type === "add" && b.type === "remove") return 1
+        return 0
+      })
     if (itemChanges.length > 0) {
       mergedLog[i].itemChanges = itemChanges
     }
