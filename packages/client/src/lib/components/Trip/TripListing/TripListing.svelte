@@ -60,21 +60,8 @@
     })
   })
 
-  // Sort trips: eligible first, then ineligible sorted by min rat value (ascending)
-  let sortedTrips = $derived.by(() => {
-    return [...tripsWithEligibility].sort((a, b) => {
-      // a[2] and b[2] are the eligible boolean
-      // If both are eligible or both ineligible, sort by min rat value
-      if (a[2] === b[2]) {
-        // Both eligible - keep current order
-        if (a[2]) return 0
-        // Both ineligible - sort by min rat value (ascending)
-        return a[4] - b[4]
-      }
-      // Eligible trips first
-      return a[2] ? -1 : 1
-    })
-  })
+  // Keep trips in the same sort order (eligible and ineligible interleaved)
+  let sortedTrips = $derived(tripsWithEligibility)
 
   // Count eligible trips
   let eligibleCount = $derived(tripsWithEligibility.filter(t => t[2]).length)
