@@ -73,28 +73,31 @@
       ease: "power2.out"
     })
 
-    // Count up/down value with animation (count to value-1, then show final formatted text)
+    // Count using absolute value (no sign)
     if (value > 1) {
       addEasedCountAnimation({
         timeline,
         valueElement,
-        value: negative ? -(value - 1) : value - 1
+        value: value - 1
       })
     }
 
-    // Change color
-    timeline.to(outcomeElement, {
-      duration: 0.1,
-      background: negative ? "red" : "green",
-      ease: "power2.out"
-    })
-
-    // Set final text
+    // Set final text with sign and change color simultaneously
     timeline.to(
       valueElement,
       {
         textContent: `${name} (${CURRENCY_SYMBOL}${negative ? "-" : ""}${value})`,
         duration: 0,
+        ease: "power2.out"
+      }
+    )
+
+    // Change color
+    timeline.to(
+      outcomeElement,
+      {
+        duration: 0.1,
+        background: negative ? "red" : "green",
         ease: "power2.out"
       },
       "<"

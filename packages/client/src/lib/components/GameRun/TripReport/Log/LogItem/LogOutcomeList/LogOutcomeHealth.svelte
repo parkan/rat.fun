@@ -18,6 +18,7 @@
   // Element
   let outcomeElement = $state<HTMLDivElement | null>(null)
   let valueElement = $state<HTMLSpanElement | null>(null)
+  let heartElement = $state<HTMLSpanElement | null>(null)
 
   let negative = $state(value < 0)
 
@@ -30,6 +31,13 @@
     gsap.set(outcomeElement, {
       opacity: 0
     })
+
+    // Hide heart symbol initially
+    if (heartElement) {
+      gsap.set(heartElement, {
+        opacity: 0
+      })
+    }
 
     if (valueElement) {
       valueElement.textContent = ""
@@ -59,13 +67,32 @@
       ease: "power2.out"
     })
 
-    // Count up/down value with animation
+    // Count using absolute value (no sign)
     addEasedCountAnimation({
       timeline,
       valueElement,
-      value
+      value: Math.abs(value)
     })
 
+    // Reveal heart symbol, sign, and background color
+    timeline.to(heartElement, {
+      opacity: 1,
+      duration: 0.1,
+      ease: "power2.out"
+    })
+
+    // Update value to show with sign
+    timeline.to(
+      valueElement,
+      {
+        textContent: value,
+        duration: 0,
+        ease: "power2.out"
+      },
+      "<"
+    )
+
+    // Apply background color
     timeline.to(
       outcomeElement,
       {
@@ -73,7 +100,7 @@
         background: negative ? "red" : "green",
         ease: "power2.out"
       },
-      ">-0.3"
+      "<"
     )
 
     // Check if rat is dead after balance update
@@ -124,7 +151,7 @@
 </script>
 
 <div class="outcome" class:negative bind:this={outcomeElement}>
-  <span class="heart">{HEALTH_SYMBOL}</span>
+  <span class="heart" bind:this={heartElement}>{HEALTH_SYMBOL}</span>
   <span class="value" bind:this={valueElement}>0</span>
 </div>
 
