@@ -98,7 +98,7 @@
       filter: grayscale(100%) contrast(20) opacity(0.2);
       mix-blend-mode: screen;
       transition: filter 5s ease;
-      z-index: -1;
+      z-index: -1; // ???
       mask-image: radial-gradient(circle at top right, black 50%, transparent 70%);
       -webkit-mask-image: radial-gradient(circle at top right, black 50%, transparent 70%);
     }

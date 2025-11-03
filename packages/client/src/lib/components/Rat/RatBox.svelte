@@ -88,7 +88,7 @@
     height: var(--game-window-main-height);
     width: var(--game-column-width);
     position: relative;
-    z-index: 100;
+    z-index: var(--z-top);
     overflow: visible;
 
     @media (max-width: 700px) {

@@ -478,9 +478,7 @@
     justify-content: center;
     align-items: center;
     overscroll-behavior: none;
-    z-index: var(--z-high);
-    width: 100dvw;
-    height: 100dvh;
+    z-index: var(--z-modal);
   }
 
   .modal-content {

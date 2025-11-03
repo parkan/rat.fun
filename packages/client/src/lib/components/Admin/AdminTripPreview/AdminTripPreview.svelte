@@ -149,6 +149,6 @@
     position: sticky;
     height: 60px;
     top: 0;
-    z-index: 10;
+    z-index: var(--z-base);
   }
 </style>

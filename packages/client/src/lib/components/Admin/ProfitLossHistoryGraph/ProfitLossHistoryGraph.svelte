@@ -353,7 +353,7 @@
 
   .legend {
     position: absolute;
-    z-index: 999;
+    z-index: var(--z-top);
     display: flex;
     gap: 8px;
     padding: 8px;

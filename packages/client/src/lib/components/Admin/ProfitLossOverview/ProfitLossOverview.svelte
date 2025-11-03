@@ -112,7 +112,7 @@
           position: absolute;
           font-size: 240px;
           padding: 5px;
-          z-index: 0;
+          z-index: var(--z-background);
 
           &.upText {
             color: var(--color-up);
@@ -139,7 +139,7 @@
         .content {
           position: relative;
           display: flex;
-          z-index: 1;
+          z-index: var(--z-base);
         }
 
         .calculations {

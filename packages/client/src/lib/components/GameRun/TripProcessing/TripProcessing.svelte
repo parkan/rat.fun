@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Hex } from "viem"
   import type { EnterTripReturnValue } from "@server/modules/types"
   import { onMount, onDestroy } from "svelte"
   import * as transitions from "svelte/transition"
@@ -67,9 +66,7 @@
     out:transitions.fade={{ duration: 300 }}
     class="popup"
   >
-    <div class="mask">
-      <span> RAT STILL IN HALLUCINATORY STATE.<br />PLEASE STAND BY... </span>
-    </div>
+    <div>RAT STILL IN HALLUCINATORY STATE.<br />PLEASE STAND BY...</div>
   </div>
 {:else if timeElapsed > 20 && timeElapsed < 28}
   <div
@@ -77,11 +74,9 @@
     out:transitions.fade={{ duration: 300 }}
     class="popup"
   >
-    <div class="mask">
-      <span>
-        RAT BEING REVIVED FROM DEEP DRUG INDUCED COMA.<br />EVERYTHING IS NORMAL.<br />PLEASE STAND
-        BY...
-      </span>
+    <div>
+      RAT BEING REVIVED FROM DEEP DRUG INDUCED COMA.<br />EVERYTHING IS NORMAL.<br />PLEASE STAND
+      BY...
     </div>
   </div>
 {:else if timeElapsed > 30}
@@ -90,8 +85,8 @@
     out:transitions.fade={{ duration: 300 }}
     class="popup"
   >
-    <div class="mask">
-      <span> ALL IS FINE.<br /> JUST ONE MOMENT.<br /> WE VALUE YOUR PATIENCE. </span>
+    <div>
+      ALL IS FINE.<br /> JUST ONE MOMENT.<br /> WE VALUE YOUR PATIENCE.
     </div>
   </div>
 {/if}
@@ -106,30 +101,24 @@
 <style lang="scss">
   .popup {
     position: fixed;
-    top: 50vh;
-    left: 50vw;
+    top: 50%;
+    left: 50%;
     width: 600px;
     height: 300px;
     transform: translate(-50%, -50%);
     color: white;
-
-    .mask {
-      z-index: 99;
-      background: black;
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      width: 600px;
-      height: 300px;
-
-      span {
-        display: block;
-        width: 300px;
-        font-family: var(--special-font-stack);
-        font-size: var(--font-size-large);
-      }
+    border: 3px solid var(--color-grey-mid);
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: var(--z-modal);
+    background: black;
+    div {
+      width: 500px;
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-extra-large);
     }
   }
 
