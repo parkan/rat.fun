@@ -28,7 +28,7 @@
     }
   })
 
-  const onClick = async () => {
+  const onclick = async () => {
     ratState.state.transitionTo(RAT_BOX_STATE.CONFIRM_LIQUIDATION)
   }
 </script>
@@ -45,7 +45,7 @@
       <DangerButton
         text="Liquidate Rat"
         tippyText="Liquidate rat to get the value added to your wallet"
-        onclick={onClick}
+        {onclick}
       />
     </div>
   {/if}

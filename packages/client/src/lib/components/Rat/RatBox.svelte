@@ -17,6 +17,8 @@
   import { RAT_BOX_STATE, ratState } from "$lib/components/Rat/state.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
+  $inspect("ratState.state.current", ratState.state.current)
+
   onMount(() => {
     shaderManager.setShader("clouds", true)
     $backgroundMusic?.stop()

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { fade, fly } from "svelte/transition"
+  import { scale } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
 
   let {
     item,
@@ -13,7 +12,6 @@
   } = $props()
 
   let busy = $state(false)
-  let introstarted = $state(false)
 
   // Determine rarity class based on value
   const getRarityClass = (value: bigint | number) => {
@@ -30,13 +28,10 @@
 </script>
 
 <div
-  in:fly|global={{ duration: 100, y: -30, delay: 2000 + index * 60 }}
-  out:fly|global={{ duration: 100, y: 30 }}
+  in:scale|global={{ duration: 100, delay: 600 + index * 60 }}
+  out:scale|global={{ duration: 100 }}
   onintroend={() => {
-    playSound("ratfunUI", "hover3")
-  }}
-  onoutrostart={() => {
-    playSound("ratfunUI", "negative")
+    playSound("ratfunUI", "itemPositive", false, false, 1, 0, 0.3)
   }}
   class="inventory-item {getRarityClass(item.value)} index-{index}"
   class:disabled={busy}

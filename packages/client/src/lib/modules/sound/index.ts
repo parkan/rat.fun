@@ -44,6 +44,7 @@ export function initSound(): void {
  * @param {boolean} [fadeIn=false] - Determines if the sound should have fade in/out effects.
  * @param {number} [pitch=1] - The pitch of the sound.
  * @param {number} [delay=0] - The delay in milliseconds before the sound is played.
+ * @param {number | undefined} [volume=undefined] - The volume of the sound.
  * @returns {Howl | undefined} - The Howl object of the sound.
  */
 export function playSound(
@@ -52,7 +53,8 @@ export function playSound(
   loop: boolean = false,
   fadeIn: boolean = false,
   pitch: number = 1,
-  delay: number = 0
+  delay: number = 0,
+  volume: number | undefined = undefined
 ): Howl | undefined {
   // Check if category exists
   if (!soundLibrary[category]) {
@@ -75,6 +77,11 @@ export function playSound(
     return undefined
   }
 
+  // Set volume
+  if (volume !== undefined) {
+    sound.volume(volume)
+  }
+
   // Set loop state
   sound.loop(loop)
 
@@ -86,7 +93,7 @@ export function playSound(
     sound.play()
     if (fadeIn) {
       const FADE_TIME = 2000
-      sound.fade(0, soundLibrary[category][id].volume, FADE_TIME)
+      sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME)
     }
   }
 
