@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte"
+  import { onMount, onDestroy, tick } from "svelte"
   import { rat } from "$lib/modules/state/stores"
   import { frozenRat, resetFrozenState } from "$lib/components/GameRun/state.svelte"
   import { RatStats, RatInventory, LiquidateRat } from "$lib/components/Rat"
@@ -26,8 +26,9 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     console.log("onMount RatInfo")
+    await tick()
     updateDisplayRat()
   })
 

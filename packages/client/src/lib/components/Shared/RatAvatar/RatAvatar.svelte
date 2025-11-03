@@ -63,6 +63,11 @@
     // Create timeline for animation sequence
     const tl = gsap.timeline()
 
+    tl.to(bodyElement, {
+      scale: 0.95,
+      duration: 0
+    })
+
     // Animate head and ears with scale and directional movement
     tl.to([headElement, earsElement], {
       scale: 1.2,
@@ -79,7 +84,7 @@
         playSound("ratfunUI", "chirp")
       },
       [],
-      0.2
+      0.3
     )
 
     // Wait until 600ms total (matching Mascot's timing), then reset
@@ -94,18 +99,17 @@
         duration: 0.2,
         ease: "elastic.out(1.5)"
       },
-      0.6
+      0.4
     )
 
     tl.to(
-      armsElement,
+      bodyElement,
       {
         scale: 1,
-        y: 0,
         duration: 0.2,
         ease: "elastic.out(1.5)"
       },
-      0.6
+      0.4
     )
   }
 

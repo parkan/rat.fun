@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
-  import { player, rat } from "$lib/modules/state/stores"
+  import { rat } from "$lib/modules/state/stores"
   import { waitForPropertyChange } from "$lib/modules/state/utils"
   import { sendCreateRat } from "$lib/modules/action-manager/index.svelte"
   import { generateRatName, lastNameFragments, firstNameFragments } from "./ratNameGenerator"
@@ -127,8 +127,10 @@
     // Check if the rat was already made, and we are just waiting for the user to click buttons
     if ($rat) {
       if ($rat.balance > 0 && !$rat.dead) {
-        ;[firstName, lastName, ratNumber] = $rat.name.split("_")
-        // console.log(firstName, lastName, ratNumber)
+        const [first, last, num] = $rat.name.split("_")
+        firstName = first
+        lastName = last
+        ratNumber = Number(num)
         deploymentDone = true
         return // return before calling create rat
       }
@@ -174,7 +176,8 @@
     if ($rat?.name !== finalName) {
       await waitForPropertyChange(rat, "name", finalName, 10000)
     }
-    await new Promise(res => setTimeout(res, 4000))
+    // Does not seem to be needed. And slows down the transition to has rat state
+    // await new Promise(res => setTimeout(res, 4000))
     // Transition to has rat state
     ratState.state.transitionTo(RAT_BOX_STATE.HAS_RAT)
   }
