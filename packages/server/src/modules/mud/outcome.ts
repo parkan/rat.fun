@@ -433,36 +433,38 @@ export function updateOutcome(
   }
 
   // * * * * * * * * * * * * * * * * * *
-  // CASE 2: Mismatch detected - contract modified or rejected the LLM's suggestion
+  // CASE 2: Mismatch detected - contract modified the LLM's suggestion
   // * * * * * * * * * * * * * * * * * *
   // This can happen when:
-  // - LLM suggested transfer exceeds available budget/balance
+  // - LLM suggested transfer exceeds available budget/balance (most common)
   // - Contract applied constraints we didn't account for
-  // - There's a bug in the LLM output or our parsing
+  // - LLM made math errors in calculating transfers
+  //
+  // STRATEGY: Scale transfers proportionally to match actual outcome
+  // This preserves the narrative structure (all logSteps) while ensuring
+  // the correction LLM has context to rewrite the story coherently
 
-  console.error("🚨 BALANCE TRANSFER MISMATCH DETECTED")
-  console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-  console.error("Rat ID:", newRat.id)
-  console.error("Expected (LLM):", expectedBalanceChange)
-  console.error("Actual balance change:", actualBalanceChange)
+  console.warn("⚠️  BALANCE TRANSFER MISMATCH DETECTED")
+  console.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  console.warn("Rat ID:", newRat.id)
+  console.warn("Expected (LLM):", expectedBalanceChange)
+  console.warn("Actual balance change:", actualBalanceChange)
   if (ratDied && implicitItemValueTransfer > 0) {
-    console.error("Implicit item value transfer (death):", implicitItemValueTransfer)
-    console.error("Effective actual (balance + items):", effectiveActualBalanceChange)
+    console.warn("Implicit item value transfer (death):", implicitItemValueTransfer)
+    console.warn("Effective actual (balance + items):", effectiveActualBalanceChange)
   }
-  console.error("Difference:", effectiveActualBalanceChange - expectedBalanceChange)
-  console.error("Old balance:", oldBalance)
-  console.error("New balance:", newBalance)
-  console.error("Rat died:", ratDied)
-  console.error("LLM suggested transfers:", JSON.stringify(llmOutcome.balanceTransfers, null, 2))
-  console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  console.warn("Difference:", effectiveActualBalanceChange - expectedBalanceChange)
+  console.warn("Old balance:", oldBalance)
+  console.warn("New balance:", newBalance)
+  console.warn("Rat died:", ratDied)
+  console.warn("LLM suggested transfers:", JSON.stringify(llmOutcome.balanceTransfers, null, 2))
+  console.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-  // Use consistent error message so Sentry groups all balance mismatches together
+  // Report to Sentry for monitoring (but this is expected behavior, not critical)
   const error = new Error(
     `Balance Transfer Mismatch: Expected does not match actual on-chain balance change`
   )
 
-  // Add all the dynamic data as context instead of in the error message
-  // This ensures Sentry groups all balance mismatches into ONE issue
   const errorContext = {
     ratId: newRat.id,
     expected: expectedBalanceChange,
@@ -479,11 +481,22 @@ export function updateOutcome(
 
   captureError(error, errorContext)
 
-  // For now, we return empty balanceTransfers to indicate the mismatch
-  // This means the client won't see the step-by-step transfers in the UI
-  // TODO: Implement partial transfer validation - determine which transfers succeeded
-  // and which failed, rather than assuming total failure
-  console.log("__ Returning empty balanceTransfers array due to mismatch")
+  // Scale transfers proportionally to match the actual outcome
+  // This ensures the user sees the progression that led to the final state
+  // and gives the correction LLM context to rewrite the narrative
+  console.log(
+    "__ Scaling balance transfers proportionally to match actual outcome:",
+    effectiveActualBalanceChange
+  )
+
+  const scaledTransfers = scaleBalanceTransfers(
+    llmOutcome.balanceTransfers,
+    effectiveActualBalanceChange
+  )
+
+  newOutcome.balanceTransfers = scaledTransfers
+
+  console.log("__ ✓ Scaled transfers preserve narrative structure for correction LLM")
 
   return newOutcome
 }
@@ -502,4 +515,75 @@ export function updateOutcome(
 function getLogStep(name: string, list: ItemChange[]) {
   const item = list.find(i => i.name === name)
   return item?.logStep ?? 0
+}
+
+/**
+ * Helper: Scale balance transfers proportionally when contract modified the outcome
+ *
+ * When the contract can't fulfill the LLM's balance transfer request (e.g., rat doesn't
+ * have enough balance), we scale all transfers proportionally so they:
+ * 1. Sum to the actual balance change that occurred
+ * 2. Preserve all story beats (logSteps)
+ * 3. Give the correction LLM context to rewrite the narrative
+ *
+ * Example:
+ *   LLM suggested: [{step: 5, -15}, {step: 4, -120}] = -135
+ *   Contract did: -100 (rat only had 100)
+ *   Scale factor: -100 / -135 = 0.74
+ *   Result: [{step: 5, -11}, {step: 4, -89}] = -100
+ *
+ * @param transfers - The LLM's suggested transfers
+ * @param targetSum - The actual balance change that occurred on-chain
+ * @returns Scaled transfers that sum to targetSum
+ */
+function scaleBalanceTransfers(
+  transfers: Array<{ logStep: number; amount: number }>,
+  targetSum: number
+): Array<{ logStep: number; amount: number }> {
+  if (transfers.length === 0) {
+    return []
+  }
+
+  console.log("__ Scaling balance transfers to match actual on-chain outcome")
+  console.log("__   Original transfers:", transfers)
+  console.log("__   Target sum:", targetSum)
+
+  // Edge case: Single transfer - just use the actual value
+  if (transfers.length === 1) {
+    console.log("__   Single transfer: using actual value directly")
+    return [{ logStep: transfers[0].logStep, amount: targetSum }]
+  }
+
+  // Calculate scale factor
+  const originalSum = transfers.reduce((sum, t) => sum + t.amount, 0)
+  const scaleFactor = originalSum === 0 ? 1 : targetSum / originalSum
+
+  console.log(`__   Scale factor: ${targetSum} / ${originalSum} = ${scaleFactor}`)
+
+  // Scale each transfer proportionally
+  const scaledTransfers = transfers.map(transfer => ({
+    logStep: transfer.logStep,
+    amount: Math.round(transfer.amount * scaleFactor)
+  }))
+
+  // Fix rounding errors - adjust the largest absolute value transfer
+  const scaledSum = scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
+  const roundingError = targetSum - scaledSum
+
+  if (roundingError !== 0) {
+    console.log(`__   Rounding error: ${roundingError}`)
+    // Find transfer with largest absolute amount to adjust
+    const largestIndex = scaledTransfers.reduce(
+      (maxIdx, transfer, idx, arr) =>
+        Math.abs(transfer.amount) > Math.abs(arr[maxIdx].amount) ? idx : maxIdx,
+      0
+    )
+    scaledTransfers[largestIndex].amount += roundingError
+    console.log(`__   Adjusted transfer [${largestIndex}] by ${roundingError}`)
+  }
+
+  console.log("__   Scaled transfers:", scaledTransfers)
+  console.log("__   Verification sum:", scaledTransfers.reduce((sum, t) => sum + t.amount, 0))
+
+  return scaledTransfers
 }
