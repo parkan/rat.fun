@@ -615,10 +615,16 @@ function scaleBalanceTransfers(
   // Edge case: Single transfer - just use the actual value
   if (transfers.length === 1) {
     const originalAmount = transfers[0].amount
-    const signFlipped = Math.sign(originalAmount) !== Math.sign(targetSum) && originalAmount !== 0 && targetSum !== 0
+    const signFlipped =
+      Math.sign(originalAmount) !== Math.sign(targetSum) && originalAmount !== 0 && targetSum !== 0
 
     if (signFlipped) {
-      console.warn("__   ⚠️  SIGN FLIP: Single transfer changed from", originalAmount, "to", targetSum)
+      console.warn(
+        "__   ⚠️  SIGN FLIP: Single transfer changed from",
+        originalAmount,
+        "to",
+        targetSum
+      )
     } else {
       console.log("__   Single transfer: using actual value directly")
     }

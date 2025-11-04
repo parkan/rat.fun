@@ -83,14 +83,11 @@
     }
 
     // Set final text with sign and change color simultaneously
-    timeline.to(
-      valueElement,
-      {
-        textContent: `${name} (${CURRENCY_SYMBOL}${negative ? "-" : ""}${value})`,
-        duration: 0,
-        ease: "power2.out"
-      }
-    )
+    timeline.to(valueElement, {
+      textContent: `${name} (${CURRENCY_SYMBOL}${negative ? "-" : ""}${value})`,
+      duration: 0,
+      ease: "power2.out"
+    })
 
     // Change color
     timeline.to(
