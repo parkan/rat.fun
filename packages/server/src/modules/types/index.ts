@@ -89,7 +89,7 @@ export type OutcomeReturnValue = {
   id?: string
   itemChanges: ItemChange[]
   balanceTransfers: BalanceTransfer[]
-  debuggingInfo: DebuggingInfo
+  debuggingInfo?: DebuggingInfo
 }
 
 export type ItemChange = {

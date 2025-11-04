@@ -119,6 +119,9 @@ async function routes(fastify: FastifyInstance) {
         // Apply outcome onchain
         // * * * * * * * * * * * * * * * * * *
 
+        // Strip the debugging info from the outcome to not confuse the LLM
+        const { debuggingInfo, ...unvalidatedOutcome } = eventResults.outcome
+
         // Apply the outcome suggested by the LLM to the onchain state and get back the actual outcome.
         console.time("–– Chain")
         const {
@@ -128,8 +131,11 @@ async function routes(fastify: FastifyInstance) {
           newRatBalance,
           newRatValue,
           ratValueChange
-        } = await systemCalls.applyOutcome(rat, trip, eventResults.outcome)
+        } = await systemCalls.applyOutcome(rat, trip, unvalidatedOutcome)
         console.timeEnd("–– Chain")
+
+        console.log("unvalidatedOutcome", unvalidatedOutcome)
+        console.log("validatedOutcome", validatedOutcome)
 
         // * * * * * * * * * * * * * * * * * *
         // Construct correction messages
@@ -139,10 +145,11 @@ async function routes(fastify: FastifyInstance) {
         // Run it through the LLM again to get the corrected event log.
         console.time("–– Correction LLM")
         const correctionMessages = constructCorrectionMessages(
-          eventResults.outcome,
+          unvalidatedOutcome,
           validatedOutcome,
           eventResults.log
         )
+
         const correctedEvents = (await callModel(
           llmClient,
           correctionMessages,
@@ -183,7 +190,11 @@ async function routes(fastify: FastifyInstance) {
               correctedEvents,
               validatedOutcome,
               mainProcessingTime,
-              eventResults.outcome?.debuggingInfo
+              debuggingInfo ?? {
+                internalText: "No debugging info available",
+                randomSeed: 0,
+                batchId: 0
+              }
             )
           } catch (error) {
             handleBackgroundError(error, "Trip Entry - CMS")
