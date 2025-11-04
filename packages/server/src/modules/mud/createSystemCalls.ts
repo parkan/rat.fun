@@ -19,6 +19,13 @@ import {
 export type SystemCalls = ReturnType<typeof createSystemCalls>
 
 export function createSystemCalls(network: SetupNetworkResult) {
+  /**
+   * Apply the outcome changes to the blockchain state
+   * @param rat - The rat to apply the outcome to
+   * @param trip - The trip to apply the outcome to
+   * @param outcome - The outcome to apply to the rat and trip
+   * @returns The validated outcome and calculated changes
+   */
   const applyOutcome = async (rat: Rat, trip: Trip, outcome: OutcomeReturnValue) => {
     try {
       const args = createOutcomeCallArgs(rat, trip, outcome)
@@ -31,7 +38,9 @@ export function createSystemCalls(network: SetupNetworkResult) {
         maxPriorityFeePerGas: (feeData.maxPriorityFeePerGas * 200n) / 100n, // 100% higher priority
         gas: 2000000n // Set generous gas limit
       })
-      await network.waitForTransaction(tx)
+      const reciept = await network.waitForTransaction(tx)
+
+      console.log("reciept", reciept)
 
       // Suggested outcomes were sent to the chain
       // We get the new onchain state
@@ -81,6 +90,14 @@ export function createSystemCalls(network: SetupNetworkResult) {
     }
   }
 
+  /**
+   * Create a new trip
+   * @param playerId - The ID of the player creating the trip
+   * @param tripID - The ID of the trip to create
+   * @param tripCreationCost - The cost of creating the trip
+   * @param tripPrompt - The prompt for the trip
+   * @returns True if the trip was created successfully
+   */
   const createTrip = async (
     playerId: Hex,
     tripID: Hex,
@@ -112,6 +129,11 @@ export function createSystemCalls(network: SetupNetworkResult) {
     }
   }
 
+  /**
+   * Give a master key to a player
+   * @param playerId - The ID of the player to give the master key to
+   * @returns True if the master key was given successfully
+   */
   const giveMasterKey = async (playerId: Hex) => {
     try {
       const tx = await network.worldContract.write.ratfun__giveMasterKey([playerId])
