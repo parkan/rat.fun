@@ -1,9 +1,16 @@
 import { GamePercentagesConfig, Rat, Trip } from "@modules/types"
 
 export function getTripValue(trip: Trip, newTrip: Trip | undefined) {
+  const newTripValue = newTrip?.balance ?? 0
+  const tripValueChange = newTripValue - trip.balance
+
+  // When a rat dies, trip receives rat's balance + item values
+  // tripValueChange will reflect this full gain automatically
+  // since the contract adds both to trip.balance
+
   return {
-    newTripValue: newTrip?.balance ?? 0,
-    tripValueChange: (newTrip?.balance ?? 0) - trip.balance
+    newTripValue,
+    tripValueChange
   }
 }
 
@@ -30,6 +37,35 @@ export function getTripMinRatValueToEnter(
 export function getRatValue(rat: Rat, newRat: Rat) {
   const newRatValue = calculateTotalRatValue(newRat)
   const oldRatValue = calculateTotalRatValue(rat)
+
+  // DEATH MECHANICS:
+  // When a rat dies (balance → 0):
+  // - Item VALUES are transferred to trip (economically lost by rat)
+  // - But items physically STAY in dead rat's inventory (gas optimization)
+  // - calculateTotalRatValue counts those items, making newRatValue > 0
+  // - This creates incorrect ratValueChange calculation
+  //
+  // FIX: If rat died, the economic loss is the FULL old value (balance + items)
+  // even though items physically remained
+
+  const ratDied = (newRat.balance ?? 0) === 0 && (rat.balance ?? 0) > 0
+
+  if (ratDied) {
+    // Rat lost everything economically (even though items stayed physically)
+    const ratValueChange = -oldRatValue
+
+    console.log("__ getRatValue - RAT DEATH DETECTED:")
+    console.log("__   Old rat value:", oldRatValue, "(balance + items)")
+    console.log("__   New rat physical value:", newRatValue, "(items still in corpse)")
+    console.log("__   Economic value change:", ratValueChange, "(lost everything)")
+
+    return {
+      newRatValue: 0, // Economically worthless (dead)
+      ratValueChange
+    }
+  }
+
+  // Normal case: rat alive, calculate standard change
   return {
     newRatValue,
     ratValueChange: newRatValue - oldRatValue
@@ -37,7 +73,8 @@ export function getRatValue(rat: Rat, newRat: Rat) {
 }
 
 function calculateTotalRatValue(rat: Rat) {
-  if (!rat) return 0
+  // Handle death case
+  if (!rat || !rat.balance) return 0
 
   const balanceValue = Number(rat.balance ?? 0)
   const inventoryValue = (rat.inventory ?? []).reduce(
