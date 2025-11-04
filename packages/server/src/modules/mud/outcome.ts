@@ -545,7 +545,11 @@ export function updateOutcome(
     )
   }
 
-  const scaledTransfers = scaleBalanceTransfers(llmOutcome.balanceTransfers, actualBalanceChange)
+  const scaledTransfers = scaleBalanceTransfers(
+    llmOutcome.balanceTransfers,
+    actualBalanceChange,
+    oldBalance
+  )
 
   newOutcome.balanceTransfers = scaledTransfers
 
@@ -578,6 +582,7 @@ function getLogStep(name: string, list: ItemChange[]) {
  * 1. Sum to the actual balance change that occurred
  * 2. Preserve all story beats (logSteps)
  * 3. Give the correction LLM context to rewrite the narrative
+ * 4. Avoid showing "temporary death" in UI (balance crossing zero then recovering)
  *
  * Example:
  *   LLM suggested: [{step: 5, -15}, {step: 4, -120}] = -135
@@ -592,17 +597,20 @@ function getLogStep(name: string, list: ItemChange[]) {
  *
  * @param transfers - The LLM's suggested transfers
  * @param targetSum - The actual balance change that occurred on-chain
- * @returns Scaled transfers that sum to targetSum
+ * @param startingBalance - The rat's balance before any transfers (to check for zero-crossing)
+ * @returns Scaled transfers that sum to targetSum and avoid crossing zero
  */
 function scaleBalanceTransfers(
   transfers: Array<{ logStep: number; amount: number }>,
-  targetSum: number
+  targetSum: number,
+  startingBalance: number
 ): Array<{ logStep: number; amount: number }> {
   if (transfers.length === 0) {
     return []
   }
 
   console.log("__ Scaling balance transfers to match actual on-chain outcome")
+  console.log("__   Starting balance:", startingBalance)
   console.log("__   Original transfers:", transfers)
   console.log("__   Target sum:", targetSum)
 
@@ -638,18 +646,17 @@ function scaleBalanceTransfers(
   }
 
   // Scale each transfer proportionally
-  const scaledTransfers = transfers.map(transfer => ({
+  let scaledTransfers = transfers.map(transfer => ({
     logStep: transfer.logStep,
     amount: Math.round(transfer.amount * scaleFactor)
   }))
 
   // Fix rounding errors - adjust the largest absolute value transfer
-  const scaledSum = scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
+  let scaledSum = scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
   const roundingError = targetSum - scaledSum
 
   if (roundingError !== 0) {
     console.log(`__   Rounding error: ${roundingError}`)
-    // Find transfer with largest absolute amount to adjust
     const largestIndex = scaledTransfers.reduce(
       (maxIdx, transfer, idx, arr) =>
         Math.abs(transfer.amount) > Math.abs(arr[maxIdx].amount) ? idx : maxIdx,
@@ -659,11 +666,99 @@ function scaleBalanceTransfers(
     console.log(`__   Adjusted transfer [${largestIndex}] by ${roundingError}`)
   }
 
-  console.log("__   Scaled transfers:", scaledTransfers)
-  console.log(
-    "__   Verification sum:",
-    scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
-  )
+  // Check if transfers cross zero during progression (rat "dies" then recovers)
+  // This creates awkward UI where health bar shows death → resurrection
+  const finalBalance = startingBalance + targetSum
+  const crossesZero = checkIfCrossesZero(scaledTransfers, startingBalance)
+
+  if (crossesZero && finalBalance > 0) {
+    console.warn(
+      "__   ⚠️  TRANSFERS CROSS ZERO (temporary death) - Dampening to avoid UI confusion"
+    )
+
+    // Dampen the swings while maintaining the net
+    scaledTransfers = dampenTransfersToAvoidZero(scaledTransfers, startingBalance, targetSum)
+
+    console.log("__   Dampened transfers:", scaledTransfers)
+    console.log(
+      "__   Verification sum:",
+      scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
+    )
+  } else {
+    console.log("__   Scaled transfers:", scaledTransfers)
+    console.log(
+      "__   Verification sum:",
+      scaledTransfers.reduce((sum, t) => sum + t.amount, 0)
+    )
+  }
 
   return scaledTransfers
+}
+
+/**
+ * Check if a sequence of transfers causes balance to cross zero
+ */
+function checkIfCrossesZero(
+  transfers: Array<{ logStep: number; amount: number }>,
+  startingBalance: number
+): boolean {
+  let runningBalance = startingBalance
+
+  for (const transfer of transfers) {
+    runningBalance += transfer.amount
+    if (runningBalance <= 0) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * Dampen balance transfers to avoid crossing zero while maintaining net sum
+ *
+ * Strategy: Scale down intermediate swings, adjust last transfer to hit target net
+ */
+function dampenTransfersToAvoidZero(
+  transfers: Array<{ logStep: number; amount: number }>,
+  startingBalance: number,
+  targetSum: number
+): Array<{ logStep: number; amount: number }> {
+  console.log("__     Dampening transfers to avoid zero-crossing...")
+
+  // Try dampening factors until we find one that works
+  const dampeningFactors = [0.5, 0.3, 0.1, 0.05]
+
+  for (const dampening of dampeningFactors) {
+    console.log(`__     Trying dampening factor: ${dampening}`)
+
+    // Scale all transfers except the last one
+    const dampened = transfers.slice(0, -1).map(t => ({
+      logStep: t.logStep,
+      amount: Math.round(t.amount * dampening)
+    }))
+
+    // Calculate what the last transfer needs to be to hit target sum
+    const dampenedSum = dampened.reduce((sum, t) => sum + t.amount, 0)
+    const lastTransferAmount = targetSum - dampenedSum
+
+    const finalTransfers = [
+      ...dampened,
+      {
+        logStep: transfers[transfers.length - 1].logStep,
+        amount: lastTransferAmount
+      }
+    ]
+
+    // Check if this avoids crossing zero
+    if (!checkIfCrossesZero(finalTransfers, startingBalance)) {
+      console.log(`__     ✓ Success with dampening factor ${dampening}`)
+      return finalTransfers
+    }
+  }
+
+  // If all dampening factors fail, return original scaled transfers
+  // (Better to show crossing zero than break the math)
+  console.warn("__     ⚠️  Could not avoid zero-crossing, using original scaled transfers")
+  return transfers
 }
