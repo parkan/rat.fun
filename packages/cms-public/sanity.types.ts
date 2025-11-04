@@ -160,8 +160,10 @@ export type Outcome = {
     id?: string
     _key: string
   }>
+  oldTripValue?: number
   tripValue?: number
   tripValueChange?: number
+  oldRatValue?: number
   ratValue?: number
   ratValueChange?: number
   debuggingInfo?: string

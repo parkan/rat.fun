@@ -72,8 +72,12 @@ export function getRatValue(rat: Rat, newRat: Rat) {
   }
 }
 
-function calculateTotalRatValue(rat: Rat) {
-  // Handle death case
+/**
+ * Calculate the total economic value of a rat (balance + inventory)
+ * Exported so it can be reused in other modules (e.g., CMS)
+ */
+export function calculateTotalRatValue(rat: Rat) {
+  // Handle death case or missing rat
   if (!rat || !rat.balance) return 0
 
   const balanceValue = Number(rat.balance ?? 0)

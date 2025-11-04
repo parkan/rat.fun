@@ -915,6 +915,13 @@
         },
         "optional": true
       },
+      "oldTripValue": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "tripValue": {
         "type": "objectAttribute",
         "value": {
@@ -923,6 +930,13 @@
         "optional": true
       },
       "tripValueChange": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
+      "oldRatValue": {
         "type": "objectAttribute",
         "value": {
           "type": "number"

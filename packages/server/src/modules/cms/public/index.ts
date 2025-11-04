@@ -7,6 +7,7 @@ import type { Rat, Trip, Player, DebuggingInfo } from "@modules/types"
 import type { CorrectionReturnValue, OutcomeReturnValue } from "@modules/types"
 import { loadDataPublicSanity } from "@modules/cms/public/sanity"
 import { queries } from "@modules/cms/public/groq"
+import { calculateTotalRatValue } from "@modules/mud/value"
 
 import { publicSanityClient } from "@modules/cms/public/sanity"
 import { v4 as uuidv4 } from "uuid"
@@ -204,6 +205,18 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
 /**
  * Write outcome to offchain CMS.
  * Used to display statistics in the client.
+ * @param worldAddress - The world address
+ * @param player - The player who performed the trip
+ * @param trip - The trip state BEFORE the visit (old values)
+ * @param rat - The rat state BEFORE the visit (old values)
+ * @param newTripValue - The trip value AFTER the visit
+ * @param tripValueChange - Change in trip value
+ * @param newRatValue - The rat value AFTER the visit
+ * @param ratValueChange - Change in rat value
+ * @param events - The corrected event log
+ * @param outcome - The validated outcome
+ * @param mainProcessingTime - Processing time in ms
+ * @param debuggingInfo - Debug information from LLM
  */
 export async function writeOutcomeToCMS(
   worldAddress: string,
@@ -224,6 +237,13 @@ export async function writeOutcomeToCMS(
 
     const debuggingInfoString = JSON.stringify(debuggingInfo)
 
+    // Calculate old values (pre-visit) from the trip and rat objects
+    // trip.balance is the old trip value (trips have no inventory)
+    const oldTripValue = trip.balance
+
+    // rat total value = balance + items (before the visit)
+    const oldRatValue = calculateTotalRatValue(rat)
+
     const newOutcomeDoc: NewOutcomeDoc = {
       _type: "outcome",
       title: outcomeID,
@@ -235,8 +255,10 @@ export async function writeOutcomeToCMS(
       log: createOutcomeEvents(events),
       ratId: rat.id,
       ratName: rat.name,
+      oldTripValue: oldTripValue,
       tripValue: newTripValue,
       tripValueChange: tripValueChange,
+      oldRatValue: oldRatValue,
       ratValue: newRatValue,
       ratValueChange: ratValueChange,
       playerName: player.name,

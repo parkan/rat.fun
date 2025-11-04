@@ -117,6 +117,13 @@ export default {
       ]
     },
     {
+      title: "Trip value (old)",
+      description: "The value of the trip before the visit",
+      name: "oldTripValue",
+      type: "number",
+      readOnly: true
+    },
+    {
       title: "Trip value",
       description: "The value of the trip after the visit",
       name: "tripValue",
@@ -130,6 +137,13 @@ export default {
       type: "number",
       readOnly: true,
       validation: (Rule: any) => Rule.required()
+    },
+    {
+      title: "Rat value (old)",
+      description: "The value of the rat before the visit",
+      name: "oldRatValue",
+      type: "number",
+      readOnly: true
     },
     {
       title: "Rat value",
