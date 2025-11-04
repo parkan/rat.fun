@@ -365,31 +365,24 @@ export function updateOutcome(
   const actualBalanceChange = newBalance - oldBalance
 
   // SPECIAL CASE - RAT DEATH:
-  // When rat dies, contract implicitly transfers item VALUES to trip (in addition to balance)
-  // Even though items physically stay in dead rat's inventory
-  // We need to account for this implicit item value transfer when validating
+  // When rat dies, contract implicitly transfers item VALUES to trip
+  // BUT this is NOT a balance transfer - it's item confiscation
+  // balanceTransfers should ONLY reflect actual balance changes (what UI shows as health)
+  // Item value losses are tracked separately via economic value calculations
   let implicitItemValueTransfer = 0
   if (ratDied) {
     implicitItemValueTransfer = oldInventory.reduce((sum, item) => sum + (item.value ?? 0), 0)
     console.log(
-      `__ Death adjustment: Contract implicitly transferred ${implicitItemValueTransfer} in item values to trip`
+      `__ Death note: ${implicitItemValueTransfer} in item values will be transferred to trip (separate from balance)`
     )
   }
 
-  // For validation, compare what LLM expected vs what contract actually did
-  // On death, contract does: balance transfer + implicit item value transfer
-  // So we need to account for that implicit transfer
-  const effectiveActualBalanceChange = actualBalanceChange - implicitItemValueTransfer
-
   console.log("__ Balance validation:")
-  console.log("__   LLM expected:", expectedBalanceChange)
+  console.log("__   LLM expected balance change:", expectedBalanceChange)
   console.log("__   Actual balance change:", actualBalanceChange)
-  if (ratDied) {
-    console.log("__   Implicit item value transfer:", implicitItemValueTransfer)
+  if (ratDied && implicitItemValueTransfer > 0) {
     console.log(
-      "__   Effective actual (balance + items):",
-      effectiveActualBalanceChange,
-      "← This should match expected"
+      `__   (Plus ${implicitItemValueTransfer} in item values - tracked separately, not in balanceTransfers)`
     )
   }
 
@@ -426,14 +419,14 @@ export function updateOutcome(
   // * * * * * * * * * * * * * * * * * *
   // CASE 1: Expected matches actual - everything worked as planned
   // * * * * * * * * * * * * * * * * * *
-  // Use effectiveActualBalanceChange which accounts for implicit item value transfer on death
-  const balanceMatches = expectedBalanceChange === effectiveActualBalanceChange
+  // Compare BALANCE changes only (not including item value transfers)
+  const balanceMatches = expectedBalanceChange === actualBalanceChange
 
   if (balanceMatches) {
     console.log("__ ✓ Balance transfer successful - LLM intent matched on-chain execution")
     if (ratDied && implicitItemValueTransfer > 0) {
       console.log(
-        `__   (Note: Includes implicit ${implicitItemValueTransfer} item value transfer due to death)`
+        `__   (Note: ${implicitItemValueTransfer} in item values transferred separately on death)`
       )
     }
     newOutcome.balanceTransfers = [...llmOutcome.balanceTransfers]
@@ -448,17 +441,16 @@ export function updateOutcome(
   // - Contract applied constraints we didn't account for
   // - LLM made math errors in calculating transfers
   //
-  // STRATEGY: Scale transfers proportionally to match actual outcome
-  // This preserves the narrative structure (all logSteps) while ensuring
-  // the correction LLM has context to rewrite the story coherently
+  // STRATEGY: Scale transfers proportionally to match actual BALANCE outcome
+  // balanceTransfers should ONLY reflect balance changes (what UI shows as health)
+  // Item value transfers are tracked separately
 
   // CRITICAL: Detect sign flips (LLM expected gain, contract did loss, or vice versa)
-  const scaleFactor =
-    expectedBalanceChange === 0 ? 1 : effectiveActualBalanceChange / expectedBalanceChange
+  const scaleFactor = expectedBalanceChange === 0 ? 1 : actualBalanceChange / expectedBalanceChange
   const isSignFlip =
-    Math.sign(expectedBalanceChange) !== Math.sign(effectiveActualBalanceChange) &&
+    Math.sign(expectedBalanceChange) !== Math.sign(actualBalanceChange) &&
     expectedBalanceChange !== 0 &&
-    effectiveActualBalanceChange !== 0
+    actualBalanceChange !== 0
 
   if (isSignFlip) {
     console.error("🚨🚨🚨 CRITICAL: SIGN FLIP DETECTED 🚨🚨🚨")
@@ -472,8 +464,8 @@ export function updateOutcome(
     )
     console.error(
       "Contract did:",
-      effectiveActualBalanceChange,
-      `(${effectiveActualBalanceChange > 0 ? "GAIN" : "LOSS"})`
+      actualBalanceChange,
+      `(${actualBalanceChange > 0 ? "GAIN" : "LOSS"})`
     )
     console.error("Scale factor:", scaleFactor, "← NEGATIVE = OPPOSITE DIRECTION")
     console.error("Old balance:", oldBalance)
@@ -484,18 +476,19 @@ export function updateOutcome(
 
     // Report sign flip to Sentry as a separate critical issue
     const signFlipError = new Error(
-      `CRITICAL Sign Flip: LLM expected ${expectedBalanceChange > 0 ? "gain" : "loss"}, contract did ${effectiveActualBalanceChange > 0 ? "gain" : "loss"}`
+      `CRITICAL Sign Flip: LLM expected ${expectedBalanceChange > 0 ? "gain" : "loss"}, contract did ${actualBalanceChange > 0 ? "gain" : "loss"}`
     )
     captureError(signFlipError, {
       ratId: newRat.id,
       llmExpected: expectedBalanceChange,
       llmDirection: expectedBalanceChange > 0 ? "gain" : "loss",
-      contractActual: effectiveActualBalanceChange,
-      contractDirection: effectiveActualBalanceChange > 0 ? "gain" : "loss",
+      contractActual: actualBalanceChange,
+      contractDirection: actualBalanceChange > 0 ? "gain" : "loss",
       scaleFactor,
       oldBalance,
       newBalance,
       ratDied,
+      implicitItemValueTransfer: ratDied ? implicitItemValueTransfer : 0,
       suggestedTransfers: llmOutcome.balanceTransfers,
       context: "Trip Entry - Sign Flip"
     })
@@ -506,10 +499,13 @@ export function updateOutcome(
     console.warn("Expected (LLM):", expectedBalanceChange)
     console.warn("Actual balance change:", actualBalanceChange)
     if (ratDied && implicitItemValueTransfer > 0) {
-      console.warn("Implicit item value transfer (death):", implicitItemValueTransfer)
-      console.warn("Effective actual (balance + items):", effectiveActualBalanceChange)
+      console.warn(
+        "Note: Item values transferred separately on death:",
+        implicitItemValueTransfer,
+        "(NOT included in balanceTransfers)"
+      )
     }
-    console.warn("Difference:", effectiveActualBalanceChange - expectedBalanceChange)
+    console.warn("Difference:", actualBalanceChange - expectedBalanceChange)
     console.warn("Scale factor:", scaleFactor)
     console.warn("Old balance:", oldBalance)
     console.warn("New balance:", newBalance)
@@ -526,8 +522,7 @@ export function updateOutcome(
       ratId: newRat.id,
       expected: expectedBalanceChange,
       actualBalanceChange: actualBalanceChange,
-      effectiveActualBalanceChange: effectiveActualBalanceChange,
-      difference: effectiveActualBalanceChange - expectedBalanceChange,
+      difference: actualBalanceChange - expectedBalanceChange,
       scaleFactor,
       oldBalance,
       newBalance,
@@ -540,18 +535,17 @@ export function updateOutcome(
     captureError(error, errorContext)
   }
 
-  // Scale transfers proportionally to match the actual outcome
-  // This ensures the user sees the progression that led to the final state
-  // and gives the correction LLM context to rewrite the narrative
-  console.log(
-    "__ Scaling balance transfers proportionally to match actual outcome:",
-    effectiveActualBalanceChange
-  )
+  // Scale transfers proportionally to match the actual BALANCE outcome
+  // balanceTransfers represents ONLY balance/health changes (what the UI displays)
+  // Item value transfers on death are tracked separately via getRatValue/getTripValue
+  console.log("__ Scaling balance transfers to match actual balance change:", actualBalanceChange)
+  if (ratDied && implicitItemValueTransfer > 0) {
+    console.log(
+      `__   (Item values of ${implicitItemValueTransfer} handled separately - not in balanceTransfers)`
+    )
+  }
 
-  const scaledTransfers = scaleBalanceTransfers(
-    llmOutcome.balanceTransfers,
-    effectiveActualBalanceChange
-  )
+  const scaledTransfers = scaleBalanceTransfers(llmOutcome.balanceTransfers, actualBalanceChange)
 
   newOutcome.balanceTransfers = scaledTransfers
 
