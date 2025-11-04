@@ -32,8 +32,8 @@
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import {
-    AdminUnlockModal,
     ShaderGlobal,
+    // AdminUnlockModal,
     // WorldEventPopup,
     Lightbox
   } from "$lib/components/Shared"
@@ -113,7 +113,7 @@
   ></ModalTarget>
 {/if} -->
 
-<AdminUnlockModal />
+<!-- <AdminUnlockModal /> -->
 
 <EntryKit />
 <Toasts />
