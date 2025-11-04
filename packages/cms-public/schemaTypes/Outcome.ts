@@ -161,6 +161,20 @@ export default {
       validation: (Rule: any) => Rule.required()
     },
     {
+      title: "Rat balance (old)",
+      description: "The balance/health of the rat before the visit",
+      name: "oldRatBalance",
+      type: "number",
+      readOnly: true
+    },
+    {
+      title: "Rat balance (new)",
+      description: "The balance/health of the rat after the visit",
+      name: "newRatBalance",
+      type: "number",
+      readOnly: true
+    },
+    {
       title: "Debugging info",
       name: "debuggingInfo",
       type: "text",

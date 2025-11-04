@@ -166,6 +166,8 @@ export type Outcome = {
   oldRatValue?: number
   ratValue?: number
   ratValueChange?: number
+  oldRatBalance?: number
+  newRatBalance?: number
   debuggingInfo?: string
   mainProcessingTime?: number
   slug?: Slug

@@ -207,6 +207,7 @@ async function routes(fastify: FastifyInstance) {
               tripValueChange,
               newRatValue,
               ratValueChange,
+              newRatBalance,
               correctedEvents,
               validatedOutcome,
               mainProcessingTime,

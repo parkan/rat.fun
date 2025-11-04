@@ -957,6 +957,20 @@
         },
         "optional": true
       },
+      "oldRatBalance": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
+      "newRatBalance": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "debuggingInfo": {
         "type": "objectAttribute",
         "value": {

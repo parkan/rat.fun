@@ -213,6 +213,7 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
  * @param tripValueChange - Change in trip value
  * @param newRatValue - The rat value AFTER the visit
  * @param ratValueChange - Change in rat value
+ * @param newRatBalance - The rat balance/health AFTER the visit
  * @param events - The corrected event log
  * @param outcome - The validated outcome
  * @param mainProcessingTime - Processing time in ms
@@ -227,6 +228,7 @@ export async function writeOutcomeToCMS(
   tripValueChange: number,
   newRatValue: number,
   ratValueChange: number,
+  newRatBalance: number,
   events: CorrectionReturnValue,
   outcome: OutcomeReturnValue,
   mainProcessingTime: number,
@@ -243,6 +245,9 @@ export async function writeOutcomeToCMS(
 
     // rat total value = balance + items (before the visit)
     const oldRatValue = calculateTotalRatValue(rat)
+
+    // rat balance/health (before the visit)
+    const oldRatBalance = rat.balance
 
     const newOutcomeDoc: NewOutcomeDoc = {
       _type: "outcome",
@@ -261,6 +266,8 @@ export async function writeOutcomeToCMS(
       oldRatValue: oldRatValue,
       ratValue: newRatValue,
       ratValueChange: ratValueChange,
+      oldRatBalance: oldRatBalance,
+      newRatBalance: newRatBalance,
       playerName: player.name,
       mainProcessingTime: mainProcessingTime,
       debuggingInfo: debuggingInfoString,
