@@ -53,7 +53,7 @@
       onRecoverableError: error => _errorHandler(error),
       onUncaughtError: error => _errorHandler(error)
     })
-    const config = wagmiConfig()
+    const config = wagmiConfig(networkConfig.chainId)
 
     // 2. Create the needed Entrykit component.
     // The second argument are props

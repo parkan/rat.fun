@@ -22,8 +22,9 @@ export const transports = {
   [extendedMudFoundry.id]: http()
 } as const
 
-export function wagmiConfig(): Config<typeof chains, typeof transports> {
+export function wagmiConfig(chainId: number): Config<typeof chains, typeof transports> {
   const appName = "RAT.FUN"
+  const chain = chains.find(chain => chain.id === chainId) as (typeof chains)[number]
 
   // If browser supports extensions, leave connectors empty to allow auto-detection
   const connectors: CreateConnectorFn[] = []
@@ -52,7 +53,7 @@ export function wagmiConfig(): Config<typeof chains, typeof transports> {
 
   const configParams = getDefaultConfig({
     appName,
-    chains,
+    chains: [chain],
     transports,
     pollingInterval: {
       [extendedBaseSepolia.id]: 2000

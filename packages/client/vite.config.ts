@@ -21,5 +21,14 @@ export default defineConfig(() => {
         }
       }
     ]
+    // Uncomment when linking local entrykit to fix issues with multiple react instances
+    /*
+    resolve: {
+      alias: {
+        'react-dom': path.resolve('./node_modules/react-dom'),
+        'react': path.resolve('./node_modules/react')
+      }
+    },
+    */
   }
 })
