@@ -25,6 +25,7 @@ import { Hex } from "viem"
 import { OutcomeReturnValue, ItemChange } from "@modules/types"
 import { Rat, Trip } from "@modules/types"
 import { captureError } from "@modules/sentry"
+import { isValidBytes32 } from "@modules/utils"
 
 /**
  * Parse the LLM outcome into the arguments for the smart contract's applyOutcome function
@@ -93,28 +94,44 @@ export function createOutcomeCallArgs(rat: Rat, trip: Trip, outcome: OutcomeRetu
   // * * * * * * * * * * * * * * * * * *
   // Extract IDs of items the LLM wants to remove from rat's inventory
   // These items' values will be transferred back to the trip
+  // IMPORTANT: Validate all IDs - LLM sometimes provides invalid/missing IDs
 
   console.log("\n🗑️  ITEMS TO REMOVE:")
-  const itemsToRemoveFromRat =
-    (outcome?.itemChanges ?? []).filter(c => c.type === "remove").map(c => c.id) ?? []
+  const itemsToRemoveLLM = (outcome?.itemChanges ?? []).filter(c => c.type === "remove")
 
-  if (itemsToRemoveFromRat.length === 0) {
+  const itemsToRemoveFromRat: Hex[] = []
+  const invalidRemovals: Array<{ name: string; id: any }> = []
+
+  if (itemsToRemoveLLM.length === 0) {
     console.log("  ℹ️  No items to remove")
   } else {
-    console.log(`  Found ${itemsToRemoveFromRat.length} item(s) to remove:`)
-    itemsToRemoveFromRat.forEach((id, index) => {
-      const item = outcome.itemChanges?.find(c => c.id === id)
-      console.log(`    [${index}] ${id} - ${item?.name} (value: ${item?.value})`)
+    console.log(`  LLM requested ${itemsToRemoveLLM.length} item(s) to remove`)
+
+    itemsToRemoveLLM.forEach((item) => {
+      if (isValidBytes32(item.id)) {
+        itemsToRemoveFromRat.push(item.id)
+        console.log(`    [✓] ${item.id} - ${item.name} (value: ${item.value})`)
+      } else {
+        invalidRemovals.push({ name: item.name, id: item.id })
+        console.warn(
+          `    [✗] Invalid ID for "${item.name}": ${JSON.stringify(item.id)} - SKIPPED`
+        )
+      }
     })
+
+    if (invalidRemovals.length > 0) {
+      console.warn(`  ⚠️  Skipped ${invalidRemovals.length} invalid removal(s):`)
+      invalidRemovals.forEach(({ name, id }) => {
+        console.warn(`      - ${name}: ID was ${JSON.stringify(id)}`)
+      })
+      console.warn("  ⚠️  Common causes: LLM trying to remove items added in same trip, or providing invalid IDs")
+    }
   }
 
   // Calculate total value of items being removed (these will refund to trip)
-  const totalItemValueToRemove = itemsToRemoveFromRat
-    .map(id => {
-      const item = outcome.itemChanges?.find(c => c.id === id)
-      return item?.value ?? 0
-    })
-    .reduce((sum, val) => sum + val, 0)
+  const totalItemValueToRemove = itemsToRemoveLLM
+    .filter(item => isValidBytes32(item.id))
+    .reduce((sum, item) => sum + (item.value ?? 0), 0)
   console.log(`  💰 Total value to refund to trip: ${totalItemValueToRemove}`)
 
   // * * * * * * * * * * * * * * * * * *

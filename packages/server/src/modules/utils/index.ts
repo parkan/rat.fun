@@ -1,4 +1,13 @@
-import { Hex } from "viem"
+import { Hex, isHex } from "viem"
+
+/**
+ * Validates if a value is a valid bytes32 hex string (0x + 64 hex chars)
+ * @param value The value to check
+ * @returns True if valid bytes32 hex string
+ */
+export function isValidBytes32(value: any): value is Hex {
+  return isHex(value) && value.length === 66
+}
 
 export function generateRandomBytes32(): Hex {
   const bytes = crypto.getRandomValues(new Uint8Array(32))
