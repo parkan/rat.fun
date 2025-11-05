@@ -105,6 +105,7 @@
     color: var(--foreground);
     padding: 0;
     background: red;
+    min-width: 100px;
 
     &.balance {
       background: var(--color-value);
@@ -117,6 +118,10 @@
       padding-inline: 10px;
       align-items: center;
       width: 100%;
+
+      .value {
+        display: flex;
+      }
     }
   }
 </style>
