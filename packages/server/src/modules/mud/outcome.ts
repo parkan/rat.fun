@@ -429,7 +429,27 @@ export function updateOutcome(
         `__   (Note: ${implicitItemValueTransfer} in item values transferred separately on death)`
       )
     }
-    newOutcome.balanceTransfers = [...llmOutcome.balanceTransfers]
+
+    // Even when balance matches, check if the step-by-step sequence crosses zero
+    // This prevents UI from showing temporary death states
+    const finalBalance = oldBalance + actualBalanceChange
+    const crossesZero = checkIfCrossesZero(llmOutcome.balanceTransfers, oldBalance)
+
+    if (crossesZero && finalBalance > 0) {
+      console.warn(
+        "__   ⚠️  Sequence crosses zero (temporary death) even though net is correct - Dampening"
+      )
+      const dampenedTransfers = dampenTransfersToAvoidZero(
+        llmOutcome.balanceTransfers,
+        oldBalance,
+        actualBalanceChange
+      )
+      newOutcome.balanceTransfers = dampenedTransfers
+      console.log("__   Dampened transfers:", dampenedTransfers)
+    } else {
+      newOutcome.balanceTransfers = [...llmOutcome.balanceTransfers]
+    }
+
     return newOutcome
   }
 
