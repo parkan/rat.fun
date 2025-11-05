@@ -22,6 +22,10 @@ import {
   SystemCallError,
   ContractCallError,
   OutcomeUpdateError,
+  OutcomeValidationError,
+  BalanceTransferMismatchError,
+  ValueConservationError,
+  TripBalanceCalculationError,
   LLMError,
   LLMAPIError,
   LLMParseError,
@@ -132,6 +136,10 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
     error instanceof OnchainDataError ||
     error instanceof ContractCallError ||
     error instanceof OutcomeUpdateError ||
+    error instanceof OutcomeValidationError ||
+    error instanceof BalanceTransferMismatchError ||
+    error instanceof ValueConservationError ||
+    error instanceof TripBalanceCalculationError ||
     error instanceof SystemCallError ||
     error instanceof LLMAPIError ||
     error instanceof LLMParseError ||
@@ -145,7 +153,13 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
     error instanceof RedisDataError
   ) {
     // Capture server errors in Sentry with error level
-    captureError(error, sentryContext)
+    // For outcome validation errors, include the context in Sentry
+    const errorContext =
+      error instanceof OutcomeValidationError && error.context
+        ? { ...sentryContext, ...error.context }
+        : sentryContext
+
+    captureError(error, errorContext)
     return createServerErrorResponse(reply, request, error)
   }
 
@@ -189,29 +203,85 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
 /**
  * Handle errors in background processes (outside of main request context)
  */
-export function handleBackgroundError(error: unknown, context: string): void {
+export function handleBackgroundError(error: unknown, contextStr: string): void {
   const errorCode = error instanceof AppError ? error.code : "UNKNOWN_ERROR"
   const errorMessage = `${errorCode}: ${error instanceof Error ? error.message : String(error)}`
 
-  console.error(`🚨 BACKGROUND ERROR [${context}]:`, {
+  // For OutcomeValidationError, include the error's context in the log
+  const logContext =
+    error instanceof OutcomeValidationError && error.context
+      ? { ...error.context, context: contextStr }
+      : { context: contextStr }
+
+  console.error(`🚨 BACKGROUND ERROR [${contextStr}]:`, {
     message: errorMessage,
     code: errorCode,
     stack: error instanceof Error ? error.stack : undefined,
-    context
+    ...logContext
   })
 
   // Capture background errors in Sentry
   if (error instanceof Error) {
-    captureError(error, {
-      context: "background",
-      backgroundContext: context,
-      errorCode
-    })
+    const sentryContext =
+      error instanceof OutcomeValidationError && error.context
+        ? {
+            context: "background",
+            backgroundContext: contextStr,
+            errorCode,
+            ...error.context
+          }
+        : {
+            context: "background",
+            backgroundContext: contextStr,
+            errorCode
+          }
+
+    captureError(error, sentryContext)
   } else {
-    captureMessage(`Background Error [${context}]: ${String(error)}`, "error", {
+    captureMessage(`Background Error [${contextStr}]: ${String(error)}`, "error", {
       context: "background",
-      backgroundContext: context,
+      backgroundContext: contextStr,
       errorType: typeof error
     })
   }
+}
+
+// Export error classes for use in other modules
+export {
+  AppError,
+  ValidationError,
+  AuthorizationError,
+  InsufficientBalanceError,
+  InvalidPromptError,
+  RatOwnershipError,
+  RatDeadError,
+  TripBalanceError,
+  StaleRequestError,
+  NonceUsedError,
+  DelegationNotFoundError,
+  ChainNotFoundError,
+  WorldAddressNotFoundError,
+  ReplicateError,
+  OnchainDataError,
+  RatNotFoundError,
+  TripNotFoundError,
+  PlayerNotFoundError,
+  GameConfigNotFoundError,
+  SystemCallError,
+  ContractCallError,
+  OutcomeUpdateError,
+  OutcomeValidationError,
+  BalanceTransferMismatchError,
+  ValueConservationError,
+  TripBalanceCalculationError,
+  LLMError,
+  LLMAPIError,
+  LLMParseError,
+  CMSError,
+  CMSAPIError,
+  CMSDataError,
+  RedisError,
+  RedisConnectionError,
+  RedisOperationError,
+  RedisDataError
 }

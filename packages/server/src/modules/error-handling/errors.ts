@@ -157,6 +157,91 @@ export class OutcomeUpdateError extends SystemCallError {
 }
 
 // ============================================================================
+// Outcome Validation Errors
+// ============================================================================
+
+export class OutcomeValidationError extends SystemCallError {
+  constructor(
+    code: string = "OUTCOME_VALIDATION_ERROR",
+    errorType: string = "Outcome validation error",
+    message: string,
+    public context?: Record<string, any>
+  ) {
+    super(code, errorType, message)
+  }
+}
+
+export class BalanceTransferMismatchError extends OutcomeValidationError {
+  constructor(
+    message: string,
+    public readonly expected: number,
+    public readonly actual: number,
+    public readonly ratId: string,
+    public readonly isSignFlip: boolean = false,
+    additionalContext?: Record<string, any>
+  ) {
+    const code = isSignFlip ? "BALANCE_SIGN_FLIP_ERROR" : "BALANCE_TRANSFER_MISMATCH_ERROR"
+    const errorType = isSignFlip ? "Critical balance sign flip" : "Balance transfer mismatch"
+    super(code, errorType, message, {
+      expected,
+      actual,
+      difference: actual - expected,
+      ratId,
+      isSignFlip,
+      ...additionalContext
+    })
+  }
+}
+
+export class ValueConservationError extends OutcomeValidationError {
+  constructor(
+    public readonly ratValueChange: number,
+    public readonly tripValueChange: number,
+    public readonly ratId: string,
+    public readonly tripId: string
+  ) {
+    const sum = ratValueChange + tripValueChange
+    super(
+      "VALUE_CONSERVATION_ERROR",
+      "Value conservation violated",
+      `Value conservation violated: ratValueChange=${ratValueChange}, tripValueChange=${tripValueChange}, sum=${sum} (expected 0)`,
+      {
+        ratValueChange,
+        tripValueChange,
+        sum,
+        ratId,
+        tripId
+      }
+    )
+  }
+}
+
+export class TripBalanceCalculationError extends OutcomeValidationError {
+  constructor(
+    public readonly oldBalance: number,
+    public readonly valueChange: number,
+    public readonly expected: number,
+    public readonly actual: number,
+    public readonly ratId: string,
+    public readonly tripId: string
+  ) {
+    super(
+      "TRIP_BALANCE_CALCULATION_ERROR",
+      "Trip balance calculation error",
+      `Trip balance incorrect: oldBalance=${oldBalance}, valueChange=${valueChange}, expected=${expected}, actual=${actual}`,
+      {
+        oldBalance,
+        valueChange,
+        expected,
+        actual,
+        ratId,
+        tripId
+      }
+    )
+  }
+}
+
+// ============================================================================
 // Validation Errors
 // ============================================================================
 

@@ -24,7 +24,13 @@
 import { Hex } from "viem"
 import { OutcomeReturnValue, ItemChange } from "@modules/types"
 import { Rat, Trip } from "@modules/types"
-import { captureError } from "@modules/sentry"
+import {
+  OutcomeUpdateError,
+  BalanceTransferMismatchError,
+  ValueConservationError,
+  TripBalanceCalculationError,
+  handleBackgroundError
+} from "@modules/error-handling"
 import { isValidBytes32 } from "@modules/utils"
 
 /**
@@ -57,30 +63,40 @@ export function createOutcomeCallArgs(rat: Rat, trip: Trip, outcome: OutcomeRetu
 
   console.log("\n📊 BALANCE TRANSFERS:")
 
-  const balanceTransfers = outcome?.balanceTransfers ?? []
+  const balanceTransfersLLM = outcome?.balanceTransfers ?? []
 
-  if (balanceTransfers.length === 0) {
+  if (balanceTransfersLLM.length === 0) {
     console.log("  ℹ️  No balance transfers from LLM")
   } else {
-    console.log(`  Found ${balanceTransfers.length} transfer(s):`)
-    balanceTransfers.forEach((transfer, index) => {
-      console.log(
-        `    [${index}] logStep:${transfer.logStep}, amount:${transfer.amount} (type: ${typeof transfer.amount})`
+    console.log(`  LLM provided ${balanceTransfersLLM.length} transfer(s)`)
+  }
+
+  // Validate and filter balance transfers - amounts must be numbers
+  const validBalanceTransfers: Array<{ logStep: number; amount: number }> = []
+  const invalidTransfers: Array<{ logStep: number; amount: any }> = []
+
+  balanceTransfersLLM.forEach((transfer, index) => {
+    if (typeof transfer.amount === "number" && !isNaN(transfer.amount)) {
+      validBalanceTransfers.push(transfer)
+      console.log(`    [✓] logStep:${transfer.logStep}, amount:${transfer.amount}`)
+    } else {
+      invalidTransfers.push(transfer)
+      console.warn(
+        `    [✗] logStep:${transfer.logStep}, amount:${transfer.amount} (type: ${typeof transfer.amount}) - SKIPPED`
       )
-    })
-  }
+    }
+  })
 
-  // Verify all amounts are numbers before summing
-  const invalidTransfers = balanceTransfers.filter(t => typeof t.amount !== "number")
   if (invalidTransfers.length > 0) {
-    console.error("  🚨 ERROR: Found non-number amounts in balanceTransfers!")
+    console.warn(`  ⚠️  Skipped ${invalidTransfers.length} invalid balance transfer(s)`)
     invalidTransfers.forEach(t => {
-      console.error(`    - logStep:${t.logStep}, amount:${t.amount}, type:${typeof t.amount}`)
+      console.warn(`      - logStep ${t.logStep}: amount was ${JSON.stringify(t.amount)}`)
     })
+    console.warn("  ⚠️  LLM provided undefined/null/non-number amounts")
   }
 
-  // Sum the transfers with detailed logging
-  const balanceTransfersSum = balanceTransfers.reduce((acc, curr, index) => {
+  // Sum only valid transfers
+  const balanceTransfersSum = validBalanceTransfers.reduce((acc, curr, index) => {
     const newTotal = acc + curr.amount
     console.log(`    Sum step ${index}: ${acc} + ${curr.amount} = ${newTotal}`)
     return newTotal
@@ -107,15 +123,13 @@ export function createOutcomeCallArgs(rat: Rat, trip: Trip, outcome: OutcomeRetu
   } else {
     console.log(`  LLM requested ${itemsToRemoveLLM.length} item(s) to remove`)
 
-    itemsToRemoveLLM.forEach((item) => {
+    itemsToRemoveLLM.forEach(item => {
       if (isValidBytes32(item.id)) {
         itemsToRemoveFromRat.push(item.id)
         console.log(`    [✓] ${item.id} - ${item.name} (value: ${item.value})`)
       } else {
         invalidRemovals.push({ name: item.name, id: item.id })
-        console.warn(
-          `    [✗] Invalid ID for "${item.name}": ${JSON.stringify(item.id)} - SKIPPED`
-        )
+        console.warn(`    [✗] Invalid ID for "${item.name}": ${JSON.stringify(item.id)} - SKIPPED`)
       }
     })
 
@@ -124,7 +138,9 @@ export function createOutcomeCallArgs(rat: Rat, trip: Trip, outcome: OutcomeRetu
       invalidRemovals.forEach(({ name, id }) => {
         console.warn(`      - ${name}: ID was ${JSON.stringify(id)}`)
       })
-      console.warn("  ⚠️  Common causes: LLM trying to remove items added in same trip, or providing invalid IDs")
+      console.warn(
+        "  ⚠️  Common causes: LLM trying to remove items added in same trip, or providing invalid IDs"
+      )
     }
   }
 
@@ -222,23 +238,16 @@ export function updateOutcome(
   const newOutcome = JSON.parse(JSON.stringify(llmOutcome)) as OutcomeReturnValue
 
   // * * * * * * * * * * * * * * * * * *
-  // FIX 1 & 4: Defensive null checks and array safety
+  // Defensive null checks and array safety
   // * * * * * * * * * * * * * * * * * *
   if (!oldRat || !newRat) {
-    console.error("🚨 CRITICAL: Missing rat data in updateOutcome")
-    console.error("oldRat:", oldRat)
-    console.error("newRat:", newRat)
-
-    const error = new Error("Missing Rat Data: oldRat or newRat is null/undefined in updateOutcome")
-    captureError(error, {
+    throw new OutcomeUpdateError("Missing rat data: oldRat or newRat is null/undefined", {
       hasOldRat: !!oldRat,
-      hasNewRat: !!newRat,
-      context: "Trip Entry - Missing Rat Data"
+      hasNewRat: !!newRat
     })
-    return newOutcome
   }
 
-  // FIX 6: Type validation - ensure balance fields are numbers (not undefined/null/bigint/string)
+  // Type validation - ensure balance fields are numbers (not undefined/null/bigint/string)
   const oldBalance = Number(oldRat.balance ?? 0)
   const newBalance = Number(newRat.balance ?? 0)
   const oldInventory = Array.isArray(oldRat.inventory) ? oldRat.inventory : []
@@ -250,7 +259,7 @@ export function updateOutcome(
   console.log("__ newRat balance:", newBalance, "inventory:", newInventory.length)
   console.log("__ LLM suggested balanceTransfers:", llmOutcome.balanceTransfers)
 
-  // FIX 2: Detect rat death early
+  // Detect rat death early
   // If rat died (balance = 0), special handling:
   // - Contract transfers item VALUES to trip (for accounting)
   // - But items stay in dead rat's inventory (to save gas)
@@ -336,7 +345,7 @@ export function updateOutcome(
     }
   }
 
-  // FIX 5: Log actual item changes that occurred
+  // Log actual item changes that occurred
   if (newOutcome.itemChanges.length > 0) {
     console.log("__ ✓ Actual item changes applied by contract:")
     newOutcome.itemChanges.forEach(change => {
@@ -372,11 +381,23 @@ export function updateOutcome(
     return newOutcome
   }
 
-  // Calculate what the LLM expected to happen
-  const expectedBalanceChange = llmOutcome.balanceTransfers.reduce(
-    (acc, curr) => acc + curr.amount,
-    0
+  // Filter out invalid balance transfers (same validation as in createOutcomeCallArgs)
+  const validLLMTransfers = llmOutcome.balanceTransfers.filter(
+    t => typeof t.amount === "number" && !isNaN(t.amount)
   )
+
+  if (validLLMTransfers.length === 0) {
+    console.log("__ LLM provided balance transfers, but all were invalid (undefined/NaN amounts)")
+    return newOutcome
+  }
+
+  if (validLLMTransfers.length < llmOutcome.balanceTransfers.length) {
+    const invalidCount = llmOutcome.balanceTransfers.length - validLLMTransfers.length
+    console.warn(`__ Filtered out ${invalidCount} invalid balance transfer(s) from LLM`)
+  }
+
+  // Calculate what the LLM expected to happen (using only valid transfers)
+  const expectedBalanceChange = validLLMTransfers.reduce((acc, curr) => acc + curr.amount, 0)
 
   // Calculate what actually happened on-chain (using type-validated numbers)
   const actualBalanceChange = newBalance - oldBalance
@@ -420,21 +441,21 @@ export function updateOutcome(
     // Even when balance matches, check if the step-by-step sequence crosses zero
     // This prevents UI from showing temporary death states
     const finalBalance = oldBalance + actualBalanceChange
-    const crossesZero = checkIfCrossesZero(llmOutcome.balanceTransfers, oldBalance)
+    const crossesZero = checkIfCrossesZero(validLLMTransfers, oldBalance)
 
     if (crossesZero && finalBalance > 0) {
       console.warn(
         "__   ⚠️  Sequence crosses zero (temporary death) even though net is correct - Dampening"
       )
       const dampenedTransfers = dampenTransfersToAvoidZero(
-        llmOutcome.balanceTransfers,
+        validLLMTransfers,
         oldBalance,
         actualBalanceChange
       )
       newOutcome.balanceTransfers = dampenedTransfers
       console.log("__   Dampened transfers:", dampenedTransfers)
     } else {
-      newOutcome.balanceTransfers = [...llmOutcome.balanceTransfers]
+      newOutcome.balanceTransfers = [...validLLMTransfers]
     }
 
     return newOutcome
@@ -459,55 +480,28 @@ export function updateOutcome(
     expectedBalanceChange !== 0 &&
     actualBalanceChange !== 0
 
-  // Log based on severity
-  const logFn = isSignFlip ? console.error : console.warn
-  const severity = isSignFlip ? "🚨 CRITICAL SIGN FLIP" : "⚠️  BALANCE TRANSFER MISMATCH"
-
-  logFn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-  logFn(`${severity} DETECTED`)
-  logFn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-  logFn("Rat ID:", newRat.id)
-  logFn(
-    "Expected (LLM):",
-    expectedBalanceChange,
-    `(${expectedBalanceChange > 0 ? "GAIN" : "LOSS"})`
-  )
-  logFn("Actual (Contract):", actualBalanceChange, `(${actualBalanceChange > 0 ? "GAIN" : "LOSS"})`)
-  logFn("Difference:", actualBalanceChange - expectedBalanceChange)
-  logFn("Scale factor:", scaleFactor, isSignFlip ? "← NEGATIVE = OPPOSITE DIRECTION" : "")
-  logFn("Old balance:", oldBalance)
-  logFn("New balance:", newBalance)
-  logFn("Rat died:", ratDied)
-  if (ratDied && implicitItemValueTransfer > 0) {
-    logFn(
-      "Note: Item values transferred separately on death:",
-      implicitItemValueTransfer,
-      "(NOT included in balanceTransfers)"
-    )
-  }
-  logFn("LLM suggested transfers:", JSON.stringify(llmOutcome.balanceTransfers, null, 2))
-  logFn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-
-  // Report to Sentry
+  // Report mismatch (logs to console and Sentry)
   const errorMessage = isSignFlip
-    ? `Balance Transfer Mismatch (SIGN FLIP): LLM expected ${expectedBalanceChange > 0 ? "gain" : "loss"}, contract did ${actualBalanceChange > 0 ? "gain" : "loss"}`
-    : `Balance Transfer Mismatch: Expected does not match actual on-chain balance change`
+    ? `LLM expected ${expectedBalanceChange > 0 ? "gain" : "loss"} of ${Math.abs(expectedBalanceChange)}, contract did ${actualBalanceChange > 0 ? "gain" : "loss"} of ${Math.abs(actualBalanceChange)}`
+    : `LLM expected ${expectedBalanceChange}, contract did ${actualBalanceChange}`
 
-  const error = new Error(errorMessage)
-  captureError(error, {
-    ratId: newRat.id,
+  const mismatchError = new BalanceTransferMismatchError(
+    errorMessage,
+    expectedBalanceChange,
+    actualBalanceChange,
+    newRat.id,
     isSignFlip,
-    expected: expectedBalanceChange,
-    actual: actualBalanceChange,
-    difference: actualBalanceChange - expectedBalanceChange,
-    scaleFactor,
-    oldBalance,
-    newBalance,
-    ratDied,
-    implicitItemValueTransfer: ratDied ? implicitItemValueTransfer : 0,
-    suggestedTransfers: llmOutcome.balanceTransfers,
-    context: "Trip Entry - Balance Transfer Mismatch"
-  })
+    {
+      scaleFactor,
+      oldBalance,
+      newBalance,
+      ratDied,
+      implicitItemValueTransfer: ratDied ? implicitItemValueTransfer : 0,
+      suggestedTransfers: validLLMTransfers
+    }
+  )
+
+  handleBackgroundError(mismatchError, "Trip Entry - Balance Transfer Mismatch")
 
   // Scale transfers proportionally to match the actual BALANCE outcome
   // balanceTransfers represents ONLY balance/health changes (what the UI displays)
@@ -519,11 +513,7 @@ export function updateOutcome(
     )
   }
 
-  const scaledTransfers = scaleBalanceTransfers(
-    llmOutcome.balanceTransfers,
-    actualBalanceChange,
-    oldBalance
-  )
+  const scaledTransfers = scaleBalanceTransfers(validLLMTransfers, actualBalanceChange, oldBalance)
 
   newOutcome.balanceTransfers = scaledTransfers
 
@@ -762,8 +752,6 @@ export function validateOutcome(
 ): void {
   console.log("__ VALIDATING OUTCOME")
 
-  const errors: string[] = []
-
   // * * * * * * * * * * * * * * * * * *
   // CHECK 1: Value Conservation
   // * * * * * * * * * * * * * * * * * *
@@ -772,9 +760,8 @@ export function validateOutcome(
   const valueSum = ratValueChange + tripValueChange
 
   if (valueSum !== 0) {
-    const error = `Value conservation violated: ratValueChange=${ratValueChange}, tripValueChange=${tripValueChange}, sum=${valueSum} (expected 0)`
-    errors.push(error)
-    console.error(`__   ❌ ${error}`)
+    const error = new ValueConservationError(ratValueChange, tripValueChange, newRat.id, newTrip.id)
+    handleBackgroundError(error, "Trip Entry - Value Conservation")
   } else {
     console.log(`__   ✓ Value conservation: ${ratValueChange} + ${tripValueChange} = 0`)
   }
@@ -788,37 +775,23 @@ export function validateOutcome(
   const expectedTripBalance = oldTripBalance + tripValueChange
 
   if (expectedTripBalance !== newTripBalance) {
-    const error = `Trip balance incorrect: oldBalance=${oldTripBalance}, valueChange=${tripValueChange}, expected=${expectedTripBalance}, actual=${newTripBalance}`
-    errors.push(error)
-    console.error(`__   ❌ ${error}`)
+    const error = new TripBalanceCalculationError(
+      oldTripBalance,
+      tripValueChange,
+      expectedTripBalance,
+      newTripBalance,
+      newRat.id,
+      newTrip.id
+    )
+    handleBackgroundError(error, "Trip Entry - Trip Balance")
   } else {
     console.log(
       `__   ✓ Trip balance: oldBalance(${oldTripBalance}) + change(${tripValueChange}) = newBalance(${newTripBalance})`
     )
   }
 
-  // Report to Sentry if any validation failed
-  if (errors.length > 0) {
-    console.error("🚨 OUTCOME VALIDATION FAILED:", {
-      ratId: newRat.id,
-      tripId: newTrip.id,
-      totalFailures: errors.length
-    })
-
-    // Report each error separately for better Sentry grouping
-    errors.forEach(errorMessage => {
-      const error = new Error(`Outcome Validation Failed: ${errorMessage}`)
-      captureError(error, {
-        ratId: newRat.id,
-        tripId: newTrip.id,
-        ratValueChange,
-        oldTripBalance,
-        newTripBalance,
-        tripValueChange,
-        context: "Trip Entry - Outcome Validation"
-      })
-    })
-  } else {
+  // Log success if no errors occurred
+  if (valueSum === 0 && expectedTripBalance === newTripBalance) {
     console.log("__   ✅ All outcome validations passed")
   }
 }
