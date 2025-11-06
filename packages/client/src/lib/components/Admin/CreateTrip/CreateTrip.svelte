@@ -150,11 +150,11 @@
           <div class="folder-selection">
             <div class="form-group">
               <label>
-                <span>Folder</span>
+                <span class="highlight">Select Folder</span>
               </label>
             </div>
             <TripFolders
-              onselect={(folderId) => {
+              onselect={folderId => {
                 selectedFolderId = folderId
                 currentStep = "details"
               }}
@@ -179,79 +179,79 @@
             </button>
           </div>
           <div class="controls">
-          <!-- TRIP DESCRIPTION -->
-          <div class="form-group">
-            <label for="trip-description">
-              <span>Trip Description</span>
-              <CharacterCounter
-                currentLength={tripDescription.length}
-                maxLength={$gameConfig.maxTripPromptLength}
-              />
-            </label>
-            <textarea
-              disabled={busy.CreateTrip.current !== 0}
-              id="trip-description"
-              rows={$collapsed ? 12 : 6}
-              {placeholder}
-              oninput={typeHit}
-              bind:value={tripDescription}
-              bind:this={textareaElement}
-            ></textarea>
-          </div>
+            <!-- TRIP DESCRIPTION -->
+            <div class="form-group">
+              <label for="trip-description">
+                <span class="highlight">Trip Description</span>
+                <CharacterCounter
+                  currentLength={tripDescription.length}
+                  maxLength={$gameConfig.maxTripPromptLength}
+                />
+              </label>
+              <textarea
+                disabled={busy.CreateTrip.current !== 0}
+                id="trip-description"
+                rows={$collapsed ? 12 : 6}
+                {placeholder}
+                oninput={typeHit}
+                bind:value={tripDescription}
+                bind:this={textareaElement}
+              ></textarea>
+            </div>
 
-          <!-- TRIP CREATION COST SLIDER -->
-          <div class="slider-group">
-            <label for="trip-creation-cost-slider">
-              <span>Trip Creation Cost</span>
-              <input
-                class="cost-display"
-                onblur={e => {
-                  const value = Number((e.target as HTMLInputElement).value)
-                  if (value < MIN_TRIP_CREATION_COST || value > $playerERC20Balance) {
-                    tripCreationCost = Math.min(
-                      $playerERC20Balance,
-                      Math.max(MIN_TRIP_CREATION_COST, value)
-                    )
-                  }
-                }}
-                bind:value={tripCreationCost}
-                type="number"
-              />
-            </label>
-            <div class="slider-container">
-              <input
-                type="range"
-                id="trip-creation-cost-slider"
-                class="cost-slider"
-                step={Math.floor($playerERC20Balance / 40)}
-                min={Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
-                max={$playerERC20Balance}
-                oninput={e => {
-                  // playSample(Number(e.target.value) / Number($playerERC20Balance))
-                }}
-                bind:value={tripCreationCost}
-              />
-              <div class="slider-labels">
-                <span class="slider-min"
-                  >{CURRENCY_SYMBOL}{Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}</span
-                >
-                <span class="slider-max">{CURRENCY_SYMBOL}{$playerERC20Balance}</span>
+            <!-- TRIP CREATION COST SLIDER -->
+            <div class="slider-group">
+              <label for="trip-creation-cost-slider">
+                <span class="highlight">TRIP CREATION COST</span>
+                <input
+                  class="cost-display"
+                  onblur={e => {
+                    const value = Number((e.target as HTMLInputElement).value)
+                    if (value < MIN_TRIP_CREATION_COST || value > $playerERC20Balance) {
+                      tripCreationCost = Math.min(
+                        $playerERC20Balance,
+                        Math.max(MIN_TRIP_CREATION_COST, value)
+                      )
+                    }
+                  }}
+                  bind:value={tripCreationCost}
+                  type="number"
+                />
+              </label>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="trip-creation-cost-slider"
+                  class="cost-slider"
+                  step={Math.floor($playerERC20Balance / 40)}
+                  min={Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
+                  max={$playerERC20Balance}
+                  oninput={e => {
+                    // playSample(Number(e.target.value) / Number($playerERC20Balance))
+                  }}
+                  bind:value={tripCreationCost}
+                />
+                <div class="slider-labels">
+                  <span class="slider-min"
+                    >{CURRENCY_SYMBOL}{Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}</span
+                  >
+                  <span class="slider-max">{CURRENCY_SYMBOL}{$playerERC20Balance}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CALCULATED VALUES -->
+            <div class="calculated-values">
+              <div class="value-box">
+                <div class="value-label">MIN RAT VALUE TO TRIP</div>
+                <div class="value-amount">{CURRENCY_SYMBOL}{$minRatValueToEnter}</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">MAX VALUE PER WIN</div>
+                <div class="value-amount">{CURRENCY_SYMBOL}{$maxValuePerWin}</div>
               </div>
             </div>
           </div>
-
-          <!-- CALCULATED VALUES -->
-          <div class="calculated-values">
-            <div class="value-box">
-              <div class="value-label">MIN RAT VALUE TO TRIP</div>
-              <div class="value-amount">{CURRENCY_SYMBOL}{$minRatValueToEnter}</div>
-            </div>
-            <div class="value-box">
-              <div class="value-label">MAX VALUE PER WIN</div>
-              <div class="value-amount">{CURRENCY_SYMBOL}{$maxValuePerWin}</div>
-            </div>
-          </div>
-        </div>
 
           <!-- ACTIONS -->
           <div class="actions">
@@ -391,7 +391,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
+      padding: 1rem 0;
       border-bottom: 1px solid var(--color-grey-mid);
       margin-bottom: 8px;
       font-family: var(--typewriter-font-stack);
@@ -427,9 +427,10 @@
     }
 
     .form-group {
-      padding: 1rem;
+      // padding-top: 30px;
+      // padding-left: 30px;
       display: block;
-      margin-bottom: 15px;
+      // margin-bottom: 15px;
       width: 100%;
 
       label {
@@ -438,8 +439,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-normal);
+
+        .highlight {
+          background: var(--color-alert);
+          padding: 5px;
+          color: var(--background);
+          font-weight: normal;
+        }
       }
 
       textarea {
@@ -470,19 +476,10 @@
     }
 
     .slider-group {
-      padding-left: 1rem;
-      padding-right: 1rem;
+      // padding-left: 1rem;
+      // padding-right: 1rem;
       display: block;
       width: 100%;
-
-      label {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-normal);
-      }
 
       .cost-display {
         background: var(--foreground);
@@ -558,8 +555,8 @@
     }
 
     .calculated-values {
-      padding-left: 1rem;
-      padding-right: 1rem;
+      // padding-left: 1rem;
+      // padding-right: 1rem;
       display: flex;
       gap: 0;
       margin-bottom: 1rem;

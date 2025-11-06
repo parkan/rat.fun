@@ -53,10 +53,14 @@
   )
 
   let activeList = $derived.by(() => {
-    if (lastChecked > 0) {
-      return tripList.filter(r => Number(r[1].creationBlock) <= lastChecked)
+    if (selectedFolderId !== "legacy") {
+      if (lastChecked > 0) {
+        return tripList.filter(r => Number(r[1].creationBlock) <= lastChecked)
+      } else {
+        return tripList
+      }
     } else {
-      return tripList
+      return Object.entries($nonDepletedTrips)
     }
   })
 
@@ -109,6 +113,7 @@
 <div class="content" bind:this={scrollContainer}>
   {#if selectedFolderId === ""}
     <TripFolders
+      legacyTrips={Object.entries($nonDepletedTrips)}
       onselect={(folderId: string) => (selectedFolderId = folderId)}
       folders={$staticContent.tripFolders}
       {foldersCounts}
@@ -132,14 +137,20 @@
             </button>
           {/key}
         {/if}
-        {#each tripsWithEligibility as tripEntry (tripEntry[0])}
-          <TripItem
-            tripId={tripEntry[0] as Hex}
-            trip={tripEntry[1]}
-            disabled={!tripEntry[2]}
-            overlayText={tripEntry[3]}
-          />
-        {/each}
+        {#if selectedFolderId === "legacy"}
+          {#each Object.entries($nonDepletedTrips) as tripEntry (tripEntry[0])}
+            <TripItem tripId={tripEntry[0] as Hex} trip={tripEntry[1]} />
+          {/each}
+        {:else}
+          {#each tripsWithEligibility as tripEntry (tripEntry[0])}
+            <TripItem
+              tripId={tripEntry[0] as Hex}
+              trip={tripEntry[1]}
+              disabled={!tripEntry[2]}
+              overlayText={tripEntry[3]}
+            />
+          {/each}
+        {/if}
       {:else}
         <div class="empty-listing">
           <div>NO TRIPS</div>
