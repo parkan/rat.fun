@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import type { TripFolder } from "@sanity-types"
 
   let {
@@ -18,7 +19,7 @@
 
 <div class="trip-header">
   <div class="header-text">
-    {#if !hasRat}
+    {#if !hasRat || ratState.state.current === RAT_BOX_STATE.DEPLOYING_RAT}
       Buy rat to select trip.
     {:else}
       Select a trip. <span class="trips-count">
