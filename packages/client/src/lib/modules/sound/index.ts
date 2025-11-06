@@ -6,6 +6,8 @@ import type { SoundAssets } from "./types"
  * Preloads a sound library by creating Howl instances for each sound.
  * This ensures that there's minimal delay when the sounds are played for the first time.
  *
+ * Forces Web Audio API usage to avoid iOS HTML5 Audio element limits (~20-30 elements).
+ *
  * @param {SoundAssets} library - The sound library object to preload
  * @returns {void}
  */
@@ -14,7 +16,8 @@ function preloadSoundLibrary(library: SoundAssets): void {
     library[key].sound = new Howl({
       src: [library[key].src],
       volume: library[key].volume,
-      preload: true
+      preload: true,
+      html5: false // Force Web Audio API to avoid iOS HTML5 Audio pool exhaustion
     })
   }
 }
