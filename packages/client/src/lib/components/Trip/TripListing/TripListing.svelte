@@ -132,6 +132,22 @@
       </div>
     {/if}
   {:else}
+    {#if selectedFolderId !== ""}
+      {@const i = $staticContent.tripFolders.findIndex(({ _id }) => _id === selectedFolderId)}
+      <div
+        class:void={i === -1}
+        style:background-image="url('/images/texture-{2 + (i % 5)}.png');"
+        class="folder-name-container"
+      >
+        {#if selectedFolderId === "legacy"}
+          <span> The Void </span>
+        {:else}
+          <span>
+            {$staticContent.tripFolders.find(({ _id }) => _id == selectedFolderId).title}
+          </span>
+        {/if}
+      </div>
+    {/if}
     <div class="back-button-container">
       <BackButton onclick={() => (selectedFolderId = "")} />
     </div>
@@ -192,6 +208,7 @@
     outline: none;
   }
 
+  .folder-name-container,
   .back-button-container {
     display: block;
     border-bottom: 1px solid var(--color-grey-mid);
@@ -199,6 +216,9 @@
     height: 60px;
     top: 0;
     z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .new-player-message {
@@ -224,6 +244,11 @@
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
+  }
+
+  .void {
+    background: rgb(40, 40, 40);
+    color: white;
   }
 
   .trip-header {
