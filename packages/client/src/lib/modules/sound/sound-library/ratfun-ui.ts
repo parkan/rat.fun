@@ -7,22 +7,17 @@ export const ratfunUI: SoundAssets = {
     volume: 1
   },
   type2: {
-    src: "/sounds/ratfun/ui/type2.wav",
+    src: "/sounds/ratfun/ui/type2.mp3",
     author: "leo",
     volume: 1
   },
   type3: {
-    src: "/sounds/ratfun/ui/tick.wav",
-    author: "leo",
-    volume: 1
-  },
-  lineHit: {
-    src: "/sounds/ratfun/ui/line-hit.wav",
+    src: "/sounds/ratfun/ui/tick.mp3",
     author: "leo",
     volume: 1
   },
   tick: {
-    src: "/sounds/ratfun/ui/tick.wav",
+    src: "/sounds/ratfun/ui/tick.mp3",
     author: "leo",
     volume: 1.0
   },
@@ -37,42 +32,42 @@ export const ratfunUI: SoundAssets = {
     volume: 0.5
   },
   hover3: {
-    src: "/sounds/ratfun/ui/hover-3.wav",
+    src: "/sounds/ratfun/ui/hover-3.mp3",
     author: "leo",
     volume: 0.5
   },
   glassTap: {
-    src: "/sounds/ratfun/ui/hover.wav",
+    src: "/sounds/ratfun/ui/hover.mp3",
     author: "leo",
     volume: 1
   },
   bigButtonDown: {
-    src: "/sounds/ratfun/ui/bigButton-down.wav",
+    src: "/sounds/ratfun/ui/bigButton-down.mp3",
     author: "leo",
     volume: 1
   },
   bigButtonUp: {
-    src: "/sounds/ratfun/ui/bigButton-up.wav",
+    src: "/sounds/ratfun/ui/bigButton-up.mp3",
     author: "leo",
     volume: 1
   },
   smallButtonDown: {
-    src: "/sounds/ratfun/ui/smallButton-down.wav",
+    src: "/sounds/ratfun/ui/smallButton-down.mp3",
     author: "leo",
     volume: 1
   },
   smallButtonUp: {
-    src: "/sounds/ratfun/ui/smallButton-up.wav",
+    src: "/sounds/ratfun/ui/smallButton-up.mp3",
     author: "leo",
     volume: 0.5
   },
   dropDownDown: {
-    src: "/sounds/ratfun/ui/dropDown-down.wav",
+    src: "/sounds/ratfun/ui/dropDown-down.mp3",
     author: "leo",
     volume: 1
   },
   dropDownUp: {
-    src: "/sounds/ratfun/ui/dropDown-up.wav",
+    src: "/sounds/ratfun/ui/dropDown-up.mp3",
     author: "leo",
     volume: 0.5
   },
@@ -91,16 +86,6 @@ export const ratfunUI: SoundAssets = {
     author: "leo",
     volume: 0.6
   },
-  positive: {
-    src: "/sounds/ratfun/ui/positive.mp3",
-    author: "leo",
-    volume: 1
-  },
-  negative: {
-    src: "/sounds/ratfun/ui/chirp-1.mp3",
-    author: "leo",
-    volume: 1
-  },
   ratHello: {
     src: "/sounds/ratfun/ui/rat-hello.mp3",
     author: "leo",
@@ -112,12 +97,12 @@ export const ratfunUI: SoundAssets = {
     volume: 0.5
   },
   wheelTick: {
-    src: "/sounds/ratfun/ui/wheel-tick.wav",
+    src: "/sounds/ratfun/ui/wheel-tick.mp3",
     author: "leo",
     volume: 1
   },
   wheelLock: {
-    src: "/sounds/ratfun/ui/wheel-lock.wav",
+    src: "/sounds/ratfun/ui/wheel-lock.mp3",
     author: "leo",
     volume: 1
   },
@@ -125,16 +110,6 @@ export const ratfunUI: SoundAssets = {
     src: "/sounds/ratfun/ui/logo-click.mp3",
     author: "leo",
     volume: 0.5
-  },
-  countUp: {
-    src: "/sounds/ratfun/ui/count-up.mp3",
-    author: "leo",
-    volume: 1
-  },
-  countDown: {
-    src: "/sounds/ratfun/ui/count-down.mp3",
-    author: "leo",
-    volume: 1
   },
   healthPositive: {
     src: "/sounds/ratfun/ui/health-positive.mp3",
@@ -176,18 +151,13 @@ export const ratfunUI: SoundAssets = {
     author: "leo",
     volume: 3
   },
-  counterEnd: {
-    src: "/sounds/ratfun/ui/counter-end.mp3",
-    author: "leo",
-    volume: 3
-  },
   logoIn: {
     src: "/sounds/ratfun/ui/logo-in.mp3",
     author: "leo",
     volume: 0.2
   },
   terminalHit: {
-    src: "/sounds/ratfun/ui/leo-front-ui/front_ui_12.wav",
+    src: "/sounds/ratfun/ui/leo-front-ui/front_ui_12.mp3",
     author: "leo",
     volume: 1
   },
