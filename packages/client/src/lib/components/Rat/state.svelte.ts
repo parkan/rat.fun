@@ -55,7 +55,7 @@ const VALID_TRANSITIONS: Record<RAT_BOX_STATE, RAT_BOX_STATE[]> = {
     RAT_BOX_STATE.NO_RAT,
     RAT_BOX_STATE.ERROR
   ],
-  [RAT_BOX_STATE.NO_ALLOWANCE]: [RAT_BOX_STATE.NO_RAT, RAT_BOX_STATE.ERROR],
+  [RAT_BOX_STATE.NO_ALLOWANCE]: [RAT_BOX_STATE.NO_RAT, RAT_BOX_STATE.HAS_RAT, RAT_BOX_STATE.ERROR],
   [RAT_BOX_STATE.NO_RAT]: [RAT_BOX_STATE.DEPLOYING_RAT, RAT_BOX_STATE.ERROR],
   [RAT_BOX_STATE.DEPLOYING_RAT]: [RAT_BOX_STATE.HAS_RAT, RAT_BOX_STATE.ERROR],
   [RAT_BOX_STATE.HAS_RAT]: [
@@ -83,6 +83,10 @@ const setRatBoxState = (state: RAT_BOX_STATE) => {
   ratBoxState = state
 }
 
+const resetRatBoxState = () => {
+  ratBoxState = RAT_BOX_STATE.INIT
+}
+
 const transitionTo = (newState: RAT_BOX_STATE) => {
   if (newState === ratBoxState) return
   const validTransitions = VALID_TRANSITIONS[ratBoxState]
@@ -101,6 +105,7 @@ const transitionTo = (newState: RAT_BOX_STATE) => {
 // Export singleton instance instead of factory function
 export const ratState = {
   state: {
+    reset: resetRatBoxState,
     set: setRatBoxState,
     transitionTo,
     get current() {

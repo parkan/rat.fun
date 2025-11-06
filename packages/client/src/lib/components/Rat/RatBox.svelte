@@ -37,6 +37,9 @@
       }
     }
 
+    // Set to INIT
+    ratState.state.reset()
+
     /*
      *  Possible entry scenarios based on:
      *  - $playerHasTokens
