@@ -43,9 +43,18 @@ export function createSystemCalls(network: SetupNetworkResult) {
       // Get current gas prices for speed optimization
       const feeData = await network.publicClient.estimateFeesPerGas()
 
+      // Calculate gas fees with multipliers
+      const maxFeePerGas = (feeData.maxFeePerGas * 150n) / 100n // 50% higher than estimated
+      const maxPriorityFeePerGas = (feeData.maxPriorityFeePerGas * 200n) / 100n // 100% higher priority
+
+      // Ensure maxPriorityFeePerGas doesn't exceed maxFeePerGas
+      const adjustedPriorityFee = maxPriorityFeePerGas > maxFeePerGas
+        ? maxFeePerGas
+        : maxPriorityFeePerGas
+
       const tx = await network.worldContract.write.ratfun__applyOutcome(args, {
-        maxFeePerGas: (feeData.maxFeePerGas * 150n) / 100n, // 50% higher than estimated
-        maxPriorityFeePerGas: (feeData.maxPriorityFeePerGas * 200n) / 100n, // 100% higher priority
+        maxFeePerGas,
+        maxPriorityFeePerGas: adjustedPriorityFee,
         gas: 2000000n // Set generous gas limit
       })
       await network.waitForTransaction(tx)
