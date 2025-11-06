@@ -1,21 +1,87 @@
 // ICONS
 import { MdAirlines, MdStar, MdAutoGraph, MdEvent, MdChat } from "react-icons/md"
 
-export default (S: any) =>
+export default (S: any, context: any) =>
   S.list()
     .title("Rat Trip Public")
     .items([
       S.listItem()
         .title("Trips")
         .icon(MdAirlines)
-        .child(S.documentList().title("Trips").filter('_type == "trip"').schemaType("trip")),
+        .child(async () => {
+          const client = context.getClient({ apiVersion: "2023-01-01" })
+          const results = await client.fetch(
+            '*[_type == "trip"] { "address": worldAddress } | order(address asc)'
+          )
+          const uniqueAddresses = [
+            ...new Set(results.map((r: any) => r.address).filter(Boolean))
+          ] as string[]
+
+          return S.list()
+            .title("Trips by World")
+            .items([
+              S.listItem()
+                .title("All Trips")
+                .child(
+                  S.documentList()
+                    .title("All Trips")
+                    .filter('_type == "trip"')
+                    .defaultOrdering([{ field: "_createdAt", direction: "desc" }])
+                ),
+              S.divider(),
+              ...uniqueAddresses.map((address: string) =>
+                S.listItem()
+                  .title(address)
+                  .id(`trip-world-${address}`)
+                  .child(
+                    S.documentList()
+                      .title(`${address} - Trips`)
+                      .filter('_type == "trip" && worldAddress == $worldAddress')
+                      .params({ worldAddress: address })
+                      .defaultOrdering([{ field: "_createdAt", direction: "desc" }])
+                  )
+              )
+            ])
+        }),
       S.divider(),
       S.listItem()
         .title("Outcomes")
         .icon(MdStar)
-        .child(
-          S.documentList().title("Outcomes").filter('_type == "outcome"').schemaType("outcome")
-        ),
+        .child(async () => {
+          const client = context.getClient({ apiVersion: "2023-01-01" })
+          const results = await client.fetch(
+            '*[_type == "outcome"] { "address": worldAddress } | order(address asc)'
+          )
+          const uniqueAddresses = [
+            ...new Set(results.map((r: any) => r.address).filter(Boolean))
+          ] as string[]
+
+          return S.list()
+            .title("Outcomes by World")
+            .items([
+              S.listItem()
+                .title("All Outcomes")
+                .child(
+                  S.documentList()
+                    .title("All Outcomes")
+                    .filter('_type == "outcome"')
+                    .defaultOrdering([{ field: "_createdAt", direction: "desc" }])
+                ),
+              S.divider(),
+              ...uniqueAddresses.map((address: string) =>
+                S.listItem()
+                  .title(address)
+                  .id(`outcome-world-${address}`)
+                  .child(
+                    S.documentList()
+                      .title(`${address} - Outcomes`)
+                      .filter('_type == "outcome" && worldAddress == $worldAddress')
+                      .params({ worldAddress: address })
+                      .defaultOrdering([{ field: "_createdAt", direction: "desc" }])
+                  )
+              )
+            ])
+        }),
       S.divider(),
       S.listItem()
         .title("World Events")
