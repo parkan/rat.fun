@@ -3,11 +3,13 @@
   let {
     folders,
     foldersCounts,
-    onselect
+    onselect,
+    showCounts = true
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
     onselect: (str: string) => void
+    showCounts?: boolean
   } = $props()
 
   $inspect(foldersCounts)
@@ -23,8 +25,11 @@
         onclick={() => onselect(folder._id)}
         class="title"
       >
-        {folder.title}<br />
-        {foldersCounts[i]}/{totalAmount}
+        {folder.title}
+        {#if showCounts}
+          <br />
+          {foldersCounts[i]}/{totalAmount}
+        {/if}
       </button>
     </div>
   {/each}

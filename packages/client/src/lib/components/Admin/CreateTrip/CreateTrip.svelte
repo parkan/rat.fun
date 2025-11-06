@@ -2,7 +2,7 @@
   import { gameConfig } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { getTripMaxValuePerWin, getTripMinRatValueToEnter } from "$lib/modules/state/utils"
-  import { CharacterCounter, BigButton } from "$lib/components/Shared"
+  import { CharacterCounter, BigButton, BackButton } from "$lib/components/Shared"
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
@@ -11,6 +11,7 @@
   import { MIN_TRIP_CREATION_COST } from "@server/config"
   import { collapsed } from "$lib/modules/ui/state.svelte"
   import { staticContent } from "$lib/modules/content"
+  import { TripFolders } from "$lib/components/Trip"
 
   let {
     ondone,
@@ -27,9 +28,20 @@
   let tripDescription: string = $state(savedTripDescription ?? "")
   let textareaElement: HTMLTextAreaElement | null = $state(null)
   let selectedFolderId: string = $state("")
+  let currentStep: "folder" | "details" = $state("folder")
 
   // Get non-restricted folders from staticContent
   let availableFolders = $derived($staticContent.tripFolders.filter(folder => !folder.restricted))
+
+  // Calculate folder counts (all non-depleted trips for display)
+  let foldersCounts = $derived(
+    availableFolders.map(() => 0) // Empty counts since this is for creation, not browsing
+  )
+
+  // Get selected folder title for header
+  let selectedFolderTitle = $derived(
+    availableFolders.find(f => f._id === selectedFolderId)?.title ?? ""
+  )
 
   // Prompt has to be between 1 and MAX_TRIP_PROMPT_LENGTH characters
   let invalidTripDescriptionLength = $derived(
@@ -133,11 +145,44 @@
   >
     <div class="modal-content">
       <div class="create-trip" class:collapsed={$collapsed}>
-        <div class="controls">
+        {#if currentStep === "folder"}
+          <!-- STEP 1: FOLDER SELECTION -->
+          <div class="folder-selection">
+            <div class="form-group">
+              <label>
+                <span>Folder</span>
+              </label>
+            </div>
+            <TripFolders
+              onselect={(folderId) => {
+                selectedFolderId = folderId
+                currentStep = "details"
+              }}
+              folders={availableFolders}
+              {foldersCounts}
+              showCounts={false}
+            />
+          </div>
+        {:else}
+          <!-- STEP 2: TRIP DETAILS -->
+          <div class="trip-header">
+            <div class="header-text">
+              Creating trip in: <span class="folder-name">{selectedFolderTitle}</span>
+            </div>
+            <button
+              class="back-link"
+              onclick={() => {
+                currentStep = "folder"
+              }}
+            >
+              Back
+            </button>
+          </div>
+          <div class="controls">
           <!-- TRIP DESCRIPTION -->
           <div class="form-group">
             <label for="trip-description">
-              <span class="highlight">Trip Description</span>
+              <span>Trip Description</span>
               <CharacterCounter
                 currentLength={tripDescription.length}
                 maxLength={$gameConfig.maxTripPromptLength}
@@ -154,28 +199,10 @@
             ></textarea>
           </div>
 
-          <!-- TRIP CATEGORY -->
-          <div class="form-group">
-            <label for="trip-category">
-              <span class="highlight">Trip Category</span>
-            </label>
-            <select
-              disabled={busy.CreateTrip.current !== 0}
-              id="trip-category"
-              bind:value={selectedFolderId}
-              oninput={typeHit}
-            >
-              <option value="">Select a category</option>
-              {#each availableFolders as folder}
-                <option value={folder._id}>{folder.title}</option>
-              {/each}
-            </select>
-          </div>
-
           <!-- TRIP CREATION COST SLIDER -->
           <div class="slider-group">
             <label for="trip-creation-cost-slider">
-              <span class="highlight">TRIP CREATION COST</span>
+              <span>Trip Creation Cost</span>
               <input
                 class="cost-display"
                 onblur={e => {
@@ -226,15 +253,16 @@
           </div>
         </div>
 
-        <!-- ACTIONS -->
-        <div class="actions">
-          <BigButton
-            text="Create trip"
-            cost={flooredTripCreationCost}
-            {disabled}
-            onclick={onClick}
-          />
-        </div>
+          <!-- ACTIONS -->
+          <div class="actions">
+            <BigButton
+              text="Create trip"
+              cost={flooredTripCreationCost}
+              {disabled}
+              onclick={onClick}
+            />
+          </div>
+        {/if}
       </div>
     </div>
   </div>
@@ -259,24 +287,6 @@
           bind:value={tripDescription}
           bind:this={textareaElement}
         ></textarea>
-      </div>
-
-      <!-- TRIP CATEGORY -->
-      <div class="form-group">
-        <label for="trip-category">
-          <span class="highlight">Trip Category</span>
-        </label>
-        <select
-          disabled={busy.CreateTrip.current !== 0}
-          id="trip-category"
-          bind:value={selectedFolderId}
-          oninput={typeHit}
-        >
-          <option value="">Select a category</option>
-          {#each availableFolders as folder}
-            <option value={folder._id}>{folder.title}</option>
-          {/each}
-        </select>
       </div>
 
       <!-- TRIP CREATION COST SLIDER -->
@@ -350,6 +360,11 @@
     -moz-appearance: textfield; /* Firefox */
   }
 
+  .modal-content {
+    height: 700px;
+    max-height: 90vh;
+  }
+
   .create-trip {
     height: 100%;
     width: 600px;
@@ -360,6 +375,49 @@
     justify-content: space-between;
     border: 1px solid var(--color-grey-mid);
     padding: 10px;
+
+    .folder-selection {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      > :global(.tiles) {
+        flex: 1;
+      }
+    }
+
+    .trip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-grey-mid);
+      margin-bottom: 8px;
+      font-family: var(--typewriter-font-stack);
+      font-size: var(--font-size-normal);
+
+      .header-text {
+        .folder-name {
+          font-weight: bold;
+        }
+      }
+
+      .back-link {
+        background: none;
+        border: none;
+        color: var(--foreground);
+        text-decoration: underline;
+        cursor: pointer;
+        font-family: var(--typewriter-font-stack);
+        font-size: var(--font-size-normal);
+        padding: 0;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
 
     .controls {
       display: flex;
@@ -380,13 +438,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        .highlight {
-          background: var(--color-alert);
-          padding: 5px;
-          color: var(--background);
-          font-weight: normal;
-        }
+        font-family: var(--typewriter-font-stack);
+        font-size: var(--font-size-normal);
       }
 
       textarea {
@@ -421,6 +474,15 @@
       padding-right: 1rem;
       display: block;
       width: 100%;
+
+      label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-family: var(--typewriter-font-stack);
+        font-size: var(--font-size-normal);
+      }
 
       .cost-display {
         background: var(--foreground);
