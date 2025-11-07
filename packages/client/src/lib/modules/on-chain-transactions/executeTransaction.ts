@@ -54,27 +54,31 @@ export async function executeTransaction(
       })
     }
 
-    // Wait for transaction to be executed
-    const receipt = await get(publicNetwork).publicClient.waitForTransactionReceipt({
-      hash: tx
-    })
+    const result = await waitForTransactionReceiptSuccess(tx)
 
     // Force an erc20 query to get updated allowance
     if (systemId === WorldFunctions.Approve) {
       await refetchAllowance()
     }
 
-    if (receipt) {
-      if (receipt.status == "success") {
-        return receipt
-      } else {
-        // console.log(receipt)
-        throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
-      }
-    }
-    return false
+    return result
   } catch (e: unknown) {
     errorHandler(e)
     return false
   }
+}
+
+export async function waitForTransactionReceiptSuccess(tx: Hex) {
+  // Wait for transaction to be executed
+    const receipt = await get(publicNetwork).publicClient.waitForTransactionReceipt({
+      hash: tx
+    })
+    if (receipt) {
+      if (receipt.status == "success") {
+        return receipt
+      } else {
+        throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
+      }
+    }
+    return false
 }
