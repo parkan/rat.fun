@@ -14,7 +14,7 @@ export const GET: RequestHandler = async () => {
     },
     miniapp: {
       version: "1",
-      name: "Crypto Portfolio Tracker",
+      name: "rat.fun",
       homeUrl: "https://rat.fun",
       iconUrl: "https://rat.fun/images/product/icon.png",
       splashImageUrl: "https://rat.fun/images/product/splash.png",
