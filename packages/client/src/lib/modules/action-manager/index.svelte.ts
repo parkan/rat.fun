@@ -25,7 +25,9 @@ const DEFAULT_TIMINGS = {
   CreateRat: 4000,
   LiquidateRat: 4000,
   LiquidateTrip: 4000,
-  BuyWithEth: 60000
+  BuyWithEth: 60000,
+  ApproveFakeToken: 4000,
+  ExchangeFakeToken: 4000
 }
 
 export const busy = $state({
@@ -39,5 +41,7 @@ export const busy = $state({
   CreateRat: new Tween(0, { duration: DEFAULT_TIMINGS.CreateRat, easing }),
   LiquidateRat: new Tween(0, { duration: DEFAULT_TIMINGS.LiquidateRat, easing }),
   LiquidateTrip: new Tween(0, { duration: DEFAULT_TIMINGS.LiquidateTrip, easing }),
-  BuyWithEth: new Tween(0, { duration: DEFAULT_TIMINGS.BuyWithEth, easing })
+  BuyWithEth: new Tween(0, { duration: DEFAULT_TIMINGS.BuyWithEth, easing }),
+  ApproveFakeToken: new Tween(0, { duration: DEFAULT_TIMINGS.ApproveFakeToken, easing }),
+  ExchangeFakeToken: new Tween(0, { duration: DEFAULT_TIMINGS.ExchangeFakeToken, easing })
 })

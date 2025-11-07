@@ -21,6 +21,8 @@
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
+
+  import FakeToken from "./FakeToken.svelte"
 </script>
 
 <div class="debug-dropdown-content">
@@ -120,6 +122,7 @@
       }}
       text="Force liquidate rat"
     ></SmallButton>
+    <FakeToken></FakeToken>
   </div>
 </div>
 

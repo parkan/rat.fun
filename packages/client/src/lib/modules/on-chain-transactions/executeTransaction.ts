@@ -70,15 +70,15 @@ export async function executeTransaction(
 
 export async function waitForTransactionReceiptSuccess(tx: Hex) {
   // Wait for transaction to be executed
-    const receipt = await get(publicNetwork).publicClient.waitForTransactionReceipt({
-      hash: tx
-    })
-    if (receipt) {
-      if (receipt.status == "success") {
-        return receipt
-      } else {
-        throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
-      }
+  const receipt = await get(publicNetwork).publicClient.waitForTransactionReceipt({
+    hash: tx
+  })
+  if (receipt) {
+    if (receipt.status == "success") {
+      return receipt
+    } else {
+      throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
     }
-    return false
+  }
+  return false
 }

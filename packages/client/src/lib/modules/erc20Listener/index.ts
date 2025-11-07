@@ -149,7 +149,7 @@ export function stopErc20Listener() {
  * @param erc20Address - The address of the ERC20 token to read the balance for
  * @returns The balance of the player's ERC20 token
  */
-async function readPlayerERC20Balance(
+export async function readPlayerERC20Balance(
   publicNetwork: SetupPublicNetworkResult,
   playerAddress: Hex,
   erc20Address: Hex
@@ -172,7 +172,7 @@ async function readPlayerERC20Balance(
  * @param erc20Address - The address of the ERC20 token to read the allowance for
  * @returns The allowance of the player's ERC20 token
  */
-async function readPlayerERC20Allowance(
+export async function readPlayerERC20Allowance(
   publicNetwork: SetupPublicNetworkResult,
   playerAddress: Hex,
   spenderAddress: Hex,
