@@ -74,6 +74,11 @@
         margin-bottom: 20px;
         overflow: visible;
         position: relative;
+
+        @media (max-width: 800px) {
+          width: 300px;
+          height: 300px;
+        }
       }
 
       .button-container {
