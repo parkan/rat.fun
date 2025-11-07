@@ -94,7 +94,6 @@
   // Data processing logic moved from ProfitLossHistoryGraph
   // Lazy load graph data to avoid blocking initial render
   let graphData = $derived.by(() => {
-    console.log("shouldLoadGraphData", shouldLoadGraphData)
     if (!shouldLoadGraphData) {
       return []
     }

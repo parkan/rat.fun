@@ -14,3 +14,18 @@ export const focusEvent = writable(-1)
 export const focusTrip = writable("")
 export const lightboxState = new LightboxState()
 export const selectedFolderId = writable("")
+
+// Phone view state - tracks which view is active on mobile game view (ratbox or triplisting)
+export const phoneActiveGameView = writable<"ratbox" | "triplisting">("ratbox")
+
+// Track if we're on a phone-sized screen (max-width: 800px)
+export const isPhone = writable(false)
+
+// Initialize isPhone based on window size (browser only)
+if (typeof window !== "undefined") {
+  const checkPhone = () => {
+    isPhone.set(window.innerWidth <= 800)
+  }
+  checkPhone()
+  window.addEventListener("resize", checkPhone)
+}
