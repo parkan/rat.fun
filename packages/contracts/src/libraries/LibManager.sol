@@ -154,13 +154,23 @@ library LibManager {
 
     for (uint i = 0; i < _itemsToRemoveFromRat.length; i++) {
       bytes32 itemId = _itemsToRemoveFromRat[i];
-      uint256 itemValueAmount = Value.get(itemId);
-      // Add value to trip balance
-      Balance.set(_tripId, Balance.get(_tripId) + itemValueAmount);
-      // Increase the available budget
-      _tripBudget = _tripBudget + itemValueAmount;
-      // Remove item from rat
-      Inventory.set(_ratId, LibUtils.removeFromArray(Inventory.get(_ratId), itemId));
+
+      // Get current inventory
+      bytes32[] memory oldInventory = Inventory.get(_ratId);
+
+      // Attempt to remove the item
+      bytes32[] memory newInventory = LibUtils.removeFromArray(oldInventory, itemId);
+
+      // Only credit trip if the item was actually removed (array length decreased)
+      if (newInventory.length < oldInventory.length) {
+        // Get item value and credit the trip
+        uint256 itemValueAmount = Value.get(itemId);
+        Balance.set(_tripId, Balance.get(_tripId) + itemValueAmount);
+        _tripBudget = _tripBudget + itemValueAmount;
+
+        // Update rat inventory
+        Inventory.set(_ratId, newInventory);
+      }
     }
 
     return _tripBudget;

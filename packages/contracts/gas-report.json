@@ -33,13 +33,13 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItem",
     "name": "Apply outcome (remove item)",
-    "gasUsed": 137135
+    "gasUsed": 137191
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItemsFromDifferentArrayPositions",
     "name": "Apply outcome (remove item from middle of full inventory)",
-    "gasUsed": 163616
+    "gasUsed": 163672
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
