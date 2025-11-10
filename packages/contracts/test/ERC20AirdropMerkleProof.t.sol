@@ -29,7 +29,7 @@ contract ERC20AirdropMerkleProofTest is BaseTest {
   function setUp() public override {
     super.setUp();
 
-    // See merkle-tree-claim's test_metadata
+    // See merkle-tree-airdrop's test_metadata
     bytes32 merkleRoot = 0x4c1b92236ea350508d7955b858e3b2df9bcfac77256f6e2f9f6be330593258b4;
 
     erc20 = new FakeRatERC20(address(this));
