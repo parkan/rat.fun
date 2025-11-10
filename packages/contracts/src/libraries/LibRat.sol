@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 import { getUniqueEntity } from "@latticexyz/world-modules/src/modules/uniqueentity/getUniqueEntity.sol";
 import {
-  GameConfig,
   EntityType,
   WorldStats,
   Dead,
@@ -14,8 +13,7 @@ import {
   Owner,
   CreationBlock,
   PastRats,
-  LiquidationBlock,
-  MasterKey
+  LiquidationBlock
 } from "../codegen/index.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 import { RAT_CREATION_COST } from "../constants.sol";
@@ -54,11 +52,6 @@ library LibRat {
 
     // Add to history of rats
     PastRats.push(playerId, _ratId);
-
-    // Give master key for admin access if player has killed the required number of rats
-    if (PastRats.get(playerId).length >= GameConfig.getRatsKilledForAdminAccess()) {
-      MasterKey.set(playerId, true);
-    }
 
     // Update rat
     LiquidationBlock.set(_ratId, block.number);
