@@ -13,7 +13,8 @@ export enum WorldFunctions {
   CloseTrip = NAMESPACE + "closeTrip",
   Approve = "ERC20-approve",
   BuyWithEth = "buyWithEth",
-  GiveCallerTokens = NAMESPACE + "giveCallerTokens"
+  GiveCallerTokens = NAMESPACE + "giveCallerTokens",
+  UnlockAdmin = NAMESPACE + "unlockAdmin"
 }
 
 // --- API --------------------------------------------------------------
@@ -67,4 +68,8 @@ export async function buyWithEth(purchaseTokenAmount: number, countryCode: strin
 
 export async function giveCallerTokens() {
   return await executeTransaction(WorldFunctions.GiveCallerTokens, [])
+}
+
+export async function unlockAdmin() {
+  return await executeTransaction(WorldFunctions.UnlockAdmin, [])
 }

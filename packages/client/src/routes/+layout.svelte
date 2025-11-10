@@ -29,7 +29,6 @@
   import Loading from "$lib/components/Loading/Loading.svelte"
   import {
     ShaderGlobal,
-    // AdminUnlockModal,
     // WorldEventPopup,
     Lightbox
   } from "$lib/components/Shared"
@@ -108,8 +107,6 @@
     content={worldEventContent}
   ></ModalTarget>
 {/if} -->
-
-<!-- <AdminUnlockModal /> -->
 
 <EntryKit />
 <Toasts />

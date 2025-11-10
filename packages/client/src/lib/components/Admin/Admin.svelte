@@ -3,6 +3,7 @@
   import type { TripEventBaseline, TripEvent, PendingTrip } from "$lib/components/Admin/types"
   import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
   import {
+    player,
     playerTrips,
     playerNonDepletedTrips,
     playerDepletedTrips
@@ -26,7 +27,8 @@
     AdminActiveTripTable,
     AdminPastTripTable,
     ProfitLossHistoryGraph,
-    ProfitLossOverview
+    ProfitLossOverview,
+    AdminUnlockModal
   } from "$lib/components/Admin"
   import { SmallButton } from "$lib/components/Shared"
 
@@ -202,6 +204,10 @@
 </script>
 
 <div class="admin-container">
+  {#if $player && !$player.masterKey}
+    <AdminUnlockModal />
+  {/if}
+
   {#if $isPhone}
     <!-- Phone Navigation -->
     <div class="phone-nav">

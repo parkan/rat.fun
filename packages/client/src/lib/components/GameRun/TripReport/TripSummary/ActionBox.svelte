@@ -4,7 +4,6 @@
   import { goto } from "$app/navigation"
   import { gsap } from "gsap"
   import { BigButton, RatAvatar } from "$lib/components/Shared"
-  import { shouldUnlockAdmin, showAdminUnlockModal } from "$lib/modules/state/stores"
   import { isPhone } from "$lib/modules/ui/state.svelte"
 
   let {
@@ -57,11 +56,6 @@
   })
 
   const comeDown = () => {
-    // Check if admin should be unlocked after rat death in trip
-    if (ratDead && $shouldUnlockAdmin) {
-      showAdminUnlockModal.set(true)
-    }
-
     resetProcessingState()
     // Return to game
     goto("/", { invalidateAll: true })

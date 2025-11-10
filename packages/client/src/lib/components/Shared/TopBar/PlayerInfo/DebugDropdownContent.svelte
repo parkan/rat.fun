@@ -70,6 +70,12 @@
       {$playerHasTokens}
     </p>
   </div>
+  <div class="tab">
+    <p class="key">Admin unlocked:</p>
+    <p class="value">
+      {$player?.masterKey}
+    </p>
+  </div>
   <div class="actions">
     {#if $environment !== ENVIRONMENT.BASE}
       <SmallButton

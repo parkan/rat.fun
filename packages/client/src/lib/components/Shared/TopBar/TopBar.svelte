@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state"
-  import { player, activeWorldEvent } from "$lib/modules/state/stores"
+  import { activeWorldEvent } from "$lib/modules/state/stores"
   import { upcomingWorldEvent } from "$lib/modules/content"
 
   import PlayerInfo from "./PlayerInfo/PlayerInfo.svelte"
@@ -26,9 +26,7 @@
     {:else if $upcomingWorldEvent}
       <WorldEventCountdown />
     {/if}
-    {#if $player?.masterKey}
-      <ModeSwitch {isAdminView} />
-    {/if}
+    <ModeSwitch {isAdminView} />
   </div>
 </div>
 

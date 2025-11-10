@@ -242,18 +242,3 @@ export const realisedProfitLoss = derived(
   [realisedBalance, realisedInvestment],
   ([$rb, $i]) => $rb - $i
 )
-
-// * * * * * * * * * * * * * * * * *
-// ADMIN UNLOCK MODAL
-// * * * * * * * * * * * * * * * * *
-
-export const showAdminUnlockModal = writable(false)
-
-export const shouldUnlockAdmin = derived([player, gameConfig], ([$player, $gameConfig]) => {
-  if (!$player || !$gameConfig) return false
-  const pastRatsCount = $player.pastRats?.length ?? 0
-  const requiredCount = $gameConfig.ratsKilledForAdminAccess
-
-  // Only trigger when exactly reaching the threshold
-  return pastRatsCount === requiredCount
-})
