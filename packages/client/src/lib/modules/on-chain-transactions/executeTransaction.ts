@@ -34,7 +34,7 @@ export async function executeTransaction(
       ? await prepareConnectorClientForTransaction()
       : get(walletNetwork).walletClient
 
-    let tx
+    let tx: Hex
     if (systemId === WorldFunctions.Approve) {
       if (params.length === 2) {
         tx = await client.writeContract({
