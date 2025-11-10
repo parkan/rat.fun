@@ -21,6 +21,7 @@
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
+  import { publicNetwork } from "$lib/modules/network"
 </script>
 
 <div class="debug-dropdown-content">
@@ -38,6 +39,12 @@
     <p class="key">Wallet Type:</p>
     <p class="value">
       {$walletType}
+    </p>
+  </div>
+  <div class="tab">
+    <p class="key">World address:</p>
+    <p class="value">
+      {$publicNetwork.worldAddress}
     </p>
   </div>
   <div class="tab">
