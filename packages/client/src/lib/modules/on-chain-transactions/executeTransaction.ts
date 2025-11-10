@@ -1,4 +1,5 @@
 import type { Hex, TransactionReceipt } from "viem"
+import type { WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
 import { get } from "svelte/store"
 
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
@@ -10,6 +11,11 @@ import { errorHandler } from "$lib/modules/error-handling"
 import { refetchAllowance } from "$lib/modules/erc20Listener"
 import { TransactionError } from "../error-handling/errors"
 
+type ExecuteTransactionOptions = {
+  useConnectorClient?: boolean
+  value?: bigint
+}
+
 /**
  * Executes an on-chain transaction.
  * @param systemId
@@ -19,17 +25,14 @@ import { TransactionError } from "../error-handling/errors"
 export async function executeTransaction(
   systemId: string,
   params: (string | Hex | number | bigint)[] = [],
-  useConnectorClient: boolean = false
+  options: ExecuteTransactionOptions = {}
 ): Promise<TransactionReceipt | false> {
-  // console.log("executeTransaction", systemId, params, useConnectorClient)
-
   try {
+    const { useConnectorClient = false, value } = options
     // Prepare the action's client
-    const client = useConnectorClient
+    const client: WalletTransactionClient = useConnectorClient
       ? await prepareConnectorClientForTransaction()
       : get(walletNetwork).walletClient
-
-    // console.log("client", client)
 
     let tx
     if (systemId === WorldFunctions.Approve) {
@@ -45,13 +48,16 @@ export async function executeTransaction(
         throw new TransactionError(`Invalid arguments: ${params.join(":")}`)
       }
     } else {
-      tx = await client.writeContract({
-        address: get(walletNetwork).worldContract.address,
-        abi: get(walletNetwork).worldContract.abi,
+      const worldContract = get(walletNetwork).worldContract
+      const txConfig = {
+        address: worldContract.address,
+        abi: worldContract.abi,
         functionName: systemId,
         args: params,
-        gas: 5000000n // TODO: Added to fix gas estimation. Change this.
-      })
+        gas: 5000000n, // TODO: Added to fix gas estimation. Change this.
+        ...(value !== undefined ? { value } : {})
+      }
+      tx = await client.writeContract(txConfig)
     }
 
     // Wait for transaction to be executed
@@ -68,7 +74,6 @@ export async function executeTransaction(
       if (receipt.status == "success") {
         return receipt
       } else {
-        // console.log(receipt)
         throw new TransactionError(`Transaction failed: ${receipt.transactionHash}`)
       }
     }

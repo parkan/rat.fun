@@ -16,8 +16,6 @@
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
-  // import { activeWorldEvent } from "$lib/modules/state/stores"
-  // import {  notificationsRead} from "$lib/modules/ui/state.svelte"
   import { errorHandler } from "$lib/modules/error-handling"
   import {
     environment as environmentStore,
@@ -27,15 +25,9 @@
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
-  import {
-    ShaderGlobal,
-    // WorldEventPopup,
-    Lightbox
-  } from "$lib/components/Shared"
-  // import { page } from "$app/state"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
-  import Toasts from "$lib/components/Shared/Toasts/Toasts.svelte"
+  import { ShaderGlobal, Lightbox, Toasts } from "$lib/components/Shared"
 
   let { children }: LayoutProps = $props()
 
@@ -95,18 +87,6 @@
     <ShaderGlobal />
   {/if}
 </div>
-
-<!-- {#if $activeWorldEvent && !notificationsRead.current.includes($activeWorldEvent.cmsId)} -->
-<!-- {#snippet worldEventContent()}
-    <WorldEventPopup /> -->
-<!-- {/snippet}
-  <ModalTarget
-    onclose={() => {
-      notificationsRead.set([...notificationsRead.current, $activeWorldEvent.cmsId])
-    }}
-    content={worldEventContent}
-  ></ModalTarget>
-{/if} -->
 
 <EntryKit />
 <Toasts />

@@ -124,9 +124,6 @@
     justify-content: space-between;
     font-size: var(--font-size-normal);
     font-family: var(--special-font-stack);
-    // position: sticky;
-    // top: 0;
-    // background: #000;
   }
 
   th {

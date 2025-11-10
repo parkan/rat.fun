@@ -18,30 +18,35 @@ const worldEvents =
 const tripFolderList =
   '*[_id == "trip-folder-list"][0]{ folders[]->{ _id, title, description, image, restricted } }'
 
+const outcomesForTrip = `*[_type == "outcome" && tripId == $tripId && worldAddress == $worldAddress] {
+    ...,
+    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
+  }`
+const outcomesForRat = `*[_type == "outcome" && ratId == $ratId && worldAddress == $worldAddress] {
+    ...,
+    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
+  }`
+const singleTrip = `*[_type == "trip" && _id == $id && worldAddress == $worldAddress][0]`
+const singleOutcome = `*[_type == "outcome" && _id == $id][0] {
+    ...,
+    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
+  }`
+
 export const queries = {
   ratImages,
   trips,
   outcomes,
   worldEvents,
   tripFolderList,
+  outcomesForTrip,
+  outcomesForRat,
+  singleTrip,
+  singleOutcome,
   staticContent: `{
     "ratImages": ${ratImages},
     "trips": ${trips},
     "outcomes": ${outcomes},
     "worldEvents": ${worldEvents},
     "tripFolders": ${tripFolderList}.folders
-  }`,
-  outcomesForTrip: `*[_type == "outcome" && tripId == $tripId && worldAddress == $worldAddress] {
-    ...,
-    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
-  }`,
-  outcomesForRat: `*[_type == "outcome" && ratId == $ratId && worldAddress == $worldAddress] {
-    ...,
-    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
-  }`,
-  singleTrip: `*[_type == "trip" && _id == $id && worldAddress == $worldAddress][0]`,
-  singleOutcome: `*[_type == "outcome" && _id == $id][0] {
-    ...,
-    "readableLog": array::join(log[]{"entry": timestamp + " => " + event}.entry, ", ")
   }`
 }

@@ -5,14 +5,13 @@
  * Central store for all entities in the game.
  */
 
-import { writable, derived, get } from "svelte/store"
+import { writable, derived } from "svelte/store"
 import { addressToId } from "$lib/modules/utils"
 import { blockNumber } from "$lib/modules/network"
 import { ENTITY_TYPE } from "contracts/enums"
 import {
   filterByEntitytype,
   filterByPlayer,
-  filterByOthers,
   filterActive,
   filterLiquidated,
   filterDepleted,
@@ -218,7 +217,6 @@ export const balance = derived(playerNonDepletedTrips, $playerNonDepletedTrips =
 )
 
 export const profitLoss = derived([balance, investment], ([$b, $i]) => {
-  // console.log("P L calculation", $b, $i)
   return $b - $i
 })
 

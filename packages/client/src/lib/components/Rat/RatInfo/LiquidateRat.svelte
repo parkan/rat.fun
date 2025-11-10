@@ -22,10 +22,8 @@
   $effect(() => {
     if (tweenedValue.current > tweenedValue.target && !playing) {
       playing = true
-      console.log("play positive sound")
     } else if (!playing && tweenedValue.current < tweenedValue.target) {
       playing = true
-      console.log("play negative sound")
     }
   })
 

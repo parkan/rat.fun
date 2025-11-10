@@ -105,7 +105,6 @@
         line-height: var(--top-bar-height);
         border: 0;
         background: transparent;
-        // border-right: var(--default-border-style);
         color: var(--foreground);
         padding: 8px;
 
@@ -139,12 +138,5 @@
         object-fit: contain;
       }
     }
-
-    // @media (max-width: 800px) {
-    //   // Hide avatar on phone but keep name visible
-    //   .avatar {
-    //     display: none;
-    //   }
-    // }
   }
 </style>

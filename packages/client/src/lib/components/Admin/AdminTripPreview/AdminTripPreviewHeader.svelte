@@ -2,7 +2,6 @@
   import { getTripMaxValuePerWin, getTripOwnerName } from "$lib/modules/state/utils"
   import { lastUpdated } from "$lib/modules/content"
   import { urlFor } from "$lib/modules/content/sanity"
-  import { NoImage } from "$lib/components/Shared"
   import type { Trip as SanityTrip } from "@sanity-types"
   import AdminTripPreviewPrompt from "./AdminTripPreviewPrompt.svelte"
 

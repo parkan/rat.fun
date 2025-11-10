@@ -24,7 +24,7 @@ export async function sendUnlockAdmin() {
       await approveMax(_externalAddressesConfig.gamePoolAddress)
     }
     await unlockAdmin()
-  } catch (e) {
+  } catch {
     throw new Error("Failed to unlock admin")
   } finally {
     busy.UnlockAdmin.set(0, { duration: 0 })

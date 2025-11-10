@@ -26,8 +26,6 @@ export async function sendEnterTrip(tripId: string, ratId: string) {
 
   busy.EnterTrip.set(0.99, { duration: DEFAULT_TIMING })
 
-  const startTime = performance.now()
-
   let url = ""
 
   switch (get(environmentStore)) {
@@ -69,12 +67,7 @@ export async function sendEnterTrip(tripId: string, ratId: string) {
       throw new APIError(`${error.error}: ${error.message}`, error)
     }
 
-    // @rasmus uncomment this line to see the effects
-    // await new Promise(res => setTimeout(res, 60000)) // slow down the process
-
     const outcome = (await response.json()) as EnterTripReturnValue
-
-    const endTime = performance.now()
 
     busy.EnterTrip.set(0, { duration: 0 })
 

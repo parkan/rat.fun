@@ -2,7 +2,8 @@
   import type { MergedLogEntry } from "$lib/components/GameRun/types"
   import { gsap } from "gsap"
   import { playSound } from "$lib/modules/sound"
-  import { TIMESTAMP_DURATION } from "$lib/components/GameRun/TripReport/Log/config"
+
+  const TIMESTAMP_DURATION = 0.3
 
   let {
     logEntry,

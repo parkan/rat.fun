@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { TripEvent } from "$lib/components/Admin/types"
+  import type { TripEvent, TripEventBaseline } from "$lib/components/Admin/types"
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { scaleTime, scaleLinear } from "d3-scale"
   import { max } from "d3-array"
@@ -59,35 +60,49 @@
   )
 
   // Generate points specifically for the full-width baseline
-  let baselinePoints = $derived.by(() => {
+  let baselinePoints = $derived.by<TripEventBaseline[] | null>(() => {
     if (!xScale || !yScale || !plotData || plotData.length === 0) return null
 
-    const domain = xScale.domain() // Get the full domain [start, end]
+    const [domainStart, domainEnd] = xScale.domain()
     const firstValue = plotData[0].value // Value of the first data point
+    const baselineSource = plotData[0]
+    const domainStartTime =
+      domainStart instanceof Date ? domainStart.getTime() : Number(domainStart)
+    const domainEndTime = domainEnd instanceof Date ? domainEnd.getTime() : Number(domainEnd)
 
     // Create two points spanning the full domain width at the first data point's y-level
     // These points need 'time' and 'value' structure to work with lineGenerator
     return [
       {
-        time: domain[0].getTime(),
+        eventType: TRIP_EVENT_TYPE.BASELINE,
+        time: domainStartTime,
         value: firstValue,
-        meta: { time: domain[0].getTime(), value: firstValue, meta: {} }
+        valueChange: 0,
+        index: baselineSource.index,
+        tripId: baselineSource.tripId,
+        tripCreationCost: baselineSource.tripCreationCost,
+        meta: undefined
       }, // Point at the start of the domain
       {
-        time: domain[1].getTime(),
+        eventType: TRIP_EVENT_TYPE.BASELINE,
+        time: domainEndTime,
         value: firstValue,
-        meta: { time: domain[1].getTime(), value: firstValue, meta: {} }
+        valueChange: 0,
+        index: baselineSource.index,
+        tripId: baselineSource.tripId,
+        tripCreationCost: baselineSource.tripCreationCost,
+        meta: undefined
       } // Point at the end of the domain
     ]
   })
 
   const generateTooltipContent = (point: TripEvent) => {
-    let toolTipContent = `<div>Trip balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${point?.meta?.value}</span>`
+    let toolTipContent = `<div>Trip balance: <span class="tooltip-value">${CURRENCY_SYMBOL}${point.value}</span>`
 
-    if (point?.meta?.valueChange) {
+    if (point.valueChange) {
       const valueChangeClass =
-        point.meta.valueChange > 0 ? "tooltip-value-positive" : "tooltip-value-negative"
-      toolTipContent += `<br/>Change: <span class="${valueChangeClass}">${point?.meta?.valueChange}</span></div>`
+        point.valueChange > 0 ? "tooltip-value-positive" : "tooltip-value-negative"
+      toolTipContent += `<br/>Change: <span class="${valueChangeClass}">${point.valueChange}</span></div>`
     }
 
     return toolTipContent
@@ -139,14 +154,14 @@
                 props={{ allowHTML: true }}
               >
                 <g>
-                  {#if !point?.meta?.valueChange || point?.meta?.valueChange === 0}
+                  {#if !point.valueChange || point.valueChange === 0}
                     <circle
                       fill="var(--color-value)"
                       r={smallIcons ? 3 : 6}
                       cx={xScale(point.time)}
                       cy={yScale(point.value)}
                     ></circle>
-                  {:else if point?.meta?.valueChange > 0}
+                  {:else if point.valueChange > 0}
                     <polygon
                       transform="translate({xScale(point.time)}, {yScale(
                         point.value

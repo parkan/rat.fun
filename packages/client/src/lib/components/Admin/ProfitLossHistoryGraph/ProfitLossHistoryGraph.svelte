@@ -62,21 +62,16 @@
   let isEmpty = $derived(graphData.length <= 1)
 
   // Limited version of graphData for display
-  let limitedData = $derived([...graphData].slice(-limit, graphData.length))
+  let limitedData = $derived.by<TripEvent[]>(() => [...graphData].slice(-limit, graphData.length))
 
-  let profitLossOverTime = $derived.by(() => {
+  let profitLossOverTime = $derived.by<TripEvent[]>(() => {
     if (!limitedData.length) return []
 
     // The P/L is already calculated in graphData.value from accumulating valueChanges
-    return limitedData.map((point, i) => ({
+    return limitedData.map<TripEvent>((point, i) => ({
+      ...point,
       time: i,
-      index: point.index,
-      value: point.value, // Use the already accumulated value
-      valueChange: point.valueChange,
-      tripId: point.tripId,
-      tripCreationCost: point.tripCreationCost,
-      eventType: point.eventType,
-      meta: point.meta // undefined on TripEventBaseline
+      value: point.value // Use the already accumulated value
     }))
   })
 
@@ -119,16 +114,6 @@
     `M ${focusedBoundingBox.left} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.y} L ${
       focusedBoundingBox.x + focusedBoundingBox.width
     } ${focusedBoundingBox.y} L ${
-      focusedBoundingBox.x + focusedBoundingBox.width
-    } ${focusedBoundingBox.rightY} L ${focusedBoundingBox.right} ${focusedBoundingBox.rightY}`
-  )
-
-  let bottomPath = $derived(
-    `M ${focusedBoundingBox.left} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${focusedBoundingBox.leftY} L ${focusedBoundingBox.x} ${
-      focusedBoundingBox.y + focusedBoundingBox.height
-    } L ${focusedBoundingBox.x + focusedBoundingBox.width} ${
-      focusedBoundingBox.y + focusedBoundingBox.height
-    } L ${
       focusedBoundingBox.x + focusedBoundingBox.width
     } ${focusedBoundingBox.rightY} L ${focusedBoundingBox.right} ${focusedBoundingBox.rightY}`
   )
@@ -185,45 +170,13 @@
 
             <!-- Cumulative profit/loss line -->
             <path
-              d={line()
+              d={line<TripEvent>()
                 .x(d => xScale(d.time))
                 .y(d => yScale(d.value))(profitLossOverTime)}
               stroke="var(--color-grey-light)"
               stroke-width={2}
               fill="none"
             />
-            <!-- line through selected points -->
-            <!-- Doesn't make too much sense, because it is actually not showing a real development -->
-            {#if focusedPoints.length > 0}
-              <!-- <path
-                d={line()
-                  .x(d => xScale(d.time))
-                  .y(d => yScale(d.value))(focusedPoints)}
-                stroke="white"
-                stroke-width={2}
-                fill="none"
-              /> -->
-            {/if}
-
-            <!-- Box around the points if multiple datapoints are selected -->
-            {#key boundingBoxKey}
-              <!-- <path
-                d={topPath}
-                fill="none"
-                stroke="var(--color-grey-mid)"
-                stroke-width="3"
-                in:draw|global={{ duration: 200 }}
-                out:drawReverse={{ duration: 200 }}
-              />
-              <path
-                d={bottomPath}
-                fill="none"
-                stroke="var(--color-grey-mid)"
-                stroke-width="3"
-                in:draw|global={{ duration: 200 }}
-                out:drawReverse={{ duration: 200 }}
-              /> -->
-            {/key}
 
             {#each profitLossOverTime as point, i (point.time)}
               {@const focus =

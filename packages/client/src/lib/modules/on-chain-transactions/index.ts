@@ -24,7 +24,6 @@ export async function spawn(name: string) {
 }
 
 export async function createRat(name: string) {
-  console.log("createRat", name)
   return await executeTransaction(WorldFunctions.CreateRat, [name])
 }
 
@@ -39,21 +38,23 @@ export async function closeTrip(tripId: string) {
 export async function approve(address: string, value: bigint) {
   const scaledValue = value * 10n ** 18n
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
-  return await executeTransaction(
-    WorldFunctions.Approve,
-    [address, scaledValue],
+  return await executeTransaction(WorldFunctions.Approve, [address, scaledValue], {
     useConnectorClient
-  )
+  })
 }
 
 export async function approveMax(address: string) {
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
-  return await executeTransaction(WorldFunctions.Approve, [address, maxUint256], useConnectorClient)
+  return await executeTransaction(WorldFunctions.Approve, [address, maxUint256], {
+    useConnectorClient
+  })
 }
 
 export async function revokeApproval(address: string) {
   const useConnectorClient = get(walletType) === WALLET_TYPE.ENTRYKIT
-  return await executeTransaction(WorldFunctions.Approve, [address, 0n], useConnectorClient)
+  return await executeTransaction(WorldFunctions.Approve, [address, 0n], {
+    useConnectorClient
+  })
 }
 
 export async function buyWithEth(purchaseTokenAmount: number, countryCode: string) {
@@ -61,8 +62,10 @@ export async function buyWithEth(purchaseTokenAmount: number, countryCode: strin
   return await executeTransaction(
     WorldFunctions.BuyWithEth,
     [BigInt(purchaseTokenAmount), countryCode],
-    useConnectorClient,
-    parseEther("0.001")
+    {
+      useConnectorClient,
+      value: parseEther("0.001")
+    }
   )
 }
 

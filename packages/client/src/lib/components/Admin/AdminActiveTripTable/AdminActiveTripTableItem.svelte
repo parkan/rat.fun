@@ -193,14 +193,6 @@
       }
     }
 
-    .up {
-      color: var(--color-up);
-    }
-
-    .down {
-      color: var(--color-down);
-    }
-
     .grey {
       color: grey;
     }

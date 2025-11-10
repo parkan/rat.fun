@@ -33,41 +33,31 @@
   // Helper function to check if all child timelines are collected and build timeline
   const checkAndBuildTimeline = () => {
     receivedChildTimelines++
-    // console.log(
-    //   `${logEntry.timestamp} Child timeline received: ${receivedChildTimelines}/${expectedChildTimelines}`
-    // )
-
     if (receivedChildTimelines === expectedChildTimelines) {
-      // console.log(`${logEntry.timestamp} All child timelines collected, building main timeline`)
       buildMainTimeline()
     }
   }
 
   // Handle LogTimestamp timeline - store it for later addition
   const addLogTimestampTimeline = (timestampTimeline: ReturnType<typeof gsap.timeline>) => {
-    // console.log(`${logEntry.timestamp} 1. addLogTimestampTimeline`, timestampTimeline)
     logTimestampTimeline = timestampTimeline
     checkAndBuildTimeline()
   }
 
   // Handle LogText timeline - store it for later addition
   const addLogTextTimeline = (textTimeline: ReturnType<typeof gsap.timeline>) => {
-    // console.log(`${logEntry.timestamp} 2. addLogTextTimeline`, textTimeline)
     logTextTimeline = textTimeline
     checkAndBuildTimeline()
   }
 
   // Handle LogOutcomeList timeline - store it for later addition
   const addLogOutcomeListTimeline = (outcomeListTimeline: ReturnType<typeof gsap.timeline>) => {
-    // console.log(`${logEntry.timestamp} 3. addLogOutcomeListTimeline`, outcomeListTimeline)
     logOutcomeListTimeline = outcomeListTimeline
     checkAndBuildTimeline()
   }
 
   // Build the main timeline - only called when all child timelines are collected
   const buildMainTimeline = () => {
-    // console.log(`${logEntry.timestamp} Building main timeline with collected child timelines`)
-
     // Add LogTimestamp timeline at the start
     if (logTimestampTimeline) {
       timeline.add(logTimestampTimeline)

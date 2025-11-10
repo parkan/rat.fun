@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import { goto } from "$app/navigation"
   import { gameConfig } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { BigButton } from "$lib/components/Shared"

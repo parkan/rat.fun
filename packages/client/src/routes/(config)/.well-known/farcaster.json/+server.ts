@@ -45,5 +45,7 @@ export const GET: RequestHandler = async () => {
         "Cache-Control": "public, max-age=3600" // Cache for 1 hour
       }
     })
-  } catch (error) {}
+  } catch (error) {
+    console.error(error)
+  }
 }

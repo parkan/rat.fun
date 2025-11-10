@@ -4,8 +4,7 @@
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
-
-  import CurrencySymbol from "$lib/components/Shared/CurrencySymbol/CurrencySymbol.svelte"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   // Element references
   let balanceElement = $state<HTMLSpanElement | null>(null)
@@ -16,9 +15,7 @@
 
   // Animate balance change
   function animateBalanceChange(newBalance: number, difference: number) {
-    // console.log("3. Animate to", newBalance, difference)
     if (!balanceElement || !containerElement) {
-      // console.log("Elements not ready", { balanceElement, containerElement })
       return
     }
 
@@ -88,7 +85,7 @@
   <div class="inner-wrapper">
     <Tooltip content="This is available tokens in your wallet">
       <div class="value">
-        <CurrencySymbol />
+        {CURRENCY_SYMBOL}
         <span bind:this={balanceElement}></span>
       </div>
     </Tooltip>

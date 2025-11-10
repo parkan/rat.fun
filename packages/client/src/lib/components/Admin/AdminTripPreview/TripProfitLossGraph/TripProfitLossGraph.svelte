@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
   import { onMount } from "svelte"
   import { Tooltip } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
@@ -70,6 +71,10 @@
   let tripEventData = $derived.by(() => {
     const sanityTripContent = $staticContent?.trips?.find(r => r._id == tripId)
 
+    if (!sanityTripContent) {
+      return []
+    }
+
     const outcomes = $staticContent?.outcomes?.filter(o => o.tripId == tripId) || []
 
     return calculateProfitLossForTrip(trip, tripId, sanityTripContent, outcomes)
@@ -89,7 +94,7 @@
         ...point,
         index,
         tripId,
-        tripCreationCost: trip.tripCreationCost,
+        tripCreationCost: Number(trip.tripCreationCost),
         value: runningBalance
       }
     })
@@ -108,21 +113,20 @@
 
     // The P/L is already calculated in allData.value from accumulating valueChanges
     return limitedData.map((point, i) => ({
+      ...point,
       time: i,
-      index: point.index,
-      value: point.value, // Use the already accumulated value
-      tripId: point.tripId,
-      eventType: point.eventType,
-      meta: point.meta
+      value: point.value // Use the already accumulated value
     }))
   })
 
   const generateTooltipContent = (point: TripEvent) => {
-    const mapping = {
-      trip_created: "Created trip",
-      trip_liquidated: "Liquidated trip",
-      trip_death: "Rat died",
-      trip_visit: "Rat visited",
+    const mapping: Record<string, string> = {
+      [TRIP_EVENT_TYPE.BASELINE]: "Baseline",
+      [TRIP_EVENT_TYPE.CREATION]: "Created trip",
+      [TRIP_EVENT_TYPE.LIQUIDATION]: "Liquidated trip",
+      [TRIP_EVENT_TYPE.DEATH]: "Rat died",
+      [TRIP_EVENT_TYPE.VISIT]: "Rat visited",
+      [TRIP_EVENT_TYPE.DEPLETED]: "Trip depleted",
       unknown: ""
     }
     const eventType = point.eventType || "unknown"
@@ -200,7 +204,7 @@
 
             <!-- Cumulative profit/loss line -->
             <path
-              d={line()
+              d={line<TripEvent>()
                 .x(d => xScale(d.time))
                 .y(d => yScale(d.value))(profitLossOverTime)}
               stroke="var(--color-grey-light)"

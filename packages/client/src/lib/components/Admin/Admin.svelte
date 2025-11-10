@@ -148,9 +148,6 @@
     // Now accumulate the value changes globally and add index
     let runningBalance = 0
 
-    // Return data now
-    // console.log("trips", dataWithBaseline.length, performance.now())
-
     return dataWithBaseline.map((point, index) => {
       runningBalance += point.valueChange || 0
       return {

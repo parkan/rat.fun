@@ -1,12 +1,11 @@
 import { get } from "svelte/store"
-import { transactionQueue } from "@latticexyz/common/actions"
-
 import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
 import { disconnect, getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import { getChain } from "$lib/mud/utils"
 import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
 import { WagmiConfigUnavailableError } from "../error-handling/errors"
+import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
 
 /**
  * Returns the wallet connector client from wagmi provider, which is synced with a stateful svelte config.
@@ -37,7 +36,7 @@ export async function disconnectWallet() {
  * - Wallet may switch between different chains, ensure the current chain is correct.
  * - Extend the client with MUD's transactionQueue, since it comes directly from wagmi, not entrykit's hooks.
  */
-export async function prepareConnectorClientForTransaction() {
+export async function prepareConnectorClientForTransaction(): Promise<WalletTransactionClient> {
   const wagmiConfig = get(wagmiConfigStateful)
   if (!wagmiConfig) {
     throw new WagmiConfigUnavailableError()
@@ -49,7 +48,7 @@ export async function prepareConnectorClientForTransaction() {
   if (getChainId(wagmiConfig) !== expectedChainId) {
     try {
       await switchChain(connectorClient, { id: expectedChainId })
-    } catch (e) {
+    } catch {
       await addChain(connectorClient, { chain: getChain(expectedChainId) })
       await switchChain(connectorClient, { id: expectedChainId })
     }
@@ -61,5 +60,5 @@ export async function prepareConnectorClientForTransaction() {
     })
   }
   // MUD's `transactionQueue` extends the client with `writeContract` method
-  return connectorClient.extend(transactionQueue())
+  return ensureWriteContract(connectorClient)
 }

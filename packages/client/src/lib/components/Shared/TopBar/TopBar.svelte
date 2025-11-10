@@ -1,12 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state"
-  import { activeWorldEvent } from "$lib/modules/state/stores"
-  import { upcomingWorldEvent } from "$lib/modules/content"
 
   import PlayerInfo from "./PlayerInfo/PlayerInfo.svelte"
   import ModeSwitch from "./ModeSwitch.svelte"
-  import WorldEvent from "./WorldEvent.svelte"
-  import WorldEventCountdown from "./WorldEventCountdown.svelte"
 
   import { Marquee } from "$lib/components/Shared"
 
@@ -21,11 +17,6 @@
     </Marquee>
   </div>
   <div class="right">
-    {#if $activeWorldEvent}
-      <WorldEvent />
-    {:else if $upcomingWorldEvent}
-      <WorldEventCountdown />
-    {/if}
     <ModeSwitch {isAdminView} />
   </div>
 </div>

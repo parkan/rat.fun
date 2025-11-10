@@ -7,8 +7,7 @@ import type {
   Outcome as SanityOutcome,
   WorldEvent as SanityWorldEvent,
   RatImages as SanityRatImages,
-  TripFolder as SanityTripFolder,
-  TripFolderList as SanityTripFolderList
+  TripFolder as SanityTripFolder
 } from "@sanity-types"
 import { queries } from "./sanity/groq"
 import type { MutationEvent } from "@sanity/client"

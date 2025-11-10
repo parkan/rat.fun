@@ -228,31 +228,6 @@
     background: var(--background);
   }
 
-  .new-player-message {
-    width: 100%;
-    height: calc(100% - 60px);
-    background-color: rgba(0, 0, 0, 0.5);
-    border: none;
-    outline: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--foreground);
-    font-family: var(--typewriter-font-stack);
-    font-size: var(--font-size-normal);
-    line-height: 1em;
-    text-align: center;
-  }
-
-  .loading {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    align-items: center;
-  }
-
   .trip-listing {
     flex-basis: 100%;
     flex-shrink: 0;

@@ -29,7 +29,6 @@
   })
 
   onDestroy(() => {
-    // console.log("destroying local shader manager")
     localShaderManager.destroy()
   })
 </script>

@@ -25,7 +25,6 @@ import mudConfig from "contracts/mud.config"
 export type SetupPublicNetworkResult = Awaited<ReturnType<typeof setupPublicNetwork>>
 
 export async function setupPublicNetwork(environment: ENVIRONMENT, url: URL) {
-  // console.log("setupPublicNetwork", environment, url)
   const networkConfig = getNetworkConfig(environment, url)
 
   /*
@@ -53,8 +52,6 @@ export async function setupPublicNetwork(environment: ENVIRONMENT, url: URL) {
   } as const satisfies ClientConfig
 
   const publicClient = createPublicClient(clientOptions)
-
-  // console.log("networkConfig.indexerUrl", networkConfig.indexerUrl)
 
   const resolvedConfig = {
     world,
