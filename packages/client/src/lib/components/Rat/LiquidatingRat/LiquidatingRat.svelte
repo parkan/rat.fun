@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { player, shouldUnlockAdmin, showAdminUnlockModal } from "$lib/modules/state/stores"
+  import { player } from "$lib/modules/state/stores"
   import { sendLiquidateRat } from "$lib/modules/action-manager/index.svelte"
   import { sendLiquidateRatMessage } from "$lib/modules/off-chain-sync"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
@@ -29,11 +29,6 @@
 
     // RAT_BOX_STATE.LIQUIDATING_RAT -> RAT_BOX_STATE.DEAD_RAT
     ratState.state.transitionTo(RAT_BOX_STATE.NO_RAT)
-
-    // Check if admin should be unlocked
-    if ($shouldUnlockAdmin) {
-      showAdminUnlockModal.set(true)
-    }
   })
 </script>
 

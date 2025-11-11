@@ -22,10 +22,8 @@
   $effect(() => {
     if (tweenedValue.current > tweenedValue.target && !playing) {
       playing = true
-      console.log("play positive sound")
     } else if (!playing && tweenedValue.current < tweenedValue.target) {
       playing = true
-      console.log("play negative sound")
     }
   })
 
@@ -86,7 +84,7 @@
           filter: drop-shadow(0px 0px 2px #ffffff);
         }
 
-        @media (max-width: 700px) {
+        @media (max-width: 800px) {
           font-size: 48px;
         }
       }

@@ -46,17 +46,12 @@
       // Add log timeline first
       if (logTimeline) {
         rootTimeline.add(logTimeline)
-        // console.log("Log timeline duration:", logTimeline.duration())
       }
 
       // Add summary timeline after log completes with delay
       if (summaryTimeline) {
         rootTimeline.add(summaryTimeline, ">+0.4") //
-        // console.log("Summary timeline duration:", summaryTimeline.duration())
       }
-
-      // console.log("Root timeline total duration:", rootTimeline.duration())
-      // console.log("\nTimeline Structure:\n" + serializeTimeline(rootTimeline))
 
       // Play the root timeline
       rootTimeline.play()
@@ -103,7 +98,6 @@
   const teardownTripReport = () => {
     // Stop background music
     if ($backgroundMusic) {
-      // console.log("stopping background music")
       $backgroundMusic.stop()
       $backgroundMusic = undefined
     }

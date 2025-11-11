@@ -575,4 +575,78 @@ contract ManagerSystemTest is BaseTest {
     assertEq(Balance.get(ratId), RAT_CREATION_COST - 30);
     assertEq(Balance.get(tripId), TRIP_INITIAL_BALANCE + 30 - maxValuePerWin - 50);
   }
+
+  function testRemoveItemNotOwnedByRat() public {
+    // Create another rat (eve's rat) with an item
+    setInitialBalance(eve);
+    vm.startPrank(eve);
+    world.ratfun__spawn("eve");
+    approveGamePool(type(uint256).max);
+    bytes32 eveRatId = world.ratfun__createRat("eveRat");
+    vm.stopPrank();
+
+    // Give eve's rat an item worth 50 (within trip budget)
+    // Note: maxValuePerWin is 25% of TRIP_INITIAL_BALANCE (250) = 62.5
+    Item[] memory newItems = new Item[](1);
+    newItems[0] = Item("expensive_item", 50);
+
+    prankAdmin();
+    world.ratfun__applyOutcome(eveRatId, tripId, 0, new bytes32[](0), newItems);
+    vm.stopPrank();
+
+    // Get the item ID from eve's rat
+    bytes32 eveItemId = Inventory.getItem(eveRatId, 0);
+    assertEq(Value.get(eveItemId), 50);
+    assertEq(Inventory.length(eveRatId), 1);
+
+    // Verify initial state for alice's rat
+    uint256 aliceRatInventoryLength = Inventory.length(ratId);
+    uint256 initialTripBalance = Balance.get(tripId);
+    assertEq(aliceRatInventoryLength, 0, "Alice's rat should have no items");
+
+    // Try to "remove" Eve's item from Alice's rat
+    bytes32[] memory itemsToRemove = new bytes32[](1);
+    itemsToRemove[0] = eveItemId;
+
+    prankAdmin();
+    world.ratfun__applyOutcome(ratId, tripId, 0, itemsToRemove, new Item[](0));
+    vm.stopPrank();
+
+    // Alice's rat inventory is unchanged (doesn't own the item)
+    assertEq(Inventory.length(ratId), aliceRatInventoryLength, "Alice's rat inventory should be unchanged");
+
+    // Eve's rat still has the item
+    assertEq(Inventory.length(eveRatId), 1, "Eve's rat should still have the item");
+
+    // Trip balance should be unchanged as no item was removed
+    assertEq(Balance.get(tripId), initialTripBalance);
+  }
+
+  function testRemoveNonExistentItemId() public {
+    // Add a real item to alice's rat
+    Item[] memory newItems = new Item[](1);
+    newItems[0] = Item("cheese", 40);
+
+    prankAdmin();
+    world.ratfun__applyOutcome(ratId, tripId, 0, new bytes32[](0), newItems);
+    vm.stopPrank();
+
+    // Verify initial state
+    uint256 initialRatInventoryLength = Inventory.length(ratId);
+    uint256 initialTripBalance = Balance.get(tripId);
+    assertEq(initialRatInventoryLength, 1);
+    assertEq(initialTripBalance, TRIP_INITIAL_BALANCE - 40);
+
+    // Try to remove a completely random item ID that doesn't exist anywhere
+    bytes32[] memory itemsToRemove = new bytes32[](1);
+    itemsToRemove[0] = bytes32(uint256(0xdeadbeefdeadbeefdeadbeefdeadbeef));
+
+    prankAdmin();
+    world.ratfun__applyOutcome(ratId, tripId, 0, itemsToRemove, new Item[](0));
+    vm.stopPrank();
+
+    // Nothing should have changed - no revert, just silently ignored
+    assertEq(Inventory.length(ratId), initialRatInventoryLength, "Rat inventory should be unchanged");
+    assertEq(Balance.get(tripId), initialTripBalance, "Trip balance should be unchanged");
+  }
 }

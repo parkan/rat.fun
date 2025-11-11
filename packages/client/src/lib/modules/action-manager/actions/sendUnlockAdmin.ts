@@ -1,44 +1,32 @@
 import { get } from "svelte/store"
-import { playerId } from "$lib/modules/state/stores"
-import { environment } from "$lib/modules/network"
-import { ENVIRONMENT } from "$lib/mud/enums"
-import { PUBLIC_DEVELOPMENT_SERVER_HOST } from "$env/static/public"
-import { errorHandler } from "$lib/modules/error-handling"
+import { externalAddressesConfig } from "$lib/modules/state/stores"
+import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
+import { unlockAdmin, approveMax } from "$lib/modules/on-chain-transactions"
+import { busy } from "../index.svelte"
+
+const UNLOCK_ADMIN_COST = 500
 
 /**
  * Unlock admin/cashboard privileges for the current player
- * Only works in local development (CHAIN_ID === 31337)
+ * Costs 500 tokens
  */
 export async function sendUnlockAdmin() {
+  const _externalAddressesConfig = get(externalAddressesConfig)
+  const _playerERC20Allowance = get(playerERC20Allowance)
+
+  if (busy.UnlockAdmin.current !== 0) return
+
+  busy.UnlockAdmin.set(0.99)
+
   try {
-    // Only works in local development
-    if (get(environment) !== ENVIRONMENT.DEVELOPMENT) {
-      console.warn("Admin unlock is only available in local development")
-      return
+    // Approve if needed
+    if (_playerERC20Allowance < UNLOCK_ADMIN_COST) {
+      await approveMax(_externalAddressesConfig.gamePoolAddress)
     }
-
-    const currentPlayerId = get(playerId)
-    if (!currentPlayerId) {
-      console.error("No player ID available")
-      return
-    }
-
-    const url = `http://${PUBLIC_DEVELOPMENT_SERVER_HOST}/dev/unlock-admin`
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ id: currentPlayerId })
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
-      console.error("Failed to unlock admin:", error)
-      return
-    }
-  } catch (e) {
-    errorHandler(e)
+    await unlockAdmin()
+  } catch {
+    throw new Error("Failed to unlock admin")
+  } finally {
+    busy.UnlockAdmin.set(0, { duration: 0 })
   }
 }

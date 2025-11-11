@@ -83,6 +83,9 @@
 <style lang="scss">
   .player-info {
     min-width: 200px;
+    @media (max-width: 800px) {
+      min-width: unset;
+    }
 
     .player-stats {
       display: flex;
@@ -102,7 +105,6 @@
         line-height: var(--top-bar-height);
         border: 0;
         background: transparent;
-        // border-right: var(--default-border-style);
         color: var(--foreground);
         padding: 8px;
 

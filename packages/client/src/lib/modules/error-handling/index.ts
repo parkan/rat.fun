@@ -6,6 +6,7 @@ import { version } from "$app/environment"
 import { AppError, type ExpectedError } from "./errors"
 import { toastManager } from "$lib/modules/ui/toasts.svelte"
 import { parseViemError } from "./viemErrorParser"
+import { BaseError } from "viem"
 export * from "./errors"
 
 export function captureMessage(
@@ -29,21 +30,23 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
   let processedError: ExpectedError | unknown = error
 
   // Auto-detect and parse viem errors
-  if (error && typeof error === "object" && "name" in error) {
-    // Check if it's a viem BaseError by checking for viem-specific properties
-    if ("shortMessage" in error) {
-      try {
-        // Try to parse as viem error
-        processedError = parseViemError(error as any)
-      } catch (parseError) {
-        // If parsing fails, keep original error
-        console.warn("Failed to parse potential viem error:", parseError)
-      }
+  if (error instanceof BaseError) {
+    try {
+      processedError = parseViemError(error)
+    } catch (parseError) {
+      console.warn("Failed to parse potential viem error:", parseError)
     }
   }
 
   const errorCode = processedError instanceof AppError ? processedError.code : "UNKNOWN_ERROR"
-  const errorMessage = `${errorCode}: ${message ? message + (processedError as any)?.message : (processedError as any)?.message || ""}`
+  const processedMessage =
+    processedError instanceof AppError
+      ? processedError.message
+      : processedError instanceof Error
+        ? processedError.message
+        : ""
+  const messageParts = [message, processedMessage].filter(part => part && part.length > 0)
+  const errorMessage = messageParts.length ? `${errorCode}: ${messageParts.join(" ")}` : errorCode
 
   // Determine severity level based on error type
   let severity: Sentry.SeverityLevel = "error"
@@ -109,6 +112,4 @@ export function initializeSentry(): void {
     tracesSampleRate,
     profilesSampleRate
   })
-
-  console.log(`Sentry initialized for environment: ${get(environmentStore)}`)
 }

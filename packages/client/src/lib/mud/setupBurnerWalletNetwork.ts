@@ -22,9 +22,6 @@ export function setupBurnerWalletNetwork(publicNetwork: SetupPublicNetworkResult
    */
   const burnerAccount = createBurnerAccount(networkConfig.privateKey as Hex)
 
-  // For debugging purposes
-  // console.log("*** BURNER ACCOUNT PRIVATE KEY =>", networkConfig.privateKey)
-
   /*
    * Create a viem public (read only) client
    * (https://viem.sh/docs/clients/public.html)

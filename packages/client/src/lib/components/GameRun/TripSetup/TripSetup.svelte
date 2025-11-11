@@ -1,8 +1,8 @@
 <script lang="ts">
+  import type { Trip as SanityTrip } from "@sanity-types"
   import { onMount, onDestroy } from "svelte"
   import { gsap } from "gsap"
   import { TextPlugin } from "gsap/TextPlugin"
-  import type { Trip as SanityTrip } from "@sanity-types"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateTripSetupOutput } from "./tripSetupOutput"
   import { playSound } from "$lib/modules/sound"

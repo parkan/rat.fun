@@ -3,7 +3,6 @@
   import { gsap } from "gsap"
   import { typeHit } from "$lib/modules/sound"
   import { playSound, randomPitch } from "$lib/modules/sound"
-  import { CHARACTER_DELAY } from "$lib/components/GameRun/TripReport/Log/config"
 
   let {
     logEntry,
@@ -12,6 +11,8 @@
     logEntry: MergedLogEntry
     onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
   } = $props()
+
+  const CHARACTER_DELAY = 0.04
 
   // Element
   let logTextElement = $state<HTMLSpanElement | null>(null)
@@ -185,13 +186,15 @@
 <style lang="scss">
   .log-text {
     display: inline-block;
-    background: var(--color-grey-light);
+    background: rgba(255, 255, 255, 0.6);
     max-width: 100%;
     padding: 5px;
     color: var(--background);
-    line-height: 1em;
+    line-height: 1.4em;
     font-family: var(--special-font-stack);
     font-size: var(--font-size-large);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 
     :global(.item-ref) {
       background: yellow;

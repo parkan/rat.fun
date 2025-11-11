@@ -3,73 +3,73 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddItem",
     "name": "Apply outcome (add item)",
-    "gasUsed": 458222
+    "gasUsed": 458214
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddItemTooExpensive",
     "name": "Apply outcome (add item: too expensive)",
-    "gasUsed": 210888
+    "gasUsed": 210866
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeEmpty",
     "name": "Apply outcome (empty)",
-    "gasUsed": 206321
+    "gasUsed": 206301
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeOverTransferToRat",
     "name": "Apply outcome (over transfer to rat)",
-    "gasUsed": 244189
+    "gasUsed": 244176
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeOverTransferToTrip",
     "name": "Apply outcome (over transfer to trip)",
-    "gasUsed": 391077
+    "gasUsed": 390905
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItem",
     "name": "Apply outcome (remove item)",
-    "gasUsed": 137145
+    "gasUsed": 137191
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItemsFromDifferentArrayPositions",
     "name": "Apply outcome (remove item from middle of full inventory)",
-    "gasUsed": 163609
+    "gasUsed": 163672
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeTransferToRat",
     "name": "Apply outcome (transfer to rat)",
-    "gasUsed": 246108
+    "gasUsed": 246095
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeTransferToTrip",
     "name": "Apply outcome (transfer to trip)",
-    "gasUsed": 125756
+    "gasUsed": 125743
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeValueTransferOnDeath",
     "name": "Apply outcome (value transfer on death)",
-    "gasUsed": 406494
+    "gasUsed": 406321
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testTripBudgetLimitedByBalance",
     "name": "Apply outcome (trip balance limit)",
-    "gasUsed": 233318
+    "gasUsed": 233305
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testTripCannotExceedMaxValuePerWin",
     "name": "Apply outcome (trip budget limit)",
-    "gasUsed": 238098
+    "gasUsed": 238085
   },
   {
     "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
@@ -87,7 +87,7 @@
     "file": "test/systems/RatSystem.t.sol:RatSystemTest",
     "test": "testLiquidateRat",
     "name": "Liquidate rat",
-    "gasUsed": 417421
+    "gasUsed": 406188
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
@@ -106,5 +106,11 @@
     "test": "testLongTripPrompt",
     "name": "Create trip: long prompt",
     "gasUsed": 585121
+  },
+  {
+    "file": "test/systems/UnlockAdminSystem.t.sol:UnlockAdminSystemTest",
+    "test": "testUnlockAdmin",
+    "name": "Unlock admin",
+    "gasUsed": 134620
   }
 ]

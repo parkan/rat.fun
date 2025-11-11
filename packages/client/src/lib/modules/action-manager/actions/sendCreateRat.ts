@@ -25,7 +25,7 @@ export async function sendCreateRat(name: string) {
     }
     await createRat(name)
   } catch (e) {
-    throw new RatError(`Failed to create rat "${name}"`, undefined)
+    throw new RatError(`Failed to create rat "${name}"`, JSON.stringify(e))
   } finally {
     busy.CreateRat.set(0, { duration: 0 })
   }

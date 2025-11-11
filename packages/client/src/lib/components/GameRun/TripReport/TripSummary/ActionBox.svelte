@@ -4,8 +4,7 @@
   import { goto } from "$app/navigation"
   import { gsap } from "gsap"
   import { BigButton, RatAvatar } from "$lib/components/Shared"
-  import { shouldUnlockAdmin, showAdminUnlockModal } from "$lib/modules/state/stores"
-  import { get } from "svelte/store"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
 
   let {
     result,
@@ -57,11 +56,6 @@
   })
 
   const comeDown = () => {
-    // Check if admin should be unlocked after rat death in trip
-    if (ratDead && $shouldUnlockAdmin) {
-      showAdminUnlockModal.set(true)
-    }
-
     resetProcessingState()
     // Return to game
     goto("/", { invalidateAll: true })
@@ -69,9 +63,11 @@
 </script>
 
 <div class="event" bind:this={eventElement}>
-  <div class="image">
-    <RatAvatar />
-  </div>
+  {#if !$isPhone}
+    <div class="image">
+      <RatAvatar />
+    </div>
+  {/if}
   <div class="event-text" class:dead={ratDead}>
     {frozenRat?.name}
     {statusText}
@@ -96,14 +92,9 @@
       width: 260px;
       height: 260px;
       margin-bottom: 10px;
-      position: absolute;
-      transform: translate(0, -100%);
       overflow: visible;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+      position: absolute;
+      top: -180px;
     }
 
     .event-text {

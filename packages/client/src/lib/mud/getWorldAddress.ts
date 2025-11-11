@@ -30,7 +30,5 @@ export function getWorldAddress(environment: ENVIRONMENT) {
     throw new WorldAddressNotFoundError(chainId.toString())
   }
 
-  // console.log("worldAddress", world.address)
-
   return world.address
 }

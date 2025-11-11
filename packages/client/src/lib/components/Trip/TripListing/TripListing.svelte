@@ -198,6 +198,11 @@
     height: var(--game-window-main-height);
     height: var(--game-window-height);
     max-height: 100%;
+
+    @media (max-width: 800px) {
+      flex: 1;
+      height: auto;
+    }
   }
 
   .new-trips-button {
@@ -221,31 +226,6 @@
     justify-content: center;
     align-items: center;
     background: var(--background);
-  }
-
-  .new-player-message {
-    width: 100%;
-    height: calc(100% - 60px);
-    background-color: rgba(0, 0, 0, 0.5);
-    border: none;
-    outline: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--foreground);
-    font-family: var(--typewriter-font-stack);
-    font-size: var(--font-size-normal);
-    line-height: 1em;
-    text-align: center;
-  }
-
-  .loading {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    align-items: center;
   }
 
   .trip-listing {

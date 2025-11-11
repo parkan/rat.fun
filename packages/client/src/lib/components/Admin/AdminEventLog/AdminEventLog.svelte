@@ -49,13 +49,6 @@
       display: block;
       margin-bottom: 4px;
       font-size: var(--font-size-small);
-
-      .meta {
-        font-size: var(--font-size-small);
-        color: var(--color-grey-light);
-        text-align: center;
-        margin-bottom: 20px;
-      }
     }
   }
 </style>

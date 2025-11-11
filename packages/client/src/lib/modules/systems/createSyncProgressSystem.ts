@@ -14,9 +14,6 @@ export function createSyncProgressSystem() {
     loadingMessage.set(currentValue.message ?? "Loading")
     loadingPercentage.set(Number(currentValue.percentage.toFixed(0) ?? 0))
 
-    // console.log("SYNC:", update)
-    // console.log("currentValue.step =>", currentValue.step)
-
     // || currentValue.percentage === 100
     if (currentValue.step === SyncStep.LIVE) {
       ready.set(true)

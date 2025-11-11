@@ -125,19 +125,15 @@ export default async (request: Request, context: Context) => {
     return context.next()
   }
 
-  // console.log("User agent identified as crawler:", userAgent)
-
   // Extract tripId from path: /(main)/(game)/[tripId]
   const tripId = url.pathname.split("/").pop()
 
   if (!tripId) {
-    // console.log("No trip found for:", tripId)
     return context.next()
   }
 
   // Check that trip id is a valid 32-byte hex string (64 characters + 0x prefix)
   if (!tripId || !/^0x[a-fA-F0-9]{64}$/.test(tripId)) {
-    // console.log("Invalid trip ID format:", tripId)
     return context.next()
   }
 
@@ -146,14 +142,12 @@ export default async (request: Request, context: Context) => {
 
   // Move on if no sanity project ID is not found
   if (!sanityProjectId) {
-    // console.log("No sanity project ID found")
     return context.next()
   }
 
   // Fetch trip data from Sanity
   const trip = await fetchTripData(tripId, sanityProjectId)
   if (!trip) {
-    // console.log("No trip found for:", tripId)
     return context.next()
   }
 

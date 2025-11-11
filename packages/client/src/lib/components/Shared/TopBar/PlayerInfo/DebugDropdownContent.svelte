@@ -21,8 +21,8 @@
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { ENVIRONMENT } from "$lib/mud/enums"
-
   import FakeToken from "./FakeToken.svelte"
+  import { publicNetwork } from "$lib/modules/network"
 </script>
 
 <div class="debug-dropdown-content">
@@ -40,6 +40,12 @@
     <p class="key">Wallet Type:</p>
     <p class="value">
       {$walletType}
+    </p>
+  </div>
+  <div class="tab">
+    <p class="key">World address:</p>
+    <p class="value">
+      {$publicNetwork.worldAddress}
     </p>
   </div>
   <div class="tab">
@@ -70,6 +76,12 @@
     <p class="key">Has tokens:</p>
     <p class="value">
       {$playerHasTokens}
+    </p>
+  </div>
+  <div class="tab">
+    <p class="key">Admin unlocked:</p>
+    <p class="value">
+      {$player?.masterKey}
     </p>
   </div>
   <div class="actions">

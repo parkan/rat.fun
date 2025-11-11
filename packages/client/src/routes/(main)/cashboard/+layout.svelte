@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { goto } from "$app/navigation"
   import { fly } from "svelte/transition"
   import { page } from "$app/state"
-  import { player } from "$lib/modules/state/stores"
+  // import { player } from "$lib/modules/state/stores"
+  // import { goto } from "$app/navigation"
 
   import SEO from "$lib/components/Shared/SEO/SEO.svelte"
   import { Admin } from "$lib/components/Admin"
@@ -10,17 +10,17 @@
   let { children }: { children?: any } = $props()
 
   // Redirect to game route if player is not authorized to view admin page
-  $effect(() => {
-    if ($player) {
-      if (!$player.masterKey) {
-        if (page.route.id === "/(main)/cashboard/[tripId]") {
-          goto(`/${page.params.tripId}`)
-        } else {
-          goto("/")
-        }
-      }
-    }
-  })
+  // $effect(() => {
+  //   if ($player) {
+  //     if (!$player.masterKey) {
+  //       if (page.route.id === "/(main)/cashboard/[tripId]") {
+  //         goto(`/${page.params.tripId}`)
+  //       } else {
+  //         goto("/")
+  //       }
+  //     }
+  //   }
+  // })
 </script>
 
 <SEO prependTitle="ADMIN" />

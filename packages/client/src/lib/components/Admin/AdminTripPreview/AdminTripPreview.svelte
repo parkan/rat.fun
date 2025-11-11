@@ -3,9 +3,6 @@
   import type { Outcome } from "@sanity-types"
   import type { Trip as SanityTrip } from "@sanity-types"
   import type { TripEvent } from "$lib/components/Admin/types"
-
-  import { gameConfig } from "$lib/modules/state/stores"
-  import { blockNumber } from "$lib/modules/network"
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"

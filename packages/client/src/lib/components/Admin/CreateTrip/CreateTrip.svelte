@@ -2,15 +2,15 @@
   import { gameConfig } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { getTripMaxValuePerWin, getTripMinRatValueToEnter } from "$lib/modules/state/utils"
-  import { CharacterCounter, BigButton, BackButton } from "$lib/components/Shared"
+  import { CharacterCounter, BigButton } from "$lib/components/Shared"
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { MIN_TRIP_CREATION_COST } from "@server/config"
-  import { collapsed } from "$lib/modules/ui/state.svelte"
   import { staticContent } from "$lib/modules/content"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
   import { TripFolders } from "$lib/components/Trip"
 
   let {
@@ -144,7 +144,7 @@
     }}
   >
     <div class="modal-content">
-      <div class="create-trip" class:collapsed={$collapsed}>
+      <div class="create-trip">
         {#if currentStep === "folder"}
           <!-- STEP 1: FOLDER SELECTION -->
           <div class="folder-selection">
@@ -191,7 +191,7 @@
               <textarea
                 disabled={busy.CreateTrip.current !== 0}
                 id="trip-description"
-                rows={$collapsed ? 12 : 6}
+                rows={$isPhone ? 3 : 6}
                 {placeholder}
                 oninput={typeHit}
                 bind:value={tripDescription}
@@ -267,7 +267,7 @@
     </div>
   </div>
 {:else}
-  <div class="create-trip" class:collapsed={$collapsed}>
+  <div class="create-trip">
     <div class="controls">
       <!-- TRIP DESCRIPTION -->
       <div class="form-group">
@@ -281,7 +281,7 @@
         <textarea
           disabled={busy.CreateTrip.current !== 0}
           id="trip-description"
-          rows={$collapsed ? 12 : 6}
+          rows={$isPhone ? 3 : 6}
           {placeholder}
           oninput={typeHit}
           bind:value={tripDescription}
@@ -363,11 +363,18 @@
   .modal-content {
     height: 700px;
     max-height: 90vh;
+
+    @media (max-width: 800px) {
+      height: 100vh;
+      max-height: 80vh;
+      width: 100vw;
+    }
   }
 
   .create-trip {
     height: 100%;
     width: 600px;
+    max-width: 100%;
     display: flex;
     flex-flow: column nowrap;
     background-image: url("/images/texture-3.png");
@@ -375,6 +382,11 @@
     justify-content: space-between;
     border: 1px solid var(--color-grey-mid);
     padding: 10px;
+
+    @media (max-width: 800px) {
+      width: 100vw;
+      border: none;
+    }
 
     .folder-selection {
       flex: 1;
@@ -427,10 +439,7 @@
     }
 
     .form-group {
-      // padding-top: 30px;
-      // padding-left: 30px;
       display: block;
-      // margin-bottom: 15px;
       width: 100%;
 
       label {
@@ -463,8 +472,6 @@
     }
 
     .slider-group {
-      // padding-left: 1rem;
-      // padding-right: 1rem;
       display: block;
       width: 100%;
 
@@ -542,8 +549,6 @@
     }
 
     .calculated-values {
-      // padding-left: 1rem;
-      // padding-right: 1rem;
       display: flex;
       gap: 0;
       margin-bottom: 1rem;
@@ -587,6 +592,10 @@
     align-items: center;
     overscroll-behavior: none;
     z-index: var(--z-modal);
+
+    @media (max-width: 800px) {
+      background: var(--background);
+    }
   }
 
   .modal-content {
@@ -594,5 +603,9 @@
     z-index: 1;
     overflow-x: hidden;
     overflow-y: scroll;
+
+    @media (max-width: 800px) {
+      overflow-y: auto;
+    }
   }
 </style>

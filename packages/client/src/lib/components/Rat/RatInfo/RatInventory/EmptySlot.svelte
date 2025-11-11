@@ -17,6 +17,7 @@
 </script>
 
 <div
+  in:fade|global={{ duration: 80, delay: 20 + index * 20 }}
   class="empty-slot index-{index}"
   class:hovered={isHovered}
   role="button"

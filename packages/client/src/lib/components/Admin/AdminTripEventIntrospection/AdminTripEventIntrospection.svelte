@@ -31,6 +31,4 @@
     justify-content: center;
     align-items: center;
   }
-  .void {
-  }
 </style>

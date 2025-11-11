@@ -9,16 +9,26 @@
   const localShaderManager = createShaderManager()
 
   let canvasElement = $state<HTMLCanvasElement>()
+  let initFailed = $state(false)
 
   onMount(() => {
     if (canvasElement) {
-      localShaderManager.canvas = canvasElement
-      localShaderManager.setShader(shaderKey)
+      try {
+        localShaderManager.canvas = canvasElement
+        localShaderManager.setShader(shaderKey)
+        initFailed = false
+      } catch (error) {
+        console.warn(`[ShaderLocal] Failed to initialize "${shaderKey}", hiding canvas`, error)
+        initFailed = true
+        // Hide canvas to show CSS black background
+        if (canvasElement) {
+          canvasElement.style.display = "none"
+        }
+      }
     }
   })
 
   onDestroy(() => {
-    // console.log("destroying local shader manager")
     localShaderManager.destroy()
   })
 </script>
@@ -32,9 +42,9 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: #000;
 
     .shader-canvas {
-      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
