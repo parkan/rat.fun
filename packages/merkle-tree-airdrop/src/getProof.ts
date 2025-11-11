@@ -4,6 +4,11 @@ import { StandardMerkleTreeData } from "@openzeppelin/merkle-tree/dist/standard"
 import { Hex } from "viem"
 import { merkleTreeJsonOutputFile } from "./constants"
 
+export interface GetProofReturnType {
+  value: bigint,
+  proof: string[]
+}
+
 /**
  * Returns the claim value (1e18 decimals uint) and its proof (bytes32[] needed by the claim contract for verification)
  * Returns null if account has no claim
@@ -15,7 +20,7 @@ export async function getProof(account: Hex) {
   )
 }
 
-export async function getProofFromJson(account: Hex, data: StandardMerkleTreeData<[Hex, string]>) {
+export async function getProofFromJson(account: Hex, data: StandardMerkleTreeData<[Hex, string]>): Promise<GetProofReturnType | null> {
   const tree = StandardMerkleTree.load<[Hex, string]>(data)
 
   for (const [i, v] of tree.entries()) {
