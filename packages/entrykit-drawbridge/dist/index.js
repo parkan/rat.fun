@@ -242,7 +242,11 @@ async function signCall({
     blockTag: "pending"
   })).nonce : 0n);
   const { namespace: systemNamespace, name: systemName } = hexToResource(systemId);
-  return await getAction(userClient, signTypedData, "signTypedData")({
+  return await getAction(
+    userClient,
+    signTypedData,
+    "signTypedData"
+  )({
     account: userClient.account,
     // EIP-712 domain bound to World contract and chain
     domain: {
@@ -273,7 +277,11 @@ async function callWithSignature({
       "ERC-6492 signatures, like from Coinbase Smart Wallet, are not yet supported. Try using a different wallet?"
     );
   }
-  return getAction(sessionClient, writeContract, "writeContract")({
+  return getAction(
+    sessionClient,
+    writeContract,
+    "writeContract"
+  )({
     address: opts.worldAddress,
     abi: CallWithSignatureAbi,
     functionName: "callWithSignature",
@@ -344,7 +352,11 @@ async function setupSession({
     if (!txs.length) return;
     console.log("waiting for", txs.length, "receipts");
     for (const hash of txs) {
-      const receipt = await getAction(client, waitForTransactionReceipt, "waitForTransactionReceipt")({ hash });
+      const receipt = await getAction(
+        client,
+        waitForTransactionReceipt,
+        "waitForTransactionReceipt"
+      )({ hash });
       console.log("got tx receipt", receipt);
       if (receipt.status === "reverted") {
         console.error("tx reverted?", receipt);

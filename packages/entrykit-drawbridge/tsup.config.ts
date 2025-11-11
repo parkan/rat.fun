@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup"
 
 export default defineConfig(opts => ({
-  entry: ["src/index.ts", "src/bin/deploy.ts"],
+  entry: ["src/index.ts"],
   outDir: "dist",
   format: ["esm"],
   dts: false, // Disabled: complex viem types cause issues, using source types instead

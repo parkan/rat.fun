@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "outDir": "dist"
   },
   "include": ["src", "inline-import.d.ts"]
 }

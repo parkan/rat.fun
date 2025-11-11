@@ -39,9 +39,9 @@
     "vite-plugin-devtools-json": "^1.0.0"
   },
   "dependencies": {
+    "entrykit-drawbridge": "workspace:*",
     "@latticexyz/common": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/dev-tools": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
-    "@latticexyz/entrykit": "workspace:*",
     "@latticexyz/recs": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/schema-type": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/store-sync": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",

@@ -1,7 +1,7 @@
 {
-  "name": "@latticexyz/entrykit",
+  "name": "entrykit-drawbridge",
   "version": "2.2.23-local",
-  "description": "User onboarding flows for MUD apps",
+  "description": "Stripped down headless version of @latticexyz/entrykit",
   "private": true,
   "repository": {
     "type": "git",
@@ -14,9 +14,6 @@
     ".": "./dist/index.js"
   },
   "types": "./dist/index.d.ts",
-  "bin": {
-    "entrykit-deploy": "./bin/deploy.js"
-  },
   "files": [
     "dist"
   ],
@@ -25,7 +22,6 @@
     "build:js": "tsup",
     "clean": "pnpm run clean:js",
     "clean:js": "shx rm -rf dist",
-    "deploy": "tsx src/bin/deploy.ts",
     "dev": "tsup --watch",
     "test": "tsc --noEmit && vitest",
     "test:ci": "tsc --noEmit && vitest --run"
@@ -33,12 +29,10 @@
   "dependencies": {
     "@account-abstraction/contracts": "^0.7.0",
     "@latticexyz/common": "2.2.23",
-    "@latticexyz/paymaster": "2.2.23",
     "@latticexyz/store": "2.2.23",
     "@latticexyz/world": "2.2.23",
     "@latticexyz/world-module-callwithsignature": "2.2.23",
     "debug": "^4.3.4",
-    "dotenv": "^16.0.3",
     "permissionless": "0.2.30"
   },
   "devDependencies": {

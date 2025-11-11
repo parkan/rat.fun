@@ -1,5 +1,5 @@
-import { EntryKit } from "@latticexyz/entrykit"
-import { readable, derived, writable, get as getStore } from "svelte/store"
+import { EntryKit } from "entrykit-drawbridge"
+import { readable, derived, writable } from "svelte/store"
 import { paymasters } from "./paymasters"
 import { wagmiConfig as createWagmiConfig } from "./wagmiConfig"
 import type { Hex } from "viem"

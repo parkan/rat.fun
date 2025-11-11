@@ -49,7 +49,7 @@ type StateListener = (state: EntryKitState) => void
 type Unsubscribe = () => void
 
 /**
- * EntryKit - Framework-agnostic session account management for MUD applications
+ * entrykit-drawbridge - Stripped down headless version of @latticexyz/entrykit
  *
  * Provides:
  * - ERC-4337 session account creation

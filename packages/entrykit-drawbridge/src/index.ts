@@ -1,8 +1,5 @@
 /**
- * @latticexyz/entrykit
- *
- * Framework-agnostic session account management for MUD applications.
- * Provides ERC-4337 account abstraction with MUD World delegation.
+ * entrykit-drawbridge - Stripped down headless version of @latticexyz/entrykit
  */
 
 // ===== Main API =====
