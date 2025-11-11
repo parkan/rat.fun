@@ -17,18 +17,20 @@
     ondone,
     onsubmit,
     onclose,
-    savedTripDescription
+    savedTripDescription,
+    savedFolderId
   }: {
     ondone: () => void
     onsubmit?: (data: { prompt: string; cost: number }) => void
-    onclose?: (currentDescription: string) => void
+    onclose?: (currentDescription: string, currentFolderId: string) => void
     savedTripDescription?: string
+    savedFolderId?: string
   } = $props()
 
   let tripDescription: string = $state(savedTripDescription ?? "")
   let textareaElement: HTMLTextAreaElement | null = $state(null)
-  let selectedFolderId: string = $state("")
-  let currentStep: "folder" | "details" = $state("folder")
+  let selectedFolderId: string = $state(savedFolderId ?? "")
+  let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
 
   // Get non-restricted folders from staticContent
   let availableFolders = $derived($staticContent.tripFolders.filter(folder => !folder.restricted))
@@ -112,8 +114,10 @@
     } catch (error) {
       errorHandler(error)
       tripDescription = ""
+      selectedFolderId = ""
     }
     tripDescription = ""
+    selectedFolderId = ""
   }
 
   $effect(() => {
@@ -125,7 +129,7 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
-      onclose?.(tripDescription)
+      onclose?.(tripDescription, selectedFolderId)
     }
   }
 </script>
@@ -139,7 +143,7 @@
     class="modal-backdrop"
     onclick={e => {
       if (e.target === e.currentTarget) {
-        onclose?.(tripDescription)
+        onclose?.(tripDescription, selectedFolderId)
       }
     }}
   >
