@@ -3,7 +3,7 @@ import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
 import { disconnect, getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import { getChain } from "$lib/mud/utils"
-import { wagmiConfigStateful } from "$lib/modules/entry-kit/stores"
+import { wagmiConfig } from "$lib/modules/entry-kit"
 import { WagmiConfigUnavailableError } from "../error-handling/errors"
 import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
 
@@ -14,20 +14,20 @@ import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setu
  * Expects the wallet connection to be established, throws an error otherwise.
  */
 export async function getEstablishedConnectorClient() {
-  const wagmiConfig = get(wagmiConfigStateful)
-  if (!wagmiConfig) {
+  const config = get(wagmiConfig)
+  if (!config) {
     throw new WagmiConfigUnavailableError()
   }
-  return await getConnectorClient(wagmiConfig)
+  return await getConnectorClient(config)
 }
 
 export async function disconnectWallet() {
-  const wagmiConfig = get(wagmiConfigStateful)
-  if (!wagmiConfig) {
+  const config = get(wagmiConfig)
+  if (!config) {
     // Not connected, nothing to do
     return
   }
-  await disconnect(wagmiConfig)
+  await disconnect(config)
 }
 
 /**
@@ -37,15 +37,15 @@ export async function disconnectWallet() {
  * - Extend the client with MUD's transactionQueue, since it comes directly from wagmi, not entrykit's hooks.
  */
 export async function prepareConnectorClientForTransaction(): Promise<WalletTransactionClient> {
-  const wagmiConfig = get(wagmiConfigStateful)
-  if (!wagmiConfig) {
+  const config = get(wagmiConfig)
+  if (!config) {
     throw new WagmiConfigUnavailableError()
   }
-  let connectorClient = await getConnectorClient(wagmiConfig)
+  let connectorClient = await getConnectorClient(config)
 
   // User's wallet may switch between different chains, ensure the current chain is correct
   const expectedChainId = get(publicNetwork).config.chain.id
-  if (getChainId(wagmiConfig) !== expectedChainId) {
+  if (getChainId(config) !== expectedChainId) {
     try {
       await switchChain(connectorClient, { id: expectedChainId })
     } catch {
@@ -54,9 +54,8 @@ export async function prepareConnectorClientForTransaction(): Promise<WalletTran
     }
 
     // manually update the connector and its chain id
-    // (syncing wagmi state update from react to svelte can take a while and the config state is likely stale)
-    connectorClient = await getConnectorClient(wagmiConfig, {
-      connector: getAccount(wagmiConfig).connector
+    connectorClient = await getConnectorClient(config, {
+      connector: getAccount(config).connector
     })
   }
   // MUD's `transactionQueue` extends the client with `writeContract` method

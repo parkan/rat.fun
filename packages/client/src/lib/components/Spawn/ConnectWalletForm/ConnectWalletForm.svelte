@@ -2,8 +2,9 @@
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { entryKitButton } from "$lib/modules/entry-kit/stores"
-
+  import { sessionClient, isSessionReady, entrykit, wagmiConfig } from "$lib/modules/entry-kit"
+  import { connect, getConnectors, getAccount } from "@wagmi/core"
+  import { get } from "svelte/store"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
 
   const { walletType, onComplete = () => {} } = $props<{
@@ -12,55 +13,53 @@
   }>()
 
   let buttonElement: HTMLDivElement | null = $state(null)
+  let showWalletSelect = $state(false)
+  let connecting = $state(false)
+  let settingUp = $state(false)
 
   const timeline = gsap.timeline()
 
-  function onEntrykitButtonClick() {
-    // !!! HACK
-    // Definitly not the best way to do this...
-
-    // Find the entrykit-button-container
-    const entrykitContainer = document.querySelector(".entrykit-button-container")
-    if (!entrykitContainer) {
-      console.error("entrykit-button-container not found")
-      return
+  // Watch for session to become ready
+  $effect(() => {
+    if ($sessionClient && $isSessionReady) {
+      // Session is ready, complete the flow
+      showWalletSelect = false
+      onComplete()
     }
+  })
 
-    // Find the first iframe within the container
-    const iframe = entrykitContainer.querySelector("iframe")
-    if (!iframe) {
-      console.error("iframe not found within entrykit-button-container")
-      return
+  async function connectWallet(connectorId?: string) {
+    const config = get(wagmiConfig)
+    if (!config) return
+
+    try {
+      connecting = true
+
+      // If no connector specified, try to auto-detect injected wallet
+      const connectors = getConnectors(config)
+      const connector = connectorId
+        ? connectors.find(c => c.id === connectorId)
+        : connectors.find(c => c.type === "injected")
+
+      if (!connector) {
+        console.error("No wallet connector found")
+        return
+      }
+
+      // Connect wallet via wagmi
+      await connect(config, { connector, chainId: config.chains[0].id })
+
+      // Wagmi account watcher in EntryKit.svelte will handle the rest
+      showWalletSelect = false
+    } catch (error) {
+      console.error("Connection failed:", error)
+    } finally {
+      connecting = false
     }
+  }
 
-    // Wait for iframe to load, then find and click the first button
-    iframe.addEventListener(
-      "load",
-      () => {
-        try {
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-          if (!iframeDoc) {
-            console.error("Cannot access iframe content")
-            return
-          }
-
-          const firstButton = iframeDoc.querySelector("button")
-          if (firstButton) {
-            firstButton.click()
-          } else {
-            console.error("No button found in iframe")
-          }
-        } catch (error) {
-          console.error("Error accessing iframe content:", error)
-        }
-      },
-      { once: true }
-    )
-
-    // If iframe is already loaded, try to access it immediately
-    if (iframe.contentDocument?.readyState === "complete") {
-      iframe.dispatchEvent(new Event("load"))
-    }
+  function openWalletSelect() {
+    showWalletSelect = true
   }
 
   onMount(() => {
@@ -85,11 +84,48 @@
   <div class="inner-container">
     {#if walletType === WALLET_TYPE.ENTRYKIT}
       <div class="button-container" bind:this={buttonElement}>
-        <BigButton text="Connect wallet" onclick={onEntrykitButtonClick} />
+        {#if connecting || settingUp}
+          <BigButton text={connecting ? "Connecting..." : "Setting up..."} disabled={true} />
+        {:else}
+          <BigButton text="Connect wallet" onclick={openWalletSelect} />
+        {/if}
       </div>
-      <div class="entrykit-button-container">
-        <div bind:this={$entryKitButton}></div>
-      </div>
+
+      <!-- Simple wallet selection modal -->
+      {#if showWalletSelect}
+        <div class="wallet-modal">
+          <div class="modal-content">
+            <button class="close-btn" onclick={() => (showWalletSelect = false)}>×</button>
+            <h2>Connect Wallet</h2>
+            <div class="wallet-options">
+              <button
+                class="wallet-option"
+                onclick={() => connectWallet("io.metamask")}
+                disabled={connecting}
+              >
+                MetaMask
+              </button>
+              <button
+                class="wallet-option"
+                onclick={() => connectWallet("com.coinbase.wallet")}
+                disabled={connecting}
+              >
+                Coinbase Wallet
+              </button>
+              <button
+                class="wallet-option"
+                onclick={() => connectWallet("walletConnect")}
+                disabled={connecting}
+              >
+                WalletConnect
+              </button>
+              <button class="wallet-option" onclick={() => connectWallet()} disabled={connecting}>
+                Browser Wallet
+              </button>
+            </div>
+          </div>
+        </div>
+      {/if}
     {:else}
       <div class="button-container" bind:this={buttonElement}>
         <BigButton text="Connect Burner" onclick={onComplete} />
@@ -120,11 +156,78 @@
         height: 200px;
         margin-bottom: 20px;
       }
+    }
+  }
 
-      .entrykit-button-container {
-        opacity: 0;
-        pointer-events: none;
-        height: 0;
+  .wallet-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .modal-content {
+      background: var(--background);
+      color: var(--foreground);
+      border: 2px solid var(--foreground);
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+
+      .close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: transparent;
+        color: var(--foreground);
+        border: none;
+        font-size: 32px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+
+      h2 {
+        margin: 0 0 24px 0;
+        font-size: 24px;
+        text-align: center;
+      }
+
+      .wallet-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .wallet-option {
+          background: transparent;
+          color: var(--foreground);
+          border: 2px solid var(--foreground);
+          padding: 16px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: inherit;
+
+          &:hover:not(:disabled) {
+            background: var(--foreground);
+            color: var(--background);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
       }
     }
   }

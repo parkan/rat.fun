@@ -11,5 +11,5 @@ export default defineConfig(opts => ({
   splitting: false,
   treeshake: true,
   target: "es2022",
-  external: ["viem"],
+  external: ["viem"]
 }))

@@ -1,7 +1,6 @@
 import { Chain, http } from "viem"
 import { Config, createConfig, CreateConnectorFn } from "wagmi"
 import { coinbaseWallet, injected, safe, metaMask, walletConnect } from "wagmi/connectors"
-import { getDefaultConfig } from "connectkit"
 import {
   extendedBase,
   extendedBaseSepolia,
@@ -26,8 +25,10 @@ export function wagmiConfig(chainId: number): Config<typeof chains, typeof trans
   const appName = "RAT.FUN"
   const chain = chains.find(chain => chain.id === chainId) as (typeof chains)[number]
 
-  // If browser supports extensions, leave connectors empty to allow auto-detection
+  // Build connectors list
   const connectors: CreateConnectorFn[] = []
+
+  // If browser supports extensions, leave connectors empty to allow auto-detection
   // If browser does not seem to support extensions (mobile), add specific connectors
   if (!hasExtensionSupport()) {
     connectors.push(
@@ -51,17 +52,10 @@ export function wagmiConfig(chainId: number): Config<typeof chains, typeof trans
     )
   }
 
-  const configParams = getDefaultConfig({
-    appName,
+  return createConfig({
     chains: [chain],
     transports,
-    pollingInterval: {
-      [extendedBaseSepolia.id]: 2000
-    },
-    walletConnectProjectId: PUBLIC_WALLET_CONNECT_PROJECT_ID,
-    enableFamily: false,
-    connectors
+    connectors,
+    pollingInterval: extendedBaseSepolia.id === chainId ? 2000 : undefined
   })
-
-  return createConfig(configParams) as never
 }
