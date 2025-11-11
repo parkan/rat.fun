@@ -18,6 +18,7 @@
   let isConnecting = false
 
   // Initialize EntryKit with correct network on mount
+  // Problem: retriggers on every route change
   $effect(() => {
     const networkConfig = getNetworkConfig($environment, page.url)
     console.log("[EntryKit.svelte] Initializing with network:", networkConfig.chainId)

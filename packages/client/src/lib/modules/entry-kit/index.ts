@@ -2,12 +2,27 @@ import { EntryKit } from "entrykit-drawbridge"
 import { readable, derived, writable } from "svelte/store"
 import { paymasters } from "./paymasters"
 import { wagmiConfig as createWagmiConfig } from "./wagmiConfig"
-import type { Hex } from "viem"
+import type { Hex, Address } from "viem"
 import type { Config } from "wagmi"
-import type { NetworkConfig } from "$lib/mud/getNetworkConfig"
+import type { NetworkConfig } from "$lib/mud/utils"
+
+// Temporary type for EntryKit state
+// TODO: fix type exports from entrykit-drawbridge
+type EntryKitState = {
+  sessionClient: SessionClientLike | null
+  userAddress: Address | null
+  sessionAddress: Address | null
+  isReady: boolean
+}
+
+type SessionClientLike = {
+  account: {
+    address: Address
+  }
+}
 
 // EntryKit instance (created lazily when network config is available)
-let entrykitInstance: EntryKit | null = null
+let entrykitInstance: InstanceType<typeof EntryKit> | null = null
 
 // Initialize EntryKit with network config
 export function initializeEntryKit(networkConfig: NetworkConfig) {
@@ -31,7 +46,7 @@ export function initializeEntryKit(networkConfig: NetworkConfig) {
 }
 
 // Get EntryKit instance (throws if not initialized)
-export function getEntryKit(): EntryKit {
+export function getEntryKit(): InstanceType<typeof EntryKit> {
   if (!entrykitInstance) {
     throw new Error("EntryKit not initialized. Call initializeEntryKit first.")
   }
@@ -40,7 +55,8 @@ export function getEntryKit(): EntryKit {
 
 // Create reactive Svelte stores
 // These will be empty until EntryKit is initialized
-export const entrykitState = readable<any>(
+
+export const entrykitState = readable<EntryKitState>(
   { sessionClient: null, userAddress: null, sessionAddress: null, isReady: false },
   set => {
     // Subscribe when EntryKit becomes available
@@ -57,7 +73,10 @@ export const entrykitState = readable<any>(
 )
 
 // Convenience stores
-export const sessionClient = derived(entrykitState, $state => $state?.sessionClient ?? null)
+export const sessionClient = derived<typeof entrykitState, SessionClientLike | null>(
+  entrykitState,
+  $state => $state?.sessionClient ?? null
+)
 export const userAddress = derived(entrykitState, $state => $state?.userAddress ?? null)
 export const sessionAddress = derived(entrykitState, $state => $state?.sessionAddress ?? null)
 export const isSessionReady = derived(entrykitState, $state => $state?.isReady ?? false)

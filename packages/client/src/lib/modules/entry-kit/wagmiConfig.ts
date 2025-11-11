@@ -1,5 +1,5 @@
 import { Chain, http } from "viem"
-import { Config, createConfig, CreateConnectorFn } from "wagmi"
+import { createConfig, CreateConnectorFn } from "wagmi"
 import { coinbaseWallet, injected, safe, metaMask, walletConnect } from "wagmi/connectors"
 import {
   extendedBase,
@@ -21,7 +21,7 @@ export const transports = {
   [extendedMudFoundry.id]: http()
 } as const
 
-export function wagmiConfig(chainId: number): Config<typeof chains, typeof transports> {
+export function wagmiConfig(chainId: number) {
   const appName = "RAT.FUN"
   const chain = chains.find(chain => chain.id === chainId) as (typeof chains)[number]
 
