@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { initializeEntryKit, getEntryKit, sessionClient, wagmiConfig } from "$lib/modules/entry-kit"
+  import {
+    initializeEntryKit,
+    getEntryKit,
+    sessionClient,
+    wagmiConfig
+  } from "$lib/modules/entry-kit"
   import { getConnectorClient, watchAccount } from "@wagmi/core"
   import { get } from "svelte/store"
   import { UIState } from "$lib/modules/ui/state.svelte"

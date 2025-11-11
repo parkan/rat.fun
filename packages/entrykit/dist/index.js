@@ -1,4 +1,4 @@
-import { parseAbi, isHex, http, toHex, parseErc6492Signature, encodeFunctionData, zeroAddress, formatEther } from 'viem';
+import { parseAbi, isHex, http, toHex, parseErc6492Signature, encodeFunctionData, zeroAddress } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { smartAccountActions } from 'permissionless';
@@ -7,13 +7,12 @@ import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitFo
 import { resourceToHex, hexToResource } from '@latticexyz/common';
 import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { getRecord } from '@latticexyz/store/internal';
-import { signTypedData, writeContract, waitForTransactionReceipt, readContract } from 'viem/actions';
+import { signTypedData, writeContract, waitForTransactionReceipt } from 'viem/actions';
 import { getAction } from 'viem/utils';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
-import createDebug from 'debug';
 
 // src/session/getSessionSigner.ts
 
@@ -23,6 +22,9 @@ var SessionStorage = class {
     this.STORAGE_KEY = "entrykit:session-signers";
     this.cache = this.load();
   }
+  /**
+   * Load session store from localStorage
+   */
   load() {
     if (typeof localStorage === "undefined") {
       return { signers: {} };
@@ -37,24 +39,47 @@ var SessionStorage = class {
       return { signers: {} };
     }
   }
+  /**
+   * Save session store to localStorage
+   */
   save() {
     if (typeof localStorage === "undefined") return;
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cache));
   }
+  /**
+   * Get session signer private key for a user address
+   *
+   * @param address User's wallet address
+   * @returns Private key if exists, undefined otherwise
+   */
   getSigner(address) {
     const key = address.toLowerCase();
     return this.cache.signers[key];
   }
+  /**
+   * Store session signer private key for a user address
+   *
+   * @param address User's wallet address
+   * @param privateKey Session private key to store
+   */
   setSigner(address, privateKey) {
     const key = address.toLowerCase();
     this.cache.signers[key] = privateKey;
     this.save();
   }
+  /**
+   * Remove session signer for a user address
+   *
+   * @param address User's wallet address
+   */
   removeSigner(address) {
     const key = address.toLowerCase();
     delete this.cache.signers[key];
     this.save();
   }
+  /**
+   * Clear all session signers
+   */
   clear() {
     this.cache = { signers: {} };
     this.save();
@@ -93,7 +118,7 @@ var worldAbi = parseAbi([
   "function registerDelegation(address delegatee, bytes32 delegationControlId, bytes initCallData)"
 ]);
 
-// src/getPaymaster.ts
+// src/bundler/getPaymaster.ts
 function getPaymaster(chain, paymasterOverride) {
   const contracts = chain.contracts ?? {};
   if (paymasterOverride) {
@@ -110,9 +135,10 @@ function getPaymaster(chain, paymasterOverride) {
       };
     }
   }
+  return void 0;
 }
 
-// src/createBundlerClient.ts
+// src/bundler/createBundlerClient.ts
 function createBundlerClient(config) {
   const client = config.client;
   if (!client) throw new Error("No `client` provided to `createBundlerClient`.");
@@ -120,12 +146,15 @@ function createBundlerClient(config) {
   const paymaster = chain ? getPaymaster(chain, config.paymaster) : void 0;
   return createBundlerClient$1({
     ...defaultClientConfig,
+    // Configure paymaster for gas sponsorship
     paymaster: paymaster ? paymaster.type === "custom" ? paymaster.paymasterClient : {
+      // Simple paymaster - just return address with empty data
       getPaymasterData: async () => ({
         paymaster: paymaster.address,
         paymasterData: "0x"
       })
     } : void 0,
+    // Custom fee estimation for certain chains
     userOperation: {
       estimateFeesPerGas: createFeeEstimator(client)
     },
@@ -213,18 +242,17 @@ async function signCall({
     blockTag: "pending"
   })).nonce : 0n);
   const { namespace: systemNamespace, name: systemName } = hexToResource(systemId);
-  return await getAction(
-    userClient,
-    signTypedData,
-    "signTypedData"
-  )({
+  return await getAction(userClient, signTypedData, "signTypedData")({
     account: userClient.account,
+    // EIP-712 domain bound to World contract and chain
     domain: {
       verifyingContract: worldAddress,
       salt: toHex(userClient.chain.id, { size: 32 })
     },
+    // MUD's CallWithSignature type definitions
     types: callWithSignatureTypes,
     primaryType: "Call",
+    // Message contains all call details + nonce
     message: {
       signer: userClient.account.address,
       systemNamespace,
@@ -245,11 +273,7 @@ async function callWithSignature({
       "ERC-6492 signatures, like from Coinbase Smart Wallet, are not yet supported. Try using a different wallet?"
     );
   }
-  return getAction(
-    sessionClient,
-    writeContract,
-    "writeContract"
-  )({
+  return getAction(sessionClient, writeContract, "writeContract")({
     address: opts.worldAddress,
     abi: CallWithSignatureAbi,
     functionName: "callWithSignature",
@@ -320,11 +344,7 @@ async function setupSession({
     if (!txs.length) return;
     console.log("waiting for", txs.length, "receipts");
     for (const hash of txs) {
-      const receipt = await getAction(
-        client,
-        waitForTransactionReceipt,
-        "waitForTransactionReceipt"
-      )({ hash });
+      const receipt = await getAction(client, waitForTransactionReceipt, "waitForTransactionReceipt")({ hash });
       console.log("got tx receipt", receipt);
       if (receipt.status === "reverted") {
         console.error("tx reverted?", receipt);
@@ -364,7 +384,24 @@ var EntryKit = class {
   // ===== Reactive State Management =====
   /**
    * Subscribe to state changes
-   * Returns unsubscribe function
+   *
+   * The listener will be called immediately with the current state,
+   * and again whenever the state changes.
+   *
+   * @param listener Function to call on state changes
+   * @returns Unsubscribe function
+   *
+   * @example
+   * ```typescript
+   * const unsubscribe = entrykit.subscribe((state) => {
+   *   if (state.sessionClient) {
+   *     console.log("Session ready:", state.sessionClient.account.address);
+   *   }
+   * });
+   *
+   * // Later, stop listening
+   * unsubscribe();
+   * ```
    */
   subscribe(listener) {
     this.listeners.add(listener);
@@ -372,7 +409,9 @@ var EntryKit = class {
     return () => this.listeners.delete(listener);
   }
   /**
-   * Get current state (non-reactive)
+   * Get current state (non-reactive snapshot)
+   *
+   * For reactive updates, use subscribe() instead.
    */
   getState() {
     return { ...this.state };
@@ -386,8 +425,18 @@ var EntryKit = class {
   }
   // ===== Core API =====
   /**
-   * Connect with user's wallet client
-   * Creates session account and session client
+   * Connect with user's wallet and create session account
+   *
+   * This will:
+   * 1. Generate or retrieve session keypair from localStorage
+   * 2. Create a SimpleAccount smart account with session keypair as owner
+   * 3. Create a SessionClient with MUD World extensions
+   * 4. Check if delegation already exists
+   *
+   * After this, check `isReady` to see if delegation needs to be set up.
+   *
+   * @param userClient User's wallet client (from wagmi/viem)
+   * @throws If wallet client is missing account or chain
    */
   async connect(userClient) {
     if (!userClient.account) {
@@ -418,7 +467,11 @@ var EntryKit = class {
   }
   /**
    * Check if session is ready to use
-   * Returns delegation status
+   *
+   * Queries the MUD World contract to check if delegation is registered
+   * between the user's account and the session account.
+   *
+   * @returns Delegation status
    */
   async checkPrerequisites() {
     if (!this.state.sessionClient) {
@@ -434,7 +487,16 @@ var EntryKit = class {
     return { hasDelegation, isReady: hasDelegation };
   }
   /**
-   * Setup session (register delegation, deploy account)
+   * Setup session by registering delegation and deploying account
+   *
+   * This will:
+   * 1. Register delegation in MUD World contract (user delegates to session)
+   * 2. Deploy session smart account if not already deployed
+   *
+   * User will need to sign a transaction (EOA) or user operation (smart account).
+   *
+   * @param userClient User's wallet client for signing the delegation
+   * @throws If not connected (call connect() first)
    */
   async setupSession(userClient) {
     if (!this.state.sessionClient) {
@@ -449,7 +511,10 @@ var EntryKit = class {
     this.updateState({ isReady: true });
   }
   /**
-   * Disconnect and clear session
+   * Disconnect and clear session state
+   *
+   * Note: This does NOT clear stored session keys.
+   * Use clearStorage() to permanently remove session keys.
    */
   disconnect() {
     this.updateState({
@@ -460,7 +525,10 @@ var EntryKit = class {
     });
   }
   /**
-   * Clear stored session keys
+   * Clear stored session keys from localStorage
+   *
+   * This permanently removes the session private key for the current user.
+   * Next time connect() is called, a new session account will be created.
    */
   clearStorage() {
     if (this.state.userAddress) {
@@ -468,78 +536,24 @@ var EntryKit = class {
     }
   }
   // ===== Convenience Getters =====
+  /** Get current session client (null if not connected) */
   get sessionClient() {
     return this.state.sessionClient;
   }
+  /** Get current user address (null if not connected) */
   get userAddress() {
     return this.state.userAddress;
   }
+  /** Get current session account address (null if not connected) */
   get sessionAddress() {
     return this.state.sessionAddress;
   }
+  /** Check if session is ready (has delegation) */
   get isReady() {
     return this.state.isReady;
   }
 };
-async function internal_validateSigner({
-  client,
-  worldAddress,
-  userAddress,
-  sessionAddress,
-  signerAddress
-}) {
-  const ownerAddress = await readContract(client, {
-    address: sessionAddress,
-    abi: simpleAccountAbi,
-    functionName: "owner"
-  });
-  if (ownerAddress.toLowerCase() !== signerAddress.toLowerCase()) {
-    throw new Error(
-      `Session account owner (${ownerAddress}) does not match message signer (${signerAddress}).`
-    );
-  }
-  const hasDelegation = await checkDelegation({
-    client,
-    worldAddress,
-    sessionAddress,
-    userAddress,
-    blockTag: "latest"
-  });
-  if (!hasDelegation) {
-    throw new Error(
-      `Session account (${sessionAddress}) does not have delegation for user account (${userAddress}).`
-    );
-  }
-}
-var simpleAccountAbi = [
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address"
-      }
-    ],
-    stateMutability: "view",
-    type: "function"
-  }
-];
-function formatBalance(wei) {
-  const formatted = formatEther(wei);
-  const parsed = parseFloat(formatted);
-  if (parsed > 0 && parsed < 1e-5) {
-    return "<0.00001";
-  }
-  const magnitude = Math.floor(parsed).toString().length;
-  return parsed.toLocaleString("en-US", { maximumFractionDigits: Math.max(0, 6 - magnitude) });
-}
-var debug = createDebug("mud:entrykit");
-var error = createDebug("mud:entrykit");
-debug.log = console.debug.bind(console);
-error.log = console.error.bind(console);
 
-export { EntryKit, callWithSignature, checkDelegation, createBundlerClient, debug, defineCall, formatBalance, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, internal_validateSigner, sessionStorage, setupSession, signCall };
+export { EntryKit, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

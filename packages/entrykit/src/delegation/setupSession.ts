@@ -4,18 +4,38 @@ import { waitForTransactionReceipt } from "viem/actions"
 import { getAction } from "viem/utils"
 import IBaseWorldAbi from "@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json"
 import { systemsConfig as worldSystemsConfig } from "@latticexyz/world/mud.config"
-import { unlimitedDelegationControlId, worldAbi, SessionClient } from "../common"
+import { unlimitedDelegationControlId, worldAbi, SessionClient } from "../core/types"
 import { callWithSignature } from "../utils/callWithSignature"
 import { defineCall } from "../utils/defineCall"
 
 export type SetupSessionParams = {
-  client: Client
-  userClient: Client
+  client: any
+  userClient: any
   sessionClient: SessionClient
   worldAddress: Hex
   registerDelegation?: boolean
 }
 
+/**
+ * Setup session by registering delegation and deploying session account
+ *
+ * Flow differs based on wallet type:
+ *
+ * **Smart Account Wallet:**
+ * - Sends user operation to register delegation
+ * - User's smart account submits the operation
+ *
+ * **EOA (Externally Owned Account):**
+ * - Uses CallWithSignature pattern (gasless for user)
+ * - User signs a message (EIP-712)
+ * - Session account submits the signature + call
+ * - World validates signature and executes as user
+ *
+ * **Finally:**
+ * - Deploys session account if not yet deployed (via empty user operation)
+ *
+ * @param params Setup parameters
+ */
 export async function setupSession({
   client,
   userClient,
@@ -28,7 +48,10 @@ export async function setupSession({
   console.log("setting up session", userClient)
 
   if (userClient.account.type === "smart") {
-    // Set up session for smart account wallet
+    // ===== Smart Account Flow =====
+    // User's wallet is already a smart account (e.g., Safe, Biconomy)
+    // Can submit user operations directly
+
     const calls = []
 
     if (registerDelegation) {
@@ -60,7 +83,13 @@ export async function setupSession({
       console.error("not successful?", receipt)
     }
   } else {
-    // Set up session for EOAs
+    // ===== EOA Flow (CallWithSignature) =====
+    // User's wallet is a regular EOA (MetaMask, etc.)
+    // Uses MUD's CallWithSignature pattern for gasless execution:
+    //   1. User signs message (free, no gas)
+    //   2. Session account submits signature + call (pays gas via paymaster)
+    //   3. World validates signature and executes as user
+
     const txs: Hex[] = []
 
     if (registerDelegation) {
@@ -97,9 +126,16 @@ export async function setupSession({
     }
   }
 
-  // Deploy session smart account if not already deployed
+  // ===== Deploy Session Account =====
+  // Session account needs to be deployed before it can be used.
+  // We deploy it eagerly here (rather than lazily on first use) so downstream
+  // code can assume the account exists and has a deterministic address.
+
   if (!(await sessionClient.account.isDeployed?.())) {
     console.log("creating session account by sending empty user op")
+
+    // Send empty user operation to trigger account deployment
+    // The bundler/EntryPoint will deploy the account as part of executing this operation
     const hash = await getAction(
       sessionClient,
       sendUserOperation,
