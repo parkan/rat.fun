@@ -7,7 +7,6 @@ import {
 } from "viem/account-abstraction";
 import { defaultClientConfig } from "./common";
 import { getPaymaster } from "./getPaymaster";
-import { cachedFeesPerGas } from "./actions/cachedFeesPerGas";
 
 export function createBundlerClient<
   transport extends Transport,
@@ -56,10 +55,6 @@ function createFeeEstimator(client: Client): undefined | (() => Promise<Estimate
     return async () => ({ maxFeePerGas: 100_000n, maxPriorityFeePerGas: 0n });
   }
 
-  // do our own fee calculation for redstone, garnet, pyrope chains
-  // to avoid the default RPC call to `eth_getBlockByNumber`
-  // https://github.com/wevm/viem/blob/3aa882692d2c4af3f5e9cc152099e07cde28e551/src/actions/public/estimateFeesPerGas.ts#L132
-  if ([690, 17069, 695569].includes(client.chain.id)) {
-    return cachedFeesPerGas(client);
-  }
+  // Use viem's default fee estimation for all other chains
+  return undefined;
 }

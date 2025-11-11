@@ -5,8 +5,7 @@ import { useMediaQuery, useResizeObserver } from 'usehooks-ts';
 import { mergeRefs } from 'react-merge-refs';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import { useConfig, useClient, useAccount, useConnectorClient, createConfig, useChains, createConnector, ProviderNotFoundError, ChainNotConfiguredError, useConnectors, useConnect, useBalance, useWatchBlockNumber, useDisconnect } from 'wagmi';
-import { parseAbi, http, createClient, getAddress, SwitchChainError, numberToHex, UserRejectedRequestError, isHex, parseEther, formatEther, parseEventLogs, encodeFunctionData, zeroAddress, parseErc6492Signature, toHex } from 'viem';
-import { wiresaw } from '@latticexyz/common/internal';
+import { parseAbi, http, getAddress, SwitchChainError, numberToHex, UserRejectedRequestError, isHex, parseEther, formatEther, parseEventLogs, encodeFunctionData, zeroAddress, parseErc6492Signature, toHex } from 'viem';
 import { getDefaultConfig, ConnectKitProvider, useModal } from 'connectkit';
 import { twMerge } from 'tailwind-merge';
 import { useStore } from 'zustand';
@@ -22,7 +21,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { getBalanceQueryOptions } from 'wagmi/query';
 import { getAction } from 'viem/utils';
 import { createBundlerClient as createBundlerClient$1, waitForUserOperationReceipt, entryPoint07Abi, sendUserOperation } from 'viem/account-abstraction';
-import { readContract, estimateFeesPerGas, setBalance, sendCalls, waitForTransactionReceipt, writeContract, signTypedData } from 'viem/actions';
+import { readContract, setBalance, sendCalls, waitForTransactionReceipt, writeContract, signTypedData } from 'viem/actions';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
@@ -52,9 +51,6 @@ function FrameProvider({ frame, children }) {
   return /* @__PURE__ */ jsx(Context.Provider, { value: { frame }, children });
 }
 function getBundlerTransport(chain) {
-  if ("wiresaw" in chain.rpcUrls) {
-    return wiresaw();
-  }
   const bundlerHttpUrl = chain.rpcUrls.bundler?.http[0];
   if (bundlerHttpUrl) {
     return http(bundlerHttpUrl);
@@ -762,19 +758,6 @@ function getPaymaster(chain, paymasterOverride) {
     }
   }
 }
-function cachedFeesPerGas(client, options = { refreshInterval: 1e4 }) {
-  let fees = null;
-  async function refreshFees() {
-    fees = await estimateFeesPerGas(client);
-  }
-  refreshFees();
-  setInterval(refreshFees, options.refreshInterval);
-  return async () => {
-    if (fees) return fees;
-    fees = await estimateFeesPerGas(client);
-    return fees;
-  };
-}
 
 // src/createBundlerClient.ts
 function createBundlerClient(config) {
@@ -801,9 +784,7 @@ function createFeeEstimator(client) {
   if (client.chain.id === 31337) {
     return async () => ({ maxFeePerGas: 100000n, maxPriorityFeePerGas: 0n });
   }
-  if ([690, 17069, 695569].includes(client.chain.id)) {
-    return cachedFeesPerGas(client);
-  }
+  return void 0;
 }
 function useSetupSession({ connector, userClient }) {
   const queryClient = useQueryClient();
@@ -2312,22 +2293,6 @@ function createWagmiConfig(config) {
   });
   return createConfig(configParams);
 }
-function withFeeCache(chain, options = { refreshInterval: 1e4 }) {
-  if (chain.fees?.estimateFeesPerGas) {
-    throw new Error("withFeeCache: estimateFeesPerGas already defined in chain config");
-  }
-  const client = createClient({
-    chain,
-    transport: http()
-  });
-  return {
-    ...chain,
-    fees: {
-      ...chain.fees,
-      estimateFeesPerGas: cachedFeesPerGas(client, options)
-    }
-  };
-}
 async function internal_validateSigner({
   client,
   worldAddress,
@@ -2370,6 +2335,6 @@ var simpleAccountAbi = [
   }
 ];
 
-export { AccountButton2 as AccountButton, EntryKitProvider, createBundlerClient, createWagmiConfig, defineCall, defineConfig, getBundlerTransport, getDefaultConnectors, getFundsQueryOptions, internal_validateSigner, useAccountModal, useEntryKitConfig, useFunds, useSessionClientReady as useSessionClient, withFeeCache };
+export { AccountButton2 as AccountButton, EntryKitProvider, createBundlerClient, createWagmiConfig, defineCall, defineConfig, getBundlerTransport, getDefaultConnectors, getFundsQueryOptions, internal_validateSigner, useAccountModal, useEntryKitConfig, useFunds, useSessionClientReady as useSessionClient };
 //# sourceMappingURL=internal.js.map
 //# sourceMappingURL=internal.js.map
