@@ -12,7 +12,7 @@ contract ERC20EquivalentExchange {
   // Token being sent from the exchange contract to the user
   IERC20 public immutable toToken;
 
-  constructor(address _adminAddress,  address _fromToken, address _toToken) {
+  constructor(address _adminAddress, address _fromToken, address _toToken) {
     adminAddress = _adminAddress;
     fromToken = ERC20Burnable(_fromToken);
     toToken = IERC20(_toToken);
