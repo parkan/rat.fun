@@ -4,14 +4,11 @@ import { getAction } from "viem/utils";
 import { entryPoint07Abi, sendUserOperation, waitForUserOperationReceipt } from "viem/account-abstraction";
 import { useEntryKitConfig } from "../EntryKitConfigProvider";
 import { ConnectedClient, unlimitedDelegationControlId, worldAbi } from "../common";
-import { paymasterAbi } from "../quarry/common";
 import { sendCalls, waitForTransactionReceipt } from "viem/actions";
 import { defineCall } from "../utils/defineCall";
 import { Connector, useClient } from "wagmi";
-import { resourceToHex } from "@latticexyz/common";
 import IBaseWorldAbi from "@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json";
 import { callWithSignature } from "../utils/callWithSignature";
-import { getPaymaster } from "../getPaymaster";
 import { systemsConfig as worldSystemsConfig } from "@latticexyz/world/mud.config";
 import { createBundlerClient } from "../createBundlerClient";
 import { getBundlerTransport } from "../getBundlerTransport";
@@ -20,7 +17,7 @@ import { storeEventsAbi } from "@latticexyz/store";
 
 export function useSetupSession({ connector, userClient }: { connector: Connector; userClient: ConnectedClient }) {
   const queryClient = useQueryClient();
-  const { chainId, worldAddress, paymasterOverride } = useEntryKitConfig();
+  const { chainId, worldAddress } = useEntryKitConfig();
   const client = useClient({ chainId });
 
   const mutationKey = ["setupSession", client?.chain.id, userClient.account.address];
@@ -29,15 +26,12 @@ export function useSetupSession({ connector, userClient }: { connector: Connecto
     mutationKey,
     mutationFn: async ({
       sessionClient,
-      registerSpender,
       registerDelegation,
     }: {
       sessionClient: ConnectedClient;
-      registerSpender: boolean;
       registerDelegation: boolean;
     }): Promise<void> => {
       if (!client) throw new Error("Client not ready.");
-      const paymaster = getPaymaster(client.chain, paymasterOverride);
       const sessionAddress = sessionClient.account.address;
 
       console.log("setting up session", userClient);
@@ -45,18 +39,6 @@ export function useSetupSession({ connector, userClient }: { connector: Connecto
       if (isIdPlaceConnector(connector)) {
         // Set up session for smart account wallet
         const calls = [];
-
-        if (registerSpender && paymaster?.type === "quarry") {
-          console.log("registering spender");
-          calls.push(
-            defineCall({
-              to: paymaster.address,
-              abi: paymasterAbi,
-              functionName: "registerSpender",
-              args: [sessionAddress],
-            }),
-          );
-        }
 
         if (registerDelegation) {
           console.log("registering delegation");
@@ -118,18 +100,6 @@ export function useSetupSession({ connector, userClient }: { connector: Connecto
         // Set up session for smart account wallet
         const calls = [];
 
-        if (registerSpender && paymaster?.type === "quarry") {
-          console.log("registering spender");
-          calls.push(
-            defineCall({
-              to: paymaster.address,
-              abi: paymasterAbi,
-              functionName: "registerSpender",
-              args: [sessionAddress],
-            }),
-          );
-        }
-
         if (registerDelegation) {
           console.log("registering delegation");
           calls.push(
@@ -161,24 +131,6 @@ export function useSetupSession({ connector, userClient }: { connector: Connecto
       } else {
         // Set up session for EOAs
         const txs: Hex[] = [];
-
-        if (registerSpender && paymaster?.type === "quarry") {
-          console.log("registering spender");
-          const tx = await callWithSignature({
-            client,
-            userClient,
-            sessionClient,
-            worldAddress: paymaster.address,
-            systemId: resourceToHex({ type: "system", namespace: "", name: "SpenderSystem" }),
-            callData: encodeFunctionData({
-              abi: paymasterAbi,
-              functionName: "registerSpender",
-              args: [sessionAddress],
-            }),
-          });
-          console.log("got spender tx", tx);
-          txs.push(tx);
-        }
 
         if (registerDelegation) {
           console.log("registering delegation");
@@ -233,7 +185,6 @@ export function useSetupSession({ connector, userClient }: { connector: Connecto
       })();
 
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["getSpender"] }),
         queryClient.invalidateQueries({ queryKey: ["getDelegation"] }),
         queryClient.invalidateQueries({ queryKey: ["getPrerequisites"] }),
       ]);

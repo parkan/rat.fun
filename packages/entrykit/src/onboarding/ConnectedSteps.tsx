@@ -10,7 +10,6 @@ import { useAccountModal } from "../useAccountModal";
 import { useEntryKitConfig } from "../EntryKitConfigProvider";
 import { getPaymaster } from "../getPaymaster";
 import { GasBalance } from "./GasBalance";
-import { GasBalance as QuarryGasBalance } from "./quarry/GasBalance";
 import { Connector } from "wagmi";
 
 export type Props = {
@@ -50,7 +49,7 @@ export function ConnectedSteps({ connector, userClient, initialUserAddress }: Pr
     }
   }, [closeAccountModal, isNewConnection, prerequisites]);
 
-  const { sessionAddress, hasAllowance, isSpender, hasDelegation, hasGasBalance, hasQuarryGasBalance } =
+  const { sessionAddress, hasDelegation, hasGasBalance } =
     prerequisites ?? {};
 
   const steps = useMemo((): readonly Step[] => {
@@ -80,23 +79,16 @@ export function ConnectedSteps({ connector, userClient, initialUserAddress }: Pr
           content: (props) => <GasBalance {...props} sessionAddress={sessionAddress} />,
         });
       }
-    } else if (paymaster.type === "quarry") {
-      steps.push({
-        id: "gasBalanceQuarry",
-        isComplete: !!hasQuarryGasBalance || !!hasAllowance,
-        content: (props) => <QuarryGasBalance {...props} userAddress={userAddress} paymaster={paymaster} />,
-      });
     }
 
     steps.push({
       id: "session",
-      isComplete: !!isSpender && !!hasDelegation,
+      isComplete: !!hasDelegation,
       content: (props) => (
         <Session
           {...props}
           userClient={userClient}
           connector={connector}
-          registerSpender={!isSpender}
           registerDelegation={!hasDelegation}
         />
       ),
@@ -104,11 +96,8 @@ export function ConnectedSteps({ connector, userClient, initialUserAddress }: Pr
 
     return steps;
   }, [
-    hasAllowance,
     hasDelegation,
     hasGasBalance,
-    hasQuarryGasBalance,
-    isSpender,
     paymaster,
     sessionAddress,
     userAddress,

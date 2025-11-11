@@ -13,17 +13,16 @@ import { Connector } from "wagmi";
 export type Props = StepContentProps & {
   connector: Connector;
   userClient: ConnectedClient;
-  registerSpender: boolean;
   registerDelegation: boolean;
   sessionAddress?: Hex;
 };
 
-export function Session({ isActive, isExpanded, connector, userClient, registerSpender, registerDelegation }: Props) {
+export function Session({ isActive, isExpanded, connector, userClient, registerDelegation }: Props) {
   const sessionClient = useShowQueryError(useSessionClient(userClient.account.address));
   const setup = useShowMutationError(useSetupSession({ userClient, connector }));
-  const hasSession = !registerDelegation && !registerDelegation;
+  const hasSession = !registerDelegation;
   const { data: prerequisites } = usePrerequisites(userClient.account.address);
-  const { hasAllowance, hasGasBalance, hasQuarryGasBalance } = prerequisites ?? {};
+  const { hasGasBalance } = prerequisites ?? {};
 
   useEffect(() => {
     // There seems to be a tanstack-query bug(?) where multiple simultaneous renders loses
@@ -36,13 +35,12 @@ export function Session({ isActive, isExpanded, connector, userClient, registerS
         setup.status === "idle" &&
         sessionClient.data &&
         !hasSession &&
-        (hasAllowance || hasGasBalance || hasQuarryGasBalance)
+        hasGasBalance
       ) {
         // TODO: re-enable once we can catch/handle window.open errors in popup
         //       https://github.com/ithacaxyz/porto/issues/581
         // setup.mutate({
         //   sessionClient: sessionClient.data,
-        //   registerSpender,
         //   registerDelegation,
         // });
       }
@@ -52,12 +50,9 @@ export function Session({ isActive, isExpanded, connector, userClient, registerS
     hasSession,
     isActive,
     registerDelegation,
-    registerSpender,
     sessionClient,
     setup,
-    hasAllowance,
     hasGasBalance,
-    hasQuarryGasBalance,
   ]);
 
   return (
@@ -82,7 +77,6 @@ export function Session({ isActive, isExpanded, connector, userClient, registerS
                 ? () =>
                     setup.mutate({
                       sessionClient: sessionClient.data,
-                      registerSpender,
                       registerDelegation,
                     })
                 : undefined

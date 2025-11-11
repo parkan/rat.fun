@@ -2,10 +2,8 @@ import { Address, Chain, Client, Transport } from "viem";
 import { Config, useClient, useConfig } from "wagmi";
 import { getBalanceQueryOptions } from "wagmi/query";
 import { QueryClient, queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllowanceQueryOptions } from "./onboarding/quarry/useAllowance";
 import { useEntryKitConfig } from "./EntryKitConfigProvider";
 import { getSessionAccountQueryOptions } from "./useSessionAccount";
-import { getBalanceQueryOptions as getQuarryBalanceQueryOptions } from "./onboarding/quarry/useBalance";
 
 export function getFundsQueryOptions({
   queryClient,
@@ -28,16 +26,12 @@ export function getFundsQueryOptions({
         account: { address: sessionAddress },
       } = await queryClient.fetchQuery(getSessionAccountQueryOptions({ client, userAddress }));
 
-      const [sessionBalance, paymasterAllowance, paymasterBalance] = await Promise.all([
-        queryClient.fetchQuery(getBalanceQueryOptions(config, { chainId: client.chain.id, address: sessionAddress })),
-        queryClient.fetchQuery(getAllowanceQueryOptions({ client, userAddress })),
-        queryClient.fetchQuery(getQuarryBalanceQueryOptions({ client, userAddress })),
-      ]);
+      const sessionBalance = await queryClient.fetchQuery(
+        getBalanceQueryOptions(config, { chainId: client.chain.id, address: sessionAddress })
+      );
 
       return {
         sessionBalance: sessionBalance?.value ?? null,
-        paymasterAllowance,
-        paymasterBalance,
       };
     },
     retry: false,

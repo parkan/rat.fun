@@ -4,14 +4,12 @@ import { EntryKitConfig } from "./config/output";
 
 export type Paymaster =
   | {
-      readonly type: "simple" | "quarry";
+      readonly type: "simple";
       readonly address: Hex;
-      readonly canSponsor?: boolean;
     }
   | {
       readonly type: "custom";
       readonly address?: Hex;
-      readonly canSponsor?: undefined;
       readonly paymasterClient: BundlerClientConfig["paymaster"];
     };
 
@@ -26,16 +24,6 @@ export function getPaymaster(
       type: "custom",
       paymasterClient: paymasterOverride,
     };
-  }
-
-  if ("quarryPaymaster" in contracts && contracts.quarryPaymaster != null) {
-    if ("address" in contracts.quarryPaymaster) {
-      return {
-        type: "quarry",
-        address: contracts.quarryPaymaster.address,
-        canSponsor: !!chain.rpcUrls.quarrySponsor?.http?.[0],
-      };
-    }
   }
 
   if ("paymaster" in contracts && contracts.paymaster != null) {
