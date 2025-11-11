@@ -35,11 +35,8 @@
     "build:js": "tsup",
     "clean": "pnpm run clean:js",
     "clean:js": "shx rm -rf dist",
-    "data:relay-chains": "tsx src/scripts/get-relay-chains.ts",
     "deploy": "tsx src/bin/deploy.ts",
     "dev": "tsup --watch",
-    "playground": "mprocs",
-    "playground:setup": "mprocs --config mprocs.setup.yaml",
     "test": "tsc --noEmit && vitest",
     "test:ci": "tsc --noEmit && vitest --run"
   },
@@ -76,7 +73,6 @@
     "autoprefixer": "^10.4.20",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-react-hooks": "4.6.0",
-    "mprocs": "^0.7.3",
     "postcss": "^8.4.47",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -86,9 +82,6 @@
     "tsx": "^4.0.0",
     "typescript": "^5.9.3",
     "viem": "2.38.6",
-    "vite": "^5.4.1",
-    "vite-plugin-dts": "^4.2.4",
-    "vite-plugin-externalize-deps": "^0.8.0",
     "wagmi": "2.19.2"
   },
   "peerDependencies": {
