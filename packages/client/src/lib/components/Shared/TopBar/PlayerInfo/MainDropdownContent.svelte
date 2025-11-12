@@ -9,6 +9,8 @@
   import { shortenAddress } from "$lib/modules/utils"
   import { SmallButton } from "$lib/components/Shared"
   import { disconnectWallet } from "$lib/modules/entry-kit/connector"
+  import { UIState } from "$lib/modules/ui/state.svelte"
+  import { UI } from "$lib/modules/ui/enums"
 </script>
 
 <div class="main-dropdown-content">
@@ -45,7 +47,10 @@
   <SmallButton
     tippyText="Disconnect wallet"
     onclick={async () => {
+      console.log("[MainDropdownContent] Disconnect button clicked")
       await disconnectWallet()
+      console.log("[MainDropdownContent] Disconnect complete, returning to spawn")
+      UIState.set(UI.SPAWNING)
     }}
     text="Disconnect wallet"
   ></SmallButton>

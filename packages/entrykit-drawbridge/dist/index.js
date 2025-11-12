@@ -13,6 +13,7 @@ import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.j
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
+import { createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectorClient, getConnectors, connect, disconnect } from '@wagmi/core';
 
 // src/session/getSessionSigner.ts
 
@@ -380,11 +381,11 @@ async function setupSession({
     console.log("got user op receipt", receipt);
   }
 }
-
-// src/EntryKit.ts
 var EntryKit = class {
   constructor(config) {
     this.listeners = /* @__PURE__ */ new Set();
+    this.accountWatcherCleanup = null;
+    this.isConnecting = false;
     this.config = config;
     this.state = {
       sessionClient: null,
@@ -392,6 +393,41 @@ var EntryKit = class {
       sessionAddress: null,
       isReady: false
     };
+    this.wagmiConfig = createConfig({
+      chains: config.chains,
+      transports: config.transports,
+      connectors: config.connectors,
+      pollingInterval: config.pollingInterval,
+      storage: createStorage({
+        storage: typeof window !== "undefined" ? window.localStorage : void 0
+      })
+    });
+  }
+  /**
+   * Initialize EntryKit (await reconnection and setup account watcher)
+   *
+   * This should be called once after construction and awaited.
+   * It will attempt to reconnect to a previously connected wallet.
+   */
+  async initialize() {
+    console.log("[EntryKit] Initializing...");
+    let reconnected = false;
+    try {
+      await reconnect(this.wagmiConfig);
+      reconnected = true;
+      console.log("[EntryKit] Reconnection successful");
+    } catch (error) {
+      console.log("[EntryKit] No previous connection to restore");
+    }
+    this.setupAccountWatcher();
+    if (reconnected) {
+      const account = getAccount(this.wagmiConfig);
+      if (account.isConnected && account.address) {
+        console.log("[EntryKit] Processing reconnected wallet:", account.address);
+        await this.handleWalletConnection();
+      }
+    }
+    console.log("[EntryKit] Initialization complete");
   }
   // ===== Reactive State Management =====
   /**
@@ -435,29 +471,65 @@ var EntryKit = class {
   notify() {
     this.listeners.forEach((listener) => listener(this.state));
   }
-  // ===== Core API =====
   /**
-   * Connect with user's wallet and create session account
-   *
-   * This will:
-   * 1. Generate or retrieve session keypair from localStorage
-   * 2. Create a SimpleAccount smart account with session keypair as owner
-   * 3. Create a SessionClient with MUD World extensions
-   * 4. Check if delegation already exists
-   *
-   * After this, check `isReady` to see if delegation needs to be set up.
-   *
-   * @param userClient User's wallet client (from wagmi/viem)
-   * @throws If wallet client is missing account or chain
+   * Setup wagmi account watcher to handle connection/disconnection
+   * Called automatically by initialize()
    */
-  async connect(userClient) {
-    if (!userClient.account) {
-      throw new Error("Wallet client must have an account.");
+  setupAccountWatcher() {
+    const unwatch = watchAccount(this.wagmiConfig, {
+      onChange: async (account) => {
+        console.log("[EntryKit] Account change:", {
+          isConnected: account.isConnected,
+          address: account.address
+        });
+        if (!account.isConnected) {
+          console.log("[EntryKit] Wallet disconnected");
+          this.updateState({
+            sessionClient: null,
+            userAddress: null,
+            sessionAddress: null,
+            isReady: false
+          });
+          this.isConnecting = false;
+          return;
+        }
+        if (this.isConnecting) {
+          console.log("[EntryKit] Already processing connection");
+          return;
+        }
+        if (!account.connector || !account.address) {
+          return;
+        }
+        try {
+          this.isConnecting = true;
+          await this.handleWalletConnection();
+        } catch (error) {
+          console.error("[EntryKit] Connection handler failed:", error);
+        } finally {
+          this.isConnecting = false;
+        }
+      }
+    });
+    this.accountWatcherCleanup = unwatch;
+  }
+  /**
+   * Internal handler for wallet connection
+   * Called when wagmi detects a connected account
+   */
+  async handleWalletConnection() {
+    let userClient;
+    try {
+      userClient = await getConnectorClient(this.wagmiConfig);
+    } catch (error) {
+      console.log("[EntryKit] Could not get connector client");
+      return;
     }
-    if (!userClient.chain) {
-      throw new Error("Wallet client must have a chain.");
+    if (!userClient.account || !userClient.chain) {
+      console.log("[EntryKit] Wallet client missing account or chain");
+      return;
     }
     const userAddress = userClient.account.address;
+    console.log("[EntryKit] Connecting session for address:", userAddress);
     const signer = getSessionSigner(userAddress);
     const { account } = await getSessionAccount({
       client: userClient,
@@ -470,12 +542,83 @@ var EntryKit = class {
       worldAddress: this.config.worldAddress,
       paymasterOverride: this.config.paymasterClient
     });
-    this.updateState({
-      sessionClient,
+    const hasDelegation = await checkDelegation({
+      client: sessionClient,
+      worldAddress: this.config.worldAddress,
       userAddress,
       sessionAddress: account.address
     });
-    await this.checkPrerequisites();
+    this.updateState({
+      sessionClient,
+      userAddress,
+      sessionAddress: account.address,
+      isReady: hasDelegation
+    });
+    console.log("[EntryKit] Session connection complete, isReady:", hasDelegation);
+  }
+  // ===== Public API =====
+  /**
+   * Get available wallet connectors for UI display
+   *
+   * @returns Array of connector info (id, name, type)
+   */
+  getAvailableConnectors() {
+    const connectors = getConnectors(this.wagmiConfig);
+    return connectors.map((c) => ({
+      id: c.id,
+      name: c.name,
+      type: c.type
+    }));
+  }
+  /**
+   * Connect to a wallet by connector ID
+   *
+   * This will:
+   * 1. Connect via wagmi
+   * 2. Account watcher will automatically handle EntryKit session creation
+   *
+   * @param connectorId Connector ID (from getAvailableConnectors())
+   * @throws If connector not found or connection fails
+   */
+  async connectWallet(connectorId) {
+    const connectors = getConnectors(this.wagmiConfig);
+    const connector = connectors.find((c) => c.id === connectorId);
+    if (!connector) {
+      throw new Error(`Connector not found: ${connectorId}`);
+    }
+    console.log("[EntryKit] Connecting to wallet:", connectorId);
+    try {
+      await connect(this.wagmiConfig, {
+        connector,
+        chainId: this.config.chainId
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === "ConnectorAlreadyConnectedError") {
+        console.log("[EntryKit] Already connected");
+        return;
+      }
+      throw error;
+    }
+  }
+  /**
+   * Disconnect wallet and clear session
+   *
+   * This will:
+   * 1. Disconnect via wagmi
+   * 2. Account watcher will automatically clear EntryKit state
+   */
+  async disconnectWallet() {
+    console.log("[EntryKit] disconnectWallet() called");
+    console.log("[EntryKit] Current state:", this.state);
+    console.log("[EntryKit] Calling wagmi disconnect()...");
+    try {
+      await disconnect(this.wagmiConfig);
+      console.log("[EntryKit] wagmi disconnect() returned");
+    } catch (error) {
+      console.error("[EntryKit] wagmi disconnect() threw error:", error);
+      throw error;
+    }
+    console.log("[EntryKit] Disconnect complete");
   }
   /**
    * Check if session is ready to use
@@ -502,18 +645,20 @@ var EntryKit = class {
    * Setup session by registering delegation and deploying account
    *
    * This will:
-   * 1. Register delegation in MUD World contract (user delegates to session)
-   * 2. Deploy session smart account if not already deployed
+   * 1. Get current wallet client from wagmi
+   * 2. Register delegation in MUD World contract (user delegates to session)
+   * 3. Deploy session smart account if not already deployed
    *
    * User will need to sign a transaction (EOA) or user operation (smart account).
    *
-   * @param userClient User's wallet client for signing the delegation
-   * @throws If not connected (call connect() first)
+   * @throws If not connected (call connectWallet() first)
    */
-  async setupSession(userClient) {
+  async setupSession() {
     if (!this.state.sessionClient) {
-      throw new Error("Not connected. Call connect() first.");
+      throw new Error("Not connected. Call connectWallet() first.");
     }
+    console.log("[EntryKit] Setting up session (registering delegation)...");
+    const userClient = await getConnectorClient(this.wagmiConfig);
     await setupSession({
       client: userClient,
       userClient,
@@ -521,14 +666,23 @@ var EntryKit = class {
       worldAddress: this.config.worldAddress
     });
     this.updateState({ isReady: true });
+    console.log("[EntryKit] Session setup complete");
   }
   /**
-   * Disconnect and clear session state
+   * Cleanup and destroy EntryKit instance
    *
-   * Note: This does NOT clear stored session keys.
-   * Use clearStorage() to permanently remove session keys.
+   * This will:
+   * 1. Unwatch account changes
+   * 2. Clear session state (but NOT localStorage keys)
+   *
+   * Call this when unmounting your app.
    */
-  disconnect() {
+  destroy() {
+    console.log("[EntryKit] Destroying instance");
+    if (this.accountWatcherCleanup) {
+      this.accountWatcherCleanup();
+      this.accountWatcherCleanup = null;
+    }
     this.updateState({
       sessionClient: null,
       userAddress: null,
@@ -563,6 +717,10 @@ var EntryKit = class {
   /** Check if session is ready (has delegation) */
   get isReady() {
     return this.state.isReady;
+  }
+  /** Get wagmi config (for advanced use cases like transactions) */
+  getWagmiConfig() {
+    return this.wagmiConfig;
   }
 };
 

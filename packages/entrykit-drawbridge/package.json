@@ -32,8 +32,10 @@
     "@latticexyz/store": "2.2.23",
     "@latticexyz/world": "2.2.23",
     "@latticexyz/world-module-callwithsignature": "2.2.23",
+    "@wagmi/core": "2.22.1",
     "debug": "^4.3.4",
-    "permissionless": "0.2.30"
+    "permissionless": "0.2.30",
+    "wagmi": "2.19.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",

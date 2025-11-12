@@ -1,15 +1,13 @@
 import { EntryKit } from "entrykit-drawbridge"
-import { readable, derived, writable } from "svelte/store"
+import { readable, derived } from "svelte/store"
 import { paymasters } from "./paymasters"
-import { wagmiConfig as createWagmiConfig } from "./wagmiConfig"
-import { reconnect, getConnectorClient } from "@wagmi/core"
-import { get } from "svelte/store"
+import { chains, transports, getConnectors } from "./wagmiConfig"
 import type { Hex, Address } from "viem"
-import type { Config } from "wagmi"
 import type { NetworkConfig } from "$lib/mud/utils"
 
-// Temporary type for EntryKit state
-// TODO: fix type exports from entrykit-drawbridge
+// Re-export types from package
+export type { ConnectorInfo } from "entrykit-drawbridge"
+
 type EntryKitState = {
   sessionClient: SessionClientLike | null
   userAddress: Address | null
@@ -23,37 +21,55 @@ type SessionClientLike = {
   }
 }
 
-// EntryKit instance (created lazily when network config is available)
+// EntryKit instance (singleton)
 let entrykitInstance: InstanceType<typeof EntryKit> | null = null
 
-// Initialize EntryKit with network config
-export function initializeEntryKit(networkConfig: NetworkConfig) {
+/**
+ * Initialize EntryKit - BLOCKING operation
+ * Must be called once on app startup and awaited
+ *
+ * This will:
+ * 1. Create EntryKit instance with wagmi config
+ * 2. Initialize EntryKit (await reconnection, setup watchers)
+ * 3. Return ready-to-use instance
+ */
+export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<void> {
   if (entrykitInstance) {
-    // Already initialized
-    return entrykitInstance
+    console.log("[EntryKit] Already initialized")
+    return
   }
 
-  console.log("[EntryKit] Initializing with network:", networkConfig.chainId)
+  console.log("[EntryKit] Creating instance with network:", networkConfig.chainId)
 
+  // Get chain-specific config
+  const chain = chains.find(c => c.id === networkConfig.chainId)
+  if (!chain) {
+    throw new Error(`Unsupported chain ID: ${networkConfig.chainId}`)
+  }
+
+  // Get connectors for this environment
+  const connectors = getConnectors(networkConfig.chainId)
+
+  // Create EntryKit instance with wagmi config embedded
   entrykitInstance = new EntryKit({
     chainId: networkConfig.chainId,
+    chains: [chain] as const,
+    transports,
+    connectors,
     worldAddress: networkConfig.worldAddress as Hex,
-    paymasterClient: paymasters[networkConfig.chainId]
+    paymasterClient: paymasters[networkConfig.chainId],
+    pollingInterval: networkConfig.chainId === 84532 ? 2000 : undefined // Base Sepolia = fast polling
   })
 
-  // Update wagmi config
-  const config = createWagmiConfig(networkConfig.chainId)
-  wagmiConfig.set(config)
+  // Initialize (await reconnection, setup account watcher)
+  await entrykitInstance.initialize()
 
-  // Reconnect to previously connected wallet if available
-  reconnect(config).catch(error => {
-    console.log("[EntryKit] No previous connection to restore:", error.message)
-  })
-
-  return entrykitInstance
+  console.log("[EntryKit] Instance ready")
 }
 
-// Get EntryKit instance (throws if not initialized)
+/**
+ * Get EntryKit instance (throws if not initialized)
+ */
 export function getEntryKit(): InstanceType<typeof EntryKit> {
   if (!entrykitInstance) {
     throw new Error("EntryKit not initialized. Call initializeEntryKit first.")
@@ -61,8 +77,17 @@ export function getEntryKit(): InstanceType<typeof EntryKit> {
   return entrykitInstance
 }
 
-// Create reactive Svelte stores
-// These will be empty until EntryKit is initialized
+/**
+ * Cleanup EntryKit (call on app unmount)
+ */
+export function cleanupEntryKit(): void {
+  if (entrykitInstance) {
+    entrykitInstance.destroy()
+    entrykitInstance = null
+  }
+}
+
+// ===== Reactive Stores =====
 
 export const entrykitState = readable<EntryKitState>(
   { sessionClient: null, userAddress: null, sessionAddress: null, isReady: false },
@@ -88,39 +113,6 @@ export const sessionClient = derived<typeof entrykitState, SessionClientLike | n
 export const userAddress = derived(entrykitState, $state => $state?.userAddress ?? null)
 export const sessionAddress = derived(entrykitState, $state => $state?.sessionAddress ?? null)
 export const isSessionReady = derived(entrykitState, $state => $state?.isReady ?? false)
-
-// Wagmi config (will be set when EntryKit initializes)
-export const wagmiConfig = writable<Config | null>(null)
-
-/**
- * Manually trigger session setup (delegation registration)
- * This should be called after wallet is connected but session is not ready
- */
-export async function setupEntryKitSession(): Promise<void> {
-  const entrykit = getEntryKit()
-  const config = get(wagmiConfig)
-
-  if (!config) {
-    throw new Error("Wagmi config not available")
-  }
-
-  // Get the current wallet client
-  const walletClient = await getConnectorClient(config)
-
-  console.log("[EntryKit] Setting up session (registering delegation)...")
-  await entrykit.setupSession(walletClient)
-
-  // Verify setup completed
-  console.log("[EntryKit] Verifying setup...")
-  const verified = await entrykit.checkPrerequisites()
-  console.log("[EntryKit] Setup verified:", verified)
-
-  if (!verified.isReady) {
-    throw new Error("Session setup failed - delegation not registered")
-  }
-
-  console.log("[EntryKit] Session setup complete!")
-}
 
 // Derived store to check if session setup is needed
 export const needsSessionSetup = derived(

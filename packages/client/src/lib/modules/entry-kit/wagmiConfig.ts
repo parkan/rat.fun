@@ -1,6 +1,6 @@
 import { Chain, http } from "viem"
-import { createConfig, createStorage, CreateConnectorFn } from "wagmi"
-import { coinbaseWallet, injected, safe, metaMask, walletConnect } from "wagmi/connectors"
+import { CreateConnectorFn } from "@wagmi/core"
+import { coinbaseWallet, injected, safe, walletConnect } from "wagmi/connectors"
 import {
   extendedBase,
   extendedBaseSepolia,
@@ -21,14 +21,12 @@ export const transports = {
   [extendedMudFoundry.id]: http()
 } as const
 
-export function wagmiConfig(chainId: number) {
+/**
+ * Get connectors based on chain and environment
+ */
+export function getConnectors(chainId: number): CreateConnectorFn[] {
   const appName = "RAT.FUN"
-  const chain = chains.find(chain => chain.id === chainId) as (typeof chains)[number]
-
-  // Build connectors list
   const connectors: CreateConnectorFn[] = []
-
-  console.log("hasExtensionSupport()", hasExtensionSupport())
 
   // Always include injected connector - it auto-detects all browser extension wallets
   // (MetaMask, Rainbow, Brave Wallet, etc.)
@@ -55,15 +53,5 @@ export function wagmiConfig(chainId: number) {
     )
   }
 
-  console.log("connectors", connectors)
-
-  return createConfig({
-    chains: [chain],
-    transports,
-    connectors,
-    pollingInterval: extendedBaseSepolia.id === chainId ? 2000 : undefined,
-    storage: createStorage({
-      storage: typeof window !== "undefined" ? window.localStorage : undefined
-    })
-  })
+  return connectors
 }

@@ -2,9 +2,7 @@
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { wagmiConfig } from "$lib/modules/entry-kit"
-  import { connect, getConnectors } from "@wagmi/core"
-  import { get } from "svelte/store"
+  import { getEntryKit, type ConnectorInfo } from "$lib/modules/entry-kit"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
 
   const { walletType, onComplete = () => {} } = $props<{
@@ -15,7 +13,7 @@
   let buttonElement: HTMLDivElement | null = $state(null)
   let showWalletSelect = $state(false)
   let connecting = $state(false)
-  let availableConnectors = $state<Array<{ id: string; name: string }>>([])
+  let availableConnectors = $state<ConnectorInfo[]>([])
 
   const timeline = gsap.timeline()
 
@@ -26,7 +24,7 @@
    * Get the sort priority for a connector based on preferred order
    * Returns index in preferred list, or high number if not in list
    */
-  function getWalletPriority(connector: { id: string; name: string }): number {
+  function getWalletPriority(connector: ConnectorInfo): number {
     const searchTerm = `${connector.id} ${connector.name}`.toLowerCase()
 
     for (let i = 0; i < PREFERRED_WALLET_ORDER.length; i++) {
@@ -40,51 +38,36 @@
   }
 
   async function connectWallet(connectorId: string) {
-    console.log("connectWallet", connectorId)
-    const config = get(wagmiConfig)
-    if (!config) return
+    console.log("[ConnectWalletForm] Connecting to:", connectorId)
 
     try {
       connecting = true
 
-      // Find the connector by ID
-      const connectors = getConnectors(config)
-      const connector = connectors.find(c => c.id === connectorId)
+      const entrykit = getEntryKit()
+      await entrykit.connectWallet(connectorId)
 
-      if (!connector) {
-        console.error("Connector not found:", connectorId)
-        return
-      }
-
-      // Connect wallet via wagmi
-      await connect(config, { connector, chainId: config.chains[0].id })
-
-      // Wagmi account watcher in EntryKit.svelte will handle the rest
+      // Account watcher in EntryKit will handle session creation
       // Close modal and complete this step
       showWalletSelect = false
       onComplete()
     } catch (error) {
-      console.error("Connection failed:", error)
+      console.error("[ConnectWalletForm] Connection failed:", error)
     } finally {
       connecting = false
     }
   }
 
   function openWalletSelect() {
-    // Get available connectors when opening the modal
-    const config = get(wagmiConfig)
-    if (config) {
-      const connectors = getConnectors(config)
-      // Filter out the generic "Injected" connector - only show specific wallets
-      availableConnectors = connectors
-        .filter(c => c.id !== "injected" && c.name !== "Injected")
-        .map(c => ({
-          id: c.id,
-          name: c.name
-        }))
-        .sort((a, b) => getWalletPriority(a) - getWalletPriority(b))
-      console.log("Available connectors:", availableConnectors)
-    }
+    // Get available connectors from EntryKit
+    const entrykit = getEntryKit()
+    const connectors = entrykit.getAvailableConnectors()
+
+    // Filter out the generic "Injected" connector - only show specific wallets
+    availableConnectors = connectors
+      .filter(c => c.id !== "injected" && c.name !== "Injected")
+      .sort((a, b) => getWalletPriority(a) - getWalletPriority(b))
+
+    console.log("[ConnectWalletForm] Available connectors:", availableConnectors)
     showWalletSelect = true
   }
 

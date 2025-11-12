@@ -59,9 +59,12 @@
   }
 
   const onWalletConnectionComplete = () => {
+    // For burner wallet, go straight to spawn form
     if (walletType === WALLET_TYPE.BURNER) {
       currentState = SPAWN_STATE.SPAWN_FORM
     }
+    // For EntryKit, the effect will handle transition once state settles
+    // Don't transition yet - wait for delegation check to complete
   }
 
   // Listen to changes in entrykit session
@@ -77,25 +80,25 @@
       currentState
     })
 
-    // If session is not ready, transition to SESSION_SETUP (unless already there)
-    if (!$isSessionReady) {
-      if (currentState !== SPAWN_STATE.SESSION_SETUP) {
-        console.log("[Spawn] Session not ready, transitioning to SESSION_SETUP")
-        currentState = SPAWN_STATE.SESSION_SETUP
+    // If session is ready - setup wallet and check if spawned
+    if ($isSessionReady) {
+      const wallet = setupWalletNetwork($publicNetwork, $entryKitSession)
+      const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
+
+      if (isSpawned) {
+        console.log("[Spawn] Already spawned, completing spawn flow")
+        spawned()
+      } else {
+        console.log("[Spawn] Session ready but not spawned, transitioning to SPAWN_FORM")
+        currentState = SPAWN_STATE.SPAWN_FORM
       }
       return
     }
 
-    // Session is ready - setup wallet and check if spawned
-    const wallet = setupWalletNetwork($publicNetwork, $entryKitSession)
-    const isSpawned = initWalletNetwork(wallet, $entryKitSession.userAddress, walletType)
-
-    if (isSpawned) {
-      console.log("[Spawn] Already spawned, completing spawn flow")
-      spawned()
-    } else {
-      console.log("[Spawn] Session ready but not spawned, transitioning to SPAWN_FORM")
-      currentState = SPAWN_STATE.SPAWN_FORM
+    // Session is not ready - transition to SESSION_SETUP (unless already there)
+    if (currentState !== SPAWN_STATE.SESSION_SETUP) {
+      console.log("[Spawn] Session not ready, transitioning to SESSION_SETUP")
+      currentState = SPAWN_STATE.SESSION_SETUP
     }
   })
 

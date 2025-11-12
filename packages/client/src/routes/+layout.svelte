@@ -12,21 +12,24 @@
   import { browser } from "$app/environment"
   import { goto } from "$app/navigation"
   import { onMount, onDestroy } from "svelte"
+  import { page } from "$app/state"
   import { initStaticContent } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
+  import { WALLET_TYPE } from "$lib/mud/enums"
   import { errorHandler } from "$lib/modules/error-handling"
   import {
     environment as environmentStore,
     walletType as walletTypeStore
   } from "$lib/modules/network"
+  import { initializeEntryKit, cleanupEntryKit } from "$lib/modules/entry-kit"
+  import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import EntryKit from "$lib/components/Spawn/EntryKit/EntryKit.svelte"
   import { ShaderGlobal, Lightbox, Toasts } from "$lib/components/Shared"
 
   let { children }: LayoutProps = $props()
@@ -34,6 +37,14 @@
   // Called when loading is complete
   const loaded = async () => {
     try {
+      // Ensure EntryKit is initialized before proceeding to spawn
+      if ($walletTypeStore === WALLET_TYPE.ENTRYKIT) {
+        console.log("[+layout] Ensuring EntryKit is initialized before spawning...")
+        const networkConfig = getNetworkConfig($environmentStore, page.url)
+        await initializeEntryKit(networkConfig)
+        console.log("[+layout] EntryKit ready")
+      }
+
       // Get content from CMS
       // We do not wait, for faster loading time...
       initStaticContent($publicNetwork.worldAddress)
@@ -42,7 +53,7 @@
       // Signal readiness to base (farcaster) mini app framework
       sdk.actions.ready()
     } catch (error) {
-      errorHandler(error) // CMS error
+      errorHandler(error)
       goto("/")
     }
   }
@@ -65,6 +76,11 @@
   })
 
   onDestroy(() => {
+    // Clean up EntryKit if it was initialized
+    if ($walletTypeStore === WALLET_TYPE.ENTRYKIT) {
+      cleanupEntryKit()
+    }
+
     // Clean up global shader manager when the app unmounts
     shaderManager.destroy()
   })
@@ -88,7 +104,6 @@
   {/if}
 </div>
 
-<EntryKit />
 <Toasts />
 
 {#if lightboxState.isOpen}

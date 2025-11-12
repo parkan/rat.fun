@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { setupEntryKitSession } from "$lib/modules/entry-kit"
+  import { getEntryKit } from "$lib/modules/entry-kit"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
 
   const { onComplete = () => {} } = $props<{
@@ -19,7 +19,10 @@
       settingUp = true
       error = null
       console.log("[SessionSetup] Starting session setup...")
-      await setupEntryKitSession()
+
+      const entrykit = getEntryKit()
+      await entrykit.setupSession()
+
       console.log("[SessionSetup] Session setup complete!")
       onComplete()
     } catch (err) {
@@ -50,9 +53,7 @@
   <div class="inner-container">
     <div class="text-container">
       <h2>Session Setup</h2>
-      <p>
-        Create a secure session to interact with the game without signing every transaction.
-      </p>
+      <p>Create a secure session to interact with the game without signing every transaction.</p>
       {#if error}
         <p class="error">{error}</p>
       {/if}
