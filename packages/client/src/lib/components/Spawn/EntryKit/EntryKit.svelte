@@ -59,12 +59,18 @@
       if (account.isConnected && account.address && account.chainId) {
         isConnecting = true
 
+        // Check if connector is valid before trying to get client
+        if (!account.connector) {
+          console.log("No connector available, skipping connection")
+          isConnecting = false
+          return
+        }
+
         let walletClient
         try {
           walletClient = await getConnectorClient(config)
         } catch (error) {
-          // Connector might be disconnecting, ignore
-          console.log("Could not get connector client (possibly disconnecting):", error)
+          // Connector might be disconnecting or in invalid state - silently ignore
           isConnecting = false
           return
         }
