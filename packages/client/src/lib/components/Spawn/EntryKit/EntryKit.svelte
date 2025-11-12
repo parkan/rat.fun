@@ -96,26 +96,16 @@
           await entrykit.connect(walletClient)
           console.log("EntryKit connected successfully")
 
-          // Check if setup needed
+          // Check if setup needed (but don't automatically set up)
           console.log("Checking prerequisites...")
           const prereqs = await entrykit.checkPrerequisites()
           console.log("Prerequisites:", prereqs)
 
           if (!prereqs.isReady) {
-            console.log("Setting up session (registering delegation)...")
-            await entrykit.setupSession(walletClient)
-
-            // Verify setup completed
-            console.log("Verifying setup...")
-            const verified = await entrykit.checkPrerequisites()
-            console.log("Setup verified:", verified)
-
-            if (!verified.isReady) {
-              throw new Error("Session setup failed - delegation not registered")
-            }
+            console.log("Session setup required - waiting for user action")
+          } else {
+            console.log("EntryKit ready!")
           }
-
-          console.log("EntryKit ready!")
         } catch (error) {
           console.error("EntryKit connection/setup failed:", error)
           throw error

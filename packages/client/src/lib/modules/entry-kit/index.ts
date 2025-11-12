@@ -2,7 +2,8 @@ import { EntryKit } from "entrykit-drawbridge"
 import { readable, derived, writable } from "svelte/store"
 import { paymasters } from "./paymasters"
 import { wagmiConfig as createWagmiConfig } from "./wagmiConfig"
-import { reconnect } from "@wagmi/core"
+import { reconnect, getConnectorClient } from "@wagmi/core"
+import { get } from "svelte/store"
 import type { Hex, Address } from "viem"
 import type { Config } from "wagmi"
 import type { NetworkConfig } from "$lib/mud/utils"
@@ -90,3 +91,39 @@ export const isSessionReady = derived(entrykitState, $state => $state?.isReady ?
 
 // Wagmi config (will be set when EntryKit initializes)
 export const wagmiConfig = writable<Config | null>(null)
+
+/**
+ * Manually trigger session setup (delegation registration)
+ * This should be called after wallet is connected but session is not ready
+ */
+export async function setupEntryKitSession(): Promise<void> {
+  const entrykit = getEntryKit()
+  const config = get(wagmiConfig)
+
+  if (!config) {
+    throw new Error("Wagmi config not available")
+  }
+
+  // Get the current wallet client
+  const walletClient = await getConnectorClient(config)
+
+  console.log("[EntryKit] Setting up session (registering delegation)...")
+  await entrykit.setupSession(walletClient)
+
+  // Verify setup completed
+  console.log("[EntryKit] Verifying setup...")
+  const verified = await entrykit.checkPrerequisites()
+  console.log("[EntryKit] Setup verified:", verified)
+
+  if (!verified.isReady) {
+    throw new Error("Session setup failed - delegation not registered")
+  }
+
+  console.log("[EntryKit] Session setup complete!")
+}
+
+// Derived store to check if session setup is needed
+export const needsSessionSetup = derived(
+  entrykitState,
+  $state => $state.sessionClient !== null && !$state.isReady
+)

@@ -2,7 +2,7 @@
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { sessionClient, isSessionReady, wagmiConfig } from "$lib/modules/entry-kit"
+  import { wagmiConfig } from "$lib/modules/entry-kit"
   import { connect, getConnectors } from "@wagmi/core"
   import { get } from "svelte/store"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
@@ -15,7 +15,6 @@
   let buttonElement: HTMLDivElement | null = $state(null)
   let showWalletSelect = $state(false)
   let connecting = $state(false)
-  let settingUp = $state(false)
   let availableConnectors = $state<Array<{ id: string; name: string }>>([])
 
   const timeline = gsap.timeline()
@@ -40,15 +39,6 @@
     return 9999
   }
 
-  // Watch for session to become ready
-  $effect(() => {
-    if ($sessionClient && $isSessionReady) {
-      // Session is ready, complete the flow
-      showWalletSelect = false
-      onComplete()
-    }
-  })
-
   async function connectWallet(connectorId: string) {
     console.log("connectWallet", connectorId)
     const config = get(wagmiConfig)
@@ -70,7 +60,9 @@
       await connect(config, { connector, chainId: config.chains[0].id })
 
       // Wagmi account watcher in EntryKit.svelte will handle the rest
+      // Close modal and complete this step
       showWalletSelect = false
+      onComplete()
     } catch (error) {
       console.error("Connection failed:", error)
     } finally {
@@ -118,12 +110,8 @@
   <div class="inner-container">
     {#if walletType === WALLET_TYPE.ENTRYKIT}
       <div class="button-container" bind:this={buttonElement}>
-        {#if connecting || settingUp}
-          <BigButton
-            text={connecting ? "Connecting..." : "Setting up..."}
-            disabled={true}
-            onclick={() => {}}
-          />
+        {#if connecting}
+          <BigButton text="Connecting..." disabled={true} onclick={() => {}} />
         {:else}
           <BigButton text="Connect wallet" onclick={openWalletSelect} />
         {/if}
