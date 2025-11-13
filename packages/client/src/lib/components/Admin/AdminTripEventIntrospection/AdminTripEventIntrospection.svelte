@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
   import RatTripLog from "./RatTripLog.svelte"
+  import { strings } from "$lib/modules/strings"
   let { event }: { event: TripEvent } = $props()
 </script>
 

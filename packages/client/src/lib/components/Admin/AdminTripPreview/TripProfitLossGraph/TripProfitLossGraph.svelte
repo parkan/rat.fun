@@ -10,6 +10,7 @@
   import { line } from "d3-shape"
   import { calculateProfitLossForTrip } from "../../helpers"
   import { focusEvent } from "$lib/modules/ui/state.svelte"
+  import { strings } from "$lib/modules/strings"
 
   let {
     trip,

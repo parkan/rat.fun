@@ -1,14 +1,22 @@
 import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
+const scramble = string => {
+  const end = Math.floor(Math.random() * string.length)
+  return `${string.slice(end, -1)}${string.slice(0, end)}`
+}
+
 const stringsData = {
   "en-US": {
     address: "Address",
-    admin: "Cashboard",
+    admin: "R&D Lab",
+    adminInstruction: (price: number) => `Unlock our latest rat-a-licious feature
+    \nfor ${price}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
+t he mentally deranged. Results may vary.`,
     action: "Action",
     all: "All",
     activeProfit: "Active profit",
     adminUnlocked: "Admin unlocked",
-    adminUnlockedMessage: "You unlocked the cashboard",
+    adminUnlockedMessage: "You unlocked the Research and Development Lab",
     ago: "ago",
     alive: "Alive",
     active: "Active",
@@ -18,6 +26,8 @@ const stringsData = {
     approveAllowanceInstruction: "Allow the contract to spend on your behalf",
     approvingAllowance: "Approving allowance",
     authorFullTitle: "Moving Castles GmbH",
+    totalValue: "Total value",
+    totalValueExplanation: "The total value of your rat is a sum of your health and psycho-objects",
     back: "Back",
     balance: "Balance",
     blockNumber: "BlockNumber",
@@ -30,7 +40,7 @@ const stringsData = {
     causeOfDeathShort: "CoD",
     confirm: "Confirm",
     confirmLiquidationMessage: (name: string): string =>
-      `Are you sure you want to liquidate ${name}?`,
+      `Are you sure you want to cash out? ${name} will be terminated in the process.`,
     comeDown: "COME DOWN",
     connectBurner: "Connect Burner",
     connectWallet: "Connect wallet",
@@ -39,7 +49,7 @@ const stringsData = {
       `Are you sure you want to liquidate trip #${index}?`,
     cost: "Cost:",
     createdTrip: "created trip",
-    creatingTripIn: "Creating trip in:",
+    creatingTripIn: "Filing trip under:",
     creationBlock: "Create @",
     creationCost: "Creation Cost",
     createTrip: "Create Trip",
@@ -55,6 +65,7 @@ const stringsData = {
     dieInTrip: "die in trip",
     diedTripping: "died tripping #",
     disconnectWallet: "Disconnect wallet",
+    egoDeathExplanation: `!!! ATTENTION OPERATOR !!!\ntrips are untested substances and\nmight cause extreme death to your rat!`,
     empty: "Empty",
     enjoySkillfully: "ENJOY SKILLFULLY",
     events: "Events",
@@ -84,16 +95,16 @@ const stringsData = {
     liquidated: "liquidated",
     liquidatingTrip: "Liquidating trip",
     log: "Log",
-    liquidateRatButtonText: "Liquidate Rat",
-    liquidateRatInstruction: "Liquidate rat to get the value added to your wallet",
+    liquidateRatButtonText: "Cash out",
+    liquidateRatInstruction: "Cash out the total value of your rat, for a small fee",
     liquidationBlockShort: "Liq. @",
     liquidationValueShort: "Liq. Val.",
     loadingMsg: "LoadingMsg",
     loadingPercentage: "Loading%",
     locked: "locked",
-    masterKey: "Cashboard unlocked",
+    masterKey: "R&D Lab unlocked",
     maxReward: "Max reward",
-    maxValuePerWin: "Max value per win",
+    maxValuePerWin: "Max payout per trip",
     maxValuePerWinLabel: "MAX VALUE PER WIN",
     messageCannotBeEmpty: "Message cannot be empty",
     minRatValueToEnter: "Min rat value to enter",
@@ -120,6 +131,10 @@ const stringsData = {
     pastTrips: "Past trips",
     profit: "Profit",
     portfolio: "Portfolio",
+    psychoObjectExplanation: () =>
+      scramble(
+        `psycho objects are materializations of mental items acquired tripping. Nobody really knows how they work, but they are 1000% real, definitely NOT hallucinations`
+      ),
     rat: "Rat",
     ratAmountKilled: "Rats killed",
     ratBeingRevived:
@@ -128,7 +143,7 @@ const stringsData = {
     ratHallucinatoryState: "RAT STILL IN HALLUCINATORY STATE.\nPLEASE STAND BY...",
     ratId: "RAT ID:",
     rats: "Rats",
-    ratValue: "Rat value",
+    ratValue: (name: string) => name + "'s total value",
     readyQuestion: "Ready?",
     requestTokens: "Request tokens from the contract",
     revokeApproval: "Revoke approval",
@@ -140,7 +155,7 @@ const stringsData = {
     riskProfile: "Risk profile:",
     riskUnclear: "UNCLEAR",
     selectCategoryPrompt: "Please select a category for your trip",
-    selectFolder: "Select Folder",
+    selectFolder: "Select trip category",
     send: "Send",
     sendRatToTrip: "Send rat to trip",
     sent: "sent",
@@ -166,10 +181,11 @@ const stringsData = {
     topMarqueeText: "RAT.FUN IS A GAME OF SKILL.",
     transactionInProgress: "Transaction in progress...",
     traumwertSteuer: "TraumwertSteuer",
+    traumwertSteuerExplanation: (percentage: number): string => `${percentage}% corporate tax`,
     trip: "Trip",
     tripBalance: "Trip balance",
-    tripCreationCostLabel: "TRIP CREATION COST",
-    tripDescription: "Trip Description",
+    tripCreationCostLabel: "Trip creation investment",
+    tripDescription: "Expected symptoms",
     tripGotDepleted: (index: number): string => `Trip #${index} got depleted`,
     tripLogs: "TRIP LOGS",
     tripPrompt: "TRIP PROMPT:",
@@ -178,7 +194,7 @@ const stringsData = {
     tripsLabel: "Trips:",
     tripSitters: "TRIP SITTERS",
     unlockAdmin: "Unlock Admin",
-    unlockAdminInstruction: "Unlock cashboard",
+    unlockAdminInstruction: "Unlock R&D Lab",
     unlockAdminMessage: "Unlock admin to start creating trips",
     unlockingAdmin: "Unlocking Admin",
     unlock: "Unlock",
