@@ -43,7 +43,7 @@
     <div class="total-value">
       <!-- <div class="label">Total Value</div> -->
       <div class:glow={tweenedValue.current !== tweenedValue.target} class="value">
-        <Tooltip content={}
+        <!-- <Tooltip content={} -->
         <span>{CURRENCY_SYMBOL}{Math.floor(tweenedValue.current)}</span>
       </div>
     </div>
