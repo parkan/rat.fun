@@ -2,6 +2,7 @@
   import { fade } from "svelte/transition"
   import { playSound } from "$lib/modules/sound"
   import { strings } from "$lib/modules/strings"
+  import { Tooltip } from "$lib/components/Shared"
 
   let { index }: { index: number } = $props()
 
@@ -26,7 +27,11 @@
   tabindex="0"
   onmouseenter={onMouseEnter}
   onmouseleave={onMouseLeave}
-></div>
+>
+  <Tooltip content={strings.psychoObjectExplanation}>
+    <span></span>
+  </Tooltip>
+</div>
 
 <style lang="scss">
   .empty-slot {

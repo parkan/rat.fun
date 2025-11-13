@@ -6,6 +6,7 @@
   import { max } from "d3-array"
   import { line } from "d3-shape"
   import { Tooltip } from "$lib/components/Shared"
+  import { strings } from "$lib/modules/strings"
 
   let {
     smallIcons = false,

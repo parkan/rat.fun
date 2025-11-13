@@ -24,7 +24,7 @@
     </h1>
     <ValueBreakdown
       originalValue={Number($ratTotalValue)}
-      originalLabel={strings.ratValue}
+      originalLabel={strings.ratValue($rat?.name)}
       taxRateKey="taxationLiquidateRat"
     />
   </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { DangerButton } from "$lib/components/Shared"
+  import { DangerButton, Tooltip } from "$lib/components/Shared"
   import { rat } from "$lib/modules/state/stores"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { getRatTotalValue } from "$lib/modules/state/utils"
@@ -43,6 +43,7 @@
     <div class="total-value">
       <!-- <div class="label">Total Value</div> -->
       <div class:glow={tweenedValue.current !== tweenedValue.target} class="value">
+        <Tooltip content={}
         <span>{CURRENCY_SYMBOL}{Math.floor(tweenedValue.current)}</span>
       </div>
     </div>
