@@ -10,6 +10,7 @@ export type { EntryKitConfig, EntryKitState, PrerequisiteStatus, ConnectorInfo }
 // ===== Core Types =====
 
 export type { SessionClient, ConnectedClient } from "./core/types"
+export { EntryKitStatus } from "./core/types"
 export type { Address, Hex, Client } from "viem"
 
 // ===== Session Management (Advanced) =====

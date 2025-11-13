@@ -1,4 +1,9 @@
-import { EntryKit, type SessionClient } from "entrykit-drawbridge"
+import {
+  EntryKit,
+  EntryKitStatus,
+  type SessionClient,
+  type EntryKitState
+} from "entrykit-drawbridge"
 import { readable, derived } from "svelte/store"
 import { paymasters } from "./paymasters"
 import { chains, transports, getConnectors } from "./wagmiConfig"
@@ -7,13 +12,7 @@ import type { NetworkConfig } from "$lib/mud/utils"
 
 // Re-export types from package
 export type { ConnectorInfo, SessionClient } from "entrykit-drawbridge"
-
-type EntryKitState = {
-  sessionClient: SessionClient | null
-  userAddress: Address | null
-  sessionAddress: Address | null
-  isReady: boolean
-}
+export { EntryKitStatus } from "entrykit-drawbridge"
 
 // EntryKit instance (singleton)
 let entrykitInstance: InstanceType<typeof EntryKit> | null = null
@@ -94,7 +93,13 @@ export function cleanupEntryKit(): void {
 // ===== Reactive Stores =====
 
 export const entrykitState = readable<EntryKitState>(
-  { sessionClient: null, userAddress: null, sessionAddress: null, isReady: false },
+  {
+    status: EntryKitStatus.UNINITIALIZED,
+    sessionClient: null,
+    userAddress: null,
+    sessionAddress: null,
+    isReady: false
+  },
   set => {
     // Subscribe when EntryKit becomes available
     const interval = setInterval(() => {
@@ -110,6 +115,7 @@ export const entrykitState = readable<EntryKitState>(
 )
 
 // Convenience stores
+export const status = derived(entrykitState, $state => $state.status)
 export const sessionClient = derived<typeof entrykitState, SessionClient | null>(
   entrykitState,
   $state => $state?.sessionClient ?? null

@@ -15,11 +15,10 @@
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
-  import { sessionClient, isSessionReady } from "$lib/modules/entry-kit"
+  import { sessionClient, status, EntryKitStatus } from "$lib/modules/entry-kit"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
-  import { Marquee } from "$lib/components/Shared"
   import { strings } from "$lib/modules/strings"
 
   import Introduction from "$lib/components/Spawn/Introduction/Introduction.svelte"
@@ -27,6 +26,7 @@
   import SessionSetup from "$lib/components/Spawn/SessionSetup/SessionSetup.svelte"
   import SpawnForm from "$lib/components/Spawn/SpawnForm/SpawnForm.svelte"
   import HeroImage from "$lib/components/Spawn/HeroImage/HeroImage.svelte"
+  import { Marquee } from "$lib/components/Shared"
 
   const { walletType, spawned = () => {} } = $props<{
     walletType: WALLET_TYPE
@@ -67,38 +67,41 @@
     // Don't transition yet - wait for delegation check to complete
   }
 
-  // Listen to changes in entrykit session
+  // Listen to changes in entrykit status
   $effect(() => {
-    // Only proceed if we have a session client
-    if (!$sessionClient) return
+    // Only react to EntryKit status changes
+    if (walletType !== WALLET_TYPE.ENTRYKIT) return
 
-    // Check if we have the necessary client properties
-    if (!$sessionClient?.account?.client || !$sessionClient.userAddress) return
+    console.log("[Spawn] EntryKit status changed:", $status)
 
-    console.log("[Spawn] EntryKit session detected", {
-      isSessionReady: $isSessionReady,
-      currentState
-    })
+    switch ($status) {
+      case EntryKitStatus.CONNECTED:
+        // Wallet connected but needs session setup
+        if (currentState !== SPAWN_STATE.SESSION_SETUP) {
+          console.log("[Spawn] Status CONNECTED → transitioning to SESSION_SETUP")
+          currentState = SPAWN_STATE.SESSION_SETUP
+        }
+        break
 
-    // If session is ready - setup wallet and check if spawned
-    if ($isSessionReady) {
-      const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
-      const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
+      case EntryKitStatus.READY:
+        // Session is fully ready - check if already spawned
+        if (!$sessionClient) return
 
-      if (isSpawned) {
-        console.log("[Spawn] Already spawned, completing spawn flow")
-        spawned()
-      } else {
-        console.log("[Spawn] Session ready but not spawned, transitioning to SPAWN_FORM")
-        currentState = SPAWN_STATE.SPAWN_FORM
-      }
-      return
-    }
+        console.log("[Spawn] Status READY → checking spawn status")
+        const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
+        const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
 
-    // Session is not ready - transition to SESSION_SETUP (unless already there)
-    if (currentState !== SPAWN_STATE.SESSION_SETUP) {
-      console.log("[Spawn] Session not ready, transitioning to SESSION_SETUP")
-      currentState = SPAWN_STATE.SESSION_SETUP
+        if (isSpawned) {
+          console.log("[Spawn] Already spawned, completing spawn flow")
+          spawned()
+        } else {
+          console.log("[Spawn] Not spawned yet, transitioning to SPAWN_FORM")
+          currentState = SPAWN_STATE.SPAWN_FORM
+        }
+        break
+
+      // Other statuses (DISCONNECTED, CONNECTING, SETTING_UP_SESSION) don't require action
+      // The UI components handle showing appropriate screens
     }
   })
 

@@ -1,11 +1,11 @@
+import { resourceToHex, hexToResource } from '@latticexyz/common';
 import { parseAbi, isHex, http, toHex, parseErc6492Signature, encodeFunctionData, zeroAddress } from 'viem';
+import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { smartAccountActions } from 'permissionless';
 import { callFrom, sendUserOperationFrom } from '@latticexyz/world/internal';
 import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt } from 'viem/account-abstraction';
-import { resourceToHex, hexToResource } from '@latticexyz/common';
-import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { getRecord } from '@latticexyz/store/internal';
 import { signTypedData, writeContract, waitForTransactionReceipt } from 'viem/actions';
 import { getAction } from 'viem/utils';
@@ -15,7 +15,29 @@ import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config'
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
 import { createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectorClient, getConnectors, connect, disconnect } from '@wagmi/core';
 
-// src/session/getSessionSigner.ts
+// src/core/types.ts
+var EntryKitStatus = /* @__PURE__ */ ((EntryKitStatus2) => {
+  EntryKitStatus2["UNINITIALIZED"] = "uninitialized";
+  EntryKitStatus2["DISCONNECTED"] = "disconnected";
+  EntryKitStatus2["CONNECTING"] = "connecting";
+  EntryKitStatus2["CONNECTED"] = "connected";
+  EntryKitStatus2["SETTING_UP_SESSION"] = "setting_up_session";
+  EntryKitStatus2["READY"] = "ready";
+  EntryKitStatus2["ERROR"] = "error";
+  return EntryKitStatus2;
+})(EntryKitStatus || {});
+var defaultClientConfig = {
+  pollingInterval: 250
+};
+var unlimitedDelegationControlId = resourceToHex({
+  type: "system",
+  namespace: "",
+  name: "unlimited"
+});
+var worldTables = worldConfig.namespaces.world.tables;
+var worldAbi = parseAbi([
+  "function registerDelegation(address delegatee, bytes32 delegationControlId, bytes initCallData)"
+]);
 
 // src/session/storage.ts
 var SessionStorage = class {
@@ -106,18 +128,6 @@ async function getSessionAccount({
   const account = await toSimpleSmartAccount({ client, owner: signer });
   return { account, signer };
 }
-var defaultClientConfig = {
-  pollingInterval: 250
-};
-var unlimitedDelegationControlId = resourceToHex({
-  type: "system",
-  namespace: "",
-  name: "unlimited"
-});
-var worldTables = worldConfig.namespaces.world.tables;
-var worldAbi = parseAbi([
-  "function registerDelegation(address delegatee, bytes32 delegationControlId, bytes initCallData)"
-]);
 
 // src/bundler/getPaymaster.ts
 function getPaymaster(chain, paymasterOverride) {
@@ -389,6 +399,7 @@ var EntryKit = class {
     this.isDisconnecting = false;
     this.config = config;
     this.state = {
+      status: "uninitialized" /* UNINITIALIZED */,
       sessionClient: null,
       userAddress: null,
       sessionAddress: null,
@@ -419,6 +430,7 @@ var EntryKit = class {
       console.log("[entrykit-drawbridge] Reconnection successful");
     } catch (err) {
       console.log("[entrykit-drawbridge] No previous connection to restore");
+      this.updateState({ status: "disconnected" /* DISCONNECTED */ });
     }
     this.setupAccountWatcher();
     if (reconnected) {
@@ -486,6 +498,7 @@ var EntryKit = class {
         if (!account.isConnected) {
           console.log("[entrykit-drawbridge] Wallet disconnected");
           this.updateState({
+            status: "disconnected" /* DISCONNECTED */,
             sessionClient: null,
             userAddress: null,
             sessionAddress: null,
@@ -554,6 +567,7 @@ var EntryKit = class {
       sessionAddress: account.address
     });
     this.updateState({
+      status: hasDelegation ? "ready" /* READY */ : "connected" /* CONNECTED */,
       sessionClient,
       userAddress,
       sessionAddress: account.address,
@@ -592,6 +606,7 @@ var EntryKit = class {
       throw new Error(`Connector not found: ${connectorId}`);
     }
     console.log("[entrykit-drawbridge] Connecting to wallet:", connectorId);
+    this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
       await connect(this.wagmiConfig, {
         connector,
@@ -602,6 +617,7 @@ var EntryKit = class {
         console.log("[entrykit-drawbridge] Already connected");
         return;
       }
+      this.updateState({ status: "disconnected" /* DISCONNECTED */ });
       throw err;
     }
   }
@@ -666,15 +682,21 @@ var EntryKit = class {
       throw new Error("Not connected. Call connectWallet() first.");
     }
     console.log("[entrykit-drawbridge] Setting up session (registering delegation)...");
+    this.updateState({ status: "setting_up_session" /* SETTING_UP_SESSION */ });
     const userClient = await getConnectorClient(this.wagmiConfig);
-    await setupSession({
-      client: userClient,
-      userClient,
-      sessionClient: this.state.sessionClient,
-      worldAddress: this.config.worldAddress
-    });
-    this.updateState({ isReady: true });
-    console.log("[entrykit-drawbridge] Session setup complete");
+    try {
+      await setupSession({
+        client: userClient,
+        userClient,
+        sessionClient: this.state.sessionClient,
+        worldAddress: this.config.worldAddress
+      });
+      this.updateState({ status: "ready" /* READY */, isReady: true });
+      console.log("[entrykit-drawbridge] Session setup complete");
+    } catch (err) {
+      this.updateState({ status: "connected" /* CONNECTED */ });
+      throw err;
+    }
   }
   /**
    * Cleanup and destroy EntryKit instance
@@ -692,6 +714,7 @@ var EntryKit = class {
       this.accountWatcherCleanup = null;
     }
     this.updateState({
+      status: "disconnected" /* DISCONNECTED */,
       sessionClient: null,
       userAddress: null,
       sessionAddress: null,
@@ -732,6 +755,6 @@ var EntryKit = class {
   }
 };
 
-export { EntryKit, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
+export { EntryKit, EntryKitStatus, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

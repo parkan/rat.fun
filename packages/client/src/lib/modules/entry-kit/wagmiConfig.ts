@@ -67,17 +67,11 @@ export function getConnectors(): CreateConnectorFn[] {
     // Check for provider info
     if (window.ethereum) {
       const providers: string[] = []
-      // @ts-ignore - checking for provider info
       if (window.ethereum.isCoinbaseWallet) providers.push("Coinbase")
-      // @ts-ignore
       if (window.ethereum.isMetaMask) providers.push("MetaMask")
-      // @ts-ignore
       if (window.ethereum.isRabby) providers.push("Rabby")
-      // @ts-ignore
       if (window.ethereum.isPhantom) providers.push("Phantom")
-      // @ts-ignore
       if (window.ethereum.isBraveWallet) providers.push("Brave")
-      // @ts-ignore
       if (window.ethereum.providers) {
         providers.push(`Multiple providers (${window.ethereum.providers.length})`)
       }

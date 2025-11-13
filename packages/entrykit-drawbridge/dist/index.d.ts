@@ -27,6 +27,42 @@ type SessionClient<chain extends Chain = Chain> = Client<Transport, chain, Smart
     /** Session private key - used for signing messages on behalf of session account */
     readonly internal_signer: LocalAccount;
 };
+/**
+ * EntryKit connection and setup status
+ *
+ * Provides a single source of truth for the current state of EntryKit.
+ * Transitions follow this flow:
+ *
+ * UNINITIALIZED → initialize() → DISCONNECTED
+ *                                      ↓
+ *                      connectWallet() ↓
+ *                                      ↓
+ *                                 CONNECTED
+ *                                      ↓
+ *                      setupSession()  ↓
+ *                                      ↓
+ *                             SETTING_UP_SESSION
+ *                                      ↓
+ *                                   READY
+ *
+ * Note: READY state can be reached directly from DISCONNECTED if reconnection succeeds.
+ */
+declare enum EntryKitStatus {
+    /** EntryKit not yet initialized - call initializeEntryKit() */
+    UNINITIALIZED = "uninitialized",
+    /** EntryKit initialized but no wallet connected */
+    DISCONNECTED = "disconnected",
+    /** Wallet connection in progress */
+    CONNECTING = "connecting",
+    /** Wallet connected, but session setup needed (delegation not registered) */
+    CONNECTED = "connected",
+    /** Session setup in progress (registering delegation) */
+    SETTING_UP_SESSION = "setting_up_session",
+    /** Fully ready - session client available and delegation registered */
+    READY = "ready",
+    /** An error occurred */
+    ERROR = "error"
+}
 
 /**
  * Configuration for EntryKit instance
@@ -54,6 +90,8 @@ type EntryKitConfig = {
  * Updated reactively and broadcast to subscribers
  */
 type EntryKitState = {
+    /** Current status of EntryKit - single source of truth */
+    status: EntryKitStatus;
     /** Session client with MUD World extensions, null if not connected */
     sessionClient: SessionClient | null;
     /** Original user's wallet address, null if not connected */
@@ -565,4 +603,4 @@ type CallWithSignatureOptions<chain extends Chain = Chain> = SignCallOptions<cha
  */
 declare function callWithSignature<chain extends Chain = Chain>({ sessionClient, ...opts }: CallWithSignatureOptions<chain>): Promise<`0x${string}`>;
 
-export { type ConnectedClient, type ConnectorInfo, EntryKit, type EntryKitConfig, type EntryKitState, type Paymaster, type PrerequisiteStatus, type SessionClient, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
+export { type ConnectedClient, type ConnectorInfo, EntryKit, type EntryKitConfig, type EntryKitState, EntryKitStatus, type Paymaster, type PrerequisiteStatus, type SessionClient, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };

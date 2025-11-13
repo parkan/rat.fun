@@ -35,7 +35,8 @@ const stringsData = {
     connectBurner: "Connect Burner",
     connectWallet: "Connect wallet",
     connectedWallet: "Connected wallet",
-    confirmLiquidateTripPrompt: (index: number): string => `Are you sure you want to liquidate trip #${index}?`,
+    confirmLiquidateTripPrompt: (index: number): string =>
+      `Are you sure you want to liquidate trip #${index}?`,
     cost: "Cost:",
     createdTrip: "created trip",
     creatingTripIn: "Creating trip in:",
@@ -121,7 +122,8 @@ const stringsData = {
     portfolio: "Portfolio",
     rat: "Rat",
     ratAmountKilled: "Rats killed",
-    ratBeingRevived: "RAT BEING REVIVED FROM DEEP DRUG INDUCED COMA.\nEVERYTHING IS NORMAL.\nPLEASE STAND BY...",
+    ratBeingRevived:
+      "RAT BEING REVIVED FROM DEEP DRUG INDUCED COMA.\nEVERYTHING IS NORMAL.\nPLEASE STAND BY...",
     ratCreationTimeout: "Timeout waiting for rat creation",
     ratHallucinatoryState: "RAT STILL IN HALLUCINATORY STATE.\nPLEASE STAND BY...",
     ratId: "RAT ID:",

@@ -1,6 +1,6 @@
 import { Address, Chain, Client, Transport } from "viem"
 import type { PaymasterClient } from "viem/account-abstraction"
-import { SessionClient } from "./core/types"
+import { SessionClient, EntryKitStatus } from "./core/types"
 import { getSessionSigner } from "./session/getSessionSigner"
 import { getSessionAccount } from "./session/getSessionAccount"
 import { getSessionClient } from "./session/getSessionClient"
@@ -48,6 +48,8 @@ export type EntryKitConfig = {
  * Updated reactively and broadcast to subscribers
  */
 export type EntryKitState = {
+  /** Current status of EntryKit - single source of truth */
+  status: EntryKitStatus
   /** Session client with MUD World extensions, null if not connected */
   sessionClient: SessionClient | null
   /** Original user's wallet address, null if not connected */
@@ -130,6 +132,7 @@ export class EntryKit {
   constructor(config: EntryKitConfig) {
     this.config = config
     this.state = {
+      status: EntryKitStatus.UNINITIALIZED,
       sessionClient: null,
       userAddress: null,
       sessionAddress: null,
@@ -165,6 +168,8 @@ export class EntryKit {
       console.log("[entrykit-drawbridge] Reconnection successful")
     } catch (err) {
       console.log("[entrykit-drawbridge] No previous connection to restore")
+      // No reconnection - set status to DISCONNECTED
+      this.updateState({ status: EntryKitStatus.DISCONNECTED })
     }
 
     // Setup account watcher for future changes
@@ -246,6 +251,7 @@ export class EntryKit {
         if (!account.isConnected) {
           console.log("[entrykit-drawbridge] Wallet disconnected")
           this.updateState({
+            status: EntryKitStatus.DISCONNECTED,
             sessionClient: null,
             userAddress: null,
             sessionAddress: null,
@@ -335,7 +341,9 @@ export class EntryKit {
     })
 
     // Update state once with complete information
+    // Set status to READY if delegation exists, CONNECTED if not
     this.updateState({
+      status: hasDelegation ? EntryKitStatus.READY : EntryKitStatus.CONNECTED,
       sessionClient,
       userAddress,
       sessionAddress: account.address,
@@ -381,6 +389,9 @@ export class EntryKit {
 
     console.log("[entrykit-drawbridge] Connecting to wallet:", connectorId)
 
+    // Set status to CONNECTING
+    this.updateState({ status: EntryKitStatus.CONNECTING })
+
     try {
       await connect(this.wagmiConfig, {
         connector,
@@ -392,10 +403,12 @@ export class EntryKit {
         console.log("[entrykit-drawbridge] Already connected")
         return
       }
+      // Reset to DISCONNECTED on error
+      this.updateState({ status: EntryKitStatus.DISCONNECTED })
       throw err
     }
 
-    // Account watcher will handle the rest
+    // Account watcher will handle the rest and set appropriate status
   }
 
   /**
@@ -468,19 +481,29 @@ export class EntryKit {
 
     console.log("[entrykit-drawbridge] Setting up session (registering delegation)...")
 
+    // Set status to SETTING_UP_SESSION
+    this.updateState({ status: EntryKitStatus.SETTING_UP_SESSION })
+
     // Get current wallet client from wagmi
     const userClient = await getConnectorClient(this.wagmiConfig)
 
-    await setupSession({
-      client: userClient,
-      userClient,
-      sessionClient: this.state.sessionClient,
-      worldAddress: this.config.worldAddress
-    })
+    try {
+      await setupSession({
+        client: userClient,
+        userClient,
+        sessionClient: this.state.sessionClient,
+        worldAddress: this.config.worldAddress
+      })
 
-    this.updateState({ isReady: true })
+      // Session setup complete - set status to READY
+      this.updateState({ status: EntryKitStatus.READY, isReady: true })
 
-    console.log("[entrykit-drawbridge] Session setup complete")
+      console.log("[entrykit-drawbridge] Session setup complete")
+    } catch (err) {
+      // Reset to CONNECTED on error
+      this.updateState({ status: EntryKitStatus.CONNECTED })
+      throw err
+    }
   }
 
   /**
@@ -503,6 +526,7 @@ export class EntryKit {
 
     // Clear state
     this.updateState({
+      status: EntryKitStatus.DISCONNECTED,
       sessionClient: null,
       userAddress: null,
       sessionAddress: null,
