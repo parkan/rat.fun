@@ -123,6 +123,7 @@ export class EntryKit {
   private wagmiConfig: Config
   private accountWatcherCleanup: (() => void) | null = null
   private isConnecting = false
+  private isDisconnecting = false
 
   constructor(config: EntryKitConfig) {
     this.config = config
@@ -249,6 +250,12 @@ export class EntryKit {
             isReady: false
           })
           this.isConnecting = false
+          return
+        }
+
+        // Ignore connection attempts while disconnecting to prevent deadlock
+        if (this.isDisconnecting) {
+          console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect")
           return
         }
 
@@ -402,11 +409,14 @@ export class EntryKit {
     console.log("[entrykit-drawbridge] Calling wagmi disconnect()...")
 
     try {
+      this.isDisconnecting = true
       await disconnect(this.wagmiConfig)
       console.log("[entrykit-drawbridge] wagmi disconnect() returned")
     } catch (err) {
       console.error("[entrykit-drawbridge] wagmi disconnect() threw error:", err)
       throw err
+    } finally {
+      this.isDisconnecting = false
     }
 
     console.log("[entrykit-drawbridge] Disconnect complete")

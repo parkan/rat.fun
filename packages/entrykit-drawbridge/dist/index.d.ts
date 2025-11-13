@@ -81,7 +81,7 @@ type ConnectorInfo = {
     type: string;
 };
 /**
- * entrykit-drawbridge - Headless ERC-4337 session manager with wagmi integration
+ * entrykit-drawbridge - Stripped down headless version of @latticexyz/entrykit
  *
  * Provides complete wallet connection and session management:
  * - Wagmi integration (connectors, account watching, reconnection)
@@ -125,6 +125,7 @@ declare class EntryKit {
     private wagmiConfig;
     private accountWatcherCleanup;
     private isConnecting;
+    private isDisconnecting;
     constructor(config: EntryKitConfig);
     /**
      * Initialize EntryKit (await reconnection and setup account watcher)

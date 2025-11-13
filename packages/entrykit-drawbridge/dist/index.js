@@ -386,6 +386,7 @@ var EntryKit = class {
     this.listeners = /* @__PURE__ */ new Set();
     this.accountWatcherCleanup = null;
     this.isConnecting = false;
+    this.isDisconnecting = false;
     this.config = config;
     this.state = {
       sessionClient: null,
@@ -491,6 +492,10 @@ var EntryKit = class {
             isReady: false
           });
           this.isConnecting = false;
+          return;
+        }
+        if (this.isDisconnecting) {
+          console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect");
           return;
         }
         if (this.isConnecting) {
@@ -612,11 +617,14 @@ var EntryKit = class {
     console.log("[entrykit-drawbridge] Current state:", this.state);
     console.log("[entrykit-drawbridge] Calling wagmi disconnect()...");
     try {
+      this.isDisconnecting = true;
       await disconnect(this.wagmiConfig);
       console.log("[entrykit-drawbridge] wagmi disconnect() returned");
     } catch (err) {
       console.error("[entrykit-drawbridge] wagmi disconnect() threw error:", err);
       throw err;
+    } finally {
+      this.isDisconnecting = false;
     }
     console.log("[entrykit-drawbridge] Disconnect complete");
   }
