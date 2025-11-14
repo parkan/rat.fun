@@ -133,7 +133,7 @@
 
 <div class="content" bind:this={scrollContainer}>
   {#if $selectedFolderId === ""}
-    <TripHeader title={$playerHasLiveRat ? strings.tripHeader : string.tripHeaderNoRat} />
+    <TripHeader title={$playerHasLiveRat ? strings.tripHeader : strings.tripHeaderNoRat} />
     {#if $staticContent?.tripFolders?.length ?? 0 > 0}
       <TripFolders
         {legacyTrips}
