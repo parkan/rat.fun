@@ -1,13 +1,13 @@
 import { resourceToHex, hexToResource } from '@latticexyz/common';
-import { parseAbi, isHex, http, toHex, parseErc6492Signature, encodeFunctionData, zeroAddress } from 'viem';
+import { parseAbi, isHex, encodeFunctionData, zeroAddress, http, parseErc6492Signature, toHex } from 'viem';
 import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { smartAccountActions } from 'permissionless';
 import { callFrom, sendUserOperationFrom } from '@latticexyz/world/internal';
-import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt } from 'viem/account-abstraction';
+import { sendUserOperation, waitForUserOperationReceipt, createBundlerClient as createBundlerClient$1 } from 'viem/account-abstraction';
 import { getRecord } from '@latticexyz/store/internal';
-import { signTypedData, getCode, sendTransaction, waitForTransactionReceipt, writeContract } from 'viem/actions';
+import { waitForTransactionReceipt, getCode, writeContract, sendTransaction, signTypedData } from 'viem/actions';
 import { getAction } from 'viem/utils';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
@@ -336,7 +336,11 @@ async function callWithSignature({
   ...opts
 }) {
   const rawSignature = await signCall(opts);
-  const { address: factoryAddress, data: factoryCalldata, signature } = parseErc6492Signature(rawSignature);
+  const {
+    address: factoryAddress,
+    data: factoryCalldata,
+    signature
+  } = parseErc6492Signature(rawSignature);
   let finalSignature = signature ?? rawSignature;
   if (factoryAddress != null) {
     console.log("[callWithSignature] ERC-6492 signature detected");
@@ -384,7 +388,10 @@ async function setupSession({
 }) {
   const sessionAddress = sessionClient.account.address;
   const userAddress = userClient.account.address;
-  console.log("[entrykit-drawbridge] Setup session:", { userAddress, accountType: userClient.account.type });
+  console.log("[entrykit-drawbridge] Setup session:", {
+    userAddress,
+    accountType: userClient.account.type
+  });
   if (userClient.account.type === "smart") {
     onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." });
     const account = userClient.account;
@@ -490,7 +497,11 @@ async function setupSession({
     }
     if (!txs.length) return;
     for (const hash of txs) {
-      const receipt = await getAction(client, waitForTransactionReceipt, "waitForTransactionReceipt")({ hash });
+      const receipt = await getAction(
+        client,
+        waitForTransactionReceipt,
+        "waitForTransactionReceipt"
+      )({ hash });
       if (receipt.status === "reverted") {
         throw new Error("Delegation registration transaction reverted");
       }
@@ -501,7 +512,11 @@ async function setupSession({
   if (!sessionDeployed) {
     onStatus?.({ type: "deploying_session", message: "Finalizing session setup..." });
     try {
-      const hash = await getAction(sessionClient, sendUserOperation, "sendUserOperation")({
+      const hash = await getAction(
+        sessionClient,
+        sendUserOperation,
+        "sendUserOperation"
+      )({
         calls: [{ to: zeroAddress }]
       });
       console.log("[entrykit-drawbridge] Session deploy tx:", hash);
@@ -917,6 +932,6 @@ var EntryKit = class {
   }
 };
 
-export { EntryKit, EntryKitStatus, callWithSignature, checkDelegation, createBundlerClient, defineCall, deployWallet, deployWalletIfNeeded, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, isWalletDeployed, sessionStorage, setupSession, signCall };
+export { EntryKit, EntryKitStatus };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
