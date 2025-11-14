@@ -18,15 +18,12 @@
     try {
       settingUp = true
       error = null
-      console.log("[SessionSetup] Starting session setup...")
 
       const entrykit = getEntryKit()
       await entrykit.setupSession()
 
-      console.log("[SessionSetup] Session setup complete!")
       onComplete()
     } catch (err) {
-      console.error("[SessionSetup] Session setup failed:", err)
       error = err instanceof Error ? err.message : "Session setup failed"
     } finally {
       settingUp = false
@@ -38,10 +35,8 @@
       return
     }
 
-    // Set initial opacity to 0
     buttonElement.style.opacity = "0"
 
-    // Animate opacity to 1
     timeline.to(buttonElement, {
       opacity: 1,
       duration: 0.4

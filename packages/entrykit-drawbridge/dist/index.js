@@ -7,7 +7,7 @@ import { smartAccountActions } from 'permissionless';
 import { callFrom, sendUserOperationFrom } from '@latticexyz/world/internal';
 import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt } from 'viem/account-abstraction';
 import { getRecord } from '@latticexyz/store/internal';
-import { signTypedData, writeContract, waitForTransactionReceipt, getCode, sendTransaction } from 'viem/actions';
+import { signTypedData, getCode, sendTransaction, waitForTransactionReceipt, writeContract } from 'viem/actions';
 import { getAction } from 'viem/utils';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
@@ -277,76 +277,75 @@ async function signCall({
     }
   });
 }
-async function isSmartWalletDeployed(sessionClient, walletAddress) {
+async function isWalletDeployed(client, address) {
   const code = await getAction(
-    sessionClient,
+    client,
     getCode,
     "getCode"
   )({
-    address: walletAddress
+    address
   });
-  if (code !== void 0 && code !== "0x") {
-    return true;
-  }
-  return false;
+  return code !== void 0 && code !== "0x";
 }
-async function deploySmartWallet(sessionClient, walletAddress, factoryAddress, factoryCalldata) {
+async function deployWallet(client, userAddress, factoryAddress, factoryCalldata) {
   try {
     const txHash = await getAction(
-      sessionClient,
+      client,
       sendTransaction,
       "sendTransaction"
     )({
-      account: sessionClient.account,
-      chain: sessionClient.chain,
+      account: client.account,
+      chain: client.chain,
       to: factoryAddress,
       data: factoryCalldata
     });
     await getAction(
-      sessionClient,
+      client,
       waitForTransactionReceipt,
       "waitForTransactionReceipt"
     )({
       hash: txHash
     });
+    await new Promise((resolve) => setTimeout(resolve, 2e3));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     if (errorMessage.includes("AA10") || errorMessage.includes("already constructed") || errorMessage.includes("already deployed")) {
       return;
     }
-    throw new Error(
-      `Failed to deploy smart wallet at ${walletAddress}: ${errorMessage}`
-    );
+    throw new Error(`Failed to deploy smart wallet: ${errorMessage}`);
   }
 }
+async function deployWalletIfNeeded(client, userAddress, factoryAddress, factoryCalldata) {
+  const deployed = await isWalletDeployed(client, userAddress);
+  if (deployed) {
+    return false;
+  }
+  await deployWallet(client, userAddress, factoryAddress, factoryCalldata);
+  const nowDeployed = await isWalletDeployed(client, userAddress);
+  if (!nowDeployed) {
+    throw new Error(
+      `Wallet deployment appeared to succeed but contract code not found at ${userAddress}`
+    );
+  }
+  return true;
+}
+
+// src/utils/callWithSignature.ts
 async function callWithSignature({
   sessionClient,
   ...opts
 }) {
   const rawSignature = await signCall(opts);
-  const {
-    address: factoryAddress,
-    data: factoryCalldata,
-    signature
-  } = parseErc6492Signature(rawSignature);
+  const { address: factoryAddress, data: factoryCalldata, signature } = parseErc6492Signature(rawSignature);
   let finalSignature = signature ?? rawSignature;
   if (factoryAddress != null) {
-    const isDeployed = await isSmartWalletDeployed(sessionClient, opts.userClient.account.address);
-    if (!isDeployed) {
-      await deploySmartWallet(
-        sessionClient,
-        opts.userClient.account.address,
-        factoryAddress,
-        factoryCalldata
-      );
-      const isNowDeployed = await isSmartWalletDeployed(sessionClient, opts.userClient.account.address);
-      if (!isNowDeployed) {
-        throw new Error(
-          `Wallet deployment appeared to succeed but contract code not found at ${opts.userClient.account.address}`
-        );
-      }
-      await new Promise((resolve) => setTimeout(resolve, 2e3));
-    }
+    console.log("[callWithSignature] ERC-6492 signature detected");
+    await deployWalletIfNeeded(
+      sessionClient,
+      opts.userClient.account.address,
+      factoryAddress,
+      factoryCalldata
+    );
     finalSignature = signature;
   }
   try {
@@ -363,9 +362,7 @@ async function callWithSignature({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
-      throw new Error(
-        `Smart wallet was just deployed. Please try the operation again in a moment. (If you just added a new address in Coinbase Wallet, this is expected on first use.)`
-      );
+      throw new Error("Smart wallet was just deployed. Please try again.");
     }
     throw error;
   }
@@ -382,14 +379,41 @@ async function setupSession({
   userClient,
   sessionClient,
   worldAddress,
-  registerDelegation = true
+  registerDelegation = true,
+  onStatus
 }) {
   const sessionAddress = sessionClient.account.address;
-  console.log("[entrykit-drawbridge] setting up session", userClient);
+  const userAddress = userClient.account.address;
+  console.log("[entrykit-drawbridge] Setup session:", { userAddress, accountType: userClient.account.type });
   if (userClient.account.type === "smart") {
+    onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." });
+    const account = userClient.account;
+    const hasFactoryData = account.factory && account.factoryData;
+    console.log("[entrykit-drawbridge] Smart wallet check:", { hasFactoryData, userAddress });
+    const alreadyDeployed = await isWalletDeployed(sessionClient, userAddress);
+    if (alreadyDeployed && hasFactoryData) {
+      console.log("[entrykit-drawbridge] Removing factory data from deployed wallet");
+      onStatus?.({ type: "wallet_deployed", message: "Wallet ready" });
+      delete account.factory;
+      delete account.factoryData;
+      account.factory = void 0;
+      account.factoryData = void 0;
+      console.log("[entrykit-drawbridge] Factory removed:", { stillHasFactory: !!account.factory });
+    } else if (!alreadyDeployed && hasFactoryData) {
+      console.log("[entrykit-drawbridge] Deploying user wallet...");
+      onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." });
+      await deployWalletIfNeeded(sessionClient, userAddress, account.factory, account.factoryData);
+      onStatus?.({ type: "wallet_deployed", message: "Wallet deployed successfully!" });
+      delete account.factory;
+      delete account.factoryData;
+      account.factory = void 0;
+      account.factoryData = void 0;
+      console.log("[entrykit-drawbridge] Wallet deployed, factory removed");
+    } else {
+      onStatus?.({ type: "wallet_deployed", message: "Wallet ready" });
+    }
     const calls = [];
     if (registerDelegation) {
-      console.log("[entrykit-drawbridge] registering delegation");
       calls.push(
         defineCall({
           to: worldAddress,
@@ -400,22 +424,56 @@ async function setupSession({
       );
     }
     if (!calls.length) return;
-    console.log("[entrykit-drawbridge] setting up account with", calls, userClient);
-    const hash = await getAction(userClient, sendUserOperation, "sendUserOperation")({ calls });
-    console.log("[entrykit-drawbridge] got user op hash", hash);
-    const receipt = await getAction(
-      userClient,
-      waitForUserOperationReceipt,
-      "waitForUserOperationReceipt"
-    )({ hash });
-    console.log("[entrykit-drawbridge] got user op receipt", receipt);
-    if (!receipt.success) {
-      console.error("[entrykit-drawbridge] not successful?", receipt);
+    onStatus?.({ type: "registering_delegation", message: "Setting up session..." });
+    const accountBeforeSend = userClient.account;
+    console.log("[entrykit-drawbridge] Before sendUserOperation:", {
+      hasFactory: !!accountBeforeSend.factory,
+      hasFactoryData: !!accountBeforeSend.factoryData
+    });
+    if (accountBeforeSend.factory || accountBeforeSend.factoryData) {
+      console.warn("[entrykit-drawbridge] Factory still present, attempting aggressive removal...");
+      try {
+        Object.defineProperty(accountBeforeSend, "factory", {
+          value: void 0,
+          writable: true,
+          configurable: true
+        });
+        Object.defineProperty(accountBeforeSend, "factoryData", {
+          value: void 0,
+          writable: true,
+          configurable: true
+        });
+      } catch (err) {
+        console.error("[entrykit-drawbridge] Could not remove factory (readonly property)");
+      }
+    }
+    try {
+      const hash = await getAction(userClient, sendUserOperation, "sendUserOperation")({ calls });
+      console.log("[entrykit-drawbridge] User operation sent:", hash);
+      const receipt = await getAction(
+        userClient,
+        waitForUserOperationReceipt,
+        "waitForUserOperationReceipt"
+      )({ hash });
+      if (!receipt.success) {
+        throw new Error("User operation failed during session setup");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("[entrykit-drawbridge] User operation error:", errorMessage);
+      if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
+        const helpfulError = new Error(
+          "Smart wallet deployment conflict. Please try again - it should work on the second attempt."
+        );
+        onStatus?.({ type: "error", message: "Please try again", error: helpfulError });
+        throw helpfulError;
+      }
+      onStatus?.({ type: "error", message: "Session setup failed", error });
+      throw error;
     }
   } else {
     const txs = [];
     if (registerDelegation) {
-      console.log("[entrykit-drawbridge] registering delegation");
       const tx = await callWithSignature({
         client,
         userClient,
@@ -428,39 +486,54 @@ async function setupSession({
           args: [sessionAddress, unlimitedDelegationControlId, "0x"]
         })
       });
-      console.log("[entrykit-drawbridge] got delegation tx", tx);
       txs.push(tx);
     }
     if (!txs.length) return;
-    console.log("[entrykit-drawbridge] waiting for", txs.length, "receipts");
     for (const hash of txs) {
-      const receipt = await getAction(
-        client,
-        waitForTransactionReceipt,
-        "waitForTransactionReceipt"
-      )({ hash });
-      console.log("[entrykit-drawbridge] got tx receipt", receipt);
+      const receipt = await getAction(client, waitForTransactionReceipt, "waitForTransactionReceipt")({ hash });
       if (receipt.status === "reverted") {
-        console.error("[entrykit-drawbridge] tx reverted?", receipt);
+        throw new Error("Delegation registration transaction reverted");
       }
     }
   }
-  if (!await sessionClient.account.isDeployed?.()) {
-    console.log("[entrykit-drawbridge] creating session account by sending empty user op");
-    const hash = await getAction(
-      sessionClient,
-      sendUserOperation,
-      "sendUserOperation"
-    )({
-      calls: [{ to: zeroAddress }]
-    });
-    const receipt = await getAction(
-      sessionClient,
-      waitForUserOperationReceipt,
-      "waitForUserOperationReceipt"
-    )({ hash });
-    console.log("[entrykit-drawbridge] got user op receipt", receipt);
+  const sessionDeployed = await sessionClient.account.isDeployed?.();
+  console.log("[entrykit-drawbridge] Session account deployed:", sessionDeployed);
+  if (!sessionDeployed) {
+    onStatus?.({ type: "deploying_session", message: "Finalizing session setup..." });
+    try {
+      const hash = await getAction(sessionClient, sendUserOperation, "sendUserOperation")({
+        calls: [{ to: zeroAddress }]
+      });
+      console.log("[entrykit-drawbridge] Session deploy tx:", hash);
+      const receiptPromise = getAction(
+        sessionClient,
+        waitForUserOperationReceipt,
+        "waitForUserOperationReceipt"
+      )({ hash });
+      const timeoutPromise = new Promise(
+        (_, reject) => setTimeout(() => reject(new Error("Session deployment timeout after 30s")), 3e4)
+      );
+      const receipt = await Promise.race([receiptPromise, timeoutPromise]);
+      if (!receipt.success) {
+        throw new Error("Failed to deploy session account");
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("[entrykit-drawbridge] Session deployment error:", errorMsg);
+      if (errorMsg.includes("timeout")) {
+        const nowDeployed = await sessionClient.account.isDeployed?.();
+        if (nowDeployed) {
+          console.log("[entrykit-drawbridge] Session deployed despite timeout");
+          onStatus?.({ type: "complete", message: "Session setup complete!" });
+          return;
+        }
+      }
+      onStatus?.({ type: "error", message: "Session deployment failed", error });
+      throw error;
+    }
   }
+  console.log("[entrykit-drawbridge] Setup session complete");
+  onStatus?.({ type: "complete", message: "Session setup complete!" });
 }
 var EntryKit = class {
   constructor(config) {
@@ -760,7 +833,7 @@ var EntryKit = class {
    *
    * @throws If not connected (call connectWallet() first)
    */
-  async setupSession() {
+  async setupSession(onStatus) {
     if (this.config.skipSessionSetup) {
       throw new Error(
         "Cannot setup session when skipSessionSetup is true. This EntryKit instance is in wallet-only mode."
@@ -777,7 +850,8 @@ var EntryKit = class {
         client: userClient,
         userClient,
         sessionClient: this.state.sessionClient,
-        worldAddress: this.config.worldAddress
+        worldAddress: this.config.worldAddress,
+        onStatus
       });
       this.updateState({ status: "ready" /* READY */, isReady: true });
       console.log("[entrykit-drawbridge] Session setup complete");
@@ -843,6 +917,6 @@ var EntryKit = class {
   }
 };
 
-export { EntryKit, EntryKitStatus, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
+export { EntryKit, EntryKitStatus, callWithSignature, checkDelegation, createBundlerClient, defineCall, deployWallet, deployWalletIfNeeded, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, isWalletDeployed, sessionStorage, setupSession, signCall };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

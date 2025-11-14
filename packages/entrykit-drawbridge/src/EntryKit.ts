@@ -5,7 +5,7 @@ import { getSessionSigner } from "./session/getSessionSigner"
 import { getSessionAccount } from "./session/getSessionAccount"
 import { getSessionClient } from "./session/getSessionClient"
 import { checkDelegation } from "./delegation/checkDelegation"
-import { setupSession } from "./delegation/setupSession"
+import { setupSession, type SetupSessionStatus } from "./delegation/setupSession"
 import { sessionStorage } from "./session/storage"
 import {
   createConfig,
@@ -502,7 +502,7 @@ export class EntryKit {
    *
    * @throws If not connected (call connectWallet() first)
    */
-  async setupSession(): Promise<void> {
+  async setupSession(onStatus?: (status: SetupSessionStatus) => void): Promise<void> {
     if (this.config.skipSessionSetup) {
       throw new Error(
         "Cannot setup session when skipSessionSetup is true. This EntryKit instance is in wallet-only mode."
@@ -526,7 +526,8 @@ export class EntryKit {
         client: userClient,
         userClient,
         sessionClient: this.state.sessionClient,
-        worldAddress: this.config.worldAddress!
+        worldAddress: this.config.worldAddress!,
+        onStatus
       })
 
       // Session setup complete - set status to READY

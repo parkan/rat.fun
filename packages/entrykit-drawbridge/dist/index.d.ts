@@ -64,6 +64,59 @@ declare enum EntryKitStatus {
     ERROR = "error"
 }
 
+type SetupSessionStatus = {
+    type: "checking_wallet";
+    message: string;
+} | {
+    type: "deploying_wallet";
+    message: string;
+} | {
+    type: "wallet_deployed";
+    message: string;
+} | {
+    type: "registering_delegation";
+    message: string;
+} | {
+    type: "deploying_session";
+    message: string;
+} | {
+    type: "complete";
+    message: string;
+} | {
+    type: "error";
+    message: string;
+    error?: Error;
+};
+type SetupSessionParams = {
+    client: any;
+    userClient: any;
+    sessionClient: SessionClient;
+    worldAddress: Hex;
+    registerDelegation?: boolean;
+    onStatus?: (status: SetupSessionStatus) => void;
+};
+/**
+ * Setup session by registering delegation and deploying session account
+ *
+ * Flow differs based on wallet type:
+ *
+ * **Smart Account Wallet:**
+ * - Sends user operation to register delegation
+ * - User's smart account submits the operation
+ *
+ * **EOA (Externally Owned Account):**
+ * - Uses CallWithSignature pattern (gasless for user)
+ * - User signs a message (EIP-712)
+ * - Session account submits the signature + call
+ * - World validates signature and executes as user
+ *
+ * **Finally:**
+ * - Deploys session account if not yet deployed (via empty user operation)
+ *
+ * @param params Setup parameters
+ */
+declare function setupSession({ client, userClient, sessionClient, worldAddress, registerDelegation, onStatus }: SetupSessionParams): Promise<void>;
+
 /**
  * Configuration for EntryKit instance
  */
@@ -271,7 +324,7 @@ declare class EntryKit {
      *
      * @throws If not connected (call connectWallet() first)
      */
-    setupSession(): Promise<void>;
+    setupSession(onStatus?: (status: SetupSessionStatus) => void): Promise<void>;
     /**
      * Cleanup and destroy EntryKit instance
      *
@@ -442,35 +495,6 @@ type CheckDelegationParams = {
  */
 declare function checkDelegation({ client, worldAddress, userAddress, sessionAddress, blockTag }: CheckDelegationParams): Promise<boolean>;
 
-type SetupSessionParams = {
-    client: any;
-    userClient: any;
-    sessionClient: SessionClient;
-    worldAddress: Hex;
-    registerDelegation?: boolean;
-};
-/**
- * Setup session by registering delegation and deploying session account
- *
- * Flow differs based on wallet type:
- *
- * **Smart Account Wallet:**
- * - Sends user operation to register delegation
- * - User's smart account submits the operation
- *
- * **EOA (Externally Owned Account):**
- * - Uses CallWithSignature pattern (gasless for user)
- * - User signs a message (EIP-712)
- * - Session account submits the signature + call
- * - World validates signature and executes as user
- *
- * **Finally:**
- * - Deploys session account if not yet deployed (via empty user operation)
- *
- * @param params Setup parameters
- */
-declare function setupSession({ client, userClient, sessionClient, worldAddress, registerDelegation }: SetupSessionParams): Promise<void>;
-
 /**
  * Create a bundler client for submitting ERC-4337 user operations
  *
@@ -617,4 +641,42 @@ type CallWithSignatureOptions<chain extends Chain = Chain> = SignCallOptions<cha
  */
 declare function callWithSignature<chain extends Chain = Chain>({ sessionClient, ...opts }: CallWithSignatureOptions<chain>): Promise<`0x${string}`>;
 
-export { type ConnectedClient, type ConnectorInfo, EntryKit, type EntryKitConfig, type EntryKitState, EntryKitStatus, type Paymaster, type PrerequisiteStatus, type SessionClient, callWithSignature, checkDelegation, createBundlerClient, defineCall, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, sessionStorage, setupSession, signCall };
+/**
+ * Shared utilities for smart wallet deployment
+ *
+ * Handles counterfactual smart wallets (e.g., Coinbase Smart Wallet) that use
+ * CREATE2 and exist at a deterministic address before deployment.
+ */
+/**
+ * Check if a smart wallet is deployed on-chain
+ *
+ * @param client Client to use for checking
+ * @param address Wallet address to check
+ * @returns True if deployed, false otherwise
+ */
+declare function isWalletDeployed(client: any, address: `0x${string}`): Promise<boolean>;
+/**
+ * Deploy a smart wallet using a factory contract
+ *
+ * This handles the deployment of counterfactual smart wallets. The wallet address
+ * already exists (can receive funds) but needs on-chain deployment before it can
+ * validate signatures or execute transactions.
+ *
+ * @param client Client to use for deployment transaction (usually session client with paymaster)
+ * @param userAddress User's wallet address to deploy
+ * @param factoryAddress Factory contract address that can deploy the wallet
+ * @param factoryCalldata Deployment calldata for the factory
+ */
+declare function deployWallet(client: any, userAddress: `0x${string}`, factoryAddress: `0x${string}`, factoryCalldata: `0x${string}`): Promise<void>;
+/**
+ * Deploy a smart wallet if it's not already deployed
+ *
+ * @param client Client to use for deployment
+ * @param userAddress User's wallet address
+ * @param factoryAddress Factory contract address
+ * @param factoryCalldata Deployment calldata
+ * @returns True if deployment was needed and completed, false if already deployed
+ */
+declare function deployWalletIfNeeded(client: any, userAddress: `0x${string}`, factoryAddress: `0x${string}`, factoryCalldata: `0x${string}`): Promise<boolean>;
+
+export { type ConnectedClient, type ConnectorInfo, EntryKit, type EntryKitConfig, type EntryKitState, EntryKitStatus, type Paymaster, type PrerequisiteStatus, type SessionClient, type SetupSessionParams, type SetupSessionStatus, callWithSignature, checkDelegation, createBundlerClient, defineCall, deployWallet, deployWalletIfNeeded, getBundlerTransport, getPaymaster, getSessionAccount, getSessionClient, getSessionSigner, isWalletDeployed, sessionStorage, setupSession, signCall };
