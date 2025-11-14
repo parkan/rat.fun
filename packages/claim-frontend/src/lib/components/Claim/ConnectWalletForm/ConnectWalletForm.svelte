@@ -69,6 +69,7 @@
     if (availableConnectors.length === 1) {
       console.log("[ConnectWalletForm] Only one connector available, auto-connecting")
       connectWallet(availableConnectors[0].id)
+      showWalletSelect = true
       return
     }
 

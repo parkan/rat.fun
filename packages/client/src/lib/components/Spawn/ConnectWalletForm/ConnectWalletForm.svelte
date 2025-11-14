@@ -5,6 +5,7 @@
   import { getEntryKit, type ConnectorInfo } from "$lib/modules/entry-kit"
   import { debugInfo } from "$lib/modules/entry-kit/wagmiConfig"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
 
   const { walletType, onComplete = () => {} } = $props<{
     walletType: WALLET_TYPE
@@ -20,8 +21,42 @@
 
   const timeline = gsap.timeline()
 
-  // Preferred wallet order (case-insensitive matching)
+  const shouldShowDeeplinks = $derived($isPhone && !debugInfo.hasWindowEthereum)
+
   const PREFERRED_WALLET_ORDER = ["metamask", "phantom", "rabby", "coinbase"]
+
+  const WALLET_DEEPLINKS: Record<string, { ios: string; android: string; name: string }> = {
+    metamask: {
+      ios: "https://metamask.app.link/dapp/rat.fun",
+      android: "https://metamask.app.link/dapp/rat.fun",
+      name: "MetaMask"
+    },
+    phantom: {
+      ios: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
+      android: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
+      name: "Phantom"
+    },
+    coinbase: {
+      ios: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
+      android: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
+      name: "Coinbase Wallet"
+    },
+    rabby: {
+      ios: "rabby://dapp?url=https%3A%2F%2Frat.fun",
+      android: "rabby://dapp?url=https%3A%2F%2Frat.fun",
+      name: "Rabby"
+    }
+  }
+
+  function openWalletDeeplink(walletId: string) {
+    const deeplink = WALLET_DEEPLINKS[walletId]
+    if (!deeplink) return
+
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    const url = isIOS ? deeplink.ios : deeplink.android
+
+    window.location.href = url
+  }
 
   /**
    * Get the sort priority for a connector based on preferred order
@@ -93,9 +128,6 @@
       }
     }
 
-    console.log("[ConnectWalletForm] All connectors:", allConnectors)
-    console.log("[ConnectWalletForm] Available connectors:", availableConnectors)
-
     // If no connectors at all, show modal with debug panel
     if (allConnectors.length === 0) {
       showWalletSelect = true
@@ -143,14 +175,23 @@
         {/if}
       </div>
 
-      <!-- Simple wallet selection modal -->
       {#if showWalletSelect}
         <div class="wallet-modal">
           <div class="modal-content">
             <button class="close-btn" onclick={() => (showWalletSelect = false)}>×</button>
-            <h2>Connect Wallet</h2>
+            {#if shouldShowDeeplinks}
+              <h2>Open in wallet app</h2>
+            {:else}
+              <h2>Connect Wallet</h2>
+            {/if}
             <div class="wallet-options">
-              {#if availableConnectors.length > 0}
+              {#if shouldShowDeeplinks}
+                {#each Object.entries(WALLET_DEEPLINKS) as [walletId, wallet]}
+                  <button class="wallet-option" onclick={() => openWalletDeeplink(walletId)}>
+                    {wallet.name}
+                  </button>
+                {/each}
+              {:else if availableConnectors.length > 0}
                 {#each availableConnectors as connector}
                   <button
                     class="wallet-option"
