@@ -5,8 +5,6 @@
   import "tippy.js/dist/backdrop.css"
   import "tippy.js/animations/shift-away.css"
 
-  import { sdk } from "@farcaster/miniapp-sdk"
-
   import { initSound } from "$lib/modules/sound"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
@@ -31,6 +29,7 @@
   import Loading from "$lib/components/Loading/Loading.svelte"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { ShaderGlobal, Lightbox, Toasts } from "$lib/components/Shared"
+  import { sdk } from "@farcaster/miniapp-sdk"
 
   let { children }: LayoutProps = $props()
 
