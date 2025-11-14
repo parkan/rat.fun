@@ -38,7 +38,7 @@
     <p class="value">{$environment}</p>
   </div>
   <div class="tab">
-    <p class="key">:</p>
+    <p class="key">{strings.walletType}:</p>
     <p class="value">
       {$walletType}
     </p>

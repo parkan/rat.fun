@@ -132,9 +132,7 @@ t he mentally deranged. Results may vary.`,
     profit: "Profit",
     portfolio: "Portfolio",
     psychoObjectExplanation: () =>
-      scramble(
-        `psycho objects are materializations of mental items acquired tripping. Nobody really knows how they work, but they are 1000% real, definitely NOT hallucinations`
-      ),
+      `psycho objects are materializations of mental items acquired tripping. Nobody really knows how they work, but they are 1000% real, definitely NOT hallucinations`,
     rat: "Rat",
     ratAmountKilled: "Rats killed",
     ratBeingRevived:
@@ -212,13 +210,15 @@ t he mentally deranged. Results may vary.`,
     youLiquidatedTrip: (index: number): string => `You liquidated trip #${index}`,
     yourName: "YOUR NAME",
     youWillRecover: "You will recover",
-    allIsFine: "ALL IS FINE.\n JUST ONE MOMENT.\n WE VALUE YOUR PATIENCE."
+    allIsFine: "ALL IS FINE.\n JUST ONE MOMENT.\n WE VALUE YOUR PATIENCE.",
+    tripHeader: "Select a category",
+    tripHeaderNoRat: "Buy rat to select trip."
   }
 } as const
 
 type Locale = keyof typeof stringsData
 type Strings = (typeof stringsData)[Locale]
 
-let locale: Locale = "en-US"
+const locale: Locale = "en-US"
 
 export const strings: Strings = stringsData[locale]

@@ -45,10 +45,6 @@
     height: 100%;
     text-align: center;
 
-    .fullwidth {
-      width: 100%;
-    }
-
     &::before {
       content: var(--msg-empty);
       color: rgba(255, 255, 255, 0.6);

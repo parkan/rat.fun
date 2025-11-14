@@ -2,16 +2,14 @@
   import { playerAddress, player } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  // import { playSound } from "$lib/modules/sound"
-  // import { sendBuyWithEth } from "$lib/modules/action-manager/index.svelte"
-  // import { BigButton } from "$lib/components/Shared"
-  // import { busy } from "$lib/modules/action-manager/index.svelte"
   import { shortenAddress } from "$lib/modules/utils"
-  import { SmallButton } from "$lib/components/Shared"
   import { disconnectWallet } from "$lib/modules/entry-kit/connector"
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { strings } from "$lib/modules/strings"
+  import { walletType } from "$lib/modules/network"
+  import { WALLET_TYPE } from "$lib/mud/enums"
+  import { SmallButton } from "$lib/components/Shared"
 </script>
 
 <div class="main-dropdown-content">
@@ -45,27 +43,20 @@
       </p>
     </div>
   {/if}
-  <SmallButton
-    tippyText={strings.disconnectWallet}
-    onclick={async () => {
-      console.log("[MainDropdownContent] Disconnect button clicked")
-      await disconnectWallet()
-      console.log("[MainDropdownContent] Disconnect complete, returning to spawn")
-      UIState.set(UI.SPAWNING)
-    }}
-    text={strings.disconnectWallet}
-  ></SmallButton>
+  {#if $walletType !== WALLET_TYPE.BURNER}
+    <SmallButton
+      tippyText={strings.disconnectWallet}
+      onclick={async () => {
+        await disconnectWallet()
+        UIState.set(UI.SPAWNING)
+      }}
+      text={strings.disconnectWallet}
+    ></SmallButton>
+  {/if}
 </div>
 
 <style lang="scss">
   .main-dropdown-content {
-    .buy-button-container {
-      display: flex;
-      flex-flow: column nowrap;
-      margin-bottom: 8px;
-      height: 160px;
-    }
-
     p {
       margin: 0;
     }

@@ -252,7 +252,7 @@
                 <div class="value-amount">{CURRENCY_SYMBOL}{$minRatValueToEnter}</div>
               </div>
               <div class="value-box">
-                <div class="value-label">{strings.maxValuePerWin.toUpperCase}</div>
+                <div class="value-label">{strings.maxValuePerWin.toUpperCase()}</div>
                 <div class="value-amount">{CURRENCY_SYMBOL}{$maxValuePerWin}</div>
               </div>
             </div>
