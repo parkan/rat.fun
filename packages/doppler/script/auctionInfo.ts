@@ -22,19 +22,19 @@ if (!auctionParams) throw new Error(`Auction params not found for chainId ${chai
 const isToken0 = await publicClient.readContract({
   address: auctionParams.hookAddress,
   abi: dopplerHookAbi,
-  functionName: 'isToken0',
+  functionName: "isToken0"
 })
 
 const startingTick = await publicClient.readContract({
   address: auctionParams.hookAddress,
   abi: dopplerHookAbi,
-  functionName: 'startingTick',
+  functionName: "startingTick"
 })
 
 const endingTick = await publicClient.readContract({
   address: auctionParams.hookAddress,
   abi: dopplerHookAbi,
-  functionName: 'endingTick',
+  functionName: "endingTick"
 })
 
 const dynamicAuction = await sdk.getDynamicAuction(auctionParams.hookAddress)
@@ -42,15 +42,18 @@ const hookInfo = await dynamicAuction.getHookInfo()
 const assetData = await getAssetData(publicClient, chain.id, auctionParams.token.address)
 const slot0 = await univ4getSlot0(publicClient, auctionParams.poolId)
 
-console.log('isToken0, ticks', isToken0, startingTick, endingTick)
-console.log('hasGraduated', await dynamicAuction.hasGraduated())
-console.log('hoookInfo', hookInfo)
-console.log('assetData', assetData)
-console.log('pool slot0', slot0)
-console.log('totalProceeds', formatUnits(hookInfo.totalProceeds, auctionParams.numeraire.decimals))
-console.log('totalTokensSold', formatUnits(hookInfo.totalTokensSold, auctionParams.token.decimals))
-console.log('curPrice', tickToPriceWithParams(await dynamicAuction.getCurrentPrice(), auctionParams))
-console.log('starting', tickToPriceWithParams(startingTick, auctionParams))
-console.log('ending', tickToPriceWithParams(endingTick, auctionParams))
+console.log("isToken0, ticks", isToken0, startingTick, endingTick)
+console.log("hasGraduated", await dynamicAuction.hasGraduated())
+console.log("hoookInfo", hookInfo)
+console.log("assetData", assetData)
+console.log("pool slot0", slot0)
+console.log("totalProceeds", formatUnits(hookInfo.totalProceeds, auctionParams.numeraire.decimals))
+console.log("totalTokensSold", formatUnits(hookInfo.totalTokensSold, auctionParams.token.decimals))
+console.log(
+  "curPrice",
+  tickToPriceWithParams(await dynamicAuction.getCurrentPrice(), auctionParams)
+)
+console.log("starting", tickToPriceWithParams(startingTick, auctionParams))
+console.log("ending", tickToPriceWithParams(endingTick, auctionParams))
 
 console.log(await dynamicAuction.getCurrentPrice(), startingTick, endingTick)

@@ -1,7 +1,7 @@
-import { dopplerLensAbi, getAddresses, Quoter } from '@whetstone-research/doppler-sdk'
+import { dopplerLensAbi, getAddresses, Quoter } from "@whetstone-research/doppler-sdk"
 import { parseUnits, formatUnits, PublicClient } from "viem"
-import { AuctionParams } from './types';
-import { getPoolKey } from './getPoolKey';
+import { AuctionParams } from "./types"
+import { getPoolKey } from "./getPoolKey"
 
 export class CustomQuoter {
   public quoter: Quoter
@@ -55,7 +55,7 @@ export class CustomQuoter {
       poolKey: this.poolKey,
       zeroForOne,
       exactAmount: parseUnits(exactAmount.toString(), this.inputDecimals(zeroForOne)),
-      hookData: '0x',
+      hookData: "0x"
     })
 
     return {
@@ -71,7 +71,7 @@ export class CustomQuoter {
       poolKey: this.poolKey,
       zeroForOne,
       exactAmount: parseUnits(exactAmount.toString(), this.outputDecimals(zeroForOne)),
-      hookData: '0x',
+      hookData: "0x"
     })
 
     return {
@@ -82,24 +82,26 @@ export class CustomQuoter {
 
   async quoteExactInputV4Lens(exactAmount: number | string, numeraireForToken: boolean) {
     const zeroForOne = this.zeroForOne(numeraireForToken)
-  
+
     const { result } = await this.publicClient.simulateContract({
       address: getAddresses(this.chainId).dopplerLens,
       abi: dopplerLensAbi,
-      functionName: 'quoteDopplerLensData',
-      args: [{
-        poolKey: this.poolKey,
-        zeroForOne,
-        exactAmount: parseUnits(exactAmount.toString(), this.inputDecimals(zeroForOne)),
-        hookData: '0x',
-      }],
+      functionName: "quoteDopplerLensData",
+      args: [
+        {
+          poolKey: this.poolKey,
+          zeroForOne,
+          exactAmount: parseUnits(exactAmount.toString(), this.inputDecimals(zeroForOne)),
+          hookData: "0x"
+        }
+      ]
     })
 
     return {
       ...result,
       isToken0: this.isToken0,
       formattedAmount0: formatUnits(result.amount0, this.currency0.decimals),
-      formattedAmount1: formatUnits(result.amount1, this.currency1.decimals),
+      formattedAmount1: formatUnits(result.amount1, this.currency1.decimals)
     }
   }
 }

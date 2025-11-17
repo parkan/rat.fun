@@ -1,23 +1,34 @@
 import { getAddresses } from "@whetstone-research/doppler-sdk"
-import { Account, Chain, erc20Abi, Hex, maxUint256, parseAbi, PublicClient, Transport, TypedData, WalletClient } from "viem"
+import {
+  Account,
+  Chain,
+  erc20Abi,
+  Hex,
+  maxUint256,
+  parseAbi,
+  PublicClient,
+  Transport,
+  TypedData,
+  WalletClient
+} from "viem"
 
 const permit2Abi = parseAbi([
-  'function allowance(address user, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)'
+  "function allowance(address user, address token, address spender) external view returns (uint160 amount, uint48 expiration, uint48 nonce)"
 ])
 
 const PERMIT2_PERMIT_TYPE: TypedData = {
   PermitDetails: [
-    { name: 'token', type: 'address' },
-    { name: 'amount', type: 'uint160' },
-    { name: 'expiration', type: 'uint48' },
-    { name: 'nonce', type: 'uint48' },
+    { name: "token", type: "address" },
+    { name: "amount", type: "uint160" },
+    { name: "expiration", type: "uint48" },
+    { name: "nonce", type: "uint48" }
   ],
   PermitSingle: [
-    { name: 'details', type: 'PermitDetails' },
-    { name: 'spender', type: 'address' },
-    { name: 'sigDeadline', type: 'uint256' },
-  ],
-};
+    { name: "details", type: "PermitDetails" },
+    { name: "spender", type: "address" },
+    { name: "sigDeadline", type: "uint256" }
+  ]
+}
 
 export interface Permit2PermitData {
   details: {
@@ -37,14 +48,14 @@ export interface Permit2PermitData {
 export async function isPermit2AllowedMax(
   publicClient: PublicClient<Transport, Chain>,
   walletAddress: Hex,
-  tokenAddress: Hex,
+  tokenAddress: Hex
 ) {
   const addresses = getAddresses(publicClient.chain.id)
   const allowance = await publicClient.readContract({
     address: tokenAddress,
     abi: erc20Abi,
-    functionName: 'allowance',
-    args: [walletAddress, addresses.permit2],
+    functionName: "allowance",
+    args: [walletAddress, addresses.permit2]
   })
   return allowance < maxUint256
 }
@@ -55,14 +66,14 @@ export async function isPermit2AllowedMax(
 export async function permit2AllowMax(
   publicClient: PublicClient<Transport, Chain>,
   walletClient: WalletClient<Transport, Chain, Account>,
-  tokenAddress: Hex,
+  tokenAddress: Hex
 ) {
   const addresses = getAddresses(publicClient.chain.id)
   const txHash = await walletClient.writeContract({
     address: tokenAddress,
     abi: erc20Abi,
-    functionName: 'approve',
-    args: [addresses.permit2, maxUint256],
+    functionName: "approve",
+    args: [addresses.permit2, maxUint256]
   })
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
   return {
@@ -79,7 +90,7 @@ export async function signPermit2(
   walletClient: WalletClient<Transport, Chain, Account>,
   tokenAddress: Hex,
   spender: Hex,
-  amount: bigint,
+  amount: bigint
 ) {
   if (publicClient.chain.id !== walletClient.chain.id) {
     throw new Error("public and wallet client chains mismatch")
@@ -91,8 +102,8 @@ export async function signPermit2(
   const permit2Allowance = await publicClient.readContract({
     address: addresses.permit2,
     abi: permit2Abi,
-    functionName: 'allowance',
-    args: [walletClient.account.address, tokenAddress, addresses.universalRouter],
+    functionName: "allowance",
+    args: [walletClient.account.address, tokenAddress, addresses.universalRouter]
   })
   const nonce = BigInt(permit2Allowance[2])
 
@@ -103,23 +114,23 @@ export async function signPermit2(
       token: tokenAddress,
       amount,
       expiration: nowSec + 3600n,
-      nonce: nonce,
+      nonce: nonce
     },
     spender: spender,
-    sigDeadline: nowSec + 3600n,
+    sigDeadline: nowSec + 3600n
   } as const satisfies Permit2PermitData
 
   const permitSignature = await walletClient.signTypedData({
     account: walletClient.account,
     domain: {
-      name: 'Permit2',
+      name: "Permit2",
       chainId: publicClient.chain.id,
-      verifyingContract: addresses.permit2,
+      verifyingContract: addresses.permit2
     },
     types: PERMIT2_PERMIT_TYPE,
-    primaryType: 'PermitSingle',
-    message: permit,
-  });
+    primaryType: "PermitSingle",
+    message: permit
+  })
 
   return { permit, permitSignature }
 }

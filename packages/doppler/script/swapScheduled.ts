@@ -1,12 +1,12 @@
 import fs from "node:fs/promises"
 import { Hex } from "viem"
-import { privateKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount } from "viem/accounts"
 import dotenv from "dotenv"
-import { getClients } from "./utils/getClients";
-import { readAuctionParams } from "../src/readAuctionParams";
+import { getClients } from "./utils/getClients"
+import { readAuctionParams } from "../src/readAuctionParams"
 import { getTestNumeraireTokens } from "../src/getTestNumeraireTokens"
-import { validateChain } from "./utils/validateChain";
-import { swapWithLogs } from "./utils/swapWithLogs";
+import { validateChain } from "./utils/validateChain"
+import { swapWithLogs } from "./utils/swapWithLogs"
 
 dotenv.config()
 
@@ -42,13 +42,7 @@ let i = 0
 let totalAmount = 0
 let interval = setInterval(async () => {
   try {
-    const result = await swapWithLogs(
-      publicClient,
-      walletClient,
-      auctionParams,
-      amount,
-      false
-    )
+    const result = await swapWithLogs(publicClient, walletClient, auctionParams, amount, false)
 
     rows.push(result)
 
@@ -62,16 +56,16 @@ let interval = setInterval(async () => {
       amount = 125000
     }
     i++
-    if (i>60){
-      throw new Error('stop')
+    if (i > 60) {
+      throw new Error("stop")
     }
   } catch (e) {
     clearInterval(interval)
     console.log(e)
 
-    const headers = Object.keys(rows[0]).join(',')
-    const values = rows.map(row => Object.values(row).join(','))
-    const csv = [headers, ...values].join('\n')
-    await fs.writeFile('./swaplogs.csv', csv);
+    const headers = Object.keys(rows[0]).join(",")
+    const values = rows.map(row => Object.values(row).join(","))
+    const csv = [headers, ...values].join("\n")
+    await fs.writeFile("./swaplogs.csv", csv)
   }
 }, intervalLength)

@@ -12,12 +12,12 @@ export async function getAssetData(publicClient: PublicClient, chainId: number, 
     migrationPool,
     numTokensToSell,
     totalSupply,
-    integrator,
+    integrator
   ] = await publicClient.readContract({
     address: getAddresses(chainId).airlock,
     abi: airlockAbi,
-    functionName: 'getAssetData',
-    args: [tokenAddress],
+    functionName: "getAssetData",
+    args: [tokenAddress]
   })
 
   return {
@@ -30,6 +30,6 @@ export async function getAssetData(publicClient: PublicClient, chainId: number, 
     migrationPool,
     numTokensToSell,
     totalSupply,
-    integrator,
+    integrator
   }
 }

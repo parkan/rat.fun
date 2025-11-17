@@ -10,6 +10,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "tsc --noEmit",
+    "format": "prettier --write .",
     "createAuction": "tsx ./script/createAuction.ts",
     "migrate": "tsx ./script/migrate.ts",
     "v2removeLiquidity": "tsx ./script/v2removeLiquidity.ts",

@@ -1,12 +1,12 @@
-import { Hex} from "viem"
-import { privateKeyToAccount } from 'viem/accounts';
+import { Hex } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import dotenv from "dotenv"
-import { getClients } from "./utils/getClients";
-import { readAuctionParams } from "../src/readAuctionParams";
-import { promptChain } from "./utils/promptChain";
-import { univ2getPairInfo, univ2getPairReserves, univ2removeLiquidity } from "../src/uniswapv2";
-import { getAssetData } from "../src/getAssetData";
-import { balanceOf } from "../src/erc20";
+import { getClients } from "./utils/getClients"
+import { readAuctionParams } from "../src/readAuctionParams"
+import { promptChain } from "./utils/promptChain"
+import { univ2getPairInfo, univ2getPairReserves, univ2removeLiquidity } from "../src/uniswapv2"
+import { getAssetData } from "../src/getAssetData"
+import { balanceOf } from "../src/erc20"
 
 dotenv.config()
 
@@ -34,19 +34,30 @@ const pairInfo = await univ2getPairInfo(publicClient, assetData.migrationPool)
 
 // We have to remove enough liquidity to keep only `k` percent locked
 const minNumeraireReserve = (hookInfo.totalProceeds * k) / 100n
-const currentNumeraireReserve = auctionParams.isToken0 ? pairReserves.reserve1 : pairReserves.reserve0
+const currentNumeraireReserve = auctionParams.isToken0
+  ? pairReserves.reserve1
+  : pairReserves.reserve0
 if (currentNumeraireReserve <= minNumeraireReserve) {
-  throw new Error(`current numeraire reserve ${currentNumeraireReserve} is not above expected minimum ${minNumeraireReserve}`)
+  throw new Error(
+    `current numeraire reserve ${currentNumeraireReserve} is not above expected minimum ${minNumeraireReserve}`
+  )
 }
-const removableLiquidity = (currentNumeraireReserve - minNumeraireReserve) * pairInfo.totalSupply / currentNumeraireReserve
+const removableLiquidity =
+  ((currentNumeraireReserve - minNumeraireReserve) * pairInfo.totalSupply) / currentNumeraireReserve
 
 // Liquidity belonging to the current wallet
-const pairBalance = await balanceOf(publicClient, assetData.migrationPool, walletClient.account.address)
+const pairBalance = await balanceOf(
+  publicClient,
+  assetData.migrationPool,
+  walletClient.account.address
+)
 
 // Whether the wallet has enough liquidity to remove to get to `k` percent locked
 let balanceToRemove
 if (pairBalance <= removableLiquidity) {
-  console.log(`Suspiciously low pair balance ${pairBalance} compared to removable liquidity ${removableLiquidity}`)
+  console.log(
+    `Suspiciously low pair balance ${pairBalance} compared to removable liquidity ${removableLiquidity}`
+  )
   balanceToRemove = pairBalance
 } else {
   balanceToRemove = removableLiquidity
@@ -65,8 +76,7 @@ const txHash = await univ2removeLiquidity(
   auctionParams.token.address,
   auctionParams.numeraire.address,
   balanceToRemove,
-  walletClient.account.address,
-
+  walletClient.account.address
 )
 console.log(txHash)
 await publicClient.waitForTransactionReceipt({ hash: txHash })

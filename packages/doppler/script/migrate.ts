@@ -1,10 +1,10 @@
 import { Hex } from "viem"
-import { privateKeyToAccount } from 'viem/accounts';
-import { airlockAbi, getAddresses } from "@whetstone-research/doppler-sdk";
+import { privateKeyToAccount } from "viem/accounts"
+import { airlockAbi, getAddresses } from "@whetstone-research/doppler-sdk"
 import dotenv from "dotenv"
-import { getClients } from "./utils/getClients";
-import { readAuctionParams } from "../src/readAuctionParams";
-import { promptChain } from "./utils/promptChain";
+import { getClients } from "./utils/getClients"
+import { readAuctionParams } from "../src/readAuctionParams"
+import { promptChain } from "./utils/promptChain"
 
 dotenv.config()
 
@@ -24,8 +24,8 @@ const addresses = getAddresses(chain.id)
 const txHash = await walletClient.writeContract({
   address: addresses.airlock,
   abi: airlockAbi,
-  functionName: 'migrate',
-  args: [auctionParams.token.address],
+  functionName: "migrate",
+  args: [auctionParams.token.address]
 })
 console.log(txHash)
 await publicClient.waitForTransactionReceipt({ hash: txHash })

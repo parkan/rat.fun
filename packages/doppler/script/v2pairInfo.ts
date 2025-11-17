@@ -1,10 +1,15 @@
 import { Chain, createPublicClient, formatUnits, Hex, http } from "viem"
-import { privateKeyToAccount } from 'viem/accounts'
+import { privateKeyToAccount } from "viem/accounts"
 import dotenv from "dotenv"
 import { readAuctionParams } from "../src/readAuctionParams"
 import { promptChain } from "./utils/promptChain"
 import { getAssetData } from "../src/getAssetData"
-import { univ2getPairInfo, univ2getPairReserves, v2LockerGetAddress, v2LockerGetPoolState } from "../src/uniswapv2"
+import {
+  univ2getPairInfo,
+  univ2getPairReserves,
+  v2LockerGetAddress,
+  v2LockerGetPoolState
+} from "../src/uniswapv2"
 import { balanceOf } from "../src/erc20"
 
 dotenv.config()
@@ -17,7 +22,7 @@ const chain = await promptChain()
 
 const publicClient = createPublicClient({
   chain: chain as Chain,
-  transport: http(),
+  transport: http()
 })
 
 const auctionParams = readAuctionParams(chain.id)
@@ -49,13 +54,16 @@ const numeraireReserve = auctionParams.isToken0 ? reserve1 : reserve0
 console.log(pairReserves)
 console.log(pairInfo)
 
-console.log('token reserve', formatUnits(tokenReserve, auctionParams.token.decimals))
-console.log('numeraire reserve', formatUnits(numeraireReserve, auctionParams.numeraire.decimals))
+console.log("token reserve", formatUnits(tokenReserve, auctionParams.token.decimals))
+console.log("numeraire reserve", formatUnits(numeraireReserve, auctionParams.numeraire.decimals))
 
 const accountPairBalance = await balanceOf(publicClient, assetData.migrationPool, account.address)
-console.log('current account pair balance', accountPairBalance)
+console.log("current account pair balance", accountPairBalance)
 
 const locker = await v2LockerGetAddress(publicClient)
 const lockerPairBalance = await balanceOf(publicClient, assetData.migrationPool, locker)
-console.log('current locker pair balance', lockerPairBalance)
-console.log('migration locker state', await v2LockerGetPoolState(publicClient, locker, assetData.migrationPool))
+console.log("current locker pair balance", lockerPairBalance)
+console.log(
+  "migration locker state",
+  await v2LockerGetPoolState(publicClient, locker, assetData.migrationPool)
+)

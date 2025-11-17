@@ -1,11 +1,11 @@
-import { erc20Abi, Hex, PublicClient } from "viem";
+import { erc20Abi, Hex, PublicClient } from "viem"
 
 export async function getDecimals(publicClient: PublicClient, address: Hex) {
   return await publicClient.readContract({
     address,
     abi: erc20Abi,
-    functionName: 'decimals',
-    args: [],
+    functionName: "decimals",
+    args: []
   })
 }
 
@@ -13,8 +13,8 @@ export async function getName(publicClient: PublicClient, address: Hex) {
   return await publicClient.readContract({
     address,
     abi: erc20Abi,
-    functionName: 'name',
-    args: [],
+    functionName: "name",
+    args: []
   })
 }
 
@@ -22,20 +22,16 @@ export async function getSymbol(publicClient: PublicClient, address: Hex) {
   return await publicClient.readContract({
     address,
     abi: erc20Abi,
-    functionName: 'symbol',
-    args: [],
+    functionName: "symbol",
+    args: []
   })
 }
 
-export async function balanceOf(
-  publicClient: PublicClient,
-  address: Hex,
-  holderAddress: Hex
-) {
+export async function balanceOf(publicClient: PublicClient, address: Hex, holderAddress: Hex) {
   return await publicClient.readContract({
     address,
     abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: [holderAddress],
+    functionName: "balanceOf",
+    args: [holderAddress]
   })
 }

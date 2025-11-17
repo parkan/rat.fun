@@ -1,8 +1,8 @@
-import { Command } from 'commander'
+import { Command } from "commander"
 import { createPublicClient, http, Chain } from "viem"
-import { readAuctionParams } from '../src/readAuctionParams';
-import { CustomQuoter } from '../src/CustomQuoter';
-import { validateChain } from './utils/validateChain';
+import { readAuctionParams } from "../src/readAuctionParams"
+import { CustomQuoter } from "../src/CustomQuoter"
+import { validateChain } from "./utils/validateChain"
 
 // Set up command line options
 const program = new Command()
@@ -22,15 +22,15 @@ const amount: string = options.amount
 
 const publicClient = createPublicClient({
   chain: chain as Chain,
-  transport: http(),
-});
+  transport: http()
+})
 
 const auctionParams = readAuctionParams(chain.id)
 if (!auctionParams) throw new Error(`Auction params not found for chainId ${chain.id}`)
 
 const quoter = new CustomQuoter(publicClient, chain.id, auctionParams)
-console.log('isToken0', quoter.isToken0)
-console.log('zeroForOne', quoter.zeroForOne(true))
+console.log("isToken0", quoter.isToken0)
+console.log("zeroForOne", quoter.zeroForOne(true))
 
 let inputAmount
 let outputAmount
@@ -39,23 +39,22 @@ if (isOut) {
   const input = await quoter.quoteExactOutputV4(outputAmount, true)
   inputAmount = input.formattedAmount
 
-  console.log('input:', inputAmount)
-  console.log('exact output:', outputAmount)
+  console.log("input:", inputAmount)
+  console.log("exact output:", outputAmount)
 } else {
   inputAmount = amount
   const output = await quoter.quoteExactInputV4(inputAmount, true)
   outputAmount = output.formattedAmount
 
-  console.log('exact input:', inputAmount)
-  console.log('output:', outputAmount)
+  console.log("exact input:", inputAmount)
+  console.log("output:", outputAmount)
 }
 
 const lens = await quoter.quoteExactInputV4Lens(inputAmount, true)
 const lensTokenAmount = lens.isToken0 ? lens.formattedAmount0 : lens.formattedAmount1
 const lensNumeraireAmount = lens.isToken0 ? lens.formattedAmount1 : lens.formattedAmount0
-console.log('lens token:', lensTokenAmount)
-console.log('lens numeraire:', lensNumeraireAmount)
-
+console.log("lens token:", lensTokenAmount)
+console.log("lens numeraire:", lensNumeraireAmount)
 
 /*
 Tick range: 315400 329400

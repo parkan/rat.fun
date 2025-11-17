@@ -1,20 +1,12 @@
-import { AuctionParams } from "./types";
+import { AuctionParams } from "./types"
 
-function adjustToPoolPrice(
-  price: number,
-  decimals0: number,
-  decimals1: number,
-) {
+function adjustToPoolPrice(price: number, decimals0: number, decimals1: number) {
   // Price is supposed to be currency1/currency0, so multiply by decimals1, divide by decimals0
   const decimalAdjustment = 10 ** (decimals1 - decimals0)
   return price * decimalAdjustment
 }
 
-function adjustFromPoolPrice(
-  price: number,
-  decimals0: number,
-  decimals1: number,
-) {
+function adjustFromPoolPrice(price: number, decimals0: number, decimals1: number) {
   // Price is currency1/currency0, so divide by decimals1, multiply by decimals0
   const decimalAdjustment = 10 ** (decimals1 - decimals0)
   return price / decimalAdjustment
@@ -26,7 +18,7 @@ export function calculateTickRange(
   endPrice: number,
   tickSpacing: number,
   tokenDecimals: number,
-  numeraireDecimals: number,
+  numeraireDecimals: number
 ): { startTick: number; endTick: number } {
   // Convert numeraire/token price to currency1/currency0 price
   if (!isToken0) {
@@ -42,12 +34,8 @@ export function calculateTickRange(
   endPrice = adjustToPoolPrice(endPrice, decimals0, decimals1)
 
   // Convert price range to tick range, swapping the order
-  const startTick =
-    Math.floor(Math.log(endPrice) / Math.log(1.0001) / tickSpacing) *
-    tickSpacing
-  const endTick =
-    Math.ceil(Math.log(startPrice) / Math.log(1.0001) / tickSpacing) *
-    tickSpacing
+  const startTick = Math.floor(Math.log(endPrice) / Math.log(1.0001) / tickSpacing) * tickSpacing
+  const endTick = Math.ceil(Math.log(startPrice) / Math.log(1.0001) / tickSpacing) * tickSpacing
 
   return { startTick, endTick }
 }
@@ -71,14 +59,11 @@ export function tickToPrice(
   return adjustedPrice
 }
 
-export function tickToPriceWithParams(
-  tick: number | bigint,
-  auctionParams: AuctionParams
-) {
+export function tickToPriceWithParams(tick: number | bigint, auctionParams: AuctionParams) {
   return tickToPrice(
     auctionParams.isToken0,
     tick,
     auctionParams.token.decimals,
     auctionParams.numeraire.decimals
-  );
+  )
 }

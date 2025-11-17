@@ -1,9 +1,14 @@
-import { Account, parseEther, parseUnits, PublicClient } from "viem";
-import { DAY_SECONDS, DynamicAuctionBuilder, isToken0Expected, SupportedChainId } from "@whetstone-research/doppler-sdk";
-import { getNumeraire } from "./getNumeraire";
-import { getDecimals } from "./erc20";
-import { calculateTickRange } from "./tickMath";
-import { CustomCreateDynamicAuctionParams, CustomTokenConfig } from "./CustomDopplerFactory";
+import { Account, parseEther, parseUnits, PublicClient } from "viem"
+import {
+  DAY_SECONDS,
+  DynamicAuctionBuilder,
+  isToken0Expected,
+  SupportedChainId
+} from "@whetstone-research/doppler-sdk"
+import { getNumeraire } from "./getNumeraire"
+import { getDecimals } from "./erc20"
+import { calculateTickRange } from "./tickMath"
+import { CustomCreateDynamicAuctionParams, CustomTokenConfig } from "./CustomDopplerFactory"
 
 function computeOptimalGamma(
   startTick: number,
@@ -23,12 +28,16 @@ function computeOptimalGamma(
   // Ensure minimum of one tickSpacing
   gamma = Math.max(tickSpacing, gamma)
   if (gamma % tickSpacing !== 0) {
-    throw new Error('Computed gamma must be divisible by tick spacing')
+    throw new Error("Computed gamma must be divisible by tick spacing")
   }
   return gamma
 }
 
-export async function buildAuctionParams(publicClient: PublicClient, userAccount: Account, chainId: SupportedChainId) {
+export async function buildAuctionParams(
+  publicClient: PublicClient,
+  userAccount: Account,
+  chainId: SupportedChainId
+) {
   const numeraire = getNumeraire(chainId)
   const isToken0 = isToken0Expected(numeraire)
   const tickSpacing = 30
@@ -41,21 +50,28 @@ export async function buildAuctionParams(publicClient: PublicClient, userAccount
 
   const startPrice = 0.005
   const endPrice = 0.014
-  const { startTick, endTick } = calculateTickRange(isToken0, startPrice, endPrice, tickSpacing, tokenDecimals, numeraireDecimals)
-  console.log('Tick range:', startTick, endTick)
+  const { startTick, endTick } = calculateTickRange(
+    isToken0,
+    startPrice,
+    endPrice,
+    tickSpacing,
+    tokenDecimals,
+    numeraireDecimals
+  )
+  console.log("Tick range:", startTick, endTick)
 
   //const duration = 30 * DAY_SECONDS
   //const epochLength = 0.5 * DAY_SECONDS
-  const duration = 30 * DAY_SECONDS / 30 * 7
-  const epochLength = 0.5 * DAY_SECONDS / 30 * 7
+  const duration = ((30 * DAY_SECONDS) / 30) * 7
+  const epochLength = ((0.5 * DAY_SECONDS) / 30) * 7
 
   const gamma = 7 * computeOptimalGamma(startTick, endTick, duration, epochLength, tickSpacing)
 
   const builder = new DynamicAuctionBuilder(chainId)
     .tokenConfig({ name: "Slopamine", symbol: "RAT", tokenURI: "", yearlyMintRate: 0n })
     .saleConfig({
-      initialSupply: parseEther('90000000'),
-      numTokensToSell: parseEther('64000000'),
+      initialSupply: parseEther("90000000"),
+      numTokensToSell: parseEther("64000000"),
       numeraire: getNumeraire(chainId)
     })
     .poolConfig({ fee: 3000, tickSpacing })
@@ -70,7 +86,7 @@ export async function buildAuctionParams(publicClient: PublicClient, userAccount
       gamma
     })
     .withMigration({
-      type: 'uniswapV2'
+      type: "uniswapV2"
     })
     .withUserAddress(userAccount.address)
     .withIntegrator(userAccount.address)

@@ -1,62 +1,90 @@
-import { Address, encodeAbiParameters, encodePacked, Hash, Hex, keccak256, PublicClient } from "viem";
-import { computeOptimalGamma, CreateDynamicAuctionParams, CreateParams, DEFAULT_PD_SLUGS, DEFAULT_V4_YEARLY_MINT_RATE, DERC20Bytecode, DopplerBytecode, DopplerDN404Bytecode, DopplerFactory, FLAG_MASK, getAddresses, isToken0Expected, SupportedChainId, ZERO_ADDRESS } from "@whetstone-research/doppler-sdk";
-import { DERC20BuyLimitBytecode } from "./bytecodes";
+import {
+  Address,
+  encodeAbiParameters,
+  encodePacked,
+  Hash,
+  Hex,
+  keccak256,
+  PublicClient
+} from "viem"
+import {
+  computeOptimalGamma,
+  CreateDynamicAuctionParams,
+  CreateParams,
+  DEFAULT_PD_SLUGS,
+  DEFAULT_V4_YEARLY_MINT_RATE,
+  DERC20Bytecode,
+  DopplerBytecode,
+  DopplerDN404Bytecode,
+  DopplerFactory,
+  FLAG_MASK,
+  getAddresses,
+  isToken0Expected,
+  SupportedChainId,
+  ZERO_ADDRESS
+} from "@whetstone-research/doppler-sdk"
+import { DERC20BuyLimitBytecode } from "./bytecodes"
 
 // Core configuration types
 // Token configuration (discriminated union)
 interface StandardTokenConfig {
-  type?: 'standard'; // default behavior (backwards compatible)
-  name: string;
-  symbol: string;
-  tokenURI: string;
-  yearlyMintRate?: bigint; // Optional yearly mint rate (in WAD, default: 2% = 0.02e18)
+  type?: "standard" // default behavior (backwards compatible)
+  name: string
+  symbol: string
+  tokenURI: string
+  yearlyMintRate?: bigint // Optional yearly mint rate (in WAD, default: 2% = 0.02e18)
 }
 
 interface Doppler404TokenConfig {
-  type: 'doppler404';
-  name: string;
-  symbol: string;
-  baseURI: string;
+  type: "doppler404"
+  name: string
+  symbol: string
+  baseURI: string
   // Optional unit for DN404 factory (uint256). Defaults to 1000 when omitted.
-  unit?: bigint;
+  unit?: bigint
 }
 
 export interface CustomTokenConfig extends StandardTokenConfig {
   spendLimitAmount: bigint
 }
 
-export interface CustomCreateDynamicAuctionParams<C extends SupportedChainId = SupportedChainId> extends CreateDynamicAuctionParams<C> {
+export interface CustomCreateDynamicAuctionParams<C extends SupportedChainId = SupportedChainId>
+  extends CreateDynamicAuctionParams<C> {
   token: CustomTokenConfig
 }
 
 // Custom data for governance and token factories
-export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId> extends DopplerFactory<C> {
+export class CustomDopplerFactory<
+  C extends SupportedChainId = SupportedChainId
+> extends DopplerFactory<C> {
   async createDynamicAuction(params: CustomCreateDynamicAuctionParams<C>) {
     return super.createDynamicAuction(params)
   }
 
   async encodeCreateDynamicAuctionParams(params: CustomCreateDynamicAuctionParams<C>): Promise<{
-    createParams: CreateParams,
-    hookAddress: Address,
+    createParams: CreateParams
+    hookAddress: Address
     tokenAddress: Address
   }> {
     if (!params.token.spendLimitAmount) {
       throw new Error("token spendLimitAmount not specified")
     }
 
-     // Validate parameters
+    // Validate parameters
     this.validateDynamicAuctionParams(params)
 
     const addresses = getAddresses(this.chainId)
 
     // 1. Calculate gamma if not provided
-    const gamma = params.auction.gamma ?? computeOptimalGamma(
-      params.auction.startTick,
-      params.auction.endTick,
-      params.auction.duration,
-      params.auction.epochLength,
-      params.pool.tickSpacing
-    )
+    const gamma =
+      params.auction.gamma ??
+      computeOptimalGamma(
+        params.auction.startTick,
+        params.auction.endTick,
+        params.auction.duration,
+        params.auction.epochLength,
+        params.pool.tickSpacing
+      )
 
     // 2. Prepare time parameters
     // Use provided block timestamp or fetch the latest
@@ -64,7 +92,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
     if (params.blockTimestamp !== undefined) {
       blockTimestamp = params.blockTimestamp
     } else {
-      const latestBlock = await (this.publicClient as PublicClient).getBlock({ blockTag: 'latest' })
+      const latestBlock = await (this.publicClient as PublicClient).getBlock({ blockTag: "latest" })
       blockTimestamp = Number((latestBlock as { timestamp: bigint | number }).timestamp)
     }
 
@@ -92,7 +120,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
     // 4. Prepare token parameters (standard vs Doppler404)
     if (this.isDoppler404Token(params.token)) {
       if (!addresses.doppler404Factory || addresses.doppler404Factory === ZERO_ADDRESS) {
-        throw new Error('Doppler404 factory address not configured for this chain')
+        throw new Error("Doppler404 factory address not configured for this chain")
       }
     }
 
@@ -104,7 +132,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
             name: t.name,
             symbol: t.symbol,
             baseURI: t.baseURI,
-            unit: t.unit !== undefined ? BigInt(t.unit) : 1000n,
+            unit: t.unit !== undefined ? BigInt(t.unit) : 1000n
           }
         })()
       : (() => {
@@ -138,66 +166,66 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
             tokenURI: t.tokenURI,
             buyLimitedPoolManager: addresses.poolManager,
             buyLimitEnd: BigInt(endTime),
-            spendLimitAmount: params.token.spendLimitAmount,
+            spendLimitAmount: params.token.spendLimitAmount
           }
         })()
 
     // 5. Mine hook address with appropriate flags
     // Resolve token factory with override priority (works for both standard and doppler404 variants)
     const resolvedTokenFactoryDyn: Address | undefined =
-      params.modules?.tokenFactory ?? (
-        this.isDoppler404Token(params.token)
-          ? (addresses.doppler404Factory as Address | undefined)
-          : addresses.tokenFactory
-      )
+      params.modules?.tokenFactory ??
+      (this.isDoppler404Token(params.token)
+        ? (addresses.doppler404Factory as Address | undefined)
+        : addresses.tokenFactory)
 
     if (!resolvedTokenFactoryDyn || resolvedTokenFactoryDyn === ZERO_ADDRESS) {
-      throw new Error('Token factory address not configured. Provide an explicit address via builder.withTokenFactory(...) or ensure chain config includes a valid factory.')
+      throw new Error(
+        "Token factory address not configured. Provide an explicit address via builder.withTokenFactory(...) or ensure chain config includes a valid factory."
+      )
     }
 
-    const [salt, hookAddress, tokenAddress, poolInitializerData, encodedTokenFactoryData] = this.mineHookAddress({
-      airlock: params.modules?.airlock ?? addresses.airlock,
-      poolManager: params.modules?.poolManager ?? addresses.poolManager,
-      deployer: params.modules?.dopplerDeployer ?? addresses.dopplerDeployer,
-      initialSupply: params.sale.initialSupply,
-      numTokensToSell: params.sale.numTokensToSell,
-      numeraire: params.sale.numeraire,
-      tokenFactory: resolvedTokenFactoryDyn,
-      tokenFactoryData: tokenFactoryData,
-      poolInitializer: params.modules?.v4Initializer ?? addresses.v4Initializer,
-      poolInitializerData: dopplerData,
-      tokenVariant: this.isDoppler404Token(params.token) ? 'doppler404' : 'standard',
-      customDerc20Bytecode: DERC20BuyLimitBytecode
-    })
+    const [salt, hookAddress, tokenAddress, poolInitializerData, encodedTokenFactoryData] =
+      this.mineHookAddress({
+        airlock: params.modules?.airlock ?? addresses.airlock,
+        poolManager: params.modules?.poolManager ?? addresses.poolManager,
+        deployer: params.modules?.dopplerDeployer ?? addresses.dopplerDeployer,
+        initialSupply: params.sale.initialSupply,
+        numTokensToSell: params.sale.numTokensToSell,
+        numeraire: params.sale.numeraire,
+        tokenFactory: resolvedTokenFactoryDyn,
+        tokenFactoryData: tokenFactoryData,
+        poolInitializer: params.modules?.v4Initializer ?? addresses.v4Initializer,
+        poolInitializerData: dopplerData,
+        tokenVariant: this.isDoppler404Token(params.token) ? "doppler404" : "standard",
+        customDerc20Bytecode: DERC20BuyLimitBytecode
+      })
 
     // 6. Encode migration data
     const liquidityMigratorData = this.encodeMigrationData(params.migration)
 
     // 7. Encode governance factory data
-    const governanceFactoryData = encodeAbiParameters(
-      [
-        { type: 'address' },
-      ],
-      [
-        params.userAddress,
-      ]
-    )
+    const governanceFactoryData = encodeAbiParameters([{ type: "address" }], [params.userAddress])
 
     // 7.1 Choose governance factory
-    const useNoOpGovernance = params.governance.type === 'noOp'
+    const useNoOpGovernance = params.governance.type === "noOp"
 
     const governanceFactoryAddress: Address = (() => {
       if (useNoOpGovernance) {
         // Prefer unified override; otherwise require chain's no-op governance factory
-        const resolved = params.modules?.governanceFactory ?? (addresses.noOpGovernanceFactory ?? ZERO_ADDRESS)
+        const resolved =
+          params.modules?.governanceFactory ?? addresses.noOpGovernanceFactory ?? ZERO_ADDRESS
         if (!resolved || resolved === ZERO_ADDRESS) {
-          throw new Error('No-op governance requested, but no-op governanceFactory is not configured on this chain. Provide a governanceFactory override or use a supported chain.')
+          throw new Error(
+            "No-op governance requested, but no-op governanceFactory is not configured on this chain. Provide a governanceFactory override or use a supported chain."
+          )
         }
         return resolved
       }
       const resolved = params.modules?.governanceFactory ?? addresses.governanceFactory
       if (!resolved || resolved === ZERO_ADDRESS) {
-        throw new Error('Standard governance requested but governanceFactory is not deployed on this chain.')
+        throw new Error(
+          "Standard governance requested but governanceFactory is not deployed on this chain."
+        )
       }
       return resolved
     })()
@@ -216,7 +244,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
       liquidityMigrator: this.getMigratorAddress(params.migration, params.modules),
       liquidityMigratorData: liquidityMigratorData,
       integrator: params.integrator ?? ZERO_ADDRESS,
-      salt: salt,
+      salt: salt
     }
 
     return { createParams, hookAddress, tokenAddress }
@@ -224,12 +252,12 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
 
   /**
    * Mines a salt and hook address with the appropriate flags
-   * 
+   *
    * This method iterates through possible salt values to find a combination that:
    * - Produces a hook address with required Doppler flags
    * - Maintains proper token ordering relative to numeraire
    * - Ensures deterministic deployment addresses
-   * 
+   *
    * @param params - Parameters for hook address mining
    * @returns Tuple of [salt, hook address, token address, pool data, token data]
    * @throws {Error} If no valid salt can be found within the search limit
@@ -279,7 +307,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
       tickSpacing: number
     }
     customDerc20Bytecode?: `0x${string}`
-    tokenVariant?: 'standard' | 'doppler404'
+    tokenVariant?: "standard" | "doppler404"
   }): [Hash, Address, Address, Hex, Hex] {
     const isToken0 = isToken0Expected(params.numeraire)
 
@@ -294,23 +322,23 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
       gamma,
       numPDSlugs,
       fee,
-      tickSpacing,
+      tickSpacing
     } = params.poolInitializerData
 
     const poolInitializerData = encodeAbiParameters(
       [
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'int24' },
-        { type: 'int24' },
-        { type: 'uint256' },
-        { type: 'int24' },
-        { type: 'bool' },
-        { type: 'uint256' },
-        { type: 'uint24' },
-        { type: 'int24' },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "int24" },
+        { type: "int24" },
+        { type: "uint256" },
+        { type: "int24" },
+        { type: "bool" },
+        { type: "uint256" },
+        { type: "uint24" },
+        { type: "int24" }
       ],
       [
         minimumProceeds,
@@ -324,7 +352,7 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
         isToken0,
         numPDSlugs,
         fee,
-        tickSpacing,
+        tickSpacing
       ]
     )
 
@@ -332,20 +360,20 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
 
     const hookInitHashData = encodeAbiParameters(
       [
-        { type: 'address' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'uint256' },
-        { type: 'int24' },
-        { type: 'int24' },
-        { type: 'uint256' },
-        { type: 'int24' },
-        { type: 'bool' },
-        { type: 'uint256' },
-        { type: 'address' },
-        { type: 'uint24' },
+        { type: "address" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "uint256" },
+        { type: "int24" },
+        { type: "int24" },
+        { type: "uint256" },
+        { type: "int24" },
+        { type: "bool" },
+        { type: "uint256" },
+        { type: "address" },
+        { type: "uint24" }
       ],
       [
         poolManager,
@@ -361,19 +389,54 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
         isToken0,
         numPDSlugs,
         poolInitializer,
-        fee,
+        fee
       ]
     )
 
     const hookInitHash = keccak256(
-      encodePacked(
-        ['bytes', 'bytes'],
-        [DopplerBytecode as Hex, hookInitHashData]
-      )
+      encodePacked(["bytes", "bytes"], [DopplerBytecode as Hex, hookInitHashData])
     )
 
     const tokenFactoryData = (() => {
-        const {
+      const {
+        name,
+        symbol,
+        yearlyMintRate,
+        vestingDuration,
+        recipients,
+        amounts,
+        tokenURI,
+        buyLimitedPoolManager,
+        buyLimitEnd,
+        spendLimitAmount
+      } = params.tokenFactoryData as {
+        name: string
+        symbol: string
+        initialSupply: bigint
+        airlock: Address
+        yearlyMintRate: bigint
+        vestingDuration: bigint
+        recipients: Address[]
+        amounts: bigint[]
+        tokenURI: string
+        buyLimitedPoolManager: Address
+        buyLimitEnd: bigint
+        spendLimitAmount: bigint
+      }
+      return encodeAbiParameters(
+        [
+          { type: "string" },
+          { type: "string" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "address[]" },
+          { type: "uint256[]" },
+          { type: "string" },
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" }
+        ],
+        [
           name,
           symbol,
           yearlyMintRate,
@@ -384,83 +447,55 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
           buyLimitedPoolManager,
           buyLimitEnd,
           spendLimitAmount
-        } = params.tokenFactoryData as {
-          name: string
-          symbol: string
-          initialSupply: bigint
-          airlock: Address
-          yearlyMintRate: bigint
-          vestingDuration: bigint
-          recipients: Address[]
-          amounts: bigint[]
-          tokenURI: string
-          buyLimitedPoolManager: Address
-          buyLimitEnd: bigint
-          spendLimitAmount: bigint
-        }
-        return encodeAbiParameters(
-          [
-            { type: 'string' },
-            { type: 'string' },
-            { type: 'uint256' },
-            { type: 'uint256' },
-            { type: 'address[]' },
-            { type: 'uint256[]' },
-            { type: 'string' },
-            { type: 'address' },
-            { type: 'uint256' },
-            { type: 'uint256' },
-          ],
-          [
-            name,
-            symbol,
-            yearlyMintRate,
-            vestingDuration,
-            recipients,
-            amounts,
-            tokenURI,
-            buyLimitedPoolManager,
-            buyLimitEnd,
-            spendLimitAmount,
-          ]
-        )
-      })()
+        ]
+      )
+    })()
 
     // Compute token init hash; use DN404 bytecode if tokenVariant is doppler404
     let tokenInitHash: Hash | undefined
     {
-      const { name, symbol, yearlyMintRate, vestingDuration, recipients, amounts, tokenURI, buyLimitedPoolManager, buyLimitEnd, spendLimitAmount } =
-        params.tokenFactoryData as {
-          name: string
-          symbol: string
-          initialSupply: bigint
-          airlock: Address
-          yearlyMintRate: bigint
-          vestingDuration: bigint
-          recipients: Address[]
-          amounts: bigint[]
-          tokenURI: string
-          buyLimitedPoolManager: Address
-          buyLimitEnd: bigint
-          spendLimitAmount: bigint
-        }
+      const {
+        name,
+        symbol,
+        yearlyMintRate,
+        vestingDuration,
+        recipients,
+        amounts,
+        tokenURI,
+        buyLimitedPoolManager,
+        buyLimitEnd,
+        spendLimitAmount
+      } = params.tokenFactoryData as {
+        name: string
+        symbol: string
+        initialSupply: bigint
+        airlock: Address
+        yearlyMintRate: bigint
+        vestingDuration: bigint
+        recipients: Address[]
+        amounts: bigint[]
+        tokenURI: string
+        buyLimitedPoolManager: Address
+        buyLimitEnd: bigint
+        spendLimitAmount: bigint
+      }
       const { airlock, initialSupply } = params
       const initHashData = encodeAbiParameters(
         [
-          { type: 'string' },
-          { type: 'string' },
-          { type: 'uint256' },
-          { type: 'address' },
-          { type: 'address' },
-          { type: 'uint256' },
-          { type: 'uint256' },
-          { type: 'address[]' },
-          { type: 'uint256[]' },
-          { type: 'string' },
-          { type: 'address' },
-          { type: 'uint256' },
-          { type: 'uint256' },
-          { type: 'address' },
+          { type: "string" },
+          { type: "string" },
+          { type: "uint256" },
+          { type: "address" },
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "address[]" },
+          { type: "uint256[]" },
+          { type: "string" },
+          { type: "address" },
+          { type: "uint256" },
+          { type: "uint256" },
+          { type: "address" }
         ],
         [
           name,
@@ -476,38 +511,33 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
           buyLimitedPoolManager,
           buyLimitEnd,
           spendLimitAmount,
-          airlock,
+          airlock
         ]
       )
       tokenInitHash = keccak256(
-        encodePacked(['bytes', 'bytes'], [params.customDerc20Bytecode as Hex ?? DERC20Bytecode as Hex, initHashData])
+        encodePacked(
+          ["bytes", "bytes"],
+          [(params.customDerc20Bytecode as Hex) ?? (DERC20Bytecode as Hex), initHashData]
+        )
       )
     }
 
     // Use the exact flags from V4 SDK
     const flags = BigInt(
       (1 << 13) | // BEFORE_INITIALIZE_FLAG
-      (1 << 12) | // AFTER_INITIALIZE_FLAG
-      (1 << 11) | // BEFORE_ADD_LIQUIDITY_FLAG
-      (1 << 7) |  // BEFORE_SWAP_FLAG
-      (1 << 6) |  // AFTER_SWAP_FLAG
-      (1 << 5)    // BEFORE_DONATE_FLAG
+        (1 << 12) | // AFTER_INITIALIZE_FLAG
+        (1 << 11) | // BEFORE_ADD_LIQUIDITY_FLAG
+        (1 << 7) | // BEFORE_SWAP_FLAG
+        (1 << 6) | // AFTER_SWAP_FLAG
+        (1 << 5) // BEFORE_DONATE_FLAG
     )
 
     for (let salt = BigInt(0); salt < BigInt(1_000_000); salt++) {
-      const saltBytes = `0x${salt.toString(16).padStart(64, '0')}` as Hash
-      const hook = this.computeCreate2Address(
-        saltBytes,
-        hookInitHash,
-        params.deployer
-      )
+      const saltBytes = `0x${salt.toString(16).padStart(64, "0")}` as Hash
+      const hook = this.computeCreate2Address(saltBytes, hookInitHash, params.deployer)
       const hookBigInt = BigInt(hook)
       if (tokenInitHash) {
-        const token = this.computeCreate2Address(
-          saltBytes,
-          tokenInitHash,
-          params.tokenFactory
-        )
+        const token = this.computeCreate2Address(saltBytes, tokenInitHash, params.tokenFactory)
         const tokenBigInt = BigInt(token)
         const numeraireBigInt = BigInt(params.numeraire)
         if (
@@ -520,6 +550,6 @@ export class CustomDopplerFactory<C extends SupportedChainId = SupportedChainId>
       }
     }
 
-    throw new Error('AirlockMiner: could not find salt')
+    throw new Error("AirlockMiner: could not find salt")
   }
 }

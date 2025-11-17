@@ -1,11 +1,11 @@
 import { Hex } from "viem"
-import { privateKeyToAccount } from 'viem/accounts';
-import { Command } from "commander";
+import { privateKeyToAccount } from "viem/accounts"
+import { Command } from "commander"
 import dotenv from "dotenv"
-import { getClients } from "./utils/getClients";
-import { readAuctionParams } from "../src/readAuctionParams";
-import { validateChain } from "./utils/validateChain";
-import { swapWithLogs } from "./utils/swapWithLogs";
+import { getClients } from "./utils/getClients"
+import { readAuctionParams } from "../src/readAuctionParams"
+import { validateChain } from "./utils/validateChain"
+import { swapWithLogs } from "./utils/swapWithLogs"
 
 dotenv.config()
 
@@ -34,10 +34,4 @@ const { publicClient, walletClient } = getClients(account, chain)
 const auctionParams = readAuctionParams(chain.id)
 if (!auctionParams) throw new Error(`Auction params not found for chainId ${chain.id}`)
 
-await swapWithLogs(
-  publicClient,
-  walletClient,
-  auctionParams,
-  amount,
-  isOut
-)
+await swapWithLogs(publicClient, walletClient, auctionParams, amount, isOut)
