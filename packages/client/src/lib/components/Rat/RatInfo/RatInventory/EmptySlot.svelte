@@ -18,7 +18,7 @@
   }
 </script>
 
-<Tooltip content={strings.psychoObjectExplanation()}>
+<Tooltip content={strings.psychoObjectExplanation}>
   <div
     style="--msg-empty: '{strings.empty.toUpperCase()}'"
     in:fade|global={{ duration: 80, delay: 20 + index * 20 }}

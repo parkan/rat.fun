@@ -9,11 +9,10 @@
   let inventory = $derived<Item[]>(displayRat ? getRatInventory(displayRat) : [])
 
   const MAX_INVENTORY_SIZE = 6
+
   let emptySlots = $derived(Array(MAX_INVENTORY_SIZE - (inventory?.length || 0)).fill(null))
 
   let inventorySlots = $derived([...inventory, ...emptySlots])
-
-  $inspect(inventorySlots)
 </script>
 
 <div class="inventory">
