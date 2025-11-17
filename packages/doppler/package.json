@@ -26,12 +26,11 @@
     "@whetstone-research/doppler-sdk": "npm:@dk1a/doppler-sdk-fork@0.0.1-alpha.57",
     "doppler-router": "^1.0.15",
     "dotenv": "^17.2.3",
-    "viem": "2.38.5"
+    "viem": "2.39"
   },
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.7.2",
     "commander": "^14.0.2",
-    "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "tsx": "^4.20.6"
   }
