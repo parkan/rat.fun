@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { EnterTripReturnValue } from "@server/modules/types"
-  import { frozenRat, resetProcessingState, resetFrozenState } from "$lib/components/GameRun/state.svelte"
+  import {
+    frozenRat,
+    resetProcessingState,
+    resetFrozenState
+  } from "$lib/components/GameRun/state.svelte"
   import { goto } from "$app/navigation"
   import { gsap } from "gsap"
   import { BigButton, RatAvatar } from "$lib/components/Shared"
@@ -103,6 +107,10 @@
       overflow: visible;
       position: absolute;
       top: -180px;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
     }
 
     .event-text {
@@ -113,6 +121,10 @@
       &.dead {
         color: black;
         background: red;
+      }
+
+      @media (max-width: 768px) {
+        display: none;
       }
     }
 

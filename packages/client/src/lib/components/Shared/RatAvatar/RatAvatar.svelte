@@ -353,6 +353,7 @@
       height: 100%;
       object-fit: contain;
       position: absolute;
+      inset: 0;
       pointer-events: none;
 
       &.colored {

@@ -78,7 +78,9 @@
 
 <div class="health-bar">
   <div class="health-bar-inner">
-    <span class="health-bar-inner-value">{HEALTH_SYMBOL} <span bind:this={valueElement}>{oldHealth}</span></span>
+    <span class="health-bar-inner-value">
+      {HEALTH_SYMBOL} <span bind:this={valueElement}>{oldHealth}</span>
+    </span>
     <div
       bind:this={fillElement}
       class="health-bar-inner-fill"
