@@ -1,6 +1,6 @@
 import { dopplerLensAbi, getAddresses, Quoter } from '@whetstone-research/doppler-sdk'
 import { parseUnits, formatUnits, PublicClient } from "viem"
-import { AuctionParams } from './readAuctionParams';
+import { AuctionParams } from './types';
 import { getPoolKey } from './getPoolKey';
 
 export class CustomQuoter {

@@ -1,4 +1,4 @@
-import { AuctionParams } from "./readAuctionParams";
+import { AuctionParams } from "./types";
 
 function adjustToPoolPrice(
   price: number,

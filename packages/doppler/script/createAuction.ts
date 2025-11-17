@@ -3,14 +3,14 @@ import { Hex } from "viem"
 import { privateKeyToAccount } from 'viem/accounts'
 import { computePoolId, dopplerHookAbi } from "@whetstone-research/doppler-sdk"
 import dotenv from "dotenv"
-import { getClients } from './utils/getClients'
 import { buildAuctionParams } from '../src/buildAuctionParams'
-import { AuctionParams } from "../src/readAuctionParams"
-import { getDecimals, getName, getSymbol } from "../src/erc20"
-import { promptChain } from "./utils/promptChain"
 import { auctionParamsFilePath } from "../src/constants"
 import { CustomDopplerFactory } from "../src/CustomDopplerFactory"
-import { getPoolKey } from "../src"
+import { getDecimals, getName, getSymbol } from "../src/erc20"
+import { getPoolKey } from "../src/getPoolKey"
+import { AuctionParams } from "../src/types"
+import { getClients } from './utils/getClients'
+import { promptChain } from "./utils/promptChain"
 
 dotenv.config()
 

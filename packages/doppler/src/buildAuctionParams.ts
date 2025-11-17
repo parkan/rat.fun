@@ -3,6 +3,7 @@ import { DAY_SECONDS, DynamicAuctionBuilder, isToken0Expected, SupportedChainId 
 import { getNumeraire } from "./getNumeraire";
 import { getDecimals } from "./erc20";
 import { calculateTickRange } from "./tickMath";
+import { CustomCreateDynamicAuctionParams, CustomTokenConfig } from "./CustomDopplerFactory";
 
 function computeOptimalGamma(
   startTick: number,
@@ -35,6 +36,9 @@ export async function buildAuctionParams(publicClient: PublicClient, userAccount
   const tokenDecimals = 18
   const numeraireDecimals = await getDecimals(publicClient, numeraire)
 
+  //const spendLimitAmount = parseUnits("950", numeraireDecimals)
+  const spendLimitAmount = parseUnits("95000", numeraireDecimals)
+
   const startPrice = 0.005
   const endPrice = 0.014
   const { startTick, endTick } = calculateTickRange(isToken0, startPrice, endPrice, tickSpacing, tokenDecimals, numeraireDecimals)
@@ -42,8 +46,8 @@ export async function buildAuctionParams(publicClient: PublicClient, userAccount
 
   //const duration = 30 * DAY_SECONDS
   //const epochLength = 0.5 * DAY_SECONDS
-  const duration = 30 * DAY_SECONDS / 30
-  const epochLength = 0.5 * DAY_SECONDS / 30
+  const duration = 30 * DAY_SECONDS / 30 * 7
+  const epochLength = 0.5 * DAY_SECONDS / 30 * 7
 
   const gamma = 7 * computeOptimalGamma(startTick, endTick, duration, epochLength, tickSpacing)
 
@@ -73,11 +77,29 @@ export async function buildAuctionParams(publicClient: PublicClient, userAccount
     .withTime({ startTimeOffset: 10 })
 
   builder.withGovernance({ type: "default" })
+  // Custom factories: LaunchpadGovernanceFactory, TokenFactoryBuyLimit
   if (chainId === 84532) {
     builder.withGovernanceFactory("0x8af3001ed75f86f4dd910577eca9c5db7cea765c")
+    builder.withTokenFactory("0xB222e95c77E85414696bbB2673BA619D0415b505")
   } else if (chainId === 8453) {
     builder.withGovernanceFactory("0x40bcb4dda3bcf7dba30c5d10c31ee2791ed9ddca")
+    builder.withTokenFactory("0x93a4162B3c119Ef478B670c499FE83869A28d86C")
+  } else {
+    throw new Error("Unsupported chainId for custom factories")
   }
 
-  return builder.build()
+  // Build the config
+  const result = builder.build()
+
+  // Augment the config with a custom token parameter
+  // (it's not part of the standard builder pipeline, only used by CustomDopplerFactory)
+  const customResult: CustomCreateDynamicAuctionParams<typeof chainId> = {
+    ...result,
+    token: {
+      ...result.token,
+      spendLimitAmount
+    } as CustomTokenConfig
+  }
+
+  return customResult
 }

@@ -1,5 +1,5 @@
 import { DYNAMIC_FEE_FLAG } from '@whetstone-research/doppler-sdk'
-import { AuctionParams } from './readAuctionParams'
+import { AuctionParams } from './types'
 
 export function getPoolKey(auctionParams: AuctionParams) {
   const token = auctionParams.token.address

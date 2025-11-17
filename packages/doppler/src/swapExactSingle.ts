@@ -1,7 +1,7 @@
 import { Account, Chain, maxUint256, parseEventLogs, parseUnits, PublicClient, Transport, WalletClient, zeroAddress } from "viem"
 import { CommandBuilder, V4ActionBuilder, V4ActionType } from 'doppler-router'
 import { getAddresses } from "@whetstone-research/doppler-sdk";
-import { AuctionParams } from "./readAuctionParams"
+import { AuctionParams } from "./types"
 import { getPoolKey } from "./getPoolKey";
 import { preparePermit2ForUniversalRouter } from "./permit2";
 import { CustomQuoter } from "./CustomQuoter";
