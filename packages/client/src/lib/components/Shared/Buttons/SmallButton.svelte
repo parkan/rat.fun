@@ -21,12 +21,12 @@
   } = $props()
 
   const onmousedown = () => {
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
   }
 
   const onmouseupHandler = (e: MouseEvent) => {
     if (!disabled) {
-      playSound("ratfunUI", "smallButtonUp")
+      playSound({ category: "ratfunUI", id: "smallButtonUp" })
       onmouseup?.(e)
       onclick?.(e)
     }

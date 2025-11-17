@@ -30,11 +30,11 @@
   let tooltip = $derived(folder?.title?.includes("EGO"))
 
   const onmousedown = () => {
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
   }
 
   const onmouseup = () => {
-    playSound("ratfunUI", "smallButtonUp")
+    playSound({ category: "ratfunUI", id: "smallButtonUp" })
   }
 </script>
 

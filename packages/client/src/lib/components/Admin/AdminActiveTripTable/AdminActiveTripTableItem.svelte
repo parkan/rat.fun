@@ -32,7 +32,7 @@
 
   // Go to trip preview
   const rowOnMouseDown = () => {
-    playSound("ratfunUI", "panelIn")
+    playSound({ category: "ratfunUI", id: "panelIn" })
     goto("/cashboard/" + id, { noScroll: false })
   }
 

@@ -14,3 +14,12 @@ export type SoundAssets = {
 export type SoundLibrary = {
   [index: string]: SoundAssets
 }
+
+export type PlaySoundConfig = {
+  category: string
+  id: string
+  loop?: boolean
+  fadeIn?: boolean
+  pitch?: number
+  volume?: number
+}

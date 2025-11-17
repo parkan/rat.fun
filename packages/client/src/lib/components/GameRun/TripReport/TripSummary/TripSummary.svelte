@@ -44,9 +44,14 @@
     // Play sound
     summaryTimeline.call(
       () => {
-        playSound("ratfunUI", "panelIn")
+        playSound({ category: "ratfunUI", id: "panelIn" })
         if (ratDead) {
-          const deathMusic = playSound("ratfunMusic", "death", true, true)
+          const deathMusic = playSound({
+            category: "ratfunMusic",
+            id: "death",
+            loop: true,
+            fadeIn: true
+          })
           backgroundMusic.set(deathMusic)
         }
       },

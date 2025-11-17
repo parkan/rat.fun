@@ -190,7 +190,7 @@
             repeat: 1,
             ease: "power2.inOut",
             onStart: () => {
-              playSound("ratfunUI", "itemPositive", false, false, 1, 0, 0.3)
+              playSound({ category: "ratfunUI", id: "itemPositive", volume: 0.3 })
             }
           },
           1.3 // After scale in

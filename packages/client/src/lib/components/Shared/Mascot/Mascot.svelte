@@ -37,7 +37,7 @@
       // Play sound
       enterTimeline.call(
         () => {
-          playSound("ratfunUI", "giggle2")
+          playSound({ category: "ratfunUI", id: "giggle2" })
         },
         [],
         "0.5"
@@ -148,7 +148,7 @@
 
     bubbleVisible = true
 
-    playSound("ratfunUI", "giggle1")
+    playSound({ category: "ratfunUI", id: "giggle1" })
 
     // Animate bubble in
     gsap.fromTo(

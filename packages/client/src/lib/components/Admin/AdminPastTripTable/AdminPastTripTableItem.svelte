@@ -22,7 +22,7 @@
   )
 
   const onmousedown = () => {
-    playSound("ratfunUI", "panelIn")
+    playSound({ category: "ratfunUI", id: "panelIn" })
     goto("/cashboard/" + id, { noScroll: false })
   }
 </script>

@@ -102,7 +102,7 @@
   }
 
   const setupTripReport = () => {
-    playSound("ratfunTransitions", "tripReportEnter")
+    playSound({ category: "ratfunTransitions", id: "tripReportEnter" })
 
     // Use the first palette color from seed1
     const [r, g, b] = getPaletteColor(seed1)
@@ -111,7 +111,7 @@
       u_color: { type: "vec3", value: [r, g, b] }
     })
 
-    $backgroundMusic = playSound("ratfunMusic", "tripReport", true)
+    $backgroundMusic = playSound({ category: "ratfunMusic", id: "tripReport", loop: true })
   }
 
   const teardownTripReport = () => {

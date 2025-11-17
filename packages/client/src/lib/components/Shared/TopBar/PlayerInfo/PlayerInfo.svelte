@@ -13,9 +13,9 @@
 
   function onmousedown() {
     if (showAccountDropdown) {
-      playSound("ratfunUI", "dropDownUp")
+      playSound({ category: "ratfunUI", id: "dropDownUp" })
     } else {
-      playSound("ratfunUI", "dropDownDown")
+      playSound({ category: "ratfunUI", id: "dropDownDown" })
     }
   }
 

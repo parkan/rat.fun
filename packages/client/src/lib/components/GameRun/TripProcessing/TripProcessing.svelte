@@ -32,8 +32,8 @@
   })
 
   onMount(() => {
-    playSound("ratfunTransitions", "tripProcessingEnter")
-    $backgroundMusic = playSound("ratfunMusic", "tripProcessing")
+    playSound({ category: "ratfunTransitions", id: "tripProcessingEnter" })
+    $backgroundMusic = playSound({ category: "ratfunMusic", id: "tripProcessing" })
 
     // Set the trip processing shader with custom uniforms
     shaderManager.setShader("tripProcessing", false, {

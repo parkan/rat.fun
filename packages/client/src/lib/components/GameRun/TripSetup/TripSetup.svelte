@@ -24,7 +24,7 @@
   const SETUP_DURATION = 6000
 
   onMount(async () => {
-    $backgroundMusic = playSound("ratfunMusic", "tripSetup", true)
+    $backgroundMusic = playSound({ category: "ratfunMusic", id: "tripSetup", loop: true })
 
     setTimeout(() => {
       // Stop the terminal typer

@@ -9,7 +9,7 @@
 
   onMount(() => {
     if (!suppressSound) {
-      playSound("ratfunUI", "selectionScroll")
+      playSound({ category: "ratfunUI", id: "selectionScroll" })
     }
   })
 </script>

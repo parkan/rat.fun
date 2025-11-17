@@ -12,7 +12,7 @@
     interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % spinnerChars.length
       if (soundOn) {
-        playSound("ratfunUI", "tick")
+        playSound({ category: "ratfunUI", id: "tick" })
       }
     }, 100)
   })

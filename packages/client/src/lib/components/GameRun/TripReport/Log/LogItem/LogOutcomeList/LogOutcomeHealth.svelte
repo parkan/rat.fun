@@ -112,16 +112,16 @@
         // Stop background music
         $backgroundMusic?.stop()
         // Play death sound
-        playSound("ratfunUI", "ratDeath")
+        playSound({ category: "ratfunUI", id: "ratDeath" })
         // Update text to show DEAD
         if (valueElement) {
           valueElement.textContent = "DEAD"
         }
       } else {
         if (negative) {
-          playSound("ratfunUI", "healthNegative")
+          playSound({ category: "ratfunUI", id: "healthNegative" })
         } else {
-          playSound("ratfunUI", "healthPositive")
+          playSound({ category: "ratfunUI", id: "healthPositive" })
         }
       }
     })
