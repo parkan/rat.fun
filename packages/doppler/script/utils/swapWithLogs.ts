@@ -1,5 +1,5 @@
-import { Account, Chain, formatUnits, PublicClient, Transport, WalletClient } from "viem"
-import { AuctionParams, balanceOf, swapExactSingle } from "../../src"
+import { Account, Chain, formatUnits, Hex, PublicClient, Transport, WalletClient } from "viem"
+import { AuctionParams, balanceOf, isPermit2AllowedMax, isPermitRequired, permit2AllowMax, Permit2PermitData, signPermit2ForUniversalRouter, swapExactSingle } from "../../src"
 
 export async function swapWithLogs(
   publicClient: PublicClient<Transport, Chain>,
@@ -14,12 +14,28 @@ export async function swapWithLogs(
   console.log('token:', tokenBalanceBefore)
   console.log('numeraire:', numeraireBalanceBefore)
 
+  let permit: Permit2PermitData | undefined = undefined
+  let permitSignature: Hex | undefined  = undefined
+  if (isPermitRequired(auctionParams)) {
+    const isAllowed = await isPermit2AllowedMax(publicClient, walletClient.account.address, auctionParams.numeraire.address)
+    if (!isAllowed) {
+      await permit2AllowMax(publicClient, walletClient, auctionParams.numeraire.address)
+    }
+    const result = await signPermit2ForUniversalRouter(publicClient, walletClient, auctionParams, amount, { isOut })
+    permit = result.permit
+    permitSignature = result.permitSignature
+  }
+
   await swapExactSingle(
     publicClient,
     walletClient,
     auctionParams,
     amount,
-    isOut
+    {
+      isOut,
+      permit,
+      permitSignature
+    }
   )
   await new Promise((resolve) => setTimeout(resolve, 1000));
 

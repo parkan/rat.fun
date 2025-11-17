@@ -19,26 +19,62 @@ const PERMIT2_PERMIT_TYPE: TypedData = {
   ],
 };
 
-/**
- * Prepares permit2 data for uniswap v4 swaps via universal router
- */
-export async function preparePermit2ForUniversalRouter(
-  publicClient: PublicClient<Transport, Chain>,
-  walletClient: WalletClient<Transport, Chain, Account>,
-  tokenAddress: Hex,
-  amount: bigint,
-) {
-  const addresses = getAddresses(publicClient.chain.id)
-
-  return await preparePermit2(publicClient, walletClient, tokenAddress, addresses.universalRouter, amount)
+export interface Permit2PermitData {
+  details: {
+    token: Hex
+    amount: bigint
+    expiration: bigint
+    nonce: bigint
+  }
+  spender: Hex
+  sigDeadline: bigint
 }
 
 /**
- * Prepares permit2 data
- * - The permit2 contract itself can require approval (generally one time per wallet)
- * - Then only a signature to approve the router is requested
+ * Check if token has max allowance for permit2
+ * This could be always present due to the wallet using uniswap itself, since permit2 is a global contract
  */
-export async function preparePermit2(
+export async function isPermit2AllowedMax(
+  publicClient: PublicClient<Transport, Chain>,
+  walletAddress: Hex,
+  tokenAddress: Hex,
+) {
+  const addresses = getAddresses(publicClient.chain.id)
+  const allowance = await publicClient.readContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [walletAddress, addresses.permit2],
+  })
+  return allowance < maxUint256
+}
+
+/**
+ * Set token max allowance for permit2 contract
+ */
+export async function permit2AllowMax(
+  publicClient: PublicClient<Transport, Chain>,
+  walletClient: WalletClient<Transport, Chain, Account>,
+  tokenAddress: Hex,
+) {
+  const addresses = getAddresses(publicClient.chain.id)
+  const txHash = await walletClient.writeContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: 'approve',
+    args: [addresses.permit2, maxUint256],
+  })
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
+  return {
+    txHash,
+    receipt
+  }
+}
+
+/**
+ * Prepare permit2 data and its signature (requested via walletClient)
+ */
+export async function signPermit2(
   publicClient: PublicClient<Transport, Chain>,
   walletClient: WalletClient<Transport, Chain, Account>,
   tokenAddress: Hex,
@@ -50,26 +86,6 @@ export async function preparePermit2(
   }
 
   const addresses = getAddresses(publicClient.chain.id)
-
-  // Give permit2 contract max allowance via token contract if missing
-  // (this could be always present due to the wallet using uniswap itself, since permit2 is a global contract)
-  const allowance = await publicClient.readContract({
-    address: tokenAddress,
-    abi: erc20Abi,
-    functionName: 'allowance',
-    args: [walletClient.account.address, addresses.permit2],
-  })
-  if (allowance < maxUint256) {
-    const txHash = await walletClient.writeContract({
-      address: tokenAddress,
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [addresses.permit2, maxUint256],
-    })
-    // TODO the manual 2 sec timeout isn't really necessary, but it helped avoid rpc issues
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await publicClient.waitForTransactionReceipt({ hash: txHash })
-  }
 
   // Get account's current permit2 nonce, as stored in the permit2 contract (not related to transaction nonce)
   const permit2Allowance = await publicClient.readContract({
@@ -91,7 +107,7 @@ export async function preparePermit2(
     },
     spender: spender,
     sigDeadline: nowSec + 3600n,
-  } as const
+  } as const satisfies Permit2PermitData
 
   const permitSignature = await walletClient.signTypedData({
     account: walletClient.account,
