@@ -9,5 +9,5 @@
 export { EntryKit } from "./EntryKit"
 export type { EntryKitConfig, EntryKitState, PrerequisiteStatus, ConnectorInfo } from "./EntryKit"
 
-export type { SessionClient, ConnectedClient } from "./core/types"
-export { EntryKitStatus } from "./core/types"
+export type { SessionClient, ConnectedClient } from "./types"
+export { EntryKitStatus } from "./types"

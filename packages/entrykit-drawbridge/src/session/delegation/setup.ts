@@ -1,13 +1,26 @@
-import { Hex, encodeFunctionData, zeroAddress } from "viem"
-import { sendUserOperation, waitForUserOperationReceipt } from "viem/account-abstraction"
+import { Hex, encodeFunctionData, zeroAddress, Client, Address } from "viem"
+import {
+  sendUserOperation,
+  waitForUserOperationReceipt,
+  SmartAccount,
+  UserOperationReceipt
+} from "viem/account-abstraction"
 import { waitForTransactionReceipt } from "viem/actions"
 import { getAction } from "viem/utils"
 import IBaseWorldAbi from "@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json"
 import { systemsConfig as worldSystemsConfig } from "@latticexyz/world/mud.config"
-import { unlimitedDelegationControlId, worldAbi, SessionClient } from "../core/types"
-import { callWithSignature } from "../utils/callWithSignature"
-import { defineCall } from "../utils/defineCall"
-import { deployWalletIfNeeded, isWalletDeployed } from "../utils/smartWalletDeployment"
+import { unlimitedDelegationControlId, worldAbi, SessionClient, ConnectedClient } from "../../types"
+import { callWithSignature } from "../patterns/call-with-signature"
+import { deployWalletIfNeeded, isWalletDeployed } from "../patterns/wallet-deployment"
+
+/**
+ * Smart account with optional factory properties (internal use only)
+ * Some smart account implementations add these properties dynamically
+ */
+type SmartAccountWithFactory = SmartAccount & {
+  factory?: Address
+  factoryData?: Hex
+}
 
 export type SetupSessionStatus =
   | { type: "checking_wallet"; message: string }
@@ -19,11 +32,17 @@ export type SetupSessionStatus =
   | { type: "error"; message: string; error?: Error }
 
 export type SetupSessionParams = {
-  client: any
-  userClient: any
+  /** Public client for reading blockchain state */
+  client: Client
+  /** User's connected wallet client (EOA or Smart Account) */
+  userClient: ConnectedClient
+  /** Session smart account client with MUD extensions */
   sessionClient: SessionClient
+  /** MUD World contract address */
   worldAddress: Hex
+  /** Whether to register delegation (default: true) */
   registerDelegation?: boolean
+  /** Progress callback for status updates */
   onStatus?: (status: SetupSessionStatus) => void
 }
 
@@ -68,8 +87,9 @@ export async function setupSession({
     onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." })
 
     // CHECK AND DEPLOY USER'S WALLET IF NEEDED
-    const account = userClient.account as any
-    const hasFactoryData = account.factory && account.factoryData
+    const account = userClient.account as SmartAccountWithFactory
+    const factoryArgs = await account.getFactoryArgs()
+    const hasFactoryData = factoryArgs.factory && factoryArgs.factoryData
 
     console.log("[entrykit-drawbridge] Smart wallet check:", { hasFactoryData, userAddress })
 
@@ -91,7 +111,12 @@ export async function setupSession({
       console.log("[entrykit-drawbridge] Deploying user wallet...")
       onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." })
 
-      await deployWalletIfNeeded(sessionClient, userAddress, account.factory, account.factoryData)
+      await deployWalletIfNeeded(
+        sessionClient,
+        userAddress,
+        factoryArgs.factory!,
+        factoryArgs.factoryData!
+      )
 
       onStatus?.({ type: "wallet_deployed", message: "Wallet deployed successfully!" })
 
@@ -110,14 +135,12 @@ export async function setupSession({
     const calls = []
 
     if (registerDelegation) {
-      calls.push(
-        defineCall({
-          to: worldAddress,
-          abi: worldAbi,
-          functionName: "registerDelegation",
-          args: [sessionAddress, unlimitedDelegationControlId, "0x"]
-        })
-      )
+      calls.push({
+        to: worldAddress,
+        abi: worldAbi,
+        functionName: "registerDelegation",
+        args: [sessionAddress, unlimitedDelegationControlId, "0x"]
+      })
     }
 
     if (!calls.length) return
@@ -125,7 +148,7 @@ export async function setupSession({
     onStatus?.({ type: "registering_delegation", message: "Setting up session..." })
 
     // Final check: if factory/factoryData still present, try aggressive removal
-    const accountBeforeSend = userClient.account as any
+    const accountBeforeSend = userClient.account as SmartAccountWithFactory
     console.log("[entrykit-drawbridge] Before sendUserOperation:", {
       hasFactory: !!accountBeforeSend.factory,
       hasFactoryData: !!accountBeforeSend.factoryData
@@ -184,7 +207,7 @@ export async function setupSession({
 
     if (registerDelegation) {
       const tx = await callWithSignature({
-        client,
+        client: sessionClient,
         userClient,
         sessionClient,
         worldAddress,
@@ -242,7 +265,7 @@ export async function setupSession({
         setTimeout(() => reject(new Error("Session deployment timeout after 30s")), 30000)
       )
 
-      const receipt = (await Promise.race([receiptPromise, timeoutPromise])) as any
+      const receipt = (await Promise.race([receiptPromise, timeoutPromise])) as UserOperationReceipt
 
       if (!receipt.success) {
         throw new Error("Failed to deploy session account")

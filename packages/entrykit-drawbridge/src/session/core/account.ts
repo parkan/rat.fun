@@ -1,7 +1,7 @@
 import { Address, Chain, Client, LocalAccount, Transport } from "viem"
 import { SmartAccount } from "viem/account-abstraction"
 import { toSimpleSmartAccount } from "permissionless/accounts"
-import { getSessionSigner } from "./getSessionSigner"
+import { getSessionSigner } from "./signer"
 
 export type GetSessionAccountReturnType = {
   readonly account: SmartAccount

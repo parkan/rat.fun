@@ -5,7 +5,7 @@ import { getRecord } from "@latticexyz/store/internal"
 import moduleConfig from "@latticexyz/world-module-callwithsignature/mud.config"
 import { hexToResource } from "@latticexyz/common"
 import { getAction } from "viem/utils"
-import { ConnectedClient } from "../core/types"
+import { ConnectedClient } from "../../types"
 
 export type SignCallOptions<chain extends Chain = Chain> = {
   userClient: ConnectedClient<chain>

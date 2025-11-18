@@ -13,9 +13,9 @@ import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.j
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
-import { createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectorClient, getConnectors, connect, disconnect } from '@wagmi/core';
+import { getConnectorClient, createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectors, connect, disconnect } from '@wagmi/core';
 
-// src/core/types.ts
+// src/types/state.ts
 var EntryKitStatus = /* @__PURE__ */ ((EntryKitStatus2) => {
   EntryKitStatus2["UNINITIALIZED"] = "uninitialized";
   EntryKitStatus2["DISCONNECTED"] = "disconnected";
@@ -39,7 +39,7 @@ var worldAbi = parseAbi([
   "function registerDelegation(address delegatee, bytes32 delegationControlId, bytes initCallData)"
 ]);
 
-// src/session/storage.ts
+// src/session/core/storage.ts
 var SessionStorage = class {
   constructor() {
     this.STORAGE_KEY = "entrykit:session-signers";
@@ -110,7 +110,7 @@ var SessionStorage = class {
 };
 var sessionStorage = new SessionStorage();
 
-// src/session/getSessionSigner.ts
+// src/session/core/signer.ts
 function getSessionSigner(userAddress) {
   let privateKey = sessionStorage.getSigner(userAddress);
   if (!privateKey) {
@@ -129,7 +129,7 @@ async function getSessionAccount({
   return { account, signer };
 }
 
-// src/bundler/getPaymaster.ts
+// src/bundler/paymaster.ts
 function getPaymaster(chain, paymasterOverride) {
   const contracts = chain.contracts ?? {};
   if (paymasterOverride) {
@@ -149,7 +149,7 @@ function getPaymaster(chain, paymasterOverride) {
   return void 0;
 }
 
-// src/bundler/createBundlerClient.ts
+// src/bundler/client.ts
 function createBundlerClient(config) {
   const client = config.client;
   if (!client) throw new Error("No `client` provided to `createBundlerClient`.");
@@ -187,7 +187,7 @@ function getBundlerTransport(chain) {
   throw new Error(`Chain ${chain.id} config did not include a bundler RPC URL.`);
 }
 
-// src/session/getSessionClient.ts
+// src/session/core/client.ts
 async function getSessionClient({
   userAddress,
   sessionAccount,
@@ -330,7 +330,7 @@ async function deployWalletIfNeeded(client, userAddress, factoryAddress, factory
   return true;
 }
 
-// src/utils/callWithSignature.ts
+// src/session/patterns/call-with-signature.ts
 async function callWithSignature({
   sessionClient,
   ...opts
@@ -372,12 +372,7 @@ async function callWithSignature({
   }
 }
 
-// src/utils/defineCall.ts
-function defineCall(call) {
-  return call;
-}
-
-// src/delegation/setupSession.ts
+// src/session/delegation/setup.ts
 async function setupSession({
   client,
   userClient,
@@ -395,7 +390,8 @@ async function setupSession({
   if (userClient.account.type === "smart") {
     onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." });
     const account = userClient.account;
-    const hasFactoryData = account.factory && account.factoryData;
+    const factoryArgs = await account.getFactoryArgs();
+    const hasFactoryData = factoryArgs.factory && factoryArgs.factoryData;
     console.log("[entrykit-drawbridge] Smart wallet check:", { hasFactoryData, userAddress });
     const alreadyDeployed = await isWalletDeployed(sessionClient, userAddress);
     if (alreadyDeployed && hasFactoryData) {
@@ -409,7 +405,12 @@ async function setupSession({
     } else if (!alreadyDeployed && hasFactoryData) {
       console.log("[entrykit-drawbridge] Deploying user wallet...");
       onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." });
-      await deployWalletIfNeeded(sessionClient, userAddress, account.factory, account.factoryData);
+      await deployWalletIfNeeded(
+        sessionClient,
+        userAddress,
+        factoryArgs.factory,
+        factoryArgs.factoryData
+      );
       onStatus?.({ type: "wallet_deployed", message: "Wallet deployed successfully!" });
       delete account.factory;
       delete account.factoryData;
@@ -421,14 +422,12 @@ async function setupSession({
     }
     const calls = [];
     if (registerDelegation) {
-      calls.push(
-        defineCall({
-          to: worldAddress,
-          abi: worldAbi,
-          functionName: "registerDelegation",
-          args: [sessionAddress, unlimitedDelegationControlId, "0x"]
-        })
-      );
+      calls.push({
+        to: worldAddress,
+        abi: worldAbi,
+        functionName: "registerDelegation",
+        args: [sessionAddress, unlimitedDelegationControlId, "0x"]
+      });
     }
     if (!calls.length) return;
     onStatus?.({ type: "registering_delegation", message: "Setting up session..." });
@@ -482,7 +481,7 @@ async function setupSession({
     const txs = [];
     if (registerDelegation) {
       const tx = await callWithSignature({
-        client,
+        client: sessionClient,
         userClient,
         sessionClient,
         worldAddress,
@@ -550,6 +549,84 @@ async function setupSession({
   console.log("[entrykit-drawbridge] Setup session complete");
   onStatus?.({ type: "complete", message: "Session setup complete!" });
 }
+function createWalletConfig({
+  chains,
+  transports,
+  connectors,
+  pollingInterval
+}) {
+  return createConfig({
+    chains,
+    transports,
+    connectors,
+    pollingInterval,
+    storage: createStorage({
+      storage: typeof window !== "undefined" ? window.localStorage : void 0
+    })
+  });
+}
+function setupAccountWatcher(wagmiConfig, onChange) {
+  return watchAccount(wagmiConfig, {
+    onChange: (account) => {
+      console.log("[wallet] Account change:", {
+        isConnected: account.isConnected,
+        address: account.address
+      });
+      const result = onChange(account);
+      if (result instanceof Promise) {
+        result.catch((err) => {
+          console.error("[wallet] Account change handler failed:", err);
+        });
+      }
+    }
+  });
+}
+async function attemptReconnect(wagmiConfig) {
+  try {
+    await reconnect(wagmiConfig);
+    const account = getAccount(wagmiConfig);
+    if (account.isConnected && account.address) {
+      console.log("[wallet] Reconnection successful:", account.address);
+      return {
+        reconnected: true,
+        address: account.address
+      };
+    }
+    console.log("[wallet] Reconnected but no account");
+    return { reconnected: false };
+  } catch (err) {
+    console.log("[wallet] No previous connection to restore");
+    return { reconnected: false };
+  }
+}
+async function connectWallet(wagmiConfig, connectorId, chainId) {
+  const connectors = getConnectors(wagmiConfig);
+  const connector = connectors.find((c) => c.id === connectorId);
+  if (!connector) {
+    throw new Error(`Connector not found: ${connectorId}`);
+  }
+  console.log("[wallet] Connecting to wallet:", connectorId);
+  await connect(wagmiConfig, {
+    connector,
+    chainId
+  });
+  console.log("[wallet] Connection initiated");
+}
+async function disconnectWallet(wagmiConfig) {
+  console.log("[wallet] Disconnecting...");
+  try {
+    await disconnect(wagmiConfig);
+    console.log("[wallet] Disconnected successfully");
+  } catch (err) {
+    console.error("[wallet] Disconnect error:", err);
+    throw err;
+  }
+}
+function getAvailableConnectors(wagmiConfig) {
+  return getConnectors(wagmiConfig);
+}
+
+// src/EntryKit.ts
 var EntryKit = class {
   constructor(config) {
     this.listeners = /* @__PURE__ */ new Set();
@@ -564,14 +641,11 @@ var EntryKit = class {
       sessionAddress: null,
       isReady: false
     };
-    this.wagmiConfig = createConfig({
+    this.wagmiConfig = createWalletConfig({
       chains: config.chains,
       transports: config.transports,
       connectors: config.connectors,
-      pollingInterval: config.pollingInterval,
-      storage: createStorage({
-        storage: typeof window !== "undefined" ? window.localStorage : void 0
-      })
+      pollingInterval: config.pollingInterval
     });
   }
   /**
@@ -582,22 +656,14 @@ var EntryKit = class {
    */
   async initialize() {
     console.log("[entrykit-drawbridge] Initializing...");
-    let reconnected = false;
-    try {
-      await reconnect(this.wagmiConfig);
-      reconnected = true;
-      console.log("[entrykit-drawbridge] Reconnection successful");
-    } catch (err) {
-      console.log("[entrykit-drawbridge] No previous connection to restore");
+    const result = await attemptReconnect(this.wagmiConfig);
+    if (!result.reconnected) {
       this.updateState({ status: "disconnected" /* DISCONNECTED */ });
     }
     this.setupAccountWatcher();
-    if (reconnected) {
-      const account = getAccount(this.wagmiConfig);
-      if (account.isConnected && account.address) {
-        console.log("[entrykit-drawbridge] Processing reconnected wallet:", account.address);
-        await this.handleWalletConnection();
-      }
+    if (result.reconnected && result.address) {
+      console.log("[entrykit-drawbridge] Processing reconnected wallet:", result.address);
+      await this.handleWalletConnection();
     }
     console.log("[entrykit-drawbridge] Initialization complete");
   }
@@ -648,43 +714,37 @@ var EntryKit = class {
    * Called automatically by initialize()
    */
   setupAccountWatcher() {
-    const unwatch = watchAccount(this.wagmiConfig, {
-      onChange: async (account) => {
-        console.log("[entrykit-drawbridge] Account change:", {
-          isConnected: account.isConnected,
-          address: account.address
+    const unwatch = setupAccountWatcher(this.wagmiConfig, async (account) => {
+      if (!account.isConnected) {
+        console.log("[entrykit-drawbridge] Wallet disconnected");
+        this.updateState({
+          status: "disconnected" /* DISCONNECTED */,
+          sessionClient: null,
+          userAddress: null,
+          sessionAddress: null,
+          isReady: false
         });
-        if (!account.isConnected) {
-          console.log("[entrykit-drawbridge] Wallet disconnected");
-          this.updateState({
-            status: "disconnected" /* DISCONNECTED */,
-            sessionClient: null,
-            userAddress: null,
-            sessionAddress: null,
-            isReady: false
-          });
-          this.isConnecting = false;
-          return;
-        }
-        if (this.isDisconnecting) {
-          console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect");
-          return;
-        }
-        if (this.isConnecting) {
-          console.log("[entrykit-drawbridge] Already processing connection");
-          return;
-        }
-        if (!account.connector || !account.address) {
-          return;
-        }
-        try {
-          this.isConnecting = true;
-          await this.handleWalletConnection();
-        } catch (err) {
-          console.error("[entrykit-drawbridge] Connection handler failed:", err);
-        } finally {
-          this.isConnecting = false;
-        }
+        this.isConnecting = false;
+        return;
+      }
+      if (this.isDisconnecting) {
+        console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect");
+        return;
+      }
+      if (this.isConnecting) {
+        console.log("[entrykit-drawbridge] Already processing connection");
+        return;
+      }
+      if (!account.connector || !account.address) {
+        return;
+      }
+      try {
+        this.isConnecting = true;
+        await this.handleWalletConnection();
+      } catch (err) {
+        console.error("[entrykit-drawbridge] Connection handler failed:", err);
+      } finally {
+        this.isConnecting = false;
       }
     });
     this.accountWatcherCleanup = unwatch;
@@ -753,7 +813,7 @@ var EntryKit = class {
    * @returns Array of connector info (id, name, type)
    */
   getAvailableConnectors() {
-    const connectors = getConnectors(this.wagmiConfig);
+    const connectors = getAvailableConnectors(this.wagmiConfig);
     return connectors.map((c) => ({
       id: c.id,
       name: c.name,
@@ -771,18 +831,10 @@ var EntryKit = class {
    * @throws If connector not found or connection fails
    */
   async connectWallet(connectorId) {
-    const connectors = getConnectors(this.wagmiConfig);
-    const connector = connectors.find((c) => c.id === connectorId);
-    if (!connector) {
-      throw new Error(`Connector not found: ${connectorId}`);
-    }
     console.log("[entrykit-drawbridge] Connecting to wallet:", connectorId);
     this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
-      await connect(this.wagmiConfig, {
-        connector,
-        chainId: this.config.chainId
-      });
+      await connectWallet(this.wagmiConfig, connectorId, this.config.chainId);
     } catch (err) {
       if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {
         console.log("[entrykit-drawbridge] Already connected");
@@ -805,10 +857,10 @@ var EntryKit = class {
     console.log("[entrykit-drawbridge] Calling wagmi disconnect()...");
     try {
       this.isDisconnecting = true;
-      await disconnect(this.wagmiConfig);
-      console.log("[entrykit-drawbridge] wagmi disconnect() returned");
+      await disconnectWallet(this.wagmiConfig);
+      console.log("[entrykit-drawbridge] Wallet disconnected");
     } catch (err) {
-      console.error("[entrykit-drawbridge] wagmi disconnect() threw error:", err);
+      console.error("[entrykit-drawbridge] Disconnect error:", err);
       throw err;
     } finally {
       this.isDisconnecting = false;

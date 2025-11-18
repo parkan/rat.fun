@@ -24,6 +24,7 @@ type SessionClient<chain extends Chain = Chain> = Client<Transport, chain, Smart
     /** Session private key - used for signing messages on behalf of session account */
     readonly internal_signer: LocalAccount;
 };
+
 /**
  * EntryKit connection and setup status
  *

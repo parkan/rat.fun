@@ -1,8 +1,9 @@
+import { Address, Client } from "viem"
 import { getCode, sendTransaction, waitForTransactionReceipt } from "viem/actions"
 import { getAction } from "viem/utils"
 
 /**
- * Shared utilities for smart wallet deployment
+ * Smart wallet deployment utilities
  *
  * Handles counterfactual smart wallets (e.g., Coinbase Smart Wallet) that use
  * CREATE2 and exist at a deterministic address before deployment.
@@ -15,7 +16,7 @@ import { getAction } from "viem/utils"
  * @param address Wallet address to check
  * @returns True if deployed, false otherwise
  */
-export async function isWalletDeployed(client: any, address: `0x${string}`): Promise<boolean> {
+export async function isWalletDeployed(client: Client, address: Address): Promise<boolean> {
   const code = await getAction(
     client,
     getCode,
@@ -40,10 +41,10 @@ export async function isWalletDeployed(client: any, address: `0x${string}`): Pro
  * @param factoryCalldata Deployment calldata for the factory
  */
 export async function deployWallet(
-  client: any,
-  userAddress: `0x${string}`,
-  factoryAddress: `0x${string}`,
-  factoryCalldata: `0x${string}`
+  client: Client,
+  userAddress: Address,
+  factoryAddress: Address,
+  factoryCalldata: Address
 ): Promise<void> {
   try {
     const txHash = await getAction(
@@ -55,7 +56,7 @@ export async function deployWallet(
       chain: client.chain,
       to: factoryAddress,
       data: factoryCalldata
-    } as any)
+    })
 
     // Wait for deployment confirmation
     await getAction(
@@ -95,10 +96,10 @@ export async function deployWallet(
  * @returns True if deployment was needed and completed, false if already deployed
  */
 export async function deployWalletIfNeeded(
-  client: any,
-  userAddress: `0x${string}`,
-  factoryAddress: `0x${string}`,
-  factoryCalldata: `0x${string}`
+  client: Client,
+  userAddress: Address,
+  factoryAddress: Address,
+  factoryCalldata: Address
 ): Promise<boolean> {
   const deployed = await isWalletDeployed(client, userAddress)
 

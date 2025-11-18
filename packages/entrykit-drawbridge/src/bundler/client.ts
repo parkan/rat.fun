@@ -6,8 +6,8 @@ import {
   PaymasterClient,
   createBundlerClient as viem_createBundlerClient
 } from "viem/account-abstraction"
-import { defaultClientConfig } from "../core/types"
-import { getPaymaster } from "./getPaymaster"
+import { defaultClientConfig } from "../types"
+import { getPaymaster } from "./paymaster"
 
 /**
  * Create a bundler client for submitting ERC-4337 user operations

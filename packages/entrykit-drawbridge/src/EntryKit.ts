@@ -1,25 +1,21 @@
-import { Address, Chain, Client, Transport } from "viem"
+import { Address, Chain, Client, Transport, Account } from "viem"
 import type { PaymasterClient } from "viem/account-abstraction"
-import { SessionClient, EntryKitStatus } from "./core/types"
-import { getSessionSigner } from "./session/getSessionSigner"
-import { getSessionAccount } from "./session/getSessionAccount"
-import { getSessionClient } from "./session/getSessionClient"
-import { checkDelegation } from "./delegation/checkDelegation"
-import { setupSession, type SetupSessionStatus } from "./delegation/setupSession"
-import { sessionStorage } from "./session/storage"
+import { SessionClient, EntryKitStatus } from "./types"
+import { getSessionSigner } from "./session/core/signer"
+import { getSessionAccount } from "./session/core/account"
+import { getSessionClient } from "./session/core/client"
+import { checkDelegation } from "./session/delegation/check"
+import { setupSession, type SetupSessionStatus } from "./session/delegation/setup"
+import { sessionStorage } from "./session/core/storage"
+import { getConnectorClient, type Config, type CreateConnectorFn } from "@wagmi/core"
 import {
-  createConfig,
-  createStorage,
-  reconnect,
-  watchAccount,
-  connect,
-  disconnect,
-  getConnectorClient,
-  getConnectors,
-  getAccount,
-  type Config,
-  type CreateConnectorFn
-} from "@wagmi/core"
+  createWalletConfig,
+  setupAccountWatcher,
+  attemptReconnect,
+  connectWallet as walletConnect,
+  disconnectWallet as walletDisconnect,
+  getAvailableConnectors as walletGetAvailableConnectors
+} from "./wallet"
 
 /**
  * Configuration for EntryKit instance
@@ -151,14 +147,11 @@ export class EntryKit {
     }
 
     // Create wagmi config
-    this.wagmiConfig = createConfig({
+    this.wagmiConfig = createWalletConfig({
       chains: config.chains,
       transports: config.transports,
       connectors: config.connectors,
-      pollingInterval: config.pollingInterval,
-      storage: createStorage({
-        storage: typeof window !== "undefined" ? window.localStorage : undefined
-      })
+      pollingInterval: config.pollingInterval
     })
   }
 
@@ -172,13 +165,9 @@ export class EntryKit {
     console.log("[entrykit-drawbridge] Initializing...")
 
     // Attempt to reconnect to previously connected wallet
-    let reconnected = false
-    try {
-      await reconnect(this.wagmiConfig)
-      reconnected = true
-      console.log("[entrykit-drawbridge] Reconnection successful")
-    } catch (err) {
-      console.log("[entrykit-drawbridge] No previous connection to restore")
+    const result = await attemptReconnect(this.wagmiConfig)
+
+    if (!result.reconnected) {
       // No reconnection - set status to DISCONNECTED
       this.updateState({ status: EntryKitStatus.DISCONNECTED })
     }
@@ -188,12 +177,9 @@ export class EntryKit {
 
     // If reconnection succeeded, manually handle the initial connection
     // (the watcher won't fire for connections that happened before it was set up)
-    if (reconnected) {
-      const account = getAccount(this.wagmiConfig)
-      if (account.isConnected && account.address) {
-        console.log("[entrykit-drawbridge] Processing reconnected wallet:", account.address)
-        await this.handleWalletConnection()
-      }
+    if (result.reconnected && result.address) {
+      console.log("[entrykit-drawbridge] Processing reconnected wallet:", result.address)
+      await this.handleWalletConnection()
     }
 
     console.log("[entrykit-drawbridge] Initialization complete")
@@ -251,51 +237,44 @@ export class EntryKit {
    * Called automatically by initialize()
    */
   private setupAccountWatcher(): void {
-    const unwatch = watchAccount(this.wagmiConfig, {
-      onChange: async account => {
-        console.log("[entrykit-drawbridge] Account change:", {
-          isConnected: account.isConnected,
-          address: account.address
+    const unwatch = setupAccountWatcher(this.wagmiConfig, async account => {
+      // Handle disconnection
+      if (!account.isConnected) {
+        console.log("[entrykit-drawbridge] Wallet disconnected")
+        this.updateState({
+          status: EntryKitStatus.DISCONNECTED,
+          sessionClient: null,
+          userAddress: null,
+          sessionAddress: null,
+          isReady: false
         })
+        this.isConnecting = false
+        return
+      }
 
-        // Handle disconnection
-        if (!account.isConnected) {
-          console.log("[entrykit-drawbridge] Wallet disconnected")
-          this.updateState({
-            status: EntryKitStatus.DISCONNECTED,
-            sessionClient: null,
-            userAddress: null,
-            sessionAddress: null,
-            isReady: false
-          })
-          this.isConnecting = false
-          return
-        }
+      // Ignore connection attempts while disconnecting to prevent deadlock
+      if (this.isDisconnecting) {
+        console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect")
+        return
+      }
 
-        // Ignore connection attempts while disconnecting to prevent deadlock
-        if (this.isDisconnecting) {
-          console.log("[entrykit-drawbridge] Ignoring connection attempt during disconnect")
-          return
-        }
+      // Handle connection
+      if (this.isConnecting) {
+        console.log("[entrykit-drawbridge] Already processing connection")
+        return
+      }
 
-        // Handle connection
-        if (this.isConnecting) {
-          console.log("[entrykit-drawbridge] Already processing connection")
-          return
-        }
+      if (!account.connector || !account.address) {
+        return
+      }
 
-        if (!account.connector || !account.address) {
-          return
-        }
-
-        try {
-          this.isConnecting = true
-          await this.handleWalletConnection()
-        } catch (err) {
-          console.error("[entrykit-drawbridge] Connection handler failed:", err)
-        } finally {
-          this.isConnecting = false
-        }
+      try {
+        this.isConnecting = true
+        await this.handleWalletConnection()
+      } catch (err) {
+        console.error("[entrykit-drawbridge] Connection handler failed:", err)
+      } finally {
+        this.isConnecting = false
       }
     })
 
@@ -345,8 +324,9 @@ export class EntryKit {
     const signer = getSessionSigner(userAddress)
 
     // Create ERC-4337 SimpleAccount smart wallet
+    // TypeScript: We've already checked chain exists on line 298, so cast is safe
     const { account } = await getSessionAccount({
-      client: userClient as any,
+      client: userClient as Client<Transport, Chain, Account>,
       userAddress
     })
 
@@ -389,7 +369,7 @@ export class EntryKit {
    * @returns Array of connector info (id, name, type)
    */
   getAvailableConnectors(): ConnectorInfo[] {
-    const connectors = getConnectors(this.wagmiConfig)
+    const connectors = walletGetAvailableConnectors(this.wagmiConfig)
     return connectors.map(c => ({
       id: c.id,
       name: c.name,
@@ -408,23 +388,13 @@ export class EntryKit {
    * @throws If connector not found or connection fails
    */
   async connectWallet(connectorId: string): Promise<void> {
-    const connectors = getConnectors(this.wagmiConfig)
-    const connector = connectors.find(c => c.id === connectorId)
-
-    if (!connector) {
-      throw new Error(`Connector not found: ${connectorId}`)
-    }
-
     console.log("[entrykit-drawbridge] Connecting to wallet:", connectorId)
 
     // Set status to CONNECTING
     this.updateState({ status: EntryKitStatus.CONNECTING })
 
     try {
-      await connect(this.wagmiConfig, {
-        connector,
-        chainId: this.config.chainId
-      })
+      await walletConnect(this.wagmiConfig, connectorId, this.config.chainId)
     } catch (err) {
       // If already connected, that's fine
       if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {
@@ -453,10 +423,10 @@ export class EntryKit {
 
     try {
       this.isDisconnecting = true
-      await disconnect(this.wagmiConfig)
-      console.log("[entrykit-drawbridge] wagmi disconnect() returned")
+      await walletDisconnect(this.wagmiConfig)
+      console.log("[entrykit-drawbridge] Wallet disconnected")
     } catch (err) {
-      console.error("[entrykit-drawbridge] wagmi disconnect() threw error:", err)
+      console.error("[entrykit-drawbridge] Disconnect error:", err)
       throw err
     } finally {
       this.isDisconnecting = false

@@ -1,6 +1,6 @@
 import { Address, Client } from "viem"
 import { getRecord } from "@latticexyz/store/internal"
-import { unlimitedDelegationControlId, worldTables } from "../core/types"
+import { unlimitedDelegationControlId, worldTables } from "../../types"
 
 export type CheckDelegationParams = {
   client: Client

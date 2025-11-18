@@ -2,10 +2,10 @@ import { Account, Address, Chain, Client, LocalAccount, RpcSchema, Transport } f
 import { smartAccountActions } from "permissionless"
 import { callFrom, sendUserOperationFrom } from "@latticexyz/world/internal"
 import type { PaymasterClient } from "viem/account-abstraction"
-import { createBundlerClient } from "../bundler/createBundlerClient"
-import { SessionClient } from "../core/types"
+import { createBundlerClient } from "../../bundler/client"
+import { SessionClient } from "../../types"
 import { SmartAccount } from "viem/account-abstraction"
-import { getBundlerTransport } from "../bundler/getBundlerTransport"
+import { getBundlerTransport } from "../../bundler/transport"
 
 /**
  * Create session client with MUD World extensions

@@ -1,10 +1,10 @@
 import { Chain, parseErc6492Signature } from "viem"
 import { writeContract as viem_writeContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import { SignCallOptions, signCall } from "./signCall"
+import { SignCallOptions, signCall } from "./eip712-signing"
 import CallWithSignatureAbi from "@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json"
-import { ConnectedClient } from "../core/types"
-import { isWalletDeployed, deployWalletIfNeeded } from "./smartWalletDeployment"
+import { ConnectedClient } from "../../types"
+import { deployWalletIfNeeded } from "./wallet-deployment"
 
 export type CallWithSignatureOptions<chain extends Chain = Chain> = SignCallOptions<chain> & {
   sessionClient: ConnectedClient
