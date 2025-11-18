@@ -4,7 +4,7 @@ import { getAction } from "viem/utils"
 import { SignCallOptions, signCall } from "./eip712-signing"
 import CallWithSignatureAbi from "@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json"
 import { ConnectedClient } from "../../types"
-import { deployWalletIfNeeded } from "./wallet-deployment"
+import { deployWalletIfNeeded, isAlreadyDeployedError } from "./wallet-deployment"
 
 export type CallWithSignatureOptions<chain extends Chain = Chain> = SignCallOptions<chain> & {
   sessionClient: ConnectedClient
@@ -65,6 +65,11 @@ export async function callWithSignature<chain extends Chain = Chain>({
 
   // Submit transaction to World
   try {
+    // TypeScript workaround: viem's writeContract has complex type inference that
+    // doesn't perfectly match the CallWithSignatureAbi args structure.
+    // The runtime types are correct - we're calling:
+    // callWithSignature(address signer, bytes32 systemId, bytes callData, bytes signature)
+    // This cast is safe because we're manually constructing the correct args array.
     return await getAction(
       sessionClient,
       viem_writeContract,
@@ -78,7 +83,7 @@ export async function callWithSignature<chain extends Chain = Chain>({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
 
-    if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
+    if (isAlreadyDeployedError(errorMessage)) {
       throw new Error("Smart wallet was just deployed. Please try again.")
     }
 

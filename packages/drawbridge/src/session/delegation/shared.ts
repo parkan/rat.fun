@@ -6,7 +6,7 @@ import {
   UserOperationReceipt
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
-import { SessionClient } from "../../types"
+import { SessionClient, DEPLOYMENT_TIMEOUTS } from "../../types"
 
 /**
  * Smart account with optional factory properties (internal use only)
@@ -15,6 +15,54 @@ import { SessionClient } from "../../types"
 export type SmartAccountWithFactory = SmartAccount & {
   factory?: Address
   factoryData?: Hex
+}
+
+/**
+ * Clear factory and factoryData properties from a smart account
+ *
+ * After deploying a counterfactual smart wallet, the factory properties should be
+ * removed to prevent the bundler from trying to deploy again on subsequent operations.
+ *
+ * This function tries multiple strategies because some account implementations
+ * make these properties read-only:
+ * 1. Direct delete + assignment
+ * 2. Object.defineProperty (for read-only properties)
+ *
+ * @param account Smart account to clear factory data from
+ */
+export function clearFactoryData(account: SmartAccountWithFactory): void {
+  try {
+    // Try direct deletion first
+    delete account.factory
+    delete account.factoryData
+    account.factory = undefined
+    account.factoryData = undefined
+
+    console.log("[drawbridge] Factory data cleared:", {
+      stillHasFactory: !!account.factory,
+      stillHasFactoryData: !!account.factoryData
+    })
+  } catch (err) {
+    // Fall back to Object.defineProperty for read-only properties
+    console.warn("[drawbridge] Direct deletion failed, trying Object.defineProperty")
+
+    try {
+      Object.defineProperty(account, "factory", {
+        value: undefined,
+        writable: true,
+        configurable: true
+      })
+      Object.defineProperty(account, "factoryData", {
+        value: undefined,
+        writable: true,
+        configurable: true
+      })
+
+      console.log("[drawbridge] Factory data cleared via defineProperty")
+    } catch (fallbackErr) {
+      console.error("[drawbridge] Could not remove factory (readonly property)")
+    }
+  }
 }
 
 /**
@@ -84,7 +132,15 @@ export async function deploySessionAccount(
     )({ hash })
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Session deployment timeout after 30s")), 30000)
+      setTimeout(
+        () =>
+          reject(
+            new Error(
+              `Session deployment timeout after ${DEPLOYMENT_TIMEOUTS.SESSION_DEPLOYMENT}ms`
+            )
+          ),
+        DEPLOYMENT_TIMEOUTS.SESSION_DEPLOYMENT
+      )
     )
 
     const receipt = (await Promise.race([receiptPromise, timeoutPromise])) as UserOperationReceipt

@@ -206,6 +206,13 @@ declare class Drawbridge {
     private isDisconnecting;
     constructor(config: DrawbridgeConfig);
     /**
+     * Validate configuration parameters
+     *
+     * Throws errors for invalid configuration to help developers catch issues early.
+     * @private
+     */
+    private validateConfig;
+    /**
      * Initialize Drawbridge (await reconnection and setup account watcher)
      *
      * This should be called once after construction and awaited.

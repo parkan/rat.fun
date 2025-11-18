@@ -2,3 +2,4 @@
 export * from "./clients"
 export * from "./state"
 export * from "./mud"
+export * from "./config"

@@ -1,6 +1,7 @@
 import { Address, Client } from "viem"
 import { getCode, sendTransaction, waitForTransactionReceipt } from "viem/actions"
 import { getAction } from "viem/utils"
+import { DEPLOYMENT_TIMEOUTS } from "../../types"
 
 /**
  * Smart wallet deployment utilities
@@ -8,6 +9,26 @@ import { getAction } from "viem/utils"
  * Handles counterfactual smart wallets (e.g., Coinbase Smart Wallet) that use
  * CREATE2 and exist at a deterministic address before deployment.
  */
+
+/**
+ * Check if an error indicates a wallet is already deployed
+ *
+ * ERC-4337 bundlers and smart wallets return specific error codes when
+ * attempting to deploy an already-deployed wallet:
+ * - AA10: Account already deployed (ERC-4337 bundler error code)
+ * - "already constructed": Some wallet implementations
+ * - "already deployed": Generic message from some bundlers
+ *
+ * @param errorMessage Error message to check
+ * @returns True if error indicates wallet is already deployed
+ */
+export function isAlreadyDeployedError(errorMessage: string): boolean {
+  return (
+    errorMessage.includes("AA10") ||
+    errorMessage.includes("already constructed") ||
+    errorMessage.includes("already deployed")
+  )
+}
 
 /**
  * Check if a smart wallet is deployed on-chain
@@ -69,16 +90,13 @@ export async function deployWallet(
 
     // Add delay for bundler/paymaster state to update
     // After deployment, bundlers cache account state and need time to refresh
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, DEPLOYMENT_TIMEOUTS.BUNDLER_STATE_SYNC))
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
 
-    // If already deployed, that's fine
-    if (
-      errorMessage.includes("AA10") ||
-      errorMessage.includes("already constructed") ||
-      errorMessage.includes("already deployed")
-    ) {
+    // If already deployed, that's fine - not an error
+    if (isAlreadyDeployedError(errorMessage)) {
+      console.log("[drawbridge] Wallet already deployed, continuing")
       return
     }
 

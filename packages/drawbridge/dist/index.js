@@ -39,35 +39,86 @@ var worldAbi = parseAbi([
   "function registerDelegation(address delegatee, bytes32 delegationControlId, bytes initCallData)"
 ]);
 
+// src/types/config.ts
+var DEPLOYMENT_TIMEOUTS = {
+  /**
+   * Timeout for session account deployment (milliseconds)
+   *
+   * After this time, we give up waiting for the session account to deploy.
+   * Default: 30 seconds
+   *
+   * Increase for slower chains or congested networks.
+   */
+  SESSION_DEPLOYMENT: 3e4,
+  /**
+   * Delay after wallet deployment to allow bundler state synchronization (milliseconds)
+   *
+   * After deploying a counterfactual wallet, bundlers cache the account state
+   * and need time to refresh their internal state before accepting operations.
+   *
+   * Default: 2 seconds
+   *
+   * This prevents "AA10" errors on the next user operation.
+   * See: https://github.com/eth-infinitism/account-abstraction/discussions
+   */
+  BUNDLER_STATE_SYNC: 2e3
+};
+
 // src/session/core/storage.ts
 var SessionStorage = class {
   constructor() {
-    this.STORAGE_KEY = "entrykit:session-signers";
+    this.STORAGE_KEY = "drawbridge:session-signers";
+    this.LEGACY_STORAGE_KEY = "entrykit:session-signers";
     this.cache = this.load();
   }
   /**
    * Load session store from localStorage
+   *
+   * Attempts to load from new key first, then falls back to legacy key
+   * for backwards compatibility with existing installations.
    */
   load() {
     if (typeof localStorage === "undefined") {
       return { signers: {} };
     }
-    const stored = localStorage.getItem(this.STORAGE_KEY);
+    let stored = localStorage.getItem(this.STORAGE_KEY);
+    if (!stored) {
+      stored = localStorage.getItem(this.LEGACY_STORAGE_KEY);
+      if (stored) {
+        console.log("[drawbridge] Migrating session storage from legacy key");
+      }
+    }
     if (!stored) {
       return { signers: {} };
     }
     try {
-      return JSON.parse(stored);
-    } catch {
+      const parsed = JSON.parse(stored);
+      if (!parsed.signers || typeof parsed.signers !== "object") {
+        console.warn("[drawbridge] Session storage corrupted - invalid structure, resetting");
+        return { signers: {} };
+      }
+      return parsed;
+    } catch (err) {
+      console.error(
+        "[drawbridge] Failed to parse session storage:",
+        err instanceof Error ? err.message : String(err)
+      );
+      console.warn("[drawbridge] Session storage will be reset");
       return { signers: {} };
     }
   }
   /**
    * Save session store to localStorage
+   *
+   * Saves to new key and removes legacy key to complete migration.
    */
   save() {
     if (typeof localStorage === "undefined") return;
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cache));
+    if (localStorage.getItem(this.LEGACY_STORAGE_KEY)) {
+      localStorage.removeItem(this.LEGACY_STORAGE_KEY);
+      console.log("[drawbridge] Removed legacy storage key after migration");
+    }
   }
   /**
    * Get session signer private key for a user address
@@ -238,6 +289,9 @@ async function checkDelegation({
   });
   return record.delegationControlId === unlimitedDelegationControlId;
 }
+function isAlreadyDeployedError(errorMessage) {
+  return errorMessage.includes("AA10") || errorMessage.includes("already constructed") || errorMessage.includes("already deployed");
+}
 async function isWalletDeployed(client, address) {
   const code = await getAction(
     client,
@@ -267,10 +321,11 @@ async function deployWallet(client, userAddress, factoryAddress, factoryCalldata
     )({
       hash: txHash
     });
-    await new Promise((resolve) => setTimeout(resolve, 2e3));
+    await new Promise((resolve) => setTimeout(resolve, DEPLOYMENT_TIMEOUTS.BUNDLER_STATE_SYNC));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes("AA10") || errorMessage.includes("already constructed") || errorMessage.includes("already deployed")) {
+    if (isAlreadyDeployedError(errorMessage)) {
+      console.log("[drawbridge] Wallet already deployed, continuing");
       return;
     }
     throw new Error(`Failed to deploy smart wallet: ${errorMessage}`);
@@ -289,6 +344,35 @@ async function deployWalletIfNeeded(client, userAddress, factoryAddress, factory
     );
   }
   return true;
+}
+function clearFactoryData(account) {
+  try {
+    delete account.factory;
+    delete account.factoryData;
+    account.factory = void 0;
+    account.factoryData = void 0;
+    console.log("[drawbridge] Factory data cleared:", {
+      stillHasFactory: !!account.factory,
+      stillHasFactoryData: !!account.factoryData
+    });
+  } catch (err) {
+    console.warn("[drawbridge] Direct deletion failed, trying Object.defineProperty");
+    try {
+      Object.defineProperty(account, "factory", {
+        value: void 0,
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(account, "factoryData", {
+        value: void 0,
+        writable: true,
+        configurable: true
+      });
+      console.log("[drawbridge] Factory data cleared via defineProperty");
+    } catch (fallbackErr) {
+      console.error("[drawbridge] Could not remove factory (readonly property)");
+    }
+  }
 }
 async function deploySessionAccount(sessionClient, onStatus) {
   const sessionDeployed = await sessionClient.account.isDeployed?.();
@@ -313,7 +397,14 @@ async function deploySessionAccount(sessionClient, onStatus) {
       "waitForUserOperationReceipt"
     )({ hash });
     const timeoutPromise = new Promise(
-      (_, reject) => setTimeout(() => reject(new Error("Session deployment timeout after 30s")), 3e4)
+      (_, reject) => setTimeout(
+        () => reject(
+          new Error(
+            `Session deployment timeout after ${DEPLOYMENT_TIMEOUTS.SESSION_DEPLOYMENT}ms`
+          )
+        ),
+        DEPLOYMENT_TIMEOUTS.SESSION_DEPLOYMENT
+      )
     );
     const receipt = await Promise.race([receiptPromise, timeoutPromise]);
     if (!receipt.success) {
@@ -355,11 +446,7 @@ async function setupSessionSmartAccount({
   if (alreadyDeployed && hasFactoryData) {
     console.log("[drawbridge] Removing factory data from deployed wallet");
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" });
-    delete account.factory;
-    delete account.factoryData;
-    account.factory = void 0;
-    account.factoryData = void 0;
-    console.log("[drawbridge] Factory removed:", { stillHasFactory: !!account.factory });
+    clearFactoryData(account);
   } else if (!alreadyDeployed && hasFactoryData) {
     console.log("[drawbridge] Deploying user wallet...");
     onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." });
@@ -370,11 +457,7 @@ async function setupSessionSmartAccount({
       factoryArgs.factoryData
     );
     onStatus?.({ type: "wallet_deployed", message: "Wallet deployed successfully!" });
-    delete account.factory;
-    delete account.factoryData;
-    account.factory = void 0;
-    account.factoryData = void 0;
-    console.log("[drawbridge] Wallet deployed, factory removed");
+    clearFactoryData(account);
   } else {
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" });
   }
@@ -394,26 +477,9 @@ async function setupSessionSmartAccount({
   }
   onStatus?.({ type: "registering_delegation", message: "Setting up session..." });
   const accountBeforeSend = userClient.account;
-  console.log("[drawbridge] Before sendUserOperation:", {
-    hasFactory: !!accountBeforeSend.factory,
-    hasFactoryData: !!accountBeforeSend.factoryData
-  });
   if (accountBeforeSend.factory || accountBeforeSend.factoryData) {
-    console.warn("[drawbridge] Factory still present, attempting aggressive removal...");
-    try {
-      Object.defineProperty(accountBeforeSend, "factory", {
-        value: void 0,
-        writable: true,
-        configurable: true
-      });
-      Object.defineProperty(accountBeforeSend, "factoryData", {
-        value: void 0,
-        writable: true,
-        configurable: true
-      });
-    } catch (err) {
-      console.error("[drawbridge] Could not remove factory (readonly property)");
-    }
+    console.warn("[drawbridge] Factory still present, attempting removal again...");
+    clearFactoryData(accountBeforeSend);
   }
   try {
     const hash = await getAction(userClient, sendUserOperation, "sendUserOperation")({ calls });
@@ -429,7 +495,7 @@ async function setupSessionSmartAccount({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("[drawbridge] User operation error:", errorMessage);
-    if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
+    if (isAlreadyDeployedError(errorMessage)) {
       const helpfulError = new Error(
         "Smart wallet deployment conflict. Please try again - it should work on the second attempt."
       );
@@ -516,7 +582,7 @@ async function callWithSignature({
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
+    if (isAlreadyDeployedError(errorMessage)) {
       throw new Error("Smart wallet was just deployed. Please try again.");
     }
     throw error;
@@ -688,6 +754,7 @@ var Drawbridge = class {
     this.accountWatcherCleanup = null;
     this.isConnecting = false;
     this.isDisconnecting = false;
+    this.validateConfig(config);
     this.config = config;
     this.state = {
       status: "uninitialized" /* UNINITIALIZED */,
@@ -702,6 +769,54 @@ var Drawbridge = class {
       connectors: config.connectors,
       pollingInterval: config.pollingInterval
     });
+  }
+  /**
+   * Validate configuration parameters
+   *
+   * Throws errors for invalid configuration to help developers catch issues early.
+   * @private
+   */
+  validateConfig(config) {
+    if (!config.chains || config.chains.length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: At least one chain must be configured. Provide chains in the 'chains' parameter."
+      );
+    }
+    if (!config.connectors || config.connectors.length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: At least one wallet connector must be configured. Add connectors like injected(), coinbaseWallet(), or walletConnect()."
+      );
+    }
+    if (!config.transports || Object.keys(config.transports).length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: Transports configuration is required. Provide an RPC transport for each chain."
+      );
+    }
+    for (const chain of config.chains) {
+      if (!(chain.id in config.transports)) {
+        throw new Error(
+          `Drawbridge configuration error: No transport configured for chain ${chain.id} (${chain.name}). Add it to the transports parameter: { ${chain.id}: http("https://...") }`
+        );
+      }
+    }
+    const chainIdValid = config.chains.some((chain) => chain.id === config.chainId);
+    if (!chainIdValid) {
+      throw new Error(
+        `Drawbridge configuration error: chainId ${config.chainId} is not in the chains array. Provide a chain with id ${config.chainId} in the chains parameter.`
+      );
+    }
+    if (!config.skipSessionSetup && !config.worldAddress) {
+      console.warn(
+        "[drawbridge] Configuration warning: worldAddress not provided but session setup is enabled. Session creation will work, but delegation checks will fail. Did you forget to pass worldAddress, or did you mean to set skipSessionSetup: true?"
+      );
+    }
+    if (!config.skipSessionSetup && config.worldAddress) {
+      if (!/^0x[a-fA-F0-9]{40}$/.test(config.worldAddress)) {
+        throw new Error(
+          `Drawbridge configuration error: worldAddress "${config.worldAddress}" is not a valid Ethereum address. Expected format: 0x followed by 40 hexadecimal characters.`
+        );
+      }
+    }
   }
   /**
    * Initialize Drawbridge (await reconnection and setup account watcher)

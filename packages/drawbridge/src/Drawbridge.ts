@@ -139,6 +139,9 @@ export class Drawbridge {
   private isDisconnecting = false
 
   constructor(config: DrawbridgeConfig) {
+    // Validate configuration
+    this.validateConfig(config)
+
     this.config = config
     this.state = {
       status: DrawbridgeStatus.UNINITIALIZED,
@@ -155,6 +158,77 @@ export class Drawbridge {
       connectors: config.connectors,
       pollingInterval: config.pollingInterval
     })
+  }
+
+  /**
+   * Validate configuration parameters
+   *
+   * Throws errors for invalid configuration to help developers catch issues early.
+   * @private
+   */
+  private validateConfig(config: DrawbridgeConfig): void {
+    // Validate chains
+    if (!config.chains || config.chains.length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: At least one chain must be configured. " +
+          "Provide chains in the 'chains' parameter."
+      )
+    }
+
+    // Validate connectors
+    if (!config.connectors || config.connectors.length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: At least one wallet connector must be configured. " +
+          "Add connectors like injected(), coinbaseWallet(), or walletConnect()."
+      )
+    }
+
+    // Validate transports
+    if (!config.transports || Object.keys(config.transports).length === 0) {
+      throw new Error(
+        "Drawbridge configuration error: Transports configuration is required. " +
+          "Provide an RPC transport for each chain."
+      )
+    }
+
+    // Check all chains have transports
+    for (const chain of config.chains) {
+      if (!(chain.id in config.transports)) {
+        throw new Error(
+          `Drawbridge configuration error: No transport configured for chain ${chain.id} (${chain.name}). ` +
+            `Add it to the transports parameter: { ${chain.id}: http("https://...") }`
+        )
+      }
+    }
+
+    // Check chainId is in chains array
+    const chainIdValid = config.chains.some(chain => chain.id === config.chainId)
+    if (!chainIdValid) {
+      throw new Error(
+        `Drawbridge configuration error: chainId ${config.chainId} is not in the chains array. ` +
+          `Provide a chain with id ${config.chainId} in the chains parameter.`
+      )
+    }
+
+    // Warn if worldAddress missing with session setup enabled
+    if (!config.skipSessionSetup && !config.worldAddress) {
+      console.warn(
+        "[drawbridge] Configuration warning: worldAddress not provided but session setup is enabled. " +
+          "Session creation will work, but delegation checks will fail. " +
+          "Did you forget to pass worldAddress, or did you mean to set skipSessionSetup: true?"
+      )
+    }
+
+    // Validate worldAddress if session setup is enabled
+    if (!config.skipSessionSetup && config.worldAddress) {
+      // Check that worldAddress is a valid hex address
+      if (!/^0x[a-fA-F0-9]{40}$/.test(config.worldAddress)) {
+        throw new Error(
+          `Drawbridge configuration error: worldAddress "${config.worldAddress}" is not a valid Ethereum address. ` +
+            `Expected format: 0x followed by 40 hexadecimal characters.`
+        )
+      }
+    }
   }
 
   /**

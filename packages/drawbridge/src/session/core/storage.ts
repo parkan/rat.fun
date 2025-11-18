@@ -11,11 +11,15 @@ type SessionStore = {
  * Keys are stored in localStorage and survive page refreshes.
  *
  * Storage format: { signers: { "0xabc...": "0x123..." } }
- * Storage key: "entrykit:session-signers"
+ * Storage key: "drawbridge:session-signers"
+ *
+ * Migration: Automatically migrates from legacy "entrykit:session-signers" key
+ * to maintain backwards compatibility.
  */
 export class SessionStorage {
   private cache: SessionStore
-  private readonly STORAGE_KEY = "entrykit:session-signers"
+  private readonly STORAGE_KEY = "drawbridge:session-signers"
+  private readonly LEGACY_STORAGE_KEY = "entrykit:session-signers"
 
   constructor() {
     this.cache = this.load()
@@ -23,30 +27,66 @@ export class SessionStorage {
 
   /**
    * Load session store from localStorage
+   *
+   * Attempts to load from new key first, then falls back to legacy key
+   * for backwards compatibility with existing installations.
    */
   private load(): SessionStore {
     if (typeof localStorage === "undefined") {
       return { signers: {} }
     }
 
-    const stored = localStorage.getItem(this.STORAGE_KEY)
+    // Try new key first
+    let stored = localStorage.getItem(this.STORAGE_KEY)
+
+    // Fall back to legacy key for existing users
+    if (!stored) {
+      stored = localStorage.getItem(this.LEGACY_STORAGE_KEY)
+      if (stored) {
+        console.log("[drawbridge] Migrating session storage from legacy key")
+      }
+    }
+
     if (!stored) {
       return { signers: {} }
     }
 
     try {
-      return JSON.parse(stored)
-    } catch {
+      const parsed = JSON.parse(stored)
+
+      // Validate structure
+      if (!parsed.signers || typeof parsed.signers !== "object") {
+        console.warn("[drawbridge] Session storage corrupted - invalid structure, resetting")
+        return { signers: {} }
+      }
+
+      return parsed
+    } catch (err) {
+      console.error(
+        "[drawbridge] Failed to parse session storage:",
+        err instanceof Error ? err.message : String(err)
+      )
+      console.warn("[drawbridge] Session storage will be reset")
       return { signers: {} }
     }
   }
 
   /**
    * Save session store to localStorage
+   *
+   * Saves to new key and removes legacy key to complete migration.
    */
   private save(): void {
     if (typeof localStorage === "undefined") return
+
+    // Save to new key
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cache))
+
+    // Remove legacy key if it exists (cleanup after migration)
+    if (localStorage.getItem(this.LEGACY_STORAGE_KEY)) {
+      localStorage.removeItem(this.LEGACY_STORAGE_KEY)
+      console.log("[drawbridge] Removed legacy storage key after migration")
+    }
   }
 
   /**

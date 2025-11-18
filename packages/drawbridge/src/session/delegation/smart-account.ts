@@ -1,8 +1,17 @@
 import { sendUserOperation, waitForUserOperationReceipt } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { unlimitedDelegationControlId, worldAbi, ConnectedClient } from "../../types"
-import { deployWalletIfNeeded, isWalletDeployed } from "../patterns/wallet-deployment"
-import { SetupSessionBaseParams, SmartAccountWithFactory, deploySessionAccount } from "./shared"
+import {
+  deployWalletIfNeeded,
+  isWalletDeployed,
+  isAlreadyDeployedError
+} from "../patterns/wallet-deployment"
+import {
+  SetupSessionBaseParams,
+  SmartAccountWithFactory,
+  deploySessionAccount,
+  clearFactoryData
+} from "./shared"
 
 export type SetupSessionSmartAccountParams = SetupSessionBaseParams & {
   /** User's connected smart wallet client */
@@ -53,13 +62,7 @@ export async function setupSessionSmartAccount({
     // Wallet deployed but has factory data - remove it
     console.log("[drawbridge] Removing factory data from deployed wallet")
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" })
-
-    delete account.factory
-    delete account.factoryData
-    account.factory = undefined
-    account.factoryData = undefined
-
-    console.log("[drawbridge] Factory removed:", { stillHasFactory: !!account.factory })
+    clearFactoryData(account)
   } else if (!alreadyDeployed && hasFactoryData) {
     // Wallet not deployed - deploy it
     console.log("[drawbridge] Deploying user wallet...")
@@ -75,12 +78,7 @@ export async function setupSessionSmartAccount({
     onStatus?.({ type: "wallet_deployed", message: "Wallet deployed successfully!" })
 
     // Remove factory/factoryData after deployment
-    delete account.factory
-    delete account.factoryData
-    account.factory = undefined
-    account.factoryData = undefined
-
-    console.log("[drawbridge] Wallet deployed, factory removed")
+    clearFactoryData(account)
   } else {
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" })
   }
@@ -106,30 +104,11 @@ export async function setupSessionSmartAccount({
 
   onStatus?.({ type: "registering_delegation", message: "Setting up session..." })
 
-  // Final check: if factory/factoryData still present, try aggressive removal
+  // Final check: if factory/factoryData still present, try removal again
   const accountBeforeSend = userClient.account as SmartAccountWithFactory
-  console.log("[drawbridge] Before sendUserOperation:", {
-    hasFactory: !!accountBeforeSend.factory,
-    hasFactoryData: !!accountBeforeSend.factoryData
-  })
-
   if (accountBeforeSend.factory || accountBeforeSend.factoryData) {
-    console.warn("[drawbridge] Factory still present, attempting aggressive removal...")
-
-    try {
-      Object.defineProperty(accountBeforeSend, "factory", {
-        value: undefined,
-        writable: true,
-        configurable: true
-      })
-      Object.defineProperty(accountBeforeSend, "factoryData", {
-        value: undefined,
-        writable: true,
-        configurable: true
-      })
-    } catch (err) {
-      console.error("[drawbridge] Could not remove factory (readonly property)")
-    }
+    console.warn("[drawbridge] Factory still present, attempting removal again...")
+    clearFactoryData(accountBeforeSend)
   }
 
   try {
@@ -149,7 +128,7 @@ export async function setupSessionSmartAccount({
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error("[drawbridge] User operation error:", errorMessage)
 
-    if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
+    if (isAlreadyDeployedError(errorMessage)) {
       const helpfulError = new Error(
         "Smart wallet deployment conflict. Please try again - it should work on the second attempt."
       )
