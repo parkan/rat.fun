@@ -49,8 +49,6 @@
       initStaticContent($publicNetwork.worldAddress)
       // Loading done. Set the UI state to spawning
       UIState.set(UI.SPAWNING)
-      // Signal readiness to base (farcaster) mini app framework
-      sdk.actions.ready()
     } catch (error) {
       errorHandler(error)
       goto("/")
@@ -87,6 +85,9 @@
     document.querySelector(".preloader")?.remove()
 
     initSound()
+
+    // Signal readiness to base (farcaster) mini app framework
+    sdk.actions.ready()
   })
 
   onDestroy(() => {
