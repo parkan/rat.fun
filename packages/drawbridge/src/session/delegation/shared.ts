@@ -56,10 +56,10 @@ export async function deploySessionAccount(
   onStatus?: (status: SetupSessionStatus) => void
 ): Promise<void> {
   const sessionDeployed = await sessionClient.account.isDeployed?.()
-  console.log("[entrykit-drawbridge] Session account deployed:", sessionDeployed)
+  console.log("[drawbridge] Session account deployed:", sessionDeployed)
 
   if (sessionDeployed) {
-    console.log("[entrykit-drawbridge] Session account already deployed")
+    console.log("[drawbridge] Session account already deployed")
     return
   }
 
@@ -74,7 +74,7 @@ export async function deploySessionAccount(
       calls: [{ to: zeroAddress }]
     })
 
-    console.log("[entrykit-drawbridge] Session deploy tx:", hash)
+    console.log("[drawbridge] Session deploy tx:", hash)
 
     // Add timeout
     const receiptPromise = getAction(
@@ -94,13 +94,13 @@ export async function deploySessionAccount(
     }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
-    console.error("[entrykit-drawbridge] Session deployment error:", errorMsg)
+    console.error("[drawbridge] Session deployment error:", errorMsg)
 
     // Check if timeout but actually deployed
     if (errorMsg.includes("timeout")) {
       const nowDeployed = await sessionClient.account.isDeployed?.()
       if (nowDeployed) {
-        console.log("[entrykit-drawbridge] Session deployed despite timeout")
+        console.log("[drawbridge] Session deployed despite timeout")
         onStatus?.({ type: "complete", message: "Session setup complete!" })
         return
       }

@@ -11,7 +11,7 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { environment as environmentStore } from "$lib/modules/network"
-  import { initializeEntryKit, cleanupEntryKit } from "$lib/modules/entry-kit"
+  import { initializeDrawbridge, cleanupDrawbridge } from "$lib/modules/entry-kit"
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
 
   // Components
@@ -25,7 +25,7 @@
     // Initialize EntryKit in wallet-only mode (no session setup)
     console.log("[+layout] Initializing EntryKit in wallet-only mode...")
     const networkConfig = getNetworkConfig($environmentStore, page.url)
-    await initializeEntryKit(networkConfig)
+    await initializeDrawbridge(networkConfig)
     console.log("[+layout] EntryKit ready")
 
     UIState.set(UI.READY)
@@ -39,7 +39,7 @@
 
   onDestroy(() => {
     // Clean up EntryKit
-    cleanupEntryKit()
+    cleanupDrawbridge()
 
     // Clean up global shader manager when the app unmounts
     shaderManager.destroy()

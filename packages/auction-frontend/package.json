@@ -48,7 +48,7 @@
     "@whetstone-research/doppler-sdk": "npm:@dk1a/doppler-sdk-fork@0.0.1-alpha.57",
     "contracts": "workspace:*",
     "doppler": "workspace:*",
-    "entrykit-drawbridge": "workspace:*",
+    "drawbridge": "workspace:*",
     "gsap": "^3.13.0",
     "howler": "^2.2.4",
     "rxjs": "^7.8.2",

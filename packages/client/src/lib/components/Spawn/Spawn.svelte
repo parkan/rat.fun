@@ -15,7 +15,7 @@
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
-  import { sessionClient, status, EntryKitStatus } from "$lib/modules/entry-kit"
+  import { sessionClient, status, DrawbridgeStatus } from "$lib/modules/entry-kit"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
@@ -75,7 +75,7 @@
     console.log("[Spawn] EntryKit status changed:", $status)
 
     switch ($status) {
-      case EntryKitStatus.CONNECTED:
+      case DrawbridgeStatus.CONNECTED:
         // Wallet connected but needs session setup
         if (currentState !== SPAWN_STATE.SESSION_SETUP) {
           console.log("[Spawn] Status CONNECTED → transitioning to SESSION_SETUP")
@@ -83,7 +83,7 @@
         }
         break
 
-      case EntryKitStatus.READY:
+      case DrawbridgeStatus.READY:
         // Session is fully ready - check if already spawned
         if (!$sessionClient) return
 

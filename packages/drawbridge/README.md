@@ -1,4 +1,4 @@
-# entrykit-drawbridge
+# drawbridge
 
 Headless wallet connection and session management for MUD applications.
 
@@ -13,19 +13,19 @@ A stripped-down, framework-agnostic version of `@latticexyz/entrykit` that provi
 ## Installation
 
 ```bash
-pnpm add entrykit-drawbridge
+pnpm add drawbridge
 ```
 
 ## Quick Start
 
 ```typescript
-import { EntryKit } from "entrykit-drawbridge"
+import { Drawbridge } from "drawbridge"
 import { baseSepolia } from "viem/chains"
 import { http } from "viem"
 import { injected, coinbaseWallet } from "@wagmi/connectors"
 
-// 1. Create EntryKit instance
-const entrykit = new EntryKit({
+// 1. Create Drawbridge instance
+const drawbridge = new Drawbridge({
   chainId: baseSepolia.id,
   chains: [baseSepolia],
   transports: {
@@ -36,10 +36,10 @@ const entrykit = new EntryKit({
 })
 
 // 2. Initialize (reconnect if previously connected)
-await entrykit.initialize()
+await drawbridge.initialize()
 
 // 3. Subscribe to state changes
-entrykit.subscribe((state) => {
+drawbridge.subscribe((state) => {
   console.log("Status:", state.status)
   console.log("User address:", state.userAddress)
   console.log("Session client:", state.sessionClient)
@@ -47,19 +47,19 @@ entrykit.subscribe((state) => {
 })
 
 // 4. Connect wallet
-const connectors = entrykit.getAvailableConnectors()
-await entrykit.connectWallet(connectors[0].id)
+const connectors = drawbridge.getAvailableConnectors()
+await drawbridge.connectWallet(connectors[0].id)
 
 // 5. Setup session (if needed)
-const prereqs = await entrykit.checkPrerequisites()
+const prereqs = await drawbridge.checkPrerequisites()
 if (!prereqs.isReady) {
-  await entrykit.setupSession((status) => {
+  await drawbridge.setupSession((status) => {
     console.log("Setup:", status.type, status.message)
   })
 }
 
 // 6. Use session client for transactions
-const { sessionClient } = entrykit.getState()
+const { sessionClient } = drawbridge.getState()
 if (sessionClient) {
   // Automatically routed through World.callFrom()
   // Gas paid by paymaster
@@ -75,13 +75,13 @@ if (sessionClient) {
 ## Architecture
 
 ```
-entrykit-drawbridge/
+drawbridge/
 ├── src/
-│   ├── EntryKit.ts          # Main API - orchestrates everything
+│   ├── Drawbridge.ts          # Main API - orchestrates everything
 │   │
 │   ├── types/               # Shared types and constants
 │   │   ├── clients.ts       # SessionClient, ConnectedClient
-│   │   ├── state.ts         # EntryKitStatus enum
+│   │   ├── state.ts         # DrawbridgeStatus enum
 │   │   └── mud.ts           # MUD-specific constants
 │   │
 │   ├── session/             # Session account + delegation
@@ -137,7 +137,7 @@ Sponsors gas fees for user operations, enabling gasless transactions.
 ### Basic Configuration
 
 ```typescript
-new EntryKit({
+new Drawbridge({
   chainId: 8453, // Base mainnet
   chains: [base],
   transports: {
@@ -167,7 +167,7 @@ const myChain = defineChain({
   }
 })
 
-new EntryKit({
+new Drawbridge({
   chainId: myChain.id,
   chains: [myChain],
   transports: { [myChain.id]: http() },
@@ -179,7 +179,7 @@ new EntryKit({
 ### Wallet-Only Mode (No Sessions)
 
 ```typescript
-new EntryKit({
+new Drawbridge({
   chainId: 8453,
   chains: [base],
   transports: { 8453: http() },
@@ -190,19 +190,19 @@ new EntryKit({
 
 ## API Reference
 
-### `EntryKit`
+### `Drawbridge`
 
 #### Constructor
 
 ```typescript
-new EntryKit(config: EntryKitConfig)
+new Drawbridge(config: DrawbridgeConfig)
 ```
 
 #### Methods
 
 - `initialize(): Promise<void>` - Initialize and reconnect
 - `subscribe(listener): Unsubscribe` - React to state changes
-- `getState(): EntryKitState` - Get current state snapshot
+- `getState(): DrawbridgeState` - Get current state snapshot
 - `getAvailableConnectors(): ConnectorInfo[]` - List available wallets
 - `connectWallet(connectorId): Promise<void>` - Connect to wallet
 - `disconnectWallet(): Promise<void>` - Disconnect wallet
@@ -214,8 +214,8 @@ new EntryKit(config: EntryKitConfig)
 #### State
 
 ```typescript
-type EntryKitState = {
-  status: EntryKitStatus // Current status
+type DrawbridgeState = {
+  status: DrawbridgeStatus // Current status
   sessionClient: SessionClient | null // MUD-enabled client
   userAddress: Address | null // User's wallet address
   sessionAddress: Address | null // Session account address
@@ -232,7 +232,7 @@ UNINITIALIZED → DISCONNECTED → CONNECTING → CONNECTED
 
 ## EOA vs Smart Account
 
-EntryKit handles both wallet types, but the delegation registration differs:
+Drawbridge handles both wallet types, but the delegation registration differs:
 
 ### EOA Wallets (MetaMask, etc.)
 

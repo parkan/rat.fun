@@ -46,7 +46,7 @@ export async function setupSessionEOA({
   const sessionAddress = sessionClient.account.address
   const userAddress = userClient.account.address
 
-  console.log("[entrykit-drawbridge] EOA setup:", { userAddress })
+  console.log("[drawbridge] EOA setup:", { userAddress })
 
   const txs: Hex[] = []
 
@@ -90,6 +90,6 @@ export async function setupSessionEOA({
   // Deploy session account if needed
   await deploySessionAccount(sessionClient, onStatus)
 
-  console.log("[entrykit-drawbridge] EOA setup complete")
+  console.log("[drawbridge] EOA setup complete")
   onStatus?.({ type: "complete", message: "Session setup complete!" })
 }

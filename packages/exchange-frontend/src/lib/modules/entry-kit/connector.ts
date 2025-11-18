@@ -1,9 +1,9 @@
 import { get } from "svelte/store"
 import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
-import { disconnect, getAccount, getChainId, getConnectorClient } from "@wagmi/core"
+import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import { getChain } from "$lib/mud/utils"
-import { getEntryKit } from "$lib/modules/entry-kit"
+import { getDrawbridge } from "$lib/modules/entry-kit"
 import { WagmiConfigUnavailableError } from "../error-handling/errors"
 import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
 
@@ -12,7 +12,7 @@ import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setu
  * Expects the wallet connection to be established, throws an error otherwise.
  */
 export async function getEstablishedConnectorClient() {
-  const wagmiConfig = getEntryKit().getWagmiConfig()
+  const wagmiConfig = getDrawbridge().getWagmiConfig()
   if (!wagmiConfig) {
     throw new WagmiConfigUnavailableError()
   }
@@ -21,7 +21,7 @@ export async function getEstablishedConnectorClient() {
 
 export async function disconnectWallet() {
   try {
-    const entrykit = getEntryKit()
+    const entrykit = getDrawbridge()
     await entrykit.disconnectWallet()
   } catch {
     // Not connected, nothing to do
@@ -35,7 +35,7 @@ export async function disconnectWallet() {
  * - Extend the client with MUD's transactionQueue, since it comes directly from wagmi.
  */
 export async function prepareConnectorClientForTransaction(): Promise<WalletTransactionClient> {
-  const wagmiConfig = getEntryKit().getWagmiConfig()
+  const wagmiConfig = getDrawbridge().getWagmiConfig()
   if (!wagmiConfig) {
     throw new WagmiConfigUnavailableError()
   }

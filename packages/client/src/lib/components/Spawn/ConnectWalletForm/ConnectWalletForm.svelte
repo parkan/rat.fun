@@ -2,7 +2,7 @@
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { getEntryKit, type ConnectorInfo } from "$lib/modules/entry-kit"
+  import { getDrawbridge, type ConnectorInfo } from "$lib/modules/entry-kit"
   import { debugInfo } from "$lib/modules/entry-kit/wagmiConfig"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
@@ -84,7 +84,7 @@
     try {
       connecting = true
 
-      const entrykit = getEntryKit()
+      const entrykit = getDrawbridge()
       await entrykit.connectWallet(connectorId)
 
       // Account watcher in EntryKit will handle session creation
@@ -122,7 +122,7 @@
   }
 
   function prepareConnectors() {
-    const entrykit = getEntryKit()
+    const entrykit = getDrawbridge()
     const connectors = entrykit.getAvailableConnectors()
 
     // Check if window.ethereum exists

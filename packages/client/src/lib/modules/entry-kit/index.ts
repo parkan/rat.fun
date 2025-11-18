@@ -1,38 +1,33 @@
-import {
-  EntryKit,
-  EntryKitStatus,
-  type SessionClient,
-  type EntryKitState
-} from "entrykit-drawbridge"
+import { Drawbridge, DrawbridgeStatus, type SessionClient, type DrawbridgeState } from "drawbridge"
 import { readable, derived } from "svelte/store"
 import { paymasters } from "./paymasters"
 import { chains, transports, getConnectors } from "./wagmiConfig"
-import type { Hex, Address } from "viem"
+import type { Hex } from "viem"
 import type { NetworkConfig } from "$lib/mud/utils"
 
 // Re-export types from package
-export type { ConnectorInfo, SessionClient } from "entrykit-drawbridge"
-export { EntryKitStatus } from "entrykit-drawbridge"
+export type { ConnectorInfo, SessionClient } from "drawbridge"
+export { DrawbridgeStatus } from "drawbridge"
 
-// EntryKit instance (singleton)
-let entrykitInstance: InstanceType<typeof EntryKit> | null = null
+// Drawbridge instance (singleton)
+let drawbridgeInstance: InstanceType<typeof Drawbridge> | null = null
 
 /**
- * Initialize EntryKit - BLOCKING operation
+ * Initialize Drawbridge - BLOCKING operation
  * Must be called once on app startup and awaited
  *
  * This will:
- * 1. Create EntryKit instance with wagmi config
- * 2. Initialize EntryKit (await reconnection, setup watchers)
+ * 1. Create Drawbridge instance with wagmi config
+ * 2. Initialize Drawbridge (await reconnection, setup watchers)
  * 3. Return ready-to-use instance
  */
-export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<void> {
-  if (entrykitInstance) {
-    console.log("[EntryKit] Already initialized")
+export async function initializeDrawbridge(networkConfig: NetworkConfig): Promise<void> {
+  if (drawbridgeInstance) {
+    console.log("[Drawbridge] Already initialized")
     return
   }
 
-  console.log("[EntryKit] Creating instance with network:", networkConfig.chainId)
+  console.log("[Drawbridge] Creating instance with network:", networkConfig.chainId)
 
   // Get chain-specific config
   const chain = chains.find(c => c.id === networkConfig.chainId)
@@ -42,10 +37,10 @@ export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<
 
   // Get connectors for this environment
   const connectors = getConnectors()
-  console.log("[EntryKit] Connectors from getConnectors():", connectors.length)
+  console.log("[Drawbridge] Connectors from getConnectors():", connectors.length)
 
-  // Create EntryKit instance with wagmi config embedded
-  entrykitInstance = new EntryKit({
+  // Create Drawbridge instance with wagmi config embedded
+  drawbridgeInstance = new Drawbridge({
     chainId: networkConfig.chainId,
     chains: [chain] as const,
     transports,
@@ -57,55 +52,55 @@ export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<
   })
 
   // Initialize (await reconnection, setup account watcher)
-  await entrykitInstance.initialize()
+  await drawbridgeInstance.initialize()
 
-  console.log("[EntryKit] Instance ready")
+  console.log("[Drawbridge] Instance ready")
 
   // Log available connectors for debugging
-  const availableConnectors = entrykitInstance.getAvailableConnectors()
+  const availableConnectors = drawbridgeInstance.getAvailableConnectors()
   console.log(
-    "[EntryKit] Available connectors after init:",
+    "[Drawbridge] Available connectors after init:",
     availableConnectors.length,
     availableConnectors
   )
 }
 
 /**
- * Get EntryKit instance (throws if not initialized)
+ * Get Drawbridge instance (throws if not initialized)
  */
-export function getEntryKit(): InstanceType<typeof EntryKit> {
-  if (!entrykitInstance) {
-    throw new Error("EntryKit not initialized. Call initializeEntryKit first.")
+export function getDrawbridge(): InstanceType<typeof Drawbridge> {
+  if (!drawbridgeInstance) {
+    throw new Error("Drawbridge not initialized. Call initializeDrawbridge first.")
   }
-  return entrykitInstance
+  return drawbridgeInstance
 }
 
 /**
- * Cleanup EntryKit (call on app unmount)
+ * Cleanup Drawbridge (call on app unmount)
  */
-export function cleanupEntryKit(): void {
-  if (entrykitInstance) {
-    entrykitInstance.destroy()
-    entrykitInstance = null
+export function cleanupDrawbridge(): void {
+  if (drawbridgeInstance) {
+    drawbridgeInstance.destroy()
+    drawbridgeInstance = null
   }
 }
 
 // ===== Reactive Stores =====
 
-export const entrykitState = readable<EntryKitState>(
+export const drawbridgeState = readable<DrawbridgeState>(
   {
-    status: EntryKitStatus.UNINITIALIZED,
+    status: DrawbridgeStatus.UNINITIALIZED,
     sessionClient: null,
     userAddress: null,
     sessionAddress: null,
     isReady: false
   },
   set => {
-    // Subscribe when EntryKit becomes available
+    // Subscribe when Drawbridge becomes available
     const interval = setInterval(() => {
-      if (entrykitInstance) {
+      if (drawbridgeInstance) {
         clearInterval(interval)
-        const unsubscribe = entrykitInstance.subscribe(set)
+        const unsubscribe = drawbridgeInstance.subscribe(set)
         return unsubscribe
       }
     }, 100)
@@ -115,17 +110,17 @@ export const entrykitState = readable<EntryKitState>(
 )
 
 // Convenience stores
-export const status = derived(entrykitState, $state => $state.status)
-export const sessionClient = derived<typeof entrykitState, SessionClient | null>(
-  entrykitState,
+export const status = derived(drawbridgeState, $state => $state.status)
+export const sessionClient = derived<typeof drawbridgeState, SessionClient | null>(
+  drawbridgeState,
   $state => $state?.sessionClient ?? null
 )
-export const userAddress = derived(entrykitState, $state => $state?.userAddress ?? null)
-export const sessionAddress = derived(entrykitState, $state => $state?.sessionAddress ?? null)
-export const isSessionReady = derived(entrykitState, $state => $state?.isReady ?? false)
+export const userAddress = derived(drawbridgeState, $state => $state?.userAddress ?? null)
+export const sessionAddress = derived(drawbridgeState, $state => $state?.sessionAddress ?? null)
+export const isSessionReady = derived(drawbridgeState, $state => $state?.isReady ?? false)
 
 // Derived store to check if session setup is needed
 export const needsSessionSetup = derived(
-  entrykitState,
+  drawbridgeState,
   $state => $state.sessionClient !== null && !$state.isReady
 )

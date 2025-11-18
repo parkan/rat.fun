@@ -3,7 +3,7 @@ import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
 import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import { getChain } from "$lib/mud/utils"
-import { getEntryKit } from "$lib/modules/entry-kit"
+import { getDrawbridge } from "$lib/modules/entry-kit"
 import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
 
 /**
@@ -11,7 +11,7 @@ import { ensureWriteContract, type WalletTransactionClient } from "$lib/mud/setu
  * Expects the wallet connection to be established, throws an error otherwise.
  */
 export async function getEstablishedConnectorClient() {
-  const entrykit = getEntryKit()
+  const entrykit = getDrawbridge()
   const wagmiConfig = entrykit.getWagmiConfig()
   return await getConnectorClient(wagmiConfig)
 }
@@ -21,7 +21,7 @@ export async function getEstablishedConnectorClient() {
  * Uses EntryKit's disconnect method which handles both wagmi and session cleanup
  */
 export async function disconnectWallet() {
-  const entrykit = getEntryKit()
+  const entrykit = getDrawbridge()
   await entrykit.disconnectWallet()
 }
 
@@ -32,7 +32,7 @@ export async function disconnectWallet() {
  * - Extend the client with MUD's transactionQueue, since it comes directly from wagmi, not entrykit's hooks.
  */
 export async function prepareConnectorClientForTransaction(): Promise<WalletTransactionClient> {
-  const entrykit = getEntryKit()
+  const entrykit = getDrawbridge()
   const wagmiConfig = entrykit.getWagmiConfig()
 
   let connectorClient = await getConnectorClient(wagmiConfig)

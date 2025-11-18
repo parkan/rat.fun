@@ -26,9 +26,9 @@ type SessionClient<chain extends Chain = Chain> = Client<Transport, chain, Smart
 };
 
 /**
- * EntryKit connection and setup status
+ * Drawbridge connection and setup status
  *
- * Provides a single source of truth for the current state of EntryKit.
+ * Provides a single source of truth for the current state of Drawbridge.
  * Transitions follow this flow:
  *
  * UNINITIALIZED → initialize() → DISCONNECTED
@@ -45,10 +45,10 @@ type SessionClient<chain extends Chain = Chain> = Client<Transport, chain, Smart
  *
  * Note: READY state can be reached directly from DISCONNECTED if reconnection succeeds.
  */
-declare enum EntryKitStatus {
-    /** EntryKit not yet initialized - call initializeEntryKit() */
+declare enum DrawbridgeStatus {
+    /** Drawbridge not yet initialized - call initialize() */
     UNINITIALIZED = "uninitialized",
-    /** EntryKit initialized but no wallet connected */
+    /** Drawbridge initialized but no wallet connected */
     DISCONNECTED = "disconnected",
     /** Wallet connection in progress */
     CONNECTING = "connecting",
@@ -90,9 +90,9 @@ type SetupSessionStatus = {
 };
 
 /**
- * Configuration for EntryKit instance
+ * Configuration for Drawbridge instance
  */
-type EntryKitConfig = {
+type DrawbridgeConfig = {
     /** Chain ID to operate on */
     chainId: number;
     /** Supported chains */
@@ -122,12 +122,12 @@ type EntryKitConfig = {
     skipSessionSetup?: boolean;
 };
 /**
- * Current state of the EntryKit instance
+ * Current state of the Drawbridge instance
  * Updated reactively and broadcast to subscribers
  */
-type EntryKitState = {
-    /** Current status of EntryKit - single source of truth */
-    status: EntryKitStatus;
+type DrawbridgeState = {
+    /** Current status of Drawbridge - single source of truth */
+    status: DrawbridgeStatus;
     /** Session client with MUD World extensions, null if not connected */
     sessionClient: SessionClient | null;
     /** Original user's wallet address, null if not connected */
@@ -146,7 +146,7 @@ type PrerequisiteStatus = {
     /** Whether session is fully ready (same as hasDelegation) */
     isReady: boolean;
 };
-type StateListener = (state: EntryKitState) => void;
+type StateListener = (state: DrawbridgeState) => void;
 type Unsubscribe = () => void;
 /**
  * Connector info for UI display
@@ -157,7 +157,9 @@ type ConnectorInfo = {
     type: string;
 };
 /**
- * entrykit-drawbridge - Stripped down headless version of @latticexyz/entrykit
+ * Drawbridge - Headless wallet connection and session management
+ *
+ * Based on @latticexyz/entrykit - a stripped down, headless version.
  *
  * Provides complete wallet connection and session management:
  * - Wagmi integration (connectors, account watching, reconnection)
@@ -168,7 +170,7 @@ type ConnectorInfo = {
  *
  * Usage:
  * ```typescript
- * const entrykit = new EntryKit({
+ * const drawbridge = new Drawbridge({
  *   chainId: 8453,
  *   chains: [baseChain],
  *   transports: { 8453: http() },
@@ -194,7 +196,7 @@ type ConnectorInfo = {
  * await entrykit.disconnectWallet();
  * ```
  */
-declare class EntryKit {
+declare class Drawbridge {
     private config;
     private state;
     private listeners;
@@ -202,9 +204,9 @@ declare class EntryKit {
     private accountWatcherCleanup;
     private isConnecting;
     private isDisconnecting;
-    constructor(config: EntryKitConfig);
+    constructor(config: DrawbridgeConfig);
     /**
-     * Initialize EntryKit (await reconnection and setup account watcher)
+     * Initialize Drawbridge (await reconnection and setup account watcher)
      *
      * This should be called once after construction and awaited.
      * It will attempt to reconnect to a previously connected wallet.
@@ -237,7 +239,7 @@ declare class EntryKit {
      *
      * For reactive updates, use subscribe() instead.
      */
-    getState(): EntryKitState;
+    getState(): DrawbridgeState;
     private updateState;
     private notify;
     /**
@@ -326,4 +328,4 @@ declare class EntryKit {
     getWagmiConfig(): Config;
 }
 
-export { type ConnectedClient, type ConnectorInfo, EntryKit, type EntryKitConfig, type EntryKitState, EntryKitStatus, type PrerequisiteStatus, type SessionClient };
+export { type ConnectedClient, type ConnectorInfo, Drawbridge, type DrawbridgeConfig, type DrawbridgeState, DrawbridgeStatus, type PrerequisiteStatus, type SessionClient };

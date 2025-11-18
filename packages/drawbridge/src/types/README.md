@@ -1,6 +1,6 @@
 # Types Module
 
-Shared type definitions and constants used throughout entrykit-drawbridge.
+Shared type definitions and constants used throughout drawbridge.
 
 ## Overview
 

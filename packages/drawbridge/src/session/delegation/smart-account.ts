@@ -36,7 +36,7 @@ export async function setupSessionSmartAccount({
   const sessionAddress = sessionClient.account.address
   const userAddress = userClient.account.address
 
-  console.log("[entrykit-drawbridge] Smart Account setup:", { userAddress })
+  console.log("[drawbridge] Smart Account setup:", { userAddress })
 
   onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." })
 
@@ -45,13 +45,13 @@ export async function setupSessionSmartAccount({
   const factoryArgs = await account.getFactoryArgs()
   const hasFactoryData = factoryArgs.factory && factoryArgs.factoryData
 
-  console.log("[entrykit-drawbridge] Smart wallet check:", { hasFactoryData, userAddress })
+  console.log("[drawbridge] Smart wallet check:", { hasFactoryData, userAddress })
 
   const alreadyDeployed = await isWalletDeployed(sessionClient, userAddress)
 
   if (alreadyDeployed && hasFactoryData) {
     // Wallet deployed but has factory data - remove it
-    console.log("[entrykit-drawbridge] Removing factory data from deployed wallet")
+    console.log("[drawbridge] Removing factory data from deployed wallet")
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" })
 
     delete account.factory
@@ -59,10 +59,10 @@ export async function setupSessionSmartAccount({
     account.factory = undefined
     account.factoryData = undefined
 
-    console.log("[entrykit-drawbridge] Factory removed:", { stillHasFactory: !!account.factory })
+    console.log("[drawbridge] Factory removed:", { stillHasFactory: !!account.factory })
   } else if (!alreadyDeployed && hasFactoryData) {
     // Wallet not deployed - deploy it
-    console.log("[entrykit-drawbridge] Deploying user wallet...")
+    console.log("[drawbridge] Deploying user wallet...")
     onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." })
 
     await deployWalletIfNeeded(
@@ -80,7 +80,7 @@ export async function setupSessionSmartAccount({
     account.factory = undefined
     account.factoryData = undefined
 
-    console.log("[entrykit-drawbridge] Wallet deployed, factory removed")
+    console.log("[drawbridge] Wallet deployed, factory removed")
   } else {
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" })
   }
@@ -108,13 +108,13 @@ export async function setupSessionSmartAccount({
 
   // Final check: if factory/factoryData still present, try aggressive removal
   const accountBeforeSend = userClient.account as SmartAccountWithFactory
-  console.log("[entrykit-drawbridge] Before sendUserOperation:", {
+  console.log("[drawbridge] Before sendUserOperation:", {
     hasFactory: !!accountBeforeSend.factory,
     hasFactoryData: !!accountBeforeSend.factoryData
   })
 
   if (accountBeforeSend.factory || accountBeforeSend.factoryData) {
-    console.warn("[entrykit-drawbridge] Factory still present, attempting aggressive removal...")
+    console.warn("[drawbridge] Factory still present, attempting aggressive removal...")
 
     try {
       Object.defineProperty(accountBeforeSend, "factory", {
@@ -128,13 +128,13 @@ export async function setupSessionSmartAccount({
         configurable: true
       })
     } catch (err) {
-      console.error("[entrykit-drawbridge] Could not remove factory (readonly property)")
+      console.error("[drawbridge] Could not remove factory (readonly property)")
     }
   }
 
   try {
     const hash = await getAction(userClient, sendUserOperation, "sendUserOperation")({ calls })
-    console.log("[entrykit-drawbridge] User operation sent:", hash)
+    console.log("[drawbridge] User operation sent:", hash)
 
     const receipt = await getAction(
       userClient,
@@ -147,7 +147,7 @@ export async function setupSessionSmartAccount({
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error("[entrykit-drawbridge] User operation error:", errorMessage)
+    console.error("[drawbridge] User operation error:", errorMessage)
 
     if (errorMessage.includes("AA10") || errorMessage.includes("already constructed")) {
       const helpfulError = new Error(
@@ -164,6 +164,6 @@ export async function setupSessionSmartAccount({
   // Deploy session account if needed
   await deploySessionAccount(sessionClient, onStatus)
 
-  console.log("[entrykit-drawbridge] Smart Account setup complete")
+  console.log("[drawbridge] Smart Account setup complete")
   onStatus?.({ type: "complete", message: "Session setup complete!" })
 }

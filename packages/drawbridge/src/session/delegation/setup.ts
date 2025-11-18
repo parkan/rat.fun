@@ -58,7 +58,7 @@ export async function setupSession({
   registerDelegation = true,
   onStatus
 }: SetupSessionParams): Promise<void> {
-  console.log("[entrykit-drawbridge] Setup session:", {
+  console.log("[drawbridge] Setup session:", {
     userAddress: userClient.account.address,
     accountType: userClient.account.type
   })

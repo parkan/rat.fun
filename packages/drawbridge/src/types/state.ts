@@ -1,7 +1,7 @@
 /**
- * EntryKit connection and setup status
+ * Drawbridge connection and setup status
  *
- * Provides a single source of truth for the current state of EntryKit.
+ * Provides a single source of truth for the current state of Drawbridge.
  * Transitions follow this flow:
  *
  * UNINITIALIZED → initialize() → DISCONNECTED
@@ -18,11 +18,11 @@
  *
  * Note: READY state can be reached directly from DISCONNECTED if reconnection succeeds.
  */
-export enum EntryKitStatus {
-  /** EntryKit not yet initialized - call initializeEntryKit() */
+export enum DrawbridgeStatus {
+  /** Drawbridge not yet initialized - call initialize() */
   UNINITIALIZED = "uninitialized",
 
-  /** EntryKit initialized but no wallet connected */
+  /** Drawbridge initialized but no wallet connected */
   DISCONNECTED = "disconnected",
 
   /** Wallet connection in progress */

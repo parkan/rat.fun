@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { getEntryKit } from "$lib/modules/entry-kit"
+  import { getDrawbridge } from "$lib/modules/entry-kit"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
 
   const { onComplete = () => {} } = $props<{
@@ -19,7 +19,7 @@
       settingUp = true
       error = null
 
-      const entrykit = getEntryKit()
+      const entrykit = getDrawbridge()
       await entrykit.setupSession()
 
       onComplete()

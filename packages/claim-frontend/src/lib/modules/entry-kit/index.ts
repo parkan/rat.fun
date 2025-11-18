@@ -1,31 +1,30 @@
-import { EntryKit, EntryKitStatus, type EntryKitState } from "entrykit-drawbridge"
+import { Drawbridge, DrawbridgeStatus, type DrawbridgeState } from "drawbridge"
 import { readable, derived } from "svelte/store"
 import { chains, transports, getConnectors } from "./wagmiConfig"
-import type { Address } from "viem"
 import type { NetworkConfig } from "$lib/mud/utils"
 
 // Re-export types and enums from package
-export type { ConnectorInfo } from "entrykit-drawbridge"
-export { EntryKitStatus } from "entrykit-drawbridge"
+export type { ConnectorInfo } from "drawbridge"
+export { DrawbridgeStatus } from "drawbridge"
 
-// EntryKit instance (singleton)
-let entrykitInstance: InstanceType<typeof EntryKit> | null = null
+// Drawbridge instance (singleton)
+let drawbridgeInstance: InstanceType<typeof Drawbridge> | null = null
 
 /**
- * Initialize EntryKit in wallet-only mode (no session setup)
+ * Initialize Drawbridge in wallet-only mode (no session setup)
  *
  * This is a simplified version for claim-frontend that only handles wallet connection.
  * No session accounts, no delegation, no MUD World integration.
  *
  * Use entrykit.getWagmiConfig() to get the wagmi config for direct transactions.
  */
-export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<void> {
-  if (entrykitInstance) {
-    console.log("[EntryKit] Already initialized")
+export async function initializeDrawbridge(networkConfig: NetworkConfig): Promise<void> {
+  if (drawbridgeInstance) {
+    console.log("[Drawbridge] Already initialized")
     return
   }
 
-  console.log("[EntryKit] Creating instance with network:", networkConfig.chainId)
+  console.log("[Drawbridge] Creating instance with network:", networkConfig.chainId)
 
   // Get chain-specific config
   const chain = chains.find(c => c.id === networkConfig.chainId)
@@ -35,10 +34,10 @@ export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<
 
   // Get connectors for this environment
   const connectors = getConnectors()
-  console.log("[EntryKit] Connectors from getConnectors():", connectors.length)
+  console.log("[Drawbridge] Connectors from getConnectors():", connectors.length)
 
-  // Create EntryKit instance in wallet-only mode (skipSessionSetup = true)
-  entrykitInstance = new EntryKit({
+  // Create Drawbridge instance in wallet-only mode (skipSessionSetup = true)
+  drawbridgeInstance = new Drawbridge({
     chainId: networkConfig.chainId,
     chains: [chain] as const,
     transports,
@@ -49,55 +48,55 @@ export async function initializeEntryKit(networkConfig: NetworkConfig): Promise<
   })
 
   // Initialize (await reconnection, setup account watcher)
-  await entrykitInstance.initialize()
+  await drawbridgeInstance.initialize()
 
-  console.log("[EntryKit] Instance ready (wallet-only mode)")
+  console.log("[Drawbridge] Instance ready (wallet-only mode)")
 
   // Log available connectors for debugging
-  const availableConnectors = entrykitInstance.getAvailableConnectors()
+  const availableConnectors = drawbridgeInstance.getAvailableConnectors()
   console.log(
-    "[EntryKit] Available connectors after init:",
+    "[Drawbridge] Available connectors after init:",
     availableConnectors.length,
     availableConnectors
   )
 }
 
 /**
- * Get EntryKit instance (throws if not initialized)
+ * Get Drawbridge instance (throws if not initialized)
  */
-export function getEntryKit(): InstanceType<typeof EntryKit> {
-  if (!entrykitInstance) {
-    throw new Error("EntryKit not initialized. Call initializeEntryKit first.")
+export function getDrawbridge(): InstanceType<typeof Drawbridge> {
+  if (!drawbridgeInstance) {
+    throw new Error("Drawbridge not initialized. Call initializeDrawbridge first.")
   }
-  return entrykitInstance
+  return drawbridgeInstance
 }
 
 /**
- * Cleanup EntryKit (call on app unmount)
+ * Cleanup Drawbridge (call on app unmount)
  */
-export function cleanupEntryKit(): void {
-  if (entrykitInstance) {
-    entrykitInstance.destroy()
-    entrykitInstance = null
+export function cleanupDrawbridge(): void {
+  if (drawbridgeInstance) {
+    drawbridgeInstance.destroy()
+    drawbridgeInstance = null
   }
 }
 
 // ===== Reactive Stores =====
 
-export const entrykitState = readable<EntryKitState>(
+export const drawbridgeState = readable<DrawbridgeState>(
   {
-    status: EntryKitStatus.UNINITIALIZED,
+    status: DrawbridgeStatus.UNINITIALIZED,
     sessionClient: null,
     userAddress: null,
     sessionAddress: null,
     isReady: false
   },
   set => {
-    // Subscribe when EntryKit becomes available
+    // Subscribe when Drawbridge becomes available
     const interval = setInterval(() => {
-      if (entrykitInstance) {
+      if (drawbridgeInstance) {
         clearInterval(interval)
-        const unsubscribe = entrykitInstance.subscribe(set)
+        const unsubscribe = drawbridgeInstance.subscribe(set)
         return unsubscribe
       }
     }, 100)
@@ -107,14 +106,14 @@ export const entrykitState = readable<EntryKitState>(
 )
 
 // Convenience stores
-export const status = derived(entrykitState, $state => $state.status)
-export const userAddress = derived(entrykitState, $state => $state?.userAddress ?? null)
+export const status = derived(drawbridgeState, $state => $state.status)
+export const userAddress = derived(drawbridgeState, $state => $state?.userAddress ?? null)
 
 /**
  * Check if wallet is connected and ready
  * In wallet-only mode, this means status === READY (no session setup needed)
  */
 export const isConnected = derived(
-  entrykitState,
-  $state => $state.status === EntryKitStatus.READY && $state.userAddress !== null
+  drawbridgeState,
+  $state => $state.status === DrawbridgeStatus.READY && $state.userAddress !== null
 )

@@ -21,7 +21,7 @@
     environment as environmentStore,
     walletType as walletTypeStore
   } from "$lib/modules/network"
-  import { initializeEntryKit, cleanupEntryKit, userAddress } from "$lib/modules/entry-kit"
+  import { initializeDrawbridge, cleanupDrawbridge, userAddress } from "$lib/modules/entry-kit"
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
 
   // Components
@@ -40,7 +40,7 @@
       if ($walletTypeStore === WALLET_TYPE.ENTRYKIT) {
         console.log("[+layout] Ensuring EntryKit is initialized before spawning...")
         const networkConfig = getNetworkConfig($environmentStore, page.url)
-        await initializeEntryKit(networkConfig)
+        await initializeDrawbridge(networkConfig)
         console.log("[+layout] EntryKit ready")
       }
 
@@ -92,7 +92,7 @@
   onDestroy(() => {
     // Clean up EntryKit if it was initialized
     if ($walletTypeStore === WALLET_TYPE.ENTRYKIT) {
-      cleanupEntryKit()
+      cleanupDrawbridge()
     }
 
     // Clean up global shader manager when the app unmounts

@@ -1,12 +1,12 @@
 {
-  "name": "entrykit-drawbridge",
+  "name": "drawbridge",
   "version": "2.2.23-local",
-  "description": "Stripped down headless version of @latticexyz/entrykit",
+  "description": "Headless wallet connection and session management for MUD - based on @latticexyz/entrykit",
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/Moving-Castles/rat.fun.git",
-    "directory": "packages/entrykit"
+    "directory": "packages/drawbridge"
   },
   "license": "MIT",
   "type": "module",
