@@ -27,7 +27,7 @@
     const timeline = gsap.timeline()
 
     timeline.call(() => {
-      playSound("ratfunUI", isPositive ? "tokenPositive" : "tokenNegative")
+      playSound({ category: "ratfunUI", id: isPositive ? "tokenPositive" : "tokenNegative" })
     })
 
     // Add visual feedback for positive/negative changes

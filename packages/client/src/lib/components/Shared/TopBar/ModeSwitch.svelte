@@ -11,13 +11,13 @@
   let { isAdminView }: { isAdminView: boolean } = $props()
 
   const enterAdmin = () => {
-    playSound("ratfunTransitions", "adminEnter")
+    playSound({ category: "ratfunTransitions", id: "adminEnter" })
     shaderManager.setShader("black")
     goto("/cashboard")
   }
 
   const exitAdmin = () => {
-    playSound("ratfunTransitions", "adminExit")
+    playSound({ category: "ratfunTransitions", id: "adminExit" })
     shaderManager.setShader("clouds", true)
     goto(page.route.id?.includes("tripId") ? "/" + page.params.tripId : "/")
   }

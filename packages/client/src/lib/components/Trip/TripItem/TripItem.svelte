@@ -48,15 +48,15 @@
   }
 
   const onmousedown = () => {
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
   }
 
   const onmouseup = () => {
-    playSound("ratfunUI", "smallButtonUp")
+    playSound({ category: "ratfunUI", id: "smallButtonUp" })
   }
 
   const onmouseenter = () => {
-    playSound("ratfunUI", "hover2")
+    playSound({ category: "ratfunUI", id: "hover2" })
   }
 </script>
 

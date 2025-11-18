@@ -24,7 +24,7 @@
   }
 
   const onMouseEnter = () => {
-    playSound("ratfunUI", "hover3")
+    playSound({ category: "ratfunUI", id: "hover3" })
   }
 </script>
 

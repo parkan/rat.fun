@@ -30,7 +30,7 @@
   // Stage 2: Main animation
   const main = () => {
     timeline.call(() => {
-      playSound("ratfunUI", "type2")
+      playSound({ category: "ratfunUI", id: "type2" })
     })
 
     timeline.to(timestampElement, {

@@ -39,7 +39,7 @@
   const onmousedown = (e: MouseEvent) => {
     if (inert) return false
     if (!bodyElement || !armsElement || !headElement || !earsElement) return false
-    playSound("ratfunUI", "glassTap")
+    playSound({ category: "ratfunUI", id: "glassTap" })
 
     // Kill any existing click animation
     if (clickTimeline) {
@@ -112,7 +112,7 @@
 
     clickTimeline.call(
       () => {
-        playSound("ratfunUI", "chirp")
+        playSound({ category: "ratfunUI", id: "chirp" })
       },
       [],
       0.3

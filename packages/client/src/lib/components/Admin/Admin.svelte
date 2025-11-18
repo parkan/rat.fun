@@ -182,8 +182,8 @@
   })
 
   onMount(() => {
-    $backgroundMusic?.stop()
-    $backgroundMusic = playSound("ratfunMusic", "admin", true)
+    backgroundMusic.stop()
+    backgroundMusic.play({ category: "ratfunMusic", id: "admin", loop: true })
 
     // Reset admin view to home on entry
     phoneActiveAdminView.set("home")

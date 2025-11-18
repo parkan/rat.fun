@@ -16,12 +16,12 @@
   } = $props()
 
   const onpointerup = (e: MouseEvent) => {
-    playSound("ratfunUI", "boing")
+    playSound({ category: "ratfunUI", id: "boing" })
     onclick?.(e)
   }
 
   const onpointerdown = (e: MouseEvent) => {
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
   }
 </script>
 

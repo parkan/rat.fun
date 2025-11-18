@@ -7,7 +7,7 @@
   let isHovered = $state(false)
 
   const onMouseEnter = () => {
-    playSound("ratfunUI", "hover")
+    playSound({ category: "ratfunUI", id: "hover" })
     isHovered = true
   }
 

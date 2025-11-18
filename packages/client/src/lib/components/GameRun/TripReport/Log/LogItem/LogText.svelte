@@ -74,11 +74,11 @@
   let currentCharIndex = $state(0)
 
   const playQuoteSound = () => {
-    playSound("ratfunUI", "chirp", false, false, randomPitch())
+    playSound({ category: "ratfunUI", id: "chirp", pitch: randomPitch() })
   }
 
   const playItemSound = () => {
-    playSound("ratfunUI", "itemPositive")
+    playSound({ category: "ratfunUI", id: "itemPositive" })
   }
 
   // Type hit helper - now handles segments

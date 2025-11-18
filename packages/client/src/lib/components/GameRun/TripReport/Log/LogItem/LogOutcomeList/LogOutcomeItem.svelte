@@ -103,9 +103,9 @@
     // Sound
     timeline.call(() => {
       if (negative) {
-        playSound("ratfunUI", "itemNegative")
+        playSound({ category: "ratfunUI", id: "itemNegative" })
       } else {
-        playSound("ratfunUI", "itemPositive")
+        playSound({ category: "ratfunUI", id: "itemPositive" })
       }
     })
   }

@@ -57,7 +57,7 @@
     })
 
     tl.call(() => {
-      playSound("ratfunUI", "strobe")
+      playSound({ category: "ratfunUI", id: "strobe" })
     })
 
     // Create strobe effect: 16 cycles of 1/60s (1 frame each at 60fps)

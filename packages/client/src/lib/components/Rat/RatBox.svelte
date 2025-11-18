@@ -23,8 +23,7 @@
 
   onMount(async () => {
     shaderManager.setShader("clouds", true)
-    $backgroundMusic?.stop()
-    $backgroundMusic = playSound("ratfunMusic", "main", true)
+    backgroundMusic.play({ category: "ratfunMusic", id: "main", loop: true })
 
     if ($playerERC20Balance === 0) {
       // Wait for erc20 balance to be updated
@@ -102,10 +101,7 @@
 
   onDestroy(() => {
     // Stop background music
-    if ($backgroundMusic) {
-      $backgroundMusic.stop()
-      $backgroundMusic = undefined
-    }
+    backgroundMusic.stop()
   })
 </script>
 

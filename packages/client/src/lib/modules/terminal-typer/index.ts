@@ -72,14 +72,14 @@ async function typeText(
   // If duration is 0, output everything at once
   if (duration === 0) {
     addTextToLine(targetElement, content, color, backgroundColor)
-    playSound("ratfunUI", "terminalHit")
+    playSound({ category: "ratfunUI", id: "terminalHit" })
     return
   }
 
   for (const char of content) {
     if (isStopped()) break
     addChar(targetElement, char, color, backgroundColor)
-    playSound("ratfunUI", "type")
+    playSound({ category: "ratfunUI", id: "type" })
     await sleep(typeSpeed)
   }
 }
@@ -99,7 +99,7 @@ async function typeLoader(
 
   // Output the content all at once
   addTextToLine(targetElement, content, color, backgroundColor)
-  playSound("ratfunUI", "terminalHit")
+  playSound({ category: "ratfunUI", id: "terminalHit" })
 
   // If duration is 0, output everything at once
   if (duration === 0) {
@@ -128,7 +128,7 @@ async function typeLoader(
       if (isStopped()) return
       currentLoaderContent += char
       addChar(targetElement, char, color, backgroundColor)
-      playSound("ratfunUI", "type3")
+      playSound({ category: "ratfunUI", id: "type3" })
       await sleep(typeSpeed)
 
       // Check if we've exceeded duration after each character

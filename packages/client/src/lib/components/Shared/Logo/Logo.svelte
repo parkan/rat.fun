@@ -39,7 +39,7 @@
     // Play sound
     enterTimeline.call(
       () => {
-        playSound("ratfunUI", "logoIn")
+        playSound({ category: "ratfunUI", id: "logoIn" })
       },
       [],
       "0.5"
@@ -102,7 +102,7 @@
   const onmousedown = () => {
     if (isAnimating) return
 
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
 
     gsap.to(logoElement, {
       scale: 1.2,
@@ -121,7 +121,7 @@
     if (isAnimating) return
 
     isAnimating = true
-    playSound("ratfunUI", "logoClick")
+    playSound({ category: "ratfunUI", id: "logoClick" })
 
     // Fade out text and mascot layers
     exitTimeline.to(
@@ -154,7 +154,7 @@
   const onmouseenter = () => {
     if (isAnimating) return
 
-    playSound("ratfunUI", "smallButtonDown")
+    playSound({ category: "ratfunUI", id: "smallButtonDown" })
 
     // Animate highlight on mascot layer
     gsap.to(layer3Element, {
@@ -168,7 +168,7 @@
   const onmouseleave = () => {
     if (isAnimating) return
 
-    playSound("ratfunUI", "smallButtonUp")
+    playSound({ category: "ratfunUI", id: "smallButtonUp" })
 
     // Reset mascot layer
     gsap.to(layer3Element, {

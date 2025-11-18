@@ -17,11 +17,11 @@
   } = $props()
 
   const onmousedown = () => {
-    playSound("ratfunUI", "bigButtonDown")
+    playSound({ category: "ratfunUI", id: "bigButtonDown" })
   }
 
   const onmouseup = () => {
-    playSound("ratfunUI", "bigButtonUp")
+    playSound({ category: "ratfunUI", id: "bigButtonUp" })
     onclick()
   }
 </script>

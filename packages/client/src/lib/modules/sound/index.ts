@@ -1,6 +1,6 @@
 import { Howl } from "howler"
 import { soundLibrary } from "$lib/modules/sound/sound-library"
-import type { SoundAssets } from "./types"
+import type { SoundAssets, PlaySoundConfig } from "./types"
 
 /**
  * Preloads a sound library by creating Howl instances for each sound.
@@ -41,24 +41,12 @@ export function initSound(): void {
  * Plays a sound based on category and id. Provides options for looping and fade effects.
  *
  * @export
- * @param {string} category - The category of the sound.
- * @param {string} id - The id of the sound within the category.
- * @param {boolean} [loop=false] - Determines if the sound should loop.
- * @param {boolean} [fadeIn=false] - Determines if the sound should have fade in/out effects.
- * @param {number} [pitch=1] - The pitch of the sound.
- * @param {number} [delay=0] - The delay in milliseconds before the sound is played.
- * @param {number | undefined} [volume=undefined] - The volume of the sound.
+ * @param {PlaySoundConfig} config - Configuration object for playing the sound
  * @returns {Howl | undefined} - The Howl object of the sound.
  */
-export function playSound(
-  category: string,
-  id: string,
-  loop: boolean = false,
-  fadeIn: boolean = false,
-  pitch: number = 1,
-  delay: number = 0,
-  volume: number | undefined = undefined
-): Howl | undefined {
+export function playSound(config: PlaySoundConfig): Howl | undefined {
+  const { category, id, loop = false, fadeIn = false, pitch = 1, volume } = config
+
   // Check if category exists
   if (!soundLibrary[category]) {
     console.warn(`Sound category "${category}" not found in sound library`)
@@ -91,19 +79,12 @@ export function playSound(
   // Set pitch
   sound.rate(pitch)
 
-  // Handle play timing and fade effects
-  const playWithDelay = () => {
-    sound.play()
-    if (fadeIn) {
-      const FADE_TIME = 2000
-      sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME)
-    }
-  }
+  // Play sound
+  sound.play()
 
-  if (delay > 0) {
-    setTimeout(playWithDelay, delay)
-  } else {
-    playWithDelay()
+  if (fadeIn) {
+    const FADE_TIME = 2000
+    sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME)
   }
 
   return sound
@@ -118,5 +99,5 @@ export function randomPitch(): number {
 }
 
 export const typeHit = () => {
-  playSound("ratfunUI", "type")
+  playSound({ category: "ratfunUI", id: "type" })
 }

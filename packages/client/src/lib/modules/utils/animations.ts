@@ -103,7 +103,7 @@ export function addCountAnimation(config: CountAnimationConfig): void {
 
     if (playTickSound) {
       const pitch = pitchCalc(count, isNegative, sectionIndex, positionInSection)
-      playSound("ratfunUI", "counterTick", false, false, pitch)
+      playSound({ category: "ratfunUI", id: "counterTick", pitch })
     }
   }
 
@@ -235,7 +235,7 @@ export function addEasedCountAnimation(config: EasedCountAnimationConfig): void 
     valueElement.textContent = String(displayValue)
 
     if (playTickSound) {
-      playSound("ratfunUI", "counterTick", false, false, pitch)
+      playSound({ category: "ratfunUI", id: "counterTick", pitch })
     }
   }
 

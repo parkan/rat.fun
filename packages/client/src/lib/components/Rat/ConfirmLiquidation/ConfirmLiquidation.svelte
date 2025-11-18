@@ -12,7 +12,7 @@
 
   const onClickAbort = () => {
     // RAT_BOX_STATE.CONFIRM_LIQUIDATION -> RAT_BOX_STATE.HAS_RAT
-    playSound("ratfunUI", "ratRelief")
+    playSound({ category: "ratfunUI", id: "ratRelief" })
     ratState.state.transitionTo(RAT_BOX_STATE.HAS_RAT)
   }
 </script>

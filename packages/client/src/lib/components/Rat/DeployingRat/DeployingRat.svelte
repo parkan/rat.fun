@@ -88,7 +88,7 @@
         const newNumber = getRandomNumberAvoidingPrevious(100, 999, previousNumber)
         numberDisplay = newNumber
         previousNumber = newNumber
-        playSound("ratfunUI", "wheelTick")
+        playSound({ category: "ratfunUI", id: "wheelTick" })
       }
     }, 100)
   }
@@ -178,7 +178,7 @@
     // Resume erc20 balance listener
     erc20BalanceListenerActive.set(true)
 
-    playSound("ratfunUI", "ratHello")
+    playSound({ category: "ratfunUI", id: "ratHello" })
 
     // Await rat name to have changed FROM oldName
     await waitForPropertyChangeFrom(rat, "name", oldName, 10000)
