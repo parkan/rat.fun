@@ -309,7 +309,7 @@ async function checkDelegation({
   return record.delegationControlId === unlimitedDelegationControlId;
 }
 function isAlreadyDeployedError(errorMessage) {
-  return errorMessage.includes("AA10") || errorMessage.includes("already constructed") || errorMessage.includes("already deployed");
+  return errorMessage.includes("AA10") || errorMessage.includes("already constructed") || errorMessage.includes("already deployed") || errorMessage.includes("is an existing contract, but initCode is nonempty");
 }
 async function isWalletDeployed(client, address) {
   const code = await getAction(
@@ -439,6 +439,20 @@ async function deploySessionAccount(sessionClient, onStatus) {
         onStatus?.({ type: "complete", message: "Session setup complete!" });
         return;
       }
+    }
+    if (isAlreadyDeployedError(errorMsg)) {
+      console.log("[drawbridge] Session account already deployed (bundler confirmed)");
+      console.log("[drawbridge] Waiting for RPC cache to update...");
+      await new Promise((resolve) => setTimeout(resolve, DEPLOYMENT_TIMEOUTS.BUNDLER_STATE_SYNC));
+      const nowDeployed = await sessionClient.account.isDeployed?.();
+      if (nowDeployed) {
+        console.log("[drawbridge] Session deployment verified after cache update");
+        onStatus?.({ type: "complete", message: "Session setup complete!" });
+        return;
+      }
+      console.warn("[drawbridge] Cache still stale after delay - treating as deployed anyway");
+      onStatus?.({ type: "complete", message: "Session setup complete!" });
+      return;
     }
     onStatus?.({ type: "error", message: "Session deployment failed", error });
     throw error;

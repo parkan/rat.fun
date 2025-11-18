@@ -18,6 +18,7 @@ import { DEPLOYMENT_TIMEOUTS } from "../../types"
  * - AA10: Account already deployed (ERC-4337 bundler error code)
  * - "already constructed": Some wallet implementations
  * - "already deployed": Generic message from some bundlers
+ * - "is an existing contract, but initCode is nonempty": Bundler precheck error for deployed accounts with factory data
  *
  * @param errorMessage Error message to check
  * @returns True if error indicates wallet is already deployed
@@ -26,7 +27,8 @@ export function isAlreadyDeployedError(errorMessage: string): boolean {
   return (
     errorMessage.includes("AA10") ||
     errorMessage.includes("already constructed") ||
-    errorMessage.includes("already deployed")
+    errorMessage.includes("already deployed") ||
+    errorMessage.includes("is an existing contract, but initCode is nonempty")
   )
 }
 

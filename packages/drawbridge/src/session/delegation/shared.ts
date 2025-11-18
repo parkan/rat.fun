@@ -7,6 +7,7 @@ import {
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { SessionClient, DEPLOYMENT_TIMEOUTS } from "../../types"
+import { isAlreadyDeployedError } from "../patterns/wallet-deployment"
 
 /**
  * Smart account with optional factory properties (internal use only)
@@ -160,6 +161,27 @@ export async function deploySessionAccount(
         onStatus?.({ type: "complete", message: "Session setup complete!" })
         return
       }
+    }
+
+    // Check if "already deployed" error (RPC cache inconsistency)
+    if (isAlreadyDeployedError(errorMsg)) {
+      console.log("[drawbridge] Session account already deployed (bundler confirmed)")
+      console.log("[drawbridge] Waiting for RPC cache to update...")
+
+      // Wait for RPC cache to update before re-checking
+      await new Promise(resolve => setTimeout(resolve, DEPLOYMENT_TIMEOUTS.BUNDLER_STATE_SYNC))
+
+      const nowDeployed = await sessionClient.account.isDeployed?.()
+      if (nowDeployed) {
+        console.log("[drawbridge] Session deployment verified after cache update")
+        onStatus?.({ type: "complete", message: "Session setup complete!" })
+        return
+      }
+
+      console.warn("[drawbridge] Cache still stale after delay - treating as deployed anyway")
+      // Bundler has authoritative view - if it says deployed, trust it
+      onStatus?.({ type: "complete", message: "Session setup complete!" })
+      return
     }
 
     onStatus?.({ type: "error", message: "Session deployment failed", error: error as Error })
