@@ -92,6 +92,8 @@
       // Account watcher in drawbridge will handle session creation
       // Close modal and transition to SESSION_SETUP
       showWalletSelect = false
+      // !!! HACK: Wait for 1 second to avoid showing flash of SESSION_SETUP if we are setup
+      await new Promise(resolve => setTimeout(resolve, 1000))
       spawnState.state.transitionTo(SPAWN_STATE.SESSION_SETUP)
     } catch (error) {
       console.error("[ConnectWalletForm] Connection failed:", error)
@@ -376,6 +378,8 @@
           text="Connect Burner"
           onclick={() => {
             console.log("[ConnectWalletForm] Burner wallet button clicked")
+            // Burner wallet is always "session ready", go to INTRODUCTION
+            // Spawn.svelte effects will handle checking if already spawned
             spawnState.state.transitionTo(SPAWN_STATE.INTRODUCTION)
           }}
         />

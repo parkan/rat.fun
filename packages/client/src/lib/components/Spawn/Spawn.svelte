@@ -172,7 +172,7 @@
     // Skip checks if not initialized yet
     if (!initialized) return
 
-    // Check when reaching SESSION_SETUP: if session is already ready and spawned, fast-track
+    // Check when reaching SESSION_SETUP: if session is already ready, skip this screen
     if (currentState === SPAWN_STATE.SESSION_SETUP) {
       if (walletType === WALLET_TYPE.DRAWBRIDGE && $isSessionReady && $sessionClient) {
         const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
@@ -181,7 +181,12 @@
         if (isSpawned) {
           console.log("[Spawn] At SESSION_SETUP but already spawned → fast-tracking to game")
           spawned()
+          return
         }
+
+        // Session ready but not spawned → skip to INTRODUCTION
+        console.log("[Spawn] At SESSION_SETUP but session ready → skipping to INTRODUCTION")
+        spawnState.state.transitionTo(SPAWN_STATE.INTRODUCTION)
       }
     }
 
