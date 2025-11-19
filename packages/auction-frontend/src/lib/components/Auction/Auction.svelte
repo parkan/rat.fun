@@ -10,7 +10,7 @@
   import { dopplerHookAbi } from "@whetstone-research/doppler-sdk"
   import { publicNetwork } from "$lib/modules/network"
   import { AUCTION_STATE, auctionState } from "$lib/components/Auction/state.svelte"
-  import { Available, ConnectWalletForm } from "$lib/components/Auction"
+  import { Swap, ConnectWalletForm } from "$lib/components/Auction"
   import { userAddress } from "$lib/modules/drawbridge"
   import { playerAddress } from "$lib/modules/state/stores"
   import { initErc20Listener } from "$lib/modules/erc20Listener"
@@ -162,7 +162,7 @@
         }}
       />
     {:else if auctionState.state.current === AUCTION_STATE.AVAILABLE}
-      <Available {auctionParams} {spentAmount} />
+      <Swap {auctionParams} {spentAmount} />
     {:else if auctionState.state.current === AUCTION_STATE.WALLET_LIMIT_REACHED}
       limit reached
     {:else if auctionState.state.current === AUCTION_STATE.ENDED}
