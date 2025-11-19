@@ -10,8 +10,8 @@ import { queries } from "@modules/cms/public/groq"
 import { calculateTotalRatValue } from "@modules/mud/value"
 
 import { publicSanityClient } from "@modules/cms/public/sanity"
-import { v4 as uuidv4 } from "uuid"
 import { CMSError, CMSAPIError } from "@modules/error-handling/errors"
+import { v4 as uuidv4 } from "uuid"
 
 // Define a type for new outcome documents that omits Sanity-specific fields
 type NewOutcomeDoc = Omit<OutcomeDoc, "_createdAt" | "_updatedAt" | "_rev">
@@ -162,6 +162,7 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
 /**
  * Write outcome to offchain CMS.
  * Used to display statistics in the client.
+ * @param outcomeId - The pre-generated outcome ID for tracking
  * @param worldAddress - The world address
  * @param player - The player who performed the trip
  * @param trip - The trip state BEFORE the visit (old values)
@@ -178,6 +179,7 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
  * @param logOutput - Accumulated logs from the trip processing
  */
 export async function writeOutcomeToCMS(
+  outcomeId: string,
   worldAddress: string,
   player: Player,
   trip: Trip,
@@ -194,7 +196,7 @@ export async function writeOutcomeToCMS(
   logOutput?: string
 ): Promise<OutcomeDoc> {
   try {
-    const outcomeID = uuidv4()
+    const outcomeID = outcomeId
 
     const debuggingInfoString = JSON.stringify(debuggingInfo)
 

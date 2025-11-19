@@ -26,19 +26,21 @@ export function createSystemCalls(network: SetupNetworkResult) {
    * @param trip - The trip to apply the outcome to
    * @param outcome - The outcome to apply to the rat and trip
    * @param logger - Logger for accumulating trip logs
+   * @param outcomeId - The outcome ID for error tracking
    * @returns The validated outcome and calculated changes
    */
   const applyOutcome = async (
     rat: Rat,
     trip: Trip,
     outcome: OutcomeReturnValue,
-    logger: TripLogger
+    logger: TripLogger,
+    outcomeId?: string
   ) => {
     try {
       // Get trip count before sending transaction
       const initialTripCount = rat.tripCount
 
-      const args = createOutcomeCallArgs(rat, trip, outcome, logger)
+      const args = createOutcomeCallArgs(rat, trip, outcome, logger, outcomeId)
 
       // Get current gas prices for speed optimization
       const feeData = await network.publicClient.estimateFeesPerGas()
@@ -68,7 +70,15 @@ export function createSystemCalls(network: SetupNetworkResult) {
           initialTripCount
         })
 
-        const validatedOutcome = updateOutcome(outcome, rat, newOnChainData.rat, logger)
+        const validatedOutcome = updateOutcome(
+          outcome,
+          rat,
+          newOnChainData.rat,
+          logger,
+          trip,
+          newOnChainData.trip as Trip,
+          outcomeId
+        )
 
         const { newTripValue, tripValueChange } = getTripValue(trip, newOnChainData.trip)
 
@@ -83,7 +93,8 @@ export function createSystemCalls(network: SetupNetworkResult) {
           newOnChainData.trip as Trip,
           ratValueChange,
           tripValueChange,
-          logger
+          logger,
+          outcomeId
         )
 
         return {

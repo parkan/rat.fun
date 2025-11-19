@@ -50,7 +50,8 @@ export function createOutcomeCallArgs(
   rat: Rat,
   trip: Trip,
   outcome: OutcomeReturnValue,
-  logger: TripLogger
+  logger: TripLogger,
+  outcomeId?: string
 ) {
   logger.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   logger.log("📦 createOutcomeCallArgs - Formatting LLM outcome for contract")
@@ -237,7 +238,10 @@ export function updateOutcome(
   llmOutcome: OutcomeReturnValue,
   oldRat: Rat,
   newRat: Rat,
-  logger: TripLogger
+  logger: TripLogger,
+  oldTrip?: Trip,
+  newTrip?: Trip,
+  outcomeId?: string
 ): OutcomeReturnValue {
   // Deep clone the LLM outcome to avoid mutating the original
   const newOutcome = JSON.parse(JSON.stringify(llmOutcome)) as OutcomeReturnValue
@@ -526,7 +530,11 @@ export function updateOutcome(
     }
   )
 
-  handleBackgroundError(mismatchError, "Trip Entry - Balance Transfer Mismatch")
+  handleBackgroundError(mismatchError, "Trip Entry - Balance Transfer Mismatch", {
+    ...(outcomeId && { outcomeId }),
+    ratId: newRat.id,
+    ...(newTrip?.id && { tripId: newTrip.id })
+  })
 
   // Scale transfers proportionally to match the actual BALANCE outcome
   // balanceTransfers represents ONLY balance/health changes (what the UI displays)
@@ -785,7 +793,8 @@ export function validateOutcome(
   newTrip: Trip,
   ratValueChange: number,
   tripValueChange: number,
-  logger: TripLogger
+  logger: TripLogger,
+  outcomeId?: string
 ): void {
   logger.log("__ VALIDATING OUTCOME")
 
@@ -798,7 +807,11 @@ export function validateOutcome(
 
   if (valueSum !== 0) {
     const error = new ValueConservationError(ratValueChange, tripValueChange, newRat.id, newTrip.id)
-    handleBackgroundError(error, "Trip Entry - Value Conservation")
+    handleBackgroundError(error, "Trip Entry - Value Conservation", {
+      ...(outcomeId && { outcomeId }),
+      ratId: newRat.id,
+      tripId: newTrip.id
+    })
   } else {
     logger.log(`__   ✓ Value conservation: ${ratValueChange} + ${tripValueChange} = 0`)
   }
@@ -820,7 +833,11 @@ export function validateOutcome(
       newRat.id,
       newTrip.id
     )
-    handleBackgroundError(error, "Trip Entry - Trip Balance")
+    handleBackgroundError(error, "Trip Entry - Trip Balance", {
+      ...(outcomeId && { outcomeId }),
+      ratId: newRat.id,
+      tripId: newTrip.id
+    })
   } else {
     logger.log(
       `__   ✓ Trip balance: oldBalance(${oldTripBalance}) + change(${tripValueChange}) = newBalance(${newTripBalance})`

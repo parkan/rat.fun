@@ -203,15 +203,19 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
 /**
  * Handle errors in background processes (outside of main request context)
  */
-export function handleBackgroundError(error: unknown, contextStr: string): void {
+export function handleBackgroundError(
+  error: unknown,
+  contextStr: string,
+  additionalContext?: Record<string, any>
+): void {
   const errorCode = error instanceof AppError ? error.code : "UNKNOWN_ERROR"
   const errorMessage = `${errorCode}: ${error instanceof Error ? error.message : String(error)}`
 
   // For OutcomeValidationError, include the error's context in the log
   const logContext =
     error instanceof OutcomeValidationError && error.context
-      ? { ...error.context, context: contextStr }
-      : { context: contextStr }
+      ? { ...error.context, context: contextStr, ...additionalContext }
+      : { context: contextStr, ...additionalContext }
 
   console.error(`🚨 BACKGROUND ERROR [${contextStr}]:`, {
     message: errorMessage,
@@ -228,12 +232,14 @@ export function handleBackgroundError(error: unknown, contextStr: string): void 
             context: "background",
             backgroundContext: contextStr,
             errorCode,
-            ...error.context
+            ...error.context,
+            ...additionalContext
           }
         : {
             context: "background",
             backgroundContext: contextStr,
-            errorCode
+            errorCode,
+            ...additionalContext
           }
 
     captureError(error, sentryContext)
@@ -241,7 +247,8 @@ export function handleBackgroundError(error: unknown, contextStr: string): void 
     captureMessage(`Background Error [${contextStr}]: ${String(error)}`, "error", {
       context: "background",
       backgroundContext: contextStr,
-      errorType: typeof error
+      errorType: typeof error,
+      ...additionalContext
     })
   }
 }

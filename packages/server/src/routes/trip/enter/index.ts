@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { schema } from "@routes/trip/enter/schema"
 import { Hex } from "viem"
+import { v4 as uuidv4 } from "uuid"
 
 // Types
 import {
@@ -56,6 +57,9 @@ async function routes(fastify: FastifyInstance) {
       // Extract tripId early so we can create logger before any errors
       const { tripId, ratId } = request.body.data
 
+      // Create outcomeId early for error tracking
+      const outcomeId = uuidv4()
+
       // Create logger for this trip (do this first to ensure cleanup on errors)
       const logger = createTripLogger(tripId)
 
@@ -65,6 +69,7 @@ async function routes(fastify: FastifyInstance) {
         logger.log("━━━ Trip Entry Started ━━━")
         logger.log(`Rat ID: ${ratId}`)
         logger.log(`Trip ID: ${tripId}`)
+        logger.log(`Outcome ID: ${outcomeId}`)
 
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = await verifyRequest(request.body)
@@ -147,7 +152,7 @@ async function routes(fastify: FastifyInstance) {
           newRatBalance,
           newRatValue,
           ratValueChange
-        } = await systemCalls.applyOutcome(rat, trip, unvalidatedOutcome, logger)
+        } = await systemCalls.applyOutcome(rat, trip, unvalidatedOutcome, logger, outcomeId)
         logger.log(`✓ Outcome applied onchain (${Math.round(performance.now() - chainStart)}ms)`)
 
         logger.log("Balance change: " + (newRatBalance - rat.balance))
@@ -196,6 +201,7 @@ async function routes(fastify: FastifyInstance) {
             const logOutput = logger.getLogsAsString()
 
             writeOutcomeToCMS(
+              outcomeId,
               network.worldContract?.address ?? "0x0",
               player,
               trip,
@@ -221,7 +227,7 @@ async function routes(fastify: FastifyInstance) {
             // On error, also log it before clearing
             console.error(`❌ Error in background actions: ${error}`)
             logger.clear()
-            handleBackgroundError(error, "Trip Entry - CMS")
+            handleBackgroundError(error, "Trip Entry - CMS", { outcomeId, tripId, ratId })
           }
         }
 
