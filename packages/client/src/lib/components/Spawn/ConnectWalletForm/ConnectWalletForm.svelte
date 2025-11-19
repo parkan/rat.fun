@@ -6,10 +6,10 @@
   import { debugInfo } from "$lib/modules/drawbridge/wagmiConfig"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
+  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
 
-  const { walletType, onComplete = () => {} } = $props<{
+  const { walletType } = $props<{
     walletType: WALLET_TYPE
-    onComplete: () => void
   }>()
 
   let buttonElement: HTMLDivElement | null = $state(null)
@@ -29,6 +29,11 @@
   const PREFERRED_WALLET_ORDER = ["metamask", "phantom", "rabby", "coinbase"]
 
   const WALLET_DEEPLINKS: Record<string, { ios: string; android: string; name: string }> = {
+    coinbase: {
+      ios: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
+      android: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
+      name: "BASE"
+    },
     metamask: {
       ios: "https://metamask.app.link/dapp/rat.fun",
       android: "https://metamask.app.link/dapp/rat.fun",
@@ -38,11 +43,6 @@
       ios: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
       android: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
       name: "Phantom"
-    },
-    coinbase: {
-      ios: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
-      android: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
-      name: "BASE app"
     },
     rabby: {
       ios: "rabby://dapp?url=https%3A%2F%2Frat.fun",
@@ -87,10 +87,11 @@
       const drawbridge = getDrawbridge()
       await drawbridge.connectWallet(connectorId)
 
+      console.log("[ConnectWalletForm] Wallet connected successfully")
       // Account watcher in drawbridge will handle session creation
-      // Close modal and complete this step
+      // Close modal and transition to SESSION_SETUP
       showWalletSelect = false
-      onComplete()
+      spawnState.state.transitionTo(SPAWN_STATE.SESSION_SETUP)
     } catch (error) {
       console.error("[ConnectWalletForm] Connection failed:", error)
     } finally {
@@ -185,6 +186,8 @@
   }
 
   onMount(() => {
+    console.log("[ConnectWalletForm] Component mounted, walletType:", walletType)
+
     // Only prepare connectors for DRAWBRIDGE wallet type
     if (walletType === WALLET_TYPE.DRAWBRIDGE) {
       prepareConnectors()
@@ -359,7 +362,13 @@
       </button>
     {:else}
       <div class="button-container" bind:this={buttonElement}>
-        <BigButton text="Connect Burner" onclick={onComplete} />
+        <BigButton
+          text="Connect Burner"
+          onclick={() => {
+            console.log("[ConnectWalletForm] Burner wallet button clicked")
+            spawnState.state.transitionTo(SPAWN_STATE.INTRODUCTION)
+          }}
+        />
       </div>
     {/if}
   </div>

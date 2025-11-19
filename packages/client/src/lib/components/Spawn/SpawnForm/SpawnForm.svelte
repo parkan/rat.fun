@@ -1,24 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { sendSpawn } from "$lib/modules/action-manager/index.svelte"
   import gsap from "gsap"
 
-  import { player } from "$lib/modules/state/stores"
   import { typeHit } from "$lib/modules/sound"
-  import { InputValidationError } from "$lib/modules/error-handling/errors"
-  import { waitForPropertyChangeFrom } from "$lib/modules/state/utils"
   import { isSessionReady, sessionClient } from "$lib/modules/drawbridge"
   import { walletNetwork, walletType } from "$lib/modules/network"
   import { WALLET_TYPE } from "$lib/mud/enums"
 
-  import { BigButton, Mascot, SmallSpinner } from "$lib/components/Shared"
-
-  const { onComplete = () => {} } = $props<{
-    onComplete: (name: string) => void
-  }>()
+  import { BigButton, Mascot } from "$lib/components/Shared"
+  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
 
   let name = $state("")
-  let busy = $state(false)
 
   // Check if wallet is ready based on wallet type
   const isWalletReady = $derived(
@@ -28,46 +20,36 @@
   )
 
   let mascotElement: HTMLDivElement | null = $state(null)
-  // let textElement: HTMLDivElement | null = $state(null)
   let inputElement: HTMLInputElement | null = $state(null)
   let buttonElement: HTMLDivElement | null = $state(null)
 
   const timeline = gsap.timeline()
 
-  async function submitForm() {
-    // Check if wallet is ready before allowing spawn
-    if (!isWalletReady) {
-      console.warn("Wallet not ready yet, cannot spawn")
+  function submitForm() {
+    console.log("[SpawnForm] Submit form with name:", name)
+
+    // Validate name before transitioning
+    if (!name || name.trim() === "") {
+      console.warn("[SpawnForm] Name cannot be empty")
       return
     }
 
-    busy = true
-    try {
-      // Validate name is not empty
-      if (!name || name.trim() === "") {
-        throw new InputValidationError("Name cannot be empty", "name", name)
-      }
-
-      // Additional name validation (optional - can add more rules as needed)
-      if (name.length > 50) {
-        throw new InputValidationError("Name is too long (maximum 50 characters)", "name", name)
-      }
-
-      await sendSpawn(name)
-      await waitForPropertyChangeFrom(player, "name", undefined, 10000)
-      onComplete(name)
-    } catch (error) {
-      console.error(error)
-      if (error instanceof InputValidationError) {
-        // In a real UI, you might want to show this error to the user
-        // For now, validation errors are handled silently
-      } else {
-        throw error // Re-throw non-validation errors
-      }
+    if (name.length > 50) {
+      console.warn("[SpawnForm] Name is too long (maximum 50 characters)")
+      return
     }
+
+    // Store name in state machine
+    spawnState.data.setPlayerName(name)
+    console.log("[SpawnForm] Name stored, transitioning to SPAWNING")
+
+    // Transition to spawning state
+    spawnState.state.transitionTo(SPAWN_STATE.SPAWNING)
   }
 
   onMount(() => {
+    console.log("[SpawnForm] Component mounted")
+
     if (!mascotElement || !inputElement || !buttonElement) {
       return
     }
@@ -122,42 +104,34 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    {#if busy}
-      <div class="loader">Issuing member card <SmallSpinner soundOn /></div>
-    {:else}
-      <!-- MASCOT -->
-      <div class="mascot-container" bind:this={mascotElement}>
-        <Mascot entranceOn={true} bigDanceOn={true} />
-      </div>
-      <!-- INTRO TEXT -->
-      <!-- <div class="text" bind:this={textElement}>
-        {$player?.name}ID checks out. You can enter. But we need your name.
-      </div> -->
+    <!-- MASCOT -->
+    <div class="mascot-container" bind:this={mascotElement}>
+      <Mascot entranceOn={true} bigDanceOn={true} />
+    </div>
 
-      <!-- FORM -->
-      <div class="form" bind:this={buttonElement}>
-        <!-- INPUT -->
-        <input
-          type="text"
-          placeholder="YOUR NAME"
-          bind:value={name}
-          bind:this={inputElement}
-          onkeydown={e => {
-            typeHit()
-            if (e.key === "Enter") {
-              submitForm()
-            }
-          }}
+    <!-- FORM -->
+    <div class="form" bind:this={buttonElement}>
+      <!-- INPUT -->
+      <input
+        type="text"
+        placeholder="YOUR NAME"
+        bind:value={name}
+        bind:this={inputElement}
+        onkeydown={e => {
+          typeHit()
+          if (e.key === "Enter") {
+            submitForm()
+          }
+        }}
+      />
+      <div class="button-container">
+        <BigButton
+          text={!isWalletReady ? "Setting up..." : "SIGN"}
+          onclick={submitForm}
+          disabled={!name || !isWalletReady}
         />
-        <div class="button-container">
-          <BigButton
-            text={!isWalletReady ? "Setting up..." : "SIGN"}
-            onclick={submitForm}
-            disabled={!name || !isWalletReady}
-          />
-        </div>
       </div>
-    {/if}
+    </div>
   </div>
 </div>
 
@@ -216,14 +190,6 @@
           width: 100%;
           height: 120px;
         }
-      }
-
-      .loader {
-        font-size: var(--font-size-large);
-        font-family: var(--special-font-stack);
-        background: var(--background);
-        color: var(--foreground);
-        padding: 10px;
       }
     }
   }

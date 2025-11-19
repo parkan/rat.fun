@@ -1,36 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import gsap from "gsap"
-  import { getDrawbridge } from "$lib/modules/drawbridge"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
-
-  const { onComplete = () => {} } = $props<{
-    onComplete: () => void
-  }>()
+  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
 
   let buttonElement: HTMLDivElement | null = $state(null)
-  let settingUp = $state(false)
-  let error = $state<string | null>(null)
 
   const timeline = gsap.timeline()
 
-  async function handleSetupSession() {
-    try {
-      settingUp = true
-      error = null
-
-      const drawbridge = getDrawbridge()
-      await drawbridge.setupSession()
-
-      onComplete()
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Session setup failed"
-    } finally {
-      settingUp = false
-    }
+  function handleSetupSession() {
+    console.log("[SessionSetup] Setup session button clicked")
+    spawnState.state.transitionTo(SPAWN_STATE.SETTING_UP_SESSION)
   }
 
   onMount(() => {
+    console.log("[SessionSetup] Component mounted")
+
     if (!buttonElement) {
       return
     }
@@ -49,17 +34,10 @@
     <div class="text-container">
       <h2>Session Setup</h2>
       <p>Create a secure session to interact with the game without signing every transaction.</p>
-      {#if error}
-        <p class="error">{error}</p>
-      {/if}
     </div>
 
     <div class="button-container" bind:this={buttonElement}>
-      {#if settingUp}
-        <BigButton text="Setting up..." disabled={true} onclick={() => {}} />
-      {:else}
-        <BigButton text="Setup session" onclick={handleSetupSession} />
-      {/if}
+      <BigButton text="Setup session" onclick={handleSetupSession} />
     </div>
   </div>
 </div>
@@ -96,12 +74,6 @@
           font-size: var(--font-size-normal);
           margin: 0 0 10px 0;
           line-height: 1.5;
-        }
-
-        .error {
-          color: #ff4444;
-          font-weight: bold;
-          margin-top: 20px;
         }
       }
 

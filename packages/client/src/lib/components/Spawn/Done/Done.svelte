@@ -4,7 +4,7 @@
   import gsap from "gsap"
   import { BigButton, Mascot } from "$lib/components/Shared"
 
-  let { onComplete }: { onComplete: () => void } = $props()
+  let { spawned }: { spawned: () => void } = $props()
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let textElement = $state<HTMLDivElement | null>(null)
@@ -12,7 +12,14 @@
 
   const timeline = gsap.timeline()
 
+  function handleEnjoy() {
+    console.log("[Done] Enjoy button clicked, calling spawned callback")
+    spawned()
+  }
+
   onMount(() => {
+    console.log("[Done] Component mounted")
+
     if (!mascotElement || !textElement || !buttonElement) {
       return
     }
@@ -60,7 +67,7 @@
       {$player?.name}, you are set!
     </div>
     <div class="button-container" bind:this={buttonElement}>
-      <BigButton text="ENJOY SKILLFULLY" onclick={onComplete} />
+      <BigButton text="ENJOY SKILLFULLY" onclick={handleEnjoy} />
     </div>
   </div>
 </div>

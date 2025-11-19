@@ -4,9 +4,6 @@
   import { fade } from "svelte/transition"
 
   import { WALLET_TYPE } from "$lib/mud/enums"
-  import { SPAWN_STATE } from "$lib/modules/ui/enums"
-
-  import { playSound } from "$lib/modules/sound"
 
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -15,17 +12,23 @@
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
-  import { sessionClient, status, DrawbridgeStatus } from "$lib/modules/drawbridge"
+  import { sessionClient, status, DrawbridgeStatus, isSessionReady } from "$lib/modules/drawbridge"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
-
-  import Introduction from "$lib/components/Spawn/Introduction/Introduction.svelte"
-  import ConnectWalletForm from "$lib/components/Spawn/ConnectWalletForm/ConnectWalletForm.svelte"
-  import SessionSetup from "$lib/components/Spawn/SessionSetup/SessionSetup.svelte"
-  import SpawnForm from "$lib/components/Spawn/SpawnForm/SpawnForm.svelte"
-  import HeroImage from "$lib/components/Spawn/HeroImage/HeroImage.svelte"
+  import {
+    WelcomeScreen,
+    Introduction,
+    ConnectWalletForm,
+    SessionSetup,
+    SettingUp,
+    SpawnForm,
+    Spawning,
+    Done,
+    Error
+  } from "$lib/components/Spawn"
+  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { Marquee } from "$lib/components/Shared"
 
   const { walletType, spawned = () => {} } = $props<{
@@ -33,89 +36,192 @@
     spawned: () => void
   }>()
 
-  let currentState = $state<SPAWN_STATE>(SPAWN_STATE.INTRODUCTION)
+  /*
+   *  Initial state determination based on:
+   *  - walletConnected (wallet address available)
+   *  - sessionReady (for Drawbridge: session is ready, for Burner: always true)
+   *  - spawned (player already spawned in the game)
+   *
+   *  +---+----------------+-------------+---------+------------------+
+   *  |   | walletConnected| sessionReady| spawned | Initial State    |
+   *  +---+----------------+-------------+---------+------------------+
+   *  | 0 |     false      |    false    |  false  | WELCOME_SCREEN   |
+   *  | 1 |     false      |    false    |  true   | Impossible       |
+   *  | 2 |     false      |    true     |  false  | Impossible       |
+   *  | 3 |     false      |    true     |  true   | Impossible       |
+   *  | 4 |     true       |    false    |  false  | SESSION_SETUP    |
+   *  | 5 |     true       |    false    |  true   | SESSION_SETUP    |
+   *  | 6 |     true       |    true     |  false  | INTRODUCTION     |
+   *  | 7 |     true       |    true     |  true   | DIRECT TO GAME   |
+   *  +---+----------------+-------------+---------+------------------+
+   *
+   *  Note: DONE state is reached only through normal flow (SPAWNING → DONE)
+   *        Scenario 7 exits immediately without showing any UI
+   */
 
-  const onIntroductionComplete = () => (currentState = SPAWN_STATE.CONNECT_WALLET)
+  function determineInitialState(): SPAWN_STATE {
+    console.log("[Spawn] Determining initial state, walletType:", walletType)
 
-  async function checkForBurnerWallet() {
-    const wallet = setupBurnerWalletNetwork($publicNetwork)
-    const isSpawned = initWalletNetwork(
-      wallet,
-      wallet.walletClient?.account.address,
-      WALLET_TYPE.BURNER
-    )
-
-    // Check if player is already spawned
-    if (
-      isSpawned ||
-      (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn"))
-    ) {
-      // Connected and spawned - finish spawn process
-      spawned()
-    } else {
-      // New user – show introduction
-      currentState = SPAWN_STATE.INTRODUCTION
-    }
-  }
-
-  const onWalletConnectionComplete = () => {
-    // For burner wallet, go straight to spawn form
     if (walletType === WALLET_TYPE.BURNER) {
-      currentState = SPAWN_STATE.SPAWN_FORM
+      const wallet = setupBurnerWalletNetwork($publicNetwork)
+      const walletConnected = !!wallet.walletClient?.account.address
+      const isSpawned = walletConnected
+        ? initWalletNetwork(wallet, wallet.walletClient.account.address, WALLET_TYPE.BURNER)
+        : false
+
+      console.log("[Spawn] Burner wallet status:", { walletConnected, isSpawned })
+
+      // Scenario 0: No wallet connected -> WELCOME_SCREEN
+      if (!walletConnected) {
+        console.log("[Spawn] Scenario 0: No wallet connected → WELCOME_SCREEN")
+        return SPAWN_STATE.WELCOME_SCREEN
+      }
+
+      // Scenario 7: Wallet connected, session ready (always for burner), spawned -> exit flow
+      if (
+        isSpawned ||
+        (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn"))
+      ) {
+        console.log("[Spawn] Scenario 7: Already spawned → exiting flow (no UI)")
+        spawned()
+        return SPAWN_STATE.INIT // No state transition, just exit
+      }
+
+      // Scenario 6: Wallet connected, session ready (always for burner), not spawned -> INTRODUCTION
+      console.log("[Spawn] Scenario 6: Wallet connected, not spawned → INTRODUCTION")
+      return SPAWN_STATE.INTRODUCTION
+    } else {
+      // DRAWBRIDGE
+      const walletConnected =
+        $status !== DrawbridgeStatus.DISCONNECTED && $status !== DrawbridgeStatus.UNINITIALIZED
+      const sessionReady = $isSessionReady
+      const isSpawned =
+        walletConnected && sessionReady && $sessionClient
+          ? (() => {
+              const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
+              return initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
+            })()
+          : false
+
+      console.log("[Spawn] Drawbridge wallet status:", {
+        status: $status,
+        walletConnected,
+        sessionReady,
+        isSpawned
+      })
+
+      // Scenario 0: No wallet connected -> WELCOME_SCREEN
+      if (!walletConnected) {
+        console.log("[Spawn] Scenario 0: No wallet connected → WELCOME_SCREEN")
+        return SPAWN_STATE.WELCOME_SCREEN
+      }
+
+      // Scenario 4 & 5: Wallet connected but session not ready -> SESSION_SETUP
+      if (!sessionReady) {
+        console.log("[Spawn] Scenario 4/5: Wallet connected, session not ready → SESSION_SETUP")
+        return SPAWN_STATE.SESSION_SETUP
+      }
+
+      // Scenario 7: Wallet connected, session ready, spawned -> exit flow
+      if (isSpawned) {
+        console.log("[Spawn] Scenario 7: Already spawned → exiting flow (no UI)")
+        spawned()
+        return SPAWN_STATE.INIT // No state transition, just exit
+      }
+
+      // Scenario 6: Wallet connected, session ready, not spawned -> INTRODUCTION
+      console.log("[Spawn] Scenario 6: Wallet connected, session ready, not spawned → INTRODUCTION")
+      return SPAWN_STATE.INTRODUCTION
     }
-    // For Drawbridge, the effect will handle transition once state settles
-    // Don't transition yet - wait for delegation check to complete
   }
 
-  // Listen to changes in drawbridge status
+  let initialized = $state(false)
+
+  // Wait for drawbridge stores to settle before determining initial state
   $effect(() => {
-    // Only react to drawbridge status changes
-    if (walletType !== WALLET_TYPE.DRAWBRIDGE) return
+    // For Drawbridge, wait until status is no longer UNINITIALIZED
+    // This means the stores have been updated with the actual connection state
+    if (walletType === WALLET_TYPE.DRAWBRIDGE && $status === DrawbridgeStatus.UNINITIALIZED) {
+      console.log("[Spawn] Waiting for drawbridge stores to initialize...")
+      return
+    }
 
-    console.log("[Spawn] drawbridge status changed:", $status)
+    // Only initialize once
+    if (initialized) return
+    initialized = true
 
-    switch ($status) {
-      case DrawbridgeStatus.CONNECTED:
-        // Wallet connected but needs session setup
-        if (currentState !== SPAWN_STATE.SESSION_SETUP) {
-          console.log("[Spawn] Status CONNECTED → transitioning to SESSION_SETUP")
-          currentState = SPAWN_STATE.SESSION_SETUP
-        }
-        break
+    console.log("[Spawn] Stores ready, determining initial state")
 
-      case DrawbridgeStatus.READY:
-        // Session is fully ready - check if already spawned
-        if (!$sessionClient) return
+    // Reset state machine to INIT
+    spawnState.state.reset()
 
-        console.log("[Spawn] Status READY → checking spawn status")
+    // Determine initial state and transition
+    const initialState = determineInitialState()
+    console.log("[Spawn] Initial state determined:", initialState)
+
+    // Only transition if we have a valid target state (not INIT for fast-track)
+    if (initialState !== SPAWN_STATE.INIT) {
+      spawnState.state.transitionTo(initialState)
+    }
+  })
+
+  // Check if player is already spawned when reaching certain states
+  $effect(() => {
+    const currentState = spawnState.state.current
+
+    // Skip checks if not initialized yet
+    if (!initialized) return
+
+    // Check when reaching SESSION_SETUP: if session is already ready and spawned, fast-track
+    if (currentState === SPAWN_STATE.SESSION_SETUP) {
+      if (walletType === WALLET_TYPE.DRAWBRIDGE && $isSessionReady && $sessionClient) {
         const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
         const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
 
         if (isSpawned) {
-          console.log("[Spawn] Already spawned, completing spawn flow")
+          console.log("[Spawn] At SESSION_SETUP but already spawned → fast-tracking to game")
           spawned()
-        } else {
-          console.log("[Spawn] Not spawned yet, transitioning to SPAWN_FORM")
-          currentState = SPAWN_STATE.SPAWN_FORM
         }
-        break
+      }
+    }
 
-      // Other statuses (DISCONNECTED, CONNECTING, SETTING_UP_SESSION) don't require action
-      // The UI components handle showing appropriate screens
+    // Check when reaching INTRODUCTION: if already spawned, fast-track
+    // Introduction should only be shown to users who are actually spawning (not yet spawned)
+    if (currentState === SPAWN_STATE.INTRODUCTION) {
+      if (walletType === WALLET_TYPE.BURNER) {
+        const wallet = setupBurnerWalletNetwork($publicNetwork)
+        if (wallet.walletClient?.account.address) {
+          const isSpawned = initWalletNetwork(
+            wallet,
+            wallet.walletClient.account.address,
+            WALLET_TYPE.BURNER
+          )
+
+          if (isSpawned) {
+            console.log("[Spawn] At INTRODUCTION but already spawned → fast-tracking to game")
+            spawned()
+          }
+        }
+      } else if ($sessionClient) {
+        const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
+        const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
+
+        if (isSpawned) {
+          console.log("[Spawn] At INTRODUCTION but already spawned → fast-tracking to game")
+          spawned()
+        }
+      }
     }
   })
 
   onMount(async () => {
-    if (walletType === WALLET_TYPE.BURNER) {
-      checkForBurnerWallet()
-    }
+    console.log("[Spawn] Component mounted")
 
     // HACK
-    // When already spawn we are passing through here quickly
+    // When already spawned we are passing through here quickly
     // And music might be started but onDestroy is not called
     // Only start music if the UI state has not already changed from SPAWNING
     if ($UIState === UI.SPAWNING) {
-      console.log("[Spawn] Starting music")
       await new Promise(resolve => setTimeout(resolve, 700))
       backgroundMusic.play({ category: "ratfunMusic", id: "spawn", loop: true })
       shaderManager.setShader("clouds", true)
@@ -123,12 +229,10 @@
   })
 
   function stopMusic() {
-    console.log("[Spawn] Stopping music")
     backgroundMusic.stop()
   }
 
   onDestroy(() => {
-    console.log("[Spawn] onDestroy called")
     stopMusic()
   })
 </script>
@@ -147,28 +251,24 @@
   </div>
 
   <div class="content">
-    {#if currentState === SPAWN_STATE.INTRODUCTION}
-      <Introduction onComplete={onIntroductionComplete} />
-    {:else if currentState === SPAWN_STATE.CONNECT_WALLET}
-      <ConnectWalletForm {walletType} onComplete={onWalletConnectionComplete} />
-    {:else if currentState === SPAWN_STATE.SESSION_SETUP}
-      <SessionSetup
-        onComplete={() => {
-          console.log("[Spawn] Session setup completed, effect will handle transition")
-        }}
-      />
-    {:else if currentState === SPAWN_STATE.SPAWN_FORM}
-      <SpawnForm
-        onComplete={() => {
-          currentState = SPAWN_STATE.HERO_IMAGE
-        }}
-      />
-    {:else if currentState === SPAWN_STATE.HERO_IMAGE}
-      <HeroImage
-        onComplete={() => {
-          spawned()
-        }}
-      />
+    {#if spawnState.state.current === SPAWN_STATE.WELCOME_SCREEN}
+      <WelcomeScreen />
+    {:else if spawnState.state.current === SPAWN_STATE.INTRODUCTION}
+      <Introduction />
+    {:else if spawnState.state.current === SPAWN_STATE.CONNECT_WALLET}
+      <ConnectWalletForm {walletType} />
+    {:else if spawnState.state.current === SPAWN_STATE.SESSION_SETUP}
+      <SessionSetup />
+    {:else if spawnState.state.current === SPAWN_STATE.SETTING_UP_SESSION}
+      <SettingUp />
+    {:else if spawnState.state.current === SPAWN_STATE.SPAWN_FORM}
+      <SpawnForm />
+    {:else if spawnState.state.current === SPAWN_STATE.SPAWNING}
+      <Spawning />
+    {:else if spawnState.state.current === SPAWN_STATE.DONE}
+      <Done {spawned} />
+    {:else if spawnState.state.current === SPAWN_STATE.ERROR}
+      <Error />
     {/if}
   </div>
 </div>
