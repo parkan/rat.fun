@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { WALLET_TYPE } from "$lib/mud/enums"
   import { onMount } from "svelte"
   import gsap from "gsap"
   import { getDrawbridge, type ConnectorInfo, drawbridgeError } from "$lib/modules/drawbridge"
@@ -8,10 +7,6 @@
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { errorHandler } from "$lib/modules/error-handling"
-
-  const { walletType } = $props<{
-    walletType: WALLET_TYPE
-  }>()
 
   let buttonElement: HTMLDivElement | null = $state(null)
 
@@ -198,12 +193,9 @@
   }
 
   onMount(() => {
-    console.log("[ConnectWalletForm] Component mounted, walletType:", walletType)
+    console.log("[ConnectWalletForm] Component mounted")
 
-    // Only prepare connectors for DRAWBRIDGE wallet type
-    if (walletType === WALLET_TYPE.DRAWBRIDGE) {
-      prepareConnectors()
-    }
+    prepareConnectors()
 
     if (!buttonElement) {
       return
@@ -224,167 +216,153 @@
 
 <div class="outer-container">
   <div class="inner-container">
-    {#if walletType === WALLET_TYPE.DRAWBRIDGE}
-      <div class="button-container" bind:this={buttonElement}>
-        {#if connecting}
-          <BigButton text="Connecting..." disabled={true} onclick={() => {}} />
-        {:else}
-          <BigButton text="Connect wallet" onclick={handleClick} />
-        {/if}
+    <div class="button-container" bind:this={buttonElement}>
+      {#if connecting}
+        <BigButton text="Connecting..." disabled={true} onclick={() => {}} />
+      {:else}
+        <BigButton text="Connect wallet" onclick={handleClick} />
+      {/if}
+    </div>
+
+    <!-- No wallets modal -->
+    {#if showNoWalletsModal}
+      <div class="wallet-modal">
+        <div class="modal-content">
+          <button class="close-btn" onclick={() => (showNoWalletsModal = false)}>×</button>
+          <h2>No wallets found</h2>
+          <p>No wallets found. Please install a wallet app to continue.</p>
+        </div>
       </div>
+    {/if}
 
-      <!-- No wallets modal -->
-      {#if showNoWalletsModal}
-        <div class="wallet-modal">
-          <div class="modal-content">
-            <button class="close-btn" onclick={() => (showNoWalletsModal = false)}>×</button>
-            <h2>No wallets found</h2>
-            <p>No wallets found. Please install a wallet app to continue.</p>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Wallet select -->
-      {#if showWalletSelect}
-        <div class="wallet-modal">
-          <div class="modal-content">
-            <button class="close-btn" onclick={() => (showWalletSelect = false)}>×</button>
-            <h2>Connect Wallet</h2>
-            {#if availableConnectors.length > 0}
-              <div class="wallet-options">
-                {#each availableConnectors as connector}
-                  <button
-                    class="wallet-option"
-                    onclick={() => connectWallet(connector.id)}
-                    disabled={connecting}
-                  >
-                    {connector.name}
-                  </button>
-                {/each}
-              </div>
-            {/if}
-          </div>
-        </div>
-      {/if}
-
-      <!-- Deep link select -->
-      {#if showDeepLinkSelect}
-        <div class="wallet-modal">
-          <div class="modal-content">
-            <button class="close-btn" onclick={() => (showDeepLinkSelect = false)}>×</button>
-            <h2>Open in wallet app</h2>
+    <!-- Wallet select -->
+    {#if showWalletSelect}
+      <div class="wallet-modal">
+        <div class="modal-content">
+          <button class="close-btn" onclick={() => (showWalletSelect = false)}>×</button>
+          <h2>Connect Wallet</h2>
+          {#if availableConnectors.length > 0}
             <div class="wallet-options">
-              {#each Object.entries(WALLET_DEEPLINKS) as [walletId, wallet]}
-                <button class="wallet-option" onclick={() => openWalletDeeplink(walletId)}>
-                  {wallet.name}
+              {#each availableConnectors as connector}
+                <button
+                  class="wallet-option"
+                  onclick={() => connectWallet(connector.id)}
+                  disabled={connecting}
+                >
+                  {connector.name}
                 </button>
               {/each}
             </div>
-          </div>
+          {/if}
         </div>
-      {/if}
-
-      <!-- Debug panel -->
-      {#if showDebugPanel}
-        <div class="debug-panel">
-          <div class="debug-content">
-            <button class="close-btn" onclick={() => (showDebugPanel = false)}>×</button>
-            <h2>Connection Debug Info</h2>
-            <div class="debug-section">
-              <h3>Environment</h3>
-              <div class="debug-item">
-                <strong>User Agent:</strong>
-                <span class="debug-value">{debugInfo.userAgent}</span>
-              </div>
-              <div class="debug-item">
-                <strong>Mobile:</strong>
-                <span class="debug-value">{debugInfo.isMobile ? "Yes" : "No"}</span>
-              </div>
-              <div class="debug-item">
-                <strong>Base App:</strong>
-                <span class="debug-value">{debugInfo.isBaseApp ? "Yes" : "No"}</span>
-              </div>
-              <div class="debug-item">
-                <strong>Coinbase Wallet:</strong>
-                <span class="debug-value">{debugInfo.isCoinbaseWallet ? "Yes" : "No"}</span>
-              </div>
-              <div class="debug-item">
-                <strong>In iframe:</strong>
-                <span class="debug-value">{debugInfo.isInIframe ? "Yes" : "No"}</span>
-              </div>
-              <div class="debug-item">
-                <strong>Timestamp:</strong>
-                <span class="debug-value">{debugInfo.timestamp}</span>
-              </div>
-            </div>
-            <div class="debug-section">
-              <h3>Window.ethereum</h3>
-              <div class="debug-item">
-                <strong>Exists:</strong>
-                <span class="debug-value">{debugInfo.hasWindowEthereum ? "Yes" : "No"}</span>
-              </div>
-              {#if debugInfo.hasWindowEthereum}
-                <div class="debug-item">
-                  <strong>Providers:</strong>
-                  <span class="debug-value">
-                    {debugInfo.windowEthereumProviders.length > 0
-                      ? debugInfo.windowEthereumProviders.join(", ")
-                      : "None detected"}
-                  </span>
-                </div>
-              {/if}
-            </div>
-            <div class="debug-section">
-              <h3>Connectors</h3>
-              <div class="debug-item">
-                <strong>Total from getConnectors():</strong>
-                <span class="debug-value">{debugInfo.connectorsCount}</span>
-              </div>
-              <div class="debug-item">
-                <strong>Available from drawbridge:</strong>
-                <span class="debug-value">{allConnectors.length}</span>
-              </div>
-              <div class="debug-item">
-                <strong>After filtering:</strong>
-                <span class="debug-value">{availableConnectors.length}</span>
-              </div>
-            </div>
-            <div class="debug-section">
-              <h3>All Connectors Details</h3>
-              {#if allConnectors.length > 0}
-                {#each allConnectors as connector}
-                  <div class="debug-item connector-detail">
-                    <strong>ID:</strong>
-                    {connector.id}<br />
-                    <strong>Name:</strong>
-                    {connector.name}
-                  </div>
-                {/each}
-              {:else}
-                <p class="debug-warning">No connectors found!</p>
-              {/if}
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Floating debug button - always visible -->
-      <button class="floating-debug-btn" onclick={() => (showDebugPanel = !showDebugPanel)}>
-        🐛
-      </button>
-    {:else}
-      <div class="button-container" bind:this={buttonElement}>
-        <BigButton
-          text="Connect Burner"
-          onclick={() => {
-            console.log("[ConnectWalletForm] Burner wallet button clicked")
-            // Burner wallet is always "session ready", go to INTRODUCTION
-            // Spawn.svelte effects will handle checking if already spawned
-            spawnState.state.transitionTo(SPAWN_STATE.INTRODUCTION)
-          }}
-        />
       </div>
     {/if}
+
+    <!-- Deep link select -->
+    {#if showDeepLinkSelect}
+      <div class="wallet-modal">
+        <div class="modal-content">
+          <button class="close-btn" onclick={() => (showDeepLinkSelect = false)}>×</button>
+          <h2>Open in wallet app</h2>
+          <div class="wallet-options">
+            {#each Object.entries(WALLET_DEEPLINKS) as [walletId, wallet]}
+              <button class="wallet-option" onclick={() => openWalletDeeplink(walletId)}>
+                {wallet.name}
+              </button>
+            {/each}
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Debug panel -->
+    {#if showDebugPanel}
+      <div class="debug-panel">
+        <div class="debug-content">
+          <button class="close-btn" onclick={() => (showDebugPanel = false)}>×</button>
+          <h2>Connection Debug Info</h2>
+          <div class="debug-section">
+            <h3>Environment</h3>
+            <div class="debug-item">
+              <strong>User Agent:</strong>
+              <span class="debug-value">{debugInfo.userAgent}</span>
+            </div>
+            <div class="debug-item">
+              <strong>Mobile:</strong>
+              <span class="debug-value">{debugInfo.isMobile ? "Yes" : "No"}</span>
+            </div>
+            <div class="debug-item">
+              <strong>Base App:</strong>
+              <span class="debug-value">{debugInfo.isBaseApp ? "Yes" : "No"}</span>
+            </div>
+            <div class="debug-item">
+              <strong>Coinbase Wallet:</strong>
+              <span class="debug-value">{debugInfo.isCoinbaseWallet ? "Yes" : "No"}</span>
+            </div>
+            <div class="debug-item">
+              <strong>In iframe:</strong>
+              <span class="debug-value">{debugInfo.isInIframe ? "Yes" : "No"}</span>
+            </div>
+            <div class="debug-item">
+              <strong>Timestamp:</strong>
+              <span class="debug-value">{debugInfo.timestamp}</span>
+            </div>
+          </div>
+          <div class="debug-section">
+            <h3>Window.ethereum</h3>
+            <div class="debug-item">
+              <strong>Exists:</strong>
+              <span class="debug-value">{debugInfo.hasWindowEthereum ? "Yes" : "No"}</span>
+            </div>
+            {#if debugInfo.hasWindowEthereum}
+              <div class="debug-item">
+                <strong>Providers:</strong>
+                <span class="debug-value">
+                  {debugInfo.windowEthereumProviders.length > 0
+                    ? debugInfo.windowEthereumProviders.join(", ")
+                    : "None detected"}
+                </span>
+              </div>
+            {/if}
+          </div>
+          <div class="debug-section">
+            <h3>Connectors</h3>
+            <div class="debug-item">
+              <strong>Total from getConnectors():</strong>
+              <span class="debug-value">{debugInfo.connectorsCount}</span>
+            </div>
+            <div class="debug-item">
+              <strong>Available from drawbridge:</strong>
+              <span class="debug-value">{allConnectors.length}</span>
+            </div>
+            <div class="debug-item">
+              <strong>After filtering:</strong>
+              <span class="debug-value">{availableConnectors.length}</span>
+            </div>
+          </div>
+          <div class="debug-section">
+            <h3>All Connectors Details</h3>
+            {#if allConnectors.length > 0}
+              {#each allConnectors as connector}
+                <div class="debug-item connector-detail">
+                  <strong>ID:</strong>
+                  {connector.id}<br />
+                  <strong>Name:</strong>
+                  {connector.name}
+                </div>
+              {/each}
+            {:else}
+              <p class="debug-warning">No connectors found!</p>
+            {/if}
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Floating debug button - always visible -->
+    <button class="floating-debug-btn" onclick={() => (showDebugPanel = !showDebugPanel)}>
+      🐛
+    </button>
   </div>
 </div>
 

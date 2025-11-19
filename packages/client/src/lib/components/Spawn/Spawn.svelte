@@ -261,7 +261,7 @@
     {:else if spawnState.state.current === SPAWN_STATE.INTRODUCTION}
       <Introduction />
     {:else if spawnState.state.current === SPAWN_STATE.CONNECT_WALLET}
-      <ConnectWalletForm {walletType} />
+      <ConnectWalletForm />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION_SETUP}
       <SessionSetup />
     {:else if spawnState.state.current === SPAWN_STATE.SETTING_UP_SESSION}
