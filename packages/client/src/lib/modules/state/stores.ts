@@ -8,6 +8,7 @@
 import { writable, derived } from "svelte/store"
 import { addressToId } from "$lib/modules/utils"
 import { blockNumber } from "$lib/modules/network"
+import { staticContent } from "$lib/modules/content"
 import { ENTITY_TYPE } from "contracts/enums"
 import {
   filterByEntitytype,
@@ -20,7 +21,6 @@ import {
   getRatTotalValue
 } from "./utils"
 import { addressToNumber } from "$lib/modules/utils"
-import { staticContent } from "$lib/modules/content"
 import { urlFor } from "$lib/modules/content/sanity"
 import { playerERC20Balance, playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
 import { WORLD_OBJECT_ID } from "./constants"
@@ -122,6 +122,18 @@ export const playerAddress = writable("0x0" as string)
  * Address in padded format
  */
 export const playerId = derived(playerAddress, $playerAddress => addressToId($playerAddress))
+
+/**
+ * Check if player is whitelisted for restricted trip folders
+ */
+export const playerIsWhitelisted = derived(
+  [playerAddress, staticContent],
+  ([$playerAddress, $staticContent]) =>
+    $playerAddress &&
+    $staticContent.tripFolderWhitelist?.some(
+      addr => addr.toLowerCase() === $playerAddress.toLowerCase()
+    )
+)
 
 export const player = derived(
   [entities, playerId],

@@ -13,6 +13,7 @@
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { TripFolders } from "$lib/components/Trip"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
+  import { playerIsWhitelisted } from "$lib/modules/state/stores"
 
   let {
     ondone,
@@ -33,8 +34,10 @@
   let selectedFolderId: string = $state(savedFolderId ?? "")
   let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
 
-  // Get non-restricted folders from staticContent
-  let availableFolders = $derived($staticContent.tripFolders.filter(folder => !folder.restricted))
+  // Get available folders: all non-restricted, plus restricted if user is whitelisted
+  let availableFolders = $derived(
+    $staticContent.tripFolders.filter(folder => !folder.restricted || $playerIsWhitelisted)
+  )
 
   // Calculate folder counts (all non-depleted trips for display)
   let foldersCounts = $derived(

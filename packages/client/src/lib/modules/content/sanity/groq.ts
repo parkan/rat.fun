@@ -16,7 +16,7 @@ const outcomes = `*[_type == "outcome" && worldAddress == $worldAddress] {
 const worldEvents =
   '*[_type == "worldEvent" && worldAddress == $worldAddress] | order(activationDateTime asc)'
 const tripFolderList =
-  '*[_id == "trip-folder-list"][0]{ folders[]->{ _id, title, description, image, restricted } }'
+  '*[_id == "trip-folder-list"][0]{ whitelist, folders[]->{ _id, title, description, image, restricted } }'
 
 const outcomesForTrip = `*[_type == "outcome" && tripId == $tripId && worldAddress == $worldAddress] {
     ...,
@@ -47,6 +47,7 @@ export const queries = {
     "trips": ${trips},
     "outcomes": ${outcomes},
     "worldEvents": ${worldEvents},
-    "tripFolders": ${tripFolderList}.folders
+    "tripFolders": ${tripFolderList}.folders,
+    "tripFolderWhitelist": ${tripFolderList}.whitelist
   }`
 }

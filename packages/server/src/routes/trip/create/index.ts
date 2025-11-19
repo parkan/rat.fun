@@ -19,6 +19,8 @@ import { generateImage } from "@modules/image-generation/replicate"
 
 // Signature
 import { verifyRequest } from "@modules/signature"
+import { recoverMessageAddress } from "viem"
+import { stringifyRequestForSignature } from "@modules/signature/stringifyRequestForSignature"
 
 // Validation
 import { validateInputData } from "./validation"
@@ -39,6 +41,14 @@ async function routes(fastify: FastifyInstance) {
       try {
         const { tripPrompt, tripCreationCost, folderId } = request.body.data
 
+        // Recover the user address from the signature for whitelist checking
+        const recoveredAddress = await recoverMessageAddress({
+          message: stringifyRequestForSignature(request.body),
+          signature: request.body.signature
+        })
+        // Use calledFrom if delegation is used, otherwise use recovered address
+        const userAddress = request.body.info.calledFrom || recoveredAddress
+
         // Recover player address from signature and convert to MUD bytes32 format
         const playerId = await verifyRequest(request.body)
 
@@ -54,8 +64,8 @@ async function routes(fastify: FastifyInstance) {
 
         validateInputData(gameConfig, player, tripPrompt, tripCreationCost)
 
-        // Validate trip folder
-        await validateTripFolder(folderId)
+        // Validate trip folder with user address for whitelist checking
+        await validateTripFolder(folderId, userAddress)
 
         // * * * * * * * * * * * * * * * * * *
         // Generate unique trip ID

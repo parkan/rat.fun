@@ -20,6 +20,13 @@ export default {
         }
       ],
       validation: (Rule: any) => Rule.required().min(1)
+    },
+    {
+      title: "Whitelist",
+      name: "whitelist",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "Ethereum addresses allowed to create trips in restricted folders"
     }
   ]
 }

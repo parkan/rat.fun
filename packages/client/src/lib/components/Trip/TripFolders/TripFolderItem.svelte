@@ -26,6 +26,7 @@
 
   let title = folder?.title ?? ""
   let tooltip = $derived(folder?.title?.includes("EGO"))
+  let isRestricted = $derived(folder?.restricted ?? false)
 
   const onmousedown = () => {
     playSound({ category: "ratfunUI", id: "smallButtonDown" })
@@ -38,9 +39,12 @@
 
 <div class="tile" in:fade|global={{ duration: 100, delay: listingIndex * 30 }}>
   <Tooltip content={tooltip ? UI_STRINGS.egoDeathExplanation : ""}>
-    <button class:disabled {onclick} {onmouseup} {onmousedown}>
+    <button class:disabled class:restricted={isRestricted} {onclick} {onmouseup} {onmousedown}>
       <div class="title">
         {title}
+        {#if isRestricted}
+          <span class="restricted-badge">★</span>
+        {/if}
         <span class="count">
           {#if showCounts}
             <br />
@@ -80,8 +84,19 @@
       }
 
       .title {
+        position: relative;
+
         .count {
           font-size: var(--font-size-normal);
+        }
+
+        .restricted-badge {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          font-size: 1.2em;
+          color: gold;
+          text-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
         }
       }
 
@@ -91,6 +106,17 @@
 
       &:active {
         filter: invert(1);
+      }
+
+      &.restricted {
+        border-color: gold;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+
+        &:hover {
+          border-color: rgba(255, 215, 0, 0.8);
+          box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+        }
       }
 
       &.disabled {

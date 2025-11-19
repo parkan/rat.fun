@@ -20,6 +20,7 @@ export type StaticContent = {
   outcomes: SanityOutcome[]
   worldEvents: SanityWorldEvent[]
   tripFolders: SanityTripFolder[]
+  tripFolderWhitelist: string[]
 }
 
 // --- STORES -----------------------------------------------------------
@@ -29,7 +30,8 @@ export const staticContent = writable<StaticContent>({
   outcomes: [] as SanityOutcome[],
   worldEvents: [] as SanityWorldEvent[],
   ratImages: {} as SanityRatImages,
-  tripFolders: [] as SanityTripFolder[]
+  tripFolders: [] as SanityTripFolder[],
+  tripFolderWhitelist: [] as string[]
 })
 
 export const lastUpdated = writable(performance.now())
@@ -59,7 +61,8 @@ export async function initStaticContent(worldAddress: string) {
     trips: data.trips,
     outcomes: data.outcomes,
     worldEvents: processedWorldEvents,
-    tripFolders: data.tripFolders || []
+    tripFolders: data.tripFolders || [],
+    tripFolderWhitelist: data.tripFolderWhitelist || []
   })
 
   // Subscribe to changes to trips in sanity DB
@@ -104,7 +107,8 @@ export async function initStaticContent(worldAddress: string) {
     if (result && result.folders) {
       staticContent.update(content => ({
         ...content,
-        tripFolders: result.folders as SanityTripFolder[]
+        tripFolders: result.folders as SanityTripFolder[],
+        tripFolderWhitelist: result.whitelist || []
       }))
     }
   })

@@ -18,12 +18,17 @@ type NewOutcomeDoc = Omit<OutcomeDoc, "_createdAt" | "_updatedAt" | "_rev">
 type NewTripDoc = Omit<TripDoc, "_createdAt" | "_updatedAt" | "_rev">
 
 /**
- * Validate that a folder ID exists in the trip folder list and is not restricted
+ * Validate that a folder ID exists in the trip folder list and is not restricted,
+ * or if restricted, that the user is whitelisted
  * @param folderId - The ID of the folder to validate
- * @returns True if the folder is valid and not restricted
- * @throws CMSAPIError if the folder is invalid or restricted
+ * @param userAddress - Optional user address to check against whitelist
+ * @returns True if the folder is valid and accessible
+ * @throws CMSAPIError if the folder is invalid or not accessible
  */
-export const validateTripFolder = async (folderId: string): Promise<boolean> => {
+export const validateTripFolder = async (
+  folderId: string,
+  userAddress?: string
+): Promise<boolean> => {
   try {
     const folderList = await loadDataPublicSanity(queries.tripFolderList, {})
 
@@ -38,10 +43,18 @@ export const validateTripFolder = async (folderId: string): Promise<boolean> => 
     }
 
     if (folder.restricted) {
-      throw new CMSAPIError(
-        `Trip folder ${folder.title} is restricted and cannot be used for trip creation`,
-        null
-      )
+      // Check if user is whitelisted
+      const whitelist = folderList.whitelist || []
+      const isWhitelisted =
+        userAddress &&
+        whitelist.some((addr: string) => addr.toLowerCase() === userAddress.toLowerCase())
+
+      if (!isWhitelisted) {
+        throw new CMSAPIError(
+          `Trip folder ${folder.title} is restricted and cannot be used for trip creation`,
+          null
+        )
+      }
     }
 
     return true

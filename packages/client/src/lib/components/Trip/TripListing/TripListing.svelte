@@ -29,6 +29,15 @@
     )
   )
 
+  // Show ALL folders, with restricted folders sorted first
+  let sortedFolders = $derived(
+    [...$staticContent.tripFolders].sort((a, b) => {
+      if (a.restricted && !b.restricted) return -1
+      if (!a.restricted && b.restricted) return 1
+      return 0
+    })
+  )
+
   const updateTrips = () => {
     lastChecked = Number(get(blockNumber))
   }
@@ -49,9 +58,7 @@
     return entries.sort(sortFunction)
   })
 
-  let foldersCounts = $derived(
-    $staticContent.tripFolders.map(fldr => filterByFolder(tripList, fldr._id).length)
-  )
+  let foldersCounts = $derived(sortedFolders.map(fldr => filterByFolder(tripList, fldr._id).length))
 
   let activeList = $derived.by(() => {
     if (lastChecked > 0) {
@@ -118,10 +125,10 @@
 <div class="content" bind:this={scrollContainer}>
   {#if $selectedFolderId === ""}
     <TripHeader title={$playerHasLiveRat ? UI_STRINGS.tripHeader : UI_STRINGS.tripHeaderNoRat} />
-    {#if $staticContent?.tripFolders?.length ?? 0 > 0}
+    {#if sortedFolders?.length ?? 0 > 0}
       <TripFolders
         onselect={(folderId: string) => ($selectedFolderId = folderId)}
-        folders={$staticContent.tripFolders}
+        folders={sortedFolders}
         {foldersCounts}
         disabled={!$playerHasLiveRat}
       />
