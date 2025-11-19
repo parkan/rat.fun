@@ -29,16 +29,13 @@ import { verifyRequest } from "@modules/signature"
 
 // CMS
 import { getSystemPrompts } from "@modules/cms/private"
-import { writeOutcomeToCMS, updateArchetypeData } from "@modules/cms/public"
+import { writeOutcomeToCMS } from "@modules/cms/public"
 
 // Validation
 import { validateInputData } from "./validation"
 
 // Error handling
 import { handleBackgroundError } from "@modules/error-handling"
-
-// Archetype
-import { calculateArchetypeData } from "@modules/archetypes/calculateArchetypeData"
 
 // Utils
 import { withTimeout } from "@modules/utils"
@@ -191,11 +188,6 @@ async function routes(fastify: FastifyInstance) {
 
         const backgroundActions = async () => {
           try {
-            // * * * * * * * * * * * * * * * * * *
-            // Calculate trip archetypes
-            // * * * * * * * * * * * * * * * * * *
-            updateArchetypeData(tripId, calculateArchetypeData(validatedOutcome, newRatValue))
-
             // * * * * * * * * * * * * * * * * * *
             // Write outcome to CMS
             // * * * * * * * * * * * * * * * * * *

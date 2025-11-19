@@ -1236,34 +1236,6 @@
         },
         "optional": true
       },
-      "archetypeItemAdd": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
-      "archetypeItemRemove": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
-      "archetypeBalanceAdd": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
-      "archetypeBalanceRemove": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
       "kills": {
         "type": "objectAttribute",
         "value": {

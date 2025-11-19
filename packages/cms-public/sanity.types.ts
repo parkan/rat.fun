@@ -214,10 +214,6 @@ export type Trip = {
     crop?: SanityImageCrop
     _type: "image"
   }
-  archetypeItemAdd?: number
-  archetypeItemRemove?: number
-  archetypeBalanceAdd?: number
-  archetypeBalanceRemove?: number
   kills?: number
   visits?: number
   slug?: Slug

@@ -74,11 +74,9 @@ export type Prompt = {
   _updatedAt: string
   _rev: string
   title?: string
-  prompt?: string
+  prompt?: Markdown
   returnFormat?: Code
 }
-
-export type Markdown = string
 
 export type Code = {
   _type: "code"
@@ -87,6 +85,8 @@ export type Code = {
   code?: string
   highlightedLines?: Array<number>
 }
+
+export type Markdown = string
 
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch"
@@ -112,6 +112,17 @@ export type SanityImageDimensions = {
   height?: number
   width?: number
   aspectRatio?: number
+}
+
+export type SanityImageMetadata = {
+  _type: "sanity.imageMetadata"
+  location?: Geopoint
+  dimensions?: SanityImageDimensions
+  palette?: SanityImagePalette
+  lqip?: string
+  blurHash?: string
+  hasAlpha?: boolean
+  isOpaque?: boolean
 }
 
 export type SanityImageHotspot = {
@@ -152,6 +163,13 @@ export type SanityFileAsset = {
   source?: SanityAssetSourceData
 }
 
+export type SanityAssetSourceData = {
+  _type: "sanity.assetSourceData"
+  name?: string
+  id?: string
+  url?: string
+}
+
 export type SanityImageAsset = {
   _id: string
   _type: "sanity.imageAsset"
@@ -175,17 +193,6 @@ export type SanityImageAsset = {
   source?: SanityAssetSourceData
 }
 
-export type SanityImageMetadata = {
-  _type: "sanity.imageMetadata"
-  location?: Geopoint
-  dimensions?: SanityImageDimensions
-  palette?: SanityImagePalette
-  lqip?: string
-  blurHash?: string
-  hasAlpha?: boolean
-  isOpaque?: boolean
-}
-
 export type Geopoint = {
   _type: "geopoint"
   lat?: number
@@ -199,28 +206,21 @@ export type Slug = {
   source?: string
 }
 
-export type SanityAssetSourceData = {
-  _type: "sanity.assetSourceData"
-  name?: string
-  id?: string
-  url?: string
-}
-
 export type AllSanitySchemaTypes =
   | TestPrompts
   | ActivePrompts
   | Prompt
-  | Markdown
   | Code
+  | Markdown
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
+  | SanityImageMetadata
   | SanityImageHotspot
   | SanityImageCrop
   | SanityFileAsset
+  | SanityAssetSourceData
   | SanityImageAsset
-  | SanityImageMetadata
   | Geopoint
   | Slug
-  | SanityAssetSourceData
 export declare const internalGroqTypeReferenceTo: unique symbol

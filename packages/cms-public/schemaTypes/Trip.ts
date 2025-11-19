@@ -54,30 +54,6 @@ export default {
       validation: (Rule: any) => Rule.required()
     },
     {
-      title: "Archetype | Gives Items",
-      name: "archetypeItemAdd",
-      type: "number",
-      validation: (Rule: any) => Rule.required()
-    },
-    {
-      title: "Archetype | Takes Items",
-      name: "archetypeItemRemove",
-      type: "number",
-      validation: (Rule: any) => Rule.required()
-    },
-    {
-      title: "Archetype | Gives Health",
-      name: "archetypeBalanceAdd",
-      type: "number",
-      validation: (Rule: any) => Rule.required()
-    },
-    {
-      title: "Archetype | Takes Health",
-      name: "archetypeBalanceRemove",
-      type: "number",
-      validation: (Rule: any) => Rule.required()
-    },
-    {
       title: "Kills",
       name: "kills",
       type: "number",
