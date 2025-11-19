@@ -103,8 +103,8 @@ export default {
       title: "Folder",
       name: "folder",
       type: "reference",
-      to: [{ type: "tripFolder" }],
-      readOnly: true
+      to: [{ type: "tripFolder" }]
+      // readOnly: true
     }
   ]
 }

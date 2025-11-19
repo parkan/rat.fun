@@ -5,14 +5,12 @@
   let {
     folders,
     foldersCounts,
-    legacyTrips = [],
     onselect,
     showCounts = true,
     disabled = false
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
-    legacyTrips?: [string, Trip][]
     onselect: (str: string) => void
     showCounts?: boolean
     disabled?: boolean
@@ -32,16 +30,6 @@
       }}
     />
   {/each}
-
-  {#if legacyTrips.length > 0}
-    <TripFolderItem
-      listingIndex={folders.length}
-      isVoid={true}
-      {showCounts}
-      {disabled}
-      onclick={() => onselect("legacy")}
-    />
-  {/if}
 </div>
 
 <style lang="scss">

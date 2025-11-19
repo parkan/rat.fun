@@ -42,26 +42,6 @@
     })
   }
 
-  // Filter trips without folder assignments (legacy trips)
-  let legacyTrips = $derived.by(() => {
-    const filtered = Object.entries($nonDepletedTrips).filter(([tripId, _]) => {
-      return !tripFolderMap.has(tripId)
-    })
-    // HACK !!!!!!
-    // Sort by index (newest first), fallback to creationBlock if index is missing
-    return filtered.sort((a, b) => {
-      const aIndex = Number(a[1]?.index || 0)
-      const bIndex = Number(b[1]?.index || 0)
-      if (aIndex !== 0 && bIndex !== 0) {
-        return bIndex - aIndex // Higher index = newer, so newest first
-      }
-      // Fallback to creationBlock if index is missing
-      const aBlock = Number(a[1]?.creationBlock || 0)
-      const bBlock = Number(b[1]?.creationBlock || 0)
-      return bBlock - aBlock // Higher block = newer, so newest first
-    })
-  })
-
   // Here we add once there are a couple of updates
   let tripList = $derived.by(() => {
     let entries = Object.entries($nonDepletedTrips)
@@ -74,14 +54,10 @@
   )
 
   let activeList = $derived.by(() => {
-    if ($selectedFolderId !== "legacy") {
-      if (lastChecked > 0) {
-        return tripList.filter(r => Number(r[1].creationBlock) <= lastChecked)
-      } else {
-        return tripList
-      }
+    if (lastChecked > 0) {
+      return tripList.filter(r => Number(r[1].creationBlock) <= lastChecked)
     } else {
-      return legacyTrips
+      return tripList
     }
   })
 
@@ -136,7 +112,6 @@
     <TripHeader title={$playerHasLiveRat ? UI_STRINGS.tripHeader : UI_STRINGS.tripHeaderNoRat} />
     {#if $staticContent?.tripFolders?.length ?? 0 > 0}
       <TripFolders
-        {legacyTrips}
         onselect={(folderId: string) => ($selectedFolderId = folderId)}
         folders={$staticContent.tripFolders}
         {foldersCounts}
@@ -150,9 +125,7 @@
     {#if $selectedFolderId !== ""}
       {@const i = $staticContent.tripFolders.findIndex(({ _id }) => _id === $selectedFolderId)}
       {@const folderTitle =
-        $selectedFolderId === "legacy"
-          ? "The Void"
-          : ($staticContent.tripFolders.find(({ _id }) => _id == $selectedFolderId)?.title ?? "")}
+        $staticContent.tripFolders.find(({ _id }) => _id == $selectedFolderId)?.title ?? ""}
       <TripHeader
         title={folderTitle}
         {eligibleCount}

@@ -9,7 +9,6 @@
     listingIndex,
     folder,
     count,
-    isVoid = false,
     showCounts = true,
     onclick,
     disabled: disabledProp = false
@@ -17,7 +16,6 @@
     listingIndex: number
     folder?: TripFolder
     count?: number
-    isVoid?: boolean
     showCounts?: boolean
     onclick: () => void
     disabled?: boolean
@@ -26,7 +24,7 @@
   // showCount == false indicates that we are in create trip modal
   let disabled = $derived(disabledProp || (showCounts && count === 0))
 
-  let title = folder?.title ?? "THE VOID"
+  let title = folder?.title ?? ""
   let tooltip = $derived(folder?.title?.includes("EGO"))
 
   const onmousedown = () => {
@@ -40,17 +38,13 @@
 
 <div class="tile" in:fade|global={{ duration: 100, delay: listingIndex * 30 }}>
   <Tooltip content={tooltip ? UI_STRINGS.egoDeathExplanation : ""}>
-    <button class:disabled class:void={isVoid} {onclick} {onmouseup} {onmousedown}>
+    <button class:disabled {onclick} {onmouseup} {onmousedown}>
       <div class="title">
         {title}
         <span class="count">
           {#if showCounts}
             <br />
-            {#if isVoid}
-              (All other trips)
-            {:else}
-              {count ?? 0} trip{count === 1 ? "" : "s"}
-            {/if}
+            {count ?? 0} trip{count === 1 ? "" : "s"}
           {/if}
         </span>
       </div>
