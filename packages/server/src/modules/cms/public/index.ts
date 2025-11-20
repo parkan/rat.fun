@@ -5,18 +5,15 @@ import type {
   TripFolderList as TripFolderListDoc,
   TripFolder as TripFolderDoc
 } from "@sanity-public-cms-types"
-import type { Rat, Trip, Player, DebuggingInfo } from "@modules/types"
+import type { Rat, Trip, Player } from "@modules/types"
 import type { CorrectionReturnValue, OutcomeReturnValue } from "@modules/types"
 import { loadDataPublicSanity } from "@modules/cms/public/sanity"
 import { queries } from "@modules/cms/public/groq"
-import { calculateTotalRatValue } from "@modules/mud/value"
 
 import { publicSanityClient } from "@modules/cms/public/sanity"
 import { CMSError, CMSAPIError } from "@modules/error-handling/errors"
-import { v4 as uuidv4 } from "uuid"
+import { createBaseOutcomeDocument } from "@modules/cms/shared"
 
-// Define a type for new outcome documents that omits Sanity-specific fields
-type NewOutcomeDoc = Omit<OutcomeDoc, "_createdAt" | "_updatedAt" | "_rev">
 type NewTripDoc = Omit<TripDoc, "_createdAt" | "_updatedAt" | "_rev">
 type ExpandedTripFolderListDoc = Omit<TripFolderListDoc, "folders"> & { folders: TripFolderDoc[] }
 
@@ -179,7 +176,7 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
 }
 
 /**
- * Write outcome to offchain CMS.
+ * Write outcome to public CMS without sensitive information.
  * Used to display statistics in the client.
  * @param outcomeId - The pre-generated outcome ID for tracking
  * @param worldAddress - The world address
@@ -194,8 +191,6 @@ export async function updateTripWithImage(tripID: string, imageBuffer: Buffer): 
  * @param events - The corrected event log
  * @param outcome - The validated outcome
  * @param mainProcessingTime - Processing time in ms
- * @param debuggingInfo - Debug information from LLM
- * @param logOutput - Accumulated logs from the trip processing
  */
 export async function writeOutcomeToCMS(
   outcomeId: string,
@@ -210,65 +205,28 @@ export async function writeOutcomeToCMS(
   newRatBalance: number,
   events: CorrectionReturnValue,
   outcome: OutcomeReturnValue,
-  mainProcessingTime: number,
-  debuggingInfo: DebuggingInfo,
-  logOutput?: string
+  mainProcessingTime: number
 ): Promise<OutcomeDoc> {
   try {
-    const outcomeID = outcomeId
+    // Create base outcome document without sensitive fields
+    const baseOutcomeDoc = createBaseOutcomeDocument(
+      outcomeId,
+      worldAddress,
+      player,
+      trip,
+      rat,
+      newTripValue,
+      tripValueChange,
+      newRatValue,
+      ratValueChange,
+      newRatBalance,
+      events,
+      outcome,
+      mainProcessingTime
+    )
 
-    const debuggingInfoString = JSON.stringify(debuggingInfo)
-
-    // Calculate old values (pre-visit) from the trip and rat objects
-    // trip.balance is the old trip value (trips have no inventory)
-    const oldTripValue = trip.balance
-
-    // rat total value = balance + items (before the visit)
-    const oldRatValue = calculateTotalRatValue(rat)
-
-    // rat balance/health (before the visit)
-    const oldRatBalance = rat.balance
-
-    const newOutcomeDoc: NewOutcomeDoc = {
-      _type: "outcome",
-      title: outcomeID,
-      _id: outcomeID,
-      worldAddress: worldAddress,
-      playerId: player.id,
-      tripId: trip.id,
-      tripIndex: Number(trip.index),
-      log: createOutcomeEvents(events),
-      ratId: rat.id,
-      ratName: rat.name,
-      oldTripValue: oldTripValue,
-      tripValue: newTripValue,
-      tripValueChange: tripValueChange,
-      oldRatValue: oldRatValue,
-      ratValue: newRatValue,
-      ratValueChange: ratValueChange,
-      oldRatBalance: oldRatBalance,
-      newRatBalance: newRatBalance,
-      playerName: player.name,
-      mainProcessingTime: mainProcessingTime,
-      debuggingInfo: debuggingInfoString,
-      logOutput: logOutput,
-      slug: {
-        _type: "slug",
-        current: outcomeID
-      }
-    }
-
-    if (outcome.balanceTransfers) {
-      newOutcomeDoc.balanceTransfers = createBalanceTransfers(outcome.balanceTransfers)
-    }
-
-    // Item changes
-    if (outcome.itemChanges && outcome.itemChanges.length > 0) {
-      newOutcomeDoc.itemChanges = createItemChanges(outcome.itemChanges)
-    }
-
-    // Create the outcome document in Sanity
-    const outcomeDoc = (await publicSanityClient.create(newOutcomeDoc)) as OutcomeDoc
+    // Create the outcome document in public Sanity
+    const outcomeDoc = (await publicSanityClient.create(baseOutcomeDoc)) as OutcomeDoc
 
     // Update statistics
     updateStatistics(worldAddress, ratValueChange, tripValueChange)
@@ -282,7 +240,7 @@ export async function writeOutcomeToCMS(
 
     // Otherwise, wrap it in our custom error
     throw new CMSAPIError(
-      `Error writing outcome to CMS: ${error instanceof Error ? error.message : String(error)}`,
+      `Error writing outcome to public CMS: ${error instanceof Error ? error.message : String(error)}`,
       error
     )
   }
@@ -320,19 +278,19 @@ export async function updateStatistics(
       // Therefore we correct the initial value to be the inverse of the sum of tripValueChange
       const initialRatValue = -initialTripValue
 
-      const allOutcomes = await publicSanityClient.fetch(
+      const allOutcomes = (await publicSanityClient.fetch(
         `*[_type == "outcome" && worldAddress == $worldAddress]{ratValueChange, tripValueChange}`,
         { worldAddress }
-      )
+      )) as OutcomeDoc[]
 
       let totalBalance = 0
       let totalThroughput = 0
 
       allOutcomes.forEach(outcome => {
         const { ratValueChange, tripValueChange } = outcome
-        totalBalance += ratValueChange + tripValueChange
+        totalBalance += (ratValueChange ?? 0) + (tripValueChange ?? 0)
         // Throughput is the absolute value moved (use rat side to avoid double-counting)
-        totalThroughput += Math.abs(ratValueChange)
+        totalThroughput += Math.abs(ratValueChange ?? 0)
       })
 
       const document = (await publicSanityClient.create({
@@ -359,35 +317,4 @@ export async function updateStatistics(
       error
     )
   }
-}
-
-// - - - - - -
-// HELPERS
-// - - - - - -
-
-function createOutcomeEvents(events: CorrectionReturnValue) {
-  return (events?.log ?? []).map(event => ({
-    _key: uuidv4(),
-    event: event.event,
-    timestamp: event.timestamp
-  }))
-}
-
-function createBalanceTransfers(balanceTransfers: OutcomeReturnValue["balanceTransfers"]) {
-  return balanceTransfers.map(balanceTransfer => ({
-    _key: uuidv4(),
-    logStep: balanceTransfer.logStep,
-    amount: balanceTransfer.amount
-  }))
-}
-
-function createItemChanges(itemChanges: OutcomeReturnValue["itemChanges"]) {
-  return itemChanges.map(itemChange => ({
-    _key: uuidv4(),
-    logStep: itemChange.logStep,
-    type: itemChange.type,
-    name: itemChange.name,
-    value: itemChange.value,
-    id: itemChange.id ?? ""
-  }))
 }

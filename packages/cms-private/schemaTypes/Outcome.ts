@@ -175,6 +175,19 @@ export default {
       readOnly: true
     },
     {
+      title: "Debugging info",
+      name: "debuggingInfo",
+      type: "text",
+      readOnly: true
+    },
+    {
+      title: "Log Output",
+      description: "Accumulated logs from the trip processing",
+      name: "logOutput",
+      type: "text",
+      readOnly: true
+    },
+    {
       title: "Main processing time",
       name: "mainProcessingTime",
       type: "number",

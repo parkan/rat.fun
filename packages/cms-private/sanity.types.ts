@@ -13,6 +13,58 @@
  */
 
 // Source: schema.json
+export type Outcome = {
+  _id: string
+  _type: "outcome"
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  worldAddress?: string
+  playerId?: string
+  playerName?: string
+  tripId?: string
+  tripIndex?: number
+  ratId?: string
+  ratName?: string
+  log?: Array<{
+    timestamp?: string
+    event?: string
+    _key: string
+  }>
+  balanceTransfers?: Array<{
+    logStep?: number
+    amount?: number
+    _key: string
+  }>
+  itemChanges?: Array<{
+    name?: string
+    logStep?: number
+    type?: string
+    value?: number
+    id?: string
+    _key: string
+  }>
+  oldTripValue?: number
+  tripValueChange?: number
+  tripValue?: number
+  oldRatValue?: number
+  ratValueChange?: number
+  ratValue?: number
+  oldRatBalance?: number
+  newRatBalance?: number
+  debuggingInfo?: string
+  logOutput?: string
+  mainProcessingTime?: number
+  slug?: Slug
+}
+
+export type Slug = {
+  _type: "slug"
+  current?: string
+  source?: string
+}
+
 export type TestPrompts = {
   _id: string
   _type: "testPrompts"
@@ -200,13 +252,9 @@ export type Geopoint = {
   alt?: number
 }
 
-export type Slug = {
-  _type: "slug"
-  current?: string
-  source?: string
-}
-
 export type AllSanitySchemaTypes =
+  | Outcome
+  | Slug
   | TestPrompts
   | ActivePrompts
   | Prompt
@@ -222,5 +270,4 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint
-  | Slug
 export declare const internalGroqTypeReferenceTo: unique symbol

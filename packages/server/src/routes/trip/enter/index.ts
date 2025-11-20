@@ -29,7 +29,7 @@ import { systemCalls, network } from "@modules/mud/initMud"
 import { verifyRequest } from "@modules/signature"
 
 // CMS
-import { getSystemPrompts } from "@modules/cms/private"
+import { getSystemPrompts, writeOutcomeToPrivateCMS } from "@modules/cms/private"
 import { writeOutcomeToCMS } from "@modules/cms/public"
 
 // Validation
@@ -194,13 +194,14 @@ async function routes(fastify: FastifyInstance) {
         const backgroundActions = async () => {
           try {
             // * * * * * * * * * * * * * * * * * *
-            // Write outcome to CMS
+            // Write outcome to CMS (both private and public in parallel)
             // * * * * * * * * * * * * * * * * * *
 
             // Get accumulated logs
             const logOutput = logger.getLogsAsString()
 
-            writeOutcomeToCMS(
+            // Write to both CMSs in parallel, each with independent error handling
+            const writeToPrivateCMS = writeOutcomeToPrivateCMS(
               outcomeId,
               network.worldContract?.address ?? "0x0",
               player,
@@ -220,7 +221,33 @@ async function routes(fastify: FastifyInstance) {
                 batchId: 0
               },
               logOutput
-            )
+            ).catch(error => {
+              console.error(`❌ Error writing to private CMS: ${error}`)
+              handleBackgroundError(error, "Trip Entry - Private CMS", { outcomeId, tripId, ratId })
+            })
+
+            const writeToPublicCMS = writeOutcomeToCMS(
+              outcomeId,
+              network.worldContract?.address ?? "0x0",
+              player,
+              trip,
+              rat,
+              newTripValue,
+              tripValueChange,
+              newRatValue,
+              ratValueChange,
+              newRatBalance,
+              correctedEvents,
+              validatedOutcome,
+              mainProcessingTime
+            ).catch(error => {
+              console.error(`❌ Error writing to public CMS: ${error}`)
+              handleBackgroundError(error, "Trip Entry - Public CMS", { outcomeId, tripId, ratId })
+            })
+
+            // Wait for both to complete
+            await Promise.all([writeToPrivateCMS, writeToPublicCMS])
+
             // Clear logs after successful completion
             logger.clear()
           } catch (error) {

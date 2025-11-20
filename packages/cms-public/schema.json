@@ -1157,20 +1157,6 @@
         },
         "optional": true
       },
-      "debuggingInfo": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "logOutput": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "mainProcessingTime": {
         "type": "objectAttribute",
         "value": {
