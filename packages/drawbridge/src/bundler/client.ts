@@ -1,4 +1,5 @@
 import { Transport, Chain, Client, RpcSchema, EstimateFeesPerGasReturnType } from "viem"
+import { estimateFeesPerGas } from "viem/actions"
 import {
   BundlerClient,
   BundlerClientConfig,
@@ -81,6 +82,9 @@ export function createBundlerClient<
  * - **Anvil (31337)**: Hardcoded fees because Anvil's eth_maxPriorityFeePerGas
  *   returns a fixed value that doesn't match real chains
  *
+ * - **Base (8453) & Base Sepolia (84532)**: Enforce minimum maxPriorityFeePerGas
+ *   of 1 gwei (1,000,000 wei) as required by Coinbase bundler
+ *
  * - **Other chains**: Use viem's default fee estimation (works well)
  *
  * @param client Viem client
@@ -95,6 +99,20 @@ function createFeeEstimator(
   // See: https://github.com/foundry-rs/foundry/pull/8081#issuecomment-2402002485
   if (client.chain.id === 31337) {
     return async () => ({ maxFeePerGas: 100_000n, maxPriorityFeePerGas: 0n })
+  }
+
+  // Base chains (8453 = Base, 84532 = Base Sepolia)
+  // Coinbase bundler requires minimum maxPriorityFeePerGas of 1 gwei
+  if (client.chain.id === 8453 || client.chain.id === 84532) {
+    return async () => {
+      const fees = await estimateFeesPerGas(client)
+      const minPriorityFee = 1_000_000n // 1 gwei minimum
+      return {
+        maxFeePerGas: fees.maxFeePerGas,
+        maxPriorityFeePerGas:
+          fees.maxPriorityFeePerGas > minPriorityFee ? fees.maxPriorityFeePerGas : minPriorityFee
+      }
+    }
   }
 
   // All other chains - use viem's default fee estimation
