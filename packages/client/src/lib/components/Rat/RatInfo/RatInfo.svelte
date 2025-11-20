@@ -89,8 +89,6 @@
     // Set displayRat to final state immediately
     displayRat = $rat
 
-    console.log("frozenRat", frozenRat)
-
     // Determine old and new states for animations
     if (frozenRat) {
       // Coming back from trip - animate changes

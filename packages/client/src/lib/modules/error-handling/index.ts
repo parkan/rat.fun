@@ -3,7 +3,7 @@ import { get } from "svelte/store"
 import { environment as environmentStore } from "$lib/modules/network"
 import { PUBLIC_SENTRY_DSN } from "$env/static/public"
 import { version } from "$app/environment"
-import { AppError, type ExpectedError } from "./errors"
+import { AppError, GraphicsError, type ExpectedError } from "./errors"
 import { toastManager } from "$lib/modules/ui/toasts.svelte"
 import { parseViemError } from "./viemErrorParser"
 import { BaseError } from "viem"
@@ -84,7 +84,13 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
     errorType: processedError instanceof AppError ? processedError.errorType : "UNKNOWN_ERROR"
   }
 
-  toastManager.add({ message: errorMessage, type: severity })
+  // Skip toast notifications for WebGL/Shader errors
+  // These errors are still reported to Sentry and logged to console
+  const isGraphicsError = processedError instanceof GraphicsError
+  if (!isGraphicsError) {
+    toastManager.add({ message: errorMessage, type: severity })
+  }
+
   captureMessage(errorMessage, severity, sentryContext)
 
   // Log the error to the console
