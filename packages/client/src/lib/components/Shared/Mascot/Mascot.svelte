@@ -2,15 +2,26 @@
   import { onMount } from "svelte"
   import gsap from "gsap"
   import { playSound } from "$lib/modules/sound"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
 
   let {
     entranceOn = false,
     bigDanceOn = false,
     smallDanceOn = false
-  }: { entranceOn?: boolean; bigDanceOn?: boolean; smallDanceOn?: boolean } = $props()
+  }: {
+    entranceOn?: boolean
+    bigDanceOn?: boolean
+    smallDanceOn?: boolean
+  } = $props()
 
   let isAnimating = $state(false)
   let bubbleVisible = $state(false)
+  let bubbleText = $state("")
+
+  // Parse markdown-like syntax for bold text
+  function parseMarkdown(text: string): string {
+    return text.replace(/\*\*(.+?)\*\*/g, '<span class="bold-text">$1</span>')
+  }
 
   const enterTimeline = gsap.timeline({ paused: true })
   const bigDanceTimeline = gsap.timeline({ repeat: -1, yoyo: true })
@@ -23,6 +34,8 @@
   let layer2Element: HTMLDivElement | null = $state(null)
   let layer1Element: HTMLDivElement | null = $state(null)
   let bubbleElement: HTMLDivElement | null = $state(null)
+  let bubbleEmptyElement: HTMLDivElement | null = $state(null)
+  let mobileBubbleElement: HTMLDivElement | null = $state(null)
 
   onMount(async () => {
     isAnimating = true
@@ -141,6 +154,102 @@
     smallDanceTimeline.play()
   }
 
+  // Exported function to hide speech bubble
+  export const hideSpeechBubble = () => {
+    if (!bubbleVisible) return
+
+    const bubbleEl = $isPhone ? mobileBubbleElement : bubbleEmptyElement
+
+    gsap.to(bubbleEl, {
+      opacity: 0,
+      scale: $isPhone ? 0.8 : 1,
+      duration: 0.3
+    })
+
+    gsap.to(layer3Element, {
+      scale: 1,
+      duration: 0.2,
+      ease: "elastic.out(1.5)"
+    })
+
+    gsap.to(layer4Element, {
+      scale: 1,
+      y: 0,
+      duration: 0.2,
+      ease: "elastic.out(1.5)",
+      onComplete: () => {
+        bubbleVisible = false
+        bubbleText = ""
+      }
+    })
+  }
+
+  // Exported function to show speech bubble with custom text
+  export const showSpeechBubble = (text: string, options: { autoHide?: boolean } = {}) => {
+    const { autoHide = true } = options
+
+    // If bubble is already visible, hide it first
+    if (bubbleVisible) {
+      hideSpeechBubble()
+      // Wait for hide animation to complete before showing new bubble
+      setTimeout(() => {
+        showSpeechBubbleInternal(text, autoHide)
+      }, 300)
+    } else {
+      showSpeechBubbleInternal(text, autoHide)
+    }
+  }
+
+  const showSpeechBubbleInternal = (text: string, autoHide: boolean) => {
+    bubbleText = text
+    bubbleVisible = true
+
+    playSound({ category: "ratfunUI", id: "giggle1" })
+
+    const bubbleEl = $isPhone ? mobileBubbleElement : bubbleEmptyElement
+
+    // Animate bubble in
+    gsap.fromTo(
+      bubbleEl,
+      {
+        opacity: 0,
+        scale: $isPhone ? 0.8 : 1
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.4,
+        ease: "elastic.out(1.5)"
+      }
+    )
+
+    gsap.fromTo(
+      layer3Element,
+      {
+        scale: 1
+      },
+      {
+        scale: 1.5,
+        duration: 0.2,
+        ease: "elastic.out(1.5)"
+      }
+    )
+
+    gsap.to(layer4Element, {
+      y: -30,
+      scale: 1.2,
+      duration: 0.2,
+      ease: "elastic.out(1.5)"
+    })
+
+    // Fade out after 2 seconds if autoHide is enabled
+    if (autoHide) {
+      setTimeout(() => {
+        hideSpeechBubble()
+      }, 2000)
+    }
+  }
+
   const onmouseup = () => {}
 
   const onmousedown = () => {
@@ -214,7 +323,25 @@
 </script>
 
 <div class="mascot-container">
+  <!-- MOBILE BUBBLE -->
+  {#if $isPhone}
+    <div class="mobile-bubble" bind:this={mobileBubbleElement}>
+      {#if bubbleText}
+        <div class="mobile-bubble-text">{@html parseMarkdown(bubbleText)}</div>
+      {/if}
+    </div>
+  {/if}
+
   <div class="mascot" bind:this={mascotElement}>
+    <!-- BUBBLE: EMPTY (Desktop only) -->
+    {#if !$isPhone}
+      <div class="layer bubble bubble-empty" bind:this={bubbleEmptyElement}>
+        <img src="/images/mascot/bubble-empty.png" draggable={false} alt="RAT.FUN" />
+        {#if bubbleText}
+          <div class="bubble-text">{@html parseMarkdown(bubbleText)}</div>
+        {/if}
+      </div>
+    {/if}
     <!-- BUBBLE-->
     <div class="layer bubble" bind:this={bubbleElement}>
       <img src="/images/mascot/bubble2.png" draggable={false} alt="RAT.FUN" />
@@ -257,6 +384,33 @@
     aspect-ratio: 1/1;
   }
 
+  .mobile-bubble {
+    position: absolute;
+    top: 0%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-6deg);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    border: 3px solid black;
+    padding: 16px 20px;
+    width: 90%;
+    opacity: 0;
+    pointer-events: none;
+
+    .mobile-bubble-text {
+      color: black;
+      font-size: var(--font-size-large);
+      text-align: center;
+      word-wrap: break-word;
+      :global(.bold-text) {
+        background: black;
+        color: white;
+        padding: 2px 4px;
+        border-radius: 2px;
+      }
+    }
+  }
+
   .mascot {
     position: relative;
     width: 100%;
@@ -297,6 +451,38 @@
         scale: 0;
       }
 
+      &.bubble-empty {
+        top: -35%;
+        left: 50%;
+        width: 600px;
+        height: 600px;
+        object-fit: contain;
+        z-index: 5;
+        opacity: 0;
+        scale: 1;
+        .bubble-text {
+          position: absolute;
+          top: 50%;
+          left: 57%;
+          transform: translate(-50%, -50%) rotate(-10deg);
+          color: #000;
+          font-size: 24px;
+          font-weight: bold;
+          text-align: center;
+          max-width: 90%;
+          word-wrap: break-word;
+          pointer-events: none;
+          width: 50%;
+
+          :global(.bold-text) {
+            background: black;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+          }
+        }
+      }
+
       img {
         width: 100%;
         height: 100%;
@@ -321,6 +507,13 @@
 
     &.animating {
       pointer-events: none;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .mobile-bubble {
+      padding: 12px 16px;
+      border-width: 2px;
     }
   }
 </style>
