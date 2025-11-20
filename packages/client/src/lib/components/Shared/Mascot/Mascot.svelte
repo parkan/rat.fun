@@ -462,7 +462,7 @@
         scale: 1;
         .bubble-text {
           position: absolute;
-          top: 50%;
+          top: 48%;
           left: 57%;
           transform: translate(-50%, -50%) rotate(-10deg);
           color: #000;
@@ -473,12 +473,13 @@
           word-wrap: break-word;
           pointer-events: none;
           width: 50%;
+          word-spacing: -2px;
+          line-height: 1.2em;
 
           :global(.bold-text) {
             background: black;
             color: white;
             padding: 2px 4px;
-            border-radius: 2px;
           }
         }
       }

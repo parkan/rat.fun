@@ -22,27 +22,19 @@
       buttonLabel: "OK"
     },
     {
-      text: "Welcome to the **SLOP MACHINE**. A device for exposing test-subjects to drug-induced experiences aka **TRIPS**.",
+      text: "Welcome to our rat controlled remote viewing **SLOP MACHINE**.",
       buttonLabel: "OK"
     },
     {
-      text: "Don't worry! We could never use humans for these experiments. We tried… Now we use **RATS** instead.",
+      text: "If operated skilfully this machine will bring you great riches!",
       buttonLabel: "OK"
     },
     {
-      text: "**RATS** are not pets!!! DO NOT GET ATTACHED TO THEM!!!!",
+      text: "Pump your rats with drugs and send them tripping, then cash out tokens by exploiting their success.",
       buttonLabel: "OK"
     },
     {
-      text: "You send rats into **TRIPS** to earn **TOKENS**. The more they take from the trip, the more valuable they become.",
-      buttonLabel: "OK"
-    },
-    {
-      text: "Cash out by killing your **RAT** at any moment...",
-      buttonLabel: "OK"
-    },
-    {
-      text: "Can you feel your dopamine injectors tingling already?",
+      text: "I can feel your dopamine injectors tingling! What are you waiting for?",
       buttonLabel: "I AM READY"
     }
   ]
