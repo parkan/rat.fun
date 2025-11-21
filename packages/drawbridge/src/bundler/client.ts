@@ -9,22 +9,26 @@ import {
 } from "viem/account-abstraction"
 import { defaultClientConfig } from "../types"
 import { getPaymaster } from "./paymaster"
+import { type GasEstimates } from "./gasEstimator"
 
 /**
  * Create a bundler client for submitting ERC-4337 user operations
  *
  * A bundler client is a specialized viem client that:
  * - Submits user operations to the bundler RPC
- * - Handles gas estimation for user operations
+ * - Handles gas estimation for user operations (via transport wrapper)
  * - Integrates paymaster for gas sponsorship
  * - Manages smart account interactions
  *
  * This function wraps viem's createBundlerClient with:
  * - Automatic paymaster configuration from chain or override
- * - Custom fee estimation for Anvil (local dev)
+ * - Custom fee estimation for specific chains
  * - Default polling interval
  *
+ * Gas estimation is handled by the transport layer (see gasEstimator.ts).
+ *
  * @param config Bundler client configuration
+ * @param gasEstimates Optional custom gas estimates for specific functions
  * @returns Configured bundler client
  */
 export function createBundlerClient<
@@ -34,7 +38,8 @@ export function createBundlerClient<
   client extends Client = Client,
   rpcSchema extends RpcSchema | undefined = undefined
 >(
-  config: BundlerClientConfig<transport, chain, account, client, rpcSchema>
+  config: BundlerClientConfig<transport, chain, account, client, rpcSchema>,
+  gasEstimates?: GasEstimates
 ): BundlerClient<transport, chain, account, client, rpcSchema> {
   const client = config.client
   if (!client) throw new Error("No `client` provided to `createBundlerClient`.")
@@ -52,6 +57,12 @@ export function createBundlerClient<
     console.log(`[Drawbridge/BundlerClient] Bundler client configured without paymaster`)
   }
 
+  console.log("[Drawbridge/BundlerClient] Config:", {
+    pollingInterval: defaultClientConfig.pollingInterval,
+    hasPaymaster: !!paymaster,
+    paymasterType: paymaster?.type
+  })
+
   return viem_createBundlerClient({
     ...defaultClientConfig,
     // Configure paymaster for gas sponsorship
@@ -66,7 +77,7 @@ export function createBundlerClient<
             })
           }
       : undefined,
-    // Custom fee estimation for certain chains
+    // Custom fee estimation for specific chains
     userOperation: {
       estimateFeesPerGas: createFeeEstimator(client)
     },
@@ -105,12 +116,40 @@ function createFeeEstimator(
   // Coinbase bundler requires minimum maxPriorityFeePerGas of 1 gwei
   if (client.chain.id === 8453 || client.chain.id === 84532) {
     return async () => {
-      const fees = await estimateFeesPerGas(client)
-      const minPriorityFee = 1_000_000n // 1 gwei minimum
-      return {
-        maxFeePerGas: fees.maxFeePerGas,
-        maxPriorityFeePerGas:
-          fees.maxPriorityFeePerGas > minPriorityFee ? fees.maxPriorityFeePerGas : minPriorityFee
+      console.log("[Fee Estimator] Estimating fees for Base chain...")
+      try {
+        const fees = await estimateFeesPerGas(client)
+        const minPriorityFee = 1_000_000n // 0.001 gwei minimum (Coinbase requirement)
+        const maxTotalFee = 500_000_000n // 0.5 gwei max to keep under $1 paymaster limit
+
+        // Cap maxFeePerGas to prevent exceeding paymaster budget during gas spikes
+        const cappedMaxFee = fees.maxFeePerGas > maxTotalFee ? maxTotalFee : fees.maxFeePerGas
+
+        const result = {
+          maxFeePerGas: cappedMaxFee,
+          maxPriorityFeePerGas:
+            fees.maxPriorityFeePerGas > minPriorityFee ? fees.maxPriorityFeePerGas : minPriorityFee
+        }
+
+        console.log("[Fee Estimator] Fees:", {
+          networkMaxFee: (Number(fees.maxFeePerGas) / 1e9).toFixed(3) + " gwei",
+          cappedMaxFee: (Number(result.maxFeePerGas) / 1e9).toFixed(3) + " gwei",
+          maxPriorityFeePerGas: (Number(result.maxPriorityFeePerGas) / 1e9).toFixed(3) + " gwei",
+          wasCapped: fees.maxFeePerGas > maxTotalFee
+        })
+
+        return result
+      } catch (error) {
+        // If eth_maxPriorityFeePerGas is not supported by the RPC provider, use safe defaults
+        // This can happen with some wallet providers or RPC endpoints
+        console.warn(
+          "[Fee Estimator] Estimation failed, using defaults:",
+          error instanceof Error ? error.message : String(error)
+        )
+        return {
+          maxFeePerGas: 1_000_000_000n, // 1 gwei (1 billion wei)
+          maxPriorityFeePerGas: 100_000_000n // 0.1 gwei minimum (100 million wei) - Higher to ensure bundler processes it
+        }
       }
     }
   }

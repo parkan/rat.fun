@@ -6,7 +6,7 @@ import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { smartAccountActions } from 'permissionless';
 import { callFrom, sendUserOperationFrom } from '@latticexyz/world/internal';
 import { waitForTransactionReceipt, estimateFeesPerGas, getCode, sendTransaction, writeContract, signTypedData } from 'viem/actions';
-import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt } from 'viem/account-abstraction';
+import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt, formatUserOperationRequest } from 'viem/account-abstraction';
 import { getRecord } from '@latticexyz/store/internal';
 import { getAction } from 'viem/utils';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
@@ -27,7 +27,8 @@ var DrawbridgeStatus = /* @__PURE__ */ ((DrawbridgeStatus2) => {
   return DrawbridgeStatus2;
 })(DrawbridgeStatus || {});
 var defaultClientConfig = {
-  pollingInterval: 250
+  pollingInterval: 2e3
+  // Changed from 250ms to 2000ms to reduce rate limiting
 };
 var unlimitedDelegationControlId = resourceToHex({
   type: "system",
@@ -210,7 +211,7 @@ function getPaymaster(chain, paymasterOverride) {
 }
 
 // src/bundler/client.ts
-function createBundlerClient(config) {
+function createBundlerClient(config, gasEstimates) {
   const client = config.client;
   if (!client) throw new Error("No `client` provided to `createBundlerClient`.");
   const chain = config.chain ?? client.chain;
@@ -222,6 +223,11 @@ function createBundlerClient(config) {
   } else {
     console.log(`[Drawbridge/BundlerClient] Bundler client configured without paymaster`);
   }
+  console.log("[Drawbridge/BundlerClient] Config:", {
+    pollingInterval: defaultClientConfig.pollingInterval,
+    hasPaymaster: !!paymaster,
+    paymasterType: paymaster?.type
+  });
   return createBundlerClient$1({
     ...defaultClientConfig,
     // Configure paymaster for gas sponsorship
@@ -232,7 +238,7 @@ function createBundlerClient(config) {
         paymasterData: "0x"
       })
     } : void 0,
-    // Custom fee estimation for certain chains
+    // Custom fee estimation for specific chains
     userOperation: {
       estimateFeesPerGas: createFeeEstimator(client)
     },
@@ -246,20 +252,163 @@ function createFeeEstimator(client) {
   }
   if (client.chain.id === 8453 || client.chain.id === 84532) {
     return async () => {
-      const fees = await estimateFeesPerGas(client);
-      const minPriorityFee = 1000000n;
-      return {
-        maxFeePerGas: fees.maxFeePerGas,
-        maxPriorityFeePerGas: fees.maxPriorityFeePerGas > minPriorityFee ? fees.maxPriorityFeePerGas : minPriorityFee
-      };
+      console.log("[Fee Estimator] Estimating fees for Base chain...");
+      try {
+        const fees = await estimateFeesPerGas(client);
+        const minPriorityFee = 1000000n;
+        const maxTotalFee = 500000000n;
+        const cappedMaxFee = fees.maxFeePerGas > maxTotalFee ? maxTotalFee : fees.maxFeePerGas;
+        const result = {
+          maxFeePerGas: cappedMaxFee,
+          maxPriorityFeePerGas: fees.maxPriorityFeePerGas > minPriorityFee ? fees.maxPriorityFeePerGas : minPriorityFee
+        };
+        console.log("[Fee Estimator] Fees:", {
+          networkMaxFee: (Number(fees.maxFeePerGas) / 1e9).toFixed(3) + " gwei",
+          cappedMaxFee: (Number(result.maxFeePerGas) / 1e9).toFixed(3) + " gwei",
+          maxPriorityFeePerGas: (Number(result.maxPriorityFeePerGas) / 1e9).toFixed(3) + " gwei",
+          wasCapped: fees.maxFeePerGas > maxTotalFee
+        });
+        return result;
+      } catch (error) {
+        console.warn(
+          "[Fee Estimator] Estimation failed, using defaults:",
+          error instanceof Error ? error.message : String(error)
+        );
+        return {
+          maxFeePerGas: 1000000000n,
+          // 1 gwei (1 billion wei)
+          maxPriorityFeePerGas: 100000000n
+          // 0.1 gwei minimum (100 million wei) - Higher to ensure bundler processes it
+        };
+      }
     };
   }
   return void 0;
 }
-function getBundlerTransport(chain) {
+function extractFunctionSelector(callData) {
+  if (!callData || callData.length < 10) return null;
+  let data = callData;
+  if (data.startsWith("0xb61d27f6")) {
+    console.log("[Gas Estimator] Unwrapping smart account execute()");
+    const offset = 2 + 8 + 64 + 64 + 64 + 64;
+    if (data.length > offset) {
+      data = "0x" + data.slice(offset);
+      console.log("[Gas Estimator] After unwrap, selector:", data.slice(0, 10));
+    }
+  }
+  if (data.startsWith("0xdd2bcbae")) {
+    console.log("[Gas Estimator] Unwrapping MUD callFrom()");
+    const offset = 2 + 8 + 64 + 64 + 64 + 64;
+    if (data.length > offset + 8) {
+      data = data.slice(offset, offset + 10);
+      console.log("[Gas Estimator] Final selector:", data);
+      return data;
+    }
+  }
+  return data.slice(0, 10);
+}
+function gasEstimator(gasEstimates, getTransport) {
+  return ((opts) => {
+    const { request: originalRequest, ...rest } = getTransport(opts);
+    const request = async ({ method, params }, options) => {
+      console.log("[Gas Estimator] RPC Method:", method);
+      if (method === "eth_estimateUserOperationGas") {
+        const [userOp] = params;
+        const selector = extractFunctionSelector(userOp.callData);
+        const measuredGas = selector && gasEstimates ? gasEstimates[selector] : null;
+        if (measuredGas) {
+          let defaultEstimate;
+          try {
+            defaultEstimate = await originalRequest({ method, params }, options);
+          } catch (error) {
+            console.error("[Gas Estimator] Failed to get default estimate from bundler:", error);
+            throw error;
+          }
+          const estimate = {
+            callGasLimit: measuredGas,
+            verificationGasLimit: BigInt(defaultEstimate.verificationGasLimit),
+            preVerificationGas: BigInt(defaultEstimate.preVerificationGas),
+            paymasterVerificationGasLimit: BigInt(defaultEstimate.paymasterVerificationGasLimit || "0x6978"),
+            // 27000 default
+            paymasterPostOpGasLimit: BigInt(defaultEstimate.paymasterPostOpGasLimit || "0x6978")
+            // 27000 default
+          };
+          const totalGas = estimate.callGasLimit + estimate.verificationGasLimit + estimate.preVerificationGas + estimate.paymasterVerificationGasLimit + estimate.paymasterPostOpGasLimit;
+          const maxFeePerGas = userOp.maxFeePerGas ? BigInt(userOp.maxFeePerGas) : null;
+          const gasPrice = maxFeePerGas ? Number(maxFeePerGas) / 1e9 : null;
+          console.log("\u250C\u2500 User Operation Gas Estimate \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+          console.log("\u2502 Function selector:", selector);
+          console.log("\u2502");
+          console.log("\u2502 Gas Breakdown:");
+          console.log("\u2502   callGasLimit:               ", estimate.callGasLimit.toString().padStart(7), "gas (CUSTOM)");
+          console.log("\u2502   verificationGasLimit:       ", estimate.verificationGasLimit.toString().padStart(7), "gas (viem default)");
+          console.log("\u2502   preVerificationGas:         ", estimate.preVerificationGas.toString().padStart(7), "gas (viem default)");
+          console.log("\u2502   paymasterVerificationGasLimit:", estimate.paymasterVerificationGasLimit.toString().padStart(5), "gas (viem default)");
+          console.log("\u2502   paymasterPostOpGasLimit:    ", estimate.paymasterPostOpGasLimit.toString().padStart(7), "gas (viem default)");
+          console.log("\u2502   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+          console.log("\u2502   Total gas limit:            ", totalGas.toString().padStart(7), "gas");
+          console.log("\u2502");
+          if (gasPrice !== null) {
+            console.log("\u2502 Current gas price:", gasPrice.toFixed(3), "gwei");
+            console.log("\u2502 Estimated max cost:", (Number(totalGas) * gasPrice / 1e9).toFixed(6), "ETH");
+            console.log("\u2502 (To get USD: multiply ETH cost \xD7 ETH price)");
+          }
+          console.log("\u2502");
+          console.log("\u2502 Source: Custom callGasLimit + viem defaults for verification");
+          console.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+          return formatUserOperationRequest(estimate);
+        }
+        if (!gasEstimates) {
+          console.log("[Gas Estimator] No custom gas estimates configured - using viem default");
+        } else {
+          console.log("[Gas Estimator] No measurement for", selector, "- using viem default");
+        }
+      }
+      return originalRequest({ method, params }, options);
+    };
+    return { request, ...rest };
+  });
+}
+
+// src/bundler/transport.ts
+function getBundlerTransport(chain, gasEstimates) {
   const bundlerHttpUrl = chain.rpcUrls.bundler?.http[0];
   if (bundlerHttpUrl) {
-    return http(bundlerHttpUrl);
+    return gasEstimator(
+      gasEstimates,
+      http(bundlerHttpUrl, {
+        onFetchRequest: async (request) => {
+          try {
+            if (request.body) {
+              const clonedRequest = request.clone();
+              const text = await clonedRequest.text();
+              const body = JSON.parse(text);
+              if (body?.method) {
+                console.log(`[Bundler RPC] ${body.method}`);
+              }
+              if (body?.method === "eth_sendUserOperation") {
+                const userOp = body?.params?.[0];
+                if (userOp) {
+                  const callGas = BigInt(userOp.callGasLimit);
+                  const verifyGas = BigInt(userOp.verificationGasLimit);
+                  const preVerifyGas = BigInt(userOp.preVerificationGas);
+                  const maxFee = BigInt(userOp.maxFeePerGas);
+                  const priorityFee = BigInt(userOp.maxPriorityFeePerGas);
+                  console.log("[Bundler] Sending user operation with gas:", {
+                    callGasLimit: callGas.toString(),
+                    verificationGasLimit: verifyGas.toString(),
+                    preVerificationGas: preVerifyGas.toString(),
+                    maxFeePerGas: (Number(maxFee) / 1e9).toFixed(3) + " gwei",
+                    maxPriorityFeePerGas: (Number(priorityFee) / 1e9).toFixed(3) + " gwei"
+                  });
+                }
+              }
+            }
+          } catch (e) {
+          }
+        }
+      })
+    );
   }
   throw new Error(`Chain ${chain.id} config did not include a bundler RPC URL.`);
 }
@@ -270,7 +419,8 @@ async function getSessionClient({
   sessionAccount,
   sessionSigner,
   worldAddress,
-  paymasterOverride
+  paymasterOverride,
+  gasEstimates
 }) {
   const client = sessionAccount.client;
   if (!clientHasChain(client)) {
@@ -279,12 +429,13 @@ async function getSessionClient({
   if (paymasterOverride) {
     console.log(`[Drawbridge/SessionClient] Creating session client with paymaster override`);
   }
-  const bundlerClient = createBundlerClient({
-    transport: getBundlerTransport(client.chain),
-    client,
-    account: sessionAccount,
-    paymaster: paymasterOverride
-  });
+  const bundlerClient = createBundlerClient(
+    {
+      transport: getBundlerTransport(client.chain, gasEstimates),
+      client,
+      account: sessionAccount,
+      paymaster: paymasterOverride
+    });
   const sessionClient = bundlerClient.extend(smartAccountActions).extend(
     callFrom({
       worldAddress,
@@ -978,7 +1129,8 @@ var Drawbridge = class {
       sessionAccount: account,
       sessionSigner: signer,
       worldAddress: this.config.worldAddress,
-      paymasterOverride: this.config.paymasterClient
+      paymasterOverride: this.config.paymasterClient,
+      gasEstimates: this.config.gasEstimates
     });
     let hasDelegation = false;
     try {

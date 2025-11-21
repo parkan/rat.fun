@@ -18,6 +18,15 @@ import {
 } from "./wallet"
 
 /**
+ * Gas estimation configuration for user operations
+ * Maps function selectors (4-byte hex) to gas limits
+ */
+export type GasEstimates = {
+  /** Maps function selector (e.g., "0x4575ab44") to callGasLimit */
+  [selector: string]: bigint
+}
+
+/**
  * Configuration for Drawbridge instance
  */
 export type DrawbridgeConfig = {
@@ -37,6 +46,17 @@ export type DrawbridgeConfig = {
   pollingInterval?: number
   /** Optional app name for wallet connectors */
   appName?: string
+  /**
+   * Optional custom gas estimates for user operations
+   * Maps function selectors to callGasLimit values
+   * If not provided, uses viem's default estimation
+   * @example
+   * gasEstimates: {
+   *   "0x4575ab44": 528000n, // liquidateRat
+   *   "0x894ecc58": 587500n  // createRat
+   * }
+   */
+  gasEstimates?: GasEstimates
   /**
    * Skip session setup entirely - wallet connection only mode
    * Use this for apps that don't need MUD delegation/session accounts.
@@ -431,7 +451,8 @@ export class Drawbridge {
       sessionAccount: account,
       sessionSigner: signer,
       worldAddress: this.config.worldAddress!,
-      paymasterOverride: this.config.paymasterClient
+      paymasterOverride: this.config.paymasterClient,
+      gasEstimates: this.config.gasEstimates
     })
 
     // Check if delegation already exists BEFORE notifying listeners

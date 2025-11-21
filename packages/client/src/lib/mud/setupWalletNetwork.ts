@@ -22,7 +22,6 @@ type WriteContractArgs = {
   abi: unknown
   functionName: string
   args?: unknown[]
-  gas?: bigint
   value?: bigint
 }
 

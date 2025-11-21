@@ -39,7 +39,7 @@ export function setupBurnerWalletNetwork(publicNetwork: SetupPublicNetworkResult
   const clientOptions = {
     chain: networkConfig.chain,
     transport: transportObserver(fallback(transports)),
-    pollingInterval: 1000
+    pollingInterval: 2000 // Match public network polling to reduce RPC calls
   } as const satisfies ClientConfig
 
   const burnerWalletClient = createWalletClient({

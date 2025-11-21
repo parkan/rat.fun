@@ -4,10 +4,14 @@ import worldConfig from "@latticexyz/world/mud.config"
 
 /**
  * Default viem client configuration
- * Polling interval for watching blockchain state
+ * Polling interval for watching blockchain state and user operation receipts
+ *
+ * Note: This affects how often we poll for user operation receipts after sending.
+ * Lower = faster confirmation detection but more RPC calls
+ * Higher = slower confirmation detection but fewer RPC calls (better for rate limits)
  */
 export const defaultClientConfig = {
-  pollingInterval: 250
+  pollingInterval: 2000 // Changed from 250ms to 2000ms to reduce rate limiting
 } as const satisfies Pick<ClientConfig, "pollingInterval">
 
 /**
