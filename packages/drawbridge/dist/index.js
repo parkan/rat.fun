@@ -1,5 +1,5 @@
 import { resourceToHex, hexToResource } from '@latticexyz/common';
-import { parseAbi, isHex, http, encodeFunctionData, zeroAddress, toHex } from 'viem';
+import { parseAbi, isHex, http, encodeFunctionData, formatEther, formatGwei, zeroAddress, toHex } from 'viem';
 import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
@@ -236,10 +236,78 @@ function createBundlerClient(config) {
     ...config
   });
 }
+var APPROXIMATE_CURRENT_ETH_PRICE = 2800;
+function logUserOperationCost(userOp) {
+  const callGas = BigInt(userOp.callGasLimit);
+  const verificationGas = BigInt(userOp.verificationGasLimit);
+  const preVerificationGas = BigInt(userOp.preVerificationGas);
+  const paymasterVerificationGas = BigInt(userOp.paymasterVerificationGasLimit || 0);
+  const paymasterPostOpGas = BigInt(userOp.paymasterPostOpGasLimit || 0);
+  const maxFeePerGas = BigInt(userOp.maxFeePerGas);
+  const maxPriorityFeePerGas = BigInt(userOp.maxPriorityFeePerGas);
+  const totalGas = callGas + verificationGas + preVerificationGas + paymasterVerificationGas + paymasterPostOpGas;
+  const maxCostWei = totalGas * maxFeePerGas;
+  const maxCostETH = formatEther(maxCostWei);
+  const maxCostUSD = Number(maxCostETH) * APPROXIMATE_CURRENT_ETH_PRICE;
+  console.log("\u250C\u2500 User Operation Gas & Cost \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  console.log("\u2502");
+  console.log("\u2502 Gas Estimates:");
+  console.log("\u2502   callGasLimit:                ", callGas.toString().padStart(7), "gas");
+  console.log("\u2502   verificationGasLimit:        ", verificationGas.toString().padStart(7), "gas");
+  console.log("\u2502   preVerificationGas:          ", preVerificationGas.toString().padStart(7), "gas");
+  if (paymasterVerificationGas > 0n) {
+    console.log(
+      "\u2502   paymasterVerificationGasLimit:",
+      paymasterVerificationGas.toString().padStart(7),
+      "gas"
+    );
+  }
+  if (paymasterPostOpGas > 0n) {
+    console.log(
+      "\u2502   paymasterPostOpGasLimit:     ",
+      paymasterPostOpGas.toString().padStart(7),
+      "gas"
+    );
+  }
+  console.log("\u2502   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  console.log("\u2502   Total gas:                   ", totalGas.toString().padStart(7), "gas");
+  console.log("\u2502");
+  console.log("\u2502 Fee Parameters:");
+  console.log("\u2502   maxFeePerGas:                ", formatGwei(maxFeePerGas), "gwei");
+  console.log("\u2502   maxPriorityFeePerGas:        ", formatGwei(maxPriorityFeePerGas), "gwei");
+  console.log("\u2502");
+  console.log("\u2502 Estimated Max Cost:");
+  console.log("\u2502   ETH:  ", maxCostETH, "ETH");
+  console.log(
+    "\u2502   USD:  $" + maxCostUSD.toFixed(2),
+    "(at $" + APPROXIMATE_CURRENT_ETH_PRICE + " ETH)"
+  );
+  console.log("\u2502");
+  console.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+}
+
+// src/bundler/transport.ts
 function getBundlerTransport(chain) {
   const bundlerHttpUrl = chain.rpcUrls.bundler?.http[0];
   if (bundlerHttpUrl) {
-    return http(bundlerHttpUrl);
+    return http(bundlerHttpUrl, {
+      onFetchRequest: async (request) => {
+        try {
+          if (request.body) {
+            const clonedRequest = request.clone();
+            const text = await clonedRequest.text();
+            const body = JSON.parse(text);
+            if (body?.method === "eth_sendUserOperation") {
+              const userOp = body?.params?.[0];
+              if (userOp) {
+                logUserOperationCost(userOp);
+              }
+            }
+          }
+        } catch (e) {
+        }
+      }
+    });
   }
   throw new Error(`Chain ${chain.id} config did not include a bundler RPC URL.`);
 }
