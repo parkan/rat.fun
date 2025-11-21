@@ -1,4 +1,4 @@
-import { Transport, Chain, Client, RpcSchema, EstimateFeesPerGasReturnType } from "viem"
+import { Transport, Chain, Client, RpcSchema, EstimateFeesPerGasReturnType, parseGwei } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import {
   BundlerClient,
@@ -126,17 +126,15 @@ function createFeeEstimator(
       try {
         const fees = await estimateFeesPerGas(client)
 
-        // GAS PRICE UNIT CONVERSIONS:
-        // 1 gwei = 1,000,000,000 wei (9 zeros)
-        // 1 wei  = 0.000000001 gwei
-
-        // Coinbase bundler REQUIRES minimum 1 gwei priority fee
-        // Any lower and operations will be silently rejected
-        const minPriorityFee = 1_000_000_000n // 1 gwei = 1,000,000,000 wei
+        // Coinbase bundler appears to require minimum 1 gwei priority fee
+        // Based on empirical testing: operations with lower fees are silently rejected
+        // See ERC-4337 spec: bundlers have "configurable minimum" for maxPriorityFeePerGas
+        // https://eips.ethereum.org/EIPS/eip-4337#specification (Required fields section)
+        const minPriorityFee = parseGwei("1")
 
         // Cap total fee to prevent exceeding paymaster budget during gas spikes
         // At 750k gas × 10 gwei × $3000 ETH = $22.50 (well under reasonable limits)
-        const maxTotalFee = 10_000_000_000n // 10 gwei = 10,000,000,000 wei
+        const maxTotalFee = parseGwei("10")
 
         // Determine the priority fee (must meet Coinbase's 1 gwei minimum)
         const priorityFee =
@@ -169,8 +167,8 @@ function createFeeEstimator(
         // This can happen with some wallet providers or RPC endpoints
         logFeeEstimationFallback(error)
         return {
-          maxFeePerGas: 10_000_000_000n, // 10 gwei = 10,000,000,000 wei
-          maxPriorityFeePerGas: 1_000_000_000n // 1 gwei = 1,000,000,000 wei (Coinbase minimum)
+          maxFeePerGas: parseGwei("10"),
+          maxPriorityFeePerGas: parseGwei("1") // Coinbase minimum
         }
       }
     }

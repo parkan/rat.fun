@@ -6,6 +6,8 @@
  * imports/calls to these functions removed.
  */
 
+import { formatGwei } from "viem"
+
 /**
  * Log bundler client configuration
  */
@@ -39,34 +41,60 @@ export function logFeeEstimationResult(data: {
   maxTotalFee: bigint
   minPriorityFee: bigint
 }): void {
-  const networkMaxFeeGwei = Number(data.networkMaxFee) / 1e9
-  const adjustedMaxFeeGwei = Number(data.adjustedMaxFee) / 1e9
-  const cappedMaxFeeGwei = Number(data.cappedMaxFee) / 1e9
-  const priorityFeeGwei = Number(data.maxPriorityFeePerGas) / 1e9
-  const maxTotalFeeGwei = Number(data.maxTotalFee) / 1e9
-  const minPriorityFeeGwei = Number(data.minPriorityFee) / 1e9
-
   const wasAdjusted = data.adjustedMaxFee > data.networkMaxFee
   const wasCapped = data.cappedMaxFee < data.adjustedMaxFee
 
   console.log("┌─ Fee Estimation Result ────────────────────────────")
   console.log("│")
   console.log("│ Network estimate:")
-  console.log("│   maxFeePerGas:         ", networkMaxFeeGwei.toFixed(3), "gwei", `(${data.networkMaxFee} wei)`)
+  console.log(
+    "│   maxFeePerGas:         ",
+    formatGwei(data.networkMaxFee),
+    "gwei",
+    `(${data.networkMaxFee} wei)`
+  )
   console.log("│")
   console.log("│ Our configuration:")
-  console.log("│   minPriorityFee:       ", minPriorityFeeGwei.toFixed(3), "gwei", `(${data.minPriorityFee} wei)`, "← Coinbase requirement")
-  console.log("│   maxTotalFee cap:      ", maxTotalFeeGwei.toFixed(3), "gwei", `(${data.maxTotalFee} wei)`)
+  console.log(
+    "│   minPriorityFee:       ",
+    formatGwei(data.minPriorityFee),
+    "gwei",
+    `(${data.minPriorityFee} wei)`,
+    "← Coinbase requirement"
+  )
+  console.log(
+    "│   maxTotalFee cap:      ",
+    formatGwei(data.maxTotalFee),
+    "gwei",
+    `(${data.maxTotalFee} wei)`
+  )
   console.log("│")
   if (wasAdjusted) {
     console.log("│ ⚠️  Adjustment needed:")
     console.log("│   Network's maxFeePerGas was too low for priority fee!")
-    console.log("│   Adjusted maxFeePerGas:", adjustedMaxFeeGwei.toFixed(3), "gwei", `(${data.adjustedMaxFee} wei)`, "← Increased to match priority")
+    console.log(
+      "│   Adjusted maxFeePerGas:",
+      formatGwei(data.adjustedMaxFee),
+      "gwei",
+      `(${data.adjustedMaxFee} wei)`,
+      "← Increased to match priority"
+    )
     console.log("│")
   }
   console.log("│ Final values sent:")
-  console.log("│   maxFeePerGas:         ", cappedMaxFeeGwei.toFixed(3), "gwei", `(${data.cappedMaxFee} wei)`, wasCapped ? "← CAPPED" : "")
-  console.log("│   maxPriorityFeePerGas: ", priorityFeeGwei.toFixed(3), "gwei", `(${data.maxPriorityFeePerGas} wei)`)
+  console.log(
+    "│   maxFeePerGas:         ",
+    formatGwei(data.cappedMaxFee),
+    "gwei",
+    `(${data.cappedMaxFee} wei)`,
+    wasCapped ? "← CAPPED" : ""
+  )
+  console.log(
+    "│   maxPriorityFeePerGas: ",
+    formatGwei(data.maxPriorityFeePerGas),
+    "gwei",
+    `(${data.maxPriorityFeePerGas} wei)`
+  )
   console.log("│")
   if (data.cappedMaxFee < data.maxPriorityFeePerGas) {
     console.log("│ ❌ ERROR: maxFeePerGas < maxPriorityFeePerGas!")
@@ -113,8 +141,8 @@ export function logUserOperationGas(userOp: {
     callGasLimit: callGas.toString(),
     verificationGasLimit: verifyGas.toString(),
     preVerificationGas: preVerifyGas.toString(),
-    maxFeePerGas: (Number(maxFee) / 1e9).toFixed(3) + " gwei",
-    maxPriorityFeePerGas: (Number(priorityFee) / 1e9).toFixed(3) + " gwei"
+    maxFeePerGas: formatGwei(maxFee) + " gwei",
+    maxPriorityFeePerGas: formatGwei(priorityFee) + " gwei"
   })
 }
 
@@ -200,11 +228,8 @@ export function logGasEstimateBreakdown(data: {
   console.log("│")
   if (data.gasPrice !== null) {
     console.log("│ Current gas price:", data.gasPrice.toFixed(3), "gwei")
-    console.log(
-      "│ Estimated max cost:",
-      ((Number(data.totalGas) * data.gasPrice) / 1e9).toFixed(6),
-      "ETH"
-    )
+    const costInWei = data.totalGas * BigInt(Math.floor(data.gasPrice * 1e9))
+    console.log("│ Estimated max cost:", (Number(costInWei) / 1e18).toFixed(6), "ETH")
     console.log("│ (To get USD: multiply ETH cost × ETH price)")
   }
   console.log("│")

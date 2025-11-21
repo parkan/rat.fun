@@ -1,4 +1,4 @@
-import { BundlerRpcSchema, Transport, Hex } from "viem"
+import { BundlerRpcSchema, Transport, Hex, formatGwei } from "viem"
 import { formatUserOperationRequest } from "viem/account-abstraction"
 import {
   logGasEstimatorRpcMethod,
@@ -133,7 +133,7 @@ export function gasEstimator<const transport extends Transport>(
 
           // Try to get gas price from the user operation if available
           const maxFeePerGas = userOp.maxFeePerGas ? BigInt(userOp.maxFeePerGas) : null
-          const gasPrice = maxFeePerGas ? Number(maxFeePerGas) / 1e9 : null // Convert to gwei
+          const gasPrice = maxFeePerGas ? Number(formatGwei(maxFeePerGas)) : null
 
           logGasEstimateBreakdown({
             selector,
