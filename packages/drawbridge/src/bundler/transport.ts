@@ -28,8 +28,34 @@ function getRetryDelay(attempt: number): number {
 }
 
 /**
- * Fetch with exponential backoff retry logic for rate limiting
- * Automatically retries on 429 errors with exponential backoff
+ * Check if response contains a paymaster cost rejection
+ */
+async function isPaymasterCostRejection(response: Response): Promise<boolean> {
+  if (response.status !== 200) return false
+
+  try {
+    const clonedResponse = response.clone()
+    const body = await clonedResponse.json()
+
+    // Check for Coinbase paymaster cost rejection
+    // Error code -32002 with "max sponsorship cost" message
+    if (body?.error?.code === -32002) {
+      const details = body.error.details || body.error.message || ""
+      return details.toLowerCase().includes("max sponsorship cost")
+    }
+
+    return false
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Fetch with exponential backoff retry logic
+ * Automatically retries on:
+ * - 429 HTTP rate limit errors
+ * - Network errors
+ * - Paymaster cost rejections (RPC error -32002)
  */
 async function fetchWithRetry(
   input: string | URL | Request,
@@ -41,12 +67,11 @@ async function fetchWithRetry(
     try {
       const response = await fetch(input, init)
 
-      // Check for rate limit error (429)
+      // Check for HTTP rate limit error (429)
       if (response.status === 429) {
         const isLastAttempt = attempt === RETRY_CONFIG.maxRetries
 
         if (isLastAttempt) {
-          // Extract error details from response
           let errorMessage = "Rate limit exceeded"
           try {
             const errorBody = await response.json()
@@ -62,13 +87,30 @@ async function fetchWithRetry(
           )
         }
 
-        // Calculate delay with exponential backoff
         const delayMs = getRetryDelay(attempt)
         console.warn(
           `[Drawbridge/Transport] Rate limit hit (429). Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`
         )
 
-        // Wait before retrying
+        await sleep(delayMs)
+        continue
+      }
+
+      // Check for paymaster cost rejection (RPC error in response body)
+      if (await isPaymasterCostRejection(response)) {
+        const isLastAttempt = attempt === RETRY_CONFIG.maxRetries
+
+        if (isLastAttempt) {
+          // Don't throw - let the error propagate naturally
+          // This allows the original error message to reach the user
+          return response
+        }
+
+        const delayMs = getRetryDelay(attempt)
+        console.warn(
+          `[Drawbridge/Transport] Paymaster cost limit exceeded. Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`
+        )
+
         await sleep(delayMs)
         continue
       }
@@ -130,13 +172,21 @@ export function getBundlerTransport(chain: Chain, ethPriceUSD?: number) {
             const text = await clonedRequest.text()
             const body = JSON.parse(text)
 
-            // Apply fee cap and log user operation details when sending
-            if (body?.method === "eth_sendUserOperation") {
+            // Apply fee cap to any method that includes a user operation
+            // This includes both pm_getPaymasterData (paymaster call) and eth_sendUserOperation (actual send)
+            // Fee capping MUST happen before paymaster sees the operation to stay under $1 limit
+            if (
+              body?.method === "pm_getPaymasterData" ||
+              body?.method === "eth_sendUserOperation" ||
+              body?.method === "eth_estimateUserOperationGas"
+            ) {
               const userOp = body?.params?.[0]
               if (userOp && shouldApplyFeeCap) {
                 applyFeeCap(userOp, ethPriceUSD)
               }
-              if (userOp) {
+
+              // Log costs for send operations
+              if (body?.method === "eth_sendUserOperation" && userOp) {
                 logUserOperationCost(userOp, ethPriceUSD)
               }
             }
