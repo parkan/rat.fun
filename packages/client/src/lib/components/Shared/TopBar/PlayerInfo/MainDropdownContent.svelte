@@ -10,6 +10,17 @@
   import { walletType } from "$lib/modules/network"
   import { WALLET_TYPE } from "$lib/mud/enums"
   import { SmallButton } from "$lib/components/Shared"
+  import { musicEnabled, backgroundMusic } from "$lib/modules/sound/stores"
+
+  const toggleMusic = () => {
+    musicEnabled.current = !musicEnabled.current
+    // Stop any currently playing music when disabled, resume when enabled
+    if (!musicEnabled.current) {
+      backgroundMusic.stop()
+    } else {
+      backgroundMusic.resume()
+    }
+  }
 </script>
 
 <div class="main-dropdown-content">
@@ -35,6 +46,7 @@
       {CURRENCY_SYMBOL}
     </p>
   </div>
+
   <!-- Rats killed -->
   {#if ($player?.pastRats ?? []).length > 0}
     <div class="tab">
@@ -45,15 +57,25 @@
     </div>
   {/if}
   {#if $walletType !== WALLET_TYPE.BURNER}
-    <SmallButton
-      tippyText={UI_STRINGS.disconnectWallet}
-      onclick={async () => {
-        await disconnectWallet()
-        UIState.set(UI.SPAWNING)
-      }}
-      text={UI_STRINGS.disconnectWallet}
-    ></SmallButton>
+    <div class="tab">
+      <SmallButton
+        tippyText={UI_STRINGS.disconnectWallet}
+        onclick={async () => {
+          await disconnectWallet()
+          UIState.set(UI.SPAWNING)
+        }}
+        text={UI_STRINGS.disconnectWallet}
+      ></SmallButton>
+    </div>
   {/if}
+  <!-- Music toggle -->
+  <div class="tab">
+    <SmallButton
+      tippyText={musicEnabled.current ? UI_STRINGS.musicOn : UI_STRINGS.musicOff}
+      onclick={toggleMusic}
+      text={musicEnabled.current ? UI_STRINGS.musicOn : UI_STRINGS.musicOff}
+    ></SmallButton>
+  </div>
 </div>
 
 <style lang="scss">
