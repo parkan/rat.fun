@@ -89,7 +89,8 @@ export const drawbridgeState = readable<DrawbridgeState>(
     sessionClient: null,
     userAddress: null,
     sessionAddress: null,
-    isReady: false
+    isReady: false,
+    error: null
   },
   set => {
     // Subscribe when Drawbridge becomes available
