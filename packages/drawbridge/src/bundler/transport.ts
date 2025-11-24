@@ -2,6 +2,102 @@ import { Chain, http, parseEther } from "viem"
 import { logUserOperationCost, logFeeCapApplied } from "./logging"
 
 /**
+ * Retry configuration for rate limiting
+ */
+const RETRY_CONFIG = {
+  maxRetries: 4, // Total of 5 attempts (1 initial + 4 retries)
+  baseDelayMs: 1000, // Start with 1 second
+  maxDelayMs: 16000 // Cap at 16 seconds
+} as const
+
+/**
+ * Sleep utility for retry delays
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * Calculate exponential backoff delay
+ * @param attempt Retry attempt number (0-based)
+ * @returns Delay in milliseconds
+ */
+function getRetryDelay(attempt: number): number {
+  const delay = RETRY_CONFIG.baseDelayMs * Math.pow(2, attempt)
+  return Math.min(delay, RETRY_CONFIG.maxDelayMs)
+}
+
+/**
+ * Fetch with exponential backoff retry logic for rate limiting
+ * Automatically retries on 429 errors with exponential backoff
+ */
+async function fetchWithRetry(
+  input: string | URL | Request,
+  init?: RequestInit
+): Promise<Response> {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+    try {
+      const response = await fetch(input, init)
+
+      // Check for rate limit error (429)
+      if (response.status === 429) {
+        const isLastAttempt = attempt === RETRY_CONFIG.maxRetries
+
+        if (isLastAttempt) {
+          // Extract error details from response
+          let errorMessage = "Rate limit exceeded"
+          try {
+            const errorBody = await response.json()
+            if (errorBody?.errorMessage) {
+              errorMessage = errorBody.errorMessage
+            }
+          } catch {
+            // Ignore JSON parse errors
+          }
+
+          throw new Error(
+            `${errorMessage}. All ${RETRY_CONFIG.maxRetries + 1} retry attempts exhausted.`
+          )
+        }
+
+        // Calculate delay with exponential backoff
+        const delayMs = getRetryDelay(attempt)
+        console.warn(
+          `[Drawbridge/Transport] Rate limit hit (429). Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`
+        )
+
+        // Wait before retrying
+        await sleep(delayMs)
+        continue
+      }
+
+      // Success or non-retryable error
+      return response
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      // If it's a network error on the last attempt, throw it
+      if (attempt === RETRY_CONFIG.maxRetries) {
+        throw lastError
+      }
+
+      // For network errors, also apply exponential backoff
+      const delayMs = getRetryDelay(attempt)
+      console.warn(
+        `[Drawbridge/Transport] Network error. Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`,
+        error
+      )
+      await sleep(delayMs)
+    }
+  }
+
+  // This should never be reached, but TypeScript needs it
+  throw lastError || new Error("Unexpected error in fetchWithRetry")
+}
+
+/**
  * Get bundler RPC transport for a chain
  *
  * Bundlers are special RPC endpoints that handle ERC-4337 user operations.
@@ -25,6 +121,8 @@ export function getBundlerTransport(chain: Chain, ethPriceUSD?: number) {
     const shouldApplyFeeCap = chain.id === 8453 || chain.id === 84532
 
     return http(bundlerHttpUrl, {
+      // Use custom fetch with retry logic
+      fetchFn: fetchWithRetry,
       onFetchRequest: async request => {
         try {
           if (request.body) {
