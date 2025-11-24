@@ -1,79 +1,262 @@
 <script lang="ts">
   import { formatUnits, parseUnits } from "viem"
-  import { type AuctionParams } from "doppler"
+  import { swapState, SWAP_STATE } from "../state.svelte"
+  import SpendLimitProgressBar from "./SpendLimitProgressBar.svelte"
 
-  let spentAmount = $state<bigint | undefined>(undefined)
+  // Disable form in country code and permit2 allow max states
+  let disabled = $derived.by(() => {
+    return [SWAP_STATE.COUNTRY_CODE, SWAP_STATE.PERMIT2_ALLOW_MAX].includes(swapState.state.current)
+  })
 
-  let amountIn = $state<bigint | undefined>(undefined)
-  let amountOut = $state<bigint | undefined>(undefined)
-  let isExactOut = $state(false)
-
-  let {
-    auctionParams
-  }: {
-    auctionParams: AuctionParams
-  } = $props()
-
+  /**
+   * Get numeraire amount formatted for display in input field
+   */
   function getAmountIn() {
-    return !amountIn ? undefined : Number(formatUnits(amountIn, auctionParams.numeraire.decimals))
+    const amountIn = swapState.data.amountIn
+    const auctionParams = swapState.data.auctionParams
+    if (!amountIn || !auctionParams) return undefined
+    return Number(formatUnits(amountIn, auctionParams.numeraire.decimals))
   }
 
-  function setAmountIn(v: number | undefined) {
-    isExactOut = false
-    if (v === undefined || v === null) {
-      amountIn = undefined
-      amountOut = undefined
+  /**
+   * Set numeraire amount and quote token amount (exact input swap)
+   * Clears any existing permits since amounts changed
+   */
+  function setAmountIn(value: number | undefined) {
+    const auctionParams = swapState.data.auctionParams
+    const quoter = swapState.data.quoter
+    if (!auctionParams || !quoter) return
+
+    // Mark as exact input mode
+    swapState.data.setIsExactOut(false)
+    // Clear permits when amounts change
+    swapState.data.clearPermit()
+
+    if (value === undefined || value === null) {
+      swapState.data.setAmountIn(undefined)
+      swapState.data.setAmountOut(undefined)
     } else {
-      amountIn = parseUnits(v.toString(), auctionParams.numeraire.decimals)
+      // Parse display value to bigint with proper decimals
+      const amountIn = parseUnits(value.toString(), auctionParams.numeraire.decimals)
+      swapState.data.setAmountIn(amountIn)
+      // Quote the expected output amount
       quoter.quoteExactInputV4(amountIn, true).then(result => {
-        amountOut = result.amountOut
+        swapState.data.setAmountOut(result.amountOut)
       })
     }
-
-    permit = undefined
-    permitSignature = undefined
   }
 
+  /**
+   * Get token amount formatted for display in input field
+   */
   function getAmountOut() {
-    return !amountOut ? undefined : Number(formatUnits(amountOut, auctionParams.token.decimals))
+    const amountOut = swapState.data.amountOut
+    const auctionParams = swapState.data.auctionParams
+    if (!amountOut || !auctionParams) return undefined
+    return Number(formatUnits(amountOut, auctionParams.token.decimals))
   }
 
-  function setAmountOut(v: number | undefined) {
-    isExactOut = true
-    if (v === undefined || v === null) {
-      amountIn = undefined
-      amountOut = undefined
+  /**
+   * Set token amount and quote numeraire amount (exact output swap)
+   * Clears any existing permits since amounts changed
+   */
+  function setAmountOut(value: number | undefined) {
+    const auctionParams = swapState.data.auctionParams
+    const quoter = swapState.data.quoter
+    if (!auctionParams || !quoter) return
+
+    // Mark as exact output mode
+    swapState.data.setIsExactOut(true)
+    // Clear permits when amounts change
+    swapState.data.clearPermit()
+
+    if (value === undefined || value === null) {
+      swapState.data.setAmountIn(undefined)
+      swapState.data.setAmountOut(undefined)
     } else {
-      amountOut = parseUnits(v.toString(), auctionParams.token.decimals)
+      // Parse display value to bigint with proper decimals
+      const amountOut = parseUnits(value.toString(), auctionParams.token.decimals)
+      swapState.data.setAmountOut(amountOut)
+      // Quote the required input amount
       quoter.quoteExactOutputV4(amountOut, true).then(result => {
-        amountIn = result.amountIn
+        swapState.data.setAmountIn(result.amountIn)
       })
     }
+  }
 
-    permit = undefined
-    permitSignature = undefined
+  /**
+   * Get in-game rats from token amount
+   * Each in-game rat costs 100 $RAT
+   * Floored since you can't have fractional rats
+   */
+  function getInGameRats() {
+    const amountOut = swapState.data.amountOut
+    const auctionParams = swapState.data.auctionParams
+    if (!amountOut || !auctionParams) return undefined
+    const ratAmount = Number(formatUnits(amountOut, auctionParams.token.decimals))
+    return Math.floor(ratAmount / 100)
+  }
+
+  /**
+   * Set in-game rats and calculate $RAT amount needed (exact output swap)
+   * Each in-game rat costs 100 $RAT
+   */
+  function setInGameRats(value: number | undefined) {
+    if (value === undefined || value === null) {
+      setAmountOut(undefined)
+    } else {
+      // Convert rats to $RAT amount (multiply by 100)
+      const ratAmount = value * 100
+      setAmountOut(ratAmount)
+    }
   }
 </script>
 
-<div class="swap-form">
-  <div>
-    numeraire balance: {numeraireBalance}
-  </div>
-  <div>
-    token balance: {tokenBalance}
-  </div>
-  <div>
-    spent numeraire: {spentAmount !== undefined
-      ? formatUnits(spentAmount, auctionParams.numeraire.decimals)
-      : "..."} / {formatUnits(
-      BigInt(auctionParams.spendLimitAmount),
-      auctionParams.numeraire.decimals
-    )}
+<div class="swap-form" class:disabled>
+  <!-- Balances section -->
+  <div class="balances-section">
+    <div class="balance-item">
+      <span class="label">Numeraire balance:</span>
+      <span class="value">{swapState.data.numeraireBalance ?? "..."}</span>
+    </div>
+    <div class="balance-item">
+      <span class="label">Token balance:</span>
+      <span class="value">{swapState.data.tokenBalance ?? "..."}</span>
+    </div>
   </div>
 
-  numeraire:
-  <input type="number" bind:value={getAmountIn, setAmountIn} />
+  <!-- Spend limit progress bar -->
+  <SpendLimitProgressBar />
 
-  rat:
-  <input type="number" bind:value={getAmountOut, setAmountOut} />
+  {#if swapState.data.auctionParams}
+    <!-- Input fields section -->
+    <div class="inputs-section">
+      <div class="input-group">
+        <label for="numeraire-input">Numeraire:</label>
+        <input
+          id="numeraire-input"
+          type="number"
+          step="any"
+          placeholder="0.0"
+          bind:value={getAmountIn, setAmountIn}
+        />
+      </div>
+      <div class="input-group">
+        <label for="token-input">$RAT</label>
+        <input
+          id="token-input"
+          type="number"
+          step="any"
+          placeholder="0.0"
+          bind:value={getAmountOut, setAmountOut}
+        />
+      </div>
+      <div class="input-group">
+        <label for="rats-input">In-game Rats (100 $RAT each)</label>
+        <input
+          id="rats-input"
+          type="number"
+          step="1"
+          min="0"
+          placeholder="0"
+          bind:value={getInGameRats, setInGameRats}
+        />
+      </div>
+    </div>
+  {/if}
 </div>
+
+<style lang="scss">
+  .swap-form {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 20px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 400px;
+    margin-bottom: 20px;
+
+    &.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  .balances-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+  }
+
+  .balance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .value {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+  }
+
+  .inputs-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    input {
+      padding: 12px 16px;
+      font-size: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      outline: none;
+      transition: all 0.2s;
+
+      &:focus {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      // Remove spinner arrows
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      &[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+    }
+  }
+</style>

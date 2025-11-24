@@ -1,19 +1,21 @@
 <script lang="ts">
   import { formatUnits } from "viem"
-  import { type AuctionParams, CustomQuoter, isPermit2AllowedMaxRequired, balanceOf } from "doppler"
+  import {
+    type AuctionParams,
+    CustomQuoter,
+    isPermit2AllowedMaxRequired,
+    balanceOf,
+    buyLimitSpentAmount,
+    buyLimitGetCountryCode
+  } from "doppler"
   import { userAddress } from "$lib/modules/drawbridge"
   import { publicNetwork } from "$lib/modules/network"
   import { onMount } from "svelte"
   import { asPublicClient } from "$lib/utils/clientAdapter"
   import { swapState, SWAP_STATE } from "./state.svelte"
 
-  import { SwapForm, CountryCode, Permit2AllowMax, SignPermit2, ExecuteSwap } from "./index"
-
-  let quoter = $state({} as CustomQuoter)
-  let isPermit2Req = $state<boolean | null>(null)
-
-  let numeraireBalance = $state<number | undefined>(undefined)
-  let tokenBalance = $state<number | undefined>(undefined)
+  import { SwapForm, CountryCode, Permit2AllowMax, SignAndSwap, SwapComplete } from "./index"
+  import DebugPanel from "./DebugPanel.svelte"
 
   let {
     auctionParams
@@ -21,89 +23,140 @@
     auctionParams: AuctionParams
   } = $props()
 
-  // async function updateSpentAmount() {
-  //   if (!$userAddress) return
-  //   spentAmount = await buyLimitSpentAmount(
-  //     asPublicClient($publicNetwork.publicClient),
-  //     auctionParams.token.address,
-  //     $userAddress
-  //   )
-  // }
+  /**
+   * Determine which state to transition to based on loaded data
+   */
+  function determineInitialState(): SWAP_STATE {
+    // Check in order of requirements:
 
-  // Get spent amount and country code when user connects
-  // $effect(() => {
-  //   if ($userAddress) {
-  //     updateSpentAmount()
-  //     buyLimitGetCountryCode(
-  //       asPublicClient($publicNetwork.publicClient),
-  //       auctionParams.token.address,
-  //       $userAddress
-  //     ).then(result => {
-  //       savedCountryCode = result
-  //     })
-  //   }
-  // })
+    // 1. Check wallet limit reached
+    if (
+      swapState.data.spentAmount !== undefined &&
+      swapState.data.spentAmount >= BigInt(auctionParams.spendLimitAmount)
+    ) {
+      return SWAP_STATE.WALLET_LIMIT_REACHED
+    }
+
+    // 2. Check country code requirement
+    if (!swapState.data.savedCountryCode) {
+      return SWAP_STATE.COUNTRY_CODE
+    }
+
+    // 3. Check permit2 allowance
+    if (swapState.data.isPermit2Req === true) {
+      return SWAP_STATE.PERMIT2_ALLOW_MAX
+    }
+
+    // 4. Default to sign and swap (ready to swap)
+    return SWAP_STATE.SIGN_AND_SWAP
+  }
 
   onMount(async () => {
-    if (!$userAddress) return
+    // 1. Reset swap state to INIT
+    swapState.state.reset()
+    swapState.data.reset()
 
-    // Quoter provides the expected amount user didn't specify (input for exact output, or output for exact input)
-    quoter = new CustomQuoter(
-      asPublicClient($publicNetwork.publicClient),
+    // 2. Initialize shared data in swapState
+    swapState.data.setAuctionParams(auctionParams)
+
+    const publicClient = asPublicClient($publicNetwork.publicClient)
+
+    // Initialize quoter
+    const quoter = new CustomQuoter(
+      publicClient,
       $publicNetwork.publicClient.chain.id,
       auctionParams
     )
+    swapState.data.setQuoter(quoter)
 
     console.log("[Swap] quoter:", quoter)
 
-    isPermit2Req = await isPermit2AllowedMaxRequired(
-      asPublicClient($publicNetwork.publicClient),
-      $userAddress,
-      auctionParams.numeraire.address
-    )
+    // 3. Early return if no wallet
+    if (!$userAddress) return
 
-    console.log("[Swap] isPermit2Req:", isPermit2Req)
+    // 4. Load user-specific data
 
-    const unformattedNumeraireBalance = await balanceOf(
-      asPublicClient($publicNetwork.publicClient),
-      auctionParams.numeraire.address,
-      $userAddress
-    )
-    numeraireBalance = Number(
-      formatUnits(unformattedNumeraireBalance, auctionParams.numeraire.decimals)
-    )
-
-    const unformattedTokenBalance = await balanceOf(
-      asPublicClient($publicNetwork.publicClient),
+    // Load spent amount
+    const spentAmount = await buyLimitSpentAmount(
+      publicClient,
       auctionParams.token.address,
       $userAddress
     )
-    tokenBalance = Number(formatUnits(unformattedTokenBalance, auctionParams.token.decimals))
+    swapState.data.setSpentAmount(spentAmount)
+
+    // Load country code
+    const countryCode = await buyLimitGetCountryCode(
+      publicClient,
+      auctionParams.token.address,
+      $userAddress
+    )
+    swapState.data.setSavedCountryCode(countryCode)
+
+    // Load permit2 requirement
+    const isPermit2Req = await isPermit2AllowedMaxRequired(
+      publicClient,
+      $userAddress,
+      auctionParams.numeraire.address
+    )
+    swapState.data.setIsPermit2Req(isPermit2Req)
+
+    console.log("[Swap] isPermit2Req:", isPermit2Req)
+
+    // Load balances
+    const unformattedNumeraireBalance = await balanceOf(
+      publicClient,
+      auctionParams.numeraire.address,
+      $userAddress
+    )
+    const numeraireBalance = Number(
+      formatUnits(unformattedNumeraireBalance, auctionParams.numeraire.decimals)
+    )
+    swapState.data.setNumeraireBalance(numeraireBalance)
+
+    const unformattedTokenBalance = await balanceOf(
+      publicClient,
+      auctionParams.token.address,
+      $userAddress
+    )
+    const tokenBalance = Number(formatUnits(unformattedTokenBalance, auctionParams.token.decimals))
+    swapState.data.setTokenBalance(tokenBalance)
+
+    // 5. Determine initial state based on conditions
+    const nextState = determineInitialState()
+    swapState.state.transitionTo(nextState)
   })
 </script>
 
-<div class="outer-container">
-  <div class="swap-form-container">
-    <SwapForm {auctionParams} />
+<DebugPanel />
+
+{#if swapState.state.current === SWAP_STATE.SWAP_COMPLETE}
+  <div class="swap-complete-container">
+    <SwapComplete />
   </div>
-  <div class="swap-actions-container">
+{:else}
+  <div class="swap-form-container">
+    <SwapForm />
+  </div>
+  <div class="swap-action-container">
     {#if swapState.state.current === SWAP_STATE.COUNTRY_CODE}
-      <CountryCode {auctionParams} />
+      <CountryCode />
     {:else if swapState.state.current === SWAP_STATE.PERMIT2_ALLOW_MAX}
-      <Permit2AllowMax {auctionParams} />
-    {:else if swapState.state.current === SWAP_STATE.SIGN_PERMIT2}
-      <SignPermit2 {auctionParams} />
-    {:else if swapState.state.current === SWAP_STATE.EXECUTE_SWAP}
-      <ExecuteSwap {auctionParams} />
+      <Permit2AllowMax />
+    {:else if swapState.state.current === SWAP_STATE.SIGN_AND_SWAP}
+      <SignAndSwap />
     {/if}
   </div>
-</div>
+{/if}
 
 <style lang="scss">
-  .outer-container {
+  .swap-complete-container {
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
+  }
+
+  .swap-action-container {
+    height: 160px;
   }
 </style>

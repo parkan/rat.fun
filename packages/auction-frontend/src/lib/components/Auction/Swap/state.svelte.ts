@@ -1,20 +1,21 @@
 import { errorHandler } from "$lib/modules/error-handling"
 import { InvalidStateTransitionError } from "$lib/modules/error-handling/errors"
+import type { AuctionParams, CustomQuoter, Permit2PermitData } from "doppler"
+import type { Hex } from "viem"
 
 /**
  * ========================================
  *  Swap/state.svelte.ts
  * ========================================
  * This module keeps track of the state of the swap flow.
- *
+ * It also holds all shared data needed across swap components.
  */
 
 export enum SWAP_STATE {
   INIT = "INIT",
   COUNTRY_CODE = "COUNTRY_CODE",
   PERMIT2_ALLOW_MAX = "PERMIT2_ALLOW_MAX",
-  SIGN_PERMIT2 = "SIGN_PERMIT2",
-  EXECUTE_SWAP = "EXECUTE_SWAP",
+  SIGN_AND_SWAP = "SIGN_AND_SWAP", // User signs permit then executes swap in one step
   SWAP_COMPLETE = "SWAP_COMPLETE",
   WALLET_LIMIT_REACHED = "WALLET_LIMIT_REACHED",
   ERROR = "ERROR"
@@ -22,6 +23,21 @@ export enum SWAP_STATE {
 
 // Local state
 let swapStateValue = $state<SWAP_STATE>(SWAP_STATE.INIT)
+
+// Shared data state
+let auctionParams = $state<AuctionParams | null>(null)
+let quoter = $state<CustomQuoter | null>(null)
+let amountIn = $state<bigint | undefined>(undefined)
+let amountOut = $state<bigint | undefined>(undefined)
+let isExactOut = $state(false)
+let permit = $state<Permit2PermitData | undefined>(undefined)
+let permitSignature = $state<Hex | undefined>(undefined)
+let spentAmount = $state<bigint | undefined>(undefined)
+let savedCountryCode = $state<string | undefined>(undefined)
+let isPermit2Req = $state<boolean | null>(null)
+let numeraireBalance = $state<number | undefined>(undefined)
+let tokenBalance = $state<number | undefined>(undefined)
+let swapReceipt = $state<any>(null)
 
 /**
  * Defines valid state transitions between swap states
@@ -31,18 +47,18 @@ const VALID_TRANSITIONS: Record<SWAP_STATE, SWAP_STATE[]> = {
   [SWAP_STATE.INIT]: [
     SWAP_STATE.COUNTRY_CODE,
     SWAP_STATE.PERMIT2_ALLOW_MAX,
+    SWAP_STATE.SIGN_AND_SWAP,
     SWAP_STATE.WALLET_LIMIT_REACHED,
     SWAP_STATE.ERROR
   ],
   [SWAP_STATE.COUNTRY_CODE]: [
     SWAP_STATE.PERMIT2_ALLOW_MAX,
-    SWAP_STATE.SIGN_PERMIT2,
+    SWAP_STATE.SIGN_AND_SWAP,
     SWAP_STATE.ERROR
   ],
-  [SWAP_STATE.PERMIT2_ALLOW_MAX]: [SWAP_STATE.SIGN_PERMIT2, SWAP_STATE.ERROR],
-  [SWAP_STATE.SIGN_PERMIT2]: [SWAP_STATE.EXECUTE_SWAP, SWAP_STATE.ERROR],
-  [SWAP_STATE.EXECUTE_SWAP]: [SWAP_STATE.SWAP_COMPLETE, SWAP_STATE.ERROR],
-  [SWAP_STATE.SWAP_COMPLETE]: [],
+  [SWAP_STATE.PERMIT2_ALLOW_MAX]: [SWAP_STATE.SIGN_AND_SWAP, SWAP_STATE.ERROR],
+  [SWAP_STATE.SIGN_AND_SWAP]: [SWAP_STATE.SWAP_COMPLETE, SWAP_STATE.ERROR],
+  [SWAP_STATE.SWAP_COMPLETE]: [SWAP_STATE.SIGN_AND_SWAP, SWAP_STATE.ERROR],
   [SWAP_STATE.WALLET_LIMIT_REACHED]: [],
   [SWAP_STATE.ERROR]: []
 }
@@ -53,6 +69,22 @@ const setState = (state: SWAP_STATE) => {
 
 const resetState = () => {
   swapStateValue = SWAP_STATE.INIT
+}
+
+const resetData = () => {
+  auctionParams = null
+  quoter = null
+  amountIn = undefined
+  amountOut = undefined
+  isExactOut = false
+  permit = undefined
+  permitSignature = undefined
+  spentAmount = undefined
+  savedCountryCode = undefined
+  isPermit2Req = null
+  numeraireBalance = undefined
+  tokenBalance = undefined
+  swapReceipt = null
 }
 
 const transitionTo = (newState: SWAP_STATE) => {
@@ -79,5 +111,95 @@ export const swapState = {
     get current() {
       return swapStateValue
     }
+  },
+  data: {
+    // Getters
+    get auctionParams() {
+      return auctionParams
+    },
+    get quoter() {
+      return quoter
+    },
+    get amountIn() {
+      return amountIn
+    },
+    get amountOut() {
+      return amountOut
+    },
+    get isExactOut() {
+      return isExactOut
+    },
+    get permit() {
+      return permit
+    },
+    get permitSignature() {
+      return permitSignature
+    },
+    get spentAmount() {
+      return spentAmount
+    },
+    get savedCountryCode() {
+      return savedCountryCode
+    },
+    get isPermit2Req() {
+      return isPermit2Req
+    },
+    get numeraireBalance() {
+      return numeraireBalance
+    },
+    get tokenBalance() {
+      return tokenBalance
+    },
+    get swapReceipt() {
+      return swapReceipt
+    },
+
+    // Setters
+    setAuctionParams: (params: AuctionParams) => {
+      auctionParams = params
+    },
+    setQuoter: (q: CustomQuoter) => {
+      quoter = q
+    },
+    setAmountIn: (amount: bigint | undefined) => {
+      amountIn = amount
+    },
+    setAmountOut: (amount: bigint | undefined) => {
+      amountOut = amount
+    },
+    setIsExactOut: (value: boolean) => {
+      isExactOut = value
+    },
+    setPermit: (p: Permit2PermitData | undefined) => {
+      permit = p
+    },
+    setPermitSignature: (sig: Hex | undefined) => {
+      permitSignature = sig
+    },
+    setSpentAmount: (amount: bigint | undefined) => {
+      spentAmount = amount
+    },
+    setSavedCountryCode: (code: string | undefined) => {
+      savedCountryCode = code
+    },
+    setIsPermit2Req: (value: boolean | null) => {
+      isPermit2Req = value
+    },
+    setNumeraireBalance: (balance: number | undefined) => {
+      numeraireBalance = balance
+    },
+    setTokenBalance: (balance: number | undefined) => {
+      tokenBalance = balance
+    },
+    setSwapReceipt: (receipt: any) => {
+      swapReceipt = receipt
+    },
+
+    // Helper methods
+    clearPermit: () => {
+      permit = undefined
+      permitSignature = undefined
+    },
+    reset: resetData
   }
 }

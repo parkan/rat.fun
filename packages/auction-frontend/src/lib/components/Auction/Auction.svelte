@@ -98,8 +98,8 @@
 
 <WalletInfo />
 
-<div class="claim-container">
-  <div class="claim-inner">
+<div class="auction-container">
+  <div class="auction-inner">
     {#if auctionState.state.current === AUCTION_STATE.CONNECT_WALLET}
       <ConnectWalletForm />
     {:else if auctionState.state.current === AUCTION_STATE.SWAP}
@@ -113,10 +113,20 @@
 </div>
 
 <style lang="scss">
-  .claim-container {
+  .auction-container {
     width: 100dvw;
     height: 100dvh;
     z-index: 1000;
     color: white;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+
+    .auction-inner {
+      width: 600px;
+      max-width: 90dvw;
+      height: auto;
+    }
   }
 </style>

@@ -3,7 +3,7 @@
   import { page } from "$app/state"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/systems/initEntities"
-  import { blockNumber, loadingMessage, loadingPercentage, ready } from "$lib/modules/network"
+  import { loadingPercentage, ready } from "$lib/modules/network"
 
   import { ENVIRONMENT } from "$lib/mud/enums"
 
