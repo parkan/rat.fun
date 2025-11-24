@@ -53,6 +53,16 @@ export class FaucetError extends NetworkError {
   }
 }
 
+export class RateLimitError extends NetworkError {
+  constructor(
+    message: string = "Rate limit exceeded. Please wait a moment and try again.",
+    public retryAfter?: number,
+    public originalError?: unknown
+  ) {
+    super("RATE_LIMIT_ERROR", "Rate limit exceeded", message)
+  }
+}
+
 // ============================================================================
 // Blockchain & Transaction Errors
 // ============================================================================
@@ -426,6 +436,7 @@ export type ExpectedError =
   | APIError
   | WebSocketError
   | FaucetError
+  | RateLimitError
   | BlockchainError
   | TransactionError
   | TransactionRevertedError

@@ -63,7 +63,11 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
       severity = "warning"
     }
     // Network and temporary issues are info level
-    else if (processedError.code.includes("NETWORK") || processedError.code.includes("TIMEOUT")) {
+    else if (
+      processedError.code.includes("NETWORK") ||
+      processedError.code.includes("TIMEOUT") ||
+      processedError.code.includes("RATE_LIMIT")
+    ) {
       severity = "info"
     }
     // Critical system errors remain as errors

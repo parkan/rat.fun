@@ -155,7 +155,7 @@ export class WagmiConfigUnavailableError extends BlockchainError {
 
 export class BlockTimeoutError extends BlockchainError {
   constructor(message: string = "Block Timeout") {
-    super("BLOCK_TIMEOUT_ERROR", "Block timeout error", message)
+    super("BLOCK_TIMEOUT_ERROR", "Connection to blockchain lost, try refreshing the page", message)
   }
 }
 
