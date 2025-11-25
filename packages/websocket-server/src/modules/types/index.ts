@@ -18,7 +18,7 @@ export type SignedRequestInfo = {
   nonce: number
   /**
    * Delegator address, if signing was delegated to a session wallet.
-   * Reuses MUD's delegation and `callFrom` logic.
+   * Note: Delegation is trusted without on-chain verification in this server.
    */
   calledFrom: Hex | null
 }
@@ -39,38 +39,18 @@ export interface WebSocketParams {
   Params: {
     playerId: string
   }
+  Querystring: {
+    data: string
+    info: string
+    signature: string
+  }
 }
 
-export type OffChainMessage = {
+export type ClientsUpdateMessage = {
   id: string
-  topic:
-    | "test"
-    | "clients__update"
-    | "chat__message"
-    | "rat__deploy"
-    | "rat__liquidate"
-    | "rat__death"
-    | "trip__creation"
-    | "trip__liquidation"
-    | "trip__outcome"
-    | "key__activation"
-  playerName?: string
-  ratName?: string
-  ratId?: string
-  tripIndex?: number
-  tripId?: string
-  message?: string | string[]
+  topic: "clients__update"
+  message: string[]
   timestamp: number
-  signature?: string
-}
-
-// For the message store
-export type MessageDatabaseSchema = {
-  messages: OffChainMessage[]
-}
-
-export type NonceDatabaseSchema = {
-  nonces: Record<number, boolean>
 }
 
 export interface WebSocketInterface {

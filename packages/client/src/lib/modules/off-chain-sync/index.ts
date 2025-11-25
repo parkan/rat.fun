@@ -1,28 +1,35 @@
-import type { OffChainMessage } from "@websocket-server/modules/types"
 import { ENVIRONMENT } from "$lib/mud/enums"
-import {
-  clientList,
-  latestEvents,
-  roundTriptime,
-  websocketConnected
-} from "$lib/modules/off-chain-sync/stores"
+import { clientList, websocketConnected } from "$lib/modules/off-chain-sync/stores"
 import { signRequest } from "$lib/modules/signature"
 import {
-  PUBLIC_DEVELOPMENT_SERVER_HOST,
-  PUBLIC_BASE_SEPOLIA_SERVER_HOST,
-  PUBLIC_BASE_SERVER_HOST
+  PUBLIC_DEVELOPMENT_WEBSOCKET_HOST,
+  PUBLIC_BASE_SEPOLIA_WEBSOCKET_HOST,
+  PUBLIC_BASE_WEBSOCKET_HOST
 } from "$env/static/public"
 import { errorHandler, WebSocketError } from "$lib/modules/error-handling"
 
-const MAX_RECONNECTION_DELAY = 30000 // Maximum delay of 30 seconds
-const MAX_EVENTS = 200
+type ClientsUpdateMessage = {
+  id: string
+  topic: "clients__update"
+  message: string[]
+  timestamp: number
+}
 
-let socket: WebSocket
+const MAX_RECONNECTION_DELAY = 30000 // Maximum delay of 30 seconds
+
+let socket: WebSocket | null = null
 let reconnectAttempts = 0
-let roundTripStart = 0
 let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
 
-export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
+// Store environment and playerId for reconnection
+let currentEnvironment: ENVIRONMENT | null = null
+let currentPlayerId: string | null = null
+
+export async function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
+  // Store for reconnection
+  currentEnvironment = environment
+  currentPlayerId = playerId
+
   // Clean up any existing connection
   if (socket) {
     try {
@@ -38,17 +45,31 @@ export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
     reconnectTimeout = null
   }
 
-  let url = ""
+  // Sign the connection request
+  const signedRequest = await signRequest({ action: "connect", playerId })
+
+  // Build query params with signed request
+  const queryParams = new URLSearchParams({
+    data: encodeURIComponent(JSON.stringify(signedRequest.data)),
+    info: encodeURIComponent(JSON.stringify(signedRequest.info)),
+    signature: signedRequest.signature
+  })
+
+  // Determine WebSocket URL based on environment
+  let baseUrl = ""
   switch (environment) {
     case ENVIRONMENT.BASE_SEPOLIA:
-      url = `wss://${PUBLIC_BASE_SEPOLIA_SERVER_HOST}/ws/${playerId}`
+      baseUrl = `wss://${PUBLIC_BASE_SEPOLIA_WEBSOCKET_HOST}`
       break
     case ENVIRONMENT.BASE:
-      url = `wss://${PUBLIC_BASE_SERVER_HOST}/ws/${playerId}`
+      baseUrl = `wss://${PUBLIC_BASE_WEBSOCKET_HOST}`
       break
     default:
-      url = `ws://${PUBLIC_DEVELOPMENT_SERVER_HOST}/ws/${playerId}`
+      // Default to localhost:3132 if env var not set
+      baseUrl = `ws://${PUBLIC_DEVELOPMENT_WEBSOCKET_HOST || "localhost:3132"}`
   }
+
+  const url = `${baseUrl}/ws/${playerId}?${queryParams.toString()}`
 
   socket = new WebSocket(url)
 
@@ -58,42 +79,35 @@ export function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
   }
 
   socket.onmessage = (message: MessageEvent<string>) => {
-    const messageContent = JSON.parse(message.data) as OffChainMessage
+    const messageContent = JSON.parse(message.data) as ClientsUpdateMessage
 
     // Update client list when players connect/disconnect
     if (messageContent.topic === "clients__update") {
-      clientList.set(messageContent.message as string[])
-      return
+      clientList.set(messageContent.message)
     }
-
-    if (messageContent.topic === "test") {
-      roundTriptime.set(performance.now() - roundTripStart)
-      return
-    }
-
-    // Pass message to stores
-    latestEvents.update(state => {
-      // Check if message with this ID already exists
-      if (state.some(event => event.id == messageContent.id)) {
-        return state
-      }
-      // Add new message and limit array to MAX_EVENTS items
-      const newState = [...state, messageContent]
-      return newState.slice(-MAX_EVENTS)
-    })
   }
 
-  socket.onclose = () => {
-    attemptReconnect(environment, playerId)
+  socket.onclose = event => {
+    websocketConnected.set(false)
+    // Only attempt reconnect if not a deliberate close (code 4001 = auth failure)
+    if (event.code !== 4001) {
+      attemptReconnect()
+    } else {
+      errorHandler(new WebSocketError(`WebSocket authentication failed: ${event.reason}`))
+    }
   }
 
   socket.onerror = (error: Event) => {
     errorHandler(new WebSocketError(undefined, error))
-    socket.close() // Ensure connection is properly closed before reconnecting
+    socket?.close() // Ensure connection is properly closed before reconnecting
   }
 }
 
-function attemptReconnect(environment: ENVIRONMENT, playerId: string) {
+function attemptReconnect() {
+  if (!currentEnvironment || !currentPlayerId) {
+    return
+  }
+
   if (reconnectTimeout) {
     clearTimeout(reconnectTimeout)
   }
@@ -102,65 +116,26 @@ function attemptReconnect(environment: ENVIRONMENT, playerId: string) {
   reconnectAttempts++
 
   reconnectTimeout = setTimeout(() => {
-    initOffChainSync(environment, playerId)
+    if (currentEnvironment && currentPlayerId) {
+      initOffChainSync(currentEnvironment, currentPlayerId)
+    }
   }, delay)
 }
 
-export function ping() {
-  roundTripStart = performance.now()
-  socket.send(
-    JSON.stringify({
-      topic: "test",
-      message: "ping"
-    })
-  )
-}
+export function disconnectOffChainSync() {
+  currentEnvironment = null
+  currentPlayerId = null
 
-async function sendMessageRequest(topic: OffChainMessage["topic"], data: Record<string, unknown>) {
-  const signedRequest = await signRequest({
-    topic,
-    ...data
-  })
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout)
+    reconnectTimeout = null
+  }
 
   if (socket) {
-    socket.send(JSON.stringify(signedRequest))
-  } else {
-    errorHandler(new WebSocketError("No socket"))
+    socket.close()
+    socket = null
   }
-}
 
-/****************
- * CHAT MESSAGE
- *****************/
-
-export async function sendChatMessage(message: string) {
-  console.log("disabled")
-  // sendMessageRequest("chat__message", { message })
-}
-
-/****************
- * RAT DEPLOYMENT
- *****************/
-
-export async function sendDeployRatMessage() {
-  console.log("disabled")
-  // sendMessageRequest("rat__deploy", {})
-}
-
-/****************
- * RAT LIQUIDATION
- *****************/
-
-export async function sendLiquidateRatMessage(ratId: string) {
-  console.log("disabled")
-  // sendMessageRequest("rat__liquidate", { ratId })
-}
-
-/****************
- * TRIP LIQUIDATION
- *****************/
-
-export async function sendLiquidateTripMessage(tripId: string) {
-  console.log("disabled")
-  // sendMessageRequest("trip__liquidation", { tripId })
+  websocketConnected.set(false)
+  clientList.set([])
 }

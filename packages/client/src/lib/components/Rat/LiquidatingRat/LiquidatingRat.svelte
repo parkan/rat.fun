@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { player } from "$lib/modules/state/stores"
   import { sendLiquidateRat } from "$lib/modules/action-manager/index.svelte"
-  import { sendLiquidateRatMessage } from "$lib/modules/off-chain-sync"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
   import { refetchBalance } from "$lib/modules/erc20Listener"
@@ -19,9 +17,6 @@
 
     // Send liquidation transaction
     await sendLiquidateRat()
-
-    // Send off-chain liquidation message
-    sendLiquidateRatMessage($player?.currentRat ?? "")
 
     // Update balance after liquidation
     await refetchBalance()

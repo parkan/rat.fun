@@ -5,7 +5,6 @@
   import { waitForPropertyChangeFrom } from "$lib/modules/state/utils"
   import { sendCreateRat } from "$lib/modules/action-manager/index.svelte"
   import { generateRatName, lastNameFragments, firstNameFragments } from "./ratNameGenerator"
-  import { sendDeployRatMessage } from "$lib/modules/off-chain-sync"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { PropertyChangeTimeoutError, RatError } from "$lib/modules/error-handling/errors"
   import { errorHandler } from "$lib/modules/error-handling"
@@ -145,7 +144,6 @@
     try {
       // Make sure new rat is available to avoid flash of old info
       // await waitForPropertyChange(player, "currentRat", oldRatId, 10000)
-      sendDeployRatMessage()
       deploymentDone = true
     } catch (error) {
       if (error instanceof PropertyChangeTimeoutError || error instanceof RatError) {
