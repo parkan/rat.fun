@@ -60,6 +60,8 @@
   {#if browser}
     <ShaderGlobal />
   {/if}
+
+  <slot />
 </div>
 
 <Toasts />

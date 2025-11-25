@@ -35,7 +35,12 @@
 
       console.log("[SignAndSwap] Starting sign and swap flow")
 
+      // * * * * * * * * * * * * * * * * *
+      // * * * * * * * * * * * * * * * * *
       // Step 1: Sign permit (offline)
+      // * * * * * * * * * * * * * * * * *
+      // * * * * * * * * * * * * * * * * *
+
       console.log("[SignAndSwap] Step 1: Signing permit...")
       const client = await prepareConnectorClientForTransaction()
 
@@ -63,7 +68,12 @@
 
       console.log("[SignAndSwap] Permit signed successfully")
 
+      // * * * * * * * * * * * * * * * * *
+      // * * * * * * * * * * * * * * * * *
       // Step 2: Execute swap (on-chain)
+      // * * * * * * * * * * * * * * * * *
+      // * * * * * * * * * * * * * * * * *
+
       console.log("[SignAndSwap] Step 2: Executing swap...")
       const swapResult = await swapExactSingle(
         asPublicClient($publicNetwork.publicClient),

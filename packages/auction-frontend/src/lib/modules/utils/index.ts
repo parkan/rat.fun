@@ -5,7 +5,7 @@
  * Misc. utility functions.
  */
 
-import { Hex, sha256 } from "viem"
+import { Hex } from "viem"
 import { JSONParseError } from "../error-handling/errors"
 import { get } from "svelte/store"
 import { blockNumber as blockNumberStore } from "$lib/modules/network"

@@ -33,7 +33,9 @@
   }
 
   $effect(() => {
+    if (!auctionParams.hookAddress) return
     checkEarlyExit($publicNetwork).then(earlyExit => {
+      console.log("[Auction] earlyExit:", earlyExit)
       if (earlyExit) {
         auctionState.state.transitionTo(AUCTION_STATE.ENDED)
       }
@@ -82,7 +84,12 @@
     // Monitor auction ending time
     endingTimeInterval = setInterval(() => {
       const now = Date.now() / 1000
+      console.log("[Auction] now:", now)
+      console.log("[Auction] auctionParams.endingTime:", auctionParams.endingTime)
       if (now >= auctionParams.endingTime) {
+        console.log("[Auction] endingTime reached, transitioning to ENDED state")
+        clearInterval(endingTimeInterval!)
+        endingTimeInterval = null
         auctionState.state.transitionTo(AUCTION_STATE.ENDED)
       }
     }, 60_000)
