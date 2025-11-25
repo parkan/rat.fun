@@ -226,19 +226,15 @@
     // When already spawned we are passing through here quickly
     // And music might be started but onDestroy is not called
     // Only start music if the UI state has not already changed from SPAWNING
+    await new Promise(resolve => setTimeout(resolve, 500))
     if ($UIState === UI.SPAWNING) {
-      await new Promise(resolve => setTimeout(resolve, 700))
       backgroundMusic.play({ category: "ratfunMusic", id: "spawn", loop: true })
       shaderManager.setShader("clouds", true)
     }
   })
 
-  function stopMusic() {
-    backgroundMusic.stop()
-  }
-
   onDestroy(() => {
-    stopMusic()
+    backgroundMusic.stop()
   })
 </script>
 
