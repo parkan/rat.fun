@@ -2,8 +2,13 @@
   import { swapState } from "./state.svelte"
   import { formatUnits } from "viem"
   import { onMount } from "svelte"
+  import { publicNetwork } from "$lib/modules/network"
+  import { dopplerHookAbi } from "@whetstone-research/doppler-sdk"
+  import { asPublicClient } from "$lib/utils/clientAdapter"
 
   let isVisible = $state(false)
+  let earlyExitStatus = $state<boolean | null>(null)
+  let isCheckingEarlyExit = $state(false)
 
   function formatBigInt(value: bigint | undefined, decimals: number): string {
     if (value === undefined) return "undefined"
@@ -12,6 +17,30 @@
 
   function toggleDebug() {
     isVisible = !isVisible
+  }
+
+  async function checkEarlyExit() {
+    const auctionParams = swapState.data.auctionParams
+    if (!auctionParams) {
+      console.error("[DebugPanel] No auction params available")
+      return
+    }
+
+    isCheckingEarlyExit = true
+    try {
+      const result = await asPublicClient($publicNetwork.publicClient).readContract({
+        address: auctionParams.hookAddress,
+        abi: dopplerHookAbi,
+        functionName: "earlyExit"
+      })
+      earlyExitStatus = result
+      console.log("[DebugPanel] earlyExit:", result)
+    } catch (error) {
+      console.error("[DebugPanel] Error checking earlyExit:", error)
+      earlyExitStatus = null
+    } finally {
+      isCheckingEarlyExit = false
+    }
   }
 
   onMount(() => {
@@ -101,6 +130,20 @@
       <div class="debug-label">Initialized:</div>
       <div class="debug-value">Params: {swapState.data.auctionParams ? "✓" : "✗"}</div>
       <div class="debug-value">Quoter: {swapState.data.quoter ? "✓" : "✗"}</div>
+    </div>
+
+    <div class="debug-section">
+      <div class="debug-label">Pool Status:</div>
+      <button class="debug-button" onclick={checkEarlyExit} disabled={isCheckingEarlyExit}>
+        {isCheckingEarlyExit ? "Checking..." : "Check earlyExit()"}
+      </button>
+      <div class="debug-value">
+        Early Exit: {earlyExitStatus === null
+          ? "not checked"
+          : earlyExitStatus
+            ? "TRUE (pool empty)"
+            : "FALSE (pool active)"}
+      </div>
     </div>
   </div>
 {/if}
@@ -209,6 +252,34 @@
       color: #f0f;
       font-weight: bold;
       font-size: 12px;
+    }
+  }
+
+  .debug-button {
+    background: rgba(0, 255, 0, 0.2);
+    color: #0f0;
+    border: 1px solid #0f0;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    cursor: pointer;
+    margin: 4px 0;
+    transition: all 0.2s;
+    width: 100%;
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 255, 0, 0.3);
+      transform: scale(1.02);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 </style>

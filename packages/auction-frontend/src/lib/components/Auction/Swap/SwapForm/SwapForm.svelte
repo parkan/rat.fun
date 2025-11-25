@@ -3,9 +3,9 @@
   import { swapState, SWAP_STATE } from "../state.svelte"
   import SpendLimitProgressBar from "./SpendLimitProgressBar.svelte"
 
-  // Disable form in country code and permit2 allow max states
+  // Disable form in agreement and permit2 allow max states
   let disabled = $derived.by(() => {
-    return [SWAP_STATE.COUNTRY_CODE, SWAP_STATE.PERMIT2_ALLOW_MAX].includes(swapState.state.current)
+    return [SWAP_STATE.AGREEMENT, SWAP_STATE.PERMIT2_ALLOW_MAX].includes(swapState.state.current)
   })
 
   /**
@@ -40,9 +40,15 @@
       const amountIn = parseUnits(value.toString(), auctionParams.numeraire.decimals)
       swapState.data.setAmountIn(amountIn)
       // Quote the expected output amount
-      quoter.quoteExactInputV4(amountIn, true).then(result => {
-        swapState.data.setAmountOut(result.amountOut)
-      })
+      quoter
+        .quoteExactInputV4(amountIn, true)
+        .then(result => {
+          swapState.data.setAmountOut(result.amountOut)
+        })
+        .catch(error => {
+          console.error("[SwapForm] Quote failed:", error)
+          swapState.data.setAmountOut(undefined)
+        })
     }
   }
 
@@ -78,9 +84,15 @@
       const amountOut = parseUnits(value.toString(), auctionParams.token.decimals)
       swapState.data.setAmountOut(amountOut)
       // Quote the required input amount
-      quoter.quoteExactOutputV4(amountOut, true).then(result => {
-        swapState.data.setAmountIn(result.amountIn)
-      })
+      quoter
+        .quoteExactOutputV4(amountOut, true)
+        .then(result => {
+          swapState.data.setAmountIn(result.amountIn)
+        })
+        .catch(error => {
+          console.error("[SwapForm] Quote failed:", error)
+          swapState.data.setAmountIn(undefined)
+        })
     }
   }
 
@@ -177,6 +189,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     min-width: 400px;
     margin-bottom: 20px;
+    width: 100%;
 
     &.disabled {
       opacity: 0.5;

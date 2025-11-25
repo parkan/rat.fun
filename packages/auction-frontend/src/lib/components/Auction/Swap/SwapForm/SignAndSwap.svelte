@@ -1,6 +1,6 @@
 <script lang="ts">
   import { signPermit2ForUniversalRouter, swapExactSingle } from "doppler"
-  import { BigButton } from "$lib/components/Shared"
+  import { BigButton, Checkbox } from "$lib/components/Shared"
   import { prepareConnectorClientForTransaction } from "$lib/modules/drawbridge/connector"
   import { userAddress } from "$lib/modules/drawbridge"
   import { publicNetwork } from "$lib/modules/network"
@@ -9,6 +9,7 @@
   import { swapState, SWAP_STATE } from "../state.svelte"
 
   let isProcessing = $state(false)
+  let waiveWithdrawal = $state(false)
 
   /**
    * Sign permit2 and execute swap in one flow
@@ -91,6 +92,9 @@
       // Store receipt in state
       swapState.data.setSwapReceipt(swapResult)
 
+      // Reset checkbox for next swap
+      waiveWithdrawal = false
+
       // Transition to swap complete state
       swapState.state.transitionTo(SWAP_STATE.SWAP_COMPLETE)
     } catch (error) {
@@ -102,10 +106,54 @@
   }
 </script>
 
-<BigButton
-  disabled={!swapState.data.amountIn || isProcessing}
-  text={isProcessing ? "Processing..." : "Swap"}
-  onclick={() => {
-    signAndSwap()
-  }}
-/>
+<div class="withdrawal-container">
+  <label class="withdrawal-label">
+    <Checkbox bind:checked={waiveWithdrawal} />
+    <span class="withdrawal-text">
+      I want immediate delivery and waive my 14-day withdrawal right for this purchase.
+    </span>
+  </label>
+</div>
+
+<div class="button-container">
+  <BigButton
+    disabled={!swapState.data.amountIn || isProcessing || !waiveWithdrawal}
+    text={isProcessing ? "Processing..." : "Swap"}
+    onclick={() => {
+      signAndSwap()
+    }}
+  />
+</div>
+
+<style lang="scss">
+  .withdrawal-container {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .withdrawal-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .withdrawal-text {
+    font-size: var(--font-size-normal);
+    line-height: 1.2;
+    color: white;
+  }
+
+  .button-container {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

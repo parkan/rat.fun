@@ -14,7 +14,7 @@
   import { asPublicClient } from "$lib/utils/clientAdapter"
   import { swapState, SWAP_STATE } from "./state.svelte"
 
-  import { SwapForm, CountryCode, Permit2AllowMax, SignAndSwap, SwapComplete } from "./index"
+  import { SwapForm, Agreement, Permit2AllowMax, SignAndSwap, SwapComplete } from "./index"
   import DebugPanel from "./DebugPanel.svelte"
 
   let {
@@ -39,7 +39,7 @@
 
     // 2. Check country code requirement
     if (!swapState.data.savedCountryCode) {
-      return SWAP_STATE.COUNTRY_CODE
+      return SWAP_STATE.AGREEMENT
     }
 
     // 3. Check permit2 allowance
@@ -129,34 +129,24 @@
 
 <DebugPanel />
 
-{#if swapState.state.current === SWAP_STATE.SWAP_COMPLETE}
-  <div class="swap-complete-container">
-    <SwapComplete />
-  </div>
-{:else}
-  <div class="swap-form-container">
+<div class="swap-container">
+  {#if swapState.state.current === SWAP_STATE.AGREEMENT}
+    <Agreement />
+  {:else if swapState.state.current === SWAP_STATE.PERMIT2_ALLOW_MAX}
+    <Permit2AllowMax />
+  {:else if swapState.state.current === SWAP_STATE.SIGN_AND_SWAP}
     <SwapForm />
-  </div>
-  <div class="swap-action-container">
-    {#if swapState.state.current === SWAP_STATE.COUNTRY_CODE}
-      <CountryCode />
-    {:else if swapState.state.current === SWAP_STATE.PERMIT2_ALLOW_MAX}
-      <Permit2AllowMax />
-    {:else if swapState.state.current === SWAP_STATE.SIGN_AND_SWAP}
-      <SignAndSwap />
-    {/if}
-  </div>
-{/if}
+    <SignAndSwap />
+  {:else if swapState.state.current === SWAP_STATE.SWAP_COMPLETE}
+    <SwapComplete />
+  {/if}
+</div>
 
 <style lang="scss">
-  .swap-complete-container {
+  .swap-container {
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
-  }
-
-  .swap-action-container {
-    height: 160px;
   }
 </style>

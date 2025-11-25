@@ -3,6 +3,9 @@ export { default as BigButton } from "./Buttons/BigButton.svelte"
 export { default as SmallButton } from "./Buttons/SmallButton.svelte"
 export { default as BackButton } from "./Buttons/BackButton.svelte"
 
+/* Inputs */
+export { default as Checkbox } from "./Inputs/Checkbox.svelte"
+
 /* Graphics */
 export { default as X } from "./Graphics/X.svelte"
 
