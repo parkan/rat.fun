@@ -7,57 +7,58 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
-  import { walletType } from "$lib/modules/network"
-  import { WALLET_TYPE } from "$lib/mud/enums"
-  import { SmallButton } from "$lib/components/Shared"
+  import { walletType, saleStatus } from "$lib/modules/network"
+  import { WALLET_TYPE, SALE_STATUS } from "$lib/mud/enums"
+  import { SmallButton, Checkbox } from "$lib/components/Shared"
   import { musicEnabled, backgroundMusic } from "$lib/modules/sound/stores"
+  import {
+    playerNotificationsEnabled,
+    tripNotificationsEnabled
+  } from "$lib/modules/ui/notification-settings"
+  import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
 
   const toggleMusic = () => {
     musicEnabled.current = !musicEnabled.current
-    // Stop any currently playing music when disabled, resume when enabled
     if (!musicEnabled.current) {
       backgroundMusic.stop()
     } else {
       backgroundMusic.resume()
     }
   }
+
+  const togglePlayerNotifications = () => {
+    playerNotificationsEnabled.current = !playerNotificationsEnabled.current
+    if (!playerNotificationsEnabled.current) {
+      toastManager.removeByType(TOAST_TYPE.PLAYER_NOTIFICATION)
+    }
+  }
+
+  const toggleTripNotifications = () => {
+    tripNotificationsEnabled.current = !tripNotificationsEnabled.current
+    if (!tripNotificationsEnabled.current) {
+      toastManager.removeByType(TOAST_TYPE.TRIP_NOTIFICATION)
+    }
+  }
+
+  const pastRatsCount = $derived(($player?.pastRats ?? []).length)
 </script>
 
 <div class="main-dropdown-content">
   <!-- Name -->
-  <div class="tab">
-    <p class="key">{UI_STRINGS.name}:</p>
-    <p class="value">
-      {$player?.name ?? ""}
-    </p>
-  </div>
-  <!-- Wallet -->
-  <div class="tab">
-    <p class="key">{UI_STRINGS.connectedWallet}:</p>
-    <p class="value">
-      {shortenAddress($playerAddress)}
-    </p>
-  </div>
-  <!-- Balance -->
-  <div class="tab">
-    <p class="key">{UI_STRINGS.balance}:</p>
-    <p class="value">
-      {$playerERC20Balance}
-      {CURRENCY_SYMBOL}
-    </p>
+  <div class="row">
+    <span class="label">{UI_STRINGS.name}:</span>
+    <span class="value">{$player?.name ?? ""}</span>
   </div>
 
-  <!-- Rats killed -->
-  {#if ($player?.pastRats ?? []).length > 0}
-    <div class="tab">
-      <p class="key">{UI_STRINGS.ratAmountKilled}:</p>
-      <p class="value">
-        {$player?.pastRats.length}
-      </p>
-    </div>
-  {/if}
+  <!-- Wallet Address -->
+  <div class="row">
+    <span class="label">{UI_STRINGS.connectedWallet}:</span>
+    <span class="value">{shortenAddress($playerAddress)}</span>
+  </div>
+
+  <!-- Disconnect Wallet Button -->
   {#if $walletType !== WALLET_TYPE.BURNER}
-    <div class="tab">
+    <div class="row">
       <SmallButton
         tippyText={UI_STRINGS.disconnectWallet}
         onclick={async () => {
@@ -65,34 +66,88 @@
           UIState.set(UI.SPAWNING)
         }}
         text={UI_STRINGS.disconnectWallet}
-      ></SmallButton>
+      />
     </div>
   {/if}
-  <!-- Music toggle -->
-  <div class="tab">
-    <SmallButton
-      tippyText={musicEnabled.current ? UI_STRINGS.musicOn : UI_STRINGS.musicOff}
-      onclick={toggleMusic}
-      text={musicEnabled.current ? UI_STRINGS.musicOn : UI_STRINGS.musicOff}
-    ></SmallButton>
+
+  <!-- Rats Killed Section (conditional) -->
+  {#if pastRatsCount > 0}
+    <div class="divider"></div>
+    <div class="row">
+      <span class="label">{UI_STRINGS.ratAmountKilled}:</span>
+      <span class="value">{pastRatsCount}</span>
+    </div>
+  {/if}
+
+  <div class="divider"></div>
+
+  <!-- Balance -->
+  <div class="row">
+    <span class="label">{UI_STRINGS.balance}:</span>
+    <span class="value">{$playerERC20Balance} {CURRENCY_SYMBOL}</span>
+  </div>
+
+  <!-- Buy $RAT Button (placeholder, only if sale is live) -->
+  {#if $saleStatus === SALE_STATUS.LIVE}
+    <div class="row">
+      <SmallButton tippyText="Buy $RAT" onclick={() => {}} text="Buy $RAT" />
+    </div>
+  {/if}
+
+  <!-- Manage Allowance Button (placeholder) -->
+  <div class="row">
+    <SmallButton tippyText="Manage Allowance" onclick={() => {}} text="Manage Allowance" />
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Music Toggle -->
+  <div class="row toggle-row">
+    <span class="label">Music</span>
+    <Checkbox checked={musicEnabled.current} onchange={toggleMusic} />
+  </div>
+
+  <!-- Player Notification Toggle -->
+  <div class="row toggle-row">
+    <span class="label">Player Notifications</span>
+    <Checkbox checked={playerNotificationsEnabled.current} onchange={togglePlayerNotifications} />
+  </div>
+
+  <!-- Trip Notification Toggle -->
+  <div class="row toggle-row">
+    <span class="label">Trip Notifications</span>
+    <Checkbox checked={tripNotificationsEnabled.current} onchange={toggleTripNotifications} />
   </div>
 </div>
 
 <style lang="scss">
   .main-dropdown-content {
-    p {
-      margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .label {
+        min-width: 180px;
+      }
+
+      .value {
+        font-weight: bold;
+      }
     }
 
-    .tab {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 8px;
+    .toggle-row {
+      justify-content: space-between;
+    }
 
-      .key {
-        width: 240px;
-      }
+    .divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 4px 0;
     }
   }
 </style>

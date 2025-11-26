@@ -57,6 +57,10 @@ class ToastManager {
     this.toasts = this.toasts.filter(t => t.id !== id)
   }
 
+  removeByType(type: TOAST_TYPE) {
+    this.toasts = this.toasts.filter(t => t.type !== type)
+  }
+
   clear() {
     this.toasts = []
   }

@@ -57,3 +57,6 @@ export { default as RatLiquidationValueBreakdown } from "./ValueBreakdown/RatLiq
 /* Utility Components */
 export { default as SEO } from "./SEO/SEO.svelte"
 export { default as SignedNumber } from "./SignedNumber/SignedNumber.svelte"
+
+/* Inputs */
+export { default as Checkbox } from "./Inputs/Checkbox.svelte"

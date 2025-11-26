@@ -1,5 +1,6 @@
 import type { Outcome as SanityOutcome, Trip as SanityTrip } from "@sanity-types"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
+import { tripNotificationsEnabled } from "$lib/modules/ui/notification-settings"
 import type { Readable } from "svelte/store"
 import { get } from "svelte/store"
 
@@ -36,6 +37,9 @@ export function markInitialOutcomesReceived() {
 export function handleNewOutcome(outcome: SanityOutcome, trips: SanityTrip[]) {
   // Skip notifications on initial load
   if (!hasReceivedInitialOutcomes) return
+
+  // Skip if notifications are disabled
+  if (!tripNotificationsEnabled.current) return
 
   // Skip if playerId store not set
   if (!playerIdStore) return

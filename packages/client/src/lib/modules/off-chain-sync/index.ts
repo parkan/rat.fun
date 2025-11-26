@@ -11,6 +11,7 @@ import { errorHandler, WebSocketError } from "$lib/modules/error-handling"
 import { players } from "$lib/modules/state/stores"
 import { shortenAddress } from "$lib/modules/utils"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
+import { playerNotificationsEnabled } from "$lib/modules/ui/notification-settings"
 
 type ClientsUpdateMessage = {
   id: string
@@ -100,8 +101,8 @@ export async function initOffChainSync(environment: ENVIRONMENT, playerId: strin
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
 
-      // Show toast for new players joining (not for yourself, not on initial load)
-      if (hasReceivedInitialClientList) {
+      // Show toast for new players joining (not for yourself, not on initial load, if enabled)
+      if (hasReceivedInitialClientList && playerNotificationsEnabled.current) {
         for (const player of onlinePlayersList) {
           if (!previousIds.has(player.id) && player.id !== currentPlayerId) {
             toastManager.add({
