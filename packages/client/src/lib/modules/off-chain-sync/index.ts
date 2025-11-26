@@ -1,5 +1,6 @@
+import { get } from "svelte/store"
 import { ENVIRONMENT } from "$lib/mud/enums"
-import { clientList, websocketConnected } from "$lib/modules/off-chain-sync/stores"
+import { onlinePlayers, websocketConnected } from "$lib/modules/off-chain-sync/stores"
 import { signRequest } from "$lib/modules/signature"
 import {
   PUBLIC_DEVELOPMENT_WEBSOCKET_HOST,
@@ -7,6 +8,8 @@ import {
   PUBLIC_BASE_WEBSOCKET_HOST
 } from "$env/static/public"
 import { errorHandler, WebSocketError } from "$lib/modules/error-handling"
+import { players } from "$lib/modules/state/stores"
+import { shortenAddress } from "$lib/modules/utils"
 
 type ClientsUpdateMessage = {
   id: string
@@ -83,7 +86,14 @@ export async function initOffChainSync(environment: ENVIRONMENT, playerId: strin
 
     // Update client list when players connect/disconnect
     if (messageContent.topic === "clients__update") {
-      clientList.set(messageContent.message)
+      const currentPlayers = get(players)
+      const onlinePlayersList = messageContent.message
+        .map(playerId => ({
+          id: playerId,
+          name: currentPlayers[playerId]?.name ?? shortenAddress(playerId)
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+      onlinePlayers.set(onlinePlayersList)
     }
   }
 
@@ -137,5 +147,5 @@ export function disconnectOffChainSync() {
   }
 
   websocketConnected.set(false)
-  clientList.set([])
+  onlinePlayers.set([])
 }

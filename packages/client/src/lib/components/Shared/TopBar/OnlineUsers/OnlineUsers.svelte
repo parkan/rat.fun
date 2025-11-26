@@ -1,7 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
-  import { clientList, websocketConnected } from "$lib/modules/off-chain-sync/stores"
-  import { players } from "$lib/modules/state/stores"
+  import { onlinePlayers, websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { playSound } from "$lib/modules/sound"
   import { Tooltip } from "$lib/components/Shared"
 
@@ -9,17 +8,7 @@
   let dropdownElement = $state<HTMLElement | undefined>(undefined)
   let buttonElement = $state<HTMLElement | undefined>(undefined)
 
-  // Get online player names from clientList (which contains playerIds)
-  const onlinePlayers = $derived(
-    $clientList
-      .map(playerId => ({
-        id: playerId,
-        name: $players[playerId]?.name ?? "Unknown"
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  )
-
-  const onlineCount = $derived($clientList.length)
+  const onlineCount = $derived($onlinePlayers.length)
 
   function onmousedown() {
     if (showDropdown) {
@@ -77,11 +66,11 @@
 {#if showDropdown}
   <div class="online-dropdown" bind:this={dropdownElement} out:fade={{ duration: 200 }}>
     <div class="header">Online Players ({onlineCount})</div>
-    {#if onlinePlayers.length === 0}
+    {#if $onlinePlayers.length === 0}
       <div class="empty">No players online</div>
     {:else}
       <ul class="player-list">
-        {#each onlinePlayers as player (player.id)}
+        {#each $onlinePlayers as player (player.id)}
           <li class="player-item">{player.name}</li>
         {/each}
       </ul>

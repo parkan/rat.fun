@@ -5,7 +5,7 @@ export interface Toast {
   duration?: number
 }
 
-// shorten words that are extremely long (always the motherfn addresses...)
+// Shorten words that are extremely long (addresses, etc.)
 const processMessage = (msg: string) => {
   return msg
     .split(" ")
