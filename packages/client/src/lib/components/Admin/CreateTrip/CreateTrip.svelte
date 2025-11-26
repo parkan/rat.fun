@@ -10,7 +10,7 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { MIN_TRIP_CREATION_COST } from "@server/config"
+  import { MIN_TRIP_CREATION_COST, DEFAULT_SUGGESTED_TRIP_CREATION_COST } from "@server/config"
   import { staticContent } from "$lib/modules/content"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { TripFolders } from "$lib/components/Trip"
@@ -56,7 +56,7 @@
     tripDescription.length < 1 || tripDescription.length > $gameConfig.maxTripPromptLength
   )
 
-  let tripCreationCost = $state(MIN_TRIP_CREATION_COST)
+  let tripCreationCost = $state(DEFAULT_SUGGESTED_TRIP_CREATION_COST)
 
   // Floor the trip creation cost to ensure it's an integer
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
