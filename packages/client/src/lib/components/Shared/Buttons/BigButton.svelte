@@ -4,12 +4,22 @@
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { ShaderLocal } from "$lib/components/Shared"
 
+  export type BigButtonType =
+    | "default"
+    | "abort"
+    | "confirm"
+    | "danger"
+    | "cash_out"
+    | "buy_rat"
+    | "create_trip"
+
   let {
     text,
     cost,
     tippyText,
     disabled = false,
     extraBig = false,
+    type = "default",
     onclick
   }: {
     text: string
@@ -17,7 +27,7 @@
     tippyText?: string
     disabled?: boolean
     extraBig?: boolean
-    id?: string
+    type?: BigButtonType
     onclick: () => void
   } = $props()
 
@@ -32,7 +42,7 @@
 </script>
 
 <Tooltip content={tippyText}>
-  <button class:disabled class:extraBig {onmouseup} {onmousedown}>
+  <button class="type-{type}" class:disabled class:extraBig {onmouseup} {onmousedown}>
     <div class="button-content">
       <span class="button-text">{text}</span>
       {#if cost}
@@ -90,13 +100,8 @@
       // opacity: 0.5;
     }
 
-    &:hover {
-      background: var(--color-alert-priority-light);
-    }
-
     &:active {
       border-style: inset;
-      background: var(--color-alert-priority-muted);
       transform: translateY(2px);
       position: relative;
       color: white;
@@ -113,6 +118,77 @@
         .button-text {
           font-size: var(--font-size-super-large);
         }
+      }
+    }
+
+    /* Button types */
+    &.type-default {
+      background: var(--color-alert-priority);
+      &:hover {
+        background: var(--color-alert-priority-light);
+      }
+      &:active {
+        background: var(--color-alert-priority-muted);
+      }
+    }
+
+    &.type-abort {
+      background: var(--color-death);
+      &:hover {
+        background: var(--color-death-light);
+      }
+      &:active {
+        background: var(--color-death-muted);
+      }
+    }
+
+    &.type-confirm {
+      background: var(--color-alert-priority);
+      &:hover {
+        background: var(--color-alert-priority-light);
+      }
+      &:active {
+        background: var(--color-alert-priority-muted);
+      }
+    }
+
+    &.type-danger {
+      background: var(--color-death);
+      &:hover {
+        background: var(--color-death-light);
+      }
+      &:active {
+        background: var(--color-death-muted);
+      }
+    }
+
+    &.type-cash_out {
+      background: var(--color-death);
+      &:hover {
+        background: var(--color-death-light);
+      }
+      &:active {
+        background: var(--color-death-muted);
+      }
+    }
+
+    &.type-buy_rat {
+      background: var(--color-alert-priority);
+      &:hover {
+        background: var(--color-alert-priority-light);
+      }
+      &:active {
+        background: var(--color-alert-priority-muted);
+      }
+    }
+
+    &.type-create_trip {
+      background: var(--color-alert-priority);
+      &:hover {
+        background: var(--color-alert-priority-light);
+      }
+      &:active {
+        background: var(--color-alert-priority-muted);
       }
     }
   }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { DangerButton } from "$lib/components/Shared"
+  import { BigButton } from "$lib/components/Shared"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { getRatTotalValue } from "$lib/modules/state/utils"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
@@ -184,9 +184,10 @@
 <div class="liquidate-rat">
   {#if displayRat}
     <div class="action" bind:this={actionContainer}>
-      <DangerButton
+      <BigButton
         text={UI_STRINGS.liquidateRatButtonText}
         tippyText={UI_STRINGS.liquidateRatInstruction}
+        type="cash_out"
         {onclick}
       />
     </div>

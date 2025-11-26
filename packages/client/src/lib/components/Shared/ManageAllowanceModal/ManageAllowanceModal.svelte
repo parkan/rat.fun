@@ -2,7 +2,7 @@
   import { busy, sendApprove } from "$lib/modules/action-manager/index.svelte"
   import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
   import { refetchAllowance } from "$lib/modules/erc20Listener"
-  import { BigButton, DangerButton, SmallSpinner } from "$lib/components/Shared"
+  import { BigButton, SmallSpinner } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
   import { errorHandler } from "$lib/modules/error-handling"
@@ -162,10 +162,11 @@
         </div>
         {#if $playerERC20Allowance > 0}
           <div class="revoke-button">
-            <DangerButton
+            <BigButton
               text={UI_STRINGS.revokeApproval}
               onclick={handleRevokeAllowance}
               tippyText={UI_STRINGS.revokeApprovalInstruction}
+              type="danger"
             />
           </div>
         {/if}
