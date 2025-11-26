@@ -32,8 +32,12 @@
       {UI_STRINGS.confirmLiquidationMessage($rat?.name)}
     </div>
     <div class="button-container">
-      <BigButton text={UI_STRINGS.cancel} type="abort" onclick={onClickAbort} />
-      <BigButton text={UI_STRINGS.confirm} type="confirm" onclick={onClickConfirm} />
+      <div class="abort-button-container">
+        <BigButton text={UI_STRINGS.cancel} type="abort" onclick={onClickAbort} />
+      </div>
+      <div class="confirm-button-container">
+        <BigButton text={UI_STRINGS.confirm} type="confirm" onclick={onClickConfirm} />
+      </div>
     </div>
   </div>
 </div>
@@ -81,6 +85,26 @@
         height: 80px;
         @media (max-width: 800px) {
           width: 100%;
+          flex-direction: column;
+          height: auto;
+        }
+
+        .abort-button-container {
+          width: 100%;
+          height: 100%;
+
+          @media (max-width: 800px) {
+            order: 2;
+          }
+        }
+
+        .confirm-button-container {
+          width: 100%;
+          height: 100%;
+
+          @media (max-width: 800px) {
+            order: 1;
+          }
         }
       }
     }
