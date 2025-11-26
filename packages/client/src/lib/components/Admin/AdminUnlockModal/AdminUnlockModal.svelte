@@ -4,6 +4,7 @@
   import { refetchBalance } from "$lib/modules/erc20Listener"
   import { BigButton, SmallSpinner } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
 
   let unlockingAdmin = $state(false)
 
@@ -19,15 +20,15 @@
   <div class="unlock-modal">
     {#if unlockingAdmin || busy.UnlockAdmin.current !== 0}
       <!-- Loading State -->
-      <h2>Unlocking Admin</h2>
+      <h2>Unlocking Cashboard</h2>
       <div class="loading-spinner">
         <SmallSpinner />
       </div>
       <p>Transaction in progress...</p>
     {:else}
       <!-- Initial State -->
-      <h2>Unlock Admin</h2>
-      <p>Unlock admin to start creating trips</p>
+      <h2>{UI_STRINGS.unlockAdminHeader}</h2>
+      <p>{UI_STRINGS.unlockAdminMessage}</p>
       <div class="unlock-cost">
         Cost: 500 {CURRENCY_SYMBOL}
       </div>
@@ -37,11 +38,13 @@
           {CURRENCY_SYMBOL})
         </div>
       {/if}
-      <BigButton
-        text="Unlock"
-        onclick={unlockAdmin}
-        disabled={$playerERC20Balance < 500 || busy.UnlockAdmin.current !== 0}
-      />
+      <div class="unlock-button-container">
+        <BigButton
+          text="Unlock"
+          onclick={unlockAdmin}
+          disabled={$playerERC20Balance < 500 || busy.UnlockAdmin.current !== 0}
+        />
+      </div>
     {/if}
   </div>
 </div>
@@ -99,10 +102,13 @@
       margin: 30px 0;
       color: var(--color-white);
     }
+  }
 
-    :global(button) {
-      width: 100%;
-      max-width: 300px;
-    }
+  .unlock-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    height: 160px;
   }
 </style>

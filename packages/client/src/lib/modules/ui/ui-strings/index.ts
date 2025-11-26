@@ -199,7 +199,6 @@ t he mentally deranged. Results may vary.`,
     tripSitters: "TRIP SITTERS",
     unlockAdmin: "Unlock Admin",
     unlockAdminInstruction: "Unlock Cashboard",
-    unlockAdminMessage: "Unlock admin to start creating trips",
     unlockingAdmin: "Unlocking Admin",
     unlock: "Unlock",
     unknown: "unknown",
@@ -218,7 +217,10 @@ t he mentally deranged. Results may vary.`,
     youWillRecover: "You will recover",
     allIsFine: "ALL IS FINE.\n JUST ONE MOMENT.\n WE VALUE YOUR PATIENCE.",
     tripHeader: "Select a category",
-    tripHeaderNoRat: "Buy rat to select trip."
+    tripHeaderNoRat: "Buy rat to select trip.",
+    unlockAdminHeader: "Unlock Cashboard",
+    unlockAdminMessage:
+      "Lets you create bespoke trips through a Bloomberg-style terminal for the mentally deranged. Results may vary."
   }
 } as const
 
