@@ -46,13 +46,13 @@
 <div class="main-dropdown-content">
   <!-- Name -->
   <div class="row">
-    <span class="label">{UI_STRINGS.name}:</span>
+    <span class="label">{UI_STRINGS.name}</span>
     <span class="value">{$player?.name ?? ""}</span>
   </div>
 
   <!-- Wallet Address -->
   <div class="row">
-    <span class="label">{UI_STRINGS.connectedWallet}:</span>
+    <span class="label">{UI_STRINGS.connectedWallet}</span>
     <span class="value">{shortenAddress($playerAddress)}</span>
   </div>
 
@@ -74,7 +74,7 @@
   {#if pastRatsCount > 0}
     <div class="divider"></div>
     <div class="row">
-      <span class="label">{UI_STRINGS.ratAmountKilled}:</span>
+      <span class="label">{UI_STRINGS.ratAmountKilled}</span>
       <span class="value">{pastRatsCount}</span>
     </div>
   {/if}
@@ -83,7 +83,7 @@
 
   <!-- Balance -->
   <div class="row">
-    <span class="label">{UI_STRINGS.balance}:</span>
+    <span class="label">{UI_STRINGS.balance}</span>
     <span class="value">{$playerERC20Balance} {CURRENCY_SYMBOL}</span>
   </div>
 
@@ -132,11 +132,12 @@
       gap: 8px;
 
       .label {
+        font-family: var(--typewriter-font-stack);
         min-width: 180px;
       }
 
       .value {
-        font-weight: bold;
+        font-family: var(--special-font-stack);
       }
     }
 
