@@ -154,7 +154,6 @@
 
     .empty {
       opacity: 0.5;
-      font-style: italic;
     }
 
     .player-list {

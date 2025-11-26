@@ -91,7 +91,6 @@
       }
 
       .empty {
-        font-style: italic;
         opacity: 0.7;
       }
     }
