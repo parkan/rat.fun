@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IAerodromeSwapRouter, IAerodromeQuoter } from "./AerodromeInterfaces.sol";
 import { IWETH, IPermit2 } from "./MiscInterfaces.sol";
 import { UniswapConstants, PoolKey, IUniversalRouter, IV4Quoter } from "./UniswapInterfaces.sol";
@@ -69,14 +70,32 @@ contract RatRouter {
     return amountIn1;
   }
 
-  function swapExactIn(
+  function swapExactInEth(
+    bytes calldata aerodromePath,
+    PoolKey memory uniswapPoolKey,
+    bool uniswapZeroForOne,
+    uint256 deadline
+  ) external payable {
+    uint256 amountIn = msg.value;
+    weth.deposit{ value: msg.value }();
+
+    _swapExactIn(
+      amountIn,
+      aerodromePath,
+      uniswapPoolKey,
+      uniswapZeroForOne,
+      deadline
+    );
+  }
+
+  function swapExactInToken(
     uint256 amountIn,
     bytes calldata aerodromePath,
     PoolKey memory uniswapPoolKey,
     bool uniswapZeroForOne,
     IPermit2.PermitTransferFrom calldata permit,
     bytes calldata permitSignature
-  ) external {
+  ) public {
     permit2.permitTransferFrom(
       permit,
       IPermit2.SignatureTransferDetails({
@@ -87,9 +106,27 @@ contract RatRouter {
       permitSignature
     );
 
-    uint128 amountOutAerodrome = _executeAerodromeRouterExactInput(aerodromePath, permit.deadline, amountIn);
+    _swapExactIn(
+      amountIn,
+      aerodromePath,
+      uniswapPoolKey,
+      uniswapZeroForOne,
+      permit.deadline
+    );
+  }
+
+  function _swapExactIn(
+    uint256 amountIn,
+    bytes calldata aerodromePath,
+    PoolKey memory uniswapPoolKey,
+    bool uniswapZeroForOne,
+    uint256 deadline
+  ) internal {
+    uint128 amountOutAerodrome = _executeAerodromeRouterExactInput(aerodromePath, deadline, amountIn);
 
     _executeUniversalRouterV4SwapExactInputSingle(uniswapPoolKey, uniswapZeroForOne, amountOutAerodrome);
+
+    _transferFinalCurrencyToSender(uniswapPoolKey, uniswapZeroForOne);
   }
 
   function _executeAerodromeRouterExactInput(bytes memory path, uint256 deadline, uint256 amountIn) internal returns (uint128) {
@@ -135,5 +172,16 @@ contract RatRouter {
     inputs[0] = abi.encode(actions, params);
 
     universalRouter.execute(commands, inputs);
+  }
+
+  function _transferFinalCurrencyToSender(
+    PoolKey memory poolKey,
+    bool zeroForOne
+  ) internal {
+    address finalCurrency = zeroForOne ? poolKey.currency1 : poolKey.currency0;
+    IERC20(finalCurrency).transfer(
+      msg.sender,
+      IERC20(finalCurrency).balanceOf(address(this))
+    );
   }
 }
