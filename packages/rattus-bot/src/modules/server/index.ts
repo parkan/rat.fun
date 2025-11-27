@@ -1,0 +1,1 @@
+export { enterTrip } from "./enterTrip"

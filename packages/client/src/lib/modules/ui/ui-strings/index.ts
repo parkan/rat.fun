@@ -5,7 +5,7 @@ const UIStringsData = {
     address: "Address",
     admin: "CASHBOARD",
     adminInstruction: (price: number) => `Unlock our latest rat-a-licious feature
-    \nfor ${price}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
+    \nfor ${price} ${CURRENCY_SYMBOL}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
 t he mentally deranged. Results may vary.`,
     action: "Action",
     all: "All",
