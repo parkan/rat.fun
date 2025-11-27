@@ -38,8 +38,12 @@
   } = $props()
 
   // Use override values if provided, otherwise use global stores
-  let effectiveFocusEvent = $derived(focusEventOverride !== undefined ? focusEventOverride : $focusEvent)
-  let effectiveSelectedEvent = $derived(selectedEventOverride !== undefined ? selectedEventOverride : $selectedEvent)
+  let effectiveFocusEvent = $derived(
+    focusEventOverride !== undefined ? focusEventOverride : $focusEvent
+  )
+  let effectiveSelectedEvent = $derived(
+    selectedEventOverride !== undefined ? selectedEventOverride : $selectedEvent
+  )
 
   let valueChangeDirection = $derived(
     point.valueChange > 0
@@ -55,7 +59,8 @@
 
   let selected = $derived(effectiveSelectedEvent === point.index)
   let hovered = $derived(
-    effectiveFocusEvent === point.index || (point.tripId === $focusTrip && effectiveFocusEvent === -1)
+    effectiveFocusEvent === point.index ||
+      (point.tripId === $focusTrip && effectiveFocusEvent === -1)
   )
   let timeStamp = $derived(timeSince(new Date(point.time).getTime()))
 
@@ -155,8 +160,7 @@
   </div>
 {/snippet}
 
-<a
-  {href}
+<button
   class="event {visitClass} {valueChangeDirection}"
   {onpointerdown}
   {onpointerup}
@@ -180,7 +184,7 @@
       {/if}
     </div>
   </Tooltip>
-</a>
+</button>
 
 <style lang="scss">
   .event {
@@ -188,6 +192,7 @@
     padding: 0;
     margin: 0;
     color: white;
+    background-color: var(--color-button);
     cursor: pointer;
     font-size: var(--font-size-small);
     width: 100%;

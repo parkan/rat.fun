@@ -42,10 +42,12 @@
     ProfitLossHistoryGraph,
     ProfitLossOverview,
     AdminUnlockModal,
-    AdminTripEventIntrospection
+    AdminTripEventIntrospection,
+    AdminTripEventTicker
   } from "$lib/components/Admin"
   import { makeHref } from "$lib/components/Admin/helpers"
   import { SmallButton } from "$lib/components/Shared"
+  import BigButton from "../Shared/Buttons/BigButton.svelte"
 
   let showCreateTripModal = $state(false)
   let savedTripDescription = $state<string>("")
@@ -195,7 +197,50 @@
     logData.filter(point => point.eventType === "trip_visit" || point.eventType === "trip_death")
   )
 
-  let href = $state("")
+  const previous = (andCommit = false, andGo = false) => {
+    const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === $focusEvent)
+    // Move down in visual list (which is previous in reversed array)
+    const prevIndex = currentVisitIndex === -1 ? allVisitsData.length - 1 : currentVisitIndex - 1
+    if (prevIndex >= 0) {
+      const prevEvent = allVisitsData[prevIndex]
+      $focusEvent = prevEvent.index
+      $focusTrip = prevEvent.tripId
+    }
+    if (andCommit || andGo) {
+      commit()
+    }
+    if (andGo) {
+      go()
+    }
+  }
+
+  const next = (andCommit = false, andGo = false) => {
+    const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === $focusEvent)
+    // Move up in visual list (which is next in reversed array)
+    const nextIndex = currentVisitIndex === -1 ? 0 : currentVisitIndex + 1
+    if (nextIndex < allVisitsData.length) {
+      const nextEvent = allVisitsData[nextIndex]
+      $focusEvent = nextEvent.index
+      $focusTrip = nextEvent.tripId
+    }
+    if (andCommit || andGo) {
+      commit()
+    }
+    if (andGo) {
+      go()
+    }
+  }
+
+  const commit = () => {
+    $selectedEvent = $focusEvent
+  }
+
+  const go = () => {
+    const href = makeHref(graphData[$focusEvent])
+    if (href) {
+      goto(href)
+    }
+  }
 
   const handleKeypress = e => {
     // Only handle keyboard events on main cashboard, not on nested trip view
@@ -203,29 +248,12 @@
 
     if (!allVisitsData.length) return
 
-    const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === $focusEvent)
-
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-      // Move down in visual list (which is previous in reversed array)
-      const prevIndex = currentVisitIndex === -1 ? allVisitsData.length - 1 : currentVisitIndex - 1
-      if (prevIndex >= 0) {
-        const prevEvent = allVisitsData[prevIndex]
-        $focusEvent = prevEvent.index
-        $focusTrip = prevEvent.tripId
-      }
+      previous()
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-      // Move up in visual list (which is next in reversed array)
-      const nextIndex = currentVisitIndex === -1 ? 0 : currentVisitIndex + 1
-      if (nextIndex < allVisitsData.length) {
-        const nextEvent = allVisitsData[nextIndex]
-        $focusEvent = nextEvent.index
-        $focusTrip = nextEvent.tripId
-      }
+      next()
     } else if (e.key === "Return" || e.key === "Enter") {
-      // Commit selection and navigate
-      $selectedEvent = $focusEvent
-      const href = makeHref(graphData[$focusEvent])
-      goto(href)
+      commit()
     }
   }
 
@@ -445,12 +473,25 @@
       <!-- Past trips -->
       <div class="flashback-container">
         <div class="flashbacks">
+          {#if effectiveEvent}
+            {#key effectiveEvent?.meta?._id}
+              <AdminTripEventTicker
+                next={() => next(true, page.route.id?.includes("[tripId]"))}
+                nextEnabled={$selectedEvent > 0}
+                previous={() => previous(true, page.route.id?.includes("[tripId]"))}
+                previousEnabled={$selectedEvent < graphData.length - 1}
+                event={effectiveEvent}
+              />
+            {/key}
+          {/if}
+
           <div class="full">
-            <div class="min-height">
-              {#key effectiveEvent?.meta?._id}
-                <AdminTripEventIntrospection event={effectiveEvent} />
-              {/key}
-            </div>
+            {#key effectiveEvent?.meta?._id}
+              <AdminTripEventIntrospection event={effectiveEvent} />
+              {#if effectiveEvent?.eventType === TRIP_EVENT_TYPE.DEATH || effectiveEvent?.eventType === TRIP_EVENT_TYPE.VISIT}
+                <BigButton text="Open" onclick={go} />
+              {/if}
+            {/key}
           </div>
           <!-- Show flashback here for the LAST OPENED OUTCOME -->
         </div>

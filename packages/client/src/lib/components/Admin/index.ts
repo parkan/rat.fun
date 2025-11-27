@@ -25,6 +25,7 @@ export { default as AdminPastTripTableItem } from "./AdminPastTripTable/AdminPas
 // Admin event log
 export { default as AdminEventLog } from "./AdminEventLog/AdminEventLog.svelte"
 export { default as AdminEventLogItem } from "./AdminEventLog/AdminEventLogItem.svelte"
+export { default as AdminTripEventTicker } from "./AdminTripEventTicker/AdminTripEventTicker.svelte"
 
 // Graph
 export { default as ProfitLossHistoryGraph } from "./ProfitLossHistoryGraph/ProfitLossHistoryGraph.svelte"
