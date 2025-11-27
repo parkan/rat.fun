@@ -102,7 +102,54 @@ export async function swapExactSingle(
     amountIn = amount
   }
 
-  // Build poolKey and zeroForOne as in the quoting example
+  // If swapping native currency rather than an ERC20 token, skip permit and send value to router
+  const swapFromNative = auctionParams.numeraire.address === zeroAddress
+
+  const commandBuilder = new CommandBuilder()
+
+  // Permit2
+  if (!swapFromNative) {
+    const permit = params.permit
+    const permitSignature = params.permitSignature
+    if (!permit || !permitSignature) {
+      throw new Error("Missing required permit2 permit and signature")
+    }
+    commandBuilder.addPermit2Permit(permit, permitSignature)
+  }
+
+  // Add v4 swap command
+  commandBuilder.addV4Swap(...buildV4Swap(auctionParams, isOut ? amount : 0n, isOut))
+  const [commands, inputs] = commandBuilder.build()
+
+  // Simulate to catch errors
+  const { request } = await simulateContract(walletClient, {
+    address: addresses.universalRouter,
+    abi: [...universalRouterAbi, ...universalRouterErrors],
+    functionName: "execute",
+    args: [commands, inputs],
+    // Send ETH when swapping from native currency
+    value: swapFromNative ? amountIn : 0n
+  })
+  // Execute
+  const txHash = await walletClient.writeContract(request)
+  // Wait for receipt and return swap logs
+  return waitForDopplerSwapReceipt(publicClient, txHash)
+}
+
+export async function waitForDopplerSwapReceipt(publicClient: PublicClient<Transport, Chain>, hash: Hex) {
+  const receipt = await publicClient.waitForTransactionReceipt({ hash })
+
+  const parsedLogs = parseEventLogs({
+    abi: swapAndReceiptEventsAbi,
+    logs: receipt.logs
+  })
+  const swapLogs = parsedLogs.filter(
+    ({ eventName, args }) => (eventName === "Swap" && args.liquidity > 0) || eventName === "Receipt"
+  )
+  return swapLogs
+}
+
+function buildV4Swap(auctionParams: AuctionParams, amount: bigint, isOut: boolean) {
   const poolKey = getPoolKey(auctionParams)
   const zeroForOne = !auctionParams.isToken0
 
@@ -124,47 +171,7 @@ export async function swapExactSingle(
     0n
   ])
 
-  // If swapping native currency rather than an ERC20 token, skip permit and send value to router
-  const swapFromNative = zeroForOne && poolKey.currency0 === zeroAddress
-
-  const commandBuilder = new CommandBuilder()
-
-  // Permit2
-  if (!swapFromNative) {
-    const permit = params.permit
-    const permitSignature = params.permitSignature
-    if (!permit || !permitSignature) {
-      throw new Error("Missing required permit2 permit and signature")
-    }
-    commandBuilder.addPermit2Permit(permit, permitSignature)
-  }
-
-  // Encode Universal Router command
-  const [actions, actionParams] = actionBuilder.build()
-  commandBuilder.addV4Swap(actions, actionParams)
-  const [commands, inputs] = commandBuilder.build()
-
-  // Simulate to catch errors
-  const { request } = await simulateContract(walletClient, {
-    address: addresses.universalRouter,
-    abi: [...universalRouterAbi, ...universalRouterErrors],
-    functionName: "execute",
-    args: [commands, inputs],
-    // Send ETH when swapping from native currency
-    value: swapFromNative ? amountIn : 0n
-  })
-  // Execute
-  const txHash = await walletClient.writeContract(request)
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
-
-  const parsedLogs = parseEventLogs({
-    abi: swapAndReceiptEventsAbi,
-    logs: receipt.logs
-  })
-  const swapLogs = parsedLogs.filter(
-    ({ eventName, args }) => (eventName === "Swap" && args.liquidity > 0) || eventName === "Receipt"
-  )
-  return swapLogs
+  return actionBuilder.build()
 }
 
 // Helps viem decode some common errors that aren't present in the abi
