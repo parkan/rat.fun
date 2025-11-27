@@ -29,13 +29,6 @@ export interface SwapExactParams {
   permitSignature?: Hex
 }
 
-export function isPermitRequired(auctionParams: AuctionParams) {
-  const poolKey = getPoolKey(auctionParams)
-  const zeroForOne = !auctionParams.isToken0
-  const swapFromNative = zeroForOne && poolKey.currency0 === zeroAddress
-  return !swapFromNative
-}
-
 /**
  * Prepare permit2 data and its signature for numeraire swap via universal router
  */

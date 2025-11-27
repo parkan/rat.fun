@@ -6,13 +6,14 @@ import {
   parseUnits,
   PublicClient,
   Transport,
-  WalletClient
+  WalletClient,
+  zeroAddress
 } from "viem"
 import {
   AuctionParams,
   balanceOf,
+  getPoolKey,
   isPermit2AllowedMaxRequired,
-  isPermitRequired,
   permit2AllowMax,
   Permit2PermitData,
   signPermit2ForUniversalRouter,
@@ -100,4 +101,11 @@ export async function swapWithLogs(
     numeraireDiff,
     effectivePrice
   }
+}
+
+function isPermitRequired(auctionParams: AuctionParams) {
+  const poolKey = getPoolKey(auctionParams)
+  const zeroForOne = !auctionParams.isToken0
+  const swapFromNative = zeroForOne && poolKey.currency0 === zeroAddress
+  return !swapFromNative
 }
