@@ -5,7 +5,7 @@ const UIStringsData = {
     address: "Address",
     admin: "CASHBOARD",
     adminInstruction: (price: number) => `Unlock our latest rat-a-licious feature
-    \nfor ${price}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
+    \nfor ${price} ${CURRENCY_SYMBOL}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
 t he mentally deranged. Results may vary.`,
     action: "Action",
     all: "All",
@@ -30,7 +30,7 @@ t he mentally deranged. Results may vary.`,
     settingAllowance: "Setting Allowance",
     authorFullTitle: "Moving Castles GmbH",
     totalValue: "Total value",
-    totalValueExplanation: "The total value of your rat is a sum of your health and psycho-objects",
+    totalValueExplanation: "The total value of your rat is a sum of your health and PsychoObjects",
     back: "Back",
     balance: "Balance",
     blockNumber: "BlockNumber",
