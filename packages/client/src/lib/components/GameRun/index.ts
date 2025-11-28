@@ -12,3 +12,4 @@ export { default as OutcomeItem } from "./TripReport/Log/LogItem/LogOutcomeList/
 export { default as Trip } from "./Trip.svelte"
 export { default as TripSetup } from "./TripSetup/TripSetup.svelte"
 export { default as TripProcessing } from "./TripProcessing/TripProcessing.svelte"
+export { default as TripError } from "./TripError/TripError.svelte"

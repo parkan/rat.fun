@@ -67,11 +67,11 @@
     }
 
     &.toast-error {
-      border-color: var(--color-alert-priority);
+      border-color: red;
     }
 
     &.toast-warning {
-      border-color: var(--color-alert);
+      border-color: yellow;
     }
 
     &.toast-info {

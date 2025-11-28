@@ -30,7 +30,7 @@
     left: 0;
     width: 100dvw;
     height: 100dvh;
-    color: white;
+    color: black;
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
@@ -39,8 +39,8 @@
     z-index: var(--z-modal);
     div {
       font-family: var(--special-font-stack);
-      font-size: 10dvw;
-      line-height: 1em;
+      font-size: 8dvw;
+      line-height: 0.9em;
     }
   }
 </style>

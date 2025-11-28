@@ -6,8 +6,7 @@
   import { staticContent } from "$lib/modules/content"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { sendEnterTrip } from "$lib/modules/action-manager/actions/sendEnterTrip"
-  import { NetworkError, APIError } from "$lib/modules/error-handling/errors"
-  import { TripError } from "$lib/modules/error-handling/errors"
+  import { TripError as TripErrorClass } from "$lib/modules/error-handling/errors"
   import { player } from "$lib/modules/state/stores"
   import { replaceState } from "$app/navigation"
   import {
@@ -18,7 +17,7 @@
     resetTripState
   } from "$lib/components/GameRun/state.svelte"
   import { rat, trips } from "$lib/modules/state/stores"
-  import { TripSetup, TripProcessing, TripReport } from "$lib/components/GameRun"
+  import { TripSetup, TripProcessing, TripReport, TripError } from "$lib/components/GameRun"
   import {
     suppressNotifications,
     unsuppressNotifications
@@ -44,34 +43,22 @@
 
   // Process the trip
   const processTripEntry = async () => {
-    if (!$player?.currentRat) {
-      throw new TripError("No rat selected", tripId)
-    }
-
-    if (!tripId) {
-      throw new TripError("No trip ID", tripId)
-    }
-
     try {
+      if (!$player?.currentRat) {
+        throw new TripErrorClass("No rat selected", tripId)
+      }
+
+      if (!tripId) {
+        throw new TripErrorClass("No trip ID", tripId)
+      }
+
       result = await sendEnterTrip(tripId, $player.currentRat)
       if (!result) {
-        throw new TripError("No result returned from trip entry", tripId)
+        throw new TripErrorClass("No result returned from trip entry", tripId)
       }
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message.includes("network") || err.message.includes("fetch")) {
-          throw new NetworkError(
-            "TRIP_ENTRY_NETWORK_ERROR",
-            "Network error during trip entry",
-            err.message
-          )
-        } else if (err.message.includes("api") || err.message.includes("server")) {
-          throw new APIError("Trip entry API error: " + err.message, err)
-        } else {
-          console.log(err)
-          throw new TripError("Trip entry failed: " + err.message, tripId)
-        }
-      }
+      console.error("Trip entry error:", err)
+      transitionTo(TRIP_STATE.ERROR)
     }
   }
 
@@ -107,7 +94,9 @@
     <TripSetup
       {staticTripContent}
       onComplete={() => {
-        transitionTo(TRIP_STATE.PROCESSING)
+        if (tripResultState.state === TRIP_STATE.SETUP) {
+          transitionTo(TRIP_STATE.PROCESSING)
+        }
       }}
     />
   {/if}
@@ -127,6 +116,11 @@
   <!-- ### 3. TRIP RESULTS ### -->
   {#if tripResultState.state === TRIP_STATE.RESULTS && result}
     <TripReport {result} {seed1} />
+  {/if}
+
+  <!-- ### 4. TRIP ERROR ### -->
+  {#if tripResultState.state === TRIP_STATE.ERROR}
+    <TripError />
   {/if}
 </div>
 

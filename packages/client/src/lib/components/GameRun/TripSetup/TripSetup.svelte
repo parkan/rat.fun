@@ -35,7 +35,7 @@
     }, SETUP_DURATION)
 
     if (terminalBoxElement) {
-      typer = await terminalTyper(terminalBoxElement, generateTripSetupOutput())
+      typer = terminalTyper(terminalBoxElement, generateTripSetupOutput())
     }
   })
 
