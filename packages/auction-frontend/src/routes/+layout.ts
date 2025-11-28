@@ -10,7 +10,7 @@ export const prerender = false
 
 export const load: LayoutLoad = async () => {
   // Always BASE SEPOLIA
-  environmentStore.set(ENVIRONMENT.BASE_SEPOLIA)
+  environmentStore.set(ENVIRONMENT.BASE)
   // Always DRAWBRIDGE wallet type
   walletTypeStore.set(WALLET_TYPE.DRAWBRIDGE)
 }

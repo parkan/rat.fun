@@ -8,19 +8,19 @@
 
   let isProcessing = $state(false)
 
+  // TODO this should be called based on fromCurrency, after user initiates swap
+  // eth doesn't need permit2 at all, usdc does
+  // eurc isn't planned to be used, so it's just usdc for now
   async function sendPermit2AllowMax() {
     if (isProcessing) return
     isProcessing = true
 
     try {
-      const auctionParams = swapState.data.auctionParams
-      if (!auctionParams) throw new Error("auction params not initialized")
-
       const client = await prepareConnectorClientForTransaction()
       const { receipt } = await permit2AllowMax(
         asPublicClient($publicNetwork.publicClient),
         asWalletClient(client),
-        auctionParams.numeraire.address
+        swapState.data.fromCurrency.address
       )
       if (receipt.status === "success") {
         // Update state and transition to next state

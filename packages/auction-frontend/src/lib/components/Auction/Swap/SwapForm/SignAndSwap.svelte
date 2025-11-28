@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { signPermit2ForUniversalRouter, swapExactSingle } from "doppler"
+  import { signPermit2, waitForDopplerSwapReceipt } from "doppler"
   import { BigButton, Checkbox } from "$lib/components/Shared"
   import { prepareConnectorClientForTransaction } from "$lib/modules/drawbridge/connector"
   import { userAddress } from "$lib/modules/drawbridge"
   import { publicNetwork } from "$lib/modules/network"
+  import { ratRouterAddress, swapExactIn } from "$lib/modules/swap-router"
   import { signTypedData } from "viem/actions"
-  import { asPublicClient, asWalletClient } from "$lib/utils/clientAdapter"
+  import { asPublicClient } from "$lib/utils/clientAdapter"
   import { swapState, SWAP_STATE } from "../state.svelte"
 
   let isProcessing = $state(false)
@@ -30,9 +31,7 @@
       const isExactOut = swapState.data.isExactOut
 
       if (!auctionParams) throw new Error("auction params not initialized")
-
-      const amount = isExactOut ? amountOut : amountIn
-      if (amount === undefined) throw new Error("amount is undefined")
+      if (amountIn === undefined) throw new Error("amountIn is undefined")
 
       console.log("[SignAndSwap] Starting sign and swap flow")
 
@@ -52,15 +51,13 @@
 
       // For exact out give 10% padding to permit amount to account for price variance and imprecise conversion
       // (because permit is always for input currency)
-      const amountPadded = isExactOut ? (amount * 110n) / 100n : amount
-      const result = await signPermit2ForUniversalRouter(
+      const amountPadded = isExactOut ? (amountIn * 110n) / 100n : amountIn
+      const result = await signPermit2(
         asPublicClient($publicNetwork.publicClient),
         extendedClient,
-        auctionParams,
-        amountPadded,
-        {
-          isOut: isExactOut
-        }
+        swapState.data.fromCurrency.address,
+        ratRouterAddress,
+        amountPadded
       )
 
       // Update swapState with permit data
@@ -76,16 +73,17 @@
       // * * * * * * * * * * * * * * * * *
 
       console.log("[SignAndSwap] Step 2: Executing swap...")
-      const swapResult = await swapExactSingle(
-        asPublicClient($publicNetwork.publicClient),
-        asWalletClient(client),
+      const swapTxHash = await swapExactIn(
+        swapState.data.fromCurrency.address,
         auctionParams,
-        amount,
-        {
-          isOut: isExactOut,
-          permit: result.permit,
-          permitSignature: result.permitSignature
-        }
+        // TODO add swapExactOut or consider padding amountIn for isExactOut
+        amountIn,
+        result.permit,
+        result.permitSignature
+      )
+      const swapResult = await waitForDopplerSwapReceipt(
+        asPublicClient($publicNetwork.publicClient),
+        swapTxHash
       )
       console.log("[SignAndSwap] Swap executed successfully:", swapResult)
 
