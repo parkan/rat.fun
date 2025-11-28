@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { MergedLogEntry } from "$lib/components/GameRun/types"
   import { gsap } from "gsap"
-  import { typeHit } from "$lib/modules/sound"
-  import { playSound, randomPitch } from "$lib/modules/sound"
+  import { typeHit, playSound, randomPitch } from "$lib/modules/sound"
+  import { parseLogText } from "./parseLogText"
 
   let {
     logEntry,
@@ -20,85 +20,67 @@
   // Timeline
   const timeline = gsap.timeline()
 
-  // Parse markdown-like text
-  type TextSegment = { type: "plain" | "item" | "quote"; text: string }
+  // Tag configuration system
+  type SoundMode = "each" | "first"
 
-  function parseText(text: string): TextSegment[] {
-    const segments: TextSegment[] = []
-    let currentIndex = 0
-
-    // Match **text** (items) or _text_ (quotes)
-    const regex = /(\*\*.*?\*\*|_.*?_)/g
-    let match: RegExpExecArray | null
-
-    while ((match = regex.exec(text)) !== null) {
-      // Add plain text before the match
-      if (match.index > currentIndex) {
-        segments.push({
-          type: "plain",
-          text: text.substring(currentIndex, match.index)
-        })
-      }
-
-      const matchedText = match[0]
-      if (matchedText.startsWith("**") && matchedText.endsWith("**")) {
-        // Item reference
-        segments.push({
-          type: "item",
-          text: matchedText.slice(2, -2)
-        })
-      } else if (matchedText.startsWith("_") && matchedText.endsWith("_")) {
-        // Quote
-        segments.push({
-          type: "quote",
-          text: matchedText.slice(1, -1)
-        })
-      }
-
-      currentIndex = match.index + matchedText.length
-    }
-
-    // Add remaining plain text
-    if (currentIndex < text.length) {
-      segments.push({
-        type: "plain",
-        text: text.substring(currentIndex)
-      })
-    }
-
-    return segments
+  type TagConfig = {
+    className: string
+    sound: () => void
+    soundMode: SoundMode
   }
+
+  const TAG_CONFIG: Record<string, TagConfig> = {
+    ITEM: {
+      className: "item-ref",
+      sound: () => playSound({ category: "ratfunUI", id: "itemPositive" }),
+      soundMode: "first"
+    },
+    QUOTE: {
+      className: "quote",
+      sound: () => playSound({ category: "ratfunUI", id: "chirp", pitch: randomPitch() }),
+      soundMode: "each"
+    },
+    SYSTEM: {
+      className: "system-message",
+      sound: () => typeHit(),
+      soundMode: "each"
+    },
+    BALANCE: {
+      className: "balance-message",
+      sound: () => typeHit(),
+      soundMode: "each"
+    }
+  }
+
+  const PLAIN_CONFIG: TagConfig = {
+    className: "",
+    sound: () => typeHit(),
+    soundMode: "each"
+  }
+
+  const KNOWN_TAGS = Object.keys(TAG_CONFIG)
 
   // Current typing state
   let currentSegmentIndex = $state(0)
   let currentCharIndex = $state(0)
 
-  const playQuoteSound = () => {
-    playSound({ category: "ratfunUI", id: "chirp", pitch: randomPitch() })
-  }
-
-  const playItemSound = () => {
-    playSound({ category: "ratfunUI", id: "itemPositive" })
-  }
-
-  // Type hit helper - now handles segments
-  const playTypeHit = () => {
+  // Type hit helper - handles segments with config-based sounds
+  const handleCharacter = () => {
     if (!logTextElement) return
 
-    const segments = parseText(logEntry.event)
+    const segments = parseLogText(logEntry.event, KNOWN_TAGS)
     if (currentSegmentIndex >= segments.length) return
 
     const segment = segments[currentSegmentIndex]
     const char = segment.text[currentCharIndex]
+    const config = segment.type === "plain" ? PLAIN_CONFIG : TAG_CONFIG[segment.type]
 
     // Find or create the current segment span
     let segmentSpan = logTextElement.children[currentSegmentIndex] as HTMLSpanElement
     if (!segmentSpan) {
       segmentSpan = document.createElement("span")
-      if (segment.type === "item") {
-        segmentSpan.className = "item-ref"
-      } else if (segment.type === "quote") {
-        segmentSpan.className = "quote"
+      if (config.className) {
+        segmentSpan.className = config.className
       }
       logTextElement.appendChild(segmentSpan)
     }
@@ -106,13 +88,9 @@
     // Add character to the current segment
     segmentSpan.textContent += char
 
-    // Play appropriate sound based on segment type
-    if (segment.type === "item") {
-      playItemSound()
-    } else if (segment.type === "quote") {
-      playQuoteSound()
-    } else {
-      typeHit()
+    // Play sound based on config
+    if (config.soundMode === "each" || currentCharIndex === 0) {
+      config.sound()
     }
 
     // Move to next character
@@ -149,12 +127,12 @@
     })
 
     // Calculate total characters across all segments
-    const segments = parseText(logEntry.event)
+    const segments = parseLogText(logEntry.event, KNOWN_TAGS)
     const totalChars = segments.reduce((sum, seg) => sum + seg.text.length, 0)
 
     // Add a call for each character
     for (let i = 0; i < totalChars; i++) {
-      timeline.call(playTypeHit, [], `+=${CHARACTER_DELAY}`)
+      timeline.call(handleCharacter, [], `+=${CHARACTER_DELAY}`)
     }
   }
 
@@ -203,6 +181,16 @@
 
     :global(.quote) {
       background: pink;
+      padding: 2px 4px;
+    }
+
+    :global(.system-message) {
+      background: orangered;
+      padding: 2px 4px;
+    }
+
+    :global(.balance-message) {
+      background: green;
       padding: 2px 4px;
     }
 

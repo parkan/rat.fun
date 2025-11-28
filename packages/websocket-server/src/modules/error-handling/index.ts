@@ -5,11 +5,7 @@ import {
   SignatureError,
   StaleRequestError,
   NonceUsedError,
-  DelegationNotFoundError,
-  RedisError,
-  RedisConnectionError,
-  RedisOperationError,
-  RedisDataError
+  PlayerIdMismatchError
 } from "./errors"
 
 /**
@@ -73,19 +69,13 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
     error instanceof SignatureError ||
     error instanceof StaleRequestError ||
     error instanceof NonceUsedError ||
-    error instanceof DelegationNotFoundError
+    error instanceof PlayerIdMismatchError
   ) {
     return createClientErrorResponse(reply, request, error)
   }
 
   // Handle server errors (500)
-  if (
-    error instanceof WebSocketError ||
-    error instanceof RedisError ||
-    error instanceof RedisConnectionError ||
-    error instanceof RedisOperationError ||
-    error instanceof RedisDataError
-  ) {
+  if (error instanceof WebSocketError) {
     return createServerErrorResponse(reply, request, error)
   }
 

@@ -3,11 +3,27 @@ import { get } from "svelte/store"
 import { environment as environmentStore } from "$lib/modules/network"
 import { PUBLIC_SENTRY_DSN } from "$env/static/public"
 import { version } from "$app/environment"
-import { AppError, GraphicsError, type ExpectedError } from "./errors"
-import { toastManager } from "$lib/modules/ui/toasts.svelte"
+import {
+  AppError,
+  GraphicsError,
+  UserRejectedTransactionError,
+  WebSocketError,
+  type ExpectedError
+} from "./errors"
+import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
 import { parseViemError } from "./viemErrorParser"
 import { BaseError } from "viem"
 export * from "./errors"
+
+/**
+ * Error classes that should not trigger toast notifications.
+ * These errors are still logged to console and reported to Sentry.
+ */
+const SILENT_TOAST_ERRORS: Array<new (...args: never[]) => AppError> = [
+  GraphicsError,
+  UserRejectedTransactionError,
+  WebSocketError
+]
 
 export function captureMessage(
   message: string,
@@ -88,11 +104,20 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
     errorType: processedError instanceof AppError ? processedError.errorType : "UNKNOWN_ERROR"
   }
 
-  // Skip toast notifications for WebGL/Shader errors
+  // Skip toast notifications for errors in SILENT_TOAST_ERRORS
   // These errors are still reported to Sentry and logged to console
-  const isGraphicsError = processedError instanceof GraphicsError
-  if (!isGraphicsError) {
-    toastManager.add({ message: errorMessage, type: severity })
+  const shouldSuppressToast = SILENT_TOAST_ERRORS.some(
+    ErrorClass => processedError instanceof ErrorClass
+  )
+  if (!shouldSuppressToast) {
+    // Map Sentry severity to toast type
+    const toastType =
+      severity === "warning"
+        ? TOAST_TYPE.WARNING
+        : severity === "info"
+          ? TOAST_TYPE.INFO
+          : TOAST_TYPE.ERROR
+    toastManager.add({ message: errorMessage, type: toastType })
   }
 
   captureMessage(errorMessage, severity, sentryContext)

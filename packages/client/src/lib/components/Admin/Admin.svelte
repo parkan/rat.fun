@@ -22,12 +22,17 @@
   import { staticContent } from "$lib/modules/content"
   import { calculateProfitLossForTrip } from "./helpers"
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
+  import { page } from "$app/state"
   import {
     isPhone,
     phoneActiveAdminView,
-    phoneAdminTripsSubView,
-    phoneAdminProfitSubView
+    adminTripsSubView,
+    phoneAdminProfitSubView,
+    focusEvent,
+    selectedEvent,
+    focusTrip
   } from "$lib/modules/ui/state.svelte"
+  import { goto } from "$app/navigation"
 
   import {
     AdminEventLog,
@@ -36,9 +41,13 @@
     AdminPastTripTable,
     ProfitLossHistoryGraph,
     ProfitLossOverview,
-    AdminUnlockModal
+    AdminUnlockModal,
+    AdminTripEventIntrospection,
+    AdminTripEventTicker
   } from "$lib/components/Admin"
+  import { makeHref } from "$lib/components/Admin/helpers"
   import { SmallButton } from "$lib/components/Shared"
+  import BigButton from "../Shared/Buttons/BigButton.svelte"
 
   let showCreateTripModal = $state(false)
   let savedTripDescription = $state<string>("")
@@ -46,14 +55,14 @@
   let pendingTrip = $state<PendingTrip>(null)
   let clientHeight = $state(0)
   let shouldLoadGraphData = $state(false)
-
   // Sorting state for active trips
   let activeTripsSortDirection = $state<"asc" | "desc">("asc")
   let activeTripsSortFunction = $state(sortFunctions.entriesChronologically)
-
   // Sorting state for past trips
   let pastTripsSortDirection = $state<"asc" | "desc">("asc")
   let pastTripsSortFunction = $state(sortFunctions.entriesChronologically)
+  // Track previous view to detect when switching away from trips/profit
+  let previousView = $state<"home" | "trips" | "profit">("home")
 
   // Memoized lookups for static content to avoid repeated find/filter operations
   let tripContentMap = $derived(new Map($staticContent?.trips?.map(t => [t._id, t]) || []))
@@ -180,37 +189,88 @@
     })
   })
 
-  onMount(() => {
-    backgroundMusic.stop()
-    backgroundMusic.play({ category: "ratfunMusic", id: "admin", loop: true })
+  let logData = $derived(
+    graphData?.toReversed().filter(p => p.eventType !== TRIP_EVENT_TYPE.BASELINE)
+  )
 
-    // Reset admin view to home on entry
-    phoneActiveAdminView.set("home")
-    phoneAdminTripsSubView.set("active")
-    phoneAdminProfitSubView.set("graph")
+  let allVisitsData = $derived(
+    logData.filter(point => point.eventType === "trip_visit" || point.eventType === "trip_death")
+  )
 
-    // Defer graph data loading to avoid blocking initial render
-    setTimeout(() => {
-      shouldLoadGraphData = true
-    }, 50)
-  })
+  const previous = (andCommit = false, andGo = false) => {
+    const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === $focusEvent)
+    // Move down in visual list (which is previous in reversed array)
+    const prevIndex = currentVisitIndex === -1 ? allVisitsData.length - 1 : currentVisitIndex - 1
+    if (prevIndex >= 0) {
+      const prevEvent = allVisitsData[prevIndex]
+      $focusEvent = prevEvent.index
+      $focusTrip = prevEvent.tripId
+    }
+    if (andCommit || andGo) {
+      commit()
+    }
+    if (andGo) {
+      go()
+    }
+  }
 
-  onDestroy(() => {
-    // Reset all admin views when leaving cashboard
-    phoneActiveAdminView.set("home")
-    phoneAdminTripsSubView.set("active")
-    phoneAdminProfitSubView.set("graph")
-  })
+  const next = (andCommit = false, andGo = false) => {
+    const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === $focusEvent)
+    // Move up in visual list (which is next in reversed array)
+    const nextIndex = currentVisitIndex === -1 ? 0 : currentVisitIndex + 1
+    if (nextIndex < allVisitsData.length) {
+      const nextEvent = allVisitsData[nextIndex]
+      $focusEvent = nextEvent.index
+      $focusTrip = nextEvent.tripId
+    }
+    if (andCommit || andGo) {
+      commit()
+    }
+    if (andGo) {
+      go()
+    }
+  }
 
-  // Track previous view to detect when switching away from trips/profit
-  let previousView = $state<"home" | "trips" | "profit">("home")
+  const commit = () => {
+    $selectedEvent = $focusEvent
+  }
+
+  const go = () => {
+    const event = graphData[$focusEvent]
+    if (!event || event.eventType === TRIP_EVENT_TYPE.BASELINE) {
+      return
+    }
+    const href = makeHref(event)
+    if (href) {
+      goto(href)
+    }
+  }
+
+  const handleKeypress = (e: KeyboardEvent) => {
+    // Only handle keyboard events on main cashboard, not on nested trip view
+    if (page.route?.id?.includes("/cashboard/[tripId]")) return
+
+    if (!allVisitsData.length) return
+
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      previous()
+      commit()
+    } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      next()
+      commit()
+    } else if (e.key === "Return" || e.key === "Enter") {
+      commit()
+    }
+  }
+
+  let effectiveEvent = $derived(graphData?.[$selectedEvent])
 
   $effect(() => {
     const currentView = $phoneActiveAdminView
 
     // Reset trips sub-view when switching away from trips
     if (previousView === "trips" && currentView !== "trips") {
-      phoneAdminTripsSubView.set("active")
+      adminTripsSubView.set("active")
     }
 
     // Reset profit sub-view when switching away from profit
@@ -220,7 +280,38 @@
 
     previousView = currentView
   })
+  onMount(() => {
+    backgroundMusic.stop()
+    backgroundMusic.play({ category: "ratfunMusic", id: "admin", loop: true })
+
+    // Reset admin view to home on entry
+    phoneActiveAdminView.set("home")
+    adminTripsSubView.set("active")
+    phoneAdminProfitSubView.set("graph")
+
+    // Defer graph data loading to avoid blocking initial render
+    setTimeout(() => {
+      shouldLoadGraphData = true
+
+      // Initialize selectedEvent to first visit/death event after data loads
+      setTimeout(() => {
+        if (allVisitsData.length > 0) {
+          const firstEvent = allVisitsData[0]
+          selectedEvent.set(firstEvent.index)
+        }
+      }, 100)
+    }, 50)
+  })
+
+  onDestroy(() => {
+    // Reset all admin views when leaving cashboard
+    phoneActiveAdminView.set("home")
+    adminTripsSubView.set("active")
+    phoneAdminProfitSubView.set("graph")
+  })
 </script>
+
+<svelte:window onkeydown={handleKeypress} />
 
 <div class="admin-container">
   {#if $player && !$player.masterKey}
@@ -269,19 +360,19 @@
           <div class="sub-nav-button-wrapper">
             <SmallButton
               text={UI_STRINGS.active.toUpperCase()}
-              onclick={() => phoneAdminTripsSubView.set("active")}
-              disabled={$phoneAdminTripsSubView === "active"}
+              onclick={() => adminTripsSubView.set("active")}
+              disabled={$adminTripsSubView === "active"}
             />
           </div>
           <div class="sub-nav-button-wrapper">
             <SmallButton
               text={UI_STRINGS.past.toUpperCase()}
-              onclick={() => phoneAdminTripsSubView.set("past")}
-              disabled={$phoneAdminTripsSubView === "past"}
+              onclick={() => adminTripsSubView.set("past")}
+              disabled={$adminTripsSubView === "past"}
             />
           </div>
         </div>
-        {#if $phoneAdminTripsSubView === "active"}
+        {#if $adminTripsSubView === "active"}
           <AdminActiveTripTable
             {pendingTrip}
             tripList={activeTripsList}
@@ -320,7 +411,7 @@
             <ProfitLossHistoryGraph {graphData} height={clientHeight} />
           </div>
         {:else}
-          <AdminEventLog {graphData} />
+          <AdminEventLog graphData={logData} behavior="click" />
         {/if}
       </div>
     {/if}
@@ -344,30 +435,72 @@
       </div>
       <!-- Event log -->
       <div class="event-log-container">
-        <AdminEventLog {graphData} />
+        <AdminEventLog graphData={logData} behavior="click" />
       </div>
     </div>
     <!-- Bottom row -->
     <div class="admin-row bottom">
       <!-- Active trips -->
-      <div class="active-trip-table-container">
-        <AdminActiveTripTable
-          {pendingTrip}
-          tripList={activeTripsList}
-          plots={allSparkPlots}
-          bind:sortFunction={activeTripsSortFunction}
-          bind:sortDirection={activeTripsSortDirection}
-        />
+      <div class="trip-table-container">
+        <div class="admin-nav-toggle">
+          <div class="admin-nav-button-wrapper">
+            <SmallButton
+              text={UI_STRINGS.active.toUpperCase()}
+              onclick={() => adminTripsSubView.set("active")}
+              disabled={$adminTripsSubView === "active"}
+            />
+          </div>
+          <div class="admin-nav-button-wrapper">
+            <SmallButton
+              text={UI_STRINGS.past.toUpperCase()}
+              onclick={() => adminTripsSubView.set("past")}
+              disabled={$adminTripsSubView === "past"}
+            />
+          </div>
+        </div>
+        {#if $adminTripsSubView === "active"}
+          <AdminActiveTripTable
+            {pendingTrip}
+            tripList={activeTripsList}
+            plots={allSparkPlots}
+            bind:sortFunction={activeTripsSortFunction}
+            bind:sortDirection={activeTripsSortDirection}
+          />
+        {:else}
+          <AdminPastTripTable
+            tripList={pastTripsList}
+            bind:sortFunction={pastTripsSortFunction}
+            bind:sortDirection={pastTripsSortDirection}
+          />
+        {/if}
       </div>
       <!-- Divider -->
       <div class="admin-divider warning-mute"></div>
       <!-- Past trips -->
-      <div class="past-trip-table-container">
-        <AdminPastTripTable
-          tripList={pastTripsList}
-          bind:sortFunction={pastTripsSortFunction}
-          bind:sortDirection={pastTripsSortDirection}
-        />
+      <div class="flashback-container">
+        <div class="flashbacks">
+          {#if effectiveEvent}
+            {#key effectiveEvent?.meta?._id}
+              <AdminTripEventTicker
+                next={() => next(true, page.route.id?.includes("[tripId]"))}
+                nextEnabled={$selectedEvent > 0}
+                previous={() => previous(true, page.route.id?.includes("[tripId]"))}
+                previousEnabled={$selectedEvent < graphData.length - 1}
+                event={effectiveEvent}
+              />
+            {/key}
+          {/if}
+
+          <div class="full">
+            {#key effectiveEvent?.meta?._id}
+              <AdminTripEventIntrospection event={effectiveEvent} />
+              {#if effectiveEvent?.eventType === TRIP_EVENT_TYPE.DEATH || effectiveEvent?.eventType === TRIP_EVENT_TYPE.VISIT}
+                <BigButton text="Open" onclick={go} />
+              {/if}
+            {/key}
+          </div>
+          <!-- Show flashback here for the LAST OPENED OUTCOME -->
+        </div>
       </div>
     </div>
   {/if}
@@ -460,6 +593,12 @@
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
+
+      .admin-nav-toggle {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+      }
     }
 
     .trip-monitor-container {
@@ -491,11 +630,11 @@
       width: 320px;
     }
 
-    .active-trip-table-container {
+    .trip-table-container {
       width: calc(50% - 20px);
     }
 
-    .past-trip-table-container {
+    .flashback-container {
       width: calc(50% - 20px);
     }
 

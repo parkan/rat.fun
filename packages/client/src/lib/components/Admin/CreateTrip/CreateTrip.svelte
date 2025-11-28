@@ -3,12 +3,14 @@
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { getTripMaxValuePerWin, getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { CharacterCounter, BigButton } from "$lib/components/Shared"
+  import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
+  import { openAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
   import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { MIN_TRIP_CREATION_COST } from "@server/config"
+  import { MIN_TRIP_CREATION_COST, DEFAULT_SUGGESTED_TRIP_CREATION_COST } from "@server/config"
   import { staticContent } from "$lib/modules/content"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { TripFolders } from "$lib/components/Trip"
@@ -54,7 +56,7 @@
     tripDescription.length < 1 || tripDescription.length > $gameConfig.maxTripPromptLength
   )
 
-  let tripCreationCost = $state(MIN_TRIP_CREATION_COST)
+  let tripCreationCost = $state(DEFAULT_SUGGESTED_TRIP_CREATION_COST)
 
   // Floor the trip creation cost to ensure it's an integer
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
@@ -92,6 +94,12 @@ Trips induce remote viewing trances in susceptible vermin.
 During a trance rats might materialise psycho objects, transferring some value from your trip to their flesh. Shall a trip be too heroic and kill the rat you will collect its total value.`
 
   async function onClick() {
+    // Check allowance before proceeding
+    if ($playerERC20Allowance < flooredTripCreationCost) {
+      openAllowanceModal(UI_STRINGS.insufficientAllowance)
+      return
+    }
+
     try {
       // Validate trip description before sending
       if (!tripDescription || tripDescription.trim() === "") {
@@ -270,6 +278,7 @@ During a trance rats might materialise psycho objects, transferring some value f
           <div class="actions">
             <BigButton
               text="Create trip"
+              type="create_trip"
               cost={flooredTripCreationCost}
               {disabled}
               onclick={onClick}
@@ -356,7 +365,13 @@ During a trance rats might materialise psycho objects, transferring some value f
 
     <!-- ACTIONS -->
     <div class="actions">
-      <BigButton text="Create trip" cost={flooredTripCreationCost} {disabled} onclick={onClick} />
+      <BigButton
+        text="Create trip"
+        type="create_trip"
+        cost={flooredTripCreationCost}
+        {disabled}
+        onclick={onClick}
+      />
     </div>
   </div>
 {/if}

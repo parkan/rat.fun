@@ -1,11 +1,27 @@
+export enum TOAST_TYPE {
+  ERROR = "error",
+  WARNING = "warning",
+  INFO = "info",
+  PLAYER_NOTIFICATION = "player-notification",
+  TRIP_NOTIFICATION = "trip-notification"
+}
+
 export interface Toast {
   id: string
   message: string
-  type?: "error" | "success" | "warning" | "info"
+  type?: TOAST_TYPE
   duration?: number
 }
 
-// shorten words that are extremely long (always the motherfn addresses...)
+const TOAST_DURATION: Record<TOAST_TYPE, number> = {
+  [TOAST_TYPE.ERROR]: 8000,
+  [TOAST_TYPE.WARNING]: 8000,
+  [TOAST_TYPE.INFO]: 8000,
+  [TOAST_TYPE.PLAYER_NOTIFICATION]: 2000,
+  [TOAST_TYPE.TRIP_NOTIFICATION]: 8000
+}
+
+// Shorten words that are extremely long (addresses, etc.)
 const processMessage = (msg: string) => {
   return msg
     .split(" ")
@@ -23,10 +39,11 @@ class ToastManager {
 
   add(toast: Omit<Toast, "id">): string {
     const id = crypto.randomUUID()
+    const type = toast.type ?? TOAST_TYPE.ERROR
     const newToast: Toast = {
       id,
-      type: "error",
-      duration: 10000,
+      type,
+      duration: TOAST_DURATION[type],
       ...toast
     }
     newToast.message = processMessage(newToast.message)
@@ -45,6 +62,10 @@ class ToastManager {
 
   remove(id: string) {
     this.toasts = this.toasts.filter(t => t.id !== id)
+  }
+
+  removeByType(type: TOAST_TYPE) {
+    this.toasts = this.toasts.filter(t => t.type !== type)
   }
 
   clear() {

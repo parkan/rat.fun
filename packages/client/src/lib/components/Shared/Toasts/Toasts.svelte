@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { slide } from "svelte/transition"
+  import { slide, fade } from "svelte/transition"
   import { toastManager } from "$lib/modules/ui/toasts.svelte"
 
   const onToastClick = (id: string) => {
@@ -13,7 +13,8 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        transition:slide|global
+        in:slide|global={{ duration: 200 }}
+        out:fade|global={{ duration: 200 }}
         class="toast toast-{toast.type}"
         onclick={() => onToastClick(toast.id)}
       >
@@ -42,7 +43,8 @@
     background: var(--background);
     border: var(--default-border-style);
     padding: 12px 16px;
-    width: 400px;
+    max-width: 400px;
+    min-width: 200px;
     font-family: var(--typewriter-font-stack);
     font-size: var(--font-size-small);
     line-height: var(--font-size-small);
@@ -56,28 +58,34 @@
     transition: all 0.2s ease;
     overflow: hidden;
 
+    @media (max-width: 768px) {
+      max-width: 90%;
+    }
+
     &:hover {
       opacity: 0.8;
     }
 
     &.toast-error {
       border-color: var(--color-alert-priority);
-      background: var(--background);
-    }
-
-    &.toast-success {
-      border-color: var(--color-success);
-      background: var(--background);
     }
 
     &.toast-warning {
       border-color: var(--color-alert);
-      background: var(--background);
     }
 
     &.toast-info {
       border-color: var(--color-grey-mid);
-      background: var(--background);
+    }
+
+    &.toast-player-notification {
+      font-size: var(--font-size-normal);
+      border-color: var(--color-up);
+    }
+
+    &.toast-trip-notification {
+      font-size: var(--font-size-normal);
+      border-color: var(--color-up);
     }
   }
 

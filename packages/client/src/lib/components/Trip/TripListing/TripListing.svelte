@@ -4,6 +4,7 @@
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
   import { nonDepletedTrips, ratTotalValue, playerHasLiveRat } from "$lib/modules/state/stores"
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { selectedFolderId } from "$lib/modules/ui/state.svelte"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
@@ -12,9 +13,15 @@
   import { staticContent } from "$lib/modules/content"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
 
-  import { TripItem, TripFolders } from "$lib/components/Trip"
+  import { TripItem, TripFolders, NoRatListing } from "$lib/components/Trip"
   import { BackButton } from "$lib/components/Shared"
   import TripHeader from "./TripHeader.svelte"
+
+  // Show NoRatListing when player has no rat OR when rat is being deployed
+  // The DEPLOYING_RAT check ensures we don't hide the no-rat UI until deployment is truly finished
+  let showNoRatListing = $derived(
+    !$playerHasLiveRat || ratState.state.current === RAT_BOX_STATE.DEPLOYING_RAT
+  )
 
   let sortFunction = $state(entriesChronologically)
   let lastChecked = $state<number>(Number(get(blockNumber)))
@@ -46,6 +53,7 @@
   }
 
   // Here we add once there are a couple of updates
+  // ???
   let tripList = $derived.by(() => {
     let entries = Object.entries($nonDepletedTrips)
     entries = filterByFolder(entries, $selectedFolderId)
@@ -117,14 +125,16 @@
 </script>
 
 <div class="content" bind:this={scrollContainer}>
-  {#if $selectedFolderId === ""}
-    <TripHeader title={$playerHasLiveRat ? UI_STRINGS.tripHeader : UI_STRINGS.tripHeaderNoRat} />
+  {#if showNoRatListing}
+    <TripHeader title={UI_STRINGS.tripHeaderNoRat} />
+    <NoRatListing />
+  {:else if $selectedFolderId === ""}
+    <TripHeader title={UI_STRINGS.tripHeader} />
     {#if sortedFolders?.length ?? 0 > 0}
       <TripFolders
         onselect={(folderId: string) => ($selectedFolderId = folderId)}
         folders={sortedFolders}
         {foldersCounts}
-        disabled={!$playerHasLiveRat}
       />
     {/if}
   {:else}

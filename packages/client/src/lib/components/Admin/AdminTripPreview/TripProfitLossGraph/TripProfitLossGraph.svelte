@@ -9,7 +9,7 @@
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
   import { calculateProfitLossForTrip } from "../../helpers"
-  import { focusEvent } from "$lib/modules/ui/state.svelte"
+  import { focusEvent, selectedEvent } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
 
   let {
@@ -17,14 +17,30 @@
     tripId,
     height = 400,
     behavior = "hover",
-    data = $bindable([])
+    data = $bindable([]),
+    focusEventOverride = undefined,
+    selectedEventOverride = undefined,
+    onFocusChange = undefined,
+    onSelectionChange = undefined
   }: {
     trip: Trip
     tripId: string
     height?: number
     behavior?: "hover" | "click"
     data?: TripEvent[]
+    focusEventOverride?: number
+    selectedEventOverride?: number
+    onFocusChange?: (index: number) => void
+    onSelectionChange?: (index: number) => void
   } = $props()
+
+  // Use override values if provided, otherwise use global stores
+  let effectiveFocusEvent = $derived(
+    focusEventOverride !== undefined ? focusEventOverride : $focusEvent
+  )
+  let effectiveSelectedEvent = $derived(
+    selectedEventOverride !== undefined ? selectedEventOverride : $selectedEvent
+  )
 
   // Add reactive timestamp for real-time updates
   let currentTime = $state(Date.now())
@@ -213,20 +229,9 @@
               fill="none"
             />
 
-            {#each profitLossOverTime as point, i (point.time)}
-              {@const lastPoint = profitLossOverTime?.[i - 1]}
-
-              {#if $focusEvent === point.index}
-                <line
-                  x1={xScale(point.time)}
-                  y1={0}
-                  x2={xScale(point.time)}
-                  y2={height}
-                  stroke="var(--color-grey-mid)"
-                  stroke-width="2"
-                  stroke-dasharray="4,4"
-                />
-              {/if}
+            <!-- Render all non-focused points first -->
+            {#each profitLossOverTime.filter(p => p.index !== effectiveFocusEvent) as point, i (point.time)}
+              {@const lastPoint = profitLossOverTime?.[profitLossOverTime.indexOf(point) - 1]}
 
               <Tooltip
                 content={generateTooltipContent(point)}
@@ -237,53 +242,37 @@
                   onpointerdown={() => {}}
                   onpointerup={() => {
                     if (behavior === "click") {
-                      $focusEvent = point.index
+                      if (onFocusChange) {
+                        onFocusChange(point.index)
+                      } else {
+                        $focusEvent = point.index
+                      }
+                      if (onSelectionChange) {
+                        onSelectionChange(point.index)
+                      } else {
+                        $selectedEvent = point.index
+                      }
                     }
                   }}
                   onpointerenter={() => {
                     if (behavior === "hover") {
-                      $focusEvent = point.index
+                      if (onFocusChange) {
+                        onFocusChange(point.index)
+                      } else {
+                        $focusEvent = point.index
+                      }
                     }
                   }}
                   onpointerleave={() => {
                     if (behavior === "hover") {
-                      $focusEvent = -1
+                      if (onFocusChange) {
+                        onFocusChange(-1)
+                      } else {
+                        $focusEvent = -1
+                      }
                     }
                   }}
                 >
-                  {#if point.eventType === "trip_death"}
-                    <circle
-                      fill="var(--color-grey-light)"
-                      stroke={$focusEvent === point.index ? "white" : ""}
-                      r="5"
-                      cx={xScale(point.time)}
-                      cy={yScale(point.value)}
-                    ></circle>
-                  {:else if point.eventType === "trip_liquidated"}
-                    <circle
-                      fill="var(--color-grey-light)"
-                      stroke={$focusEvent === point.index ? "white" : ""}
-                      r="5"
-                      cx={xScale(point.time)}
-                      cy={yScale(point.value)}
-                    ></circle>
-                  {:else if point.eventType === "trip_created"}
-                    <circle
-                      fill="var(--color-grey-light)"
-                      stroke={$focusEvent === point.index ? "white" : ""}
-                      r="5"
-                      cx={xScale(point.time)}
-                      cy={yScale(point.value)}
-                    ></circle>
-                  {:else}
-                    <circle
-                      fill="var(--color-grey-light)"
-                      stroke={$focusEvent === point.index ? "white" : ""}
-                      r="5"
-                      cx={xScale(point.time)}
-                      cy={yScale(point.value)}
-                    ></circle>
-                  {/if}
                   {#if lastPoint}
                     {@const candleHeight = Math.abs(yScale(point.value) - yScale(lastPoint.value))}
                     {@const candleWidth = innerWidth / 80}
@@ -296,7 +285,6 @@
                           : yScale(lastPoint.value) - candleHeight}
                         width={candleWidth}
                         height={candleHeight}
-                        stroke={$focusEvent === point.index ? "white" : ""}
                         fill={point.value < lastPoint.value
                           ? "var(--color-down)"
                           : "var(--color-up)"}
@@ -304,9 +292,158 @@
                       </rect>
                     {/if}
                   {/if}
+                  {#if point.eventType === "trip_death"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else if point.eventType === "trip_liquidated"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else if point.eventType === "trip_created"}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {:else}
+                    <circle
+                      fill="var(--color-grey-light)"
+                      r="5"
+                      cx={xScale(point.time)}
+                      cy={yScale(point.value)}
+                    ></circle>
+                  {/if}
                 </g>
               </Tooltip>
             {/each}
+
+            <!-- Render focused point on top -->
+            {#if effectiveFocusEvent !== -1}
+              {@const focusedPoint = profitLossOverTime.find(p => p.index === effectiveFocusEvent)}
+              {#if focusedPoint}
+                {@const focusedIndex = profitLossOverTime.indexOf(focusedPoint)}
+                {@const lastPoint = profitLossOverTime?.[focusedIndex - 1]}
+
+                <line
+                  x1={xScale(focusedPoint.time)}
+                  y1={0}
+                  x2={xScale(focusedPoint.time)}
+                  y2={height}
+                  stroke="var(--color-grey-mid)"
+                  stroke-width="2"
+                  stroke-dasharray="4,4"
+                />
+
+                <Tooltip
+                  content={generateTooltipContent(focusedPoint)}
+                  svg={true}
+                  props={{ allowHTML: true }}
+                >
+                  <g
+                    onpointerdown={() => {}}
+                    onpointerup={() => {
+                      if (behavior === "click") {
+                        if (onFocusChange) {
+                          onFocusChange(focusedPoint.index)
+                        } else {
+                          $focusEvent = focusedPoint.index
+                        }
+                        if (onSelectionChange) {
+                          onSelectionChange(focusedPoint.index)
+                        } else {
+                          $selectedEvent = focusedPoint.index
+                        }
+                      }
+                    }}
+                    onpointerenter={() => {
+                      if (behavior === "hover") {
+                        if (onFocusChange) {
+                          onFocusChange(focusedPoint.index)
+                        } else {
+                          $focusEvent = focusedPoint.index
+                        }
+                      }
+                    }}
+                    onpointerleave={() => {
+                      if (behavior === "hover") {
+                        if (onFocusChange) {
+                          onFocusChange(-1)
+                        } else {
+                          $focusEvent = -1
+                        }
+                      }
+                    }}
+                  >
+                    {#if lastPoint}
+                      {@const candleHeight = Math.abs(yScale(focusedPoint.value) - yScale(lastPoint.value))}
+                      {@const candleWidth = innerWidth / 80}
+                      <!-- Draw "candle" -->
+                      {#if focusedPoint.eventType === "trip_death" || focusedPoint.eventType === "trip_visit"}
+                        <rect
+                          x={xScale(focusedPoint.time) - candleWidth / 2}
+                          y={focusedPoint.value < lastPoint.value
+                            ? yScale(lastPoint.value)
+                            : yScale(lastPoint.value) - candleHeight}
+                          width={candleWidth}
+                          height={candleHeight}
+                          stroke="white"
+                          stroke-width="2"
+                          fill={focusedPoint.value < lastPoint.value
+                            ? "var(--color-down)"
+                            : "var(--color-up)"}
+                        >
+                        </rect>
+                      {/if}
+                    {/if}
+                    {#if focusedPoint.eventType === "trip_death"}
+                      <circle
+                        fill="var(--color-grey-light)"
+                        stroke="white"
+                        stroke-width="2"
+                        r="5"
+                        cx={xScale(focusedPoint.time)}
+                        cy={yScale(focusedPoint.value)}
+                      ></circle>
+                    {:else if focusedPoint.eventType === "trip_liquidated"}
+                      <circle
+                        fill="var(--color-grey-light)"
+                        stroke="white"
+                        stroke-width="2"
+                        r="5"
+                        cx={xScale(focusedPoint.time)}
+                        cy={yScale(focusedPoint.value)}
+                      ></circle>
+                    {:else if focusedPoint.eventType === "trip_created"}
+                      <circle
+                        fill="var(--color-grey-light)"
+                        stroke="white"
+                        stroke-width="2"
+                        r="5"
+                        cx={xScale(focusedPoint.time)}
+                        cy={yScale(focusedPoint.value)}
+                      ></circle>
+                    {:else}
+                      <circle
+                        fill="var(--color-grey-light)"
+                        stroke="white"
+                        stroke-width="2"
+                        r="5"
+                        cx={xScale(focusedPoint.time)}
+                        cy={yScale(focusedPoint.value)}
+                      ></circle>
+                    {/if}
+                  </g>
+                </Tooltip>
+              {/if}
+            {/if}
           </g>
         {/if}
       </svg>

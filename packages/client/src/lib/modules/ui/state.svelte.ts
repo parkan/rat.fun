@@ -10,7 +10,8 @@ export const UIState = writable(UI.LOADING)
 
 // For UI
 export const collapsed = writable(true)
-export const focusEvent = writable(-1)
+export const focusEvent = writable(-1) // Preview/hover state
+export const selectedEvent = writable(-1) // Committed selection state (for flashback)
 export const focusTrip = writable("")
 export const lightboxState = new LightboxState()
 export const selectedFolderId = writable("")
@@ -34,5 +35,5 @@ export const phoneActiveGameView = writable<"ratbox" | "triplisting">("ratbox")
 export const phoneActiveAdminView = writable<"home" | "trips" | "profit">("home")
 
 // Phone admin sub-view state - tracks sub-navigation within trips and profit views
-export const phoneAdminTripsSubView = writable<"active" | "past">("active")
+export const adminTripsSubView = writable<"active" | "past">("active")
 export const phoneAdminProfitSubView = writable<"graph" | "log">("graph")

@@ -4,6 +4,7 @@
   import { mergeLog } from "./index"
   import { gsap } from "gsap"
   import { LogItem, LogStatus } from "$lib/components/GameRun"
+  import LogInventory from "./LogInventory.svelte"
 
   let {
     result,
@@ -26,7 +27,7 @@
   $effect(() => {
     if (result && !mergedLog) {
       mergedLog = mergeLog(result)
-      totalItems = mergedLog.length + 1 // +1 for START status only
+      totalItems = mergedLog.length + 2 // +1 for START status, +1 for LogInventory
     }
   })
 
@@ -69,6 +70,7 @@
 
 <div class="log-container" bind:this={logElement}>
   <LogStatus status="START" onTimeline={timeline => addToTimeline(timeline)} />
+  <LogInventory onTimeline={timeline => addToTimeline(timeline)} />
   {#if mergedLog && mergedLog.length > 0}
     {#each mergedLog as logEntry, i (i)}
       <LogItem {logEntry} onTimeline={timeline => addToTimeline(timeline)} delay={0} />

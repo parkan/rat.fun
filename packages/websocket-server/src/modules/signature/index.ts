@@ -1,46 +1,47 @@
 import { Hex, recoverMessageAddress } from "viem"
-import { SignedRequest } from "@modules/types"
-import { hasDelegation } from "@modules/mud/getOnchainData/hasDelegation"
-import { hasNonce, storeNonce } from "@modules/signature/db"
+import { SignedRequest, SignedRequestInfo } from "@modules/types"
+import { hasNonce, storeNonce } from "@modules/nonce-store"
 import { addressToId } from "@modules/signature/utils"
-import { stringifyRequestForSignature } from "@modules/signature/stringifyRequestForSignature"
 import { REQUEST_SIGNATURE_TIMEOUT_MS } from "@config"
-import {
-  StaleRequestError,
-  NonceUsedError,
-  DelegationNotFoundError
-} from "@modules/error-handling/errors"
+import { StaleRequestError, NonceUsedError } from "@modules/error-handling/errors"
+
+/**
+ * Stringify request for signature verification.
+ * Must match the client-side signing format exactly.
+ */
+function stringifyRequestForSignature({ data, info }: { data: unknown; info: SignedRequestInfo }) {
+  return JSON.stringify({ data, info })
+}
 
 /**
  * Verify the request timeout, nonce and signature,
- * optionally substitute the call signer address for `callFrom`,
- * and return the caller address converted to id.
+ * optionally use the calledFrom address if provided (delegation trusted without on-chain verification),
+ * and return the caller address converted to player id.
  * @returns callerAddress signer or delegator player id.
  */
 export async function verifyRequest<T>(signedRequest: SignedRequest<T>): Promise<Hex> {
+  const { data, info, signature } = signedRequest
+
   const recoveredAddress = await recoverMessageAddress({
-    message: stringifyRequestForSignature(signedRequest),
-    signature: signedRequest.signature
+    message: stringifyRequestForSignature({ data, info }),
+    signature
   })
   let callerAddress: Hex = recoveredAddress
 
   // Check timeout
-  if (Date.now() - signedRequest.info.timestamp > REQUEST_SIGNATURE_TIMEOUT_MS) {
+  if (Date.now() - info.timestamp > REQUEST_SIGNATURE_TIMEOUT_MS) {
     throw new StaleRequestError()
   }
 
   // Check nonce, and store it to prevent replay attacks during the timeout window
-  if (await hasNonce(signedRequest.info.nonce)) {
+  if (await hasNonce(info.nonce)) {
     throw new NonceUsedError()
   }
-  await storeNonce(signedRequest.info.nonce)
+  await storeNonce(info.nonce)
 
-  // Check delegation and substitute playerAddress if necessary
-  if (signedRequest.info.calledFrom) {
-    if (!hasDelegation(signedRequest.info.calledFrom, recoveredAddress)) {
-      throw new DelegationNotFoundError()
-    }
-    callerAddress = signedRequest.info.calledFrom
+  // Use calledFrom address if provided (delegation trusted without on-chain verification)
+  if (info.calledFrom) {
+    callerAddress = info.calledFrom
   }
 
   return addressToId(callerAddress) as Hex

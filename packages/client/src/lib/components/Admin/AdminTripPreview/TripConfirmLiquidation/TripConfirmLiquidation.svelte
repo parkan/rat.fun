@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Trip as SanityTrip } from "@sanity-types"
   import { sendLiquidateTrip } from "$lib/modules/action-manager/index.svelte"
-  import { sendLiquidateTripMessage } from "$lib/modules/off-chain-sync"
   import { BigButton, TripClosureValueBreakdown, SmallSpinner } from "$lib/components/Shared"
 
   let {
@@ -23,7 +22,6 @@
   const onClickConfirm = async () => {
     liquidating = true
     await sendLiquidateTrip(tripId)
-    sendLiquidateTripMessage(tripId)
     onDone()
   }
 </script>
@@ -45,8 +43,8 @@
       />
     </div>
     <div class="button-container">
-      <BigButton text="Abort" onclick={onAbort} />
-      <BigButton text="Confirm" onclick={onClickConfirm} />
+      <BigButton text="Abort" type="abort" onclick={onAbort} />
+      <BigButton text="Confirm" type="confirm" onclick={onClickConfirm} />
     </div>
   {/if}
 </div>
@@ -76,7 +74,7 @@
     }
 
     .loading {
-      background: orangered;
+      background: white;
       padding: 10px;
     }
   }

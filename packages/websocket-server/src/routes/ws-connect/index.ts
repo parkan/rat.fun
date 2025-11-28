@@ -1,89 +1,89 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
-import { schema } from "@routes/ws-connect/schema"
-import { broadcast, wsConnections } from "@modules/websocket"
+import { Hex } from "viem"
 import { v4 as uuidv4 } from "uuid"
 
-// Types
-import type { WebSocketParams, OffChainMessage, SignedRequest } from "@modules/types"
+import { schema } from "@routes/ws-connect/schema"
+import { broadcast, wsConnections, getConnectedPlayerIds } from "@modules/websocket"
+import { verifyRequest } from "@modules/signature"
+import { PlayerIdMismatchError } from "@modules/error-handling/errors"
 
-// Message store
-import { getMessages } from "@modules/message-store"
-
-import { handleMessage } from "./messageHandling"
-import { handleWebSocketError } from "@modules/error-handling"
+import type { WebSocketParams, SignedRequest, SignedRequestInfo } from "@modules/types"
 
 async function routes(fastify: FastifyInstance) {
-  fastify.get(
+  // Health check endpoint
+  fastify.get("/healthz", async () => {
+    return { status: "ok", connections: wsConnections.size }
+  })
+
+  // Fastify 5 TypeProvider issue: websocket option not recognized in RouteShorthandOptions
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(fastify as any).get(
     "/ws/:playerId",
     { websocket: true, schema: schema },
-    async (socket, req: FastifyRequest<WebSocketParams>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (socket: any, req: FastifyRequest<WebSocketParams>) => {
       const { playerId } = req.params
+      const { data, info, signature } = req.query
 
       try {
+        // Parse the signed request from query params
+        const signedRequest: SignedRequest<unknown> = {
+          data: JSON.parse(decodeURIComponent(data)),
+          info: JSON.parse(decodeURIComponent(info)) as SignedRequestInfo,
+          signature: signature as Hex
+        }
+
+        // Verify the signature and get the verified player ID
+        const verifiedPlayerId = await verifyRequest(signedRequest)
+
+        // Ensure the playerId in the URL matches the verified address
+        if (playerId.toLowerCase() !== verifiedPlayerId.toLowerCase()) {
+          throw new PlayerIdMismatchError(
+            `URL playerId ${playerId} does not match verified address ${verifiedPlayerId}`
+          )
+        }
+
         // Clean up any existing connection for this playerId
-        if (wsConnections[playerId]) {
+        const existingConnection = wsConnections.get(playerId)
+        if (existingConnection) {
           try {
-            wsConnections[playerId].close()
+            existingConnection.close()
           } catch (e) {
             console.error("Error closing existing connection:", e)
           }
-          delete wsConnections[playerId]
+          wsConnections.delete(playerId)
         }
 
-        // Store the WebSocket connection
-        wsConnections[playerId] = socket as unknown as WebSocket
-
-        // Send last 30 messages to the newly connected user
-        try {
-          const lastMessages = await getMessages(30)
-          for (const message of lastMessages) {
-            socket.send(JSON.stringify(message))
-          }
-        } catch (error) {
-          // Log the error but don't fail the connection
-          console.error("Failed to get messages for new connection:", error)
-        }
+        // Store the new WebSocket connection
+        wsConnections.set(playerId, socket as unknown as WebSocket)
 
         // Broadcast updated client list to all connected clients
         broadcast({
           id: uuidv4(),
           topic: "clients__update",
-          message: Object.keys(wsConnections),
+          message: getConnectedPlayerIds(),
           timestamp: Date.now()
-        }).catch(console.error)
-
-        // Add message handler
-        socket.on("message", async (message: Buffer) => {
-          //SignedRequest<OffChainMessage>
-          try {
-            const signedRequest = JSON.parse(message.toString()) as SignedRequest<OffChainMessage>
-            await handleMessage(signedRequest, socket)
-          } catch (error) {
-            handleWebSocketError(error, socket as unknown as WebSocket)
-          }
         })
 
-        socket.on("close", async () => {
-          delete wsConnections[playerId] // Clean up connection
+        socket.on("close", () => {
+          wsConnections.delete(playerId)
           // Broadcast updated client list to all connected clients
-          try {
-            await broadcast({
-              id: uuidv4(),
-              topic: "clients__update",
-              message: Object.keys(wsConnections),
-              timestamp: Date.now()
-            })
-          } catch (error) {
-            console.error("Error broadcasting client update on close:", error)
-          }
+          broadcast({
+            id: uuidv4(),
+            topic: "clients__update",
+            message: getConnectedPlayerIds(),
+            timestamp: Date.now()
+          })
         })
 
         socket.on("error", (error: Error) => {
           console.error(`WebSocket error for player ${playerId}:`, error)
-          delete wsConnections[playerId]
+          wsConnections.delete(playerId)
         })
       } catch (error) {
-        handleWebSocketError(error, socket as unknown as WebSocket)
+        console.error("Connection authentication failed:", error)
+        // Close the socket with an error code
+        socket.close(4001, error instanceof Error ? error.message : "Authentication failed")
       }
     }
   )

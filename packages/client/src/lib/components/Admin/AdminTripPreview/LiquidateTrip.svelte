@@ -2,7 +2,7 @@
   import { gameConfig } from "$lib/modules/state/stores"
   import { blockNumber } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
-  import { DangerButton } from "$lib/components/Shared"
+  import { BigButton } from "$lib/components/Shared"
 
   let { trip, onclick }: { trip: Trip; onclick: () => void } = $props()
 
@@ -14,11 +14,12 @@
 
 <div class="liquidate-trip">
   <div class="action">
-    <DangerButton
+    <BigButton
       text={blockUntilUnlock <= 0
         ? `Liquidate Trip`
         : `Liquidation unlocked in ${blockUntilUnlock} blocks`}
       tippyText="Liquidate trip to get the value added to your wallet"
+      type="danger"
       {onclick}
       disabled={busy.CloseTrip.current !== 0 || blockUntilUnlock > 0}
     />
