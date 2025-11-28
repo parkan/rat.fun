@@ -58,6 +58,15 @@
     goto("/cashboard")
   }
 
+  const commit = () => {
+    // Commit selection
+    localSelectedEvent = localFocusEvent
+    $selectedEvent = mapLocalIndexToGlobal(localFocusEvent, graphData, $playerTrips, $staticContent)
+    // // Clear parent's hover state so scroll goes to selected, not hovered
+    // $focusEvent = -1
+    // $focusTrip = ""
+  }
+
   // Keyboard navigation for this trip's events
   const handleKeypress = (e: KeyboardEvent) => {
     if (!allVisitsData.length) return
@@ -71,6 +80,7 @@
         const prevEvent = allVisitsData[prevIndex]
         localFocusEvent = prevEvent.index
       }
+      commit()
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       // Move up in visual list (which is next in reversed array)
       const nextIndex = currentVisitIndex === -1 ? 0 : currentVisitIndex + 1
@@ -78,18 +88,7 @@
         const nextEvent = allVisitsData[nextIndex]
         localFocusEvent = nextEvent.index
       }
-    } else if (e.key === "Return" || e.key === "Enter") {
-      // Commit selection
-      localSelectedEvent = localFocusEvent
-      $selectedEvent = mapLocalIndexToGlobal(
-        localFocusEvent,
-        graphData,
-        $playerTrips,
-        $staticContent
-      )
-      // Clear parent's hover state so scroll goes to selected, not hovered
-      $focusEvent = -1
-      $focusTrip = ""
+      commit()
     }
   }
 
@@ -161,7 +160,6 @@
     <div bind:clientHeight class="right">
       <AdminEventLog
         graphData={logData}
-        behavior="click"
         hideUnlockEvent
         focusEventOverride={localFocusEvent}
         selectedEventOverride={localSelectedEvent}
@@ -172,8 +170,6 @@
           localSelectedEvent = index
           $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
           // Clear parent's hover state so scroll goes to selected, not hovered
-          $focusEvent = -1
-          $focusTrip = ""
         }}
       />
     </div>

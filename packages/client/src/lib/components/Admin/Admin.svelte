@@ -250,8 +250,10 @@
 
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       previous()
+      commit()
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       next()
+      commit()
     } else if (e.key === "Return" || e.key === "Enter") {
       commit()
     }

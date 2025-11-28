@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
+  import { makeHref } from "$lib/components/Admin/helpers"
   import { focusEvent, selectedEvent } from "$lib/modules/ui/state.svelte"
   import type { TripEvent } from "$lib/components/Admin/types"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
+  import { goto } from "$app/navigation"
 
   import { tick } from "svelte"
 
@@ -9,90 +12,41 @@
 
   let {
     graphData,
-    hideUnlockEvent = false,
-    behavior = "hover",
-    focusEventOverride = undefined,
-    selectedEventOverride = undefined,
-    onFocusChange = undefined,
-    onSelectionChange = undefined
+    hideUnlockEvent = false
   }: {
     graphData: TripEvent[]
     hideUnlockEvent?: boolean
-    behavior?: "hover" | "click"
-    focusEventOverride?: number
-    selectedEventOverride?: number
-    onFocusChange?: (index: number, tripId: string) => void
-    onSelectionChange?: (index: number, tripId: string) => void
   } = $props()
 
-  // Use override values if provided, otherwise use global stores
-  let effectiveFocusEvent = $derived(
-    focusEventOverride !== undefined ? focusEventOverride : $focusEvent
-  )
-  let effectiveSelectedEvent = $derived(
-    selectedEventOverride !== undefined ? selectedEventOverride : $selectedEvent
-  )
   let scrollContainer = $state<HTMLElement>()
-  let isScrolling = $state(false)
-  let scrollTimeout: ReturnType<typeof setTimeout> | null = null
-
-  $effect(() => {
-    // React to focusEvent or selectedEvent changes and scroll to the element
-    // Explicitly reference both to ensure reactivity
-    const focus = effectiveFocusEvent
-    const selected = effectiveSelectedEvent
-    const shouldScroll = (focus !== -1 || selected !== -1) && graphData.length > 0
-
-    if (shouldScroll) {
-      // Use tick() to ensure Svelte has updated the DOM
-      tick().then(() => {
-        // Prioritize hovered (active navigation) over selected
-        const element =
-          scrollContainer?.querySelector(".hovered") || scrollContainer?.querySelector(".selected")
-
-        if (element && scrollContainer) {
-          const containerRect = scrollContainer.getBoundingClientRect()
-          const elementRect = element.getBoundingClientRect()
-
-          // Only scroll if element is outside viewport
-          const isVisible =
-            elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom
-
-          if (!isVisible) {
-            // Set flag to prevent pointer events from interfering
-            isScrolling = true
-
-            // Clear any existing timeout
-            if (scrollTimeout) clearTimeout(scrollTimeout)
-
-            element.scrollIntoView({ block: "nearest" })
-
-            // Clear flag after scroll animation completes
-            scrollTimeout = setTimeout(() => {
-              isScrolling = false
-              scrollTimeout = null
-            }, 150)
-          }
-        }
-      })
-    }
-  })
 </script>
 
 <div bind:this={scrollContainer} class="admin-event-log">
   {#each graphData as point, index (point.index)}
-    <AdminEventLogItem
-      {point}
-      {behavior}
-      {isScrolling}
-      {focusEventOverride}
-      {selectedEventOverride}
-      {onFocusChange}
-      {onSelectionChange}
-    />
+    <div
+      class:selected={$selectedEvent === point.index}
+      class:focus={$focusEvent === point.index}
+      onclick={() => {
+        $selectedEvent = point.index
+      }}
+      onpointerenter={() => ($focusEvent = point.index)}
+      onpointerup={() => {
+        console.log("up")
+        if (
+          point.eventType === TRIP_EVENT_TYPE.DEPLETED ||
+          point.eventType === TRIP_EVENT_TYPE.CREATION ||
+          point.eventType === TRIP_EVENT_TYPE.LIQUIDATION
+        ) {
+          goto(makeHref(point))
+        }
+      }}
+      class="log-item"
+    >
+      <AdminEventLogItem {point} />
+    </div>
   {/each}
   {#if !hideUnlockEvent}
-    <p class="event">{UI_STRINGS.adminUnlockedMessage}</p>
+    <button class="log-item">{UI_STRINGS.adminUnlockedMessage}</button>
   {/if}
 </div>
 
@@ -122,6 +76,22 @@
       display: block;
       margin-bottom: 4px;
       font-size: var(--font-size-small);
+    }
+
+    .log-item {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-small);
+
+      &.focus {
+        background: black;
+      }
+
+      &.selected {
+        background: white;
+        color: black;
+      }
     }
   }
 </style>
