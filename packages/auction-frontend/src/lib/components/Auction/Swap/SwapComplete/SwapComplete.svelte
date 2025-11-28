@@ -24,6 +24,7 @@
 
     const { buyer, countryCode, tokenAmount, numeraireAmount } = receiptLog.args
 
+    // TODO receipt is always in eurc, decide if spent fromCurrency (usdc/eth) should also be shown
     return {
       buyer,
       countryCode,

@@ -2,15 +2,17 @@
   import { formatUnits, parseUnits } from "viem"
   import { swapState, SWAP_STATE } from "../state.svelte"
   import SpendLimitProgressBar from "./SpendLimitProgressBar.svelte"
+  import { quoteExactIn, quoteExactOut } from "$lib/modules/swap-router"
 
   /**
    * Get numeraire amount formatted for display in input field
    */
   function getAmountIn() {
     const amountIn = swapState.data.amountIn
+    if (amountIn === 0n) return 0
     const auctionParams = swapState.data.auctionParams
     if (!amountIn || !auctionParams) return undefined
-    return Number(formatUnits(amountIn, auctionParams.numeraire.decimals))
+    return Number(formatUnits(amountIn, swapState.data.fromCurrency.decimals))
   }
 
   /**
@@ -19,31 +21,37 @@
    */
   function setAmountIn(value: number | undefined) {
     const auctionParams = swapState.data.auctionParams
-    const quoter = swapState.data.quoter
-    if (!auctionParams || !quoter) return
+    if (!auctionParams) return
 
     // Mark as exact input mode
     swapState.data.setIsExactOut(false)
     // Clear permits when amounts change
     swapState.data.clearPermit()
 
-    if (value === undefined || value === null) {
+    const fromCurrency = swapState.data.fromCurrency
+    if (value === undefined || value === null || !fromCurrency) {
       swapState.data.setAmountIn(undefined)
+      swapState.data.setAmountOut(undefined)
+    } else if (value === 0) {
+      swapState.data.setAmountIn(0n)
       swapState.data.setAmountOut(undefined)
     } else {
       // Parse display value to bigint with proper decimals
-      const amountIn = parseUnits(value.toString(), auctionParams.numeraire.decimals)
+      const amountIn = parseUnits(value.toString(), fromCurrency.decimals)
       swapState.data.setAmountIn(amountIn)
       // Quote the expected output amount
-      quoter
-        .quoteExactInputV4(amountIn, true)
-        .then(result => {
-          swapState.data.setAmountOut(result.amountOut)
-        })
-        .catch(error => {
-          console.error("[SwapForm] Quote failed:", error)
-          swapState.data.setAmountOut(undefined)
-        })
+      quoteExactIn(
+        fromCurrency.address,
+        auctionParams,
+        amountIn
+      ).then(result => {
+        swapState.data.setAmountOut(result.amountOutFinal)
+        // TODO eurc for limits
+        console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
+      }).catch(error => {
+        console.error("[SwapForm] Quote failed:", error)
+        swapState.data.setAmountOut(undefined)
+      })
     }
   }
 
@@ -52,6 +60,7 @@
    */
   function getAmountOut() {
     const amountOut = swapState.data.amountOut
+    if (amountOut === 0n) return 0
     const auctionParams = swapState.data.auctionParams
     if (!amountOut || !auctionParams) return undefined
     return Number(formatUnits(amountOut, auctionParams.token.decimals))
@@ -63,31 +72,37 @@
    */
   function setAmountOut(value: number | undefined) {
     const auctionParams = swapState.data.auctionParams
-    const quoter = swapState.data.quoter
-    if (!auctionParams || !quoter) return
+    if (!auctionParams) return
 
     // Mark as exact output mode
     swapState.data.setIsExactOut(true)
     // Clear permits when amounts change
     swapState.data.clearPermit()
 
-    if (value === undefined || value === null) {
+    const fromCurrency = swapState.data.fromCurrency
+    if (value === undefined || value === null || !fromCurrency) {
       swapState.data.setAmountIn(undefined)
       swapState.data.setAmountOut(undefined)
+    } else if (value === 0) {
+      swapState.data.setAmountIn(undefined)
+      swapState.data.setAmountOut(0n)
     } else {
       // Parse display value to bigint with proper decimals
       const amountOut = parseUnits(value.toString(), auctionParams.token.decimals)
       swapState.data.setAmountOut(amountOut)
       // Quote the required input amount
-      quoter
-        .quoteExactOutputV4(amountOut, true)
-        .then(result => {
-          swapState.data.setAmountIn(result.amountIn)
-        })
-        .catch(error => {
-          console.error("[SwapForm] Quote failed:", error)
-          swapState.data.setAmountIn(undefined)
-        })
+      quoteExactOut(
+        fromCurrency.address,
+        auctionParams,
+        amountOut
+      ).then(result => {
+        swapState.data.setAmountIn(result.amountInInitial)
+        // TODO eurc for limits
+        console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
+      }).catch(error => {
+        console.error("[SwapForm] Quote failed:", error)
+        swapState.data.setAmountIn(undefined)
+      })
     }
   }
 

@@ -3,19 +3,23 @@ import {
   Chain,
   formatUnits,
   Hex,
+  maxUint128,
   parseUnits,
   PublicClient,
   Transport,
-  WalletClient
+  WalletClient,
+  zeroAddress
 } from "viem"
+import { getAddresses } from "@whetstone-research/doppler-sdk"
 import {
   AuctionParams,
   balanceOf,
-  isPermit2AllowedMaxRequired,
-  isPermitRequired,
+  CustomQuoter,
+  getPoolKey,
+  isPermit2AllowanceRequired,
   permit2AllowMax,
   Permit2PermitData,
-  signPermit2ForUniversalRouter,
+  signPermit2,
   swapExactSingle
 } from "../../src"
 
@@ -46,20 +50,31 @@ export async function swapWithLogs(
   let permit: Permit2PermitData | undefined = undefined
   let permitSignature: Hex | undefined = undefined
   if (isPermitRequired(auctionParams)) {
-    const isAllowedMaxRequired = await isPermit2AllowedMaxRequired(
+    const isAllowedMaxRequired = await isPermit2AllowanceRequired(
       publicClient,
       walletClient.account.address,
-      auctionParams.numeraire.address
+      auctionParams.numeraire.address,
+      maxUint128
     )
     if (isAllowedMaxRequired) {
       await permit2AllowMax(publicClient, walletClient, auctionParams.numeraire.address)
     }
-    const result = await signPermit2ForUniversalRouter(
+    let amountIn: bigint
+    if (isOut) {
+      const quoter = new CustomQuoter(publicClient, publicClient.chain.id, auctionParams)
+      const input = await quoter.quoteExactOutputV4(parsedAmount, true)
+  
+      amountIn = input.amountIn
+    } else {
+      amountIn = parsedAmount
+    }
+    const addresses = getAddresses(publicClient.chain.id)
+    const result = await signPermit2(
       publicClient,
       walletClient,
-      auctionParams,
-      parsedAmount,
-      { isOut }
+      auctionParams.numeraire.address,
+      addresses.universalRouter,
+      amountIn
     )
     permit = result.permit
     permitSignature = result.permitSignature
@@ -100,4 +115,11 @@ export async function swapWithLogs(
     numeraireDiff,
     effectivePrice
   }
+}
+
+function isPermitRequired(auctionParams: AuctionParams) {
+  const poolKey = getPoolKey(auctionParams)
+  const zeroForOne = !auctionParams.isToken0
+  const swapFromNative = zeroForOne && poolKey.currency0 === zeroAddress
+  return !swapFromNative
 }

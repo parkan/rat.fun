@@ -1,5 +1,6 @@
 import { errorHandler } from "$lib/modules/error-handling"
 import { InvalidStateTransitionError } from "$lib/modules/error-handling/errors"
+import { usdcCurrency } from "$lib/modules/swap-router"
 import type { AuctionParams, CustomQuoter, Permit2PermitData, SwapReceipt } from "doppler"
 import type { Hex } from "viem"
 
@@ -128,6 +129,10 @@ export const swapState = {
     },
     get isExactOut() {
       return isExactOut
+    },
+    get fromCurrency() {
+      // TODO token selection
+      return usdcCurrency
     },
     get permit() {
       return permit

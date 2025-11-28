@@ -42,22 +42,23 @@ export interface Permit2PermitData {
 }
 
 /**
- * Check if token has max allowance for permit2
+ * Check if token has sufficient allowance for permit2
  * This could be always present due to the wallet using uniswap itself, since permit2 is a global contract
  */
-export async function isPermit2AllowedMaxRequired(
+export async function isPermit2AllowanceRequired(
   publicClient: PublicClient<Transport, Chain>,
   walletAddress: Hex,
-  tokenAddress: Hex
+  tokenAddress: Hex,
+  requiredAllowance: bigint
 ) {
-  const addresses = getAddresses(publicClient.chain.id)
+  const permit2Address = getAddresses(publicClient.chain.id).permit2
   const allowance = await publicClient.readContract({
     address: tokenAddress,
     abi: erc20Abi,
     functionName: "allowance",
-    args: [walletAddress, addresses.permit2]
+    args: [walletAddress, permit2Address]
   })
-  return allowance < maxUint256
+  return allowance < requiredAllowance
 }
 
 /**
@@ -68,12 +69,12 @@ export async function permit2AllowMax(
   walletClient: WalletClient<Transport, Chain, Account>,
   tokenAddress: Hex
 ) {
-  const addresses = getAddresses(publicClient.chain.id)
+  const permit2Address = getAddresses(publicClient.chain.id).permit2
   const txHash = await walletClient.writeContract({
     address: tokenAddress,
     abi: erc20Abi,
     functionName: "approve",
-    args: [addresses.permit2, maxUint256]
+    args: [permit2Address, maxUint256]
   })
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
   return {
@@ -96,14 +97,14 @@ export async function signPermit2(
     throw new Error("public and wallet client chains mismatch")
   }
 
-  const addresses = getAddresses(publicClient.chain.id)
+  const permit2Address = getAddresses(publicClient.chain.id).permit2
 
   // Get account's current permit2 nonce, as stored in the permit2 contract (not related to transaction nonce)
   const permit2Allowance = await publicClient.readContract({
-    address: addresses.permit2,
+    address: permit2Address,
     abi: permit2Abi,
     functionName: "allowance",
-    args: [walletClient.account.address, tokenAddress, addresses.universalRouter]
+    args: [walletClient.account.address, tokenAddress, spender]
   })
   const nonce = BigInt(permit2Allowance[2])
 
@@ -114,9 +115,9 @@ export async function signPermit2(
       token: tokenAddress,
       amount,
       expiration: nowSec + 3600n,
-      nonce: nonce
+      nonce
     },
-    spender: spender,
+    spender,
     sigDeadline: nowSec + 3600n
   } as const satisfies Permit2PermitData
 
@@ -125,7 +126,7 @@ export async function signPermit2(
     domain: {
       name: "Permit2",
       chainId: publicClient.chain.id,
-      verifyingContract: addresses.permit2
+      verifyingContract: permit2Address
     },
     types: PERMIT2_PERMIT_TYPE,
     primaryType: "PermitSingle",
