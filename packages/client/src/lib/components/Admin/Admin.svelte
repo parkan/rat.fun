@@ -236,7 +236,11 @@
   }
 
   const go = () => {
-    const href = makeHref(graphData[$focusEvent])
+    const event = graphData[$focusEvent]
+    if (!event || event.eventType === TRIP_EVENT_TYPE.BASELINE) {
+      return
+    }
+    const href = makeHref(event)
     if (href) {
       goto(href)
     }
