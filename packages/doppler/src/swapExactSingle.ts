@@ -30,27 +30,6 @@ export interface SwapExactParams {
 }
 
 /**
- * Prepare permit2 data and its signature for numeraire swap via universal router
- */
-export async function signPermit2ForUniversalRouter(
-  publicClient: PublicClient<Transport, Chain>,
-  walletClient: WalletClient<Transport, Chain, Account>,
-  auctionParams: AuctionParams,
-  amount: bigint
-) {
-  const chainId = publicClient.chain.id
-  const addresses = getAddresses(chainId)
-
-  return await signPermit2(
-    publicClient,
-    walletClient,
-    auctionParams.numeraire.address,
-    addresses.universalRouter,
-    amount
-  )
-}
-
-/**
  * Swap numeraire for token
  * @param amount exact amount in/out depending on `isOut`
  */

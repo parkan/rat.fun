@@ -9,6 +9,7 @@ import {
   WalletClient,
   zeroAddress
 } from "viem"
+import { getAddresses } from "@whetstone-research/doppler-sdk"
 import {
   AuctionParams,
   balanceOf,
@@ -17,7 +18,7 @@ import {
   isPermit2AllowedMaxRequired,
   permit2AllowMax,
   Permit2PermitData,
-  signPermit2ForUniversalRouter,
+  signPermit2,
   swapExactSingle
 } from "../../src"
 
@@ -65,10 +66,12 @@ export async function swapWithLogs(
     } else {
       amountIn = parsedAmount
     }
-    const result = await signPermit2ForUniversalRouter(
+    const addresses = getAddresses(publicClient.chain.id)
+    const result = await signPermit2(
       publicClient,
       walletClient,
-      auctionParams,
+      auctionParams.numeraire.address,
+      addresses.universalRouter,
       amountIn
     )
     permit = result.permit
