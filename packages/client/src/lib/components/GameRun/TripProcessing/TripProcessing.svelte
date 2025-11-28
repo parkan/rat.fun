@@ -35,6 +35,9 @@
     playSound({ category: "ratfunTransitions", id: "tripProcessingEnter" })
     backgroundMusic.play({ category: "ratfunMusic", id: "tripProcessing" })
 
+    // Enable continuous rendering for trip processing animation
+    shaderManager.enableContinuousRendering()
+
     // Set the trip processing shader with custom uniforms
     shaderManager.setShader("tripProcessing", false, {
       u_seed1: { type: "float", value: seed1 },
@@ -53,6 +56,8 @@
 
   onDestroy(async () => {
     backgroundMusic.stop()
+    // Disable continuous rendering when trip processing ends
+    shaderManager.disableContinuousRendering()
   })
 </script>
 

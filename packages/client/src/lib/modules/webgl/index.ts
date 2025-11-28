@@ -40,6 +40,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
   private frameInterval: number = 1000 / 60
   private shaderSource: ShaderSource
   private contextLost: boolean = false
+  private isPaused: boolean = false
 
   /**
    * Creates a new WebGL renderer instance.
@@ -352,7 +353,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
    */
   render(): void {
     if (!this.gl || !this.program || this.contextLost) {
-      if (this.autoRender) {
+      if (this.autoRender && !this.isPaused) {
         this.animationId = requestAnimationFrame(() => this.render())
       }
       return
@@ -362,7 +363,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
 
     // Frame rate limiting - only schedule next frame after we render
     if (currentTime - this.lastFrameTime < this.frameInterval) {
-      if (this.autoRender) {
+      if (this.autoRender && !this.isPaused) {
         this.animationId = requestAnimationFrame(() => this.render())
       }
       return
@@ -389,9 +390,55 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
       this.fps = Math.round((this.frameCount / elapsed) * 1000)
     }
 
-    if (this.autoRender) {
+    if (this.autoRender && !this.isPaused) {
       this.animationId = requestAnimationFrame(() => this.render())
     }
+  }
+
+  /**
+   * Pauses animation rendering (for mobile optimization).
+   * Cancels the animation frame loop but keeps the renderer ready.
+   */
+  pause(): void {
+    this.isPaused = true
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId)
+      this.animationId = undefined
+    }
+  }
+
+  /**
+   * Resumes animation rendering.
+   * Restarts the animation frame loop if autoRender is enabled.
+   */
+  resume(): void {
+    this.isPaused = false
+    if (this.autoRender && !this.animationId) {
+      this.animationId = requestAnimationFrame(() => this.render())
+    }
+  }
+
+  /**
+   * Renders a single frame without starting the animation loop.
+   * Useful for static rendering on mobile devices.
+   */
+  renderSingleFrame(): void {
+    if (!this.gl || !this.program || this.contextLost) {
+      return
+    }
+
+    const currentTime = performance.now()
+
+    // Update time uniform if it exists (using cached location)
+    const timeLocation = this.uniformLocations.get("u_time")
+    if (timeLocation) {
+      const time = (currentTime - this.startTime) * 0.001
+      this.gl.uniform1f(timeLocation, time)
+    }
+
+    // Clear and draw
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+    this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4)
   }
 
   /**

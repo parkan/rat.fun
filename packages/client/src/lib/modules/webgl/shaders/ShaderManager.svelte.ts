@@ -2,6 +2,8 @@ import { WebGLGeneralRenderer } from "$lib/modules/webgl"
 import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
 import { ShaderInitializationError } from "$lib/modules/error-handling/errors"
 import { errorHandler } from "$lib/modules/error-handling"
+import { isPhone } from "$lib/modules/ui/state.svelte"
+import { get } from "svelte/store"
 
 export type UniformType = "float" | "vec2" | "vec3" | "vec4" | "int" | "bool"
 
@@ -25,6 +27,7 @@ export class ShaderManager {
   private recoveryTimeout: ReturnType<typeof setTimeout> | null = null
   private recoveryAttempts = 0
   private maxRecoveryAttempts = 10
+  private forceContinuousRendering = false
 
   constructor() {
     // No initialization needed
@@ -154,6 +157,16 @@ export class ShaderManager {
         if (this._canvas) {
           this._canvas.style.display = "block"
         }
+
+        // On mobile, pause after first frame unless continuous rendering is forced
+        if (get(isPhone) && !this.forceContinuousRendering && this._renderer) {
+          // Wait for first frame to render, then pause
+          setTimeout(() => {
+            if (this._renderer && !this.forceContinuousRendering) {
+              this._renderer.pause()
+            }
+          }, 100)
+        }
       } catch (error) {
         // Error already logged to Sentry in initializeRenderer
         console.error(`Failed to initialize shader "${shaderKey}":`, error)
@@ -172,6 +185,26 @@ export class ShaderManager {
         // Instead, trigger recovery system
         this.scheduleContextRecovery(shaderKey)
       }
+    }
+  }
+
+  /**
+   * Enable continuous rendering (for animations like trip processing)
+   */
+  enableContinuousRendering() {
+    this.forceContinuousRendering = true
+    if (this._renderer) {
+      this._renderer.resume()
+    }
+  }
+
+  /**
+   * Disable continuous rendering (revert to mobile optimization)
+   */
+  disableContinuousRendering() {
+    this.forceContinuousRendering = false
+    if (get(isPhone) && this._renderer) {
+      this._renderer.pause()
     }
   }
 
