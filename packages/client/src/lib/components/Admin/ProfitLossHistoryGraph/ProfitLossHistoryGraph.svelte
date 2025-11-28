@@ -196,29 +196,11 @@
               fill="none"
             />
 
-            {#each profitLossOverTime as point, i (point.time)}
-              {@const focus =
-                $focusEvent === point.index || (point.tripId === $focusTrip && $focusEvent === -1)}
-              {@const lastPoint = profitLossOverTime?.[i - 1]}
+            <!-- Render all non-focused points first -->
+            {#each profitLossOverTime.filter(p => $focusEvent !== p.index) as point, i (point.time)}
+              {@const focus = point.tripId === $focusTrip && $focusEvent === -1}
+              {@const lastPoint = profitLossOverTime?.[profitLossOverTime.indexOf(point) - 1]}
 
-              <!-- If the candle is selected, draw a line through it -->
-              {#if $focusEvent === point.index}
-                <line
-                  x1={xScale(point.time)}
-                  y1={0}
-                  x2={xScale(point.time)}
-                  y2={height}
-                  stroke="var(--color-grey-mid)"
-                  stroke-width="2"
-                  stroke-dasharray="4,4"
-                />
-              {/if}
-
-              <!-- <Tooltip
-                content={generateTooltipContent(point)}
-                svg={true}
-                props={{ allowHTML: true }}
-              > -->
               <g
                 onpointerenter={() => {
                   $focusTrip = point.tripId
@@ -238,6 +220,26 @@
                   }
                 }}
               >
+                {#if lastPoint}
+                  {@const candleHeight = Math.abs(yScale(point.value) - yScale(lastPoint.value))}
+                  {@const candleWidth = innerWidth / 80}
+                  <!-- Draw "candle" -->
+                  {#if point.eventType === "trip_death" || point.eventType === "trip_visit"}
+                    <rect
+                      x={xScale(point.time) - candleWidth / 2}
+                      y={point.value < lastPoint.value
+                        ? yScale(lastPoint.value)
+                        : yScale(lastPoint.value) - candleHeight}
+                      width={candleWidth}
+                      height={candleHeight}
+                      paint-order="stroke"
+                      stroke={focus ? "white" : ""}
+                      stroke-width="2"
+                      fill={point.value < lastPoint.value ? "var(--color-down)" : "var(--color-up)"}
+                    >
+                    </rect>
+                  {/if}
+                {/if}
                 {#if point.eventType === "trip_death"}
                   <circle
                     paint-order="stroke"
@@ -279,29 +281,116 @@
                     cy={yScale(point.value)}
                   ></circle>
                 {/if}
-                {#if lastPoint}
-                  {@const candleHeight = Math.abs(yScale(point.value) - yScale(lastPoint.value))}
-                  {@const candleWidth = innerWidth / 80}
-                  <!-- Draw "candle" -->
-                  {#if point.eventType === "trip_death" || point.eventType === "trip_visit"}
-                    <rect
-                      x={xScale(point.time) - candleWidth / 2}
-                      y={point.value < lastPoint.value
-                        ? yScale(lastPoint.value)
-                        : yScale(lastPoint.value) - candleHeight}
-                      width={candleWidth}
-                      height={candleHeight}
-                      paint-order="stroke"
-                      stroke={focus ? "white" : ""}
-                      stroke-width="2"
-                      fill={point.value < lastPoint.value ? "var(--color-down)" : "var(--color-up)"}
-                    >
-                    </rect>
-                  {/if}
-                {/if}
               </g>
-              <!-- </Tooltip> -->
             {/each}
+
+            <!-- Render focused point on top -->
+            {#if $focusEvent !== -1}
+              {@const focusedPoint = profitLossOverTime.find(p => p.index === $focusEvent)}
+              {#if focusedPoint}
+                {@const focusedIndex = profitLossOverTime.indexOf(focusedPoint)}
+                {@const lastPoint = profitLossOverTime?.[focusedIndex - 1]}
+
+                <!-- Draw line through focused point -->
+                <line
+                  x1={xScale(focusedPoint.time)}
+                  y1={0}
+                  x2={xScale(focusedPoint.time)}
+                  y2={height}
+                  stroke="var(--color-grey-mid)"
+                  stroke-width="2"
+                  stroke-dasharray="4,4"
+                />
+
+                <g
+                  onpointerenter={() => {
+                    $focusTrip = focusedPoint.tripId
+                    $focusEvent = focusedPoint.index
+                  }}
+                  onpointerdown={() => {
+                    // Play sound
+                  }}
+                  onpointerup={() => {
+                    $selectedEvent = focusedPoint.index
+                    goto(
+                      `/cashboard/${focusedPoint.tripId}?focusId=${focusedPoint?.meta?._id || ""}`
+                    )
+                  }}
+                  onpointerleave={() => {
+                    if (!page.route?.id?.includes("/cashboard/[tripId]")) {
+                      $focusTrip = ""
+                      $focusEvent = -1
+                    }
+                  }}
+                >
+                  {#if lastPoint}
+                    {@const candleHeight = Math.abs(
+                      yScale(focusedPoint.value) - yScale(lastPoint.value)
+                    )}
+                    {@const candleWidth = innerWidth / 80}
+                    <!-- Draw "candle" -->
+                    {#if focusedPoint.eventType === "trip_death" || focusedPoint.eventType === "trip_visit"}
+                      <rect
+                        x={xScale(focusedPoint.time) - candleWidth / 2}
+                        y={focusedPoint.value < lastPoint.value
+                          ? yScale(lastPoint.value)
+                          : yScale(lastPoint.value) - candleHeight}
+                        width={candleWidth}
+                        height={candleHeight}
+                        paint-order="stroke"
+                        stroke="white"
+                        stroke-width="2"
+                        fill={focusedPoint.value < lastPoint.value
+                          ? "var(--color-down)"
+                          : "var(--color-up)"}
+                      >
+                      </rect>
+                    {/if}
+                  {/if}
+                  {#if focusedPoint.eventType === "trip_death"}
+                    <circle
+                      paint-order="stroke"
+                      fill="white"
+                      stroke="white"
+                      stroke-width="2"
+                      r="5"
+                      cx={xScale(focusedPoint.time)}
+                      cy={yScale(focusedPoint.value)}
+                    ></circle>
+                  {:else if focusedPoint.eventType === "trip_liquidated"}
+                    <circle
+                      paint-order="stroke"
+                      fill="white"
+                      stroke="white"
+                      stroke-width="2"
+                      r="5"
+                      cx={xScale(focusedPoint.time)}
+                      cy={yScale(focusedPoint.value)}
+                    ></circle>
+                  {:else if focusedPoint.eventType === "trip_created"}
+                    <circle
+                      paint-order="stroke"
+                      fill="white"
+                      stroke="white"
+                      stroke-width="2"
+                      r="5"
+                      cx={xScale(focusedPoint.time)}
+                      cy={yScale(focusedPoint.value)}
+                    ></circle>
+                  {:else}
+                    <circle
+                      paint-order="stroke"
+                      fill="white"
+                      stroke="white"
+                      stroke-width="2"
+                      r="5"
+                      cx={xScale(focusedPoint.time)}
+                      cy={yScale(focusedPoint.value)}
+                    ></circle>
+                  {/if}
+                </g>
+              {/if}
+            {/if}
           </g>
         {/if}
       </svg>

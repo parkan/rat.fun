@@ -22,21 +22,19 @@
 
 {#if point.eventType === "trip_visit"}
   <span class="event-message">
-    trip #{point.meta?.tripIndex}
-    <span class="event-icon">→</span>
-    {point.meta?.playerName}
+    {point.meta?.playerName} sent rat to trip #{point.meta?.tripIndex}
   </span>
   <div class="event-valuechange">
     <SignedNumber neutralColor="rgba(255, 255, 0, 1);" value={point.valueChange} />
   </div>
 {:else if point.eventType === "trip_liquidated"}
-  <span class="event-message">
+  <span class="event-message prio-2">
     <span class="event-icon">*</span>
     You liquidated trip #{point.meta?.index}
   </span>
   <div class="event-valuechange"></div>
 {:else if point.eventType === "trip_created"}
-  <span class="event-message">
+  <span class="event-message prio-2">
     <span class="event-icon">*</span>
     You created trip #{point.meta?.index}
     <!-- {point.meta.tripCreationCost} -->
@@ -46,15 +44,13 @@
   </div>
 {:else if point.eventType === "trip_death"}
   <span class="event-message">
-    trip #{point.meta?.tripIndex}
-    <span class="event-icon">✝</span>
-    {point.meta?.playerName}
+    {point.meta?.playerName}'s rat died in trip #{point.meta?.tripIndex}
   </span>
   <div class="event-valuechange">
     <SignedNumber neutralColor="rgba(255, 255, 0, 1);" value={point.valueChange} />
   </div>
 {:else if point.eventType === "trip_depleted"}
-  <span class="event-message">
+  <span class="event-message prio-2">
     <span class="event-icon">*</span>
     Trip #{point.meta?.index} got depleted
   </span>
@@ -79,6 +75,10 @@
     border-style: outset;
     border-width: 2px;
     border-color: rgba(0, 0, 0, 0.3);
+
+    .prio-2 {
+      color: var(--color-grey-mid);
+    }
 
     &.selected {
       background: white;

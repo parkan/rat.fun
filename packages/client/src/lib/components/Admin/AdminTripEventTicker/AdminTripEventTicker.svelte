@@ -6,10 +6,10 @@
 
 <div class="admin-trip-event-ticker">
   <div class="buttons">
-    <button onclick={previous} disabled={!previousEnabled}>
+    <button onclick={next} disabled={!nextEnabled}>
       {"<"}
     </button>
-    <button onclick={next} disabled={!nextEnabled}>
+    <button onclick={previous} disabled={!previousEnabled}>
       {">"}
     </button>
   </div>
@@ -39,5 +39,6 @@
     background: black;
     text-align: left;
     padding: var(--trip-item-padding);
+    font-size: var(--font-size-small);
   }
 </style>

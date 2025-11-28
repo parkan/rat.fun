@@ -62,9 +62,7 @@
     // Commit selection
     localSelectedEvent = localFocusEvent
     $selectedEvent = mapLocalIndexToGlobal(localFocusEvent, graphData, $playerTrips, $staticContent)
-    // // Clear parent's hover state so scroll goes to selected, not hovered
-    // $focusEvent = -1
-    // $focusTrip = ""
+    $focusEvent = $selectedEvent
   }
 
   // Keyboard navigation for this trip's events
@@ -151,9 +149,7 @@
         onSelectionChange={index => {
           localSelectedEvent = index
           $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
-          // Clear parent's hover state so scroll goes to selected, not hovered
-          $focusEvent = -1
-          $focusTrip = ""
+          $focusEvent = $selectedEvent
         }}
       />
     </div>
@@ -169,7 +165,7 @@
         onSelectionChange={(index, tripId) => {
           localSelectedEvent = index
           $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
-          // Clear parent's hover state so scroll goes to selected, not hovered
+          $focusEvent = $selectedEvent
         }}
       />
     </div>

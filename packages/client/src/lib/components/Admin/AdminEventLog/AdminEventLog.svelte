@@ -12,24 +12,64 @@
 
   let {
     graphData,
-    hideUnlockEvent = false
+    hideUnlockEvent = false,
+    focusEventOverride = undefined,
+    selectedEventOverride = undefined,
+    onFocusChange = undefined,
+    onSelectionChange = undefined
   }: {
     graphData: TripEvent[]
     hideUnlockEvent?: boolean
+    focusEventOverride?: number
+    selectedEventOverride?: number
+    onFocusChange?: (index: number, tripId: string) => void
+    onSelectionChange?: (index: number, tripId: string) => void
   } = $props()
 
   let scrollContainer = $state<HTMLElement>()
+
+  // Use overrides if provided, otherwise fall back to global state
+  let effectiveFocusEvent = $derived(
+    focusEventOverride !== undefined ? focusEventOverride : $focusEvent
+  )
+  let effectiveSelectedEvent = $derived(
+    selectedEventOverride !== undefined ? selectedEventOverride : $selectedEvent
+  )
+
+  // Auto-scroll to selected event
+  $effect(() => {
+    if (effectiveSelectedEvent !== -1 && scrollContainer) {
+      tick().then(() => {
+        const selectedElement = scrollContainer?.querySelector(".selected")
+        if (selectedElement) {
+          selectedElement.scrollIntoView({ block: "nearest" })
+        }
+      })
+    }
+  })
 </script>
 
 <div bind:this={scrollContainer} class="admin-event-log">
   {#each graphData as point, index (point.index)}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-      class:selected={$selectedEvent === point.index}
-      class:focus={$focusEvent === point.index}
+      class:selected={effectiveSelectedEvent === point.index}
+      class:focus={effectiveFocusEvent === point.index}
       onclick={() => {
-        $selectedEvent = point.index
+        if (onSelectionChange) {
+          onSelectionChange(point.index, point.tripId)
+        } else {
+          $selectedEvent = point.index
+        }
       }}
-      onpointerenter={() => ($focusEvent = point.index)}
+      onpointerenter={() => {
+        if (onFocusChange) {
+          onFocusChange(point.index, point.tripId)
+        } else {
+          $focusEvent = point.index
+        }
+      }}
       onpointerup={() => {
         console.log("up")
         if (
@@ -37,10 +77,16 @@
           point.eventType === TRIP_EVENT_TYPE.CREATION ||
           point.eventType === TRIP_EVENT_TYPE.LIQUIDATION
         ) {
-          goto(makeHref(point))
+          const href = makeHref(point)
+          if (href) {
+            goto(href)
+          }
         }
       }}
       class="log-item"
+      class:secondary={point.eventType === TRIP_EVENT_TYPE.DEPLETED ||
+        point.eventType === TRIP_EVENT_TYPE.CREATION ||
+        point.eventType === TRIP_EVENT_TYPE.LIQUIDATION}
     >
       <AdminEventLogItem {point} />
     </div>
@@ -83,6 +129,10 @@
       display: flex;
       justify-content: space-between;
       font-size: var(--font-size-small);
+
+      &.secondary {
+        color: var(--color-alert-priority);
+      }
 
       &.focus {
         background: black;
