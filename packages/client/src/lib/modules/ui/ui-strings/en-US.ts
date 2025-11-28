@@ -273,5 +273,14 @@ t he mentally deranged. Results may vary.`,
   loadingTrademarks: "FUN and RAT are registered trademarks of RAT.FUN SCIENTIFIC INSTRUMENTS LLC",
   loadingAgreement:
     "BY READING THIS TEXT YOU AGREE TO BE BOUND BY THE TERMS OF THE AGREEMENT AND FORFEIT YOUR HUMAN RIGHTS",
-  loadingBoot: "BOOTING SLOP MACHINE..."
+  loadingBoot: "BOOTING SLOP MACHINE...",
+  // Introduction messages
+  introductionStep1: "Gooood moooooorning **OPERATOR**!",
+  introductionStep2: "Welcome to our rat controlled remote viewing **SLOP MACHINE**.",
+  introductionStep3: "If operated skilfully this machine will bring you great riches!",
+  introductionStep4:
+    "Pump your rats with drugs and send them tripping, then cash out tokens by exploiting their success.",
+  introductionStep5: "I can feel your dopamine injectors tingling! What are you waiting for?",
+  introductionButtonOk: "OK",
+  introductionButtonReady: "I AM READY"
 } as const

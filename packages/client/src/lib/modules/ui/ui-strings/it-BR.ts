@@ -271,5 +271,14 @@ export const itBR = {
   loadingTrademarks: "FUN e RAT sono marki registrat de RAT.FUN STRUMENTI SCIENTIFIK LLC",
   loadingAgreement:
     "LEGGEND QUEST TESTO AKKETTI DE ESSER VINKOLAT AI TERMINI DELL AKKORD E FORFETTI I TUA DIRITTI UMAN BRO FR FR",
-  loadingBoot: "BOOTTAND MAKKINA SLOP..."
+  loadingBoot: "BOOTTAND MAKKINA SLOP...",
+  // Introduction messages
+  introductionStep1: "Buoooongiornooooo **OPERATOR** zio!",
+  introductionStep2: "benvenut alla nostra **MAKKINA SLOP** kontroltat da rat fr fr.",
+  introductionStep3: "se operat kon skilla sta makkina ti portera rikkezz immens bro no cap!",
+  introductionStep4:
+    "pompa i tuo rat kon droghe e inviali trippando, poi kascia token sfruttando il lor sukkess zio gg.",
+  introductionStep5: "sent i tuo iniettori de dopamina formikolà! ke aspett fra?",
+  introductionButtonOk: "OK",
+  introductionButtonReady: "SONT PRONT BRO"
 } as const

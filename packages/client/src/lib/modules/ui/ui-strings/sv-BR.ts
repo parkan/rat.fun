@@ -280,5 +280,15 @@ export const svBR = {
     "FÜN öch RÄT är rëgïstrërädë trädemärks äv RÄT.FÜN VËTËNSKÄPLÏGÄ ÏNSTRÜMËNT LLC",
   loadingAgreement:
     "GËNÖM ÄTT LÄSÄ DËNNÄ TËXT GÖDKÄNNËR DÜ ÄTT BÏNDÄS ÄV TËRMS ÄV ÄGRËËMËNT ÖCH FÖRFËÏT DÏNÄ HÜMÄN RÏGHTS LÏKË BÖTËN ÄNNÄ ÄSSÅ NÖ CÄP",
-  loadingBoot: "BÖÖTÄND SLÖP MÄSKÏN FRÅN ÜMËÅ..."
+  loadingBoot: "BÖÖTÄND SLÖP MÄSKÏN FRÅN ÜMËÅ...",
+  // Introduction messages
+  introductionStep1: "Göööööd mööööörnïng **ÖPËRÄTOR** från Ümëå!",
+  introductionStep2: "välkömmën tïll vår råttä-köntrölërädë rëmötë vïëwïng **SLÖP MÄSKÏN** ässå!",
+  introductionStep3:
+    "öm öpërëräd skïcklïgt dënnä BËSTÅ kömmër gë dïg störä rïkëdömär brör från ÏKËÄ!",
+  introductionStep4:
+    "pümpä dïnä råttör mëd drögër öch skïckä dëm trïppändës, sëdän cäshä üt tökëns gënöm ätt ëxplöïtërä dërës süccëss ässå lïkë Swëdïsh Höüsë Mäfïä.",
+  introductionStep5: "jäg kännër dïnä döpämïn-ïnjëktörër kïttlä! väd väntär dü på brör ässå?",
+  introductionButtonOk: "ÖK BÄSSHÜNTËR",
+  introductionButtonReady: "JÄG ÄR RËDÖ FRÅN ÜMËÅ"
 } as const
