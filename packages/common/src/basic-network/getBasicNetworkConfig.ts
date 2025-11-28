@@ -19,7 +19,10 @@ export interface ChainRpcUrls {
   webSocket?: readonly string[] | undefined
 }
 
-export function getBasicNetworkConfig(environment: ENVIRONMENT, overrideDefaultRpcUrls: ChainRpcUrls | null = null): BasicNetworkConfig {
+export function getBasicNetworkConfig(
+  environment: ENVIRONMENT,
+  overrideDefaultRpcUrls: ChainRpcUrls | null = null
+): BasicNetworkConfig {
   // Default to local development chain
   let chainId = 31337
 

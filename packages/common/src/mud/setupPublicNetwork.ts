@@ -5,11 +5,11 @@
  */
 import { Hex, PublicClient, Transport, Chain, Block } from "viem"
 import { Observable } from "rxjs"
-import { StorageAdapterBlock } from "@latticexyz/store-sync";
+import { StorageAdapterBlock } from "@latticexyz/store-sync"
 import { syncToRecs, SyncToRecsResult } from "@latticexyz/store-sync/recs"
 import { World } from "@latticexyz/recs"
 
-import { setupPublicBasicNetwork } from "../basic-network";
+import { setupPublicBasicNetwork } from "../basic-network"
 import { NetworkConfig } from "./getNetworkConfig"
 import { world } from "./world"
 
@@ -37,8 +37,11 @@ export type SetupPublicNetworkResult = {
   tableKeys: string[]
 }
 
-export async function setupPublicNetwork(networkConfig: NetworkConfig, devMode: boolean): Promise<SetupPublicNetworkResult> {
-  const { publicClient } = await setupPublicBasicNetwork(networkConfig, devMode);
+export async function setupPublicNetwork(
+  networkConfig: NetworkConfig,
+  devMode: boolean
+): Promise<SetupPublicNetworkResult> {
+  const { publicClient } = await setupPublicBasicNetwork(networkConfig, devMode)
 
   const resolvedConfig = {
     world,

@@ -26,7 +26,7 @@ export abstract class AbstractERC20Listener<T> {
   /**
    * Async value getter implementation
    */
-  protected abstract fetchValue(): Promise<T>;
+  protected abstract fetchValue(): Promise<T>
 
   /**
    * Trigger an async request to update the value
@@ -37,7 +37,7 @@ export abstract class AbstractERC20Listener<T> {
     const localNonce = this.totalNonce
     this.totalNonce += 1n
 
-    this.fetchValue().then((value) => {
+    this.fetchValue().then(value => {
       if (localNonce >= this.lastUpdateNonce) {
         this.lastUpdateNonce = localNonce
         this.value = value

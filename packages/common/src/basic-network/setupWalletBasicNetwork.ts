@@ -46,9 +46,7 @@ export function ensureWriteContract(client: WalletClientInput): WalletTransactio
 
 export type SetupWalletBasicNetworkResult = Awaited<ReturnType<typeof setupWalletBasicNetwork>>
 
-export function setupWalletBasicNetwork(
-  walletClient: WalletClientInput
-) {
+export function setupWalletBasicNetwork(walletClient: WalletClientInput) {
   const enhancedWalletClient = ensureWriteContract(walletClient)
 
   return {
@@ -56,6 +54,6 @@ export function setupWalletBasicNetwork(
       { address: "address" },
       { address: enhancedWalletClient.account.address }
     ),
-    walletClient: enhancedWalletClient,
+    walletClient: enhancedWalletClient
   }
 }

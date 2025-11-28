@@ -1,4 +1,4 @@
-import { Chain, erc20Abi, Hex, PublicClient, Transport } from "viem";
+import { Chain, erc20Abi, Hex, PublicClient, Transport } from "viem"
 
 /**
  * Read the player's ERC20 balance
@@ -32,7 +32,7 @@ export async function readERC20Allowance(
   publicClient: PublicClient<Transport, Chain>,
   erc20Address: Hex,
   ownerAddress: Hex,
-  spenderAddress: Hex,
+  spenderAddress: Hex
 ) {
   return await publicClient.readContract({
     address: erc20Address,

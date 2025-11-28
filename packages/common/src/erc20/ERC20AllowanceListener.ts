@@ -12,13 +12,7 @@ export class ERC20AllowanceListener extends AbstractERC20Listener<number> {
     protected erc20Decimals: number,
     protected erc20SpenderAddress: Hex
   ) {
-    super(
-      publicClient,
-      ownerAddress,
-      erc20Address,
-      ALLOWANCE_INTERVAL,
-      0
-    )
+    super(publicClient, ownerAddress, erc20Address, ALLOWANCE_INTERVAL, 0)
   }
 
   /**

@@ -15,5 +15,5 @@ export const supportedChains = [
   // Deployment chains
   mudFoundry,
   extendedBase,
-  extendedBaseSepolia,
+  extendedBaseSepolia
 ] as const satisfies MUDChain[]

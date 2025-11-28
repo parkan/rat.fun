@@ -23,7 +23,11 @@ export interface NetworkConfig {
   indexerUrl?: string
 }
 
-export function getNetworkConfig(environment: ENVIRONMENT, url: URL, overrideDefaultRpcUrls: ChainRpcUrls | null = null): NetworkConfig {
+export function getNetworkConfig(
+  environment: ENVIRONMENT,
+  url: URL,
+  overrideDefaultRpcUrls: ChainRpcUrls | null = null
+): NetworkConfig {
   // Use provided URL or fallback to empty search params for SSR
   const searchParams = url?.searchParams
 
@@ -58,7 +62,7 @@ export function getNetworkConfig(environment: ENVIRONMENT, url: URL, overrideDef
    */
   const initialBlockNumber = searchParams?.has("initialBlockNumber")
     ? Number(searchParams.get("initialBlockNumber"))
-    : (world?.blockNumber ?? -1) // -1 will attempt to find the block number from RPC
+    : world?.blockNumber ?? -1 // -1 will attempt to find the block number from RPC
 
   let indexerUrl = chain.indexerUrl
   if (searchParams?.has("disableIndexer")) {

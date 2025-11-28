@@ -3,7 +3,18 @@
  * (https://viem.sh/docs/getting-started.html).
  * This line imports the functions we need from it.
  */
-import { Hex, getContract, WalletClient, Chain, Account, Transport, Client, GetContractReturnType, Address, PublicClient } from "viem"
+import {
+  Hex,
+  getContract,
+  WalletClient,
+  Chain,
+  Account,
+  Transport,
+  Client,
+  GetContractReturnType,
+  Address,
+  PublicClient
+} from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
 import { encodeEntity } from "@latticexyz/store-sync/recs"
 import { transactionQueue } from "@latticexyz/common/actions"

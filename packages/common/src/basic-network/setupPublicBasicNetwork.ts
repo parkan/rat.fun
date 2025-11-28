@@ -1,4 +1,13 @@
-import { createPublicClient, fallback, http, ClientConfig, PublicClient, Transport, Chain, webSocket } from "viem"
+import {
+  createPublicClient,
+  fallback,
+  http,
+  ClientConfig,
+  PublicClient,
+  Transport,
+  Chain,
+  webSocket
+} from "viem"
 import { transportObserver } from "@latticexyz/common"
 import { BasicNetworkConfig, ChainRpcUrls } from "./getBasicNetworkConfig"
 
@@ -6,7 +15,10 @@ export type SetupPublicBasicNetworkResult = {
   publicClient: PublicClient<Transport, Chain>
 }
 
-export async function setupPublicBasicNetwork(networkConfig: BasicNetworkConfig, devMode: boolean): Promise<SetupPublicBasicNetworkResult> {
+export async function setupPublicBasicNetwork(
+  networkConfig: BasicNetworkConfig,
+  devMode: boolean
+): Promise<SetupPublicBasicNetworkResult> {
   console.log("[MUD/PublicNetwork] Setting up RPC transports:")
   console.log("  Environment:", devMode ? "development" : "production")
   console.log("  Chain:", networkConfig.chain.name, `(${networkConfig.chain.id})`)
@@ -22,7 +34,7 @@ export async function setupPublicBasicNetwork(networkConfig: BasicNetworkConfig,
   const publicClient = createPublicClient(clientOptions)
 
   return {
-    publicClient,
+    publicClient
   }
 }
 

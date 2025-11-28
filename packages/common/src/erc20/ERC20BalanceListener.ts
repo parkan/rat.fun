@@ -11,24 +11,14 @@ export class ERC20BalanceListener extends AbstractERC20Listener<number> {
     protected erc20Address: Hex,
     protected erc20Decimals: number
   ) {
-    super(
-      publicClient,
-      ownerAddress,
-      erc20Address,
-      BALANCE_INTERVAL,
-      0
-    )
+    super(publicClient, ownerAddress, erc20Address, BALANCE_INTERVAL, 0)
   }
 
   /**
    * Fetch ERC20 balance and format it
    */
   protected async fetchValue() {
-    const value = await readERC20Balance(
-      this.publicClient,
-      this.erc20Address,
-      this.ownerAddress
-    )
+    const value = await readERC20Balance(this.publicClient, this.erc20Address, this.ownerAddress)
     return Number(formatUnits(value, this.erc20Decimals))
   }
 }
