@@ -103,10 +103,7 @@
       {#if swapState.data.auctionParams}
         <div class="debug-value">
           Spent: {swapState.data.spentAmount !== undefined
-            ? formatBigInt(
-                swapState.data.spentAmount,
-                swapState.data.fromCurrency.decimals
-              )
+            ? formatBigInt(swapState.data.spentAmount, swapState.data.fromCurrency.decimals)
             : "undefined"}
         </div>
       {/if}

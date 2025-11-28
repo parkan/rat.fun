@@ -19,7 +19,7 @@ export async function quoteExactIn(
     abi: RatRouterAbi,
     functionName: "quoteExactIn",
     args: [amountIn, ...prepareSwapRouterPathArgs(fromCurrencyAddress, auctionParams, false)],
-    account: get(userAddress),
+    account: get(userAddress)
   })
   const [amountOutFinal, amountInUniswap]: [bigint, bigint] = result
   return {
@@ -40,7 +40,7 @@ export async function quoteExactOut(
     abi: RatRouterAbi,
     functionName: "quoteExactOut",
     args: [amountOut, ...prepareSwapRouterPathArgs(fromCurrencyAddress, auctionParams, true)],
-    account: get(userAddress),
+    account: get(userAddress)
   })
   const [amountInInitial, amountInUniswap]: [bigint, bigint] = result
   return {

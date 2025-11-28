@@ -93,7 +93,10 @@ export async function swapExactSingle(
   return waitForDopplerSwapReceipt(publicClient, txHash)
 }
 
-export async function waitForDopplerSwapReceipt(publicClient: PublicClient<Transport, Chain>, hash: Hex) {
+export async function waitForDopplerSwapReceipt(
+  publicClient: PublicClient<Transport, Chain>,
+  hash: Hex
+) {
   const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
   const parsedLogs = parseEventLogs({

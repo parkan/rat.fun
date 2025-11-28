@@ -29,14 +29,20 @@ export async function swapExactIn(
     // Execute
     return await writeContract(client, request)
   } else {
-    if (!permit || !permitSignature) throw new Error("Permit2 data and signature required for token swap")
+    if (!permit || !permitSignature)
+      throw new Error("Permit2 data and signature required for token swap")
 
     // Simulate to catch errors
     const { request } = await simulateContract(client, {
       address: ratRouterAddress,
       abi: RatRouterAbi,
       functionName: "swapExactInToken",
-      args: [amountIn, ...prepareSwapRouterPathArgs(fromCurrencyAddress, auctionParams, false), permit, permitSignature]
+      args: [
+        amountIn,
+        ...prepareSwapRouterPathArgs(fromCurrencyAddress, auctionParams, false),
+        permit,
+        permitSignature
+      ]
     })
     // Execute
     return await writeContract(client, request)

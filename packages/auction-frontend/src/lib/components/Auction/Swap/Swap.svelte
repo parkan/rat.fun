@@ -94,13 +94,15 @@
     swapState.data.setSavedCountryCode(countryCode)
 
     // Load permit2 requirement
-    const isPermit2Req = isPermit2Required(swapState.data.fromCurrency.address) && await isPermit2AllowanceRequired(
-      publicClient,
-      $userAddress,
-      swapState.data.fromCurrency.address,
-      // TODO replace this with actual required allowance for the swap
-      maxUint128
-    )
+    const isPermit2Req =
+      isPermit2Required(swapState.data.fromCurrency.address) &&
+      (await isPermit2AllowanceRequired(
+        publicClient,
+        $userAddress,
+        swapState.data.fromCurrency.address,
+        // TODO replace this with actual required allowance for the swap
+        maxUint128
+      ))
     swapState.data.setIsPermit2Req(isPermit2Req)
 
     console.log("[Swap] isPermit2Req:", isPermit2Req)

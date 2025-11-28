@@ -63,7 +63,7 @@ export async function swapWithLogs(
     if (isOut) {
       const quoter = new CustomQuoter(publicClient, publicClient.chain.id, auctionParams)
       const input = await quoter.quoteExactOutputV4(parsedAmount, true)
-  
+
       amountIn = input.amountIn
     } else {
       amountIn = parsedAmount

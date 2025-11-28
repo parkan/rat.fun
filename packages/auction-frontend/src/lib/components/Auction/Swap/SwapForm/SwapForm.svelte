@@ -40,18 +40,16 @@
       const amountIn = parseUnits(value.toString(), fromCurrency.decimals)
       swapState.data.setAmountIn(amountIn)
       // Quote the expected output amount
-      quoteExactIn(
-        fromCurrency.address,
-        auctionParams,
-        amountIn
-      ).then(result => {
-        swapState.data.setAmountOut(result.amountOutFinal)
-        // TODO eurc for limits
-        console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
-      }).catch(error => {
-        console.error("[SwapForm] Quote failed:", error)
-        swapState.data.setAmountOut(undefined)
-      })
+      quoteExactIn(fromCurrency.address, auctionParams, amountIn)
+        .then(result => {
+          swapState.data.setAmountOut(result.amountOutFinal)
+          // TODO eurc for limits
+          console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
+        })
+        .catch(error => {
+          console.error("[SwapForm] Quote failed:", error)
+          swapState.data.setAmountOut(undefined)
+        })
     }
   }
 
@@ -91,18 +89,16 @@
       const amountOut = parseUnits(value.toString(), auctionParams.token.decimals)
       swapState.data.setAmountOut(amountOut)
       // Quote the required input amount
-      quoteExactOut(
-        fromCurrency.address,
-        auctionParams,
-        amountOut
-      ).then(result => {
-        swapState.data.setAmountIn(result.amountInInitial)
-        // TODO eurc for limits
-        console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
-      }).catch(error => {
-        console.error("[SwapForm] Quote failed:", error)
-        swapState.data.setAmountIn(undefined)
-      })
+      quoteExactOut(fromCurrency.address, auctionParams, amountOut)
+        .then(result => {
+          swapState.data.setAmountIn(result.amountInInitial)
+          // TODO eurc for limits
+          console.log("eurc", formatUnits(result.amountInUniswap, auctionParams.numeraire.decimals))
+        })
+        .catch(error => {
+          console.error("[SwapForm] Quote failed:", error)
+          swapState.data.setAmountIn(undefined)
+        })
     }
   }
 

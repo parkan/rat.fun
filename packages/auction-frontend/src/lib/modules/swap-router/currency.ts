@@ -23,7 +23,7 @@ export const wethCurrency: CurrencyData = {
 
 const aerodromePaths: Record<Hex, [number, Hex][]> = {
   [usdcCurrency.address]: [[50, eurcCurrency.address]],
-  [wethCurrency.address]: [[100, eurcCurrency.address]],
+  [wethCurrency.address]: [[100, eurcCurrency.address]]
 }
 
 function getAerodromePath(fromCurrencyAddress: Hex, isExactOut: boolean): Hex {
@@ -44,7 +44,11 @@ function getAerodromePath(fromCurrencyAddress: Hex, isExactOut: boolean): Hex {
   return packedPath
 }
 
-export function prepareSwapRouterPathArgs(fromCurrencyAddress: Hex, auctionParams: AuctionParams, isExactOut: boolean) {
+export function prepareSwapRouterPathArgs(
+  fromCurrencyAddress: Hex,
+  auctionParams: AuctionParams,
+  isExactOut: boolean
+) {
   const aerodromePath = getAerodromePath(fromCurrencyAddress, isExactOut)
 
   const poolKey = getPoolKey(auctionParams)
