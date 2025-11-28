@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
+  import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
   import type {
     TripEventBaseline,
     TripEvent,
@@ -10,18 +11,19 @@
     PendingTrip
   } from "$lib/components/Admin/types"
   import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
-  import { UI_STRINGS } from "$lib/modules/ui/ui-strings"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import {
     player,
     playerTrips,
     playerNonDepletedTrips,
-    playerDepletedTrips
+    playerDepletedTrips,
+    realisedProfitLoss,
+    profitLoss
   } from "$lib/modules/state/stores"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
   import { staticContent } from "$lib/modules/content"
   import { calculateProfitLossForTrip } from "./helpers"
-  import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
   import { page } from "$app/state"
   import {
     isPhone,
@@ -46,7 +48,7 @@
     AdminTripEventTicker
   } from "$lib/components/Admin"
   import { makeHref } from "$lib/components/Admin/helpers"
-  import { SmallButton } from "$lib/components/Shared"
+  import { SmallButton, SignedNumber } from "$lib/components/Shared"
   import BigButton from "../Shared/Buttons/BigButton.svelte"
 
   let showCreateTripModal = $state(false)
@@ -442,20 +444,25 @@
     <div class="admin-row bottom">
       <!-- Active trips -->
       <div class="trip-table-container">
-        <div class="admin-nav-toggle">
-          <div class="admin-nav-button-wrapper">
-            <SmallButton
-              text={UI_STRINGS.active.toUpperCase()}
-              onclick={() => adminTripsSubView.set("active")}
-              disabled={$adminTripsSubView === "active"}
-            />
+        <div class="table-summary">
+          <div class="left">
+            <span
+              class="toggle"
+              class:secondary={$adminTripsSubView === "past"}
+              onclick={() => adminTripsSubView.set("active")}>{UI_STRINGS.activeTrips}</span
+            ><span
+              class="toggle"
+              class:secondary={$adminTripsSubView === "active"}
+              onclick={() => adminTripsSubView.set("past")}>{UI_STRINGS.pastTrips}</span
+            >
           </div>
-          <div class="admin-nav-button-wrapper">
-            <SmallButton
-              text={UI_STRINGS.past.toUpperCase()}
-              onclick={() => adminTripsSubView.set("past")}
-              disabled={$adminTripsSubView === "past"}
-            />
+          <div class="right">
+            {UI_STRINGS.profit}:
+            {#if $adminTripsSubView === "active"}
+              <SignedNumber withCurrency withTween value={$profitLoss} />
+            {:else}
+              <SignedNumber withCurrency value={$realisedProfitLoss} />
+            {/if}
           </div>
         </div>
         {#if $adminTripsSubView === "active"}
@@ -640,6 +647,30 @@
 
     .admin-divider {
       width: 50px;
+    }
+
+    .table-summary {
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-normal);
+      font-family: var(--special-font-stack);
+      cursor: pointer;
+    }
+  }
+
+  .secondary {
+    opacity: 0.6;
+  }
+
+  .left {
+    display: flex;
+    gap: 0.5rem;
+
+    .toggle {
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 </style>
