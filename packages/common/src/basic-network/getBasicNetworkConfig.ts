@@ -4,14 +4,22 @@
  *
  */
 
+import { MUDChain } from "@latticexyz/common/chains"
 import { getChain } from "./utils"
 import { ENVIRONMENT } from "./enums"
 import { ChainNotFoundError } from "../error-handling/errors"
 
-export function getBasicNetworkConfig(environment: ENVIRONMENT, url: URL) {
-  // Use provided URL or fallback to empty search params for SSR
-  const searchParams = url?.searchParams
+export interface BasicNetworkConfig {
+  chainId: number
+  chain: MUDChain
+}
 
+export interface ChainRpcUrls {
+  http: readonly string[]
+  webSocket?: readonly string[] | undefined
+}
+
+export function getBasicNetworkConfig(environment: ENVIRONMENT, overrideDefaultRpcUrls: ChainRpcUrls | null = null): BasicNetworkConfig {
   // Default to local development chain
   let chainId = 31337
 
@@ -34,11 +42,12 @@ export function getBasicNetworkConfig(environment: ENVIRONMENT, url: URL) {
   }
 
   return {
-    provider: {
-      chainId,
-      jsonRpcUrl: searchParams?.get("rpc") ?? chain.rpcUrls.default.http[0],
-    },
     chainId,
-    chain
+    chain: {
+      ...chain,
+      rpcUrls: {
+        default: overrideDefaultRpcUrls ?? chain.rpcUrls.default
+      }
+    }
   }
 }

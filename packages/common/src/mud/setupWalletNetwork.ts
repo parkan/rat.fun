@@ -22,7 +22,6 @@ type WriteContractArgs = {
   abi: unknown
   functionName: string
   args?: unknown[]
-  gas?: bigint
   value?: bigint
 }
 
@@ -33,7 +32,7 @@ export type WalletTransactionClient = WalletClientInput & {
 /**
  * Ensure the provided viem client exposes a `writeContract` helper.
  *
- * - EntryKit session clients already ship with the method, so we return them verbatim.
+ * - drawbridge session clients already ship with the method, so we return them verbatim.
  * - Burner / wagmi-derived clients need the MUD `transactionQueue` extension to gain it.
  * - As a final fallback we cast, since some typed clients expose the method but miss the narrows.
  */

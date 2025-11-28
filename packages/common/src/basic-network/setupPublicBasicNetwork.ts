@@ -1,24 +1,21 @@
-import { createPublicClient, fallback, http, ClientConfig, PublicClient, Transport, Chain } from "viem"
+import { createPublicClient, fallback, http, ClientConfig, PublicClient, Transport, Chain, webSocket } from "viem"
 import { transportObserver } from "@latticexyz/common"
-import { getBasicNetworkConfig } from "./getBasicNetworkConfig"
-import { ENVIRONMENT } from "./enums"
+import { BasicNetworkConfig, ChainRpcUrls } from "./getBasicNetworkConfig"
 
 export type SetupPublicBasicNetworkResult = {
   publicClient: PublicClient<Transport, Chain>
 }
 
-export async function setupPublicBasicNetwork(environment: ENVIRONMENT, url: URL): Promise<SetupPublicBasicNetworkResult> {
-  const networkConfig = getBasicNetworkConfig(environment, url)
+export async function setupPublicBasicNetwork(networkConfig: BasicNetworkConfig, devMode: boolean): Promise<SetupPublicBasicNetworkResult> {
+  console.log("[MUD/PublicNetwork] Setting up RPC transports:")
+  console.log("  Environment:", devMode ? "development" : "production")
+  console.log("  Chain:", networkConfig.chain.name, `(${networkConfig.chain.id})`)
 
-  /*
-   * Create a viem public (read only) client
-   * (https://viem.sh/docs/clients/public.html)
-   */
-  const transports = [http(networkConfig.provider.jsonRpcUrl)]
+  const transport = chainTransport(networkConfig.chain.rpcUrls.default, devMode)
 
   const clientOptions = {
     chain: networkConfig.chain,
-    transport: transportObserver(fallback(transports)),
+    transport: transportObserver(transport),
     pollingInterval: 2000
   } as const satisfies ClientConfig
 
@@ -27,4 +24,38 @@ export async function setupPublicBasicNetwork(environment: ENVIRONMENT, url: URL
   return {
     publicClient,
   }
+}
+
+function chainTransport(rpcUrls: ChainRpcUrls, devMode: boolean): Transport {
+  const transports: Transport[] = []
+
+  const webSocketUrl = rpcUrls.webSocket?.[0]
+  const httpUrls = rpcUrls.http
+
+  console.log("  WebSocket RPC:", webSocketUrl || "not configured")
+
+  // Add WebSocket transport if WebSocket URL is available
+  if (webSocketUrl) {
+    if (devMode) {
+      console.log("  WebSocket disabled in development mode")
+    } else {
+      transports.push(webSocket(webSocketUrl))
+      console.log("  WebSocket transport added (primary)")
+    }
+  } else {
+    console.log("  No WebSocket URL configured, using HTTP only")
+  }
+
+  // Always add HTTP transport as fallback
+  for (const httpUrl of httpUrls) {
+    console.log("  HTTP RPC:", httpUrl)
+    transports.push(http(httpUrl))
+    console.log("  HTTP transport added" + (transports.length > 1 ? " (fallback)" : " (primary)"))
+  }
+
+  console.log(
+    `  📡 Final transport stack: ${transports.length > httpUrls.length ? "WebSocket → HTTP fallback" : "HTTP only"}`
+  )
+
+  return fallback(transports)
 }

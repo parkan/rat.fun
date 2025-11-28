@@ -10,13 +10,32 @@ import { MUDChain } from "@latticexyz/common/chains"
 import { ENVIRONMENT } from "../basic-network/enums"
 import { WorldAddressNotFoundError } from "../error-handling/errors"
 import { getWorldFromChainId } from "./utils"
-import { getBasicNetworkConfig } from "../basic-network"
+import { ChainRpcUrls, getBasicNetworkConfig } from "../basic-network"
 
-export function getNetworkConfig(environment: ENVIRONMENT, url: URL) {
-  const { provider, chainId, chain } = getBasicNetworkConfig(environment, url)
+export interface NetworkConfig {
+  privateKey: string | null
+  useBurner: boolean
+  chainId: number
+  faucetServiceUrl?: string | null
+  worldAddress: Hex
+  initialBlockNumber: number
+  chain: MUDChain
+  indexerUrl?: string
+}
 
+export function getNetworkConfig(environment: ENVIRONMENT, url: URL, overrideDefaultRpcUrls: ChainRpcUrls | null = null): NetworkConfig {
   // Use provided URL or fallback to empty search params for SSR
   const searchParams = url?.searchParams
+
+  // URL RPC override takes precedence
+  const searchParamsRpc = searchParams?.get("rpc")
+  if (searchParamsRpc) {
+    overrideDefaultRpcUrls = {
+      http: [searchParamsRpc]
+    }
+  }
+
+  const { chainId, chain } = getBasicNetworkConfig(environment, overrideDefaultRpcUrls)
 
   /*
    * Get the address of the World. If you want to use a
@@ -41,7 +60,7 @@ export function getNetworkConfig(environment: ENVIRONMENT, url: URL) {
     ? Number(searchParams.get("initialBlockNumber"))
     : (world?.blockNumber ?? -1) // -1 will attempt to find the block number from RPC
 
-  let indexerUrl = (chain as MUDChain).indexerUrl
+  let indexerUrl = chain.indexerUrl
   if (searchParams?.has("disableIndexer")) {
     indexerUrl = undefined
   }
@@ -52,11 +71,10 @@ export function getNetworkConfig(environment: ENVIRONMENT, url: URL) {
     (typeof window !== "undefined" ? getBurnerPrivateKey() : null)
 
   return {
-    provider,
     privateKey: searchParams?.get("privateKey") ?? privateKey, // do not run getBurnerPrivateKey in
     useBurner: searchParams?.has("useBurner"),
     chainId,
-    faucetServiceUrl: searchParams?.get("faucet") ?? (chain as MUDChain).faucetUrl, // Todo, update
+    faucetServiceUrl: searchParams?.get("faucet") ?? chain.faucetUrl, // Todo, update
     worldAddress,
     initialBlockNumber,
     chain,

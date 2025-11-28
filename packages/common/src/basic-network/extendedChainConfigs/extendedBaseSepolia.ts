@@ -5,7 +5,8 @@ export const extendedBaseSepolia = {
   ...baseSepoliaConfig,
   rpcUrls: {
     default: {
-      http: ["https://api.developer.coinbase.com/rpc/v1/base-sepolia/nwWmepet0KAHsp8awdicqYG1g8KkrGWo", ...baseSepoliaConfig.rpcUrls.default.http]
+      http: ["https://base-sepolia.g.alchemy.com/v2/-hnbjcqjwXmO7ip5cyHBh", ...baseSepoliaConfig.rpcUrls.default.http],
+      webSocket: ["wss://base-sepolia.g.alchemy.com/v2/-hnbjcqjwXmO7ip5cyHBh"]
     },
     bundler: {
       http: ["https://api.developer.coinbase.com/rpc/v1/base-sepolia/nwWmepet0KAHsp8awdicqYG1g8KkrGWo"]

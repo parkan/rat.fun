@@ -5,7 +5,8 @@ export const extendedBase = {
   ...baseConfig,
   rpcUrls: {
     default: {
-      http: ["https://api.developer.coinbase.com/rpc/v1/base/nwWmepet0KAHsp8awdicqYG1g8KkrGWo", ...baseConfig.rpcUrls.default.http]
+      http: ["https://base-mainnet.g.alchemy.com/v2/o0Q1hppQS1CH1vqg63edZ", ...baseConfig.rpcUrls.default.http],
+      webSocket: ["wss://base-mainnet.g.alchemy.com/v2/-hnbjcqjwXmO7ip5cyHBh"]
     },
     bundler: {
       http: ["https://api.developer.coinbase.com/rpc/v1/base/nwWmepet0KAHsp8awdicqYG1g8KkrGWo"]

@@ -3,15 +3,14 @@
  * (https://viem.sh/docs/getting-started.html).
  * This line imports the functions we need from it.
  */
-import { createPublicClient, fallback, http, Hex, ClientConfig, PublicClient, Transport, Chain, Block } from "viem"
+import { Hex, PublicClient, Transport, Chain, Block } from "viem"
 import { Observable } from "rxjs"
-import { transportObserver } from "@latticexyz/common"
 import { StorageAdapterBlock } from "@latticexyz/store-sync";
 import { syncToRecs, SyncToRecsResult } from "@latticexyz/store-sync/recs"
 import { World } from "@latticexyz/recs"
 
-import { ENVIRONMENT } from "../basic-network/enums"
-import { getNetworkConfig } from "./getNetworkConfig"
+import { setupPublicBasicNetwork } from "../basic-network";
+import { NetworkConfig } from "./getNetworkConfig"
 import { world } from "./world"
 
 /*
@@ -27,7 +26,7 @@ import mudConfig from "contracts/mud.config"
 type recsSyncResult = SyncToRecsResult<typeof mudConfig, {}>
 
 export type SetupPublicNetworkResult = {
-  config: ReturnType<typeof getNetworkConfig>
+  config: NetworkConfig
   worldAddress: Hex
   world: World
   components: recsSyncResult["components"]
@@ -38,22 +37,8 @@ export type SetupPublicNetworkResult = {
   tableKeys: string[]
 }
 
-export async function setupPublicNetwork(environment: ENVIRONMENT, url: URL): Promise<SetupPublicNetworkResult> {
-  const networkConfig = getNetworkConfig(environment, url)
-
-  /*
-   * Create a viem public (read only) client
-   * (https://viem.sh/docs/clients/public.html)
-   */
-  const transports = [http(networkConfig.provider.jsonRpcUrl)]
-
-  const clientOptions = {
-    chain: networkConfig.chain,
-    transport: transportObserver(fallback(transports)),
-    pollingInterval: 2000
-  } as const satisfies ClientConfig
-
-  const publicClient = createPublicClient(clientOptions)
+export async function setupPublicNetwork(networkConfig: NetworkConfig, devMode: boolean): Promise<SetupPublicNetworkResult> {
+  const { publicClient } = await setupPublicBasicNetwork(networkConfig, devMode);
 
   const resolvedConfig = {
     world,
