@@ -96,14 +96,14 @@ export async function signPermit2(
     throw new Error("public and wallet client chains mismatch")
   }
 
-  const addresses = getAddresses(publicClient.chain.id)
+  const permit2Address = getAddresses(publicClient.chain.id).permit2
 
   // Get account's current permit2 nonce, as stored in the permit2 contract (not related to transaction nonce)
   const permit2Allowance = await publicClient.readContract({
-    address: addresses.permit2,
+    address: permit2Address,
     abi: permit2Abi,
     functionName: "allowance",
-    args: [walletClient.account.address, tokenAddress, addresses.universalRouter]
+    args: [walletClient.account.address, tokenAddress, spender]
   })
   const nonce = BigInt(permit2Allowance[2])
 
@@ -125,7 +125,7 @@ export async function signPermit2(
     domain: {
       name: "Permit2",
       chainId: publicClient.chain.id,
-      verifyingContract: addresses.permit2
+      verifyingContract: permit2Address
     },
     types: PERMIT2_PERMIT_TYPE,
     primaryType: "PermitSingle",
