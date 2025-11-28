@@ -28,53 +28,47 @@
 
   const {
     environment,
-    loaded = () => {},
-    minimumDuration = 2000
+    loaded = () => {}
   }: {
     environment: ENVIRONMENT
     loaded: () => void
-    minimumDuration?: number
   } = $props()
 
-  let minimumDurationComplete = $state(false)
-  let walletSetupComplete = $state(false)
-  let entitiesInitialized = $state(false)
   let typer = $state<{ stop: () => void }>()
-
-  // Store player ID if we can determine it early
-  let earlyPlayerId = $state<string | null>(null)
 
   // Elements
   let loadingElement: HTMLDivElement
   let terminalBoxElement: HTMLDivElement
   let logoElement: HTMLDivElement
 
+  // ============================================================================
+  // ASYNC HELPERS
+  // ============================================================================
+
   /**
    * Initialize wallet infrastructure and determine player ID if available.
-   * Does NOT call initEntities - that happens after chain sync is ready.
+   * Returns player ID if wallet is connected, null otherwise.
    */
   async function initWalletInfrastructure(): Promise<string | null> {
     const walletType = get(walletTypeStore)
     const network = get(publicNetwork)
 
     if (walletType === WALLET_TYPE.BURNER) {
-      // Burner wallet: always have address from localStorage private key
       const wallet = setupBurnerWalletNetwork(network)
       const address = wallet.walletClient?.account?.address
       if (address) {
         const playerId = addressToId(address)
-        console.log("[Loading] Burner wallet address found:", playerId)
+        console.log("[Loading] Burner wallet found:", playerId)
         return playerId
       }
+      console.log("[Loading] No burner wallet")
       return null
     }
 
     if (walletType === WALLET_TYPE.DRAWBRIDGE) {
-      // Initialize drawbridge
       const networkConfig = getNetworkConfig(environment, page.url)
       await initializeDrawbridge(networkConfig)
 
-      // Check if user already has a session (wallet connected from localStorage)
       const drawbridge = getDrawbridge()
       const address = drawbridge.getState().userAddress
       if (address) {
@@ -83,105 +77,96 @@
         return playerId
       }
 
-      // No existing session - initEntities will be called in Spawn after wallet connection
-      console.log("[Loading] No drawbridge session - deferring initEntities to Spawn")
+      console.log("[Loading] No drawbridge session")
       return null
     }
 
     return null
   }
 
-  // When chain sync is ready AND we have a player ID, initialize entities
-  $effect(() => {
-    if ($ready && walletSetupComplete && !entitiesInitialized) {
-      if (earlyPlayerId) {
-        console.log("[Loading] Chain sync ready - initializing entities for:", earlyPlayerId)
-        initEntities({ activePlayerId: earlyPlayerId })
-      } else {
-        console.log("[Loading] Chain sync ready - no player ID, deferring initEntities to Spawn")
-      }
-      entitiesInitialized = true
-    }
-  })
-
-  // Wait for chain sync, minimum duration, wallet setup, AND entities init to complete
-  $effect(() => {
-    if ($ready && minimumDurationComplete && walletSetupComplete && entitiesInitialized) {
-      // Stop the terminal typer
-      if (typer?.stop) {
-        typer.stop()
-      }
-
-      // Animate out and proceed to spawn
-      animateOut()
-    }
-  })
+  // ============================================================================
+  // ANIMATION
+  // ============================================================================
 
   const strobeColors = ["#ff0000", "#00ff00", "#0000ff"]
 
-  const animateOut = async () => {
-    const tl = gsap.timeline()
+  function animateOut(): Promise<void> {
+    return new Promise(resolve => {
+      const tl = gsap.timeline()
 
-    tl.to(terminalBoxElement, {
-      opacity: 0,
-      duration: 0
-    })
-
-    tl.call(() => {
-      playSound({ category: "ratfunUI", id: "strobe" })
-    })
-
-    // Create strobe effect: 16 cycles of 1/60s (1 frame each at 60fps)
-    for (let i = 0; i < 16; i++) {
-      tl.to(loadingElement, {
-        background: strobeColors[i % strobeColors.length],
-        duration: 0,
-        delay: 1 / 60
+      tl.to(terminalBoxElement, {
+        opacity: 0,
+        duration: 0
       })
-      tl.to(loadingElement, {
-        background: "transparent",
-        duration: 0,
-        delay: 1 / 60
+
+      tl.call(() => {
+        playSound({ category: "ratfunUI", id: "strobe" })
       })
-    }
 
-    tl.to(logoElement, {
-      opacity: 1,
-      duration: 0,
-      delay: 0
-    })
+      // Create strobe effect: 16 cycles of 1/60s (1 frame each at 60fps)
+      for (let i = 0; i < 16; i++) {
+        tl.to(loadingElement, {
+          background: strobeColors[i % strobeColors.length],
+          duration: 0,
+          delay: 1 / 60
+        })
+        tl.to(loadingElement, {
+          background: "transparent",
+          duration: 0,
+          delay: 1 / 60
+        })
+      }
 
-    tl.to(loadingElement, {
-      background: "black",
-      duration: 0,
-      delay: 5 / 60
-    })
+      tl.to(logoElement, {
+        opacity: 1,
+        duration: 0,
+        delay: 0
+      })
 
-    tl.call(() => {
-      loaded()
+      tl.to(loadingElement, {
+        background: "black",
+        duration: 0,
+        delay: 5 / 60
+      })
+
+      tl.call(() => {
+        resolve()
+      })
     })
   }
 
+  // ============================================================================
+  // MAIN LOADING SEQUENCE
+  // ============================================================================
+
   onMount(async () => {
-    // Setup public network and sync from indexer
-    // Note: This returns after setup, but $ready becomes true asynchronously when sync completes
-    await initPublicNetwork(environment, page.url)
-
-    // Start the minimum duration timer
-    setTimeout(() => {
-      minimumDurationComplete = true
-    }, minimumDuration)
-
-    // Run the terminal typer
+    // Start terminal typer for visual feedback
     if (terminalBoxElement) {
       typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
 
-    // Initialize wallet infrastructure and get player ID if available
-    // This runs in parallel with chain sync
-    // initEntities is called in the $effect above once $ready is true
-    earlyPlayerId = await initWalletInfrastructure()
-    walletSetupComplete = true
+    // Step 1: Initialize public network and wait for chain sync to complete
+    await initPublicNetwork(environment, page.url)
+
+    // Step 2: Initialize wallet infrastructure (get player ID if wallet exists)
+    const playerId = await initWalletInfrastructure()
+
+    // Step 3: Initialize entities (chain sync is now complete)
+    if (playerId) {
+      console.log("[Loading] Initializing entities for player:", playerId)
+      initEntities({ activePlayerId: playerId })
+    } else {
+      console.log("[Loading] No player ID - deferring initEntities to Spawn")
+    }
+
+    // Step 4: Stop terminal typer
+    if (typer?.stop) {
+      typer.stop()
+    }
+
+    // Step 5: Animate out and signal completion
+    await animateOut()
+    loaded()
   })
 
   onDestroy(() => {
