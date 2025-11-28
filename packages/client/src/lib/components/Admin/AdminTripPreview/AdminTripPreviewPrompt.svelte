@@ -28,9 +28,14 @@
 
     .content {
       max-width: 55ch;
-      padding-top: 20px;
       padding-bottom: 10px;
       padding-inline: 10px;
+
+      @media screen and (min-width: 800px) {
+        padding-top: 20px;
+        padding-bottom: 10px;
+        padding-inline: 10px;
+      }
 
       &.short {
         font-size: var(--font-size-normal);

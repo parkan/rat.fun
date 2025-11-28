@@ -24,8 +24,7 @@
   .sidebar {
     position: fixed;
     height: calc(var(--game-window-main-height) + 1px); // To overlap the topbar border
-    width: 50%;
-    min-width: 600px;
+    width: 100%;
     overflow-x: hidden;
     z-index: 999;
     top: 58px; // To overlap the topbar border
@@ -34,6 +33,11 @@
     transform: translate(-100%, 0);
     transition: transform 0.2s ease;
     border: 1px solid var(--color-grey-mid);
+
+    @media screen and (min-width: 800px) {
+      min-width: 600px;
+      width: 600px;
+    }
     &.open {
       transform: translate(0, 0);
     }

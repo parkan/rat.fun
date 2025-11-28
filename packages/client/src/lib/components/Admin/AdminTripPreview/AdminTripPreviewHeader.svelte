@@ -2,6 +2,7 @@
   import { getTripMaxValuePerWin, getTripOwnerName } from "$lib/modules/state/utils"
   import { lastUpdated } from "$lib/modules/content"
   import { urlFor } from "$lib/modules/content/sanity"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import type { Trip as SanityTrip } from "@sanity-types"
   import AdminTripPreviewPrompt from "./AdminTripPreviewPrompt.svelte"
 
@@ -41,48 +42,52 @@
   <!-- INFO -->
   <div class="info">
     <!-- INDEX -->
-    <div class="row index">
-      <div class="label">TRIP</div>
+    <div class="row index hide-mobile">
+      <div class="label">{UI_STRINGS.trip}</div>
       <div class="value">#{trip.index}</div>
     </div>
     <!-- OWNER -->
-    <div class="row">
-      <div class="label">Creator</div>
+    <div class="row hide-mobile">
+      <div class="label">{UI_STRINGS.creator}</div>
       <div class="value">{getTripOwnerName(trip)}</div>
     </div>
     <!-- VISIT COUNT -->
     <div class="row visit-count">
-      <div class="label">VISITS</div>
+      <div class="label">{UI_STRINGS.visits}</div>
       <div class="value">{trip.visitCount}</div>
     </div>
     <!-- KILL COUNT -->
     {#if trip?.killCount > 0}
       <div class="row kill-count">
-        <div class="label">KILLS</div>
+        <div class="label">{UI_STRINGS.kills}</div>
         <div class="value">{trip?.killCount}</div>
       </div>
     {/if}
     {#if Number(trip?.minRatValueToEnter ?? 0) > 0}
       <div class="row min-rat-value-to-enter">
-        <div class="label">MIN RAT VALUE TO ENTER</div>
+        <div class="label">{UI_STRINGS.minRatValueToEnter}</div>
         <div class="value">{trip?.minRatValueToEnter}</div>
       </div>
     {/if}
     {#if $maxValuePerWin > 0}
       <div class="row max-value-per-win">
-        <div class="label">MAX VALUE PER WIN</div>
+        <div class="label">{UI_STRINGS.maxValuePerWin}</div>
         <div class="value">{$maxValuePerWin}</div>
       </div>
     {/if}
     <!-- BALANCE -->
     {#if !trip.liquidationBlock}
       <div class="row balance" class:depleted={Number(trip.balance) == 0}>
-        <div class="label">BALANCE</div>
+        <div class="label">{UI_STRINGS.balance}</div>
         <div class="value">{trip.balance}</div>
       </div>
     {/if}
   </div>
   <div class="prompt">
+    <div class="prompt-header-mobile">
+      @{getTripOwnerName(trip)}
+      {UI_STRINGS.trip} #{trip.index}
+    </div>
     <AdminTripPreviewPrompt {trip} />
   </div>
 </div>
@@ -91,8 +96,12 @@
   .trip-preview-header {
     position: relative;
     display: flex;
-    flex-direction: row;
+    flex-direction: column-reverse;
     overflow: hidden;
+
+    @media screen and (min-width: 800px) {
+      flex-direction: row;
+    }
 
     .watermark {
       position: absolute;
@@ -120,13 +129,32 @@
     }
 
     .prompt {
-      width: 420px;
+      width: 100%;
+      @media screen and (min-width: 800px) {
+        width: 420px;
+      }
+
+      .prompt-header-mobile {
+        display: flex;
+        padding: 4px 10px;
+        border-bottom: var(--default-border-style);
+        margin-bottom: 10px;
+        font-family: var(--special-font-stack);
+        @media screen and (min-width: 800px) {
+          display: none;
+        }
+      }
     }
 
     .info {
       display: flex;
-      flex-direction: column;
-      width: 300px;
+      width: 100%;
+      flex-direction: row;
+
+      @media screen and (min-width: 800px) {
+        width: 300px;
+        flex-direction: column;
+      }
 
       .row {
         width: 100%;
@@ -139,6 +167,14 @@
         justify-content: space-between;
         align-items: center;
         font-size: var(--font-size-small);
+
+        &.hide-mobile {
+          display: none;
+
+          @media screen and (min-width: 800px) {
+            display: flex;
+          }
+        }
 
         .value {
           font-family: var(--special-font-stack);

@@ -48,6 +48,11 @@
     font-size: var(--font-size-small);
   }
 
+  .buttons {
+    display: flex;
+    gap: 8px;
+  }
+
   .number {
   }
 </style>

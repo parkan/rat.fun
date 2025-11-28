@@ -4,11 +4,12 @@
   import type { Trip as SanityTrip } from "@sanity-types"
   import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
   import type { TripEvent } from "$lib/components/Admin/types"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { onMount } from "svelte"
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
-  import { selectedEvent, focusEvent, focusTrip } from "$lib/modules/ui/state.svelte"
+  import { selectedEvent, focusEvent, focusTrip, isPhone } from "$lib/modules/ui/state.svelte"
   import { playerTrips } from "$lib/modules/state/stores"
   import { mapLocalIndexToGlobal } from "$lib/components/Admin/helpers"
 
@@ -19,7 +20,7 @@
   import LiquidateTrip from "$lib/components/Admin/AdminTripPreview/LiquidateTrip.svelte"
   import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
 
-  import { BackButton } from "$lib/components/Shared"
+  import { BackButton, SmallButton } from "$lib/components/Shared"
 
   let {
     tripId,
@@ -38,6 +39,9 @@
   // Local state for this trip's preview/selection (separate from parent layout)
   let localFocusEvent = $state(-1)
   let localSelectedEvent = $state(-1)
+
+  // Phone sub-view toggle
+  let phoneTripView = $state<"graph" | "log">("graph")
 
   // Show liquidate button if:
   //  * - Trip is not depleted
@@ -127,54 +131,126 @@
 <svelte:window onkeydown={handleKeypress} />
 
 {#if !liquidating}
-  <div class="trip-inner-container" class:depleted={!showLiquidateButton}>
-    <div class="back-button-container full">
-      <BackButton onclick={onBackButtonClick} />
-    </div>
-    <div class="full">
-      <AdminTripPreviewHeader {sanityTripContent} {trip} />
-    </div>
-    <div class="left">
-      <TripProfitLossGraph
-        behavior="click"
-        {trip}
-        {tripId}
-        bind:data={graphData}
-        height={clientHeight}
-        focusEventOverride={localFocusEvent}
-        selectedEventOverride={localSelectedEvent}
-        onFocusChange={index => {
-          localFocusEvent = index
-        }}
-        onSelectionChange={index => {
-          localSelectedEvent = index
-          $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
-          $focusEvent = $selectedEvent
-        }}
-      />
-    </div>
-    <div bind:clientHeight class="right">
-      <AdminEventLog
-        graphData={logData}
-        hideUnlockEvent
-        focusEventOverride={localFocusEvent}
-        selectedEventOverride={localSelectedEvent}
-        onFocusChange={(index, tripId) => {
-          localFocusEvent = index
-        }}
-        onSelectionChange={(index, tripId) => {
-          localSelectedEvent = index
-          $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
-          $focusEvent = $selectedEvent
-        }}
-      />
-    </div>
-    {#if showLiquidateButton}
-      <div class="full">
-        <LiquidateTrip onclick={() => (liquidating = true)} {trip} />
+  {#if $isPhone}
+    <!-- Phone Layout -->
+    <div class="trip-inner-container phone">
+      <div class="back-button-container full">
+        <BackButton onclick={onBackButtonClick} />
       </div>
-    {/if}
-  </div>
+      <div class="full">
+        <AdminTripPreviewHeader {sanityTripContent} {trip} />
+      </div>
+      <div class="phone-sub-nav">
+        <div class="sub-nav-button-wrapper">
+          <SmallButton
+            text={UI_STRINGS.graph.toUpperCase()}
+            onclick={() => (phoneTripView = "graph")}
+            disabled={phoneTripView === "graph"}
+          />
+        </div>
+        <div class="sub-nav-button-wrapper">
+          <SmallButton
+            text={UI_STRINGS.log.toUpperCase()}
+            onclick={() => (phoneTripView = "log")}
+            disabled={phoneTripView === "log"}
+          />
+        </div>
+      </div>
+      {#if phoneTripView === "graph"}
+        <div bind:clientHeight class="phone-view">
+          <TripProfitLossGraph
+            behavior="click"
+            {trip}
+            {tripId}
+            bind:data={graphData}
+            height={clientHeight}
+            focusEventOverride={localFocusEvent}
+            selectedEventOverride={localSelectedEvent}
+            onFocusChange={index => {
+              localFocusEvent = index
+            }}
+            onSelectionChange={index => {
+              localSelectedEvent = index
+              $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
+              $focusEvent = $selectedEvent
+            }}
+          />
+        </div>
+      {:else}
+        <div class="phone-view">
+          <AdminEventLog
+            graphData={logData}
+            hideUnlockEvent
+            focusEventOverride={localFocusEvent}
+            selectedEventOverride={localSelectedEvent}
+            onFocusChange={(index, tripId) => {
+              localFocusEvent = index
+            }}
+            onSelectionChange={(index, tripId) => {
+              localSelectedEvent = index
+              $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
+              $focusEvent = $selectedEvent
+            }}
+          />
+        </div>
+      {/if}
+      {#if showLiquidateButton}
+        <div class="full">
+          <LiquidateTrip onclick={() => (liquidating = true)} {trip} />
+        </div>
+      {/if}
+    </div>
+  {:else}
+    <!-- Desktop Layout -->
+    <div class="trip-inner-container" class:depleted={!showLiquidateButton}>
+      <div class="back-button-container full">
+        <BackButton onclick={onBackButtonClick} />
+      </div>
+      <div class="full">
+        <AdminTripPreviewHeader {sanityTripContent} {trip} />
+      </div>
+      <div class="left">
+        <TripProfitLossGraph
+          behavior="click"
+          {trip}
+          {tripId}
+          bind:data={graphData}
+          height={clientHeight}
+          focusEventOverride={localFocusEvent}
+          selectedEventOverride={localSelectedEvent}
+          onFocusChange={index => {
+            localFocusEvent = index
+          }}
+          onSelectionChange={index => {
+            localSelectedEvent = index
+            $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
+            $focusEvent = $selectedEvent
+          }}
+        />
+      </div>
+      <div bind:clientHeight class="right">
+        <AdminEventLog
+          graphData={logData}
+          hideUnlockEvent
+          focusEventOverride={localFocusEvent}
+          selectedEventOverride={localSelectedEvent}
+          onFocusChange={(index, tripId) => {
+            localFocusEvent = index
+          }}
+          onSelectionChange={(index, tripId) => {
+            localSelectedEvent = index
+            $selectedEvent = mapLocalIndexToGlobal(index, graphData, $playerTrips, $staticContent)
+            $focusEvent = $selectedEvent
+          }}
+        />
+      </div>
+      {#if showLiquidateButton}
+        <div class="full">
+          <LiquidateTrip onclick={() => (liquidating = true)} {trip} />
+        </div>
+      {/if}
+    </div>
+  {/if}
 {:else}
   <TripConfirmLiquidation
     {tripId}
@@ -198,25 +274,63 @@
     height: 100%;
     max-height: 100%;
     overflow-x: hidden;
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 60px 200px calc(var(--game-window-main-height) - 340px) auto;
-    grid-auto-rows: 1fr;
+
+    &:not(.phone) {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: 60px 200px calc(var(--game-window-main-height) - 340px) auto;
+      grid-auto-rows: 1fr;
+
+      .left {
+        grid-column: 1 / 9;
+      }
+      .right {
+        grid-column: 9 / 13;
+      }
+
+      .full {
+        grid-column: 1 / 13;
+      }
+    }
+
+    &.phone {
+      display: flex;
+      flex-direction: column;
+
+      .full {
+        flex-shrink: 0;
+      }
+
+      .phone-sub-nav {
+        display: flex;
+        border-bottom: var(--default-border-style);
+        background: var(--background-semi-transparent);
+        flex-shrink: 0;
+
+        .sub-nav-button-wrapper {
+          flex: 0 0 50%;
+          width: 50%;
+          height: 50px;
+
+          :global(button) {
+            border-radius: 0;
+          }
+        }
+      }
+
+      .phone-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #222;
+      }
+    }
 
     .section-header {
       padding: 0 8px;
     }
 
-    .left {
-      grid-column: 1 / 9;
-    }
-    .right {
-      grid-column: 9 / 13;
-    }
-
-    .full {
-      grid-column: 1 / 13;
-    }
     .back-button-container {
       display: block;
       border-bottom: 1px solid var(--color-grey-mid);
