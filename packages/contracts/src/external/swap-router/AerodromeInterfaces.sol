@@ -14,7 +14,10 @@ interface IAerodromeSwapRouter {
 }
 
 interface IAerodromeQuoter {
-  function quoteExactInput(bytes memory path, uint256 amountIn)
+  function quoteExactInput(
+    bytes memory path,
+    uint256 amountIn
+  )
     external
     returns (
       uint256 amountOut,
@@ -23,7 +26,10 @@ interface IAerodromeQuoter {
       uint256 gasEstimate
     );
 
-  function quoteExactOutput(bytes memory path, uint256 amountOut)
+  function quoteExactOutput(
+    bytes memory path,
+    uint256 amountOut
+  )
     external
     returns (
       uint256 amountIn,

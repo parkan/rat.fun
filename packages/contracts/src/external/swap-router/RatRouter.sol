@@ -40,14 +40,16 @@ contract RatRouter {
     PoolKey memory uniswapPoolKey,
     bool uniswapZeroForOne
   ) external returns (uint256) {
-    (uint256 amountOut1,,,) = aerodromeQuoter.quoteExactInput(aerodromePath, amountIn);
+    (uint256 amountOut1, , , ) = aerodromeQuoter.quoteExactInput(aerodromePath, amountIn);
 
-    (uint256 amountOut2,) = uniswapV4Quoter.quoteExactInputSingle(IV4Quoter.QuoteExactSingleParams({
-      poolKey: uniswapPoolKey,
-      zeroForOne: uniswapZeroForOne,
-      exactAmount: uint128(amountOut1),
-      hookData: ""
-    }));
+    (uint256 amountOut2, ) = uniswapV4Quoter.quoteExactInputSingle(
+      IV4Quoter.QuoteExactSingleParams({
+        poolKey: uniswapPoolKey,
+        zeroForOne: uniswapZeroForOne,
+        exactAmount: uint128(amountOut1),
+        hookData: ""
+      })
+    );
 
     return amountOut2;
   }
@@ -58,14 +60,16 @@ contract RatRouter {
     PoolKey memory uniswapPoolKey,
     bool uniswapZeroForOne
   ) external returns (uint256) {
-    (uint256 amountIn2,) = uniswapV4Quoter.quoteExactOutputSingle(IV4Quoter.QuoteExactSingleParams({
-      poolKey: uniswapPoolKey,
-      zeroForOne: uniswapZeroForOne,
-      exactAmount: amountOut,
-      hookData: ""
-    }));
+    (uint256 amountIn2, ) = uniswapV4Quoter.quoteExactOutputSingle(
+      IV4Quoter.QuoteExactSingleParams({
+        poolKey: uniswapPoolKey,
+        zeroForOne: uniswapZeroForOne,
+        exactAmount: amountOut,
+        hookData: ""
+      })
+    );
 
-    (uint256 amountIn1,,,) = aerodromeQuoter.quoteExactOutput(aerodromePath, amountIn2);
+    (uint256 amountIn1, , , ) = aerodromeQuoter.quoteExactOutput(aerodromePath, amountIn2);
 
     return amountIn1;
   }
@@ -81,13 +85,7 @@ contract RatRouter {
     // Approve aerodrome router to spend tokens
     IERC20(address(weth)).approve(address(aerodromeRouter), amountIn);
 
-    _swapExactIn(
-      amountIn,
-      aerodromePath,
-      uniswapPoolKey,
-      uniswapZeroForOne,
-      deadline
-    );
+    _swapExactIn(amountIn, aerodromePath, uniswapPoolKey, uniswapZeroForOne, deadline);
   }
 
   function swapExactInToken(
@@ -99,22 +97,12 @@ contract RatRouter {
     bytes calldata permitSignature
   ) public {
     // Permit and transfer tokens from sender to this contract
-    permit2.permit(
-      msg.sender,
-      permit,
-      permitSignature
-    );
+    permit2.permit(msg.sender, permit, permitSignature);
     permit2.transferFrom(msg.sender, address(this), uint160(amountIn), permit.details.token);
     // Approve aerodrome router to spend tokens
     IERC20(permit.details.token).approve(address(aerodromeRouter), amountIn);
 
-    _swapExactIn(
-      amountIn,
-      aerodromePath,
-      uniswapPoolKey,
-      uniswapZeroForOne,
-      permit.details.expiration
-    );
+    _swapExactIn(amountIn, aerodromePath, uniswapPoolKey, uniswapZeroForOne, permit.details.expiration);
   }
 
   function _swapExactIn(
@@ -129,14 +117,20 @@ contract RatRouter {
     _executeUniversalRouterV4SwapExactInputSingle(uniswapPoolKey, uniswapZeroForOne, amountOutAerodrome);
   }
 
-  function _executeAerodromeRouterExactInput(bytes memory path, uint256 deadline, uint256 amountIn) internal returns (uint128) {
-    uint256 amountOut = aerodromeRouter.exactInput(IAerodromeSwapRouter.ExactInputParams({
-      path: path,
-      recipient: address(this),
-      deadline: deadline,
-      amountIn: amountIn,
-      amountOutMinimum: 0
-    }));
+  function _executeAerodromeRouterExactInput(
+    bytes memory path,
+    uint256 deadline,
+    uint256 amountIn
+  ) internal returns (uint128) {
+    uint256 amountOut = aerodromeRouter.exactInput(
+      IAerodromeSwapRouter.ExactInputParams({
+        path: path,
+        recipient: address(this),
+        deadline: deadline,
+        amountIn: amountIn,
+        amountOutMinimum: 0
+      })
+    );
     return uint128(amountOut);
   }
 
@@ -160,13 +154,15 @@ contract RatRouter {
     );
     bytes[] memory params = new bytes[](3);
     // action 0 - SWAP_EXACT_IN_SINGLE
-    params[0] = abi.encode(IUniversalRouter.ExactInputSingleParams({
-      poolKey: poolKey,
-      zeroForOne: zeroForOne,
-      amountIn: amountIn,
-      amountOutMinimum: 0,
-      hookData: ""
-    }));
+    params[0] = abi.encode(
+      IUniversalRouter.ExactInputSingleParams({
+        poolKey: poolKey,
+        zeroForOne: zeroForOne,
+        amountIn: amountIn,
+        amountOutMinimum: 0,
+        hookData: ""
+      })
+    );
     // action 1 - SETTLE_ALL
     params[1] = abi.encode(fromCurrency, type(uint256).max);
     // action 2 - TAKE_PORTION (10_000 bips = 100%)

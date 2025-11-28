@@ -40,11 +40,11 @@ interface IV4Quoter {
     bytes hookData;
   }
 
-  function quoteExactInputSingle(QuoteExactSingleParams memory params)
-    external
-    returns (uint256 amountOut, uint256 gasEstimate);
+  function quoteExactInputSingle(
+    QuoteExactSingleParams memory params
+  ) external returns (uint256 amountOut, uint256 gasEstimate);
 
-  function quoteExactOutputSingle(QuoteExactSingleParams memory params)
-    external
-    returns (uint256 amountIn, uint256 gasEstimate);
+  function quoteExactOutputSingle(
+    QuoteExactSingleParams memory params
+  ) external returns (uint256 amountIn, uint256 gasEstimate);
 }
