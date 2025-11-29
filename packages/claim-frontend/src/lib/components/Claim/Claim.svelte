@@ -1,71 +1,48 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import type { Hex } from "viem"
-  import type { PublicClient } from "drawbridge"
-  import { getProofFromJson, type GetProofReturnType } from "merkle-tree-airdrop"
+  import { getProofFromJson } from "merkle-tree-airdrop"
   import merkleTree from "merkle-tree-airdrop/static/test_tree.json" with { type: "json" }
-  import { publicClient as publicClientStore, networkConfig } from "$lib/network"
   import { CLAIM_STATE, claimState } from "$lib/components/Claim/state.svelte"
-  import { Available, ConnectWalletForm, Done } from "$lib/components/Claim"
+  import { ConnectWalletForm, NotEligible, ClaimFlow } from "$lib/components/Claim"
   import { userAddress } from "$lib/modules/drawbridge"
   import { initErc20Listener } from "$lib/modules/erc20Listener"
   import WalletInfo from "$lib/components/WalletInfo/WalletInfo.svelte"
-  import { ERC20AirdropMerkleProofAbi } from "contracts/externalAbis"
 
-  let proof = $state<undefined | null | GetProofReturnType>(undefined)
-  let hasClaimed = $state<undefined | boolean>(undefined)
-
-  // Get proof when user connects
-  $effect(() => {
-    if ($userAddress && proof === undefined) {
-      getProofFromJson($userAddress, merkleTree).then(result => {
-        proof = result
-      })
-    }
-  })
-
-  // Check claim status
-  async function checkClaimStatus(
-    publicClient: PublicClient,
-    playerAddress: Hex,
-    airdropAddress: Hex
-  ) {
-    return await publicClient.readContract({
-      address: airdropAddress,
-      abi: ERC20AirdropMerkleProofAbi,
-      functionName: "hasClaimed",
-      args: [playerAddress]
-    })
+  /**
+   * Check if user is eligible (has proof in merkle tree)
+   * This is a quick client-side check before entering the claim flow
+   */
+  async function checkEligibility(address: Hex): Promise<boolean> {
+    const proof = await getProofFromJson(address, merkleTree)
+    return proof !== null
   }
 
-  $effect(() => {
-    const pubClient = $publicClientStore
-    const config = $networkConfig
-    if ($userAddress && hasClaimed === undefined && pubClient && config) {
-      checkClaimStatus(pubClient, $userAddress, config.airdropContractAddress).then(result => {
-        hasClaimed = result as boolean
-      })
+  /**
+   * Handle wallet connection and transition to appropriate state
+   */
+  async function handleWalletConnected(address: Hex) {
+    console.log("[Claim] Wallet connected:", address)
+
+    // Initialize ERC20 listener (for balance display in WalletInfo)
+    initErc20Listener()
+
+    // Check eligibility
+    const isEligible = await checkEligibility(address)
+
+    if (isEligible) {
+      // User is eligible - hand off to ClaimFlow
+      claimState.state.transitionTo(CLAIM_STATE.CLAIM)
+    } else {
+      // User not in merkle tree
+      claimState.state.transitionTo(CLAIM_STATE.NOT_ELIGIBLE)
     }
-  })
+  }
 
-  // Listen to changes in wallet connection (for when user connects wallet)
+  // Listen to changes in wallet connection
   $effect(() => {
-    if ($userAddress) {
-      console.log("[Claim] Wallet connected:", $userAddress)
-
-      // Initialize ERC20 listener (for balance display in WalletInfo)
-      initErc20Listener()
-
-      // Transition based on claim status
-      if (proof === null) {
-        claimState.state.transitionTo(CLAIM_STATE.NOT_AVAILABLE)
-      } else if (proof === undefined || hasClaimed === undefined) {
-        claimState.state.transitionTo(CLAIM_STATE.CHECKING)
-      } else if (hasClaimed) {
-        claimState.state.transitionTo(CLAIM_STATE.DONE)
-      } else {
-        claimState.state.transitionTo(CLAIM_STATE.AVAILABLE)
-      }
+    if ($userAddress && claimState.state.current === CLAIM_STATE.CONNECT_WALLET) {
+      handleWalletConnected($userAddress)
     }
   })
 
@@ -73,12 +50,10 @@
     // Reset state to INIT
     claimState.state.reset()
 
-    // If wallet is already connected (from previous session), transition to checking
+    // If wallet is already connected (from previous session)
     if ($userAddress) {
       console.log("[Claim] Wallet already connected on mount:", $userAddress)
-      // Initialize listeners
-      initErc20Listener()
-      claimState.state.transitionTo(CLAIM_STATE.CHECKING)
+      await handleWalletConnected($userAddress)
     } else {
       // No wallet connected, show connect wallet screen
       claimState.state.transitionTo(CLAIM_STATE.CONNECT_WALLET)
@@ -92,12 +67,12 @@
   <div class="claim-inner">
     {#if claimState.state.current === CLAIM_STATE.CONNECT_WALLET}
       <ConnectWalletForm />
-    {:else if claimState.state.current === CLAIM_STATE.CHECKING || !proof}
-      loading...
-    {:else if claimState.state.current === CLAIM_STATE.AVAILABLE}
-      <Available {proof} />
-    {:else if claimState.state.current === CLAIM_STATE.DONE}
-      <Done />
+    {:else if claimState.state.current === CLAIM_STATE.CLAIM}
+      <ClaimFlow />
+    {:else if claimState.state.current === CLAIM_STATE.NOT_ELIGIBLE}
+      <NotEligible />
+    {:else if claimState.state.current === CLAIM_STATE.ERROR}
+      <div class="error">Something went wrong</div>
     {/if}
   </div>
 </div>
@@ -108,5 +83,20 @@
     height: 100dvh;
     z-index: 1000;
     color: white;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+
+    .claim-inner {
+      width: 600px;
+      max-width: 90dvw;
+      height: auto;
+    }
+  }
+
+  .error {
+    text-align: center;
+    color: orangered;
   }
 </style>
