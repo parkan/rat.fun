@@ -1,13 +1,12 @@
 <script lang="ts">
+  import { get } from "svelte/store"
   import { formatUnits } from "viem"
   import type { GetProofReturnType } from "merkle-tree-airdrop"
   import { BigButton } from "$lib/components/Shared"
   import { prepareConnectorClientForTransaction } from "$lib/modules/drawbridge/connector"
   import { ERC20AirdropMerkleProofAbi } from "contracts/externalAbis"
   import { userAddress } from "$lib/modules/drawbridge"
-
-  // TODO this is a test contract on base mainnet
-  const airdropContractAddress = "0xD6d2e85bEfD703847cDBa78589c4c67b7a147020" as const
+  import { networkConfig } from "$lib/network"
 
   let {
     proof
@@ -18,9 +17,12 @@
   async function sendClaim() {
     if (!$userAddress) throw new Error("wallet not connected")
 
+    const config = get(networkConfig)
+    if (!config) throw new Error("network not initialized")
+
     const client = await prepareConnectorClientForTransaction()
     client.writeContract({
-      address: airdropContractAddress,
+      address: config.airdropContractAddress,
       abi: ERC20AirdropMerkleProofAbi,
       functionName: "claim",
       args: [$userAddress, proof.value, proof.proof]

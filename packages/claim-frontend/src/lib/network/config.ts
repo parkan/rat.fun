@@ -1,106 +1,54 @@
 /**
  * Network configuration for claim-frontend
  *
- * This replaces the complex MUD network config with a simple chain-based setup.
- * External addresses are read once from the World contract at startup.
+ * Simplified config - hardcoded to Base mainnet only.
+ * Contract addresses come from environment variables.
  */
 
-import { type Chain } from "viem"
-import { base, baseSepolia } from "viem/chains"
-import worldsJson from "contracts/worlds.json" with { type: "json" }
-import { PUBLIC_BASE_RPC_URL, PUBLIC_BASE_SEPOLIA_RPC_URL } from "$env/static/public"
-
-export enum ENVIRONMENT {
-  UNKNOWN = "unknown",
-  DEVELOPMENT = "development",
-  BASE_SEPOLIA = "base-sepolia",
-  BASE = "base"
-}
+import { type Chain, type Hex } from "viem"
+import { base } from "viem/chains"
+import {
+  PUBLIC_BASE_RPC_URL,
+  PUBLIC_RAT_TOKEN_ADDRESS,
+  PUBLIC_AIRDROP_CONTRACT_ADDRESS
+} from "$env/static/public"
 
 export type NetworkConfig = {
-  environment: ENVIRONMENT
   chain: Chain
   chainId: number
   rpcUrl: string
-  worldAddress: `0x${string}`
+  ratTokenAddress: Hex
+  airdropContractAddress: Hex
 }
 
 /**
- * Chain configurations with custom RPC URLs
+ * Chain configuration with custom RPC URL
  */
-const chainConfigs: Record<number, Chain> = {
-  [base.id]: {
-    ...base,
-    rpcUrls: {
-      default: {
-        http: [PUBLIC_BASE_RPC_URL, ...base.rpcUrls.default.http]
-      }
-    }
-  },
-  [baseSepolia.id]: {
-    ...baseSepolia,
-    rpcUrls: {
-      default: {
-        http: [PUBLIC_BASE_SEPOLIA_RPC_URL, ...baseSepolia.rpcUrls.default.http]
-      }
+const chain: Chain = {
+  ...base,
+  rpcUrls: {
+    default: {
+      http: [PUBLIC_BASE_RPC_URL, ...base.rpcUrls.default.http]
     }
   }
 }
 
 /**
- * World addresses from contracts deployment
+ * Get network configuration
  */
-const worlds = worldsJson as Record<string, { address: string; blockNumber?: number }>
-
-/**
- * Get network configuration based on environment
- */
-export function getNetworkConfig(environment: ENVIRONMENT): NetworkConfig {
-  let chainId: number
-
-  switch (environment) {
-    case ENVIRONMENT.BASE:
-      chainId = base.id // 8453
-      break
-    case ENVIRONMENT.BASE_SEPOLIA:
-      chainId = baseSepolia.id // 84532
-      break
-    default:
-      chainId = 31337 // Local development
-      break
+export function getNetworkConfig(): NetworkConfig {
+  if (!PUBLIC_RAT_TOKEN_ADDRESS) {
+    throw new Error("PUBLIC_RAT_TOKEN_ADDRESS environment variable is required")
   }
-
-  const chain = chainConfigs[chainId]
-  if (!chain) {
-    throw new Error(`Unsupported chain ID: ${chainId}`)
-  }
-
-  const world = worlds[chainId.toString()]
-  if (!world?.address) {
-    throw new Error(`No world address found for chain ID: ${chainId}`)
+  if (!PUBLIC_AIRDROP_CONTRACT_ADDRESS) {
+    throw new Error("PUBLIC_AIRDROP_CONTRACT_ADDRESS environment variable is required")
   }
 
   return {
-    environment,
     chain,
-    chainId,
+    chainId: base.id, // 8453
     rpcUrl: chain.rpcUrls.default.http[0],
-    worldAddress: world.address as `0x${string}`
-  }
-}
-
-/**
- * Get environment from URL hostname/params
- */
-export function getEnvironmentFromUrl(url: URL): ENVIRONMENT {
-  const hostname = url.hostname
-  const networkParam = url.searchParams.get("network")
-
-  if (hostname === "rat.fun" || networkParam === "base") {
-    return ENVIRONMENT.BASE
-  } else if (hostname === "base-sepolia.rat.fun" || networkParam === "base-sepolia") {
-    return ENVIRONMENT.BASE_SEPOLIA
-  } else {
-    return ENVIRONMENT.DEVELOPMENT
+    ratTokenAddress: PUBLIC_RAT_TOKEN_ADDRESS as Hex,
+    airdropContractAddress: PUBLIC_AIRDROP_CONTRACT_ADDRESS as Hex
   }
 }

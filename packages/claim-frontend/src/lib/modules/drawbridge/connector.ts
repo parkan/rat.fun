@@ -1,81 +1,32 @@
 import { get } from "svelte/store"
-import type { Hex, WalletClient, Chain, Account, Transport, Client } from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
-import { addChain, switchChain } from "viem/actions"
+import type { Hex } from "viem"
+import { addChain, switchChain, writeContract } from "viem/actions"
 import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
-import { transactionQueue } from "@latticexyz/common/actions"
+import type { Config } from "@wagmi/core"
 
 import { networkConfig } from "$lib/network"
 import { getDrawbridge } from "$lib/modules/drawbridge"
 import { WagmiConfigUnavailableError, NetworkNotInitializedError } from "../error-handling/errors"
 
-// Types for wallet clients
-type WalletClientInput =
-  | WalletClient<Transport, Chain, Account>
-  | Client<Transport, Chain, Account>
-  | Client<Transport, Chain, SmartAccount>
-
 type WriteContractArgs = {
   address: Hex
-  abi: unknown
+  abi: readonly unknown[]
   functionName: string
-  args?: unknown[]
+  args?: readonly unknown[]
   gas?: bigint
   value?: bigint
 }
 
-export type WalletTransactionClient = WalletClientInput & {
+export type WalletTransactionClient = {
   writeContract: (args: WriteContractArgs) => Promise<Hex>
 }
 
 /**
- * Ensure the provided viem client exposes a `writeContract` helper.
- */
-function ensureWriteContract(client: WalletClientInput): WalletTransactionClient {
-  if ("writeContract" in client && typeof client.writeContract === "function") {
-    return client as WalletTransactionClient
-  }
-
-  if ("extend" in client && typeof client.extend === "function") {
-    const extended = (client as WalletClient<Transport, Chain, Account>).extend(transactionQueue())
-    if ("writeContract" in extended && typeof extended.writeContract === "function") {
-      return extended as WalletTransactionClient
-    }
-    return extended as WalletTransactionClient
-  }
-
-  return client as WalletTransactionClient
-}
-
-/**
- * Returns the wallet connector client from wagmi.
- * Expects the wallet connection to be established, throws an error otherwise.
- */
-export async function getEstablishedConnectorClient() {
-  const wagmiConfig = getDrawbridge().getWagmiConfig()
-  if (!wagmiConfig) {
-    throw new WagmiConfigUnavailableError()
-  }
-  return await getConnectorClient(wagmiConfig)
-}
-
-export async function disconnectWallet() {
-  try {
-    const drawbridge = getDrawbridge()
-    await drawbridge.disconnectWallet()
-  } catch {
-    // Not connected, nothing to do
-  }
-}
-
-/**
- * Prepares the wallet client obtained from wagmi for sending onchain transactions.
- * - Expects wagmi provider to already have a wallet connected to it by drawbridge.
- * - Wallet may switch between different chains, ensure the current chain is correct.
- * - Extend the client with MUD's transactionQueue, since it comes directly from wagmi.
+ * Get the connector client from wagmi, ensuring we're on the correct chain.
+ * Returns a client that can be used with viem's writeContract action.
  */
 export async function prepareConnectorClientForTransaction(): Promise<WalletTransactionClient> {
-  const wagmiConfig = getDrawbridge().getWagmiConfig()
+  const wagmiConfig = getDrawbridge().getWagmiConfig() as Config
   if (!wagmiConfig) {
     throw new WagmiConfigUnavailableError()
   }
@@ -102,6 +53,20 @@ export async function prepareConnectorClientForTransaction(): Promise<WalletTran
       connector: getAccount(wagmiConfig).connector
     })
   }
-  // MUD's `transactionQueue` extends the client with `writeContract` method
-  return ensureWriteContract(connectorClient)
+
+  // Return a simple wrapper with writeContract using viem's tree-shakable action
+  return {
+    async writeContract(args: WriteContractArgs): Promise<Hex> {
+      return writeContract(connectorClient, args as Parameters<typeof writeContract>[1])
+    }
+  }
+}
+
+export async function disconnectWallet() {
+  try {
+    const drawbridge = getDrawbridge()
+    await drawbridge.disconnectWallet()
+  } catch {
+    // Not connected, nothing to do
+  }
 }
