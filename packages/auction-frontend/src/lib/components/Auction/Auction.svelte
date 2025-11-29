@@ -71,7 +71,7 @@
     auctionState.state.reset()
 
     auctionParams = readAuctionParamsStrict($publicNetwork.publicClient.chain.id)
-    console.log("[Auction] auctionParams:", auctionParams)
+    console.log("[Auction] auctionParams:", $state.snapshot(auctionParams))
     if (!auctionParams) {
       console.error("[Auction] auctionParams not found")
       auctionState.state.transitionTo(AUCTION_STATE.ERROR)
