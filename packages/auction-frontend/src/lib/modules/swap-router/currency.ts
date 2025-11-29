@@ -4,6 +4,7 @@ import { encodePacked, Hex } from "viem"
 export interface CurrencyData {
   address: Hex
   decimals: number
+  symbol?: string
 }
 
 // Mainnet-only addresses
@@ -14,12 +15,17 @@ const eurcCurrency: CurrencyData = {
 }
 export const usdcCurrency: CurrencyData = {
   address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-  decimals: 6
+  decimals: 6,
+  symbol: "USDC"
 }
 export const wethCurrency: CurrencyData = {
   address: "0x4200000000000000000000000000000000000006",
-  decimals: 18
+  decimals: 18,
+  symbol: "ETH"
 }
+
+// Available currencies for swap (user can select from these)
+export const availableCurrencies: CurrencyData[] = [usdcCurrency, wethCurrency]
 
 const aerodromePaths: Record<Hex, [number, Hex][]> = {
   [usdcCurrency.address]: [[50, eurcCurrency.address]],

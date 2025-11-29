@@ -114,7 +114,7 @@
         </div>
       {/if}
       <div class="debug-value">Country: {swapState.data.savedCountryCode || "none"}</div>
-      <div class="debug-value">Permit2 Req: {swapState.data.isPermit2Req ?? "null"}</div>
+      <div class="debug-value">Currency: {swapState.data.fromCurrency.symbol ?? "unknown"}</div>
     </div>
 
     <div class="debug-section">

@@ -1,8 +1,23 @@
 <script lang="ts">
   import { formatUnits, parseUnits } from "viem"
-  import { swapState, SWAP_STATE } from "../state.svelte"
+  import { swapState } from "../state.svelte"
   import SpendLimitProgressBar from "./SpendLimitProgressBar.svelte"
-  import { quoteExactIn, quoteExactOut } from "$lib/modules/swap-router"
+  import { quoteExactIn, quoteExactOut, availableCurrencies } from "$lib/modules/swap-router"
+
+  /**
+   * Handle currency change from dropdown
+   */
+  function handleCurrencyChange(event: Event) {
+    const select = event.target as HTMLSelectElement
+    const selected = availableCurrencies.find(c => c.address === select.value)
+    if (selected) {
+      swapState.data.setFromCurrency(selected)
+      // Clear amounts when currency changes
+      swapState.data.setAmountIn(undefined)
+      swapState.data.setAmountOut(undefined)
+      swapState.data.clearPermit()
+    }
+  }
 
   /**
    * Get numeraire amount formatted for display in input field
@@ -149,7 +164,19 @@
     <!-- Input fields section -->
     <div class="inputs-section">
       <div class="input-group">
-        <label for="numeraire-input">Numeraire:</label>
+        <label for="currency-select">Pay with:</label>
+        <select
+          id="currency-select"
+          value={swapState.data.fromCurrency.address}
+          onchange={handleCurrencyChange}
+        >
+          {#each availableCurrencies as currency}
+            <option value={currency.address}>{currency.symbol}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="numeraire-input">{swapState.data.fromCurrency.symbol ?? "Amount"}:</label>
         <input
           id="numeraire-input"
           type="number"
@@ -240,6 +267,7 @@
       color: rgba(255, 255, 255, 0.9);
     }
 
+    select,
     input {
       padding: 12px 16px;
       font-size: 16px;
@@ -254,7 +282,18 @@
         border-color: rgba(255, 255, 255, 0.4);
         background: rgba(0, 0, 0, 0.4);
       }
+    }
 
+    select {
+      cursor: pointer;
+
+      option {
+        background: #1a1a1a;
+        color: white;
+      }
+    }
+
+    input {
       &::placeholder {
         color: rgba(255, 255, 255, 0.3);
       }
