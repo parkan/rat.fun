@@ -1,10 +1,11 @@
 <script lang="ts">
   import { exchangeState, EXCHANGE_STATE } from "$lib/components/Exchange/state.svelte"
-  import { playerFakeTokenBalance } from "$lib/modules/erc20Listener/stores"
+  import { fakeRatTokenBalance } from "$lib/modules/erc20Listener/stores"
 
+  // Watch for balance changes - if user receives tokens, transition to exchange
   $effect(() => {
-    if ($playerFakeTokenBalance > 0) {
-      exchangeState.state.transitionTo(EXCHANGE_STATE.APPROVE)
+    if ($fakeRatTokenBalance > 0) {
+      exchangeState.state.transitionTo(EXCHANGE_STATE.EXCHANGE)
     }
   })
 </script>
@@ -16,13 +17,6 @@
 <style lang="scss">
   .no-tokens {
     text-align: center;
-    color: var(--white);
-    width: 100dvw;
-    height: 100dvh;
-    overflow: hidden;
-    position: relative;
-    background-image: url("/images/texture-2.png");
-    background-size: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -32,7 +26,7 @@
       font-family: var(--typewriter-font-stack);
       color: black;
       background: orangered;
-      padding: 10px;
+      padding: 10px 20px;
     }
   }
 </style>

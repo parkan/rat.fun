@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
+  import { ratTokenBalance, fakeRatTokenBalance } from "$lib/modules/erc20Listener/stores"
   import { userAddress } from "$lib/modules/drawbridge"
   import { shortenAddress } from "$lib/modules/utils"
   import { disconnectWallet } from "$lib/modules/drawbridge/connector"
@@ -64,8 +64,12 @@
             <span class="value">{shortenAddress($userAddress!)}</span>
           </div>
           <div class="info-row">
+            <span class="label">$FAKERAT:</span>
+            <span class="value">{$fakeRatTokenBalance}</span>
+          </div>
+          <div class="info-row">
             <span class="label">$RAT:</span>
-            <span class="value">{$playerERC20Balance}</span>
+            <span class="value">{$ratTokenBalance}</span>
           </div>
           <div class="button-container">
             <SmallButton text="Disconnect wallet" onclick={handleDisconnect} />
