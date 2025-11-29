@@ -1,19 +1,18 @@
-import { Drawbridge, DrawbridgeStatus, type SessionClient, type DrawbridgeState } from "drawbridge"
+import {
+  Drawbridge,
+  DrawbridgeStatus,
+  type SessionClient,
+  type DrawbridgeState,
+  type PublicClient
+} from "drawbridge"
 import { readable, derived } from "svelte/store"
-import { getPublicClient } from "@wagmi/core"
 import { paymasters } from "./paymasters"
 import { chains, transports, getConnectors } from "./wagmiConfig"
-import type { Hex, Client, Transport, Chain } from "viem"
+import type { Hex } from "viem"
 import type { NetworkConfig } from "$lib/mud/utils"
 
-/**
- * A viem Client with public actions. Using loose generics to allow
- * clients with different chain/transport configurations to be used.
- */
-type AnyPublicClient = Client<Transport, Chain | undefined>
-
 // Re-export types from package
-export type { ConnectorInfo, SessionClient } from "drawbridge"
+export type { ConnectorInfo, SessionClient, PublicClient } from "drawbridge"
 export { DrawbridgeStatus } from "drawbridge"
 
 // Drawbridge instance (singleton)
@@ -94,24 +93,19 @@ export function cleanupDrawbridge(): void {
 }
 
 /**
- * Get a public client from drawbridge's wagmi config.
- * This allows reusing the same client for MUD sync to avoid double RPC polling.
+ * Get the public client from drawbridge.
+ *
+ * This is the single source of truth for all chain reads.
+ * Use this to pass to other systems (like MUD) to avoid double RPC polling.
  *
  * @throws If drawbridge is not initialized
  */
-export function getDrawbridgePublicClient(): AnyPublicClient {
+export function getDrawbridgePublicClient(): PublicClient {
   if (!drawbridgeInstance) {
     throw new Error("Drawbridge not initialized. Call initializeDrawbridge first.")
   }
 
-  const wagmiConfig = drawbridgeInstance.getWagmiConfig()
-  const publicClient = getPublicClient(wagmiConfig)
-
-  if (!publicClient) {
-    throw new Error("Could not get public client from drawbridge wagmi config")
-  }
-
-  return publicClient as AnyPublicClient
+  return drawbridgeInstance.getPublicClient()
 }
 
 // ===== Reactive Stores =====

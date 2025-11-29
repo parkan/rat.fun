@@ -3,17 +3,7 @@
  * (https://viem.sh/docs/getting-started.html).
  * This line imports the functions we need from it.
  */
-import {
-  createPublicClient,
-  fallback,
-  webSocket,
-  http,
-  type Hex,
-  type ClientConfig,
-  type Client,
-  type Transport,
-  type Chain
-} from "viem"
+import { createPublicClient, fallback, webSocket, http, type Hex, type ClientConfig } from "viem"
 import { syncToRecs } from "@latticexyz/store-sync/recs"
 
 import { getNetworkConfig } from "./getNetworkConfig"
@@ -21,6 +11,7 @@ import { world } from "./world"
 import { transportObserver } from "@latticexyz/common"
 
 import { ENVIRONMENT } from "./enums"
+import type { PublicClient } from "$lib/modules/drawbridge"
 
 /*
  * Import our MUD config, which includes strong types for
@@ -76,21 +67,15 @@ function createPublicClientWithTransports(networkConfig: ReturnType<typeof getNe
   return createPublicClient(clientOptions)
 }
 
-/**
- * A viem Client with public actions. Using loose generics to allow
- * clients with different chain/transport configurations to be passed.
- */
-type AnyPublicClient = Client<Transport, Chain | undefined>
-
 export type SetupPublicNetworkOptions = {
   environment: ENVIRONMENT
   url: URL
   /**
-   * Optional pre-configured public client (e.g., from drawbridge's wagmi config)
+   * Optional pre-configured public client (e.g., from drawbridge)
    * If provided, this client will be used instead of creating a new one.
    * This avoids duplicate RPC polling when using drawbridge.
    */
-  publicClient?: AnyPublicClient
+  publicClient?: PublicClient
 }
 
 export async function setupPublicNetwork(options: SetupPublicNetworkOptions) {
