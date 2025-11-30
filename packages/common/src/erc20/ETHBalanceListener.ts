@@ -1,22 +1,20 @@
 import { Chain, Hex, PublicClient, Transport } from "viem"
 import { AbstractListener } from "./AbstractListener"
-import { readERC20Balance } from "./read"
 
 const BALANCE_INTERVAL = 10_000 // 10 seconds
 
-export class ERC20BalanceListener extends AbstractListener<bigint> {
+export class ETHBalanceListener extends AbstractListener<bigint> {
   constructor(
     protected publicClient: PublicClient<Transport, Chain>,
-    protected ownerAddress: Hex,
-    protected erc20Address: Hex
+    protected ownerAddress: Hex
   ) {
     super(publicClient, ownerAddress, BALANCE_INTERVAL, 0n)
   }
 
   /**
-   * Fetch ERC20 balance
+   * Fetch owner account ETH balance
    */
   protected async fetchValue() {
-    return await readERC20Balance(this.publicClient, this.erc20Address, this.ownerAddress)
+    return await this.publicClient.getBalance({ address: this.ownerAddress })
   }
 }

@@ -3,7 +3,7 @@ import { Chain, Hex, PublicClient, Transport } from "viem"
 type Listener<T> = (value: T) => void
 type Unsubscribe = () => void
 
-export abstract class AbstractERC20Listener<T> {
+export abstract class AbstractListener<T> {
   protected interval: ReturnType<typeof setInterval> | null = null
   protected listeners = new Set<(value: T) => void>()
   // Incrementing index so each nonce is unique and greater than previous
@@ -16,7 +16,6 @@ export abstract class AbstractERC20Listener<T> {
   constructor(
     protected publicClient: PublicClient<Transport, Chain>,
     protected ownerAddress: Hex,
-    protected erc20Address: Hex,
     protected intervalFrequency: number,
     initialValue: T
   ) {
