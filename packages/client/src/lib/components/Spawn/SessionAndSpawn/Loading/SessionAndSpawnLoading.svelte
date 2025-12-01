@@ -12,6 +12,8 @@
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
   import { WALLET_TYPE } from "$lib/mud/enums"
+  import { initEntities, isEntitiesInitialized } from "$lib/modules/chain-sync"
+  import { addressToId } from "$lib/modules/utils"
 
   let error = $state<string | null>(null)
   let status = $state<string>("Setting up session")
@@ -65,6 +67,13 @@
         console.log("[SessionAndSpawnLoading] Initializing wallet network")
         const wallet = setupWalletNetwork($publicNetwork, state.sessionClient)
         initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
+
+        // Initialize entities (Scenario C without session)
+        if (!isEntitiesInitialized()) {
+          const playerId = addressToId(state.userAddress)
+          console.log("[SessionAndSpawnLoading] Initializing entities for player:", playerId)
+          initEntities({ activePlayerId: playerId })
+        }
       }
 
       /* - - - - - - - - - - - - -

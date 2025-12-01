@@ -9,10 +9,6 @@ import { addressToId } from "$lib/modules/utils"
 
 /**
  * Initialize the wallet network - sets up stores.
- *
- * Note: ERC20 listener is NOT initialized here because externalAddressesConfig
- * (derived from entities store) is not yet populated. Call initErc20Listener()
- * separately after initEntities() has completed.
  */
 export function initWalletNetwork(
   wallet: SetupWalletNetworkResult,

@@ -4,7 +4,6 @@
   import { get } from "svelte/store"
   import { initPublicNetwork } from "$lib/initPublicNetwork"
   import { initEntities } from "$lib/modules/chain-sync"
-  import { initErc20Listener } from "$lib/modules/erc20Listener"
   import { terminalTyper } from "$lib/modules/terminal-typer/index"
   import { generateLoadingOutput } from "$lib/components/Loading/loadingOutput"
   import { playSound } from "$lib/modules/sound"
@@ -164,9 +163,6 @@
       // Initialize entities with player filtering
       const playerId = addressToId(drawbridgeState.userAddress)
       initEntities({ activePlayerId: playerId })
-
-      // Initialize ERC20 listener (requires playerAddress + entities for externalAddressesConfig)
-      initErc20Listener()
     } else if (drawbridgeState.userAddress) {
       // -----------------------------------------------------------------------
       // SCENARIO B: Wallet connected, but NO session
@@ -182,9 +178,6 @@
 
       const playerId = addressToId(drawbridgeState.userAddress)
       initEntities({ activePlayerId: playerId })
-
-      // NOTE: We do NOT call initErc20Listener here because playerAddress
-      // store is not set (requires initWalletNetwork which needs sessionClient)
     } else {
       // -----------------------------------------------------------------------
       // SCENARIO C: No wallet connected
