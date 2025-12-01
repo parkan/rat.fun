@@ -4,20 +4,14 @@
 
   import { typeHit } from "$lib/modules/sound"
   import { isSessionReady, sessionClient } from "$lib/modules/drawbridge"
-  import { walletNetwork, walletType } from "$lib/modules/network"
-  import { WALLET_TYPE } from "$lib/mud/enums"
 
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
 
   let name = $state("")
 
-  // Check if wallet is ready based on wallet type
-  const isWalletReady = $derived(
-    $walletType === WALLET_TYPE.BURNER
-      ? !!$walletNetwork.walletClient
-      : $isSessionReady && !!$sessionClient
-  )
+  // Check if wallet is ready (session established)
+  const isWalletReady = $derived($isSessionReady && !!$sessionClient)
 
   let mascotElement: HTMLDivElement | null = $state(null)
   let inputElement: HTMLInputElement | null = $state(null)

@@ -13,11 +13,7 @@
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
-  import { WALLET_TYPE } from "$lib/mud/enums"
-  import {
-    environment as environmentStore,
-    walletType as walletTypeStore
-  } from "$lib/modules/network"
+  import { environment as environmentStore } from "$lib/modules/network"
   import { cleanupDrawbridge, userAddress } from "$lib/modules/drawbridge"
   import { playerId } from "$lib/modules/state/stores"
   import { initOffChainSync, disconnectOffChainSync } from "$lib/modules/off-chain-sync"
@@ -68,9 +64,6 @@
 
   // Detect wallet disconnection and navigate back to spawn
   $effect(() => {
-    // Only monitor disconnections for drawbridge wallet type
-    if ($walletTypeStore !== WALLET_TYPE.DRAWBRIDGE) return
-
     // Only act when in READY state (not during initial load or spawn flow)
     if ($UIState !== UI.READY) return
 
@@ -124,10 +117,8 @@
   })
 
   onDestroy(() => {
-    // Clean up drawbridge if it was initialized
-    if ($walletTypeStore === WALLET_TYPE.DRAWBRIDGE) {
-      cleanupDrawbridge()
-    }
+    // Clean up drawbridge
+    cleanupDrawbridge()
 
     // Clean up global shader manager when the app unmounts
     shaderManager.destroy()
@@ -140,7 +131,7 @@
   {#if $UIState === UI.LOADING}
     <Loading environment={$environmentStore} {loaded} />
   {:else if $UIState === UI.SPAWNING}
-    <Spawn walletType={$walletTypeStore} {spawned} />
+    <Spawn {spawned} />
   {:else}
     {@render children?.()}
   {/if}

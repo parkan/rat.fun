@@ -43,7 +43,6 @@ t he mentally deranged. Results may vary.`,
   confirmLiquidationMessage: (name: string): string =>
     `Are you sure you want to cash out? ${name} will be terminated in the process.`,
   comeDown: "COME DOWN",
-  connectBurner: "Connect Burner",
   connectWallet: "Connect wallet",
   connectedWallet: "Connected wallet",
   confirmLiquidateTripPrompt: (index: number): string =>

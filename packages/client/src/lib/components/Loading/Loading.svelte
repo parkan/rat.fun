@@ -23,7 +23,6 @@
   import { gsap } from "gsap"
 
   // Wallet setup imports
-  import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
   import {
@@ -53,17 +52,11 @@
   // ============================================================================
 
   /**
-   * Initialize drawbridge if in DRAWBRIDGE mode.
+   * Initialize drawbridge.
    * Returns the public client from drawbridge's wagmi config to reuse for MUD sync.
    * This avoids double RPC polling.
    */
-  async function initDrawbridgeIfNeeded() {
-    const walletType = get(walletTypeStore)
-
-    if (walletType !== WALLET_TYPE.DRAWBRIDGE) {
-      return undefined
-    }
-
+  async function initDrawbridge() {
     console.log("[Loading] Initializing drawbridge before MUD sync...")
     const networkConfig = getNetworkConfig(environment, page.url)
     await initializeDrawbridge(networkConfig)
@@ -79,52 +72,34 @@
    * Initialize wallet network if wallet is connected.
    * This sets up stores and ERC20 listeners.
    *
-   * For BURNER: Always available, initialize immediately.
-   * For DRAWBRIDGE: Only if wallet was restored from localStorage.
-   *                 If not connected yet, will be initialized in ConnectWalletForm.
+   * Only if wallet was restored from localStorage.
+   * If not connected yet, will be initialized in ConnectWalletForm.
    *
    * @returns Player ID if wallet is connected, null otherwise
    */
   function initWalletIfConnected(): string | null {
-    const currentWalletType = get(walletTypeStore)
     const network = get(publicNetwork)
 
-    if (currentWalletType === WALLET_TYPE.BURNER) {
-      const wallet = setupBurnerWalletNetwork(network)
-      const address = wallet.walletClient?.account?.address
-      if (address) {
-        console.log("[Loading] Initializing burner wallet:", address)
-        initWalletNetwork(wallet, address, WALLET_TYPE.BURNER)
-        return addressToId(address)
-      }
-      console.log("[Loading] No burner wallet")
-      return null
+    const drawbridge = getDrawbridge()
+    const state = drawbridge.getState()
+
+    // Only initialize if session is ready (has sessionClient)
+    // If not ready, wallet will be initialized after ConnectWalletForm
+    if (state.sessionClient && state.userAddress) {
+      console.log("[Loading] Initializing drawbridge wallet:", state.userAddress)
+      const wallet = setupWalletNetwork(network, state.sessionClient)
+      initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
+      return addressToId(state.userAddress)
     }
 
-    if (currentWalletType === WALLET_TYPE.DRAWBRIDGE) {
-      const drawbridge = getDrawbridge()
-      const state = drawbridge.getState()
-
-      // Only initialize if session is ready (has sessionClient)
-      // If not ready, wallet will be initialized after ConnectWalletForm
-      if (state.sessionClient && state.userAddress) {
-        console.log("[Loading] Initializing drawbridge wallet:", state.userAddress)
-        const wallet = setupWalletNetwork(network, state.sessionClient)
-        initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
-        return addressToId(state.userAddress)
-      }
-
-      // Wallet connected but no session - don't initialize yet
-      // (will go through spawn flow to set up session)
-      if (state.userAddress) {
-        console.log("[Loading] Drawbridge wallet connected but no session:", state.userAddress)
-        return addressToId(state.userAddress)
-      }
-
-      console.log("[Loading] No drawbridge wallet")
-      return null
+    // Wallet connected but no session - don't initialize yet
+    // (will go through spawn flow to set up session)
+    if (state.userAddress) {
+      console.log("[Loading] Drawbridge wallet connected but no session:", state.userAddress)
+      return addressToId(state.userAddress)
     }
 
+    console.log("[Loading] No drawbridge wallet")
     return null
   }
 
@@ -189,9 +164,9 @@
       typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
 
-    // Step 1: Initialize drawbridge FIRST if in DRAWBRIDGE mode
+    // Step 1: Initialize drawbridge FIRST
     // This gives us a public client to reuse, avoiding double RPC polling
-    const drawbridgePublicClient = await initDrawbridgeIfNeeded()
+    const drawbridgePublicClient = await initDrawbridge()
 
     // Step 2: Initialize public network and wait for chain sync to complete
     // Pass the drawbridge public client if available (reuses same RPC connection)

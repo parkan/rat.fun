@@ -3,16 +3,12 @@
   import { page } from "$app/state"
   import { fade } from "svelte/transition"
 
-  import { WALLET_TYPE } from "$lib/mud/enums"
-
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
 
   import { checkIsSpawned } from "$lib/initWalletNetwork"
   import { getDrawbridge } from "$lib/modules/drawbridge"
   import { backgroundMusic } from "$lib/modules/sound/stores"
-  import { playerAddress } from "$lib/modules/state/stores"
-  import { get } from "svelte/store"
 
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import {
@@ -38,15 +34,14 @@
   import { checkHasAllowance } from "$lib/components/Spawn/flowContext"
   import { Marquee } from "$lib/components/Shared"
 
-  const { walletType, spawned = () => {} } = $props<{
-    walletType: WALLET_TYPE
+  const { spawned = () => {} } = $props<{
     spawned: () => void
   }>()
 
   /*
    *  Initial state determination based on:
    *  - walletConnected (wallet address available)
-   *  - sessionReady (for Drawbridge: session is ready, for Burner: always true)
+   *  - sessionReady (session is ready)
    *  - hasAllowance (user has approved allowance > 100 tokens)
    *  - spawned (player already spawned in the game)
    *
@@ -87,85 +82,53 @@
    * initialized by ConnectWalletForm/SessionLoading for new users).
    */
   async function buildInitialFlowContext(): Promise<FlowContext> {
-    console.log("[Spawn] Building initial flow context, walletType:", walletType)
+    console.log("[Spawn] Building initial flow context")
 
-    if (walletType === WALLET_TYPE.BURNER) {
-      // For burner wallet, check playerAddress store (set by Loading)
-      const walletAddress = get(playerAddress)
+    // Read directly from instance to avoid store timing issues
+    const drawbridge = getDrawbridge()
+    const state = drawbridge.getState()
 
-      if (!walletAddress || walletAddress === "0x0") {
-        return {
-          walletConnected: false,
-          sessionReady: false,
-          hasAllowance: false,
-          isSpawned: false
-        }
-      }
+    const walletConnected = !!state.userAddress
+    const sessionReady = state.isReady
+    const walletAddress = state.userAddress
 
-      const isSpawned = checkIsSpawned(walletAddress as `0x${string}`)
-      const hasAllowance = await checkHasAllowance(walletAddress)
+    console.log("[Spawn] Drawbridge state:", {
+      walletConnected,
+      sessionReady,
+      walletAddress,
+      hasSessionClient: !!state.sessionClient
+    })
 
+    if (!walletConnected) {
       return {
-        walletConnected: true,
-        sessionReady: true, // Burner wallet always has session ready
-        hasAllowance,
-        isSpawned
-      }
-    } else if (walletType === WALLET_TYPE.DRAWBRIDGE) {
-      // DRAWBRIDGE - read directly from instance to avoid store timing issues
-      const drawbridge = getDrawbridge()
-      const state = drawbridge.getState()
-
-      const walletConnected = !!state.userAddress
-      const sessionReady = state.isReady
-      const walletAddress = state.userAddress
-
-      console.log("[Spawn] Drawbridge state:", {
-        walletConnected,
-        sessionReady,
-        walletAddress,
-        hasSessionClient: !!state.sessionClient
-      })
-
-      if (!walletConnected) {
-        return {
-          walletConnected: false,
-          sessionReady: false,
-          hasAllowance: false,
-          isSpawned: false
-        }
-      }
-
-      const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
-
-      // Without session, we can't check spawn status
-      if (!sessionReady) {
-        return {
-          walletConnected: true,
-          sessionReady: false,
-          hasAllowance,
-          isSpawned: false
-        }
-      }
-
-      // Session is ready - check spawn status
-      // (wallet network already initialized by Loading)
-      const isSpawned = walletAddress ? checkIsSpawned(walletAddress) : false
-
-      return {
-        walletConnected: true,
-        sessionReady,
-        hasAllowance,
-        isSpawned
+        walletConnected: false,
+        sessionReady: false,
+        hasAllowance: false,
+        isSpawned: false
       }
     }
 
-    // Fallback (shouldn't reach here)
+    const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
+
+    // Without session, we can't check spawn status
+    if (!sessionReady) {
+      return {
+        walletConnected: true,
+        sessionReady: false,
+        hasAllowance,
+        isSpawned: false
+      }
+    }
+
+    // Session is ready - check spawn status
+    // (wallet network already initialized by Loading)
+    const isSpawned = walletAddress ? checkIsSpawned(walletAddress) : false
+
     return {
-      walletConnected: false,
-      sessionReady: false,
-      hasAllowance: false,
-      isSpawned: false
+      walletConnected: true,
+      sessionReady,
+      hasAllowance,
+      isSpawned
     }
   }
 
@@ -196,8 +159,7 @@
     spawnState.state.reset()
 
     // Determine initial state and transition
-    // For DRAWBRIDGE: drawbridge is guaranteed to be initialized by Loading component
-    // For BURNER: no async initialization needed
+    // Drawbridge is guaranteed to be initialized by Loading component
     const initialState = await determineInitialState()
     console.log("[Spawn] Initial state determined:", initialState)
     spawnState.state.transitionTo(initialState)

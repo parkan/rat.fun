@@ -7,8 +7,8 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
-  import { walletType, saleStatus } from "$lib/modules/network"
-  import { WALLET_TYPE, SALE_STATUS } from "$lib/mud/enums"
+  import { saleStatus } from "$lib/modules/network"
+  import { SALE_STATUS } from "$lib/mud/enums"
   import { SmallButton, Checkbox } from "$lib/components/Shared"
   import { musicEnabled, backgroundMusic } from "$lib/modules/sound/stores"
   import {
@@ -58,18 +58,16 @@
   </div>
 
   <!-- Disconnect Wallet Button -->
-  {#if $walletType !== WALLET_TYPE.BURNER}
-    <div class="row">
-      <SmallButton
-        tippyText={UI_STRINGS.disconnectWallet}
-        onclick={async () => {
-          await disconnectWallet()
-          UIState.set(UI.SPAWNING)
-        }}
-        text={UI_STRINGS.disconnectWallet}
-      />
-    </div>
-  {/if}
+  <div class="row">
+    <SmallButton
+      tippyText={UI_STRINGS.disconnectWallet}
+      onclick={async () => {
+        await disconnectWallet()
+        UIState.set(UI.SPAWNING)
+      }}
+      text={UI_STRINGS.disconnectWallet}
+    />
+  </div>
 
   <!-- Rats Killed Section (conditional) -->
   {#if pastRatsCount > 0}
