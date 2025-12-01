@@ -21,12 +21,10 @@ import {
  * Configuration for Drawbridge instance
  */
 export type DrawbridgeConfig = {
-  /** Chain ID to operate on */
-  chainId: number
-  /** Supported chains */
-  chains: readonly [Chain, ...Chain[]]
-  /** Transport configuration per chain */
-  transports: Record<number, Transport>
+  /** Public client */
+  publicClient: PublicClient
+  /** Transport for wallet client */
+  transport: Transport
   /** Wallet connectors (injected, walletConnect, etc.) */
   connectors: CreateConnectorFn[]
   /** MUD World contract address (optional if skipSessionSetup is true) */
@@ -161,26 +159,18 @@ export class Drawbridge {
       error: null
     }
 
-    // Get the chain for this config
-    const chain = config.chains.find(c => c.id === config.chainId)
-    if (!chain) {
-      throw new Error(`Chain ${config.chainId} not found in provided chains`)
-    }
+    // Get the chain from public client
+    const chain = config.publicClient.chain
 
-    // Create dedicated public client for all read operations
-    // This is the single source of truth for chain reads
-    this._publicClient = createPublicClient({
-      chain,
-      transport: config.transports[config.chainId],
-      pollingInterval: config.pollingInterval ?? 2000
-    })
+    // Set the public client from config
+    this._publicClient = config.publicClient
 
-    console.log("[drawbridge] Public client created for chain:", chain.name)
+    console.log("[drawbridge] Public client set from config for chain:", chain.id)
 
     // Create wagmi config for wallet connections
     this.wagmiConfig = createWalletConfig({
-      chains: config.chains,
-      transports: config.transports,
+      chains: [chain],
+      transports: { [chain.id]: config.transport },
       connectors: config.connectors,
       pollingInterval: config.pollingInterval
     })
@@ -193,49 +183,6 @@ export class Drawbridge {
    * @private
    */
   private validateConfig(config: DrawbridgeConfig): void {
-    // Validate chains
-    if (!config.chains || config.chains.length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: At least one chain must be configured. " +
-          "Provide chains in the 'chains' parameter."
-      )
-    }
-
-    // Validate connectors
-    if (!config.connectors || config.connectors.length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: At least one wallet connector must be configured. " +
-          "Add connectors like injected(), coinbaseWallet(), or walletConnect()."
-      )
-    }
-
-    // Validate transports
-    if (!config.transports || Object.keys(config.transports).length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: Transports configuration is required. " +
-          "Provide an RPC transport for each chain."
-      )
-    }
-
-    // Check all chains have transports
-    for (const chain of config.chains) {
-      if (!(chain.id in config.transports)) {
-        throw new Error(
-          `Drawbridge configuration error: No transport configured for chain ${chain.id} (${chain.name}). ` +
-            `Add it to the transports parameter: { ${chain.id}: http("https://...") }`
-        )
-      }
-    }
-
-    // Check chainId is in chains array
-    const chainIdValid = config.chains.some(chain => chain.id === config.chainId)
-    if (!chainIdValid) {
-      throw new Error(
-        `Drawbridge configuration error: chainId ${config.chainId} is not in the chains array. ` +
-          `Provide a chain with id ${config.chainId} in the chains parameter.`
-      )
-    }
-
     // Warn if worldAddress missing with session setup enabled
     if (!config.skipSessionSetup && !config.worldAddress) {
       console.warn(
@@ -418,9 +365,10 @@ export class Drawbridge {
     console.log("[drawbridge] Wallet connected:", userAddress)
 
     // Validate wallet is on the correct chain
-    if (userClient.chain.id !== this.config.chainId) {
+    const expectedChainId = this.config.publicClient.chain.id
+    if (userClient.chain.id !== expectedChainId) {
       const error = new Error(
-        `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${this.config.chainId}`
+        `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${expectedChainId}`
       )
       console.error("[drawbridge]", error.message)
       throw error
@@ -539,7 +487,7 @@ export class Drawbridge {
     this.updateState({ status: DrawbridgeStatus.CONNECTING })
 
     try {
-      await walletConnect(this.wagmiConfig, connectorId, this.config.chainId)
+      await walletConnect(this.wagmiConfig, connectorId, this._publicClient.chain.id)
     } catch (err) {
       // If already connected, that's fine
       if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {

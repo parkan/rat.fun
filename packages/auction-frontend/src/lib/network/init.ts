@@ -12,7 +12,7 @@ import {
   networkReady,
   loadingMessage
 } from "./stores"
-import { initializeDrawbridge, getDrawbridge } from "$lib/modules/drawbridge"
+import { initializeDrawbridge } from "$lib/modules/drawbridge"
 import { getNetworkConfig } from "./config"
 
 /**
@@ -32,16 +32,10 @@ export async function initNetwork(): Promise<void> {
 
     loadingMessage.set("Setting up basic public network...")
     const publicNetwork = await setupPublicBasicNetwork(config, import.meta.env.DEV)
+    publicClientStore.set(publicNetwork.publicClient)
 
     loadingMessage.set("Initializing wallet connection...")
-    await initializeDrawbridge({
-      chain: config.chain,
-      transport: publicNetwork.transport
-    })
-
-    const drawbridge = getDrawbridge()
-    const client = drawbridge.getPublicClient()
-    publicClientStore.set(client)
+    await initializeDrawbridge(publicNetwork)
 
     loadingMessage.set("Ready")
     networkReady.set(true)

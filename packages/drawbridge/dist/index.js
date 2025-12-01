@@ -1,5 +1,5 @@
-import { parseAbi, createPublicClient, isHex, http, encodeFunctionData, parseEther, formatEther, formatGwei, zeroAddress, toHex } from 'viem';
 import { resourceToHex, hexToResource } from '@latticexyz/common';
+import { parseAbi, isHex, http, encodeFunctionData, parseEther, formatEther, formatGwei, zeroAddress, toHex } from 'viem';
 import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
@@ -14,8 +14,6 @@ import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignatu
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
 import { getConnectorClient, createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectors, connect, disconnect } from '@wagmi/core';
-
-// src/Drawbridge.ts
 
 // src/types/state.ts
 var DrawbridgeStatus = /* @__PURE__ */ ((DrawbridgeStatus2) => {
@@ -1003,19 +1001,12 @@ var Drawbridge = class {
       isReady: false,
       error: null
     };
-    const chain = config.chains.find((c) => c.id === config.chainId);
-    if (!chain) {
-      throw new Error(`Chain ${config.chainId} not found in provided chains`);
-    }
-    this._publicClient = createPublicClient({
-      chain,
-      transport: config.transports[config.chainId],
-      pollingInterval: config.pollingInterval ?? 2e3
-    });
-    console.log("[drawbridge] Public client created for chain:", chain.name);
+    const chain = config.publicClient.chain;
+    this._publicClient = config.publicClient;
+    console.log("[drawbridge] Public client set from config for chain:", chain.id);
     this.wagmiConfig = createWalletConfig({
-      chains: config.chains,
-      transports: config.transports,
+      chains: [chain],
+      transports: { [chain.id]: config.transport },
       connectors: config.connectors,
       pollingInterval: config.pollingInterval
     });
@@ -1027,34 +1018,6 @@ var Drawbridge = class {
    * @private
    */
   validateConfig(config) {
-    if (!config.chains || config.chains.length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: At least one chain must be configured. Provide chains in the 'chains' parameter."
-      );
-    }
-    if (!config.connectors || config.connectors.length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: At least one wallet connector must be configured. Add connectors like injected(), coinbaseWallet(), or walletConnect()."
-      );
-    }
-    if (!config.transports || Object.keys(config.transports).length === 0) {
-      throw new Error(
-        "Drawbridge configuration error: Transports configuration is required. Provide an RPC transport for each chain."
-      );
-    }
-    for (const chain of config.chains) {
-      if (!(chain.id in config.transports)) {
-        throw new Error(
-          `Drawbridge configuration error: No transport configured for chain ${chain.id} (${chain.name}). Add it to the transports parameter: { ${chain.id}: http("https://...") }`
-        );
-      }
-    }
-    const chainIdValid = config.chains.some((chain) => chain.id === config.chainId);
-    if (!chainIdValid) {
-      throw new Error(
-        `Drawbridge configuration error: chainId ${config.chainId} is not in the chains array. Provide a chain with id ${config.chainId} in the chains parameter.`
-      );
-    }
     if (!config.skipSessionSetup && !config.worldAddress) {
       console.warn(
         "[drawbridge] Configuration warning: worldAddress not provided but session setup is enabled. Session creation will work, but delegation checks will fail. Did you forget to pass worldAddress, or did you mean to set skipSessionSetup: true?"
@@ -1198,9 +1161,10 @@ var Drawbridge = class {
     }
     const userAddress = userClient.account.address;
     console.log("[drawbridge] Wallet connected:", userAddress);
-    if (userClient.chain.id !== this.config.chainId) {
+    const expectedChainId = this.config.publicClient.chain.id;
+    if (userClient.chain.id !== expectedChainId) {
       const error = new Error(
-        `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${this.config.chainId}`
+        `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${expectedChainId}`
       );
       console.error("[drawbridge]", error.message);
       throw error;
@@ -1290,7 +1254,7 @@ var Drawbridge = class {
     console.log("[drawbridge] Connecting to wallet:", connectorId);
     this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
-      await connectWallet(this.wagmiConfig, connectorId, this.config.chainId);
+      await connectWallet(this.wagmiConfig, connectorId, this._publicClient.chain.id);
     } catch (err) {
       if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {
         console.log("[drawbridge] Already connected");

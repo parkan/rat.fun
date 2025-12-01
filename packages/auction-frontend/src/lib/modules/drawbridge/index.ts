@@ -1,7 +1,6 @@
-import { Drawbridge, DrawbridgeStatus, type DrawbridgeState } from "drawbridge"
+import { Drawbridge, DrawbridgeStatus, PublicClient, type DrawbridgeState } from "drawbridge"
 import { readable, derived } from "svelte/store"
 import type { Hex, Transport } from "viem"
-import type { MUDChain } from "@ratfun/common/basic-network"
 import { getConnectors } from "./getConnectors"
 
 // Re-export types and enums from package
@@ -12,7 +11,7 @@ export { DrawbridgeStatus } from "drawbridge"
  * Minimal config needed for drawbridge initialization
  */
 export type DrawbridgeInitConfig = {
-  chain: MUDChain
+  publicClient: PublicClient
   transport: Transport
   worldAddress?: Hex
 }
@@ -34,7 +33,7 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
     return
   }
 
-  console.log("[Drawbridge] Creating instance with network:", config.chain.id)
+  console.log("[Drawbridge] Creating instance with network:", config.publicClient.chain.id)
 
   // Get connectors for this environment
   const connectors = getConnectors()
@@ -42,9 +41,8 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
 
   // Create Drawbridge instance in wallet-only mode (skipSessionSetup = true)
   drawbridgeInstance = new Drawbridge({
-    chainId: config.chain.id,
-    chains: [config.chain],
-    transports: { [config.chain.id]: config.transport },
+    publicClient: config.publicClient,
+    transport: config.transport,
     connectors,
     skipSessionSetup: true, // ← Wallet-only mode, no session setup
     pollingInterval: 2000,

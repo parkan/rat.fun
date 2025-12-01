@@ -1,4 +1,4 @@
-import { Client, Transport, Chain, Address, LocalAccount, PublicActions, Account } from 'viem';
+import { Client, Transport, Chain, PublicActions, Address, LocalAccount, Account } from 'viem';
 import { SmartAccount, PaymasterClient } from 'viem/account-abstraction';
 import { CreateConnectorFn, Config } from '@wagmi/core';
 
@@ -100,12 +100,10 @@ type SetupSessionStatus = {
  * Configuration for Drawbridge instance
  */
 type DrawbridgeConfig = {
-    /** Chain ID to operate on */
-    chainId: number;
-    /** Supported chains */
-    chains: readonly [Chain, ...Chain[]];
-    /** Transport configuration per chain */
-    transports: Record<number, Transport>;
+    /** Public client */
+    publicClient: PublicClient;
+    /** Transport for wallet client */
+    transport: Transport;
     /** Wallet connectors (injected, walletConnect, etc.) */
     connectors: CreateConnectorFn[];
     /** MUD World contract address (optional if skipSessionSetup is true) */
