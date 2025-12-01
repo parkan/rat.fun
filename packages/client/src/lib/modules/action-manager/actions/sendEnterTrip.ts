@@ -1,7 +1,7 @@
 import { busy } from "../index.svelte"
 import { get } from "svelte/store"
 import { environment as environmentStore } from "$lib/modules/network"
-import { ENVIRONMENT } from "$lib/mud/enums"
+import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import { signRequest } from "$lib/modules/signature"
 import type { EnterTripRequestBody, EnterTripReturnValue } from "@server/modules/types"
 import {
@@ -10,7 +10,7 @@ import {
   PUBLIC_BASE_SERVER_HOST
 } from "$env/static/public"
 import { errorHandler } from "$lib/modules/error-handling"
-import { APIError, TripError } from "$lib/modules/error-handling/errors"
+import { APIError, TripError } from "@ratfun/common/error-handling"
 
 const DEFAULT_TIMING = 4000
 

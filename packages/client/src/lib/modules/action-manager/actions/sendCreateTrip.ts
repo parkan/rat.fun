@@ -6,14 +6,14 @@ import { busy } from "../index.svelte"
 import type { CreateTripRequestBody, CreateTripReturnValue } from "@server/modules/types"
 import { signRequest } from "$lib/modules/signature"
 import { environment as environmentStore } from "$lib/modules/network"
-import { ENVIRONMENT } from "$lib/mud/enums"
+import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import {
   PUBLIC_DEVELOPMENT_SERVER_HOST,
   PUBLIC_BASE_SEPOLIA_SERVER_HOST,
   PUBLIC_BASE_SERVER_HOST
 } from "$env/static/public"
 import { errorHandler } from "$lib/modules/error-handling"
-import { APIError, TripError } from "$lib/modules/error-handling/errors"
+import { APIError, TripError } from "@ratfun/common/error-handling"
 
 const DEFAULT_TIMING = 4000
 

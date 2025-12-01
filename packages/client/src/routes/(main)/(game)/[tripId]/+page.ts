@@ -3,7 +3,7 @@ import { loadData } from "$lib/modules/content/sanity"
 import { queries } from "$lib/modules/content/sanity/groq"
 import { redirect } from "@sveltejs/kit"
 import { errorHandler, CMSError } from "$lib/modules/error-handling"
-import { getWorldAddress } from "$lib/mud/getWorldAddress"
+import { getWorldAddress } from "@ratfun/common/mud"
 import { environment as environmentStore } from "$lib/modules/network"
 import { get } from "svelte/store"
 

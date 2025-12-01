@@ -5,7 +5,7 @@
   import { typeHit } from "$lib/modules/sound"
   import { isSessionReady, sessionClient } from "$lib/modules/drawbridge"
   import { walletNetwork, walletType } from "$lib/modules/network"
-  import { WALLET_TYPE } from "$lib/mud/enums"
+  import { WALLET_TYPE } from "@ratfun/common/basic-network"
 
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"

@@ -3,13 +3,13 @@
   import { page } from "$app/state"
   import { fade } from "svelte/transition"
 
-  import { WALLET_TYPE } from "$lib/mud/enums"
+  import { WALLET_TYPE } from "@ratfun/common/basic-network"
 
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
 
   import { publicNetwork } from "$lib/modules/network"
-  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
+  import { setupWalletNetwork } from "@ratfun/common/mud"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
   import { sessionClient, status, DrawbridgeStatus, isSessionReady } from "$lib/modules/drawbridge"

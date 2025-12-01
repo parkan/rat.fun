@@ -1,6 +1,6 @@
 import { buyWithEth } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
-import { TransactionError } from "$lib/modules/error-handling/errors"
+import { TransactionError } from "@ratfun/common/error-handling"
 
 /**
  * Buy tokens with ETH

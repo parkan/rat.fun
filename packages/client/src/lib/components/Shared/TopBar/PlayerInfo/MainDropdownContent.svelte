@@ -8,7 +8,7 @@
   import { UI } from "$lib/modules/ui/enums"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { walletType, saleStatus } from "$lib/modules/network"
-  import { WALLET_TYPE, SALE_STATUS } from "$lib/mud/enums"
+  import { WALLET_TYPE, SALE_STATUS } from "@ratfun/common/basic-network"
   import { SmallButton, Checkbox } from "$lib/components/Shared"
   import { musicEnabled, backgroundMusic } from "$lib/modules/sound/stores"
   import {

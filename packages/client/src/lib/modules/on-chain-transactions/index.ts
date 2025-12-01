@@ -1,5 +1,5 @@
 import { maxUint256, parseEther } from "viem"
-import { WALLET_TYPE } from "$lib/mud/enums"
+import { WALLET_TYPE } from "@ratfun/common/basic-network"
 import { get } from "svelte/store"
 import { walletType } from "$lib/modules/network"
 import { executeTransaction } from "./executeTransaction"

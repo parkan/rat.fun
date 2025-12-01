@@ -1,5 +1,5 @@
 import type { Hex, TransactionReceipt } from "viem"
-import type { WalletTransactionClient } from "$lib/mud/setupWalletNetwork"
+import type { WalletTransactionClient } from "@ratfun/common/mud"
 import { get } from "svelte/store"
 
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
@@ -9,7 +9,7 @@ import { WorldFunctions } from "./index"
 import { prepareConnectorClientForTransaction } from "$lib/modules/drawbridge/connector"
 import { errorHandler } from "$lib/modules/error-handling"
 import { refetchAllowance } from "$lib/modules/erc20Listener"
-import { TransactionError } from "../error-handling/errors"
+import { TransactionError } from "@ratfun/common/error-handling"
 
 type ExecuteTransactionOptions = {
   useConnectorClient?: boolean

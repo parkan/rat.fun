@@ -1,6 +1,6 @@
 import { giveCallerTokens } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
-import { TransactionError } from "$lib/modules/error-handling/errors"
+import { TransactionError } from "@ratfun/common/error-handling"
 
 const DEFAULT_TIMING = 4000
 

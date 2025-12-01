@@ -18,16 +18,15 @@
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { addressToId } from "$lib/modules/utils"
 
-  import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
   import { gsap } from "gsap"
 
   // Wallet setup imports
+  import { ENVIRONMENT, WALLET_TYPE } from "@ratfun/common/basic-network"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
-  import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
   import {
     initializeDrawbridge,
     getDrawbridge,
-    getDrawbridgePublicClient
+    type DrawbridgeInitConfig
   } from "$lib/modules/drawbridge"
 
   const {
@@ -50,26 +49,18 @@
   // ============================================================================
 
   /**
-   * Initialize drawbridge if in DRAWBRIDGE mode.
-   * Returns the public client from drawbridge's wagmi config to reuse for MUD sync.
+   * Initialize drawbridge if in DRAWBRIDGE mode using the provided public client.
    * This avoids double RPC polling.
    */
-  async function initDrawbridgeIfNeeded() {
+  async function initDrawbridgeIfNeeded(config: DrawbridgeInitConfig) {
     const walletType = get(walletTypeStore)
 
     if (walletType !== WALLET_TYPE.DRAWBRIDGE) {
       return undefined
     }
 
-    console.log("[Loading] Initializing drawbridge before MUD sync...")
-    const networkConfig = getNetworkConfig(environment, page.url)
-    await initializeDrawbridge(networkConfig)
-
-    // Get the public client from drawbridge to reuse for MUD sync
-    const publicClient = getDrawbridgePublicClient()
-    console.log("[Loading] Got public client from drawbridge")
-
-    return publicClient
+    console.log("[Loading] Initializing drawbridge after MUD sync...")
+    await initializeDrawbridge(config)
   }
 
   /**
@@ -169,17 +160,15 @@
       typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
 
-    // Step 1: Initialize drawbridge FIRST if in DRAWBRIDGE mode
+    // Step 1: Initialize public network and wait for chain sync to complete
     // This gives us a public client to reuse, avoiding double RPC polling
-    const drawbridgePublicClient = await initDrawbridgeIfNeeded()
-
-    // Step 2: Initialize public network and wait for chain sync to complete
-    // Pass the drawbridge public client if available (reuses same RPC connection)
     await initPublicNetwork({
       environment,
-      url: page.url,
-      publicClient: drawbridgePublicClient
+      url: page.url
     })
+
+    // Step 2: Initialize drawbridge if in DRAWBRIDGE mode
+    await initDrawbridgeIfNeeded($publicNetwork)
 
     // Step 3: Get player ID from wallet if connected
     // For DRAWBRIDGE: already initialized in step 1

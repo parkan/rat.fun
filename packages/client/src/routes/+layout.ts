@@ -1,9 +1,8 @@
 import type { LayoutLoad } from "./$types"
 import { get } from "svelte/store"
 import { getEnvironmentFromUrl, getWalletTypeFromUrl } from "$lib/modules/network"
-import { SALE_STATUS } from "$lib/mud/enums"
+import { ENVIRONMENT, WALLET_TYPE, SALE_STATUS } from "@ratfun/common/basic-network"
 import { PUBLIC_SALE_STATUS } from "$env/static/public"
-import { ENVIRONMENT, WALLET_TYPE } from "$lib/mud/enums"
 import {
   environment as environmentStore,
   walletType as walletTypeStore,

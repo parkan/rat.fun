@@ -17,7 +17,7 @@
   import { ENTITY_TYPE } from "contracts/enums"
   import { walletType, environment } from "$lib/modules/network"
   import { busy } from "$lib/modules/action-manager/index.svelte"
-  import { ENVIRONMENT } from "$lib/mud/enums"
+  import { ENVIRONMENT } from "@ratfun/common/basic-network"
   import { publicNetwork } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 

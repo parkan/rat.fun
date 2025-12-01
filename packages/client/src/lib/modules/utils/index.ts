@@ -6,7 +6,7 @@
  */
 
 import { Hex, sha256 } from "viem"
-import { JSONParseError } from "../error-handling/errors"
+import { JSONParseError } from "@ratfun/common/error-handling"
 import { get } from "svelte/store"
 import { blockNumber as blockNumberStore } from "$lib/modules/network"
 import type { RatImages } from "@sanity-types"

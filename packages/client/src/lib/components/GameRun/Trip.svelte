@@ -6,7 +6,7 @@
   import { staticContent } from "$lib/modules/content"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { sendEnterTrip } from "$lib/modules/action-manager/actions/sendEnterTrip"
-  import { TripError as TripErrorClass } from "$lib/modules/error-handling/errors"
+  import { TripError as TripErrorClass } from "@ratfun/common/error-handling"
   import { player } from "$lib/modules/state/stores"
   import { replaceState } from "$app/navigation"
   import {

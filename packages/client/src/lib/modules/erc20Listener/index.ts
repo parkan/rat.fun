@@ -1,6 +1,6 @@
 import { get } from "svelte/store"
 import { erc20Abi, Hex } from "viem"
-import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
+import { SetupPublicNetworkResult } from "@ratfun/common/mud"
 import { publicNetwork } from "$lib/modules/network"
 import { externalAddressesConfig, playerAddress } from "$lib/modules/state/stores"
 import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/erc20Listener/stores"

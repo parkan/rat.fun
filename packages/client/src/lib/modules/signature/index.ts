@@ -1,7 +1,7 @@
 import { get } from "svelte/store"
 import { Hex } from "viem"
 import { walletType } from "$lib/modules/network"
-import { WALLET_TYPE } from "$lib/mud/enums"
+import { WALLET_TYPE } from "@ratfun/common/basic-network"
 import { signMessage } from "viem/actions"
 import type { SessionClient } from "drawbridge"
 import { SignedRequest, SignedRequestInfo } from "@server/modules/types"

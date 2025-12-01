@@ -3,15 +3,13 @@
  * (https://viem.sh/docs/getting-started.html).
  * This line imports the functions we need from it.
  */
-import { fallback, webSocket, http, createWalletClient, Hex, ClientConfig, parseEther } from "viem"
+import { createWalletClient, Hex, ClientConfig, parseEther } from "viem"
 
 import { createBurnerAccount, transportObserver } from "@latticexyz/common"
 import { transactionQueue } from "@latticexyz/common/actions"
 
-import { setupWalletNetwork } from "./setupWalletNetwork"
-import { SetupPublicNetworkResult } from "./setupPublicNetwork"
-import { FaucetError } from "$lib/modules/error-handling/errors"
-import { errorHandler } from "$lib/modules/error-handling"
+import { SetupPublicNetworkResult, setupWalletNetwork } from "@ratfun/common/mud"
+import { errorHandler, FaucetError } from "$lib/modules/error-handling"
 
 export function setupBurnerWalletNetwork(publicNetwork: SetupPublicNetworkResult) {
   const networkConfig = publicNetwork.config
@@ -22,23 +20,9 @@ export function setupBurnerWalletNetwork(publicNetwork: SetupPublicNetworkResult
    */
   const burnerAccount = createBurnerAccount(networkConfig.privateKey as Hex)
 
-  /*
-   * Create a viem public (read only) client
-   * (https://viem.sh/docs/clients/public.html)
-   */
-  const transports = []
-
-  // Add WebSocket transport if WebSocket URL is available
-  if (networkConfig.provider.wsRpcUrl) {
-    transports.push(webSocket(networkConfig.provider.wsRpcUrl))
-  }
-
-  // Always add HTTP transport as fallback
-  transports.push(http(networkConfig.provider.jsonRpcUrl))
-
   const clientOptions = {
     chain: networkConfig.chain,
-    transport: transportObserver(fallback(transports)),
+    transport: transportObserver(publicNetwork.transport),
     pollingInterval: 2000 // Match public network polling to reduce RPC calls
   } as const satisfies ClientConfig
 

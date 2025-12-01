@@ -6,7 +6,7 @@
   import { sendCreateRat } from "$lib/modules/action-manager/index.svelte"
   import { generateRatName, lastNameFragments, firstNameFragments } from "./ratNameGenerator"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
-  import { PropertyChangeTimeoutError, RatError } from "$lib/modules/error-handling/errors"
+  import { PropertyChangeTimeoutError, RatError } from "@ratfun/common/error-handling"
   import { errorHandler } from "$lib/modules/error-handling"
   import { getRandomNumber, getRandomElement } from "$lib/modules/utils"
   import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"

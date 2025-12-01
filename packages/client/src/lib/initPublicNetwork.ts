@@ -1,8 +1,12 @@
-import { setupPublicNetwork, type SetupPublicNetworkOptions } from "$lib/mud/setupPublicNetwork"
+import { ENVIRONMENT } from "@ratfun/common/basic-network"
+import { getNetworkConfig, setupPublicNetwork } from "@ratfun/common/mud"
 import { waitForChainSync } from "$lib/modules/chain-sync"
 import { publicNetwork, ready, initBlockListener } from "$lib/modules/network"
 
-export type InitPublicNetworkOptions = SetupPublicNetworkOptions
+interface InitPublicNetworkOptions {
+  environment: ENVIRONMENT
+  url: URL
+}
 
 /**
  * Initialize the public network connection and wait for chain sync to complete.
@@ -10,13 +14,13 @@ export type InitPublicNetworkOptions = SetupPublicNetworkOptions
  *
  * @param options.environment - The environment to connect to
  * @param options.url - The URL (for query params like worldAddress)
- * @param options.publicClient - Optional public client from drawbridge (avoids double polling)
  */
 export async function initPublicNetwork(options: InitPublicNetworkOptions) {
-  const { environment, url, publicClient } = options
+  const { environment, url } = options
 
   // Setup MUD layer and store reference
-  const mudLayer = await setupPublicNetwork({ environment, url, publicClient })
+  const networkConfig = getNetworkConfig(environment, url)
+  const mudLayer = await setupPublicNetwork(networkConfig, import.meta.env.DEV)
   publicNetwork.set(mudLayer)
 
   // Wait for chain sync to complete (updates loading UI during sync)

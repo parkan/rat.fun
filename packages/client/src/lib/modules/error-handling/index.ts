@@ -3,17 +3,11 @@ import { get } from "svelte/store"
 import { environment as environmentStore } from "$lib/modules/network"
 import { PUBLIC_SENTRY_DSN } from "$env/static/public"
 import { version } from "$app/environment"
-import {
-  AppError,
-  GraphicsError,
-  UserRejectedTransactionError,
-  WebSocketError,
-  type ExpectedError
-} from "./errors"
+import { AppError, ExpectedError, GraphicsError, parseViemError, UserRejectedTransactionError, WebSocketError } from "@ratfun/common/error-handling"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
-import { parseViemError } from "./viemErrorParser"
 import { BaseError } from "viem"
-export * from "./errors"
+
+export * from "@ratfun/common/error-handling"
 
 /**
  * Error classes that should not trigger toast notifications.

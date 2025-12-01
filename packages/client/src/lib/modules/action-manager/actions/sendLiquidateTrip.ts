@@ -1,6 +1,6 @@
 import { closeTrip } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
-import { LiquidationError } from "$lib/modules/error-handling/errors"
+import { LiquidationError } from "@ratfun/common/error-handling"
 
 const DEFAULT_TIMING = 4000
 

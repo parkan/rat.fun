@@ -2,7 +2,7 @@ import type { PageLoad } from "./$types"
 import { loadData } from "$lib/modules/content/sanity"
 import { queries } from "$lib/modules/content/sanity/groq"
 import { errorHandler, CMSError } from "$lib/modules/error-handling"
-import { getWorldAddress } from "$lib/mud/getWorldAddress"
+import { getWorldAddress } from "@ratfun/common/mud"
 import { environment as environmentStore } from "$lib/modules/network"
 import { get } from "svelte/store"
 

@@ -1,5 +1,5 @@
 import { get } from "svelte/store"
-import { ENVIRONMENT } from "$lib/mud/enums"
+import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import { onlinePlayers, websocketConnected } from "$lib/modules/off-chain-sync/stores"
 import { signRequest } from "$lib/modules/signature"
 import {

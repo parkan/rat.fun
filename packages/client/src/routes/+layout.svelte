@@ -13,7 +13,7 @@
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
-  import { WALLET_TYPE } from "$lib/mud/enums"
+  import { WALLET_TYPE } from "@ratfun/common/basic-network"
   import {
     environment as environmentStore,
     walletType as walletTypeStore

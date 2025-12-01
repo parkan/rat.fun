@@ -8,7 +8,7 @@
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { CharacterLimitError, InputValidationError } from "$lib/modules/error-handling/errors"
+  import { CharacterLimitError, InputValidationError } from "@ratfun/common/error-handling"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { MIN_TRIP_CREATION_COST, DEFAULT_SUGGESTED_TRIP_CREATION_COST } from "@server/config"
   import { staticContent } from "$lib/modules/content"

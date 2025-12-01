@@ -8,7 +8,7 @@
   import { gsap } from "gsap"
   import { backgroundMusic } from "$lib/modules/sound/stores"
   import { environment } from "$lib/modules/network"
-  import { ENVIRONMENT } from "$lib/mud/enums"
+  import { ENVIRONMENT } from "@ratfun/common/basic-network"
 
   /**
    * Timeline structure:

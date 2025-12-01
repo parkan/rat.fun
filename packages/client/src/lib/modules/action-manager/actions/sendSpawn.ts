@@ -1,6 +1,6 @@
 import { spawn } from "$lib/modules/on-chain-transactions"
 import { busy } from "../index.svelte"
-import { SpawnError } from "$lib/modules/error-handling/errors"
+import { SpawnError } from "@ratfun/common/error-handling"
 
 const DEFAULT_TIMING = 4000
 

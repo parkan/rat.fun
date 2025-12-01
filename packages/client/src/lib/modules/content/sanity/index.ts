@@ -6,7 +6,7 @@
 import { createClient } from "@sanity/client"
 import imageUrlBuilder from "@sanity/image-url"
 import { PUBLIC_SANITY_CMS_ID } from "$env/static/public"
-import { CMSError } from "$lib/modules/error-handling/errors"
+import { CMSError } from "@ratfun/common/error-handling"
 
 export const client = createClient({
   projectId: PUBLIC_SANITY_CMS_ID,

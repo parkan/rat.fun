@@ -1,6 +1,6 @@
 import { WebGLGeneralRenderer } from "$lib/modules/webgl"
 import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
-import { ShaderInitializationError } from "$lib/modules/error-handling/errors"
+import { ShaderInitializationError } from "@ratfun/common/error-handling"
 import { errorHandler } from "$lib/modules/error-handling"
 import { isPhone } from "$lib/modules/ui/state.svelte"
 import { get } from "svelte/store"

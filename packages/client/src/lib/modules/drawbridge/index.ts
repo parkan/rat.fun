@@ -6,14 +6,22 @@ import {
   type PublicClient
 } from "drawbridge"
 import { readable, derived } from "svelte/store"
+import type { Hex, Transport } from "viem"
 import { paymasters } from "./paymasters"
-import { chains, transports, getConnectors } from "./wagmiConfig"
-import type { Hex } from "viem"
-import type { NetworkConfig } from "$lib/mud/utils"
+import { getConnectors } from "./getConnectors"
 
 // Re-export types from package
 export type { ConnectorInfo, SessionClient, PublicClient } from "drawbridge"
 export { DrawbridgeStatus } from "drawbridge"
+
+/**
+ * Minimal config needed for drawbridge initialization
+ */
+export type DrawbridgeInitConfig = {
+  publicClient: PublicClient
+  transport: Transport
+  worldAddress: Hex
+}
 
 // Drawbridge instance (singleton)
 let drawbridgeInstance: InstanceType<typeof Drawbridge> | null = null
@@ -27,19 +35,13 @@ let drawbridgeInstance: InstanceType<typeof Drawbridge> | null = null
  * 2. Initialize Drawbridge (await reconnection, setup watchers)
  * 3. Return ready-to-use instance
  */
-export async function initializeDrawbridge(networkConfig: NetworkConfig): Promise<void> {
+export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promise<void> {
   if (drawbridgeInstance) {
     console.log("[Drawbridge] Already initialized")
     return
   }
 
-  console.log("[Drawbridge] Creating instance with network:", networkConfig.chainId)
-
-  // Get chain-specific config
-  const chain = chains.find(c => c.id === networkConfig.chainId)
-  if (!chain) {
-    throw new Error(`Unsupported chain ID: ${networkConfig.chainId}`)
-  }
+  console.log("[Drawbridge] Creating instance with network:", config.publicClient.chain.id)
 
   // Get connectors for this environment
   const connectors = getConnectors()
@@ -47,12 +49,11 @@ export async function initializeDrawbridge(networkConfig: NetworkConfig): Promis
 
   // Create Drawbridge instance with wagmi config embedded
   drawbridgeInstance = new Drawbridge({
-    chainId: networkConfig.chainId,
-    chains: [chain] as const,
-    transports,
+    publicClient: config.publicClient,
+    transport: config.transport,
     connectors,
-    worldAddress: networkConfig.worldAddress as Hex,
-    paymasterClient: paymasters[networkConfig.chainId],
+    worldAddress: config.worldAddress,
+    paymasterClient: paymasters[config.publicClient.chain.id],
     pollingInterval: 2000,
     appName: "RAT.FUN",
     ethPriceUSD: 2800 // $2,800

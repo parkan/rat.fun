@@ -2,7 +2,7 @@
   import { onMount } from "svelte"
   import gsap from "gsap"
   import { getDrawbridge, type ConnectorInfo, drawbridgeError } from "$lib/modules/drawbridge"
-  import { debugInfo } from "$lib/modules/drawbridge/wagmiConfig"
+  import { debugInfo } from "$lib/modules/drawbridge/getConnectors"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"

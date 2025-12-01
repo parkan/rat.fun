@@ -9,7 +9,7 @@ import { Hex } from "viem"
 import { ENTITY_TYPE } from "contracts/enums"
 import { players, gameConfig, gamePercentagesConfig } from "$lib/modules/state/stores"
 import { derived, get, Readable } from "svelte/store"
-import { PropertyChangeTimeoutError, StoreTimeoutError } from "$lib/modules/error-handling/errors"
+import { PropertyChangeTimeoutError, StoreTimeoutError } from "@ratfun/common/error-handling"
 import { items } from "./stores"
 
 /**

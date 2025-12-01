@@ -1,7 +1,6 @@
 import { writable } from "svelte/store"
-import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
-import { SetupWalletNetworkResult } from "$lib/mud/setupWalletNetwork"
-import { ENVIRONMENT, WALLET_TYPE, SALE_STATUS } from "$lib/mud/enums"
+import { ENVIRONMENT, WALLET_TYPE, SALE_STATUS } from "@ratfun/common/basic-network"
+import { SetupPublicNetworkResult, SetupWalletNetworkResult } from "@ratfun/common/mud"
 
 // ----------------------------------------------------------------------------
 
