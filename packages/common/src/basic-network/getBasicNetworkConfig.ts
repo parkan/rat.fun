@@ -49,6 +49,7 @@ export function getBasicNetworkConfig(
     chain: {
       ...chain,
       rpcUrls: {
+        ...chain.rpcUrls,
         default: overrideDefaultRpcUrls ?? chain.rpcUrls.default
       }
     }
