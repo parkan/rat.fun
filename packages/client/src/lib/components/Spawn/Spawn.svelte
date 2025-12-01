@@ -25,10 +25,14 @@
   import {
     Introduction,
     ConnectWalletForm,
-    SessionSetup,
-    SettingUp,
-    SpawnForm,
-    Spawning,
+    Allowance,
+    AllowanceLoading,
+    Session,
+    SessionLoading,
+    SessionAndSpawn,
+    SessionAndSpawnLoading,
+    SpawnComponent,
+    SpawnLoading,
     Done,
     Error
   } from "$lib/components/Spawn"
@@ -73,10 +77,9 @@
    *        - Scenarios 1 to 7 are not possible be cause we do not have a wallet connected
    *        - Scenario 11 is returning user who for some reason does not have a session (new browser, cleared cache, etc.)
    *        - Scenario 12 is returning user who has revoked allowance
-   *        - Scenario 15 is a fully setup returning user
+   *        - Scenario 15 is a fully setup returning user, exits immediately without showing any UI
    *        - hasAllowance = allowance > 100 tokens
    *        - DONE state is reached only through normal flow (SPAWN_AND_SESSION__LOADING → DONE)
-   *        - Scenario 15 exits immediately without showing any UI
    */
 
   const ALLOWANCE_THRESHOLD = 100
@@ -164,19 +167,40 @@
       const sessionReady = $isSessionReady
       const walletAddress = $userAddress
 
-      // Scenario 0: No wallet connected -> CONNECT_WALLET
+      // Scenario 0-7: No wallet connected -> CONNECT_WALLET
       if (!walletConnected) {
-        console.log("[Spawn] Scenario 0: No wallet connected → CONNECT_WALLET")
+        console.log("[Spawn] Scenario 0-7: No wallet connected → CONNECT_WALLET")
         return SPAWN_STATE.CONNECT_WALLET
       }
 
-      // Scenario 8-11: Wallet connected but session not ready -> SESSION
+      // We need allowance info even without session, check if we have wallet address
+      const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
+
+      // Scenarios 8-11: Wallet connected but session not ready
       if (!sessionReady) {
-        console.log("[Spawn] Scenario 8-11: Wallet connected, session not ready → SESSION")
-        return SPAWN_STATE.SESSION
+        // We need to check spawn status - but without session we can't easily do this
+        // For now, assume not spawned if no session (which is the common case)
+        // TODO: Could check spawn status via public client if needed
+
+        console.log("[Spawn] Drawbridge no session status:", {
+          walletConnected,
+          sessionReady,
+          hasAllowance
+        })
+
+        // Scenario 8: No session, no allowance, not spawned -> INTRODUCTION
+        if (!hasAllowance) {
+          console.log("[Spawn] Scenario 8: No session, no allowance → INTRODUCTION")
+          return SPAWN_STATE.INTRODUCTION
+        }
+
+        // Scenario 10: No session, has allowance, not spawned -> SESSION_AND_SPAWN
+        // (Scenario 11 would be has allowance + spawned -> SESSION, but we assume not spawned without session)
+        console.log("[Spawn] Scenario 10: No session, has allowance → SESSION_AND_SPAWN")
+        return SPAWN_STATE.SESSION_AND_SPAWN
       }
 
-      // Session is ready - check allowance and spawn status
+      // Session is ready - check spawn status
       if ($sessionClient && walletAddress) {
         // Ensure entities are initialized before checking spawn status
         const playerId = addressToId($sessionClient.userAddress)
@@ -187,7 +211,6 @@
 
         const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
         const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
-        const hasAllowance = await checkHasAllowance(walletAddress)
 
         console.log("[Spawn] Drawbridge status:", {
           walletConnected,
@@ -292,25 +315,21 @@
     {:else if spawnState.state.current === SPAWN_STATE.INTRODUCTION}
       <Introduction />
     {:else if spawnState.state.current === SPAWN_STATE.ALLOWANCE}
-      <!-- TODO: Allowance component -->
-      <div>ALLOWANCE - Set allowance</div>
+      <Allowance />
     {:else if spawnState.state.current === SPAWN_STATE.ALLOWANCE__LOADING}
-      <!-- TODO: Allowance loading component -->
-      <div>ALLOWANCE__LOADING - Setting allowance...</div>
+      <AllowanceLoading />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION}
-      <SessionSetup />
+      <Session />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION__LOADING}
-      <SettingUp />
+      <SessionLoading />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION_AND_SPAWN}
-      <!-- TODO: Combined session and spawn component -->
-      <div>SESSION_AND_SPAWN - Setup session and spawn</div>
+      <SessionAndSpawn />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION_AND_SPAWN__LOADING}
-      <!-- TODO: Combined loading component -->
-      <div>SESSION_AND_SPAWN__LOADING - Setting up...</div>
+      <SessionAndSpawnLoading />
     {:else if spawnState.state.current === SPAWN_STATE.SPAWN}
-      <SpawnForm />
+      <SpawnComponent />
     {:else if spawnState.state.current === SPAWN_STATE.SPAWN__LOADING}
-      <Spawning />
+      <SpawnLoading />
     {:else if spawnState.state.current === SPAWN_STATE.DONE}
       <Done />
     {:else if spawnState.state.current === SPAWN_STATE.ERROR}

@@ -42,11 +42,13 @@ let onExitFlowCallback: (() => void) | null = null
  */
 const VALID_TRANSITIONS: Record<SPAWN_STATE, SPAWN_STATE[]> = {
   [SPAWN_STATE.INIT]: [
-    SPAWN_STATE.CONNECT_WALLET, // No wallet, new user flow
-    SPAWN_STATE.ALLOWANCE, // All setup but no allowance
-    SPAWN_STATE.SESSION, // Wallet but no session
-    SPAWN_STATE.SPAWN, // Wallet and session, but not spawned
-    SPAWN_STATE.EXIT_FLOW, // All setup, go to game
+    SPAWN_STATE.CONNECT_WALLET, // Scenarios 0-7: No wallet connected
+    SPAWN_STATE.INTRODUCTION, // Scenario 8: Wallet, no session, no allowance, not spawned
+    SPAWN_STATE.ALLOWANCE, // Scenarios 9, 12, 13: No allowance
+    SPAWN_STATE.SESSION_AND_SPAWN, // Scenario 10: Wallet, no session, has allowance, not spawned
+    SPAWN_STATE.SESSION, // Scenario 11: Wallet, no session, has allowance, spawned
+    SPAWN_STATE.SPAWN, // Scenario 14: Wallet, session, has allowance, not spawned
+    SPAWN_STATE.EXIT_FLOW, // Scenario 15: All setup, go to game
     SPAWN_STATE.ERROR
   ],
   [SPAWN_STATE.CONNECT_WALLET]: [
