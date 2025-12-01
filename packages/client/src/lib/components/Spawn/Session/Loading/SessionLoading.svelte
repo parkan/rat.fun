@@ -3,12 +3,13 @@
   import { fade } from "svelte/transition"
   import { getDrawbridge, isSessionReady } from "$lib/modules/drawbridge"
   import { spawnState, SPAWN_STATE, determineNextState } from "$lib/components/Spawn/state.svelte"
-  import { buildFlowContextSync } from "$lib/components/Spawn/flowContext"
+  import { buildFlowContextSync, checkHasAllowance } from "$lib/components/Spawn/flowContext"
   import { SmallSpinner } from "$lib/components/Shared"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { checkHasAllowance } from "$lib/components/Spawn/flowContext"
-  import { userAddress } from "$lib/modules/drawbridge"
-  import { get } from "svelte/store"
+  import { publicNetwork } from "$lib/modules/network"
+  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
+  import { initWalletNetwork } from "$lib/initWalletNetwork"
+  import { WALLET_TYPE } from "$lib/mud/enums"
 
   let error = $state<string | null>(null)
 
@@ -27,10 +28,19 @@
           console.log("[SessionLoading] Session is ready")
           clearInterval(checkInterval)
 
+          // Initialize wallet network now that session is ready
+          const drawbridge = getDrawbridge()
+          const state = drawbridge.getState()
+          if (state.sessionClient && state.userAddress) {
+            console.log("[SessionLoading] Initializing wallet network")
+            const wallet = setupWalletNetwork($publicNetwork, state.sessionClient)
+            initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
+          }
+
           // After session setup, determine next state based on current context
-          // We need to check allowance since it might have changed
-          const walletAddress = get(userAddress)
-          const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
+          const hasAllowance = state.userAddress
+            ? await checkHasAllowance(state.userAddress)
+            : false
           const context = buildFlowContextSync(hasAllowance)
           const nextState = determineNextState(context)
 

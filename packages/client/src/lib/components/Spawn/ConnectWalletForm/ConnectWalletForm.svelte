@@ -8,6 +8,10 @@
   import { spawnState, determineNextState } from "$lib/components/Spawn/state.svelte"
   import { buildFlowContext } from "$lib/components/Spawn/flowContext"
   import { errorHandler } from "$lib/modules/error-handling"
+  import { publicNetwork } from "$lib/modules/network"
+  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
+  import { initWalletNetwork } from "$lib/initWalletNetwork"
+  import { WALLET_TYPE } from "$lib/mud/enums"
 
   let buttonElement: HTMLDivElement | null = $state(null)
 
@@ -90,6 +94,15 @@
 
       // Wait briefly for stores to update after wallet connection
       await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Initialize wallet network if session is ready
+      // (returning user with existing session in localStorage)
+      const state = drawbridge.getState()
+      if (state.sessionClient && state.userAddress) {
+        console.log("[ConnectWalletForm] Session ready, initializing wallet network")
+        const wallet = setupWalletNetwork($publicNetwork, state.sessionClient)
+        initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
+      }
 
       // Determine next state based on current context
       const context = await buildFlowContext()

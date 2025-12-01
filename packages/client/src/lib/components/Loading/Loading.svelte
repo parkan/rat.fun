@@ -23,12 +23,14 @@
 
   // Wallet setup imports
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
+  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { getNetworkConfig } from "$lib/mud/getNetworkConfig"
   import {
     initializeDrawbridge,
     getDrawbridge,
     getDrawbridgePublicClient
   } from "$lib/modules/drawbridge"
+  import { initWalletNetwork } from "$lib/initWalletNetwork"
 
   const {
     environment,
@@ -73,35 +75,52 @@
   }
 
   /**
-   * Get player ID from wallet if connected.
-   * For DRAWBRIDGE: drawbridge is already initialized, just check state.
-   * For BURNER: initialize burner wallet using MUD's public network.
+   * Initialize wallet network if wallet is connected.
+   * This sets up stores and ERC20 listeners.
+   *
+   * For BURNER: Always available, initialize immediately.
+   * For DRAWBRIDGE: Only if wallet was restored from localStorage.
+   *                 If not connected yet, will be initialized in ConnectWalletForm.
+   *
+   * @returns Player ID if wallet is connected, null otherwise
    */
-  function getPlayerIdFromWallet(): string | null {
-    const walletType = get(walletTypeStore)
+  function initWalletIfConnected(): string | null {
+    const currentWalletType = get(walletTypeStore)
+    const network = get(publicNetwork)
 
-    if (walletType === WALLET_TYPE.BURNER) {
-      const network = get(publicNetwork)
+    if (currentWalletType === WALLET_TYPE.BURNER) {
       const wallet = setupBurnerWalletNetwork(network)
       const address = wallet.walletClient?.account?.address
       if (address) {
-        const playerId = addressToId(address)
-        console.log("[Loading] Burner wallet found:", playerId)
-        return playerId
+        console.log("[Loading] Initializing burner wallet:", address)
+        initWalletNetwork(wallet, address, WALLET_TYPE.BURNER)
+        return addressToId(address)
       }
       console.log("[Loading] No burner wallet")
       return null
     }
 
-    if (walletType === WALLET_TYPE.DRAWBRIDGE) {
+    if (currentWalletType === WALLET_TYPE.DRAWBRIDGE) {
       const drawbridge = getDrawbridge()
-      const address = drawbridge.getState().userAddress
-      if (address) {
-        const playerId = addressToId(address)
-        console.log("[Loading] Drawbridge session found:", playerId)
-        return playerId
+      const state = drawbridge.getState()
+
+      // Only initialize if session is ready (has sessionClient)
+      // If not ready, wallet will be initialized after ConnectWalletForm
+      if (state.sessionClient && state.userAddress) {
+        console.log("[Loading] Initializing drawbridge wallet:", state.userAddress)
+        const wallet = setupWalletNetwork(network, state.sessionClient)
+        initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
+        return addressToId(state.userAddress)
       }
-      console.log("[Loading] No drawbridge session")
+
+      // Wallet connected but no session - don't initialize yet
+      // (will go through spawn flow to set up session)
+      if (state.userAddress) {
+        console.log("[Loading] Drawbridge wallet connected but no session:", state.userAddress)
+        return addressToId(state.userAddress)
+      }
+
+      console.log("[Loading] No drawbridge wallet")
       return null
     }
 
@@ -181,10 +200,10 @@
       publicClient: drawbridgePublicClient
     })
 
-    // Step 3: Get player ID from wallet if connected
-    // For DRAWBRIDGE: already initialized in step 1
-    // For BURNER: initializes burner wallet now using MUD's public network
-    const playerId = getPlayerIdFromWallet()
+    // Step 3: Initialize wallet network if connected
+    // This sets up stores and ERC20 listeners for wallets restored from storage
+    // For DRAWBRIDGE without session: will be initialized later in spawn flow
+    const playerId = initWalletIfConnected()
 
     // Step 4: Initialize entities (chain sync is now complete)
     if (playerId) {

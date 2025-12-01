@@ -11,12 +11,11 @@ import { get } from "svelte/store"
 import type { FlowContext } from "./state.svelte"
 import { WALLET_TYPE } from "$lib/mud/enums"
 import { walletType, publicNetwork } from "$lib/modules/network"
-import { isSessionReady, sessionClient, userAddress } from "$lib/modules/drawbridge"
+import { isSessionReady, userAddress } from "$lib/modules/drawbridge"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
 import { readPlayerERC20Allowance } from "$lib/modules/erc20Listener"
-import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
 import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
-import { initWalletNetwork } from "$lib/initWalletNetwork"
+import { checkIsSpawned } from "$lib/initWalletNetwork"
 
 const ALLOWANCE_THRESHOLD = 100
 
@@ -47,29 +46,6 @@ export async function checkHasAllowance(walletAddress: string): Promise<boolean>
 }
 
 /**
- * Check if player is spawned
- * Works for both burner and drawbridge wallets
- */
-export function checkIsSpawned(): boolean {
-  const currentWalletType = get(walletType)
-
-  if (currentWalletType === WALLET_TYPE.BURNER) {
-    const wallet = setupBurnerWalletNetwork(get(publicNetwork))
-    if (wallet.walletClient?.account.address) {
-      return initWalletNetwork(wallet, wallet.walletClient.account.address, WALLET_TYPE.BURNER)
-    }
-    return false
-  } else {
-    const client = get(sessionClient)
-    if (client) {
-      const wallet = setupWalletNetwork(get(publicNetwork), client)
-      return initWalletNetwork(wallet, client.userAddress, currentWalletType)
-    }
-    return false
-  }
-}
-
-/**
  * Build the current flow context for state transitions.
  * This checks all conditions needed to determine the next state.
  *
@@ -95,7 +71,7 @@ export async function buildFlowContext(): Promise<FlowContext> {
       }
     }
 
-    const isSpawned = initWalletNetwork(wallet, walletAddress, WALLET_TYPE.BURNER)
+    const isSpawned = checkIsSpawned(walletAddress)
     const hasAllowance = await checkHasAllowance(walletAddress)
 
     console.log("[FlowContext] Burner context:", {
@@ -116,13 +92,11 @@ export async function buildFlowContext(): Promise<FlowContext> {
     const walletConnected = !!get(userAddress)
     const sessionReady = get(isSessionReady)
     const walletAddress = get(userAddress)
-    const client = get(sessionClient)
 
     console.log("[FlowContext] Drawbridge raw values:", {
       walletConnected,
       sessionReady,
-      walletAddress,
-      hasSessionClient: !!client
+      walletAddress
     })
 
     if (!walletConnected || !walletAddress) {
@@ -136,7 +110,7 @@ export async function buildFlowContext(): Promise<FlowContext> {
     }
 
     const hasAllowance = await checkHasAllowance(walletAddress)
-    const isSpawned = checkIsSpawned()
+    const isSpawned = checkIsSpawned(walletAddress as `0x${string}`)
 
     console.log("[FlowContext] Drawbridge context:", {
       walletConnected: true,
@@ -175,7 +149,7 @@ export function buildFlowContextSync(hasAllowance: boolean): FlowContext {
       }
     }
 
-    const isSpawned = initWalletNetwork(wallet, walletAddress, WALLET_TYPE.BURNER)
+    const isSpawned = checkIsSpawned(walletAddress)
 
     return {
       walletConnected: true,
@@ -186,7 +160,8 @@ export function buildFlowContextSync(hasAllowance: boolean): FlowContext {
   } else {
     const walletConnected = !!get(userAddress)
     const sessionReady = get(isSessionReady)
-    const isSpawned = checkIsSpawned()
+    const walletAddress = get(userAddress)
+    const isSpawned = walletAddress ? checkIsSpawned(walletAddress as `0x${string}`) : false
 
     return {
       walletConnected,

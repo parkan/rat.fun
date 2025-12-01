@@ -8,14 +8,11 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
 
-  import { publicNetwork } from "$lib/modules/network"
-  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
-  import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
-  import { initWalletNetwork } from "$lib/initWalletNetwork"
+  import { checkIsSpawned } from "$lib/initWalletNetwork"
   import { getDrawbridge } from "$lib/modules/drawbridge"
   import { backgroundMusic } from "$lib/modules/sound/stores"
-  import { initEntities, isEntitiesInitialized } from "$lib/modules/chain-sync"
-  import { addressToId } from "$lib/modules/utils"
+  import { playerAddress } from "$lib/modules/state/stores"
+  import { get } from "svelte/store"
 
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import {
@@ -86,19 +83,17 @@
 
   /**
    * Build the flow context for initial state determination.
-   * This is slightly different from buildFlowContext in flowContext.ts because
-   * it handles additional edge cases during initial load (e.g., page route checks,
-   * entity initialization for drawbridge).
+   * Wallet network is already initialized by Loading component (or will be
+   * initialized by ConnectWalletForm/SessionLoading for new users).
    */
   async function buildInitialFlowContext(): Promise<FlowContext> {
     console.log("[Spawn] Building initial flow context, walletType:", walletType)
 
     if (walletType === WALLET_TYPE.BURNER) {
-      const wallet = setupBurnerWalletNetwork($publicNetwork)
-      const walletConnected = !!wallet.walletClient?.account.address
-      const walletAddress = wallet.walletClient?.account.address
+      // For burner wallet, check playerAddress store (set by Loading)
+      const walletAddress = get(playerAddress)
 
-      if (!walletConnected || !walletAddress) {
+      if (!walletAddress || walletAddress === "0x0") {
         return {
           walletConnected: false,
           sessionReady: false,
@@ -107,7 +102,7 @@
         }
       }
 
-      const isSpawned = initWalletNetwork(wallet, walletAddress, WALLET_TYPE.BURNER)
+      const isSpawned = checkIsSpawned(walletAddress as `0x${string}`)
       const hasAllowance = await checkHasAllowance(walletAddress)
 
       return {
@@ -116,7 +111,7 @@
         hasAllowance,
         isSpawned
       }
-    } else {
+    } else if (walletType === WALLET_TYPE.DRAWBRIDGE) {
       // DRAWBRIDGE - read directly from instance to avoid store timing issues
       const drawbridge = getDrawbridge()
       const state = drawbridge.getState()
@@ -124,13 +119,12 @@
       const walletConnected = !!state.userAddress
       const sessionReady = state.isReady
       const walletAddress = state.userAddress
-      const client = state.sessionClient
 
       console.log("[Spawn] Drawbridge state:", {
         walletConnected,
         sessionReady,
         walletAddress,
-        hasSessionClient: !!client
+        hasSessionClient: !!state.sessionClient
       })
 
       if (!walletConnected) {
@@ -144,29 +138,19 @@
 
       const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
 
-      // Without session, we can't easily check spawn status - assume not spawned
+      // Without session, we can't check spawn status
       if (!sessionReady) {
         return {
           walletConnected: true,
           sessionReady: false,
           hasAllowance,
-          isSpawned: false // Assume not spawned without session
+          isSpawned: false
         }
       }
 
       // Session is ready - check spawn status
-      let isSpawned = false
-      if (client && walletAddress) {
-        // Ensure entities are initialized before checking spawn status
-        const playerId = addressToId(client.userAddress)
-        if (!isEntitiesInitialized(playerId)) {
-          console.log("[Spawn] Initializing entities for drawbridge user:", playerId)
-          initEntities({ activePlayerId: playerId })
-        }
-
-        const wallet = setupWalletNetwork($publicNetwork, client)
-        isSpawned = initWalletNetwork(wallet, client.userAddress, walletType)
-      }
+      // (wallet network already initialized by Loading)
+      const isSpawned = walletAddress ? checkIsSpawned(walletAddress) : false
 
       return {
         walletConnected: true,
@@ -174,6 +158,14 @@
         hasAllowance,
         isSpawned
       }
+    }
+
+    // Fallback (shouldn't reach here)
+    return {
+      walletConnected: false,
+      sessionReady: false,
+      hasAllowance: false,
+      isSpawned: false
     }
   }
 
