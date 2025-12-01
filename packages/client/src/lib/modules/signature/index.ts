@@ -27,7 +27,7 @@ export async function signRequest<T>(data: T): Promise<SignedRequest<T>> {
       message: stringifyRequestForSignature({ data, info })
     })
   } else {
-    signature = await signMessage(client, {
+    signature = await signMessage(client as Parameters<typeof signMessage>[0], {
       account: client.account,
       message: stringifyRequestForSignature({ data, info })
     })
