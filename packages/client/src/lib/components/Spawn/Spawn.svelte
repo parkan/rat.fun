@@ -280,11 +280,11 @@
       <ConnectWalletForm />
     {:else if spawnState.state.current === SPAWN_STATE.SESSION_SETUP}
       <SessionSetup />
-    {:else if spawnState.state.current === SPAWN_STATE.SETTING_UP_SESSION}
+    {:else if spawnState.state.current === SPAWN_STATE.SESSION_SETUP__LOADING}
       <SettingUp />
-    {:else if spawnState.state.current === SPAWN_STATE.SPAWN_FORM}
+    {:else if spawnState.state.current === SPAWN_STATE.SPAWN}
       <SpawnForm />
-    {:else if spawnState.state.current === SPAWN_STATE.SPAWNING}
+    {:else if spawnState.state.current === SPAWN_STATE.SPAWN__LOADING}
       <Spawning />
     {:else if spawnState.state.current === SPAWN_STATE.DONE}
       <Done {spawned} />

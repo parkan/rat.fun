@@ -11,7 +11,7 @@
 
   function handleSetupSession() {
     console.log("[SessionSetup] Setup session button clicked")
-    spawnState.state.transitionTo(SPAWN_STATE.SETTING_UP_SESSION)
+    spawnState.state.transitionTo(SPAWN_STATE.SESSION_SETUP__LOADING)
   }
 
   onMount(() => {

@@ -44,7 +44,7 @@
     console.log("[SpawnForm] Name stored, transitioning to SPAWNING")
 
     // Transition to spawning state
-    spawnState.state.transitionTo(SPAWN_STATE.SPAWNING)
+    spawnState.state.transitionTo(SPAWN_STATE.SPAWN__LOADING)
   }
 
   onMount(() => {

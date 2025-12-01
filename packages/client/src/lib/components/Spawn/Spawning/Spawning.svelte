@@ -17,7 +17,7 @@
     // Defensive check - should never happen due to state machine guarantees
     if (!name) {
       console.error("[Spawning] No name found in state - this should not happen")
-      spawnState.state.transitionTo(SPAWN_STATE.SPAWN_FORM)
+      spawnState.state.transitionTo(SPAWN_STATE.SPAWN)
       return
     }
 
@@ -41,7 +41,7 @@
 
       // Wait a moment to show error, then go back to form
       setTimeout(() => {
-        spawnState.state.transitionTo(SPAWN_STATE.SPAWN_FORM)
+        spawnState.state.transitionTo(SPAWN_STATE.SPAWN)
       }, 2000)
     }
   }
