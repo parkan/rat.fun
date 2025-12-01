@@ -13,8 +13,7 @@
     loadingMessage,
     loadingPercentage,
     ready,
-    publicNetwork,
-    walletType as walletTypeStore
+    publicNetwork
   } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { addressToId } from "$lib/modules/utils"
@@ -46,62 +45,6 @@
   let loadingElement: HTMLDivElement
   let terminalBoxElement: HTMLDivElement
   let logoElement: HTMLDivElement
-
-  // ============================================================================
-  // ASYNC HELPERS
-  // ============================================================================
-
-  /**
-   * Initialize drawbridge.
-   * Returns the public client from drawbridge's wagmi config to reuse for MUD sync.
-   * This avoids double RPC polling.
-   */
-  async function initDrawbridge() {
-    console.log("[Loading] Initializing drawbridge before MUD sync...")
-    const networkConfig = getNetworkConfig(environment, page.url)
-    await initializeDrawbridge(networkConfig)
-
-    // Get the public client from drawbridge to reuse for MUD sync
-    const publicClient = getDrawbridgePublicClient()
-    console.log("[Loading] Got public client from drawbridge")
-
-    return publicClient
-  }
-
-  /**
-   * Initialize wallet network if wallet is connected.
-   * This sets up stores and ERC20 listeners.
-   *
-   * Only if wallet was restored from localStorage.
-   * If not connected yet, will be initialized in ConnectWalletForm.
-   *
-   * @returns Player ID if wallet is connected, null otherwise
-   */
-  function initWalletIfConnected(): string | null {
-    const network = get(publicNetwork)
-
-    const drawbridge = getDrawbridge()
-    const state = drawbridge.getState()
-
-    // Only initialize if session is ready (has sessionClient)
-    // If not ready, wallet will be initialized after ConnectWalletForm
-    if (state.sessionClient && state.userAddress) {
-      console.log("[Loading] Initializing drawbridge wallet:", state.userAddress)
-      const wallet = setupWalletNetwork(network, state.sessionClient)
-      initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
-      return addressToId(state.userAddress)
-    }
-
-    // Wallet connected but no session - don't initialize yet
-    // (will go through spawn flow to set up session)
-    if (state.userAddress) {
-      console.log("[Loading] Drawbridge wallet connected but no session:", state.userAddress)
-      return addressToId(state.userAddress)
-    }
-
-    console.log("[Loading] No drawbridge wallet")
-    return null
-  }
 
   // ============================================================================
   // ANIMATION
@@ -164,41 +107,100 @@
       typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
 
-    // Step 1: Initialize drawbridge FIRST
-    // This gives us a public client to reuse, avoiding double RPC polling
-    const drawbridgePublicClient = await initDrawbridge()
+    // -------------------------------------------------------------------------
+    // Step 1: Initialize drawbridge
+    // -------------------------------------------------------------------------
+    // Drawbridge manages wallet connection and session keys.
+    // This reconnects any wallet stored in localStorage.
+    console.log("[Loading] Initializing drawbridge...")
+    const networkConfig = getNetworkConfig(environment, page.url)
+    await initializeDrawbridge(networkConfig)
+    const drawbridgePublicClient = getDrawbridgePublicClient()
 
-    // Step 2: Initialize public network and wait for chain sync to complete
-    // Pass the drawbridge public client if available (reuses same RPC connection)
+    // -------------------------------------------------------------------------
+    // Step 2: Initialize public network (MUD sync)
+    // -------------------------------------------------------------------------
+    // Sets up MUD layer and waits for chain sync to complete.
+    // Reuses drawbridge's public client to avoid duplicate RPC polling.
     await initPublicNetwork({
       environment,
       url: page.url,
       publicClient: drawbridgePublicClient
     })
 
-    // Step 3: Initialize wallet network if connected
-    // This sets up stores for wallets restored from storage
-    // For DRAWBRIDGE without session: will be initialized later in spawn flow
-    const playerId = initWalletIfConnected()
+    // -------------------------------------------------------------------------
+    // Step 3: Check wallet state and initialize accordingly
+    // -------------------------------------------------------------------------
+    // After drawbridge init, we have three possible scenarios:
+    //
+    // SCENARIO A: Wallet connected + session ready
+    //   → Full initialization: wallet, entities, ERC20 listener
+    //   → User goes straight to game (Spawn exits immediately)
+    //
+    // SCENARIO B: Wallet connected + NO session
+    //   → Partial initialization: entities only (for filtering)
+    //   → Wallet/ERC20 initialized later in Spawn after session setup
+    //
+    // SCENARIO C: No wallet connected
+    //   → No initialization here
+    //   → Everything initialized in Spawn flow
+    //
+    const drawbridge = getDrawbridge()
+    const drawbridgeState = drawbridge.getState()
+    const network = get(publicNetwork)
 
-    // Step 4: Initialize entities (chain sync is now complete)
-    if (playerId) {
-      console.log("[Loading] Initializing entities for player:", playerId)
+    if (drawbridgeState.sessionClient && drawbridgeState.userAddress) {
+      // -----------------------------------------------------------------------
+      // SCENARIO A: Wallet + Session ready
+      // -----------------------------------------------------------------------
+      // Returning user with full session. Initialize everything.
+      console.log("[Loading] Scenario A: Wallet + session ready")
+      console.log("[Loading] Address:", drawbridgeState.userAddress)
+
+      // Initialize wallet network (sets walletNetwork, playerAddress stores)
+      const wallet = setupWalletNetwork(network, drawbridgeState.sessionClient)
+      initWalletNetwork(wallet, drawbridgeState.userAddress, WALLET_TYPE.DRAWBRIDGE)
+
+      // Initialize entities with player filtering
+      const playerId = addressToId(drawbridgeState.userAddress)
       initEntities({ activePlayerId: playerId })
 
-      // Step 4b: Initialize ERC20 listener AFTER entities are populated
-      // (externalAddressesConfig is derived from entities store)
+      // Initialize ERC20 listener (requires playerAddress + entities for externalAddressesConfig)
       initErc20Listener()
+    } else if (drawbridgeState.userAddress) {
+      // -----------------------------------------------------------------------
+      // SCENARIO B: Wallet connected, but NO session
+      // -----------------------------------------------------------------------
+      // User's wallet was restored from localStorage, but session expired or
+      // was never created. They'll need to set up session in Spawn flow.
+      //
+      // We initialize entities here (with player filtering) so the game state
+      // is ready. Wallet network and ERC20 listener will be initialized after
+      // session setup in Spawn.
+      console.log("[Loading] Scenario B: Wallet connected, no session")
+      console.log("[Loading] Address:", drawbridgeState.userAddress)
+
+      const playerId = addressToId(drawbridgeState.userAddress)
+      initEntities({ activePlayerId: playerId })
+
+      // NOTE: We do NOT call initErc20Listener here because playerAddress
+      // store is not set (requires initWalletNetwork which needs sessionClient)
     } else {
-      console.log("[Loading] No player ID - deferring initEntities to Spawn")
+      // -----------------------------------------------------------------------
+      // SCENARIO C: No wallet connected
+      // -----------------------------------------------------------------------
+      // New user or cleared localStorage. Everything will be initialized
+      // in the Spawn flow after they connect wallet and set up session.
+      console.log("[Loading] Scenario C: No wallet connected")
     }
 
-    // Step 5: Stop terminal typer
+    // -------------------------------------------------------------------------
+    // Step 4: Finish loading sequence
+    // -------------------------------------------------------------------------
     if (typer?.stop) {
       typer.stop()
     }
 
-    // Step 6: Animate out and signal completion
     await animateOut()
     loaded()
   })
