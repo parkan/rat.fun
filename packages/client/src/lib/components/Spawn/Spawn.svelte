@@ -9,8 +9,6 @@
   import { UI } from "$lib/modules/ui/enums"
 
   import { publicNetwork } from "$lib/modules/network"
-  import { readPlayerERC20Allowance } from "$lib/modules/erc20Listener"
-  import { externalAddressesConfig } from "$lib/modules/state/stores"
   import { userAddress } from "$lib/modules/drawbridge"
   import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
   import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
@@ -36,7 +34,13 @@
     Done,
     Error
   } from "$lib/components/Spawn"
-  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
+  import {
+    spawnState,
+    SPAWN_STATE,
+    determineNextState,
+    type FlowContext
+  } from "$lib/components/Spawn/state.svelte"
+  import { checkHasAllowance } from "$lib/components/Spawn/flowContext"
   import { Marquee } from "$lib/components/Shared"
 
   const { walletType, spawned = () => {} } = $props<{
@@ -82,84 +86,38 @@
    *        - DONE state is reached only through normal flow (SPAWN_AND_SESSION__LOADING → DONE)
    */
 
-  const ALLOWANCE_THRESHOLD = 100
-
   /**
-   * Check if user has sufficient allowance (> 100 tokens)
-   * Returns false if unable to check (no wallet, no addresses configured)
+   * Build the flow context for initial state determination.
+   * This is slightly different from buildFlowContext in flowContext.ts because
+   * it handles additional edge cases during initial load (e.g., page route checks,
+   * entity initialization for drawbridge).
    */
-  async function checkHasAllowance(walletAddress: string): Promise<boolean> {
-    const addresses = $externalAddressesConfig
-    if (!addresses?.erc20Address || !addresses?.gamePoolAddress) {
-      console.log("[Spawn] Cannot check allowance: external addresses not configured")
-      return false
-    }
-
-    try {
-      const allowance = await readPlayerERC20Allowance(
-        $publicNetwork,
-        walletAddress as `0x${string}`,
-        addresses.gamePoolAddress,
-        addresses.erc20Address
-      )
-      console.log("[Spawn] Current allowance:", allowance)
-      return allowance > ALLOWANCE_THRESHOLD
-    } catch (err) {
-      console.error("[Spawn] Failed to check allowance:", err)
-      return false
-    }
-  }
-
-  async function determineInitialState(): Promise<SPAWN_STATE> {
-    console.log("[Spawn] Determining initial state, walletType:", walletType)
+  async function buildInitialFlowContext(): Promise<FlowContext> {
+    console.log("[Spawn] Building initial flow context, walletType:", walletType)
 
     if (walletType === WALLET_TYPE.BURNER) {
       const wallet = setupBurnerWalletNetwork($publicNetwork)
       const walletConnected = !!wallet.walletClient?.account.address
       const walletAddress = wallet.walletClient?.account.address
 
-      // Scenario 0: No wallet connected -> CONNECT_WALLET
       if (!walletConnected || !walletAddress) {
-        console.log("[Spawn] Scenario 0: No wallet connected → CONNECT_WALLET")
-        return SPAWN_STATE.CONNECT_WALLET
+        return {
+          walletConnected: false,
+          sessionReady: false,
+          hasAllowance: false,
+          isSpawned: false
+        }
       }
 
       const isSpawned = initWalletNetwork(wallet, walletAddress, WALLET_TYPE.BURNER)
-      // For burner wallet, session is always ready
-      const sessionReady = true
       const hasAllowance = await checkHasAllowance(walletAddress)
 
-      console.log("[Spawn] Burner wallet status:", {
-        walletConnected,
-        sessionReady,
+      return {
+        walletConnected: true,
+        sessionReady: true, // Burner wallet always has session ready
         hasAllowance,
         isSpawned
-      })
-
-      // Scenario 15: All conditions met -> EXIT_FLOW
-      if (
-        (isSpawned && hasAllowance) ||
-        (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn"))
-      ) {
-        console.log("[Spawn] Scenario 15: All setup → EXIT_FLOW")
-        return SPAWN_STATE.EXIT_FLOW
       }
-
-      // Scenario 14: Session ready, has allowance, not spawned -> SPAWN
-      if (hasAllowance && !isSpawned) {
-        console.log("[Spawn] Scenario 14: Has allowance, not spawned → SPAWN")
-        return SPAWN_STATE.SPAWN
-      }
-
-      // Scenario 12/13: Session ready, no allowance -> ALLOWANCE
-      if (!hasAllowance) {
-        console.log("[Spawn] Scenario 12/13: No allowance → ALLOWANCE")
-        return SPAWN_STATE.ALLOWANCE
-      }
-
-      // Fallback (shouldn't reach here)
-      console.log("[Spawn] Fallback → SPAWN")
-      return SPAWN_STATE.SPAWN
     } else {
       // DRAWBRIDGE
       const walletConnected =
@@ -167,40 +125,29 @@
       const sessionReady = $isSessionReady
       const walletAddress = $userAddress
 
-      // Scenario 0-7: No wallet connected -> CONNECT_WALLET
       if (!walletConnected) {
-        console.log("[Spawn] Scenario 0-7: No wallet connected → CONNECT_WALLET")
-        return SPAWN_STATE.CONNECT_WALLET
+        return {
+          walletConnected: false,
+          sessionReady: false,
+          hasAllowance: false,
+          isSpawned: false
+        }
       }
 
-      // We need allowance info even without session, check if we have wallet address
       const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
 
-      // Scenarios 8-11: Wallet connected but session not ready
+      // Without session, we can't easily check spawn status - assume not spawned
       if (!sessionReady) {
-        // We need to check spawn status - but without session we can't easily do this
-        // For now, assume not spawned if no session (which is the common case)
-        // TODO: Could check spawn status via public client if needed
-
-        console.log("[Spawn] Drawbridge no session status:", {
-          walletConnected,
-          sessionReady,
-          hasAllowance
-        })
-
-        // Scenario 8: No session, no allowance, not spawned -> INTRODUCTION
-        if (!hasAllowance) {
-          console.log("[Spawn] Scenario 8: No session, no allowance → INTRODUCTION")
-          return SPAWN_STATE.INTRODUCTION
+        return {
+          walletConnected: true,
+          sessionReady: false,
+          hasAllowance,
+          isSpawned: false // Assume not spawned without session
         }
-
-        // Scenario 10: No session, has allowance, not spawned -> SESSION_AND_SPAWN
-        // (Scenario 11 would be has allowance + spawned -> SESSION, but we assume not spawned without session)
-        console.log("[Spawn] Scenario 10: No session, has allowance → SESSION_AND_SPAWN")
-        return SPAWN_STATE.SESSION_AND_SPAWN
       }
 
       // Session is ready - check spawn status
+      let isSpawned = false
       if ($sessionClient && walletAddress) {
         // Ensure entities are initialized before checking spawn status
         const playerId = addressToId($sessionClient.userAddress)
@@ -210,38 +157,33 @@
         }
 
         const wallet = setupWalletNetwork($publicNetwork, $sessionClient)
-        const isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
-
-        console.log("[Spawn] Drawbridge status:", {
-          walletConnected,
-          sessionReady,
-          hasAllowance,
-          isSpawned
-        })
-
-        // Scenario 15: All conditions met -> EXIT_FLOW
-        if (isSpawned && hasAllowance) {
-          console.log("[Spawn] Scenario 15: All setup → EXIT_FLOW")
-          return SPAWN_STATE.EXIT_FLOW
-        }
-
-        // Scenario 14: Session ready, has allowance, not spawned -> SPAWN
-        if (hasAllowance && !isSpawned) {
-          console.log("[Spawn] Scenario 14: Has allowance, not spawned → SPAWN")
-          return SPAWN_STATE.SPAWN
-        }
-
-        // Scenario 12/13: Session ready, no allowance -> ALLOWANCE
-        if (!hasAllowance) {
-          console.log("[Spawn] Scenario 12/13: No allowance → ALLOWANCE")
-          return SPAWN_STATE.ALLOWANCE
-        }
+        isSpawned = initWalletNetwork(wallet, $sessionClient.userAddress, walletType)
       }
 
-      // Fallback: session ready but no client (shouldn't happen)
-      console.log("[Spawn] Fallback: session ready but no client → ALLOWANCE")
-      return SPAWN_STATE.ALLOWANCE
+      return {
+        walletConnected: true,
+        sessionReady,
+        hasAllowance,
+        isSpawned
+      }
     }
+  }
+
+  async function determineInitialState(): Promise<SPAWN_STATE> {
+    const context = await buildInitialFlowContext()
+
+    console.log("[Spawn] Flow context:", context)
+
+    // Special case: if we're on a trip page without spawn param, skip the flow
+    if (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn")) {
+      console.log("[Spawn] On trip page without spawn param → EXIT_FLOW")
+      return SPAWN_STATE.EXIT_FLOW
+    }
+
+    const nextState = determineNextState(context)
+    console.log("[Spawn] Initial state:", nextState)
+
+    return nextState
   }
 
   let initialized = $state(false)

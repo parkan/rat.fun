@@ -5,7 +5,8 @@
   import { debugInfo } from "$lib/modules/drawbridge/wagmiConfig"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import BigButton from "$lib/components/Shared/Buttons/BigButton.svelte"
-  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
+  import { spawnState, determineNextState } from "$lib/components/Spawn/state.svelte"
+  import { buildFlowContext } from "$lib/components/Spawn/flowContext"
   import { errorHandler } from "$lib/modules/error-handling"
 
   let buttonElement: HTMLDivElement | null = $state(null)
@@ -84,12 +85,20 @@
       await drawbridge.connectWallet(connectorId)
 
       console.log("[ConnectWalletForm] Wallet connected successfully")
-      // Account watcher in drawbridge will handle session creation
-      // Close modal and transition to SESSION
+      // Close modal
       showWalletSelect = false
-      // !!! HACK: Wait for 1 second to avoid showing flash of SESSION if we are setup
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      spawnState.state.transitionTo(SPAWN_STATE.SESSION)
+
+      // Wait briefly for stores to update after wallet connection
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Determine next state based on current context
+      const context = await buildFlowContext()
+      const nextState = determineNextState(context)
+
+      console.log("[ConnectWalletForm] Flow context:", context)
+      console.log("[ConnectWalletForm] Next state:", nextState)
+
+      spawnState.state.transitionTo(nextState)
     } catch (error) {
       console.error("[ConnectWalletForm] Connection failed:", error)
       errorHandler(error, "Failed to connect wallet")

@@ -2,72 +2,75 @@
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import { get } from "svelte/store"
-  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
+  import { spawnState, SPAWN_STATE, determineNextState } from "$lib/components/Spawn/state.svelte"
+  import { buildFlowContextSync } from "$lib/components/Spawn/flowContext"
   import { SmallSpinner } from "$lib/components/Shared"
   import { errorHandler } from "$lib/modules/error-handling"
   import { approveMax } from "$lib/modules/on-chain-transactions"
   import { externalAddressesConfig } from "$lib/modules/state/stores"
-  import { isSessionReady, sessionClient } from "$lib/modules/drawbridge"
-  import { walletNetwork, walletType } from "$lib/modules/network"
-  import { WALLET_TYPE } from "$lib/mud/enums"
-  import { initWalletNetwork } from "$lib/initWalletNetwork"
-  import { setupWalletNetwork } from "$lib/mud/setupWalletNetwork"
+  import { userAddress } from "$lib/modules/drawbridge"
   import { publicNetwork } from "$lib/modules/network"
-  import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
+  import { readPlayerERC20Allowance } from "$lib/modules/erc20Listener"
+  import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
+  import type { Hex } from "viem"
 
   let error = $state<string | null>(null)
 
-  function checkIsSpawned(): boolean {
-    const currentWalletType = get(walletType)
+  /**
+   * Wait for externalAddressesConfig to be populated from chain sync
+   */
+  async function waitForAddresses(): Promise<{ gamePoolAddress: string; erc20Address: string }> {
+    const maxWaitMs = 10000
+    const checkIntervalMs = 100
+    let waited = 0
 
-    if (currentWalletType === WALLET_TYPE.BURNER) {
-      const wallet = setupBurnerWalletNetwork(get(publicNetwork))
-      if (wallet.walletClient?.account.address) {
-        return initWalletNetwork(wallet, wallet.walletClient.account.address, WALLET_TYPE.BURNER)
+    while (waited < maxWaitMs) {
+      const addresses = get(externalAddressesConfig)
+      if (addresses?.gamePoolAddress && addresses?.erc20Address) {
+        return addresses as { gamePoolAddress: string; erc20Address: string }
       }
-      return false
-    } else {
-      const client = get(sessionClient)
-      if (client) {
-        const wallet = setupWalletNetwork(get(publicNetwork), client)
-        return initWalletNetwork(wallet, client.userAddress, currentWalletType)
-      }
-      return false
+      await new Promise(resolve => setTimeout(resolve, checkIntervalMs))
+      waited += checkIntervalMs
     }
+
+    throw new Error("Timed out waiting for game pool address")
   }
 
   async function executeApproval() {
     console.log("[AllowanceLoading] Starting max allowance approval")
 
     try {
-      const addresses = get(externalAddressesConfig)
-      if (!addresses?.gamePoolAddress) {
-        throw new Error("Game pool address not configured")
-      }
+      const addresses = await waitForAddresses()
 
       await approveMax(addresses.gamePoolAddress)
       console.log("[AllowanceLoading] Approval transaction complete")
 
-      // Determine next state based on current conditions
-      const currentWalletType = get(walletType)
-      const sessionReady = currentWalletType === WALLET_TYPE.BURNER ? true : get(isSessionReady)
-      const isSpawned = checkIsSpawned()
-
-      console.log("[AllowanceLoading] Post-approval status:", { sessionReady, isSpawned })
-
-      if (isSpawned) {
-        // Already spawned, exit the flow
-        console.log("[AllowanceLoading] Already spawned → EXIT_FLOW")
-        spawnState.state.transitionTo(SPAWN_STATE.EXIT_FLOW)
-      } else if (sessionReady) {
-        // Session ready, go to spawn
-        console.log("[AllowanceLoading] Session ready → SPAWN")
-        spawnState.state.transitionTo(SPAWN_STATE.SPAWN)
-      } else {
-        // Need session setup and spawn
-        console.log("[AllowanceLoading] Need session and spawn → SESSION_AND_SPAWN")
-        spawnState.state.transitionTo(SPAWN_STATE.SESSION_AND_SPAWN)
+      // Explicitly update the allowance store since playerAddress may not be set yet
+      // during the spawn flow (refetchAllowance in executeTransaction may have failed silently)
+      const walletAddress = get(userAddress)
+      if (walletAddress) {
+        try {
+          const allowance = await readPlayerERC20Allowance(
+            get(publicNetwork),
+            walletAddress as Hex,
+            addresses.gamePoolAddress as Hex,
+            addresses.erc20Address as Hex
+          )
+          playerERC20Allowance.set(allowance)
+          console.log("[AllowanceLoading] Updated allowance store:", allowance)
+        } catch (e) {
+          console.warn("[AllowanceLoading] Failed to update allowance store:", e)
+        }
       }
+
+      // After approval, allowance is now true - determine next state
+      const context = buildFlowContextSync(true) // hasAllowance = true after approval
+      const nextState = determineNextState(context)
+
+      console.log("[AllowanceLoading] Flow context:", context)
+      console.log("[AllowanceLoading] Next state:", nextState)
+
+      spawnState.state.transitionTo(nextState)
     } catch (err) {
       console.error("[AllowanceLoading] Approval failed:", err)
       error = err instanceof Error ? err.message : "Approval failed"

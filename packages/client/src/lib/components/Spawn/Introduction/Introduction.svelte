@@ -46,7 +46,7 @@
       currentTextIndex++
     } else {
       // After all texts are shown, transition to next step
-      spawnState.state.transitionTo(SPAWN_STATE.SPAWN)
+      spawnState.state.transitionTo(SPAWN_STATE.ALLOWANCE)
     }
   }
 
