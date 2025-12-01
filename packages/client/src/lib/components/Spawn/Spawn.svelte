@@ -54,7 +54,7 @@
    *  | 4 |     true       |    false    |  false  | SESSION_SETUP    |
    *  | 5 |     true       |    false    |  true   | SESSION_SETUP    |
    *  | 6 |     true       |    true     |  false  | INTRODUCTION     |
-   *  | 7 |     true       |    true     |  true   | DIRECT TO GAME   |
+   *  | 7 |     true       |    true     |  true   | EXIT_FLOW        |
    *  +---+----------------+-------------+---------+------------------+
    *
    *  Note: DONE state is reached only through normal flow (SPAWNING → DONE)
@@ -85,8 +85,7 @@
         (page.route.id === "/(main)/(game)/[tripId]" && !page.url.searchParams.has("spawn"))
       ) {
         console.log("[Spawn] Scenario 7: Already spawned → exiting flow (no UI)")
-        spawned()
-        return SPAWN_STATE.INIT // No state transition, just exit
+        return SPAWN_STATE.EXIT_FLOW
       }
 
       // Scenario 6: Wallet connected, session ready (always for burner), not spawned -> INTRODUCTION
@@ -130,8 +129,7 @@
         // Scenario 7: Wallet connected, session ready, spawned -> exit flow
         if (isSpawned) {
           console.log("[Spawn] Scenario 7: Already spawned → exiting flow (no UI)")
-          spawned()
-          return SPAWN_STATE.INIT // No state transition, just exit
+          return SPAWN_STATE.EXIT_FLOW
         }
       }
 
@@ -158,6 +156,9 @@
 
     console.log("[Spawn] Stores ready, determining initial state")
 
+    // Register the exit flow callback
+    spawnState.state.setOnExitFlow(spawned)
+
     // Reset state machine to INIT
     spawnState.state.reset()
 
@@ -165,10 +166,8 @@
     const initialState = determineInitialState()
     console.log("[Spawn] Initial state determined:", initialState)
 
-    // Only transition if we have a valid target state (not INIT for fast-track)
-    if (initialState !== SPAWN_STATE.INIT) {
-      spawnState.state.transitionTo(initialState)
-    }
+    // Transition to the determined state
+    spawnState.state.transitionTo(initialState)
   })
 
   // Check if player is already spawned when reaching certain states
@@ -193,7 +192,7 @@
 
         if (isSpawned) {
           console.log("[Spawn] At SESSION_SETUP but already spawned → fast-tracking to game")
-          spawned()
+          spawnState.state.transitionTo(SPAWN_STATE.EXIT_FLOW)
           return
         }
 
@@ -217,7 +216,7 @@
 
           if (isSpawned) {
             console.log("[Spawn] At INTRODUCTION but already spawned → fast-tracking to game")
-            spawned()
+            spawnState.state.transitionTo(SPAWN_STATE.EXIT_FLOW)
           }
         }
       } else if ($sessionClient) {
@@ -233,7 +232,7 @@
 
         if (isSpawned) {
           console.log("[Spawn] At INTRODUCTION but already spawned → fast-tracking to game")
-          spawned()
+          spawnState.state.transitionTo(SPAWN_STATE.EXIT_FLOW)
         }
       }
     }
@@ -287,7 +286,7 @@
     {:else if spawnState.state.current === SPAWN_STATE.SPAWN__LOADING}
       <Spawning />
     {:else if spawnState.state.current === SPAWN_STATE.DONE}
-      <Done {spawned} />
+      <Done />
     {:else if spawnState.state.current === SPAWN_STATE.ERROR}
       <Error />
     {/if}

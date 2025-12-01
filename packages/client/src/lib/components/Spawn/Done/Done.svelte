@@ -3,8 +3,7 @@
   import { player } from "$lib/modules/state/stores"
   import gsap from "gsap"
   import { BigButton, Mascot } from "$lib/components/Shared"
-
-  let { spawned }: { spawned: () => void } = $props()
+  import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let textElement = $state<HTMLDivElement | null>(null)
@@ -13,8 +12,8 @@
   const timeline = gsap.timeline()
 
   function handleEnjoy() {
-    console.log("[Done] Enjoy button clicked, calling spawned callback")
-    spawned()
+    console.log("[Done] Enjoy button clicked, transitioning to EXIT_FLOW")
+    spawnState.state.transitionTo(SPAWN_STATE.EXIT_FLOW)
   }
 
   onMount(() => {

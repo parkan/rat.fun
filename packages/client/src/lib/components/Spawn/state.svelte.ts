@@ -22,15 +22,17 @@ export enum SPAWN_STATE {
   SESSION_SETUP = "SESSION_SETUP",
   SESSION_SETUP__LOADING = "SESSION_SETUP__LOADING",
   INTRODUCTION = "INTRODUCTION",
-  SPAWN = "SPAWN_FORM",
+  SPAWN = "SPAWN",
   SPAWN__LOADING = "SPAWN__LOADING",
   DONE = "DONE",
+  EXIT_FLOW = "EXIT_FLOW",
   ERROR = "ERROR"
 }
 
 // Local state
 let spawnStateValue = $state<SPAWN_STATE>(SPAWN_STATE.INIT)
 let playerName = $state<string>("")
+let onExitFlowCallback: (() => void) | null = null
 
 /**
  * Defines valid state transitions between spawn states
@@ -40,6 +42,7 @@ const VALID_TRANSITIONS: Record<SPAWN_STATE, SPAWN_STATE[]> = {
     SPAWN_STATE.WELCOME_SCREEN,
     SPAWN_STATE.SESSION_SETUP,
     SPAWN_STATE.INTRODUCTION,
+    SPAWN_STATE.EXIT_FLOW,
     SPAWN_STATE.ERROR
   ],
   [SPAWN_STATE.WELCOME_SCREEN]: [SPAWN_STATE.CONNECT_WALLET, SPAWN_STATE.ERROR],
@@ -48,16 +51,21 @@ const VALID_TRANSITIONS: Record<SPAWN_STATE, SPAWN_STATE[]> = {
     SPAWN_STATE.INTRODUCTION,
     SPAWN_STATE.ERROR
   ],
-  [SPAWN_STATE.SESSION_SETUP]: [SPAWN_STATE.SESSION_SETUP__LOADING, SPAWN_STATE.ERROR],
+  [SPAWN_STATE.SESSION_SETUP]: [
+    SPAWN_STATE.SESSION_SETUP__LOADING,
+    SPAWN_STATE.EXIT_FLOW,
+    SPAWN_STATE.ERROR
+  ],
   [SPAWN_STATE.SESSION_SETUP__LOADING]: [
     SPAWN_STATE.INTRODUCTION,
     SPAWN_STATE.SESSION_SETUP,
     SPAWN_STATE.ERROR
   ],
-  [SPAWN_STATE.INTRODUCTION]: [SPAWN_STATE.SPAWN, SPAWN_STATE.ERROR],
+  [SPAWN_STATE.INTRODUCTION]: [SPAWN_STATE.SPAWN, SPAWN_STATE.EXIT_FLOW, SPAWN_STATE.ERROR],
   [SPAWN_STATE.SPAWN]: [SPAWN_STATE.SPAWN__LOADING, SPAWN_STATE.ERROR],
   [SPAWN_STATE.SPAWN__LOADING]: [SPAWN_STATE.DONE, SPAWN_STATE.SPAWN, SPAWN_STATE.ERROR],
-  [SPAWN_STATE.DONE]: [],
+  [SPAWN_STATE.DONE]: [SPAWN_STATE.EXIT_FLOW],
+  [SPAWN_STATE.EXIT_FLOW]: [],
   [SPAWN_STATE.ERROR]: []
 }
 
@@ -84,10 +92,19 @@ const transitionTo = (newState: SPAWN_STATE) => {
   }
   console.log(`[Spawn State] ${spawnStateValue} → ${newState}`)
   setSpawnState(newState)
+
+  // Trigger callback when exiting the flow
+  if (newState === SPAWN_STATE.EXIT_FLOW && onExitFlowCallback) {
+    onExitFlowCallback()
+  }
 }
 
 const setPlayerName = (name: string) => {
   playerName = name
+}
+
+const setOnExitFlow = (callback: () => void) => {
+  onExitFlowCallback = callback
 }
 
 // Export singleton instance instead of factory function
@@ -96,6 +113,7 @@ export const spawnState = {
     reset: resetSpawnState,
     set: setSpawnState,
     transitionTo,
+    setOnExitFlow,
     get current() {
       return spawnStateValue
     }
