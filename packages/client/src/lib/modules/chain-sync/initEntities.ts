@@ -177,7 +177,7 @@ export function isEntitiesInitialized(playerId?: string | null): boolean {
  */
 export function resetEntitiesInitialization(): void {
   initializedForPlayer = null
-  console.log("[initEntities] Reset - will reinitialize on next call")
+  // console.log("[initEntities] Reset - will reinitialize on next call")
 }
 
 export function initEntities(options: InitEntitiesOptions = {}) {
@@ -185,7 +185,7 @@ export function initEntities(options: InitEntitiesOptions = {}) {
 
   // Guard against duplicate initialization for same player
   if (activePlayerId && initializedForPlayer === activePlayerId) {
-    console.log("[initEntities] Already initialized for player:", activePlayerId)
+    // console.log("[initEntities] Already initialized for player:", activePlayerId)
     return
   }
 
@@ -196,13 +196,13 @@ export function initEntities(options: InitEntitiesOptions = {}) {
   // Build filter context (needs player's rat and inventory info)
   const filterContext = buildFilterContext(activePlayerId, filteredComponents)
 
-  if (activePlayerId) {
-    console.log("[initEntities] Filtering enabled for player:", activePlayerId)
-    console.log("[initEntities] Active rat:", filterContext.activePlayerCurrentRat)
-    console.log("[initEntities] Inventory items:", filterContext.activePlayerRatInventory.size)
-  } else {
-    console.log("[initEntities] No activePlayerId - syncing all entities")
-  }
+  // if (activePlayerId) {
+  //   console.log("[initEntities] Filtering enabled for player:", activePlayerId)
+  //   console.log("[initEntities] Active rat:", filterContext.activePlayerCurrentRat)
+  //   console.log("[initEntities] Inventory items:", filterContext.activePlayerRatInventory.size)
+  // } else {
+  //   console.log("[initEntities] No activePlayerId - syncing all entities")
+  // }
 
   const syncEntities = {} as Entities
   const componentBreakdown: Record<string, { entityCount: number; totalValues: number }> = {}
@@ -279,10 +279,10 @@ export function initEntities(options: InitEntitiesOptions = {}) {
   }
 
   // Log hydration stats (pre and post filtering)
-  logHydrationStats(syncEntities, finalEntities, componentBreakdown, {
-    filteredOutCount,
-    partialSyncCount
-  })
+  // logHydrationStats(syncEntities, finalEntities, componentBreakdown, {
+  //   filteredOutCount,
+  //   partialSyncCount
+  // })
 
   // Single write to store
   entities.set(finalEntities)

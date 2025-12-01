@@ -78,14 +78,14 @@
       currentPlayerId &&
       currentPlayerId !== "0x0000000000000000000000000000000000000000000000000000000000000000"
     ) {
-      console.log("[+layout] Initializing off-chain sync for player:", currentPlayerId)
+      // console.log("[+layout] Initializing off-chain sync for player:", currentPlayerId)
       initOffChainSync(environment, currentPlayerId)
     }
 
     // Disconnect when leaving ready state
     return () => {
       if (isReady) {
-        console.log("[+layout] Disconnecting off-chain sync")
+        // console.log("[+layout] Disconnecting off-chain sync")
         disconnectOffChainSync()
       }
     }

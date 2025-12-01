@@ -10,7 +10,6 @@ import { addressToId } from "$lib/modules/utils"
 
 /**
  * Initialize the wallet network - sets up stores and ERC20 listeners.
- * Only call this when you actually want to (re)initialize the wallet.
  */
 export function initWalletNetwork(
   wallet: SetupWalletNetworkResult,
