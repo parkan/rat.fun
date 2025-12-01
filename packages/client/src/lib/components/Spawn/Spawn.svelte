@@ -6,8 +6,6 @@
   import { UIState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
 
-  import { checkIsSpawned } from "$lib/initWalletNetwork"
-  import { getDrawbridge } from "$lib/modules/drawbridge"
   import { backgroundMusic } from "$lib/modules/sound/stores"
 
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
@@ -25,115 +23,21 @@
     Done,
     Error
   } from "$lib/components/Spawn"
-  import {
-    spawnState,
-    SPAWN_STATE,
-    determineNextState,
-    type FlowContext
-  } from "$lib/components/Spawn/state.svelte"
-  import { checkHasAllowance } from "$lib/components/Spawn/flowContext"
+  import { spawnState, SPAWN_STATE, determineNextState } from "$lib/components/Spawn/state.svelte"
+  import { buildFlowContext } from "$lib/components/Spawn/flowContext"
   import { Marquee } from "$lib/components/Shared"
 
   const { spawned = () => {} } = $props<{
     spawned: () => void
   }>()
 
-  /*
-   *  Initial state determination based on:
-   *  - walletConnected (wallet address available)
-   *  - sessionReady (session is ready)
-   *  - hasAllowance (user has approved allowance > 100 tokens)
-   *  - spawned (player already spawned in the game)
-   *
-   *  +----+----------------+-------------+--------------+---------+-------------------+
-   *  |    | walletConnected| sessionReady| hasAllowance | spawned | Initial State     |
-   *  +----+----------------+-------------+--------------+---------+-------------------+
-   *  |  0 |     false      |    false    |    false     |  false  | CONNECT_WALLET    |
-   *  |  1 |     false      |    false    |    false     |  true   | CONNECT_WALLET    |
-   *  |  2 |     false      |    false    |    true      |  false  | CONNECT_WALLET    |
-   *  |  3 |     false      |    false    |    true      |  true   | CONNECT_WALLET    |
-   *  |  4 |     false      |    true     |    false     |  false  | CONNECT_WALLET    |
-   *  |  5 |     false      |    true     |    false     |  true   | CONNECT_WALLET    |
-   *  |  6 |     false      |    true     |    true      |  false  | CONNECT_WALLET    |
-   *  |  7 |     false      |    true     |    true      |  true   | CONNECT_WALLET    |
-   *  |  8 |     true       |    false    |    false     |  false  | INTRODUCTION      |
-   *  |  9 |     true       |    false    |    false     |  true   | ALLOWANCE         |
-   *  | 10 |     true       |    false    |    true      |  false  | SESSION_AND_SPAWN |
-   *  | 11 |     true       |    false    |    true      |  true   | SESSION           |
-   *  | 12 |     true       |    true     |    false     |  false  | ALLOWANCE         |
-   *  | 13 |     true       |    true     |    false     |  true   | ALLOWANCE         |
-   *  | 14 |     true       |    true     |    true      |  false  | SPAWN             |
-   *  | 15 |     true       |    true     |    true      |  true   | EXIT_FLOW         |
-   *  +----+----------------+-------------+--------------+---------+-------------------+
-   *
-   *  Note:
-   *        - Scenario 0 is a new user flow
-   *        - Scenarios 1 to 7 are not possible be cause we do not have a wallet connected
-   *        - Scenario 11 is returning user who for some reason does not have a session (new browser, cleared cache, etc.)
-   *        - Scenario 12 is returning user who has revoked allowance
-   *        - Scenario 15 is a fully setup returning user, exits immediately without showing any UI
-   *        - hasAllowance = allowance > 100 tokens
-   *        - DONE state is reached only through normal flow (SPAWN_AND_SESSION__LOADING → DONE)
-   */
-
   /**
-   * Build the flow context for initial state determination.
-   * Wallet network is already initialized by Loading component (or will be
-   * initialized by ConnectWalletForm/SessionLoading for new users).
+   * Determine the initial state based on the flow context.
+   * See comment in state.svelte.ts
+   * @returns The initial state
    */
-  async function buildInitialFlowContext(): Promise<FlowContext> {
-    console.log("[Spawn] Building initial flow context")
-
-    // Read directly from instance to avoid store timing issues
-    const drawbridge = getDrawbridge()
-    const state = drawbridge.getState()
-
-    const walletConnected = !!state.userAddress
-    const sessionReady = state.isReady
-    const walletAddress = state.userAddress
-
-    console.log("[Spawn] Drawbridge state:", {
-      walletConnected,
-      sessionReady,
-      walletAddress,
-      hasSessionClient: !!state.sessionClient
-    })
-
-    if (!walletConnected) {
-      return {
-        walletConnected: false,
-        sessionReady: false,
-        hasAllowance: false,
-        isSpawned: false
-      }
-    }
-
-    const hasAllowance = walletAddress ? await checkHasAllowance(walletAddress) : false
-
-    // Without session, we can't check spawn status
-    if (!sessionReady) {
-      return {
-        walletConnected: true,
-        sessionReady: false,
-        hasAllowance,
-        isSpawned: false
-      }
-    }
-
-    // Session is ready - check spawn status
-    // (wallet network already initialized by Loading)
-    const isSpawned = walletAddress ? checkIsSpawned(walletAddress) : false
-
-    return {
-      walletConnected: true,
-      sessionReady,
-      hasAllowance,
-      isSpawned
-    }
-  }
-
   async function determineInitialState(): Promise<SPAWN_STATE> {
-    const context = await buildInitialFlowContext()
+    const context = await buildFlowContext()
 
     console.log("[Spawn] Flow context:", context)
 

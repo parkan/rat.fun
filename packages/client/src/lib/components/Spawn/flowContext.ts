@@ -10,7 +10,7 @@
 import { get } from "svelte/store"
 import type { FlowContext } from "./state.svelte"
 import { publicNetwork } from "$lib/modules/network"
-import { isSessionReady, userAddress } from "$lib/modules/drawbridge"
+import { getDrawbridge, isDrawbridgeInitialized } from "$lib/modules/drawbridge"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
 import { readPlayerERC20Allowance } from "$lib/modules/erc20Listener"
 import { checkIsSpawned } from "$lib/initWalletNetwork"
@@ -47,12 +47,26 @@ export async function checkHasAllowance(walletAddress: string): Promise<boolean>
  * Build the current flow context for state transitions.
  * This checks all conditions needed to determine the next state.
  *
+ * NOTE: Reads directly from drawbridge.getState() instead of svelte stores
+ * to avoid race conditions where stores haven't synced yet.
+ *
  * @returns FlowContext with current wallet, session, allowance, and spawn status
  */
 export async function buildFlowContext(): Promise<FlowContext> {
-  const walletConnected = !!get(userAddress)
-  const sessionReady = get(isSessionReady)
-  const walletAddress = get(userAddress)
+  if (!isDrawbridgeInitialized()) {
+    console.log("[FlowContext] Drawbridge not initialized")
+    return {
+      walletConnected: false,
+      sessionReady: false,
+      hasAllowance: false,
+      isSpawned: false
+    }
+  }
+
+  const state = getDrawbridge().getState()
+  const walletConnected = !!state.userAddress
+  const sessionReady = state.isReady
+  const walletAddress = state.userAddress
 
   console.log("[FlowContext] Drawbridge raw values:", {
     walletConnected,
@@ -71,7 +85,11 @@ export async function buildFlowContext(): Promise<FlowContext> {
   }
 
   const hasAllowance = await checkHasAllowance(walletAddress)
+
+  // Debug: check isSpawned with detailed logging
+  console.log("[FlowContext] Checking isSpawned for:", walletAddress)
   const isSpawned = checkIsSpawned(walletAddress as `0x${string}`)
+  console.log("[FlowContext] isSpawned result:", isSpawned)
 
   console.log("[FlowContext] Drawbridge context:", {
     walletConnected: true,
@@ -91,11 +109,24 @@ export async function buildFlowContext(): Promise<FlowContext> {
 /**
  * Build flow context synchronously (without allowance check).
  * Useful when allowance is already known or for quick checks.
+ *
+ * NOTE: Reads directly from drawbridge.getState() instead of svelte stores
+ * to avoid race conditions where stores haven't synced yet.
  */
 export function buildFlowContextSync(hasAllowance: boolean): FlowContext {
-  const walletConnected = !!get(userAddress)
-  const sessionReady = get(isSessionReady)
-  const walletAddress = get(userAddress)
+  if (!isDrawbridgeInitialized()) {
+    return {
+      walletConnected: false,
+      sessionReady: false,
+      hasAllowance: false,
+      isSpawned: false
+    }
+  }
+
+  const state = getDrawbridge().getState()
+  const walletConnected = !!state.userAddress
+  const sessionReady = state.isReady
+  const walletAddress = state.userAddress
   const isSpawned = walletAddress ? checkIsSpawned(walletAddress as `0x${string}`) : false
 
   return {

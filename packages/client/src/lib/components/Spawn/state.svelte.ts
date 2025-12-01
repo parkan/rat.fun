@@ -136,14 +136,24 @@ const setOnExitFlow = (callback: () => void) => {
  * ─────────────────────────────────────────────
  * Flow Context & Next State Determination
  * ─────────────────────────────────────────────
- * Centralized logic for determining the next state based on current conditions.
- * This is the single source of truth for flow logic.
  *
- * Truth table:
+ *  State determination based on:
+ *  - walletConnected (wallet address available)
+ *  - sessionReady (session is ready)
+ *  - hasAllowance (user has approved allowance > 100 tokens)
+ *  - spawned (player already spawned in the game)
+ *
  *  +----+----------------+-------------+--------------+---------+-------------------+
- *  |    | walletConnected| sessionReady| hasAllowance | spawned | Next State        |
+ *  |    | walletConnected| sessionReady| hasAllowance | spawned | Initial State     |
  *  +----+----------------+-------------+--------------+---------+-------------------+
- *  |  0 |     false      |      *      |      *       |    *    | CONNECT_WALLET    |
+ *  |  0 |     false      |    false    |    false     |  false  | CONNECT_WALLET    |
+ *  |  1 |     false      |    false    |    false     |  true   | CONNECT_WALLET    |
+ *  |  2 |     false      |    false    |    true      |  false  | CONNECT_WALLET    |
+ *  |  3 |     false      |    false    |    true      |  true   | CONNECT_WALLET    |
+ *  |  4 |     false      |    true     |    false     |  false  | CONNECT_WALLET    |
+ *  |  5 |     false      |    true     |    false     |  true   | CONNECT_WALLET    |
+ *  |  6 |     false      |    true     |    true      |  false  | CONNECT_WALLET    |
+ *  |  7 |     false      |    true     |    true      |  true   | CONNECT_WALLET    |
  *  |  8 |     true       |    false    |    false     |  false  | INTRODUCTION      |
  *  |  9 |     true       |    false    |    false     |  true   | ALLOWANCE         |
  *  | 10 |     true       |    false    |    true      |  false  | SESSION_AND_SPAWN |
@@ -153,6 +163,15 @@ const setOnExitFlow = (callback: () => void) => {
  *  | 14 |     true       |    true     |    true      |  false  | SPAWN             |
  *  | 15 |     true       |    true     |    true      |  true   | EXIT_FLOW         |
  *  +----+----------------+-------------+--------------+---------+-------------------+
+ *
+ *  Note:
+ *        - Scenario 0 is a new user flow
+ *        - Scenarios 1 to 7 are not possible be cause we do not have a wallet connected
+ *        - Scenario 11 is returning user who for some reason does not have a session (new browser, cleared cache, etc.)
+ *        - Scenario 12 is returning user who has revoked allowance
+ *        - Scenario 15 is a fully setup returning user, exits immediately without showing any UI
+ *        - hasAllowance = allowance > 100 tokens
+ *        - DONE state is reached only through normal flow (SPAWN_AND_SESSION__LOADING → DONE)
  */
 
 export type FlowContext = {

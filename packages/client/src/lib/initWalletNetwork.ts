@@ -31,5 +31,12 @@ export function checkIsSpawned(address: Hex): boolean {
   const playerId = addressToId(address)
   const allEntities = get(entities)
   const playerEntity = allEntities[playerId]
-  return playerEntity?.entityType === ENTITY_TYPE.PLAYER
+  const isSpawned = playerEntity?.entityType === ENTITY_TYPE.PLAYER
+
+  console.log("[checkIsSpawned] playerId:", playerId)
+  console.log("[checkIsSpawned] entityCount:", Object.keys(allEntities).length)
+  console.log("[checkIsSpawned] playerEntity:", playerEntity)
+  console.log("[checkIsSpawned] result:", isSpawned)
+
+  return isSpawned
 }

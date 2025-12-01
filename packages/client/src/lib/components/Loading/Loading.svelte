@@ -148,7 +148,7 @@
     const drawbridgeState = drawbridge.getState()
     const network = get(publicNetwork)
 
-    if (drawbridgeState.sessionClient && drawbridgeState.userAddress) {
+    if (drawbridgeState.isReady && drawbridgeState.sessionClient && drawbridgeState.userAddress) {
       // -----------------------------------------------------------------------
       // SCENARIO A: Wallet + Session ready
       // -----------------------------------------------------------------------
