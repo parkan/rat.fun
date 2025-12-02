@@ -42,7 +42,7 @@
             if (!isEntitiesInitialized()) {
               const playerId = addressToId(state.userAddress)
               console.log("[SessionLoading] Initializing entities for player:", playerId)
-              initEntities({ activePlayerId: playerId })
+              await initEntities({ activePlayerId: playerId })
             }
           }
 

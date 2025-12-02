@@ -162,7 +162,7 @@
 
       // Initialize entities with player filtering
       const playerId = addressToId(drawbridgeState.userAddress)
-      initEntities({ activePlayerId: playerId })
+      await initEntities({ activePlayerId: playerId })
     } else if (drawbridgeState.userAddress) {
       // -----------------------------------------------------------------------
       // SCENARIO B: Wallet connected, but NO session
@@ -177,7 +177,7 @@
       console.log("[Loading] Address:", drawbridgeState.userAddress)
 
       const playerId = addressToId(drawbridgeState.userAddress)
-      initEntities({ activePlayerId: playerId })
+      await initEntities({ activePlayerId: playerId })
     } else {
       // -----------------------------------------------------------------------
       // SCENARIO C: No wallet connected

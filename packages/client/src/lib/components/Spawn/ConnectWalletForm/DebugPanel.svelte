@@ -97,9 +97,7 @@
 {/if}
 
 <!-- Floating debug button -->
-<button class="floating-debug-btn" onclick={() => (show = !show)}>
-  🐛
-</button>
+<button class="floating-debug-btn" onclick={() => (show = !show)}> 🐛 </button>
 
 <style lang="scss">
   .floating-debug-btn {
