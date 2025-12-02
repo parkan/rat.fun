@@ -11,12 +11,8 @@
   import {
     pendingMascotMessage,
     clearPendingMascotMessage,
-    getMascotMessage,
-    setPendingMascotMessage
+    getMascotMessage
   } from "$lib/modules/ui/mascot-messages"
-
-  // TEST: Set test message synchronously before render
-  setPendingMascotMessage({ type: "test" })
 
   // Get mascot text from pending message if any
   const mascotText = $derived(

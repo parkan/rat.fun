@@ -3,9 +3,8 @@ import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 export const enUS = {
   address: "Address",
   admin: "CASHBOARD",
-  adminInstruction: (price: number) => `Unlock our latest rat-a-licious feature
-    \nfor ${price} ${CURRENCY_SYMBOL}. Lets you create bespoke trips\nhrough a Bloomberg-style terminal for
-t he mentally deranged. Results may vary.`,
+  adminInstruction: (price: number) =>
+    `Unlock our latest rat-a-licious feature for ${price} ${CURRENCY_SYMBOL}. Lets you create bespoke trips through a Bloomberg-style terminal for the mentally deranged. Results may vary.`,
   action: "Action",
   all: "All",
   activeProfit: "Active profit",
@@ -65,7 +64,7 @@ t he mentally deranged. Results may vary.`,
   dieInTrip: "die in trip",
   diedTripping: "died tripping #",
   disconnectWallet: "Disconnect wallet",
-  egoDeathExplanation: `!!! ATTENTION OPERATOR !!!\ntrips are untested substances and\nmight cause extreme death to your rat!`,
+  egoDeathExplanation: `!!! ATTENTION OPERATOR !!! trips are untested substances and might cause extreme death to your rat!`,
   empty: "Empty",
   enjoySkillfully: "ENJOY SKILLFULLY",
   events: "Events",
