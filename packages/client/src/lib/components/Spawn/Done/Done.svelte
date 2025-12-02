@@ -37,7 +37,7 @@
 <div class="outer-container">
   <div class="inner-container">
     <div class="mascot-container" bind:this={mascotElement}>
-      <Mascot smallDanceOn={true} text={mascotText} />
+      <Mascot smallDanceOn={true} text={mascotText} finishTextOnClick={true} />
     </div>
 
     <div class="button-container" bind:this={buttonElement}>

@@ -215,7 +215,7 @@
 <div class="outer-container">
   <div class="inner-container">
     <div class="mascot-container" bind:this={mascotElement}>
-      <Mascot text={connectWalletFormMascotText} />
+      <Mascot text={connectWalletFormMascotText} finishTextOnClick={true} />
     </div>
 
     <div class="button-container" bind:this={buttonElement}>

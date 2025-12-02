@@ -60,9 +60,6 @@
         {error}
       </div>
     {:else if spawning}
-      <div class="mascot-container" in:fade={{ duration: 200 }}>
-        <Mascot smallDanceOn={true} />
-      </div>
       <div class="message" in:fade={{ duration: 200 }}>
         Issuing member card
         <SmallSpinner soundOn />
@@ -101,13 +98,6 @@
       justify-content: center;
       width: var(--spawn-inner-width);
       max-width: 90dvw;
-
-      .mascot-container {
-        width: var(--spawn-mascot-size);
-        height: var(--spawn-mascot-size);
-        margin-bottom: var(--spawn-mascot-margin-bottom);
-        pointer-events: none;
-      }
 
       .message {
         font-size: var(--font-size-large);

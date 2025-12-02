@@ -92,7 +92,7 @@
   <div class="inner-container">
     <!-- MASCOT -->
     <div class="mascot-container" bind:this={mascotElement}>
-      <Mascot entranceOn={true} bigDanceOn={true} text={spawnMascotText} />
+      <Mascot entranceOn={true} bigDanceOn={true} text={spawnMascotText} finishTextOnClick={true} />
     </div>
 
     <!-- FORM -->

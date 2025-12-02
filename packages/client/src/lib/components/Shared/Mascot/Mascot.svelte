@@ -9,15 +9,21 @@
     entranceOn = false,
     bigDanceOn = false,
     smallDanceOn = false,
-    text = []
+    text = [],
+    closeTextOnClick = false,
+    finishTextOnClick = false
   }: {
     entranceOn?: boolean
     bigDanceOn?: boolean
     smallDanceOn?: boolean
     text?: TerminalOutputUnit[]
+    closeTextOnClick?: boolean
+    finishTextOnClick?: boolean
   } = $props()
 
   let isAnimating = $state(false)
+  let showBubble = $state(true)
+  let typerController: ReturnType<typeof terminalTyper> | null = null
 
   const enterTimeline = gsap.timeline({ paused: true })
   const bigDanceTimeline = gsap.timeline({ repeat: -1, yoyo: true })
@@ -50,7 +56,7 @@
 
       // Clear and start typing
       bubbleElement.innerHTML = ""
-      terminalTyper(bubbleElement, text)
+      typerController = terminalTyper(bubbleElement, text)
     }
 
     // Starting states
@@ -166,10 +172,37 @@
     // Start the dance timeline
     smallDanceTimeline.play()
   }
+
+  function handleClick() {
+    if (closeTextOnClick) {
+      typerController?.stop()
+      showBubble = false
+    } else if (finishTextOnClick && bubbleElement) {
+      typerController?.stop()
+      // Render all text immediately
+      bubbleElement.innerHTML = ""
+      for (const unit of text) {
+        const line = document.createElement("div")
+        line.className = "terminal-line"
+        const span = document.createElement("span")
+        span.textContent = unit.content
+        span.style.color = unit.color
+        span.style.backgroundColor = unit.backgroundColor
+        line.appendChild(span)
+        bubbleElement.appendChild(line)
+      }
+    }
+  }
 </script>
 
-<div class="mascot-container">
-  {#if text.length > 0}
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+  class="mascot-container"
+  class:clickable={closeTextOnClick || finishTextOnClick}
+  onclick={handleClick}
+>
+  {#if text.length > 0 && showBubble}
     <div class="bubble" bind:this={bubbleElement}></div>
   {/if}
 
@@ -199,6 +232,11 @@
     width: 100%;
     height: 100%;
     aspect-ratio: 1/1;
+
+    &.clickable {
+      pointer-events: auto;
+      cursor: pointer;
+    }
   }
 
   .bubble {

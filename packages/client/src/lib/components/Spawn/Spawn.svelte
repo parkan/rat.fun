@@ -76,7 +76,7 @@
         id: "spawn",
         loop: true,
         fadeIn: true,
-        volume: 0.3
+        volume: 0.1
       })
     }
   })
