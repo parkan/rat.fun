@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
+  import { fade } from "svelte/transition"
   import gsap from "gsap"
   import { playSound } from "$lib/modules/sound"
   import { terminalTyper } from "$lib/modules/terminal-typer"
@@ -10,6 +11,7 @@
     bigDanceOn = false,
     smallDanceOn = false,
     text = [],
+    isGameMascot = false,
     closeTextOnClick = false,
     finishTextOnClick = false
   }: {
@@ -17,6 +19,7 @@
     bigDanceOn?: boolean
     smallDanceOn?: boolean
     text?: TerminalOutputUnit[]
+    isGameMascot?: boolean
     closeTextOnClick?: boolean
     finishTextOnClick?: boolean
   } = $props()
@@ -80,7 +83,7 @@
         mascotElement,
         {
           duration: 0.7,
-          opacity: 0.7,
+          opacity: 1,
           scale: 1,
           ease: "elastic.out(1.5)"
         },
@@ -203,7 +206,12 @@
   onclick={handleClick}
 >
   {#if text.length > 0 && showBubble}
-    <div class="bubble" bind:this={bubbleElement}></div>
+    <div
+      class="bubble"
+      out:fade={{ duration: 200 }}
+      class:isGameMascot
+      bind:this={bubbleElement}
+    ></div>
   {/if}
 
   <div class="mascot" bind:this={mascotElement}>
@@ -252,6 +260,14 @@
     max-width: 90dvw;
     pointer-events: none;
     font-size: 22px;
+    font-family: var(--special-font-stack);
+    text-align: left;
+
+    &.isGameMascot {
+      width: 400px;
+      top: 40px;
+      right: 60%;
+    }
   }
 
   .mascot {
@@ -260,7 +276,7 @@
     height: 100%;
     aspect-ratio: 1/1;
     object-fit: contain;
-    opacity: 0.7;
+    opacity: 1;
     pointer-events: none;
 
     .layer {
