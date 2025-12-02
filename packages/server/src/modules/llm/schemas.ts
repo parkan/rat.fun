@@ -21,34 +21,40 @@ export const LogEntrySchema = z.object({
 // Event model schemas
 // * * * * * * * * * * * * * * * * * *
 
-export const ItemChangeSchema = z.object({
-  logStep: z.coerce.number(),
-  type: z.enum(["add", "remove"]),
-  name: z.string(),
-  value: z.coerce.number(),
-  id: z.string().optional()
-})
+export const ItemChangeSchema = z
+  .object({
+    logStep: z.coerce.number(),
+    type: z.enum(["add", "remove"]),
+    name: z.string(),
+    value: z.coerce.number(),
+    id: z.string().optional()
+  })
+  .refine(data => data.type !== "remove" || data.id !== undefined, {
+    message: "id is required when type is 'remove'",
+    path: ["id"]
+  })
 
 export const BalanceTransferSchema = z.object({
   logStep: z.coerce.number(),
   amount: z.coerce.number()
 })
 
-export const DebuggingInfoSchema = z.object({
-  internalText: z.string(),
-  randomSeed: z.coerce.number(),
-  batchId: z.coerce.number()
-})
+export const DebuggingInfoSchema = z
+  .object({
+    internalText: z.string().default("No debugging info provided"),
+    randomSeed: z.coerce.number().default(666)
+  })
+  .default({ internalText: "No debugging info provided", randomSeed: 666 })
 
 export const OutcomeReturnValueSchema = z.object({
   id: z.string().optional(),
   itemChanges: z.array(ItemChangeSchema).default([]),
   balanceTransfers: z.array(BalanceTransferSchema).default([]),
-  debuggingInfo: DebuggingInfoSchema.optional()
+  debuggingInfo: DebuggingInfoSchema
 })
 
 export const EventsReturnValueSchema = z.object({
-  log: z.array(LogEntrySchema).default([]),
+  log: z.array(LogEntrySchema).min(1, "log must have at least one entry"),
   outcome: OutcomeReturnValueSchema
 })
 
@@ -57,7 +63,7 @@ export const EventsReturnValueSchema = z.object({
 // * * * * * * * * * * * * * * * * * *
 
 export const CorrectionReturnValueSchema = z.object({
-  log: z.array(LogEntrySchema).default([])
+  log: z.array(LogEntrySchema).min(1, "log must have at least one entry")
 })
 
 // * * * * * * * * * * * * * * * * * *

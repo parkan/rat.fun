@@ -114,7 +114,6 @@ export type LogEntry = {
 export type DebuggingInfo = {
   internalText: string
   randomSeed: number
-  batchId: number
 }
 
 /*

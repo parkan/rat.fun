@@ -216,11 +216,7 @@ async function routes(fastify: FastifyInstance) {
               correctedEvents,
               validatedOutcome,
               mainProcessingTime,
-              debuggingInfo ?? {
-                internalText: "No debugging info available",
-                randomSeed: 0,
-                batchId: 0
-              },
+              debuggingInfo,
               logOutput
             ).catch(error => {
               console.error(`❌ Error writing to private CMS: ${error}`)
@@ -272,14 +268,10 @@ async function routes(fastify: FastifyInstance) {
 
         const response: EnterTripReturnValue = {
           id: ratId as Hex,
-          log: correctedEvents.log ?? [],
+          log: correctedEvents.log,
           itemChanges: validatedOutcome.itemChanges,
           balanceTransfers: validatedOutcome.balanceTransfers,
-          debuggingInfo: eventResults.outcome?.debuggingInfo ?? {
-            internalText: "No debugging info available",
-            randomSeed: 0,
-            batchId: 0
-          },
+          debuggingInfo: eventResults.outcome.debuggingInfo,
           ratDead: newRatBalance == 0,
           tripDepleted: newTripValue == 0
         }
