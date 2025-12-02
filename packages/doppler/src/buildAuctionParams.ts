@@ -65,7 +65,7 @@ export async function buildAuctionParams(
   const gamma = 7 * computeOptimalGamma(startTick, endTick, duration, epochLength, tickSpacing)
 
   const builder = new DynamicAuctionBuilder(chainId)
-    .tokenConfig({ name: "TEST", symbol: "TEST", tokenURI: "", yearlyMintRate: 0n })
+    .tokenConfig({ name: "RAT", symbol: "RAT", tokenURI: "", yearlyMintRate: 0n })
     .saleConfig({
       initialSupply: parseEther("90000000"),
       numTokensToSell: parseEther("64000000"),
