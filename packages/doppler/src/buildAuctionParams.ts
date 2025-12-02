@@ -45,13 +45,10 @@ export async function buildAuctionParams(
   const tokenDecimals = 18
   const numeraireDecimals = await getDecimals(publicClient, numeraire)
 
-  //const spendLimitAmount = parseUnits("950", numeraireDecimals)
-  const spendLimitAmount = parseUnits((950 / 1000000).toString(), numeraireDecimals)
+  const spendLimitAmount = parseUnits("950", numeraireDecimals)
 
-  // const startPrice = 0.005
-  // const endPrice = 0.014
-  const startPrice = 0.005 / 1000000
-  const endPrice = 0.014 / 1000000
+  const startPrice = 0.005
+  const endPrice = 0.014
   const { startTick, endTick } = calculateTickRange(
     isToken0,
     startPrice,
@@ -62,10 +59,8 @@ export async function buildAuctionParams(
   )
   console.log("Tick range:", startTick, endTick)
 
-  //const duration = 30 * DAY_SECONDS
-  //const epochLength = 0.5 * DAY_SECONDS
-  const duration = ((30 * DAY_SECONDS) / 30) * 14
-  const epochLength = ((0.5 * DAY_SECONDS) / 30) * 14
+  const duration = 31 * DAY_SECONDS
+  const epochLength = 0.5 * DAY_SECONDS
 
   const gamma = 7 * computeOptimalGamma(startTick, endTick, duration, epochLength, tickSpacing)
 
