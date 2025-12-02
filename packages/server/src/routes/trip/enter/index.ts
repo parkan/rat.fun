@@ -7,14 +7,13 @@ import { v4 as uuidv4 } from "uuid"
 import {
   EnterTripData,
   EnterTripReturnValue,
-  EventsReturnValue,
-  CorrectionReturnValue,
   SignedRequest,
   EnterTripRequestBody
 } from "@modules/types"
 
 // LLM
 import { constructEventMessages, constructCorrectionMessages } from "@modules/llm/constructMessages"
+import { EventsReturnValueSchema, CorrectionReturnValueSchema } from "@modules/llm/schemas"
 
 // Anthropic
 import { getLLMClient } from "@modules/llm/anthropic"
@@ -126,13 +125,14 @@ async function routes(fastify: FastifyInstance) {
 
         const eventLLMStart = performance.now()
         logger.log("Calling event LLM...")
-        const eventResults = (await callModel(
+        const eventResults = await callModel(
           llmClient,
           eventMessages,
           combinedSystemPrompt,
           process.env.EVENT_MODEL ?? "claude-sonnet-4-20250514",
-          Number(process.env.EVENT_TEMPERATURE)
-        )) as EventsReturnValue
+          Number(process.env.EVENT_TEMPERATURE),
+          EventsReturnValueSchema
+        )
         logger.log(`✓ Event LLM completed (${Math.round(performance.now() - eventLLMStart)}ms)`)
 
         // * * * * * * * * * * * * * * * * * *
@@ -172,13 +172,14 @@ async function routes(fastify: FastifyInstance) {
           eventResults.log
         )
 
-        const correctedEvents = (await callModel(
+        const correctedEvents = await callModel(
           llmClient,
           correctionMessages,
           correctionSystemPrompt,
           process.env.CORRECTION_MODEL ?? "claude-sonnet-4-20250514",
-          Number(process.env.CORRECTION_TEMPERATURE)
-        )) as CorrectionReturnValue
+          Number(process.env.CORRECTION_TEMPERATURE),
+          CorrectionReturnValueSchema
+        )
         logger.log(
           `✓ Correction LLM completed (${Math.round(performance.now() - correctionStart)}ms)`
         )
