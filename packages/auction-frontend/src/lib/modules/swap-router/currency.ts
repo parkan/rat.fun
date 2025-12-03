@@ -32,7 +32,7 @@ export const wethCurrency: CurrencyData = {
 
 // TODO: this is FAKERAT, replace with real token address
 export const ratCurrency: CurrencyData = {
-  address: "0x13751a213f39ef4DadfcD1eb35aAC8AEc0De5bA6",
+  address: "0xf2DD384662411A21259ab17038574289091F2D41",
   decimals: 18,
   symbol: "$RAT"
 }

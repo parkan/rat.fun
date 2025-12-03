@@ -15,7 +15,7 @@ contract DeployERC20AirdropMerkleProof is Script {
     vm.startBroadcast(deployerPrivateKey);
 
     // TODO use correct token and root
-    address erc20 = 0x13751a213f39ef4DadfcD1eb35aAC8AEc0De5bA6;
+    address erc20 = 0xf2DD384662411A21259ab17038574289091F2D41;
     bytes32 merkleRoot = 0x6166741825cd30d2dff203e5296fb595935340aa700631d5cb9a78af7bbd07bd;
 
     ERC20AirdropMerkleProof airdrop = new ERC20AirdropMerkleProof(vm.addr(deployerPrivateKey), erc20, merkleRoot);

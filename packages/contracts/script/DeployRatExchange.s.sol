@@ -15,8 +15,7 @@ contract DeployRatExchange is Script {
     vm.startBroadcast(deployerPrivateKey);
 
     address fakeRat = 0x13751a213f39ef4DadfcD1eb35aAC8AEc0De5bA6;
-    revert("TODO set real rat token address");
-    address realRat;
+    address realRat = 0xf2DD384662411A21259ab17038574289091F2D41;
 
     ERC20EquivalentExchange exchange = new ERC20EquivalentExchange(vm.addr(deployerPrivateKey), fakeRat, realRat);
     console.log("deployed exchange address: ", address(exchange));
