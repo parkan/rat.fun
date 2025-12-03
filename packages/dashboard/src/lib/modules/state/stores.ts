@@ -146,11 +146,11 @@ export async function fetchPlayerERC20Balances() {
   unsubNetwork()
   unsubExternal()
 
-  if (
-    !currentPublicNetwork ||
-    !currentExternalAddresses?.erc20Address ||
-    !Object.keys(currentPlayers).length
-  ) {
+  // Get erc20 address from config (type comes from MUD schema)
+  const erc20Address = (currentExternalAddresses as { erc20Address?: Hex } | undefined)
+    ?.erc20Address
+
+  if (!currentPublicNetwork || !erc20Address || !Object.keys(currentPlayers).length) {
     return
   }
 
@@ -162,7 +162,7 @@ export async function fetchPlayerERC20Balances() {
     const balances = await readMultipleERC20Balances(
       currentPublicNetwork,
       playerAddresses,
-      currentExternalAddresses.erc20Address
+      erc20Address
     )
 
     // Map balances back to entity IDs

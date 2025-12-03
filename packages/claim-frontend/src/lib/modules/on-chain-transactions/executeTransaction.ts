@@ -2,7 +2,7 @@ import type { Hex } from "viem"
 import { get } from "svelte/store"
 
 import { publicClient as publicClientStore } from "$lib/network"
-import { TransactionError } from "../error-handling/errors"
+import { TransactionError } from "$lib/modules/error-handling"
 
 export async function waitForTransactionReceiptSuccess(tx: Hex) {
   const publicClient = get(publicClientStore)

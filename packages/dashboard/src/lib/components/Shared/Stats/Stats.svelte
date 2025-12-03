@@ -21,7 +21,7 @@
     <div class="balance throughput">
       <h2 class="title">Throughput</h2>
       <h1>
-        <SignedNumber value={$staticContent?.statistics?.totalThroughput} noColor hideSign />
+        <SignedNumber value={$staticContent?.statistics?.totalThroughput ?? 0} noColor hideSign />
       </h1>
     </div>
     <div class="balance trips">
@@ -45,8 +45,7 @@
     // align-items: center;
 
     h1,
-    h2,
-    p {
+    h2 {
       margin: 0;
     }
 

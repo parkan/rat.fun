@@ -8,7 +8,7 @@ import {
   PUBLIC_RAT_TOKEN_ADDRESS,
   PUBLIC_EXCHANGE_CONTRACT_ADDRESS
 } from "$env/static/public"
-import { TransactionError } from "$lib/modules/error-handling/errors"
+import { TransactionError } from "$lib/modules/error-handling"
 
 // Contract addresses from environment
 export const fakeRatTokenAddress = PUBLIC_FAKE_RAT_TOKEN_ADDRESS as Hex

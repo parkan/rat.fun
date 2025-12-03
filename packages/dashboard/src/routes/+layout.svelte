@@ -79,19 +79,4 @@
     // left: 0;
     font-weight: bold;
   }
-
-  .numbers {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-
-    small {
-      vertical-align: super;
-      color: grey;
-    }
-
-    .top {
-      border-bottom: 1px solid black;
-    }
-  }
 </style>

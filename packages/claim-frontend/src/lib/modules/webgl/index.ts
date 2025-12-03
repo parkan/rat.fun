@@ -5,7 +5,7 @@ import {
   ShaderError,
   WebGLError,
   UniformLocationError
-} from "$lib/modules/error-handling/errors"
+} from "$lib/modules/error-handling"
 import { errorHandler } from "$lib/modules/error-handling"
 
 /**

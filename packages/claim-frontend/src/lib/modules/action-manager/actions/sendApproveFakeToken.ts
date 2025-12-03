@@ -1,6 +1,6 @@
 import { approveMaxFakeTokenForExchange } from "$lib/modules/on-chain-transactions/fakeToken"
 import { busy } from "../index.svelte"
-import { TransactionError } from "$lib/modules/error-handling/errors"
+import { TransactionError } from "$lib/modules/error-handling"
 
 /**
  * Approve fake token for exchange contract to burn

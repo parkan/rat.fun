@@ -8,6 +8,7 @@
   "scripts": {
     "build": "NODE_OPTIONS=--max-old-space-size=4096 pnpm recursive run build",
     "build:client": "NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter 'client' run build",
+    "check": "pnpm --filter 'client' --filter 'dashboard' --filter 'claim-frontend' --filter 'exchange-frontend' --filter 'auction-frontend' run check",
     "dev": "mprocs",
     "dev:client": "pnpm --filter 'client' run dev",
     "dev:contracts": "pnpm --filter 'contracts' run dev",

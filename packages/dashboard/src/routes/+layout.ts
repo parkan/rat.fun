@@ -1,9 +1,8 @@
 import type { LayoutLoad } from "./$types"
 import { get } from "svelte/store"
 import { getEnvironmentFromUrl } from "$lib/modules/network"
-import { SALE_STATUS } from "$lib/mud/enums"
+import { ENVIRONMENT, SALE_STATUS } from "@ratfun/common/basic-network"
 import { PUBLIC_SALE_STATUS } from "$env/static/public"
-import { ENVIRONMENT } from "$lib/mud/enums"
 import {
   environment as environmentStore,
   saleStatus as saleStatusStore

@@ -6,7 +6,10 @@ import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 
 import { networkConfig } from "$lib/network"
 import { getDrawbridge } from "$lib/modules/drawbridge"
-import { WagmiConfigUnavailableError, NetworkNotInitializedError } from "../error-handling/errors"
+import {
+  WagmiConfigUnavailableError,
+  NetworkNotInitializedError
+} from "$lib/modules/error-handling"
 
 // Types for wallet clients
 type WalletClientInput =

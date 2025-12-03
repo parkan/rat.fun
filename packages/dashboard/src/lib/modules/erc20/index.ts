@@ -1,5 +1,5 @@
 import { erc20Abi, Hex } from "viem"
-import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
+import { SetupPublicNetworkResult } from "@ratfun/common/mud"
 
 /**
  * Read the ERC20 balance for a given address

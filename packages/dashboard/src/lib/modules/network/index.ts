@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
-import { SetupPublicNetworkResult } from "$lib/mud/setupPublicNetwork"
-import { ENVIRONMENT, SALE_STATUS } from "$lib/mud/enums"
+import { SetupPublicNetworkResult } from "@ratfun/common/mud"
+import { ENVIRONMENT, SALE_STATUS } from "@ratfun/common/basic-network"
 
 // ----------------------------------------------------------------------------
 

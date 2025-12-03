@@ -6,7 +6,7 @@
  */
 
 import { Hex, sha256 } from "viem"
-import { JSONParseError } from "../error-handling/errors"
+import { JSONParseError } from "$lib/modules/error-handling"
 
 const BLOCKTIME = 2
 

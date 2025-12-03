@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte"
   import { tippy } from "svelte-tippy"
   import type { Props } from "tippy.js"
 
@@ -17,11 +18,14 @@
   // Disabled tooltips on mobile
   const tooltipsEnabled = $derived(window.innerWidth >= 700)
 
-  let conditionalAction = $derived(content && tooltipsEnabled ? tippy : () => {})
+  // Cast tippy to accept SVG elements (works at runtime but types don't support it)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let conditionalAction = $derived(content && tooltipsEnabled ? tippy : ((() => {}) as any))
   let tippyOptions = $derived({ content, ...props })
 </script>
 
 {#if svg}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <g use:conditionalAction={tippyOptions}>
     {@render children()}
   </g>

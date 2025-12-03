@@ -6,7 +6,7 @@
  */
 
 import { Hex } from "viem"
-import { JSONParseError } from "../error-handling/errors"
+import { JSONParseError } from "../error-handling"
 import { get } from "svelte/store"
 import { blockNumber as blockNumberStore } from "$lib/modules/network"
 

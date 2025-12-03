@@ -1,6 +1,6 @@
 import { exchangeFakeToken } from "$lib/modules/on-chain-transactions/fakeToken"
 import { busy } from "../index.svelte"
-import { TransactionError } from "$lib/modules/error-handling/errors"
+import { TransactionError } from "$lib/modules/error-handling"
 
 /**
  * Exchange one token for another

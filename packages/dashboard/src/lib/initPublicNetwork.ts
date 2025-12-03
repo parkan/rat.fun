@@ -1,11 +1,12 @@
-import { setupPublicNetwork } from "$lib/mud/setupPublicNetwork"
+import { ENVIRONMENT } from "@ratfun/common/basic-network"
+import { getNetworkConfig, setupPublicNetwork } from "@ratfun/common/mud"
 import { createSyncProgressSystem } from "$lib/modules/chain-sync"
 import { publicNetwork, initBlockListener } from "$lib/modules/network"
-import { ENVIRONMENT } from "$lib/mud/enums"
 
 export async function initPublicNetwork(environment: ENVIRONMENT, url: URL) {
-  // Write mud layer to svelte store
-  const mudLayer = await setupPublicNetwork(environment, url)
+  // Get network config and setup MUD layer
+  const networkConfig = getNetworkConfig(environment, url)
+  const mudLayer = await setupPublicNetwork(networkConfig, import.meta.env.DEV)
 
   publicNetwork.set(mudLayer)
 

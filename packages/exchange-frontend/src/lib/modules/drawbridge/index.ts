@@ -1,6 +1,7 @@
-import { Drawbridge, DrawbridgeStatus, type DrawbridgeState } from "drawbridge"
+import { Drawbridge, DrawbridgeStatus, type DrawbridgeState, type PublicClient } from "drawbridge"
 import { readable, derived } from "svelte/store"
-import { chains, transports, getConnectors } from "./wagmiConfig"
+import { createPublicClient, http } from "viem"
+import { chains, getConnectors } from "./wagmiConfig"
 import type { Hex } from "viem"
 
 // Re-export types and enums from package
@@ -40,15 +41,21 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
     throw new Error(`Unsupported chain ID: ${config.chainId}`)
   }
 
+  // Create public client for the chain
+  const transport = http()
+  const publicClient = createPublicClient({
+    chain,
+    transport
+  }) as PublicClient
+
   // Get connectors for this environment
   const connectors = getConnectors()
   console.log("[Drawbridge] Connectors from getConnectors():", connectors.length)
 
   // Create Drawbridge instance in wallet-only mode (skipSessionSetup = true)
   drawbridgeInstance = new Drawbridge({
-    chainId: config.chainId,
-    chains: [chain] as const,
-    transports,
+    publicClient,
+    transport,
     connectors,
     skipSessionSetup: true, // ← Wallet-only mode, no session setup
     pollingInterval: 2000,
