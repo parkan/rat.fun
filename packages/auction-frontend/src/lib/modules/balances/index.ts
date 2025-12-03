@@ -35,7 +35,10 @@ export function initBalanceListeners(publicClient: PublicClient, userAddress: He
   for (const currency of [ratCurrency, ...availableCurrencies]) {
     const balanceListener = {
       // ETH has a different listener class
-      listener: currency.address === wethCurrency.address ? new ETHBalanceListener(publicClient, userAddress) : new ERC20BalanceListener(publicClient, userAddress, currency.address),
+      listener:
+        currency.address === wethCurrency.address
+          ? new ETHBalanceListener(publicClient, userAddress)
+          : new ERC20BalanceListener(publicClient, userAddress, currency.address),
       currency
     }
     // Start each one
@@ -55,15 +58,17 @@ export const tokenBalances = derived<typeof balanceListeners, Record<Hex, TokenB
     const unsubscribers: Unsubscriber[] = []
     // listen for erc20 balance updates
     for (const { listener, currency } of $listeners) {
-      unsubscribers.push(listener.subscribe(balance => {
-        update(balances => {
-          balances[currency.address] = {
-            balance,
-            formatted: Number(formatUnits(balance, currency.decimals))
-          }
-          return balances
+      unsubscribers.push(
+        listener.subscribe(balance => {
+          update(balances => {
+            balances[currency.address] = {
+              balance,
+              formatted: Number(formatUnits(balance, currency.decimals))
+            }
+            return balances
+          })
         })
-      }))
+      )
     }
     return () => {
       unsubscribers.forEach(unsubscribe => unsubscribe())

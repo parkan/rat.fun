@@ -12,8 +12,7 @@
     loadingMessage,
     loadingPercentage,
     ready,
-    publicNetwork,
-    walletType as walletTypeStore
+    publicNetwork
   } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { addressToId } from "$lib/modules/utils"
@@ -21,13 +20,10 @@
   import { gsap } from "gsap"
 
   // Wallet setup imports
+  import { setupWalletNetwork } from "@ratfun/common/mud"
   import { ENVIRONMENT, WALLET_TYPE } from "@ratfun/common/basic-network"
-  import { setupBurnerWalletNetwork } from "$lib/mud/setupBurnerWalletNetwork"
-  import {
-    initializeDrawbridge,
-    getDrawbridge,
-    type DrawbridgeInitConfig
-  } from "$lib/modules/drawbridge"
+  import { initializeDrawbridge, getDrawbridge } from "$lib/modules/drawbridge"
+  import { initWalletNetwork } from "$lib/initWalletNetwork"
 
   const {
     environment,
@@ -43,61 +39,6 @@
   let loadingElement: HTMLDivElement
   let terminalBoxElement: HTMLDivElement
   let logoElement: HTMLDivElement
-
-  // ============================================================================
-  // ASYNC HELPERS
-  // ============================================================================
-
-  /**
-   * Initialize drawbridge if in DRAWBRIDGE mode using the provided public client.
-   * This avoids double RPC polling.
-   */
-  async function initDrawbridgeIfNeeded(config: DrawbridgeInitConfig) {
-    const walletType = get(walletTypeStore)
-
-    if (walletType !== WALLET_TYPE.DRAWBRIDGE) {
-      return undefined
-    }
-
-    console.log("[Loading] Initializing drawbridge after MUD sync...")
-    await initializeDrawbridge(config)
-  }
-
-  /**
-   * Get player ID from wallet if connected.
-   * For DRAWBRIDGE: drawbridge is already initialized, just check state.
-   * For BURNER: initialize burner wallet using MUD's public network.
-   */
-  function getPlayerIdFromWallet(): string | null {
-    const walletType = get(walletTypeStore)
-
-    if (walletType === WALLET_TYPE.BURNER) {
-      const network = get(publicNetwork)
-      const wallet = setupBurnerWalletNetwork(network)
-      const address = wallet.walletClient?.account?.address
-      if (address) {
-        const playerId = addressToId(address)
-        console.log("[Loading] Burner wallet found:", playerId)
-        return playerId
-      }
-      console.log("[Loading] No burner wallet")
-      return null
-    }
-
-    if (walletType === WALLET_TYPE.DRAWBRIDGE) {
-      const drawbridge = getDrawbridge()
-      const address = drawbridge.getState().userAddress
-      if (address) {
-        const playerId = addressToId(address)
-        console.log("[Loading] Drawbridge session found:", playerId)
-        return playerId
-      }
-      console.log("[Loading] No drawbridge session")
-      return null
-    }
-
-    return null
-  }
 
   // ============================================================================
   // ANIMATION
@@ -160,35 +101,96 @@
       typer = terminalTyper(terminalBoxElement, generateLoadingOutput())
     }
 
-    // Step 1: Initialize public network and wait for chain sync to complete
-    // This gives us a public client to reuse, avoiding double RPC polling
-    await initPublicNetwork({
+    // -------------------------------------------------------------------------
+    // Step 1: Initialize public network (MUD sync)
+    // -------------------------------------------------------------------------
+    // Sets up MUD layer and waits for chain sync to complete.
+    // Returns publicClient and transport for reuse by drawbridge.
+    console.log("[Loading] Initializing public network...")
+    const { publicClient, transport, worldAddress } = await initPublicNetwork({
       environment,
       url: page.url
     })
 
-    // Step 2: Initialize drawbridge if in DRAWBRIDGE mode
-    await initDrawbridgeIfNeeded($publicNetwork)
+    // -------------------------------------------------------------------------
+    // Step 2: Initialize drawbridge
+    // -------------------------------------------------------------------------
+    // Drawbridge manages wallet connection and session keys.
+    // Reuses the publicClient from MUD to avoid duplicate RPC polling.
+    console.log("[Loading] Initializing drawbridge...")
+    await initializeDrawbridge({
+      publicClient,
+      transport,
+      worldAddress
+    })
 
-    // Step 3: Get player ID from wallet if connected
-    // For DRAWBRIDGE: already initialized in step 1
-    // For BURNER: initializes burner wallet now using MUD's public network
-    const playerId = getPlayerIdFromWallet()
+    // -------------------------------------------------------------------------
+    // Step 3: Check wallet state and initialize accordingly
+    // -------------------------------------------------------------------------
+    // After drawbridge init, we have three possible scenarios:
+    //
+    // SCENARIO A: Wallet connected + session ready
+    //   → Full initialization: wallet, entities, ERC20 listener
+    //   → User goes straight to game (Spawn exits immediately)
+    //
+    // SCENARIO B: Wallet connected + NO session
+    //   → Partial initialization: entities only (for filtering)
+    //   → Wallet/ERC20 initialized later in Spawn after session setup
+    //
+    // SCENARIO C: No wallet connected
+    //   → No initialization here
+    //   → Everything initialized in Spawn flow
+    //
+    const drawbridge = getDrawbridge()
+    const drawbridgeState = drawbridge.getState()
+    const network = get(publicNetwork)
 
-    // Step 4: Initialize entities (chain sync is now complete)
-    if (playerId) {
-      console.log("[Loading] Initializing entities for player:", playerId)
-      initEntities({ activePlayerId: playerId })
+    if (drawbridgeState.isReady && drawbridgeState.sessionClient && drawbridgeState.userAddress) {
+      // -----------------------------------------------------------------------
+      // SCENARIO A: Wallet + Session ready
+      // -----------------------------------------------------------------------
+      // Returning user with full session. Initialize everything.
+      console.log("[Loading] Scenario A: Wallet + session ready")
+      console.log("[Loading] Address:", drawbridgeState.userAddress)
+
+      // Initialize wallet network (sets walletNetwork, playerAddress stores)
+      const wallet = setupWalletNetwork(network, drawbridgeState.sessionClient)
+      initWalletNetwork(wallet, drawbridgeState.userAddress, WALLET_TYPE.DRAWBRIDGE)
+
+      // Initialize entities with player filtering
+      const playerId = addressToId(drawbridgeState.userAddress)
+      await initEntities({ activePlayerId: playerId })
+    } else if (drawbridgeState.userAddress) {
+      // -----------------------------------------------------------------------
+      // SCENARIO B: Wallet connected, but NO session
+      // -----------------------------------------------------------------------
+      // User's wallet was restored from localStorage, but session expired or
+      // was never created. They'll need to set up session in Spawn flow.
+      //
+      // We initialize entities here (with player filtering) so the game state
+      // is ready. Wallet network and ERC20 listener will be initialized after
+      // session setup in Spawn.
+      console.log("[Loading] Scenario B: Wallet connected, no session")
+      console.log("[Loading] Address:", drawbridgeState.userAddress)
+
+      const playerId = addressToId(drawbridgeState.userAddress)
+      await initEntities({ activePlayerId: playerId })
     } else {
-      console.log("[Loading] No player ID - deferring initEntities to Spawn")
+      // -----------------------------------------------------------------------
+      // SCENARIO C: No wallet connected
+      // -----------------------------------------------------------------------
+      // New user or cleared localStorage. Everything will be initialized
+      // in the Spawn flow after they connect wallet and set up session.
+      console.log("[Loading] Scenario C: No wallet connected")
     }
 
-    // Step 5: Stop terminal typer
+    // -------------------------------------------------------------------------
+    // Step 4: Finish loading sequence
+    // -------------------------------------------------------------------------
     if (typer?.stop) {
       typer.stop()
     }
 
-    // Step 6: Animate out and signal completion
     await animateOut()
     loaded()
   })

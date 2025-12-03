@@ -5,7 +5,11 @@
  */
 
 import { PUBLIC_BASE_RPC_URL } from "$env/static/public"
-import { BasicNetworkConfig, ENVIRONMENT, getBasicNetworkConfig } from "@ratfun/common/basic-network"
+import {
+  BasicNetworkConfig,
+  ENVIRONMENT,
+  getBasicNetworkConfig
+} from "@ratfun/common/basic-network"
 
 export interface NetworkConfig extends BasicNetworkConfig {}
 
@@ -18,7 +22,7 @@ export function getNetworkConfig(): NetworkConfig {
   }
 
   const config = getBasicNetworkConfig(ENVIRONMENT.BASE, overrideDefaultRpcUrls)
-  
+
   return {
     ...config
   }

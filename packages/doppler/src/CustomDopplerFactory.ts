@@ -98,8 +98,12 @@ export class CustomDopplerFactory<
 
     // Use startTimeOffset if provided, otherwise default to 30 seconds
     const startTimeOffset = params.startTimeOffset ?? 30
-    const startTime = blockTimestamp + startTimeOffset
-    const endTime = blockTimestamp + params.auction.duration + startTimeOffset
+    //const startTime = blockTimestamp + startTimeOffset
+    //const endTime = blockTimestamp + params.auction.duration + startTimeOffset
+
+    // Hardcoded times for launch
+    const startTime = new Date("2025-12-09T16:00:00+01:00").getTime() / 1000
+    const endTime = startTime + params.auction.duration
 
     // 3. Prepare hook initialization data
     const dopplerData = {

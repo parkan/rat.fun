@@ -2,7 +2,11 @@ import { get } from "svelte/store"
 import { publicNetwork } from "$lib/modules/network"
 import { addChain, switchChain } from "viem/actions"
 import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
-import { ensureWriteContract, getChain, WalletTransactionClient } from "@ratfun/common/basic-network"
+import {
+  ensureWriteContract,
+  getChain,
+  WalletTransactionClient
+} from "@ratfun/common/basic-network"
 import { getDrawbridge } from "$lib/modules/drawbridge"
 
 /**

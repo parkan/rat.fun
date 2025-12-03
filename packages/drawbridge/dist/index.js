@@ -65,6 +65,27 @@ var DEPLOYMENT_TIMEOUTS = {
   BUNDLER_STATE_SYNC: 2e3
 };
 
+// src/logger.ts
+var loggingEnabled = false;
+function setLoggingEnabled(enabled) {
+  loggingEnabled = enabled;
+}
+var logger = {
+  log: (...args) => {
+    if (loggingEnabled) {
+      console.log(...args);
+    }
+  },
+  warn: (...args) => {
+    if (loggingEnabled) {
+      console.warn(...args);
+    }
+  },
+  error: (...args) => {
+    console.error(...args);
+  }
+};
+
 // src/session/core/storage.ts
 var SessionStorage = class {
   constructor() {
@@ -86,7 +107,7 @@ var SessionStorage = class {
     if (!stored) {
       stored = localStorage.getItem(this.LEGACY_STORAGE_KEY);
       if (stored) {
-        console.log("[drawbridge] Migrating session storage from legacy key");
+        logger.log("[drawbridge] Migrating session storage from legacy key");
       }
     }
     if (!stored) {
@@ -95,16 +116,16 @@ var SessionStorage = class {
     try {
       const parsed = JSON.parse(stored);
       if (!parsed.signers || typeof parsed.signers !== "object") {
-        console.warn("[drawbridge] Session storage corrupted - invalid structure, resetting");
+        logger.warn("[drawbridge] Session storage corrupted - invalid structure, resetting");
         return { signers: {} };
       }
       return parsed;
     } catch (err) {
-      console.error(
+      logger.error(
         "[drawbridge] Failed to parse session storage:",
         err instanceof Error ? err.message : String(err)
       );
-      console.warn("[drawbridge] Session storage will be reset");
+      logger.warn("[drawbridge] Session storage will be reset");
       return { signers: {} };
     }
   }
@@ -118,7 +139,7 @@ var SessionStorage = class {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cache));
     if (localStorage.getItem(this.LEGACY_STORAGE_KEY)) {
       localStorage.removeItem(this.LEGACY_STORAGE_KEY);
-      console.log("[drawbridge] Removed legacy storage key after migration");
+      logger.log("[drawbridge] Removed legacy storage key after migration");
     }
   }
   /**
@@ -177,7 +198,7 @@ async function getSessionAccount({
   userAddress
 }) {
   const signer = getSessionSigner(userAddress);
-  console.log("[getSessionAccount] Creating session account:", {
+  logger.log("[getSessionAccount] Creating session account:", {
     userAddress,
     signerAddress: signer.address,
     chainId: publicClient.chain?.id,
@@ -188,10 +209,10 @@ async function getSessionAccount({
       client: publicClient,
       owner: signer
     });
-    console.log("[getSessionAccount] Session account created:", account.address);
+    logger.log("[getSessionAccount] Session account created:", account.address);
     return { account, signer };
   } catch (error) {
-    console.error("[getSessionAccount] Failed to create session account:", {
+    logger.error("[getSessionAccount] Failed to create session account:", {
       error: error instanceof Error ? error.message : String(error),
       userAddress,
       signerAddress: signer.address,
@@ -205,7 +226,7 @@ async function getSessionAccount({
 function getPaymaster(chain, paymasterOverride) {
   const contracts = chain.contracts ?? {};
   if (paymasterOverride) {
-    console.log(
+    logger.log(
       `[Drawbridge/Paymaster] Using custom paymaster client for chain ${chain.name} (${chain.id})`
     );
     return {
@@ -215,7 +236,7 @@ function getPaymaster(chain, paymasterOverride) {
   }
   if ("paymaster" in contracts && contracts.paymaster != null) {
     if ("address" in contracts.paymaster) {
-      console.log(
+      logger.log(
         `[Drawbridge/Paymaster] Using simple paymaster at ${contracts.paymaster.address} for chain ${chain.name} (${chain.id})`
       );
       return {
@@ -224,7 +245,7 @@ function getPaymaster(chain, paymasterOverride) {
       };
     }
   }
-  console.log(
+  logger.log(
     `[Drawbridge/Paymaster] No paymaster configured for chain ${chain.name} (${chain.id}) - user will pay gas`
   );
   return void 0;
@@ -237,11 +258,11 @@ function createBundlerClient(config) {
   const chain = config.chain ?? client.chain;
   const paymaster = chain ? getPaymaster(chain, config.paymaster) : void 0;
   if (paymaster) {
-    console.log(
+    logger.log(
       `[Drawbridge/BundlerClient] Bundler client configured with ${paymaster.type} paymaster`
     );
   } else {
-    console.log(`[Drawbridge/BundlerClient] Bundler client configured without paymaster`);
+    logger.log(`[Drawbridge/BundlerClient] Bundler client configured without paymaster`);
   }
   return createBundlerClient$1({
     ...defaultClientConfig,
@@ -270,38 +291,38 @@ function logUserOperationCost(userOp, ethPriceUSD) {
   const maxCostWei = totalGas * maxFeePerGas;
   const maxCostETH = formatEther(maxCostWei);
   const maxCostUSD = Number(maxCostETH) * ETH_PRICE;
-  console.log("\u250C\u2500 User Operation Gas & Cost \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
-  console.log("\u2502");
-  console.log("\u2502 Gas Estimates:");
-  console.log("\u2502   callGasLimit:                ", callGas.toString().padStart(7), "gas");
-  console.log("\u2502   verificationGasLimit:        ", verificationGas.toString().padStart(7), "gas");
-  console.log("\u2502   preVerificationGas:          ", preVerificationGas.toString().padStart(7), "gas");
+  logger.log("\u250C\u2500 User Operation Gas & Cost \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  logger.log("\u2502");
+  logger.log("\u2502 Gas Estimates:");
+  logger.log("\u2502   callGasLimit:                ", callGas.toString().padStart(7), "gas");
+  logger.log("\u2502   verificationGasLimit:        ", verificationGas.toString().padStart(7), "gas");
+  logger.log("\u2502   preVerificationGas:          ", preVerificationGas.toString().padStart(7), "gas");
   if (paymasterVerificationGas > 0n) {
-    console.log(
+    logger.log(
       "\u2502   paymasterVerificationGasLimit:",
       paymasterVerificationGas.toString().padStart(7),
       "gas"
     );
   }
   if (paymasterPostOpGas > 0n) {
-    console.log(
+    logger.log(
       "\u2502   paymasterPostOpGasLimit:     ",
       paymasterPostOpGas.toString().padStart(7),
       "gas"
     );
   }
-  console.log("\u2502   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
-  console.log("\u2502   Total gas:                   ", totalGas.toString().padStart(7), "gas");
-  console.log("\u2502");
-  console.log("\u2502 Fee Parameters:");
-  console.log("\u2502   maxFeePerGas:                ", formatGwei(maxFeePerGas), "gwei");
-  console.log("\u2502   maxPriorityFeePerGas:        ", formatGwei(maxPriorityFeePerGas), "gwei");
-  console.log("\u2502");
-  console.log("\u2502 Estimated Max Cost:");
-  console.log("\u2502   ETH:  ", maxCostETH, "ETH");
-  console.log("\u2502   USD:  $" + maxCostUSD.toFixed(2), "(at $" + ETH_PRICE + " ETH)");
-  console.log("\u2502");
-  console.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  logger.log("\u2502   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  logger.log("\u2502   Total gas:                   ", totalGas.toString().padStart(7), "gas");
+  logger.log("\u2502");
+  logger.log("\u2502 Fee Parameters:");
+  logger.log("\u2502   maxFeePerGas:                ", formatGwei(maxFeePerGas), "gwei");
+  logger.log("\u2502   maxPriorityFeePerGas:        ", formatGwei(maxPriorityFeePerGas), "gwei");
+  logger.log("\u2502");
+  logger.log("\u2502 Estimated Max Cost:");
+  logger.log("\u2502   ETH:  ", maxCostETH, "ETH");
+  logger.log("\u2502   USD:  $" + maxCostUSD.toFixed(2), "(at $" + ETH_PRICE + " ETH)");
+  logger.log("\u2502");
+  logger.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
 }
 function logFeeCapApplied(data) {
   const originalCost = Number(data.totalGas) * Number(formatGwei(data.originalMaxFee)) / 1e9;
@@ -309,41 +330,41 @@ function logFeeCapApplied(data) {
   const originalCostUSD = originalCost * data.ethPrice;
   const cappedCostUSD = cappedCost * data.ethPrice;
   const priorityWasReduced = data.cappedPriorityFee < data.originalPriorityFee;
-  console.log("\u250C\u2500 \u26A0\uFE0F  GAS PRICE SPIKE - FEE CAP APPLIED \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
-  console.log("\u2502");
-  console.log("\u2502 \u{1F6E1}\uFE0F  Budget Protection: Capping fees to stay under $" + data.maxBudgetUSD);
-  console.log("\u2502");
-  console.log("\u2502 This operation:");
-  console.log("\u2502   Total gas:            ", data.totalGas.toString(), "gas");
-  console.log("\u2502");
-  console.log("\u2502 Network fees would cost:");
-  console.log("\u2502   maxFeePerGas:         ", formatGwei(data.originalMaxFee), "gwei");
-  console.log("\u2502   maxPriorityFeePerGas: ", formatGwei(data.originalPriorityFee), "gwei");
-  console.log("\u2502   Estimated cost:       ", originalCost.toFixed(8), "ETH");
-  console.log("\u2502   USD cost:              $" + originalCostUSD.toFixed(2), "\u2190 OVER BUDGET!");
-  console.log("\u2502");
-  console.log("\u2502 Capped to:");
-  console.log("\u2502   maxFeePerGas:         ", formatGwei(data.cappedMaxFee), "gwei", "\u2190 CAPPED");
+  logger.log("\u250C\u2500 \u26A0\uFE0F  GAS PRICE SPIKE - FEE CAP APPLIED \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  logger.log("\u2502");
+  logger.log("\u2502 \u{1F6E1}\uFE0F  Budget Protection: Capping fees to stay under $" + data.maxBudgetUSD);
+  logger.log("\u2502");
+  logger.log("\u2502 This operation:");
+  logger.log("\u2502   Total gas:            ", data.totalGas.toString(), "gas");
+  logger.log("\u2502");
+  logger.log("\u2502 Network fees would cost:");
+  logger.log("\u2502   maxFeePerGas:         ", formatGwei(data.originalMaxFee), "gwei");
+  logger.log("\u2502   maxPriorityFeePerGas: ", formatGwei(data.originalPriorityFee), "gwei");
+  logger.log("\u2502   Estimated cost:       ", originalCost.toFixed(8), "ETH");
+  logger.log("\u2502   USD cost:              $" + originalCostUSD.toFixed(2), "\u2190 OVER BUDGET!");
+  logger.log("\u2502");
+  logger.log("\u2502 Capped to:");
+  logger.log("\u2502   maxFeePerGas:         ", formatGwei(data.cappedMaxFee), "gwei", "\u2190 CAPPED");
   if (priorityWasReduced) {
-    console.log(
+    logger.log(
       "\u2502   maxPriorityFeePerGas: ",
       formatGwei(data.cappedPriorityFee),
       "gwei",
       "\u2190 REDUCED (EIP-1559)"
     );
   } else {
-    console.log("\u2502   maxPriorityFeePerGas: ", formatGwei(data.cappedPriorityFee), "gwei");
+    logger.log("\u2502   maxPriorityFeePerGas: ", formatGwei(data.cappedPriorityFee), "gwei");
   }
-  console.log("\u2502   Estimated cost:       ", cappedCost.toFixed(8), "ETH");
-  console.log("\u2502   USD cost:              $" + cappedCostUSD.toFixed(2), "\u2705");
-  console.log("\u2502");
-  console.log(
+  logger.log("\u2502   Estimated cost:       ", cappedCost.toFixed(8), "ETH");
+  logger.log("\u2502   USD cost:              $" + cappedCostUSD.toFixed(2), "\u2705");
+  logger.log("\u2502");
+  logger.log(
     "\u2502 \u23F3 Transaction will wait in mempool until gas drops below",
     formatGwei(data.cappedMaxFee),
     "gwei"
   );
-  console.log("\u2502");
-  console.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  logger.log("\u2502");
+  logger.log("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
 }
 
 // src/bundler/transport.ts
@@ -397,7 +418,7 @@ async function fetchWithRetry(input, init) {
           );
         }
         const delayMs = getRetryDelay(attempt);
-        console.warn(
+        logger.warn(
           `[Drawbridge/Transport] Rate limit hit (429). Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`
         );
         await sleep(delayMs);
@@ -409,7 +430,7 @@ async function fetchWithRetry(input, init) {
           return response;
         }
         const delayMs = getRetryDelay(attempt);
-        console.warn(
+        logger.warn(
           `[Drawbridge/Transport] Paymaster cost limit exceeded. Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`
         );
         await sleep(delayMs);
@@ -422,7 +443,7 @@ async function fetchWithRetry(input, init) {
         throw lastError;
       }
       const delayMs = getRetryDelay(attempt);
-      console.warn(
+      logger.warn(
         `[Drawbridge/Transport] Network error. Retrying in ${delayMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1})...`,
         error
       );
@@ -512,7 +533,7 @@ async function getSessionClient({
     throw new Error("Public client had no associated chain.");
   }
   if (paymasterOverride) {
-    console.log(`[Drawbridge/SessionClient] Creating session client with paymaster override`);
+    logger.log(`[Drawbridge/SessionClient] Creating session client with paymaster override`);
   }
   const bundlerClient = createBundlerClient({
     transport: getBundlerTransport(chain, ethPriceUSD),
@@ -589,7 +610,7 @@ async function deployWallet(client, factoryAddress, factoryCalldata) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     if (isAlreadyDeployedError(errorMessage)) {
-      console.log("[drawbridge] Wallet already deployed, continuing");
+      logger.log("[drawbridge] Wallet already deployed, continuing");
       return;
     }
     throw new Error(`Failed to deploy smart wallet: ${errorMessage}`);
@@ -601,12 +622,12 @@ function clearFactoryData(account) {
     delete account.factoryData;
     account.factory = void 0;
     account.factoryData = void 0;
-    console.log("[drawbridge] Factory data cleared:", {
+    logger.log("[drawbridge] Factory data cleared:", {
       stillHasFactory: !!account.factory,
       stillHasFactoryData: !!account.factoryData
     });
   } catch (err) {
-    console.warn("[drawbridge] Direct deletion failed, trying Object.defineProperty");
+    logger.warn("[drawbridge] Direct deletion failed, trying Object.defineProperty");
     try {
       Object.defineProperty(account, "factory", {
         value: void 0,
@@ -618,17 +639,17 @@ function clearFactoryData(account) {
         writable: true,
         configurable: true
       });
-      console.log("[drawbridge] Factory data cleared via defineProperty");
+      logger.log("[drawbridge] Factory data cleared via defineProperty");
     } catch (fallbackErr) {
-      console.error("[drawbridge] Could not remove factory (readonly property)");
+      logger.error("[drawbridge] Could not remove factory (readonly property)");
     }
   }
 }
 async function deploySessionAccount(sessionClient, onStatus) {
   const sessionDeployed = await sessionClient.account.isDeployed?.();
-  console.log("[drawbridge] Session account deployed:", sessionDeployed);
+  logger.log("[drawbridge] Session account deployed:", sessionDeployed);
   if (sessionDeployed) {
-    console.log("[drawbridge] Session account already deployed");
+    logger.log("[drawbridge] Session account already deployed");
     return;
   }
   onStatus?.({ type: "deploying_session", message: "Finalizing session setup..." });
@@ -640,7 +661,7 @@ async function deploySessionAccount(sessionClient, onStatus) {
     )({
       calls: [{ to: zeroAddress }]
     });
-    console.log("[drawbridge] Session deploy tx:", hash);
+    logger.log("[drawbridge] Session deploy tx:", hash);
     const receiptPromise = getAction(
       sessionClient,
       waitForUserOperationReceipt,
@@ -662,26 +683,26 @@ async function deploySessionAccount(sessionClient, onStatus) {
     }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error("[drawbridge] Session deployment error:", errorMsg);
+    logger.error("[drawbridge] Session deployment error:", errorMsg);
     if (errorMsg.includes("timeout")) {
       const nowDeployed = await sessionClient.account.isDeployed?.();
       if (nowDeployed) {
-        console.log("[drawbridge] Session deployed despite timeout");
+        logger.log("[drawbridge] Session deployed despite timeout");
         onStatus?.({ type: "complete", message: "Session setup complete!" });
         return;
       }
     }
     if (isAlreadyDeployedError(errorMsg)) {
-      console.log("[drawbridge] Session account already deployed (bundler confirmed)");
-      console.log("[drawbridge] Waiting for RPC cache to update...");
+      logger.log("[drawbridge] Session account already deployed (bundler confirmed)");
+      logger.log("[drawbridge] Waiting for RPC cache to update...");
       await new Promise((resolve) => setTimeout(resolve, DEPLOYMENT_TIMEOUTS.BUNDLER_STATE_SYNC));
       const nowDeployed = await sessionClient.account.isDeployed?.();
       if (nowDeployed) {
-        console.log("[drawbridge] Session deployment verified after cache update");
+        logger.log("[drawbridge] Session deployment verified after cache update");
         onStatus?.({ type: "complete", message: "Session setup complete!" });
         return;
       }
-      console.warn("[drawbridge] Cache still stale after delay - treating as deployed anyway");
+      logger.warn("[drawbridge] Cache still stale after delay - treating as deployed anyway");
       onStatus?.({ type: "complete", message: "Session setup complete!" });
       return;
     }
@@ -699,22 +720,22 @@ async function setupSessionSmartAccount({
 }) {
   const sessionAddress = sessionClient.account.address;
   const userAddress = userClient.account.address;
-  console.log("[drawbridge] Smart Account setup:", { userAddress });
+  logger.log("[drawbridge] Smart Account setup:", { userAddress });
   onStatus?.({ type: "checking_wallet", message: "Checking wallet status..." });
   const account = userClient.account;
   const factoryArgs = await account.getFactoryArgs();
   const hasFactoryData = factoryArgs.factory && factoryArgs.factoryData;
-  console.log("[drawbridge] Smart wallet check:", { hasFactoryData, userAddress });
+  logger.log("[drawbridge] Smart wallet check:", { hasFactoryData, userAddress });
   const alreadyDeployed = await isWalletDeployed(sessionClient, userAddress);
-  console.log("[drawbridge] Wallet deployed:", alreadyDeployed);
+  logger.log("[drawbridge] Wallet deployed:", alreadyDeployed);
   if (alreadyDeployed && hasFactoryData) {
-    console.log("[drawbridge] CASE 1: Wallet deployed and has factory data");
-    console.log("[drawbridge] Removing factory data from deployed wallet");
+    logger.log("[drawbridge] CASE 1: Wallet deployed and has factory data");
+    logger.log("[drawbridge] Removing factory data from deployed wallet");
     onStatus?.({ type: "wallet_deployed", message: "Wallet ready" });
     clearFactoryData(account);
   } else if (!alreadyDeployed && hasFactoryData) {
-    console.log("[drawbridge] CASE 2: Wallet not deployed and has factory data");
-    console.log("[drawbridge] Deploying user wallet...");
+    logger.log("[drawbridge] CASE 2: Wallet not deployed and has factory data");
+    logger.log("[drawbridge] Deploying user wallet...");
     onStatus?.({ type: "deploying_wallet", message: "Deploying wallet (one-time setup)..." });
     await deployWallet(sessionClient, factoryArgs.factory, factoryArgs.factoryData);
     const nowDeployed = await isWalletDeployed(sessionClient, userAddress);
@@ -739,12 +760,12 @@ async function setupSessionSmartAccount({
   ];
   const accountBeforeSend = userClient.account;
   if (accountBeforeSend.factory || accountBeforeSend.factoryData) {
-    console.warn("[drawbridge] Factory still present, attempting removal again...");
+    logger.warn("[drawbridge] Factory still present, attempting removal again...");
     clearFactoryData(accountBeforeSend);
   }
   try {
     const hash = await getAction(userClient, sendUserOperation, "sendUserOperation")({ calls });
-    console.log("[drawbridge] User operation sent:", hash);
+    logger.log("[drawbridge] User operation sent:", hash);
     const receipt = await getAction(
       userClient,
       waitForUserOperationReceipt,
@@ -755,7 +776,7 @@ async function setupSessionSmartAccount({
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[drawbridge] User operation error:", errorMessage);
+    logger.error("[drawbridge] User operation error:", errorMessage);
     if (isAlreadyDeployedError(errorMessage)) {
       const helpfulError = new Error(
         "Smart wallet deployment conflict. Please try again - it should work on the second attempt."
@@ -767,7 +788,7 @@ async function setupSessionSmartAccount({
     throw error;
   }
   await deploySessionAccount(sessionClient, onStatus);
-  console.log("[drawbridge] Smart Account setup complete");
+  logger.log("[drawbridge] Smart Account setup complete");
   onStatus?.({ type: "complete", message: "Session setup complete!" });
 }
 async function signCall({
@@ -836,7 +857,7 @@ async function setupSessionEOA({
 }) {
   const sessionAddress = sessionClient.account.address;
   const userAddress = userClient.account.address;
-  console.log("[drawbridge] EOA setup:", { userAddress });
+  logger.log("[drawbridge] EOA setup:", { userAddress });
   onStatus?.({ type: "registering_delegation", message: "Setting up session..." });
   const hash = await callWithSignature({
     client: sessionClient,
@@ -859,7 +880,7 @@ async function setupSessionEOA({
     throw new Error("Delegation registration transaction reverted");
   }
   await deploySessionAccount(sessionClient, onStatus);
-  console.log("[drawbridge] EOA setup complete");
+  logger.log("[drawbridge] EOA setup complete");
   onStatus?.({ type: "complete", message: "Session setup complete!" });
 }
 
@@ -873,7 +894,7 @@ async function setupSession({
 }) {
   const userAddress = userClient.account.address;
   const sessionAddress = sessionClient.account.address;
-  console.log("[drawbridge] Setup session:", {
+  logger.log("[drawbridge] Setup session:", {
     userAddress,
     accountType: userClient.account.type
   });
@@ -885,11 +906,11 @@ async function setupSession({
   });
   const sessionDeployed = await sessionClient.account.isDeployed?.();
   if (hasDelegation && sessionDeployed) {
-    console.log("[drawbridge] Session already fully set up, skipping");
+    logger.log("[drawbridge] Session already fully set up, skipping");
     onStatus?.({ type: "complete", message: "Session already set up!" });
     return;
   }
-  console.log("[drawbridge] Session setup required:", { hasDelegation, sessionDeployed });
+  logger.log("[drawbridge] Session setup required:", { hasDelegation, sessionDeployed });
   if (userClient.account.type === "smart") {
     return setupSessionSmartAccount({
       userClient,
@@ -926,14 +947,14 @@ function createWalletConfig({
 function setupAccountWatcher(wagmiConfig, onChange) {
   return watchAccount(wagmiConfig, {
     onChange: (account) => {
-      console.log("[wallet] Account change:", {
+      logger.log("[wallet] Account change:", {
         isConnected: account.isConnected,
         address: account.address
       });
       const result = onChange(account);
       if (result instanceof Promise) {
         result.catch((err) => {
-          console.error("[wallet] Account change handler failed:", err);
+          logger.error("[wallet] Account change handler failed:", err);
         });
       }
     }
@@ -944,16 +965,16 @@ async function attemptReconnect(wagmiConfig) {
     await reconnect(wagmiConfig);
     const account = getAccount(wagmiConfig);
     if (account.isConnected && account.address) {
-      console.log("[wallet] Reconnection successful:", account.address);
+      logger.log("[wallet] Reconnection successful:", account.address);
       return {
         reconnected: true,
         address: account.address
       };
     }
-    console.log("[wallet] Reconnected but no account");
+    logger.log("[wallet] Reconnected but no account");
     return { reconnected: false };
   } catch (err) {
-    console.log("[wallet] No previous connection to restore");
+    logger.log("[wallet] No previous connection to restore");
     return { reconnected: false };
   }
 }
@@ -963,20 +984,20 @@ async function connectWallet(wagmiConfig, connectorId, chainId) {
   if (!connector) {
     throw new Error(`Connector not found: ${connectorId}`);
   }
-  console.log("[wallet] Connecting to wallet:", connectorId);
+  logger.log("[wallet] Connecting to wallet:", connectorId);
   await connect(wagmiConfig, {
     connector,
     chainId
   });
-  console.log("[wallet] Connection initiated");
+  logger.log("[wallet] Connection initiated");
 }
 async function disconnectWallet(wagmiConfig) {
-  console.log("[wallet] Disconnecting...");
+  logger.log("[wallet] Disconnecting...");
   try {
     await disconnect(wagmiConfig);
-    console.log("[wallet] Disconnected successfully");
+    logger.log("[wallet] Disconnected successfully");
   } catch (err) {
-    console.error("[wallet] Disconnect error:", err);
+    logger.error("[wallet] Disconnect error:", err);
     throw err;
   }
 }
@@ -992,6 +1013,7 @@ var Drawbridge = class {
     this.isConnecting = false;
     this.isDisconnecting = false;
     this.validateConfig(config);
+    setLoggingEnabled(config.logging ?? false);
     this.config = config;
     this.state = {
       status: "uninitialized" /* UNINITIALIZED */,
@@ -1003,7 +1025,7 @@ var Drawbridge = class {
     };
     const chain = config.publicClient.chain;
     this._publicClient = config.publicClient;
-    console.log("[drawbridge] Public client set from config for chain:", chain.id);
+    logger.log("[drawbridge] Public client created for chain:", chain.name);
     this.wagmiConfig = createWalletConfig({
       chains: [chain],
       transports: { [chain.id]: config.transport },
@@ -1019,7 +1041,7 @@ var Drawbridge = class {
    */
   validateConfig(config) {
     if (!config.skipSessionSetup && !config.worldAddress) {
-      console.warn(
+      logger.warn(
         "[drawbridge] Configuration warning: worldAddress not provided but session setup is enabled. Session creation will work, but delegation checks will fail. Did you forget to pass worldAddress, or did you mean to set skipSessionSetup: true?"
       );
     }
@@ -1038,17 +1060,17 @@ var Drawbridge = class {
    * It will attempt to reconnect to a previously connected wallet.
    */
   async initialize() {
-    console.log("[drawbridge] Initializing...");
+    logger.log("[drawbridge] Initializing...");
     const result = await attemptReconnect(this.wagmiConfig);
     if (!result.reconnected) {
       this.updateState({ status: "disconnected" /* DISCONNECTED */ });
     }
     this.setupAccountWatcher();
     if (result.reconnected && result.address) {
-      console.log("[drawbridge] Processing reconnected wallet:", result.address);
+      logger.log("[drawbridge] Processing reconnected wallet:", result.address);
       await this.handleWalletConnection();
     }
-    console.log("[drawbridge] Initialization complete");
+    logger.log("[drawbridge] Initialization complete");
   }
   // ===== Reactive State Management =====
   /**
@@ -1099,7 +1121,7 @@ var Drawbridge = class {
   setupAccountWatcher() {
     const unwatch = setupAccountWatcher(this.wagmiConfig, async (account) => {
       if (!account.isConnected) {
-        console.log("[drawbridge] Wallet disconnected");
+        logger.log("[drawbridge] Wallet disconnected");
         this.updateState({
           status: "disconnected" /* DISCONNECTED */,
           sessionClient: null,
@@ -1112,11 +1134,11 @@ var Drawbridge = class {
         return;
       }
       if (this.isDisconnecting) {
-        console.log("[drawbridge] Ignoring connection attempt during disconnect");
+        logger.log("[drawbridge] Ignoring connection attempt during disconnect");
         return;
       }
       if (this.isConnecting) {
-        console.log("[drawbridge] Already processing connection");
+        logger.log("[drawbridge] Already processing connection");
         return;
       }
       if (!account.connector || !account.address) {
@@ -1126,7 +1148,7 @@ var Drawbridge = class {
         this.isConnecting = true;
         await this.handleWalletConnection();
       } catch (err) {
-        console.error("[drawbridge] Connection handler failed:", {
+        logger.error("[drawbridge] Connection handler failed:", {
           error: err,
           errorMessage: err instanceof Error ? err.message : String(err),
           errorName: err instanceof Error ? err.name : "Unknown",
@@ -1152,25 +1174,25 @@ var Drawbridge = class {
     try {
       userClient = await getConnectorClient(this.wagmiConfig);
     } catch (err) {
-      console.log("[drawbridge] Could not get connector client");
+      logger.log("[drawbridge] Could not get connector client");
       return;
     }
     if (!userClient.account || !userClient.chain) {
-      console.log("[drawbridge] Wallet client missing account or chain");
+      logger.log("[drawbridge] Wallet client missing account or chain");
       return;
     }
     const userAddress = userClient.account.address;
-    console.log("[drawbridge] Wallet connected:", userAddress);
+    logger.log("[drawbridge] Wallet connected:", userAddress);
     const expectedChainId = this.config.publicClient.chain.id;
     if (userClient.chain.id !== expectedChainId) {
       const error = new Error(
         `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${expectedChainId}`
       );
-      console.error("[drawbridge]", error.message);
+      logger.error("[drawbridge]", error.message);
       throw error;
     }
     if (this.config.skipSessionSetup) {
-      console.log("[drawbridge] Skipping session setup (wallet-only mode)");
+      logger.log("[drawbridge] Skipping session setup (wallet-only mode)");
       this.updateState({
         status: "ready" /* READY */,
         sessionClient: null,
@@ -1181,9 +1203,9 @@ var Drawbridge = class {
       });
       return;
     }
-    console.log("[drawbridge] Setting up session for address:", userAddress);
+    logger.log("[drawbridge] Setting up session for address:", userAddress);
     const signer = getSessionSigner(userAddress);
-    console.log("[drawbridge] About to create session account with publicClient:", {
+    logger.log("[drawbridge] About to create session account with publicClient:", {
       chainId: this._publicClient.chain?.id,
       chainName: this._publicClient.chain?.name,
       userAddress,
@@ -1211,7 +1233,7 @@ var Drawbridge = class {
         sessionAddress: account.address
       });
     } catch (err) {
-      console.error("[drawbridge] Failed to check delegation:", err);
+      logger.error("[drawbridge] Failed to check delegation:", err);
       throw new Error(
         `Failed to check delegation: ${err instanceof Error ? err.message : String(err)}`
       );
@@ -1224,7 +1246,7 @@ var Drawbridge = class {
       isReady: hasDelegation,
       error: null
     });
-    console.log("[drawbridge] Session connection complete, isReady:", hasDelegation);
+    logger.log("[drawbridge] Session connection complete, isReady:", hasDelegation);
   }
   // ===== Public API =====
   /**
@@ -1251,13 +1273,13 @@ var Drawbridge = class {
    * @throws If connector not found or connection fails
    */
   async connectWallet(connectorId) {
-    console.log("[drawbridge] Connecting to wallet:", connectorId);
+    logger.log("[drawbridge] Connecting to wallet:", connectorId);
     this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
       await connectWallet(this.wagmiConfig, connectorId, this._publicClient.chain.id);
     } catch (err) {
       if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {
-        console.log("[drawbridge] Already connected");
+        logger.log("[drawbridge] Already connected");
         return;
       }
       this.updateState({ status: "disconnected" /* DISCONNECTED */ });
@@ -1272,20 +1294,20 @@ var Drawbridge = class {
    * 2. Account watcher will automatically clear drawbridge state
    */
   async disconnectWallet() {
-    console.log("[drawbridge] disconnectWallet() called");
-    console.log("[drawbridge] Current state:", this.state);
-    console.log("[drawbridge] Calling wagmi disconnect()...");
+    logger.log("[drawbridge] disconnectWallet() called");
+    logger.log("[drawbridge] Current state:", this.state);
+    logger.log("[drawbridge] Calling wagmi disconnect()...");
     try {
       this.isDisconnecting = true;
       await disconnectWallet(this.wagmiConfig);
-      console.log("[drawbridge] Wallet disconnected");
+      logger.log("[drawbridge] Wallet disconnected");
     } catch (err) {
-      console.error("[drawbridge] Disconnect error:", err);
+      logger.error("[drawbridge] Disconnect error:", err);
       throw err;
     } finally {
       this.isDisconnecting = false;
     }
-    console.log("[drawbridge] Disconnect complete");
+    logger.log("[drawbridge] Disconnect complete");
   }
   /**
    * Check if session is ready to use
@@ -1329,7 +1351,7 @@ var Drawbridge = class {
     if (!this.state.sessionClient) {
       throw new Error("Not connected. Call connectWallet() first.");
     }
-    console.log("[drawbridge] Setting up session (registering delegation)...");
+    logger.log("[drawbridge] Setting up session (registering delegation)...");
     this.updateState({ status: "setting_up_session" /* SETTING_UP_SESSION */ });
     const userClient = await getConnectorClient(this.wagmiConfig);
     try {
@@ -1341,7 +1363,7 @@ var Drawbridge = class {
         onStatus
       });
       this.updateState({ status: "ready" /* READY */, isReady: true, error: null });
-      console.log("[drawbridge] Session setup complete");
+      logger.log("[drawbridge] Session setup complete");
     } catch (err) {
       this.updateState({ status: "connected" /* CONNECTED */ });
       throw err;
@@ -1357,7 +1379,7 @@ var Drawbridge = class {
    * Call this when unmounting your app.
    */
   destroy() {
-    console.log("[drawbridge] Destroying instance");
+    logger.log("[drawbridge] Destroying instance");
     if (this.accountWatcherCleanup) {
       this.accountWatcherCleanup();
       this.accountWatcherCleanup = null;

@@ -5,7 +5,6 @@
  */
 
 import { Hex } from "viem"
-import { getBurnerPrivateKey } from "@latticexyz/common"
 import { MUDChain } from "@latticexyz/common/chains"
 import { ENVIRONMENT } from "../basic-network/enums"
 import { WorldAddressNotFoundError } from "../error-handling/errors"
@@ -13,8 +12,11 @@ import { getWorldFromChainId } from "./utils"
 import { ChainRpcUrls, getBasicNetworkConfig } from "../basic-network"
 
 export interface NetworkConfig {
-  privateKey: string | null
-  useBurner: boolean
+  provider: {
+    chainId: number
+    jsonRpcUrl: string
+    wsRpcUrl?: string
+  }
   chainId: number
   faucetServiceUrl?: string | null
   worldAddress: Hex
@@ -62,23 +64,23 @@ export function getNetworkConfig(
    */
   const initialBlockNumber = searchParams?.has("initialBlockNumber")
     ? Number(searchParams.get("initialBlockNumber"))
-    : world?.blockNumber ?? -1 // -1 will attempt to find the block number from RPC
+    : (world?.blockNumber ?? -1) // -1 will attempt to find the block number from RPC
 
   let indexerUrl = chain.indexerUrl
   if (searchParams?.has("disableIndexer")) {
     indexerUrl = undefined
   }
 
-  // Only call getBurnerPrivateKey if we're in a browser environment
-  const privateKey =
-    searchParams?.get("privateKey") ??
-    (typeof window !== "undefined" ? getBurnerPrivateKey() : null)
-
   return {
-    privateKey: searchParams?.get("privateKey") ?? privateKey, // do not run getBurnerPrivateKey in
-    useBurner: searchParams?.has("useBurner"),
+    provider: {
+      chainId,
+      jsonRpcUrl: searchParams?.get("rpc") ?? chain.rpcUrls.default.http[0],
+      wsRpcUrl:
+        searchParams?.get("wsRpc") ??
+        ("webSocket" in chain.rpcUrls.default ? chain.rpcUrls.default.webSocket?.[0] : undefined)
+    },
     chainId,
-    faucetServiceUrl: searchParams?.get("faucet") ?? chain.faucetUrl, // Todo, update
+    faucetServiceUrl: searchParams?.get("faucet") ?? (chain as MUDChain).faucetUrl,
     worldAddress,
     initialBlockNumber,
     chain,

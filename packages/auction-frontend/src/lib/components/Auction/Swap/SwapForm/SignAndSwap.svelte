@@ -148,8 +148,8 @@
       swapState.state.transitionTo(SWAP_STATE.SWAP_COMPLETE)
 
       // Manually trigger balance updates for relevant tokens
-      for (const listener of $balanceListeners) {
-        if ([auctionParams.token.address, fromCurrency.address].includes(listener.erc20.address)) {
+      for (const { listener, currency } of $balanceListeners) {
+        if ([auctionParams.token.address, fromCurrency.address].includes(currency.address)) {
           listener.triggerUpdate()
         }
       }

@@ -115,7 +115,6 @@
 
   onDestroy(() => {
     clearEndingTimeInterval()
-
   })
 </script>
 

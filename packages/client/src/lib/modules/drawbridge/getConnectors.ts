@@ -77,15 +77,15 @@ export function getConnectors(): CreateConnectorFn[] {
       }
       debugInfo.windowEthereumProviders = providers
 
-      console.log("[wagmiConfig] Wallet detection:", {
-        isCoinbaseWallet: debugInfo.isCoinbaseWallet,
-        isBaseApp: debugInfo.isBaseApp,
-        hasCoinbaseFlag,
-        hasCoinbaseProvider,
-        isOnlyProvider,
-        hasSmartWalletFeatures,
-        providers
-      })
+      // console.log("[wagmiConfig] Wallet detection:", {
+      //   isCoinbaseWallet: debugInfo.isCoinbaseWallet,
+      //   isBaseApp: debugInfo.isBaseApp,
+      //   hasCoinbaseFlag,
+      //   hasCoinbaseProvider,
+      //   isOnlyProvider,
+      //   hasSmartWalletFeatures,
+      //   providers
+      // })
     }
   }
 

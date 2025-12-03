@@ -1,7 +1,10 @@
 import { get } from "svelte/store"
 import { addChain, switchChain } from "viem/actions"
 import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
-import { WagmiConfigUnavailableError, NetworkNotInitializedError } from "@ratfun/common/error-handling"
+import {
+  WagmiConfigUnavailableError,
+  NetworkNotInitializedError
+} from "@ratfun/common/error-handling"
 import { ensureWriteContract, WalletTransactionClient } from "@ratfun/common/basic-network"
 
 import { networkConfig } from "$lib/network"

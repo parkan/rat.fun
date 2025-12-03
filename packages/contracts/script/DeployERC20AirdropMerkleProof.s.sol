@@ -16,7 +16,7 @@ contract DeployERC20AirdropMerkleProof is Script {
 
     // TODO use correct token and root
     address erc20 = 0x13751a213f39ef4DadfcD1eb35aAC8AEc0De5bA6;
-    bytes32 merkleRoot = 0x1e82a8295e02d74a339141214d46fc0ce0cf7c29047a6f6bbcdfb7dc8593364b;
+    bytes32 merkleRoot = 0x6166741825cd30d2dff203e5296fb595935340aa700631d5cb9a78af7bbd07bd;
 
     ERC20AirdropMerkleProof airdrop = new ERC20AirdropMerkleProof(vm.addr(deployerPrivateKey), erc20, merkleRoot);
     console.log("deployed airdrop address: ", address(airdrop));

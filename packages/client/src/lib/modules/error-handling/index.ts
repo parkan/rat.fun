@@ -3,7 +3,14 @@ import { get } from "svelte/store"
 import { environment as environmentStore } from "$lib/modules/network"
 import { PUBLIC_SENTRY_DSN } from "$env/static/public"
 import { version } from "$app/environment"
-import { AppError, ExpectedError, GraphicsError, parseViemError, UserRejectedTransactionError, WebSocketError } from "@ratfun/common/error-handling"
+import {
+  AppError,
+  ExpectedError,
+  GraphicsError,
+  parseViemError,
+  UserRejectedTransactionError,
+  WebSocketError
+} from "@ratfun/common/error-handling"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
 import { BaseError } from "viem"
 
