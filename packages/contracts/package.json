@@ -25,7 +25,8 @@
     "test": "forge clean && pnpm build && tsc --noEmit && mud test",
     "test-verbose": "forge clean && pnpm build && tsc --noEmit && mud test --forgeOptions=' -vvv'",
     "test-single": "forge clean && pnpm build && tsc --noEmit && mud test --forgeOptions='--match-test testCreateTrip'",
-    "drawbridge-deploy": "pnpm drawbridge-deploy"
+    "drawbridge-deploy": "pnpm drawbridge-deploy",
+    "rat-router-fork-test": "forge test --fork-url=https://base-mainnet.g.alchemy.com/v2/o0Q1hppQS1CH1vqg63edZ --fork-block-number=38996950 --match-contract=RatRouterForkTest"
   },
   "dependencies": {
     "@chainlink/contracts": "^1.4.0",
