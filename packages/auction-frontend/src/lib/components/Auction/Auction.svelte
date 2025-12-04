@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte"
   import { type AuctionParams, readAuctionParams } from "doppler"
+  import { PUBLIC_TEST_AUCTION } from "$env/static/public"
+  import testAuctionParams from "../../../../../doppler/_test-auction-params.json"
   import { dopplerHookAbi } from "@whetstone-research/doppler-sdk"
   import type { PublicClient } from "drawbridge"
   import type { Hex } from "viem"
@@ -11,11 +13,18 @@
   import { Swap, ConnectWalletForm, Ended, Error as ErrorComponent } from "$lib/components/Auction"
   import WalletInfo from "$lib/components/WalletInfo/WalletInfo.svelte"
 
+  const isTestAuction = PUBLIC_TEST_AUCTION === "true"
+
   let auctionParams = $state({} as AuctionParams)
 
   let endingTimeInterval: ReturnType<typeof setInterval> | null = null
 
   function readAuctionParamsStrict(chainId: number) {
+    if (isTestAuction) {
+      const params = testAuctionParams[String(chainId) as keyof typeof testAuctionParams]
+      if (!params) throw new Error("Test auction parameters not found for chain")
+      return params as AuctionParams
+    }
     const result = readAuctionParams(chainId)
     if (!result) throw new Error("Auction parameters not found for chain")
     return result
@@ -120,6 +129,10 @@
 
 <WalletInfo />
 
+{#if isTestAuction}
+  <div class="test-auction-banner">TEST AUCTION</div>
+{/if}
+
 <div class="auction-container">
   <div class="auction-inner">
     {#if auctionState.state.current === AUCTION_STATE.CONNECT_WALLET}
@@ -135,6 +148,21 @@
 </div>
 
 <style lang="scss">
+  .test-auction-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff4444;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 2px;
+    z-index: 9999;
+  }
+
   .auction-container {
     width: 100dvw;
     height: 100dvh;

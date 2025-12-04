@@ -1,6 +1,6 @@
 import { errorHandler } from "$lib/modules/error-handling"
 import { InvalidStateTransitionError } from "@ratfun/common/error-handling"
-import { usdcCurrency, type CurrencyData } from "$lib/modules/swap-router"
+import { wethCurrency, type CurrencyData } from "$lib/modules/swap-router"
 import type { AuctionParams, CustomQuoter, Permit2PermitData, SwapReceipt } from "doppler"
 import type { Hex } from "viem"
 
@@ -34,7 +34,7 @@ let permit = $state<Permit2PermitData | undefined>(undefined)
 let permitSignature = $state<Hex | undefined>(undefined)
 let spentAmount = $state<bigint | undefined>(undefined)
 let savedCountryCode = $state<string | undefined>(undefined)
-let fromCurrency = $state<CurrencyData>(usdcCurrency)
+let fromCurrency = $state<CurrencyData>(wethCurrency)
 let numeraireBalance = $state<number | undefined>(undefined)
 let tokenBalance = $state<number | undefined>(undefined)
 let swapReceipt = $state<SwapReceipt | null>(null)
@@ -75,7 +75,7 @@ const resetData = () => {
   permitSignature = undefined
   spentAmount = undefined
   savedCountryCode = undefined
-  fromCurrency = usdcCurrency
+  fromCurrency = wethCurrency
   numeraireBalance = undefined
   tokenBalance = undefined
   swapReceipt = null

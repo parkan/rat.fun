@@ -1,9 +1,35 @@
 <script lang="ts">
-  import { formatUnits, parseUnits } from "viem"
+  import { formatUnits, parseUnits, type Hex } from "viem"
   import { swapState } from "../state.svelte"
   import SpendLimitProgressBar from "./SpendLimitProgressBar.svelte"
   import { quoteExactIn, quoteExactOut, availableCurrencies } from "$lib/modules/swap-router"
   import { tokenBalances } from "$lib/modules/balances"
+
+  /**
+   * Parse decimal input string, accepting both . and , as decimal separator
+   */
+  function parseDecimalInput(value: string): number | undefined {
+    if (!value || value.trim() === "") return undefined
+    // Normalize: replace comma with period
+    const normalized = value.replace(",", ".")
+    const parsed = parseFloat(normalized)
+    return isNaN(parsed) ? undefined : parsed
+  }
+
+  /**
+   * Get balance for a currency address
+   */
+  function getCurrencyBalance(address: Hex): number | undefined {
+    return $tokenBalances[address]?.formatted
+  }
+
+  /**
+   * Check if a currency has zero balance
+   */
+  function hasZeroBalance(address: Hex): boolean {
+    const balance = getCurrencyBalance(address)
+    return balance === undefined || balance === 0
+  }
 
   /**
    * Get the balance of the currently selected currency
@@ -11,7 +37,7 @@
   function getSelectedCurrencyBalance(): number | undefined {
     const fromCurrency = swapState.data.fromCurrency
     if (!fromCurrency) return undefined
-    return $tokenBalances[fromCurrency.address]?.formatted
+    return getCurrencyBalance(fromCurrency.address)
   }
 
   /**
@@ -173,6 +199,33 @@
       setAmountOut(ratAmount)
     }
   }
+
+  /**
+   * Handle amount in input change (accepts both . and , as decimal separator)
+   */
+  function handleAmountInInput(event: Event) {
+    const input = event.target as HTMLInputElement
+    const value = parseDecimalInput(input.value)
+    setAmountIn(value)
+  }
+
+  /**
+   * Handle amount out input change (accepts both . and , as decimal separator)
+   */
+  function handleAmountOutInput(event: Event) {
+    const input = event.target as HTMLInputElement
+    const value = parseDecimalInput(input.value)
+    setAmountOut(value)
+  }
+
+  /**
+   * Handle in-game rats input change
+   */
+  function handleRatsInput(event: Event) {
+    const input = event.target as HTMLInputElement
+    const value = parseDecimalInput(input.value)
+    setInGameRats(value !== undefined ? Math.floor(value) : undefined)
+  }
 </script>
 
 <div class="swap-form">
@@ -190,7 +243,13 @@
           onchange={handleCurrencyChange}
         >
           {#each availableCurrencies as currency}
-            <option value={currency.address}>{currency.symbol}</option>
+            <option
+              value={currency.address}
+              disabled={hasZeroBalance(currency.address)}
+              class:disabled={hasZeroBalance(currency.address)}
+            >
+              {currency.symbol}{hasZeroBalance(currency.address) ? " (no balance)" : ""}
+            </option>
           {/each}
         </select>
       </div>
@@ -198,46 +257,50 @@
         <label for="numeraire-input">{swapState.data.fromCurrency.symbol ?? "Amount"}:</label>
         <input
           id="numeraire-input"
-          type="number"
-          step="any"
+          type="text"
+          inputmode="decimal"
           placeholder="0.0"
           class:error={isAmountExceedsBalance()}
-          bind:value={getAmountIn, setAmountIn}
+          value={getAmountIn() ?? ""}
+          oninput={handleAmountInInput}
         />
         <div class="balance-row">
-          <span class="balance-text">
-            Balance: {getSelectedCurrencyBalance()?.toLocaleString(undefined, {
-              maximumFractionDigits: 6
-            }) ?? "..."}
-            {swapState.data.fromCurrency.symbol}
+          <span class="balance-row-left">
+            <span class="balance-text" class:error={isAmountExceedsBalance()}>
+              Balance: {getSelectedCurrencyBalance()?.toLocaleString(undefined, {
+                maximumFractionDigits: 6
+              }) ?? "..."}
+              {swapState.data.fromCurrency.symbol}
+            </span>
+            {#if isAmountExceedsBalance()}
+              <span class="error-text">· Insufficient</span>
+            {/if}
           </span>
           {#if getSelectedCurrencyBalance() !== undefined && getSelectedCurrencyBalance()! > 0}
             <button class="max-button" type="button" onclick={setMaxAmount}>MAX</button>
           {/if}
         </div>
-        {#if isAmountExceedsBalance()}
-          <span class="error-text">Insufficient balance</span>
-        {/if}
       </div>
       <div class="input-group">
         <label for="token-input">$RAT</label>
         <input
           id="token-input"
-          type="number"
-          step="any"
+          type="text"
+          inputmode="decimal"
           placeholder="0.0"
-          bind:value={getAmountOut, setAmountOut}
+          value={getAmountOut() ?? ""}
+          oninput={handleAmountOutInput}
         />
       </div>
       <div class="input-group">
         <label for="rats-input">In-game Rats (100 $RAT each)</label>
         <input
           id="rats-input"
-          type="number"
-          step="1"
-          min="0"
+          type="text"
+          inputmode="numeric"
           placeholder="0"
-          bind:value={getInGameRats, setInGameRats}
+          value={getInGameRats() ?? ""}
+          oninput={handleRatsInput}
         />
       </div>
     </div>
@@ -298,6 +361,12 @@
       option {
         background: #1a1a1a;
         color: white;
+
+        &:disabled,
+        &.disabled {
+          color: rgba(255, 255, 255, 0.3);
+          cursor: not-allowed;
+        }
       }
     }
 
@@ -334,6 +403,16 @@
     .balance-text {
       font-size: 12px;
       color: rgba(255, 255, 255, 0.6);
+
+      &.error {
+        color: #ff4444;
+      }
+    }
+
+    .balance-row-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .max-button {

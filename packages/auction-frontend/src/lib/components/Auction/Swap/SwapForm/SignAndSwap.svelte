@@ -178,11 +178,7 @@
       isProcessing ||
       !waiveWithdrawal ||
       isAmountExceedsBalance()}
-    text={isProcessing
-      ? processingStep || "Processing..."
-      : isAmountExceedsBalance()
-        ? "Insufficient balance"
-        : "Swap"}
+    text={isProcessing ? processingStep || "Processing..." : "Swap"}
     onclick={() => {
       signAndSwap()
     }}

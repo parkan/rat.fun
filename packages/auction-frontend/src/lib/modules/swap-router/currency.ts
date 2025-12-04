@@ -38,7 +38,7 @@ export const ratCurrency: CurrencyData = {
 }
 
 // Available currencies for swap (user can select from these)
-export const availableCurrencies: CurrencyData[] = [usdcCurrency, wethCurrency]
+export const availableCurrencies: CurrencyData[] = [wethCurrency, usdcCurrency]
 
 // All tracked currencies (for balance display in WalletInfo)
 export const trackedCurrencies: CurrencyData[] = [usdcCurrency, wethCurrency, ratCurrency]

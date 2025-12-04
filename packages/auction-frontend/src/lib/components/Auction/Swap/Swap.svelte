@@ -12,6 +12,8 @@
   import { onMount } from "svelte"
   import { asPublicClient } from "$lib/utils/clientAdapter"
   import { swapState, SWAP_STATE } from "./state.svelte"
+  import { tokenBalances } from "$lib/modules/balances"
+  import { wethCurrency, usdcCurrency } from "$lib/modules/swap-router"
 
   import { SwapForm, Agreement, SignAndSwap, SwapComplete } from "./index"
   import DebugPanel from "./DebugPanel.svelte"
@@ -21,6 +23,40 @@
   }: {
     auctionParams: AuctionParams
   } = $props()
+
+  /**
+   * Select the best default currency based on balances
+   * Priority: ETH if has balance, else USDC if has balance, else ETH
+   */
+  function selectDefaultCurrency() {
+    const ethBalance = $tokenBalances[wethCurrency.address]?.formatted ?? 0
+    const usdcBalance = $tokenBalances[usdcCurrency.address]?.formatted ?? 0
+
+    if (ethBalance > 0) {
+      swapState.data.setFromCurrency(wethCurrency)
+    } else if (usdcBalance > 0) {
+      swapState.data.setFromCurrency(usdcCurrency)
+    } else {
+      // No balance in either, default to ETH
+      swapState.data.setFromCurrency(wethCurrency)
+    }
+  }
+
+  // Watch for balance changes and set default currency once balances are loaded
+  let hasSetDefaultCurrency = false
+  $effect(() => {
+    // Only set default once, when balances first become available
+    if (hasSetDefaultCurrency) return
+
+    const ethBalance = $tokenBalances[wethCurrency.address]
+    const usdcBalance = $tokenBalances[usdcCurrency.address]
+
+    // Wait until at least one balance is loaded
+    if (ethBalance !== undefined || usdcBalance !== undefined) {
+      selectDefaultCurrency()
+      hasSetDefaultCurrency = true
+    }
+  })
 
   /**
    * Determine which state to transition to based on loaded data
