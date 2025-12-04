@@ -57,12 +57,18 @@
 
 <div class="ready">
   <div class="info">
-    <p>You have {exchangeFlowState.data.exchangeAmount} $FAKERAT tokens</p>
-    <p>them for {exchangeFlowState.data.exchangeAmount} $RAT tokens</p>
+    <div>Swap</div>
+    <div>
+      <span class="amount">{exchangeFlowState.data.exchangeAmount} $FAKERAT</span>
+    </div>
+    <div>for</div>
+    <div>
+      <span class="amount">{exchangeFlowState.data.exchangeAmount} $RAT</span>
+    </div>
   </div>
   <div class="button-container">
     <BigButton
-      text="Swap all $FAKERAT for $RAT"
+      text="Swap all $FAKERAT"
       disabled={isProcessing || exchangeFlowState.data.exchangeAmount === 0}
       onclick={handleExchange}
     />
@@ -80,14 +86,28 @@
 
     .info {
       width: 100%;
-      font-size: var(--font-size-normal);
-      font-family: var(--typewriter-font-stack);
+      font-size: var(--font-size-large);
+      font-family: var(--special-font-stack);
       color: black;
       background: var(--white);
       padding: 20px;
+      line-height: 1.5em;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 1ch;
 
-      p {
-        margin: 5px 0;
+      @media (max-width: 768px) {
+        font-size: var(--font-size-extra-large);
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .amount {
+        color: white;
+        background: var(--black);
+        padding: 2px 5px;
       }
     }
 

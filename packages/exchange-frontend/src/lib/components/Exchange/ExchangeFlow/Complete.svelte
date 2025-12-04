@@ -1,6 +1,7 @@
 <script lang="ts">
   import { exchangeFlowState } from "./state.svelte"
-  import { BigButton } from "$lib/components/Shared"
+  import { BigButton, SmallButton } from "$lib/components/Shared"
+  import { addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
 
   const basescanUrl = exchangeFlowState.data.exchangeTxHash
     ? `https://basescan.org/tx/${exchangeFlowState.data.exchangeTxHash}`
@@ -8,6 +9,14 @@
 
   function goToRatFun() {
     window.location.href = "https://rat.fun"
+  }
+
+  async function handleAddToken() {
+    try {
+      await addRatTokenToWallet()
+    } catch (e) {
+      console.error("Failed to add token to wallet:", e)
+    }
   }
 </script>
 
@@ -20,6 +29,9 @@
         View transaction on Basescan
       </a>
     {/if}
+  </div>
+  <div class="add-token-button-container">
+    <SmallButton text="Add token information to wallet" onclick={handleAddToken} />
   </div>
   <div class="button-container">
     <BigButton text="Go to rat.fun" onclick={goToRatFun} />
@@ -60,8 +72,19 @@
       }
     }
 
+    .add-token-button-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 40px;
+    }
+
     .button-container {
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       height: 160px;
     }
   }

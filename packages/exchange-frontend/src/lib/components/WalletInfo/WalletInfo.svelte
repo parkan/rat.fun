@@ -6,7 +6,7 @@
   } from "$lib/modules/erc20Listener/stores"
   import { userAddress } from "$lib/modules/drawbridge"
   import { shortenAddress } from "$lib/modules/utils"
-  import { disconnectWallet } from "$lib/modules/drawbridge/connector"
+  import { disconnectWallet, addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
   import { SmallButton } from "$lib/components/Shared"
 
   let showDropdown = $state(false)
@@ -32,6 +32,14 @@
     showDropdown = false
     // Reload the page to reset state
     window.location.reload()
+  }
+
+  async function handleAddToken() {
+    try {
+      await addRatTokenToWallet()
+    } catch (e) {
+      console.error("Failed to add token to wallet:", e)
+    }
   }
 
   // Add/remove click listener when dropdown state changes
@@ -75,6 +83,7 @@
             <span class="label">$RAT:</span>
             <span class="value">{$ratTokenBalance}</span>
           </div>
+          <button class="add-token-btn" onclick={handleAddToken}> + Add $RAT to wallet </button>
           <div class="divider"></div>
           <div class="info-row">
             <span class="label">Available in contract:</span>
@@ -152,6 +161,22 @@
         .divider {
           border-top: 1px solid var(--color-border);
           margin: 4px 0;
+        }
+
+        .add-token-btn {
+          background: none;
+          border: 1px solid var(--color-border);
+          color: var(--white);
+          font-family: var(--typewriter-font-stack);
+          font-size: var(--font-size-small);
+          padding: 6px 10px;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+
+          &:hover {
+            opacity: 1;
+          }
         }
 
         .button-container {
