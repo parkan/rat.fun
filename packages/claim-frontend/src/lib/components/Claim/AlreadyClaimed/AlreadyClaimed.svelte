@@ -1,26 +1,23 @@
 <script lang="ts">
   import { BigButton } from "$lib/components/Shared"
-  import { disconnectWallet } from "$lib/modules/drawbridge/connector"
-  import { claimState, CLAIM_STATE } from "../state.svelte"
 
-  async function handleTryAnotherWallet() {
-    await disconnectWallet()
-    claimState.state.transitionTo(CLAIM_STATE.CONNECT_WALLET)
+  function goToRatFun() {
+    window.location.href = "https://rat.fun"
   }
 </script>
 
-<div class="not-eligible">
+<div class="already-claimed">
   <div class="content">
-    <h2>Not Eligible</h2>
-    <p>Based on our performance review you are not eligible for the grant.</p>
+    <h2>Already Claimed</h2>
+    <p>This wallet has already claimed its $RAT allocation.</p>
   </div>
   <div class="button-container">
-    <BigButton text="Try another wallet" onclick={handleTryAnotherWallet} />
+    <BigButton text="Go to rat.fun" onclick={goToRatFun} />
   </div>
 </div>
 
 <style lang="scss">
-  .not-eligible {
+  .already-claimed {
     text-align: center;
     color: var(--white);
     display: flex;

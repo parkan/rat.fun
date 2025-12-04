@@ -1,30 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import type { Hex } from "viem"
-  import type { PublicClient } from "drawbridge"
   import { getProofFromJson } from "merkle-tree-airdrop"
-  import merkleTree from "merkle-tree-airdrop/static/test_tree.json" with { type: "json" }
-  import { ERC20AirdropMerkleProofAbi } from "contracts/externalAbis"
-  import { publicClient as publicClientStore, networkConfig } from "$lib/network"
+  import merkleTree from "merkle-tree-airdrop/static/tree.json" with { type: "json" }
   import { userAddress } from "$lib/modules/drawbridge"
   import { claimFlowState, CLAIM_FLOW_STATE } from "./state.svelte"
   import { Checking, Ready, Claiming, Complete, Error as ErrorComponent } from "./index"
-
-  /**
-   * Check if user has already claimed
-   */
-  async function checkHasClaimed(
-    publicClient: PublicClient,
-    playerAddress: Hex,
-    airdropAddress: Hex
-  ): Promise<boolean> {
-    return (await publicClient.readContract({
-      address: airdropAddress,
-      abi: ERC20AirdropMerkleProofAbi,
-      functionName: "hasClaimed",
-      args: [playerAddress]
-    })) as boolean
-  }
 
   onMount(async () => {
     // Reset state
@@ -34,18 +14,16 @@
     // Transition to checking
     claimFlowState.state.transitionTo(CLAIM_FLOW_STATE.CHECKING)
 
-    const client = $publicClientStore
-    const config = $networkConfig
     const address = $userAddress
 
-    if (!client || !config || !address) {
-      claimFlowState.data.setErrorMessage("Network or wallet not initialized")
+    if (!address) {
+      claimFlowState.data.setErrorMessage("Wallet not initialized")
       claimFlowState.state.transitionTo(CLAIM_FLOW_STATE.ERROR)
       return
     }
 
     try {
-      // 1. Get proof from merkle tree
+      // Get proof from merkle tree
       const proof = await getProofFromJson(address, merkleTree)
 
       if (!proof) {
@@ -57,16 +35,8 @@
 
       claimFlowState.data.setProof(proof)
 
-      // 2. Check if already claimed
-      const hasClaimed = await checkHasClaimed(client, address, config.airdropContractAddress)
-
-      if (hasClaimed) {
-        // Already claimed - go straight to complete
-        claimFlowState.state.transitionTo(CLAIM_FLOW_STATE.COMPLETE)
-      } else {
-        // Ready to claim
-        claimFlowState.state.transitionTo(CLAIM_FLOW_STATE.READY)
-      }
+      // Ready to claim (hasClaimed check is done before entering ClaimFlow)
+      claimFlowState.state.transitionTo(CLAIM_FLOW_STATE.READY)
     } catch (error) {
       console.error("[ClaimFlow] Error during initialization:", error)
       claimFlowState.data.setErrorMessage(error instanceof Error ? error.message : "Unknown error")

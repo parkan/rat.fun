@@ -38,10 +38,6 @@
   --color-death: rgb(94, 94, 94);
   --color-death-light: rgb(209, 209, 209);
 
-  --game-window-width: calc(min(100vw, 1920px) - 30px);
-  --game-window-height: calc(100vh - 30px);
-  --game-window-main-height: calc(var(--game-window-height) - 60px);
-
   --color-up: #78ee72;
   --color-down: red;
 

@@ -48,15 +48,17 @@
 
 <div class="ready">
   <p class="amount">
-    You can claim: <strong>{formatUnits(claimFlowState.data.claimAmount, 18)} $RAT</strong>
+    You can claim: {formatUnits(claimFlowState.data.claimAmount, 18)} $RAT
   </p>
 
-  <BigButton
-    text="Claim"
-    onclick={() => {
-      sendClaim()
-    }}
-  />
+  <div class="button-container">
+    <BigButton
+      text="Claim"
+      onclick={() => {
+        sendClaim()
+      }}
+    />
+  </div>
 </div>
 
 <style lang="scss">
@@ -66,9 +68,15 @@
     flex-flow: column nowrap;
     align-items: center;
     gap: 1rem;
+    width: 800px;
 
     .amount {
       font-size: 1.2rem;
+    }
+
+    .button-container {
+      width: 100%;
+      height: 160px;
     }
   }
 </style>

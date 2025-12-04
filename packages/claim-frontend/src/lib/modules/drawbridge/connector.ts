@@ -1,6 +1,6 @@
 import { get } from "svelte/store"
 import type { Hex } from "viem"
-import { addChain, switchChain, writeContract } from "viem/actions"
+import { addChain, switchChain, writeContract, watchAsset } from "viem/actions"
 import { getAccount, getChainId, getConnectorClient } from "@wagmi/core"
 import type { Config } from "@wagmi/core"
 
@@ -72,4 +72,37 @@ export async function disconnectWallet() {
   } catch {
     // Not connected, nothing to do
   }
+}
+
+/**
+ * Returns the wallet connector client from wagmi.
+ * Expects the wallet connection to be established, throws an error otherwise.
+ */
+export async function getEstablishedConnectorClient() {
+  const wagmiConfig = getDrawbridge().getWagmiConfig() as Config
+  if (!wagmiConfig) {
+    throw new WagmiConfigUnavailableError()
+  }
+  return await getConnectorClient(wagmiConfig)
+}
+
+/**
+ * Prompts the user's wallet to add the RAT token to their token list (EIP-747)
+ */
+export async function addRatTokenToWallet(): Promise<boolean> {
+  const config = get(networkConfig)
+  if (!config) {
+    throw new NetworkNotInitializedError()
+  }
+
+  const connectorClient = await getEstablishedConnectorClient()
+
+  return watchAsset(connectorClient, {
+    type: "ERC20",
+    options: {
+      address: config.ratTokenAddress,
+      symbol: "RAT",
+      decimals: 18
+    }
+  })
 }

@@ -3,7 +3,11 @@ import { erc20Abi, Hex } from "viem"
 import type { PublicClient } from "drawbridge"
 import { publicClient as publicClientStore, networkConfig } from "$lib/network"
 import { userAddress } from "$lib/modules/drawbridge"
-import { playerERC20Balance, erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
+import {
+  playerERC20Balance,
+  erc20BalanceListenerActive,
+  airdropRatBalance
+} from "$lib/modules/erc20Listener/stores"
 
 let balanceInterval: NodeJS.Timeout | null = null
 const BALANCE_INTERVAL = 10_000 // 10 seconds
@@ -38,6 +42,24 @@ async function updateBalance(publicClient: PublicClient, playerAddr: Hex, erc20A
 }
 
 /**
+ * Update RAT balance held by the airdrop contract
+ */
+async function updateAirdropRatBalance(
+  publicClient: PublicClient,
+  airdropAddress: Hex,
+  ratTokenAddress: Hex
+) {
+  try {
+    const balance = await readPlayerERC20Balance(publicClient, airdropAddress, ratTokenAddress)
+    if (balance !== get(airdropRatBalance)) {
+      airdropRatBalance.set(balance)
+    }
+  } catch (error) {
+    console.error("Failed to update airdrop RAT balance:", error)
+  }
+}
+
+/**
  * Initialize the ERC20 listener
  */
 export function initErc20Listener() {
@@ -56,6 +78,7 @@ export function initErc20Listener() {
 
   // Initial fetch and set up balance interval
   updateBalance(currentPublicClient, currentPlayerAddress, erc20Address)
+  updateAirdropRatBalance(currentPublicClient, config.airdropContractAddress, erc20Address)
 
   // Balance is updated explicitly after user actions, we just have this to listen for external changes
   balanceInterval = setInterval(() => {
@@ -71,6 +94,7 @@ export function initErc20Listener() {
 
     if (pubClient && playerAddr && cfg) {
       updateBalance(pubClient, playerAddr, cfg.ratTokenAddress)
+      updateAirdropRatBalance(pubClient, cfg.airdropContractAddress, cfg.ratTokenAddress)
     }
   }, BALANCE_INTERVAL)
 }
