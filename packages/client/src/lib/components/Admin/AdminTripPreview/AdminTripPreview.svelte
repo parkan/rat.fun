@@ -43,6 +43,10 @@
   // Phone sub-view toggle
   let phoneTripView = $state<"graph" | "log">("graph")
 
+  // Track keyboard navigation to prevent pointer interference
+  let keyboardNavigating = $state(false)
+  let keyboardNavTimeout: ReturnType<typeof setTimeout> | null = null
+
   // Show liquidate button if:
   //  * - Trip is not depleted
   let showLiquidateButton = $derived(trip.balance > 0)
@@ -71,11 +75,18 @@
 
   // Keyboard navigation for this trip's events
   const handleKeypress = (e: KeyboardEvent) => {
+    e.preventDefault()
+
     if (!allVisitsData.length) return
 
     const currentVisitIndex = allVisitsData.findIndex(visit => visit.index === localFocusEvent)
 
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      keyboardNavigating = true
+      if (keyboardNavTimeout) clearTimeout(keyboardNavTimeout)
+      keyboardNavTimeout = setTimeout(() => {
+        keyboardNavigating = false
+      }, 400)
       // Move down in visual list (which is previous in reversed array)
       const prevIndex = currentVisitIndex === -1 ? allVisitsData.length - 1 : currentVisitIndex - 1
       if (prevIndex >= 0) {
@@ -84,6 +95,11 @@
       }
       commit()
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      keyboardNavigating = true
+      if (keyboardNavTimeout) clearTimeout(keyboardNavTimeout)
+      keyboardNavTimeout = setTimeout(() => {
+        keyboardNavigating = false
+      }, 400)
       // Move up in visual list (which is next in reversed array)
       const nextIndex = currentVisitIndex === -1 ? 0 : currentVisitIndex + 1
       if (nextIndex < allVisitsData.length) {
@@ -181,6 +197,7 @@
           <AdminEventLog
             graphData={logData}
             hideUnlockEvent
+            {keyboardNavigating}
             focusEventOverride={localFocusEvent}
             selectedEventOverride={localSelectedEvent}
             onFocusChange={(index, tripId) => {
@@ -232,6 +249,7 @@
         <AdminEventLog
           graphData={logData}
           hideUnlockEvent
+          {keyboardNavigating}
           focusEventOverride={localFocusEvent}
           selectedEventOverride={localSelectedEvent}
           onFocusChange={(index, tripId) => {
