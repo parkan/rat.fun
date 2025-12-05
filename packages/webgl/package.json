@@ -1,0 +1,39 @@
+{
+  "name": "@ratfun/webgl",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "tsc --noEmit",
+    "format": "prettier --write .",
+    "lint": "prettier --check . && eslint ."
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./shaders": {
+      "types": "./dist/shaders/index.d.ts",
+      "import": "./dist/shaders/index.js"
+    },
+    "./shaders/*": {
+      "types": "./dist/shaders/*/index.d.ts",
+      "import": "./dist/shaders/*/index.js"
+    }
+  },
+  "devDependencies": {
+    "@eslint/compat": "^1.4.1",
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "tsup": "^8.5.0",
+    "typescript-eslint": "^8.46.4"
+  },
+  "dependencies": {
+    "@ratfun/common": "workspace:*"
+  }
+}

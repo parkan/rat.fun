@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
-  import { shaders } from "$lib/modules/webgl/shaders/index.svelte"
-  import { createShaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import { shaders, createShaderManager } from "$lib/modules/webgl/shaders/index.svelte"
+  import { errorHandler } from "$lib/modules/error-handling"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
+  import { get } from "svelte/store"
 
   let { shaderKey }: { shaderKey: keyof typeof shaders } = $props()
 
-  const localShaderManager = createShaderManager()
+  const localShaderManager = createShaderManager({
+    errorHandler,
+    isPhone: () => get(isPhone)
+  })
 
   let canvasElement = $state<HTMLCanvasElement>()
   let initFailed = $state(false)
