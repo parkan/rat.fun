@@ -5,7 +5,6 @@ export { default as AdminTripEventIntrospection } from "./AdminTripEventIntrospe
 export { default as TripProfitLossGraph } from "./AdminTripPreview/TripProfitLossGraph/TripProfitLossGraph.svelte"
 export { default as TripConfirmLiquidation } from "./AdminTripPreview/TripConfirmLiquidation/TripConfirmLiquidation.svelte"
 export { default as LiquidateTrip } from "./AdminTripPreview/LiquidateTrip.svelte"
-export { default as TripEventLog } from "./AdminTripPreview/TripEventLog/TripEventLog.svelte"
 export { default as TripGraph } from "./AdminTripPreview/TripGraph/TripGraph.svelte"
 
 // Admin create trip
