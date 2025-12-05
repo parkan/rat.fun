@@ -1,0 +1,58 @@
+{
+  "8453": {
+    "poolId": "0x4c6eabf882666cfaee2fc1ee6e6e11bf87c9d9a247929cf54c09502ddcf3d0ae",
+    "transactionHash": "0xabf983958c98c28e559ca272c794ff9c49f64fa018b9cc3491f2cabd33a4690a",
+    "hookAddress": "0x56c5A894912bDf416648c3B179f939925C1Db8e0",
+    "token": {
+      "address": "0xf5E9c5668BaA5d18d00927b88CabcE85C5C81908",
+      "decimals": 18,
+      "name": "RAT",
+      "symbol": "RAT"
+    },
+    "numeraire": {
+      "address": "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
+      "decimals": 6,
+      "name": "EURC",
+      "symbol": "EURC"
+    },
+    "startingTime": 1764964680,
+    "endingTime": 1765500360,
+    "isToken0": false,
+    "startingTick": 318990,
+    "endingTick": 329310,
+    "pool": {
+      "fee": 3000,
+      "tickSpacing": 30
+    },
+    "userAddress": "0xEA61B46aE53dB45247afA83892EFdB9475e7042C",
+    "spendLimitAmount": "950000000"
+  },
+  "84532": {
+    "poolId": "0xef259df3735f8edc3ec51550a8c8ab4733d97062e435cdada4b333a79b6be830",
+    "transactionHash": "0x6db2f7a7e8608663263fcf909b12e288375a6da3b642e1bece1a3182b80f37b4",
+    "hookAddress": "0x729A9EF345aC7040DA02Ff91F05d0B6E293D78E0",
+    "token": {
+      "address": "0xBBc7bCAc7A899127dFDF2D1bFdb6ed8Fc11CE23E",
+      "decimals": 18,
+      "name": "TEST",
+      "symbol": "TEST"
+    },
+    "numeraire": {
+      "address": "0x59eCE90fdD75d93f6283d0bF136509BFC74726b6",
+      "decimals": 6,
+      "name": "TEST_NUMERAIRE_6_DECIMALS",
+      "symbol": "TEST"
+    },
+    "startingTime": 1764086898,
+    "endingTime": 1765296498,
+    "isToken0": false,
+    "startingTick": 318990,
+    "endingTick": 329310,
+    "pool": {
+      "fee": 3000,
+      "tickSpacing": 30
+    },
+    "userAddress": "0xEA61B46aE53dB45247afA83892EFdB9475e7042C",
+    "spendLimitAmount": "95000000000"
+  }
+}
