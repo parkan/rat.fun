@@ -17,7 +17,8 @@
     selectedEventOverride = undefined,
     onFocusChange = undefined,
     onSelectionChange = undefined,
-    onToggleToGraph = undefined
+    onToggleToGraph = undefined,
+    keyboardNavigating = false
   }: {
     graphData: TripEvent[]
     hideUnlockEvent?: boolean
@@ -26,6 +27,7 @@
     onFocusChange?: (index: number, tripId: string) => void
     onSelectionChange?: (index: number, tripId: string) => void
     onToggleToGraph?: () => void
+    keyboardNavigating?: boolean
   } = $props()
 
   let scrollContainer = $state<HTMLElement>()
@@ -74,6 +76,9 @@
           }
         }}
         onpointerenter={() => {
+          // Skip pointer updates during keyboard navigation to prevent fighting
+          if (keyboardNavigating) return
+
           if (onFocusChange) {
             onFocusChange(point.index, point.tripId)
           } else {
@@ -97,7 +102,11 @@
           point.eventType === TRIP_EVENT_TYPE.CREATION ||
           point.eventType === TRIP_EVENT_TYPE.LIQUIDATION}
       >
-        <AdminEventLogItem {point} />
+        <AdminEventLogItem
+          selected={effectiveSelectedEvent === point.index}
+          focus={effectiveFocusEvent === point.index}
+          {point}
+        />
       </div>
     {/each}
     {#if !hideUnlockEvent}

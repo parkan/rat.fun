@@ -67,6 +67,9 @@
   let previousView = $state<"home" | "trips" | "profit">("home")
   // Track tablet view toggle (800px-1024px) between graph and log
   let tabletProfitView = $state<"graph" | "log">("graph")
+  // Track keyboard navigation to prevent pointer interference
+  let keyboardNavigating = $state(false)
+  let keyboardNavTimeout: ReturnType<typeof setTimeout> | null = null
 
   // Memoized lookups for static content to avoid repeated find/filter operations
   let tripContentMap = $derived(new Map($staticContent?.trips?.map(t => [t._id, t]) || []))
@@ -251,15 +254,27 @@
   }
 
   const handleKeypress = (e: KeyboardEvent) => {
-    // Only handle keyboard events on main cashboard, not on nested trip view
+    e.preventDefault()
+
+    // Only handle keyboard events on main trips lab, not on nested trip view
     if (page.route?.id?.includes("/cashboard/[tripId]")) return
 
     if (!allVisitsData.length) return
 
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      keyboardNavigating = true
+      if (keyboardNavTimeout) clearTimeout(keyboardNavTimeout)
+      keyboardNavTimeout = setTimeout(() => {
+        keyboardNavigating = false
+      }, 400)
       previous()
       commit()
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      keyboardNavigating = true
+      if (keyboardNavTimeout) clearTimeout(keyboardNavTimeout)
+      keyboardNavTimeout = setTimeout(() => {
+        keyboardNavigating = false
+      }, 400)
       next()
       commit()
     } else if (e.key === "Return" || e.key === "Enter") {
@@ -273,6 +288,15 @@
   }
 
   let effectiveEvent = $derived(graphData?.[$selectedEvent])
+
+  const handleEventLogSelection = (index: number, tripId: string) => {
+    $selectedEvent = index
+    // If user is viewing a trip detail page and clicks on the event log,
+    // navigate back to main trips lab
+    if (page.route?.id?.includes("/cashboard/[tripId]")) {
+      goto("/cashboard")
+    }
+  }
 
   $effect(() => {
     const currentView = $phoneActiveAdminView
@@ -314,7 +338,7 @@
   })
 
   onDestroy(() => {
-    // Reset all admin views when leaving cashboard
+    // Reset all admin views when leaving trips lab
     phoneActiveAdminView.set("home")
     adminTripsSubView.set("active")
     phoneAdminProfitSubView.set("graph")
@@ -422,7 +446,11 @@
             <ProfitLossHistoryGraph {graphData} height={clientHeight} />
           </div>
         {:else}
-          <AdminEventLog graphData={logData} />
+          <AdminEventLog
+            graphData={logData}
+            {keyboardNavigating}
+            onSelectionChange={handleEventLogSelection}
+          />
         {/if}
       </div>
     {/if}
@@ -450,7 +478,12 @@
       </div>
       <!-- Event log -->
       <div class="event-log-container" class:tablet-hidden={tabletProfitView === "graph"}>
-        <AdminEventLog graphData={logData} onToggleToGraph={() => (tabletProfitView = "graph")} />
+        <AdminEventLog
+          graphData={logData}
+          {keyboardNavigating}
+          onSelectionChange={handleEventLogSelection}
+          onToggleToGraph={() => (tabletProfitView = "graph")}
+        />
       </div>
     </div>
     <!-- Bottom row -->
@@ -720,6 +753,19 @@
     border-width: 10px;
     border-style: inset;
     border-color: rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: var(--color-alert-priority-light);
+    }
+
+    &:active {
+      background: var(--color-alert-priority-muted);
+      border-style: inset;
+      transform: translateY(2px);
+      border-width: 10px;
+      position: relative;
+      top: -2px;
+    }
   }
 
   .full {

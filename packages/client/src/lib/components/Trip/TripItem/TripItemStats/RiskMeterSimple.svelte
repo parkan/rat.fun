@@ -63,14 +63,14 @@
   <!-- </Tooltip> -->
 </div>
 
-<div class="meta">MAX WIN</div>
+<div class="meta">MAX REWARD</div>
 <div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
   <!-- <Tooltip content="MAX WIN"> -->
   <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
   <!-- </Tooltip> -->
 </div>
 
-<div class="meta">ENTRY RISK</div>
+<div class="meta">MAX RISK</div>
 <div class="meta-data-item max-risk">
   <!-- <Tooltip content="ENTRY RISK"> -->
   <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>

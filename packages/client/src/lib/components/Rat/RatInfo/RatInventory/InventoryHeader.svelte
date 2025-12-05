@@ -15,10 +15,10 @@
 </script>
 
 <div class="inventory-header-wrapper">
-  <Tooltip content={UI_STRINGS.psychoObjectExplanation}>
+  <Tooltip content={UI_STRINGS.itemExplanation}>
     <div class="inventory-header">
       <div class="inventory-header-title">
-        {UI_STRINGS.psychoInventory}
+        {UI_STRINGS.inventoryName}
         <span class="inventory-header-count">{filledSlots}/{totalSlots}</span>
       </div>
       <div class="inventory-header-total-value">{totalValue} {CURRENCY_SYMBOL}</div>
