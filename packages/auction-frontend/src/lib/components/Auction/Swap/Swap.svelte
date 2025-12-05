@@ -18,6 +18,7 @@
     wethCurrency,
     usdcCurrency,
     getEurcToUsdcRate,
+    getEurcToEthRate,
     decodeQuoterError
   } from "$lib/modules/swap-router"
 
@@ -110,11 +111,12 @@
 
     console.log("[Swap] quoter:", quoter)
 
-    // 3. Fetch EURC/USDC rate and current price (no wallet required)
+    // 3. Fetch EURC/USDC and EURC/ETH rates (no wallet required)
     try {
-      const rate = await getEurcToUsdcRate()
-      swapState.data.setEurcToUsdcRate(rate)
-      console.log("[Swap] EURC/USDC rate:", rate)
+      const [usdcRate, ethRate] = await Promise.all([getEurcToUsdcRate(), getEurcToEthRate()])
+      swapState.data.setEurcToUsdcRate(usdcRate)
+      swapState.data.setEurcToEthRate(ethRate)
+      console.log("[Swap] EURC/USDC rate:", usdcRate, "EURC/ETH rate:", ethRate)
 
       // Try to get current price by quoting, fall back to tick-based calculation
       let priceInEurc: number
@@ -136,7 +138,7 @@
         console.log("[Swap] Starting tick price:", priceInEurc, "EURC per RAT")
       }
 
-      const priceInUsdc = priceInEurc * rate
+      const priceInUsdc = priceInEurc * usdcRate
       swapState.data.setCurrentPriceUsdc(priceInUsdc)
       console.log("[Swap] Current price:", priceInUsdc, "USDC per RAT (EURC:", priceInEurc, ")")
     } catch (error) {
