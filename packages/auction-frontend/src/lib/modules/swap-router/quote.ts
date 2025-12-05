@@ -5,7 +5,13 @@ import { get } from "svelte/store"
 import { RatRouterAbi } from "contracts/externalAbis"
 import { publicClient as publicClientStore } from "$lib/network"
 import { userAddress } from "../drawbridge"
-import { prepareSwapRouterPathArgs, ratRouterAddress, eurcCurrency, usdcCurrency } from "./currency"
+import {
+  prepareSwapRouterPathArgs,
+  ratRouterAddress,
+  eurcCurrency,
+  usdcCurrency,
+  wethCurrency
+} from "./currency"
 
 // Common errors from Uniswap V4 quoter and doppler hook
 const quoterErrors = [
@@ -36,7 +42,7 @@ export function decodeQuoterError(error: unknown): string {
   }
 
   // viem stores raw revert data in cause.raw
-  let errorData: Hex | undefined = err.cause?.raw ?? err.data ?? err.cause?.data
+  const errorData: Hex | undefined = err.cause?.raw ?? err.data ?? err.cause?.data
 
   console.log("[decodeQuoterError] Raw error data:", errorData)
 
@@ -145,6 +151,41 @@ export async function getEurcToUsdcRate(): Promise<number> {
 
   const [amountOut] = result
   return Number(formatUnits(amountOut, usdcCurrency.decimals))
+}
+
+/**
+ * Get the EURC to ETH exchange rate from Aerodrome
+ * Returns how many ETH you get for 1 EURC
+ */
+export async function getEurcToEthRate(): Promise<number> {
+  const publicClient = get(publicClientStore)
+  if (!publicClient) throw new Error("Network not initialized")
+
+  // Get the Aerodrome quoter address from RatRouter
+  const aerodromeQuoterAddress = (await readContract(publicClient, {
+    address: ratRouterAddress,
+    abi: RatRouterAbi,
+    functionName: "aerodromeQuoter"
+  })) as Hex
+
+  // Encode path: EURC → WETH (tickSpacing 100 for the EURC/WETH pool)
+  const eurcToEthPath = encodePacked(
+    ["address", "int24", "address"],
+    [eurcCurrency.address, 100, wethCurrency.address]
+  )
+
+  // Quote 1 EURC
+  const oneEurc = parseUnits("1", eurcCurrency.decimals)
+
+  const { result } = await simulateContract(publicClient, {
+    address: aerodromeQuoterAddress,
+    abi: aerodromeQuoterAbi,
+    functionName: "quoteExactInput",
+    args: [eurcToEthPath, oneEurc]
+  })
+
+  const [amountOut] = result
+  return Number(formatUnits(amountOut, wethCurrency.decimals))
 }
 
 export async function quoteExactOut(

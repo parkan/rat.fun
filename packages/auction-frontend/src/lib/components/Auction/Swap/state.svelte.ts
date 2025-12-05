@@ -39,6 +39,7 @@ let numeraireBalance = $state<number | undefined>(undefined)
 let tokenBalance = $state<number | undefined>(undefined)
 let swapReceipt = $state<SwapReceipt | null>(null)
 let eurcToUsdcRate = $state<number | undefined>(undefined)
+let eurcToEthRate = $state<number | undefined>(undefined)
 let currentPriceUsdc = $state<number | undefined>(undefined)
 
 /**
@@ -82,6 +83,7 @@ const resetData = () => {
   tokenBalance = undefined
   swapReceipt = null
   eurcToUsdcRate = undefined
+  eurcToEthRate = undefined
   currentPriceUsdc = undefined
 }
 
@@ -154,6 +156,9 @@ export const swapState = {
     get eurcToUsdcRate() {
       return eurcToUsdcRate
     },
+    get eurcToEthRate() {
+      return eurcToEthRate
+    },
     get currentPriceUsdc() {
       return currentPriceUsdc
     },
@@ -200,6 +205,9 @@ export const swapState = {
     },
     setEurcToUsdcRate: (rate: number | undefined) => {
       eurcToUsdcRate = rate
+    },
+    setEurcToEthRate: (rate: number | undefined) => {
+      eurcToEthRate = rate
     },
     setCurrentPriceUsdc: (price: number | undefined) => {
       currentPriceUsdc = price
