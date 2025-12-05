@@ -27,7 +27,8 @@
 </script>
 
 {#if isPopular(trip, blocksSinceLastVisit)}
-  <div class="meta-data-item max-win" in:fade>
+  <div class="meta-data-item max-win" transition:fade />
+  <div class="meta-data-item-text max-win" in:fade>
     <Tooltip content={`Last visited ${blocksToSeconds(blocksSinceLastVisit)} seconds ago`}>
       <div class="inner">HOT</div>
     </Tooltip>
@@ -45,7 +46,33 @@
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-normal);
-    height: 40px;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    mix-blend-mode: overlay;
+    // transform: translate(-50%, 0);
+
+    .inner {
+      padding: 10px;
+    }
+  }
+  .meta-data-item-text {
+    animation: pulsatingFire 0.5s ease-in-out 0.2s infinite;
+    background: #ffd700;
+    color: var(--background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-normal);
+    height: 30px;
+    width: 100px;
+    position: absolute;
+    border-radius: 4px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
     .inner {
       padding: 10px;

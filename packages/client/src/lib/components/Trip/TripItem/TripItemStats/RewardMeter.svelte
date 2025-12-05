@@ -8,7 +8,7 @@
 
 <div class="meta-data-item max-win">
   <Tooltip content={UI_STRINGS.maxValuePerWin}>
-    <div class="inner">{maxValuePerWin} {CURRENCY_SYMBOL}</div>
+    <div class="inner">{maxValuePerWin}&shy;{CURRENCY_SYMBOL}</div>
   </Tooltip>
 </div>
 
@@ -23,6 +23,7 @@
 
     .inner {
       padding: 10px;
+      text-align: center;
     }
   }
 </style>

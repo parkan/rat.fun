@@ -1,10 +1,7 @@
 <script lang="ts">
   import { getTripMaxValuePerWin } from "$lib/modules/state/utils"
 
-  import RewardMeter from "./RewardMeter.svelte"
-  import PopularAlert from "./PopularAlert.svelte"
-  import LowBalanceAlert from "./LowBalanceAlert.svelte"
-  import SurvivalMeter from "./SurvivalMeter.svelte"
+  import RiskMeterSimple from "./RiskMeterSimple.svelte"
 
   let { trip }: { trip: Trip } = $props()
 
@@ -12,12 +9,8 @@
 </script>
 
 <div class="meta-data">
-  <!-- METERS -->
-  <SurvivalMeter {trip} />
-  <RewardMeter maxValuePerWin={$maxValuePerWin} />
-  <!-- ALERTS -->
-  <PopularAlert {trip} />
-  <LowBalanceAlert {trip} maxValuePerWin={$maxValuePerWin} />
+  <RiskMeterSimple {trip} maxValuePerWin={$maxValuePerWin} />
+  <!-- Rest of alerts moved to trip avatar overlay -->
 </div>
 
 <style lang="scss">

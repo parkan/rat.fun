@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px;
+    height: 30px;
 
     .inner {
       padding: 10px;

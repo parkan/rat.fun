@@ -1,13 +1,15 @@
 <script lang="ts">
   import type { Hex } from "viem"
   import type { Trip as SanityTrip } from "@sanity-types"
+  import { getTripOwnerName } from "$lib/modules/state/utils"
   import { urlFor } from "$lib/modules/content/sanity"
   import { renderSafeString } from "$lib/modules/utils"
   import { staticContent } from "$lib/modules/content"
   import { playSound } from "$lib/modules/sound"
   import { NoImage } from "$lib/components/Shared"
+  import PopularAlert from "$lib/components/Trip/TripItem/TripItemStats/PopularAlert.svelte"
+  import LowBalanceAlert from "$lib/components/Trip/TripItem/TripItemStats/LowBalanceAlert.svelte"
   import TripItemStats from "./TripItemStats/TripItemStats.svelte"
-  import { getTripOwnerName } from "$lib/modules/state/utils"
 
   let {
     tripId,
@@ -82,6 +84,7 @@
       {:else}
         <NoImage />
       {/if}
+      <PopularAlert {trip} />
     </div>
   </div>
   <!-- COLUMN RIGHT -->
@@ -121,6 +124,10 @@
     position: relative;
     // overflow: hidden;
     background: var(--background-semi-transparent);
+
+    .trip-image {
+      position: relative;
+    }
 
     @media (max-width: 800px) {
       flex-direction: column;
@@ -290,7 +297,7 @@
         .meta-data {
           border-left: var(--default-border-style);
           padding-left: 10px;
-          width: 100px;
+          width: 120px;
           height: 200px;
 
           @media (max-width: 800px) {

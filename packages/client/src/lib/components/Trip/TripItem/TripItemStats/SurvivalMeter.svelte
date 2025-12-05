@@ -43,7 +43,7 @@
 </script>
 
 <div class="meta-data-item survival-meter {survivalData.category}">
-  <Tooltip content={`Survival rate: ${displayText}`}>
+  <Tooltip content={`SURVIVAL`}>
     <div class="inner">{displayText}</div>
   </Tooltip>
 </div>
