@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from "svelte"
   import { type AuctionParams, readAuctionParams } from "doppler"
   import { PUBLIC_TEST_AUCTION } from "$env/static/public"
-  import testAuctionParams from "../../../../../doppler/_test-auction-params.json"
+  import testAuctionParams from "../../../../../doppler/_test2-auction-params.json"
   import { dopplerHookAbi } from "@whetstone-research/doppler-sdk"
   import type { PublicClient } from "drawbridge"
   import type { Hex } from "viem"
