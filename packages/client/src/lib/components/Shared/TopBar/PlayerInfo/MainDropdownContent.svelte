@@ -42,6 +42,10 @@
   }
 
   const pastRatsCount = $derived(($player?.pastRats ?? []).length)
+
+  const goToSale = () => {
+    window.open("https://sale.rat.fun", "_blank")
+  }
 </script>
 
 <div class="main-dropdown-content">
@@ -89,7 +93,7 @@
   <!-- Buy $RAT Button (placeholder, only if sale is live) -->
   {#if $saleStatus === SALE_STATUS.LIVE}
     <div class="row button-row">
-      <SmallButton tippyText="Buy $RAT" onclick={() => {}} text="Buy $RAT" />
+      <SmallButton tippyText="Buy $RAT" onclick={goToSale} text="Buy $RAT" />
     </div>
   {/if}
 

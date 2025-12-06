@@ -1,7 +1,8 @@
 <script lang="ts">
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
-  import { sendGiveCallerTokens } from "$lib/modules/action-manager/index.svelte"
   import { environment } from "$lib/modules/network"
+  import { saleStatus } from "$lib/modules/network"
+  import { SALE_STATUS } from "@ratfun/common/basic-network"
   import {
     playerHasTokens,
     playerHasLiveRat,
@@ -33,22 +34,25 @@
     }
   })
 
-  const onClick = () => {
-    busy = true
-    sendGiveCallerTokens()
-    // Wait for result in $effect block above
+  const goToSale = () => {
+    window.open("https://sale.rat.fun", "_blank")
   }
 </script>
 
 <div class="no-tokens">
   {#if busy}
     <div class="loading">{UI_STRINGS.gettingTokens} <SmallSpinner soundOn /></div>
-  {:else if $environment == ENVIRONMENT.BASE}
-    <div class="notice">{UI_STRINGS.waitForTokens}</div>
-  {:else}
-    <div class="button-container">
-      <BigButton text={UI_STRINGS.getTokens(2000)} disabled={busy} onclick={onClick} />
+  {:else if $environment == ENVIRONMENT.BASE && $saleStatus === SALE_STATUS.LIVE}
+    <div class="container">
+      <div class="text-container">
+        You do not have $RAT tokens.<br />You need to buy $RAT tokens.
+      </div>
+      <div class="button-container">
+        <BigButton text="Buy $RAT" onclick={goToSale} />
+      </div>
     </div>
+  {:else}
+    <div class="notice">{UI_STRINGS.waitForTokens}</div>
   {/if}
 </div>
 
@@ -82,17 +86,28 @@
       padding: 10px;
       width: 50%;
     }
-    .button-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%);
-      overflow: hidden;
+
+    .container {
       width: 90%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
+      .text-container {
+        font-size: var(--font-size-large);
+        font-family: var(--typewriter-font-stack);
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        color: black;
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .button-container {
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
     }
   }
 </style>
