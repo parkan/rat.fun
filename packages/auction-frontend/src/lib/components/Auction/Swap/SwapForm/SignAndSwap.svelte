@@ -140,11 +140,11 @@
       // * * * * * * * * * * * * * * * * * * * * * * * * *
 
       console.log("[SignAndSwap] Step 3: Executing swap...")
-      processingStep = "Confirm swap in wallet..."
+      processingStep = "Confirm in wallet"
 
-      let swapTxHash: Hex
+      let txHash: Hex
       if (isExactOut) {
-        swapTxHash = await swapExactOut(
+        txHash = await swapExactOut(
           fromCurrency.address,
           auctionParams,
           amountOut,
@@ -153,7 +153,7 @@
           swapState.data.permitSignature
         )
       } else {
-        swapTxHash = await swapExactIn(
+        txHash = await swapExactIn(
           fromCurrency.address,
           auctionParams,
           amountIn,
@@ -162,7 +162,11 @@
           swapState.data.permitSignature
         )
       }
-      const swapResult = await waitForDopplerSwapReceipt(adaptedPublicClient, swapTxHash)
+
+      // Store txHash in state for basescan link
+      swapState.data.setSwapTxHash(txHash)
+
+      const swapResult = await waitForDopplerSwapReceipt(adaptedPublicClient, txHash)
       console.log("[SignAndSwap] Swap executed successfully:", swapResult)
 
       // Store receipt in state

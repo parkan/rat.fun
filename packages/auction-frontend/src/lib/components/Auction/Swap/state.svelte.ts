@@ -38,6 +38,7 @@ let fromCurrency = $state<CurrencyData>(wethCurrency)
 let numeraireBalance = $state<number | undefined>(undefined)
 let tokenBalance = $state<number | undefined>(undefined)
 let swapReceipt = $state<SwapReceipt | null>(null)
+let swapTxHash = $state<Hex | undefined>(undefined)
 let eurcToUsdcRate = $state<number | undefined>(undefined)
 let eurcToEthRate = $state<number | undefined>(undefined)
 let currentPriceUsdc = $state<number | undefined>(undefined)
@@ -82,6 +83,7 @@ const resetData = () => {
   numeraireBalance = undefined
   tokenBalance = undefined
   swapReceipt = null
+  swapTxHash = undefined
   eurcToUsdcRate = undefined
   eurcToEthRate = undefined
   currentPriceUsdc = undefined
@@ -153,6 +155,9 @@ export const swapState = {
     get swapReceipt() {
       return swapReceipt
     },
+    get swapTxHash() {
+      return swapTxHash
+    },
     get eurcToUsdcRate() {
       return eurcToUsdcRate
     },
@@ -202,6 +207,9 @@ export const swapState = {
     },
     setSwapReceipt: (receipt: SwapReceipt | null) => {
       swapReceipt = receipt
+    },
+    setSwapTxHash: (hash: Hex | undefined) => {
+      swapTxHash = hash
     },
     setEurcToUsdcRate: (rate: number | undefined) => {
       eurcToUsdcRate = rate

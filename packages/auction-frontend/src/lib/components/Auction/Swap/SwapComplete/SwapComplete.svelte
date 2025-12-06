@@ -1,7 +1,8 @@
 <script lang="ts">
   import { formatUnits } from "viem"
-  import { swapState, SWAP_STATE } from "../state.svelte"
-  import { BigButton } from "$lib/components/Shared"
+  import { swapState } from "../state.svelte"
+  import { BigButton, SmallButton } from "$lib/components/Shared"
+  import { addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
 
   /**
    * Extract receipt data from swap logs
@@ -10,6 +11,8 @@
   function getReceiptData() {
     const receipt = swapState.data.swapReceipt
     const auctionParams = swapState.data.auctionParams
+    const fromCurrency = swapState.data.fromCurrency
+    const amountIn = swapState.data.amountIn
 
     if (!receipt || !auctionParams) {
       return null
@@ -22,73 +25,83 @@
       return null
     }
 
-    const { buyer, countryCode, tokenAmount, numeraireAmount } = receiptLog.args
+    const { buyer, countryCode, tokenAmount } = receiptLog.args
 
-    // TODO receipt is always in eurc, decide if spent fromCurrency (usdc/eth) should also be shown
+    // Show the amount spent in the actual currency the user used (ETH or USDC)
+    const spentAmount = amountIn !== undefined ? formatUnits(amountIn, fromCurrency.decimals) : null
+
+    const tokenAmountRaw = Number(formatUnits(tokenAmount!, auctionParams.token.decimals))
+
     return {
       buyer,
       countryCode,
-      tokenAmount: formatUnits(tokenAmount!, auctionParams.token.decimals),
-      numeraireAmount: formatUnits(numeraireAmount!, auctionParams.numeraire.decimals),
+      tokenAmount: tokenAmountRaw.toFixed(4),
+      spentAmount,
       tokenSymbol: auctionParams.token.symbol,
-      numeraireSymbol: auctionParams.numeraire.symbol,
-      inGameRats: Math.floor(Number(formatUnits(tokenAmount!, auctionParams.token.decimals)) / 100)
+      spentSymbol: fromCurrency.symbol,
+      inGameRats: Math.floor(tokenAmountRaw / 100)
     }
   }
 
   const receiptData = $derived(getReceiptData())
 
-  /**
-   * Reset swap state for another swap
-   * Clears amounts and permits but keeps user data
-   */
-  function doAnotherSwap() {
-    // Clear swap-specific data
-    swapState.data.setAmountIn(undefined)
-    swapState.data.setAmountOut(undefined)
-    swapState.data.setIsExactOut(false)
-    swapState.data.clearPermit()
-    swapState.data.setSwapReceipt(null)
-
-    // Go back to ready-to-swap state
-    swapState.state.transitionTo(SWAP_STATE.SIGN_AND_SWAP)
-  }
+  const basescanUrl = $derived(
+    swapState.data.swapTxHash ? `https://basescan.org/tx/${swapState.data.swapTxHash}` : null
+  )
 
   /**
    * Navigate to the game
    */
   function goToGame() {
-    window.location.href = "https://rat.fun"
+    window.open("https://rat.fun", "_blank")
+  }
+
+  async function handleAddToken() {
+    const auctionParams = swapState.data.auctionParams
+    if (!auctionParams) return
+
+    try {
+      await addRatTokenToWallet(
+        auctionParams.token.address,
+        auctionParams.token.symbol,
+        auctionParams.token.decimals
+      )
+    } catch (e) {
+      console.error("Failed to add token to wallet:", e)
+    }
   }
 </script>
 
 <div class="swap-complete">
   <div class="success-header">
-    <h2>Swap Successful</h2>
+    <h2>Success</h2>
   </div>
 
   {#if receiptData}
     <div class="receipt-details">
-      <div class="receipt-row main">
-        <span class="label">You received:</span>
-        <span class="value">
-          {receiptData.tokenAmount}
-          {receiptData.tokenSymbol}
-        </span>
-      </div>
-
-      <div class="receipt-row main">
-        <span class="label">In-game Rats:</span>
-        <span class="value highlight">{receiptData.inGameRats}</span>
-      </div>
+      {#if receiptData.spentAmount}
+        <div class="receipt-row">
+          <span class="label">You spent:</span>
+          <span class="value">
+            {receiptData.spentAmount}
+            {receiptData.spentSymbol}
+          </span>
+        </div>
+      {/if}
 
       <div class="receipt-row">
-        <span class="label">You spent:</span>
-        <span class="value">
-          {receiptData.numeraireAmount}
-          {receiptData.numeraireSymbol}
+        <span class="label">You received:</span>
+        <span class="value highlight">
+          {receiptData.tokenAmount}
+          ${receiptData.tokenSymbol}
         </span>
       </div>
+
+      {#if basescanUrl}
+        <a href={basescanUrl} target="_blank" rel="noopener noreferrer" class="tx-link">
+          View transaction on Basescan
+        </a>
+      {/if}
     </div>
   {:else}
     <div class="receipt-details">
@@ -98,8 +111,11 @@
     </div>
   {/if}
 
+  <div class="add-token-container">
+    <SmallButton text="Add token info to wallet" onclick={handleAddToken} />
+  </div>
+
   <div class="actions">
-    <BigButton text="Swap Again" onclick={doAnotherSwap} />
     <BigButton text="Play Game" onclick={goToGame} />
   </div>
 </div>
@@ -109,22 +125,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    padding: 32px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(0, 255, 0, 0.3);
-    min-width: 400px;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    width: 100%;
   }
 
   .success-header {
@@ -157,7 +158,25 @@
     flex-direction: column;
     gap: 12px;
     padding: 20px;
-    background: rgba(0, 0, 0, 0.3);
+
+    .tx-link {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      color: white;
+      text-decoration: underline;
+      text-align: center;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .add-token-container {
+    display: flex;
+    justify-content: center;
+    height: 40px;
   }
 
   .receipt-row {
@@ -165,16 +184,6 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-
-    &.main {
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 16px;
-
-      .value {
-        font-size: 18px;
-      }
-    }
 
     .label {
       font-size: 14px;
@@ -188,8 +197,6 @@
 
       &.highlight {
         color: #0f0;
-        font-size: 20px;
-        font-weight: 700;
       }
     }
   }
@@ -198,5 +205,6 @@
     display: flex;
     gap: 12px;
     margin-top: 8px;
+    height: 160px;
   }
 </style>

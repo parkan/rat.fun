@@ -210,9 +210,9 @@
         <label for="token-input">$RAT:</label>
         <input id="token-input" type="text" readonly placeholder="0" value={getAmountOut() ?? ""} />
         <span class="subtext">minimum guaranteed</span>
-      </div>
-      <div class="rat-subjects-label">
-        ≈ <strong>{getInGameRats() ?? 0}</strong> Rat Subjects
+        <div class="rat-subjects-label">
+          ≈ <strong>{getInGameRats() ?? 0}</strong> Rat Subjects
+        </div>
       </div>
     </div>
   {/if}
@@ -224,9 +224,9 @@
     flex-flow: column nowrap;
     gap: 20px;
     padding: 0;
-    min-width: 400px;
-    margin-bottom: 20px;
     width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 5px;
   }
 
   .current-price {
@@ -244,7 +244,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-
+    margin-bottom: 10px;
     label {
       font-size: 14px;
       font-weight: 500;

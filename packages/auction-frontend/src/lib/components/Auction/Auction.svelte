@@ -204,7 +204,7 @@
     justify-content: center;
 
     .auction-inner {
-      width: 600px;
+      width: 700px;
       max-width: 90dvw;
       height: auto;
     }

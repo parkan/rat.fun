@@ -70,6 +70,10 @@
         font-size: var(--font-size-extra-large);
         font-family: var(--special-font-stack);
         line-height: 1em;
+
+        @media (max-width: 768px) {
+          font-size: 42px;
+        }
       }
 
       .button-cost {

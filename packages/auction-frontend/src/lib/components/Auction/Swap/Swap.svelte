@@ -200,6 +200,8 @@
     <SignAndSwap />
   {:else if swapState.state.current === SWAP_STATE.SWAP_COMPLETE}
     <SwapComplete />
+  {:else}
+    LOADING...
   {/if}
 </div>
 

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { userAddress } from "$lib/modules/drawbridge"
   import { shortenAddress } from "$lib/modules/utils"
-  import { disconnectWallet } from "$lib/modules/drawbridge/connector"
+  import { disconnectWallet, addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
   import { SmallButton } from "$lib/components/Shared"
   import { tokenBalances, balanceListeners } from "$lib/modules/balances"
+  import { swapState } from "$lib/components/Auction/Swap/state.svelte"
 
   let showDropdown = $state(false)
   let dropdownElement = $state<HTMLElement | undefined>(undefined)
@@ -28,6 +29,21 @@
     showDropdown = false
     // Reload the page to reset state
     window.location.reload()
+  }
+
+  async function handleAddToken() {
+    const auctionParams = swapState.data.auctionParams
+    if (!auctionParams) return
+
+    try {
+      await addRatTokenToWallet(
+        auctionParams.token.address,
+        auctionParams.token.symbol,
+        auctionParams.token.decimals
+      )
+    } catch (e) {
+      console.error("Failed to add token to wallet:", e)
+    }
   }
 
   // Add/remove click listener when dropdown state changes
@@ -74,6 +90,11 @@
               </span>
             </div>
           {/each}
+          {#if swapState.data.auctionParams}
+            <button class="add-token-btn" onclick={handleAddToken}>
+              + Add ${swapState.data.auctionParams.token.symbol} to wallet
+            </button>
+          {/if}
           <div class="button-container">
             <SmallButton text="Disconnect wallet" onclick={handleDisconnect} />
           </div>
@@ -90,6 +111,11 @@
     left: 20px;
     z-index: 2000;
     font-family: var(--typewriter-font-stack);
+
+    @media (max-width: 768px) {
+      top: 10px;
+      left: 10px;
+    }
 
     .wallet-box {
       background: var(--background-dark-transparent);
@@ -140,6 +166,22 @@
 
           .value {
             font-weight: bold;
+          }
+        }
+
+        .add-token-btn {
+          background: none;
+          border: 1px solid var(--color-border);
+          color: var(--white);
+          font-family: var(--typewriter-font-stack);
+          font-size: var(--font-size-small);
+          padding: 6px 10px;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+
+          &:hover {
+            opacity: 1;
           }
         }
 

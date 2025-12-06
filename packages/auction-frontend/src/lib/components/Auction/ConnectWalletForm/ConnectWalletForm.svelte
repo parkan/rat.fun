@@ -97,6 +97,10 @@
 
 <div class="outer-container">
   <div class="inner-container">
+    <div class="text-container">
+      <h1>$RAT SALE</h1>
+      <p>some text here</p>
+    </div>
     <div class="button-container" bind:this={buttonElement}>
       {#if connecting}
         <BigButton text="Connecting..." disabled={true} onclick={() => {}} />
@@ -146,8 +150,20 @@
       flex-flow: column nowrap;
       align-items: center;
       justify-content: center;
-      width: 500px;
+      width: 800px;
       max-width: 90dvw;
+
+      .text-container {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-family: var(--special-font-stack);
+        h1 {
+          font-size: 48px;
+        }
+      }
 
       .button-container {
         width: 100%;
