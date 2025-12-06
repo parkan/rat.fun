@@ -314,6 +314,10 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    @media (max-width: 768px) {
+      gap: 8px;
+    }
   }
 
   .input-group {
@@ -367,7 +371,7 @@
       }
 
       &.error {
-        border-color: #ff4444;
+        border-color: red;
         background: rgba(255, 68, 68, 0.1);
       }
     }
@@ -384,7 +388,7 @@
       color: rgba(255, 255, 255, 0.6);
 
       &.error {
-        color: #ff4444;
+        color: red;
       }
     }
 
@@ -417,7 +421,7 @@
 
     .error-text {
       font-size: 12px;
-      color: #ff4444;
+      color: red;
       visibility: hidden;
       min-height: 18px;
 
@@ -435,7 +439,7 @@
   .rat-subjects-label {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
-    padding: 8px 0;
+    padding: 0;
 
     strong {
       color: white;
