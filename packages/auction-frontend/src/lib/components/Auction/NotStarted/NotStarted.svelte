@@ -1,22 +1,23 @@
 <script lang="ts">
   import { BigButton } from "$lib/components/Shared"
 
-  function goToRatFun() {
-    window.location.href = "https://rat.fun"
+  function goToTelegram() {
+    window.location.href = "https://t.me/ratfun"
   }
 </script>
 
-<div class="ended">
+<div class="not-started">
   <div class="content">
-    <h2>AUCTION ENDED</h2>
+    <h2>AUCTION NOT STARTED</h2>
+    <p>Starts 9th of December at 16:00 CET</p>
     <div class="button-container">
-      <BigButton text="Go to rat.fun" onclick={goToRatFun} />
+      <BigButton text="Go to telegram" onclick={goToTelegram} />
     </div>
   </div>
 </div>
 
 <style lang="scss">
-  .ended {
+  .not-started {
     text-align: center;
 
     .button-container {

@@ -12,7 +12,13 @@
   import { userAddress } from "$lib/modules/drawbridge"
   import { initBalanceListeners } from "$lib/modules/balances"
   import { getTokenCurrency } from "$lib/modules/swap-router"
-  import { Swap, ConnectWalletForm, Ended, Error as ErrorComponent } from "$lib/components/Auction"
+  import {
+    Swap,
+    ConnectWalletForm,
+    NotStarted,
+    Ended,
+    Error as ErrorComponent
+  } from "$lib/components/Auction"
   import WalletInfo from "$lib/components/WalletInfo/WalletInfo.svelte"
 
   const isTestAuction = PUBLIC_TEST_AUCTION === "true"
@@ -42,6 +48,11 @@
     })
   }
 
+  function checkSaleNotStarted() {
+    const now = Date.now() / 1000
+    return now < auctionParams.startingTime
+  }
+
   function checkSaleEnded() {
     const now = Date.now() / 1000
     return now >= auctionParams.endingTime
@@ -64,6 +75,11 @@
   $effect(() => {
     if ($publicClient && $userAddress) {
       console.log("[Claim] Wallet connected:", $userAddress)
+
+      if (auctionState?.state?.current === AUCTION_STATE.NOT_STARTED) {
+        // Nothing to do, auction hasn't started
+        return
+      }
 
       if (auctionState?.state?.current === AUCTION_STATE.ENDED) {
         // Nothing to do, auction is over
@@ -94,6 +110,12 @@
     if (!auctionParams) {
       console.error("[Auction] auctionParams not found")
       auctionState.state.transitionTo(AUCTION_STATE.ERROR)
+      return
+    }
+
+    const saleNotStarted = checkSaleNotStarted()
+    if (saleNotStarted) {
+      auctionState.state.transitionTo(AUCTION_STATE.NOT_STARTED)
       return
     }
 
@@ -145,6 +167,8 @@
       <ConnectWalletForm />
     {:else if auctionState.state.current === AUCTION_STATE.SWAP}
       <Swap {auctionParams} />
+    {:else if auctionState.state.current === AUCTION_STATE.NOT_STARTED}
+      <NotStarted />
     {:else if auctionState.state.current === AUCTION_STATE.ENDED}
       <Ended />
     {:else if auctionState.state.current === AUCTION_STATE.ERROR}
@@ -159,7 +183,7 @@
     top: 0;
     right: 0;
     right: 0;
-    background: #ff4444;
+    background: red;
     color: white;
     text-align: center;
     padding: 8px;
