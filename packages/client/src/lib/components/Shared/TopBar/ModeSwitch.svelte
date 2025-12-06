@@ -23,7 +23,7 @@
   }
 </script>
 
-<div class="mode-switch">
+<div class="mode-switch" data-tutorial="mode-switch">
   <Tooltip allowHTML content={UI_STRINGS.adminInstruction(500)}>
     <ModeSwitchButton {isAdminView} onclick={isAdminView ? exitAdmin : enterAdmin} />
   </Tooltip>
@@ -33,5 +33,10 @@
   .mode-switch {
     width: 160px;
     height: 100%;
+
+    @media (max-width: 800px) {
+      flex: 1;
+      width: auto;
+    }
   }
 </style>

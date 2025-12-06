@@ -212,7 +212,7 @@ export const enUS = {
   you: "You",
   youAreSet: (name: string): string => `${name}, you are set!`,
   youCreatedTrip: (index: number): string => `You created TRIP #${index}`,
-  youIndication: (name: string) => `This is you: ${name}`,
+  youIndication: "This is you",
   youLiquidatedTrip: (index: number): string => `You CASHED OUT TRIP #${index}`,
   yourName: "YOUR NAME",
   youWillRecover: "You will recover",
@@ -227,7 +227,7 @@ export const enUS = {
   tripProcessingSecond: "RAT STILL IN HALLUCINATORY STATE.\nPLEASE STAND BY...",
   tripProcessingThird: "RAT BEING REVIVED FROM DEEP DRUG INDUCED COMA...",
   // Trip setup messages
-  tripSetupPresents: "*** RAT.FUN SCIENTIFIC INSTRUMENTS LLC PRESENTS ***",
+  tripSetupPresents: "*** RAT.FUN PSYCHIC INSTRUMENTS LLC PRESENTS ***",
   tripSetupWarning: "WARNING",
   tripSetupExperimental: "THIS IS AN EXPERIMENTAL EXPERIENCE AND MAY BE LETHAL",
   tripSetupLiability: "ABSOLUTELY NO LIABITITY FOR ANY PSYCHOLOGICAL MUTILATION",
@@ -268,12 +268,12 @@ export const enUS = {
   tripNotifications: "Trip Notifications",
   language: "Language",
   // Loading sequence
-  loadingCompany: "RAT.FUN SCIENTIFIC INSTRUMENTS LLC",
+  loadingCompany: "RAT.FUN PSYCHIC INSTRUMENTS LLC",
   loadingCopyright: "(c) 2034 Sexc-hell island, Kowloon, Hong Kong",
   loadingRights: "All Rights Reserved in accordance with Maritime Law",
   loadingDissociated: "FULLY DISSOCIATED AND DISOWNED SISTER COMPANY OF MOVING CASTLES GMBH",
   loadingPatent: "Patent pending in all non-aligned territories",
-  loadingTrademarks: "FUN and RAT are registered trademarks of RAT.FUN SCIENTIFIC INSTRUMENTS LLC",
+  loadingTrademarks: "FUN and RAT are registered trademarks of RAT.FUN PSYCHIC INSTRUMENTS LLC",
   loadingAgreement:
     "BY READING THIS TEXT YOU AGREE TO BE BOUND BY THE TERMS OF THE AGREEMENT AND FORFEIT YOUR HUMAN RIGHTS",
   loadingBoot: "BOOTING SLOP MACHINE...",

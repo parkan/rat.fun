@@ -49,6 +49,19 @@
 {:else if step === 4}
   <div class="tutorial-box">
     <p>
+      You can unlock access to the <span class="highlight">TRIPS LAB</span> and experiment by making
+      bespoke <span class="highlight">TRIPS</span>.
+    </p>
+    <p>You invest $RAT tokens in TRIPS.</p>
+    <p>Each time a RAT dies using one of your TRIPS you collect its $RAT value.</p>
+    <p>If a RAT survives it transfers $RAT from your TRIP to itself.</p>
+    <div class="tutorial-btn-container">
+      <SmallButton text="NEXT" onclick={onNext} />
+    </div>
+  </div>
+{:else if step === 5}
+  <div class="tutorial-box">
+    <p>
       You can <span class="highlight">CASH OUT</span> at any moment, converting your RAT and PSYCHO OBJECTS
       in $RAT tokens.
     </p>

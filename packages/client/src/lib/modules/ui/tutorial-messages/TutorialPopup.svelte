@@ -4,6 +4,7 @@
   import tippy, { type Instance } from "tippy.js"
   import { tutorialActive, tutorialStep, nextStep } from "./store"
   import { TUTORIAL_STEPS } from "./steps"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
   import TutorialContent from "./TutorialContent.svelte"
   import TutorialOverlay from "./TutorialOverlay.svelte"
 
@@ -32,10 +33,17 @@
     if (!$tutorialActive) return
 
     const stepData = TUTORIAL_STEPS[$tutorialStep]
-    const targetEl = document.querySelector(stepData.target)
+    const isMobile = $isPhone
+
+    // Get target and placement, with mobile overrides
+    const target = isMobile && stepData.mobile?.target ? stepData.mobile.target : stepData.target
+    const placement =
+      isMobile && stepData.mobile?.placement ? stepData.mobile.placement : stepData.placement
+
+    const targetEl = document.querySelector(target)
 
     if (!targetEl) {
-      console.warn(`Tutorial target not found: ${stepData.target}`)
+      console.warn(`Tutorial target not found: ${target}`)
       return
     }
 
@@ -55,7 +63,7 @@
     tippyInstance = tippy(targetEl, {
       content: container,
       theme: "tutorial",
-      placement: stepData.placement,
+      placement: placement,
       trigger: "manual",
       interactive: true,
       arrow: true,

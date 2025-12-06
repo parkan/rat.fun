@@ -24,10 +24,10 @@ export function startTutorial(): void {
 
 export function nextStep(): void {
   tutorialStep.update(step => {
-    if (step < 4) {
+    if (step < 5) {
       return (step + 1) as TutorialStep
     }
-    // Complete tutorial after step 4
+    // Complete tutorial after step 5
     tutorialActive.set(false)
     setTutorialCompleted()
     return step

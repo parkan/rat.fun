@@ -16,7 +16,10 @@
   )
 </script>
 
-<div class="phone-view-button-container">
+<div
+  class="phone-view-button-container"
+  data-tutorial={targetView === "triplisting" ? "phone-trip-button" : undefined}
+>
   <BigButton text={buttonText} onclick={switchView} />
 </div>
 

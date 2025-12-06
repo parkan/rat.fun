@@ -68,6 +68,10 @@
       .marquee-container {
         display: none;
       }
+
+      .right {
+        flex: 1;
+      }
     }
   }
 </style>

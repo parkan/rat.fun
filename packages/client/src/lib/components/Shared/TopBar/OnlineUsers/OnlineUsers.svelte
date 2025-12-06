@@ -86,6 +86,10 @@
     height: 100%;
     border-left: var(--default-border-style);
 
+    @media (max-width: 800px) {
+      display: none;
+    }
+
     .online-button {
       display: flex;
       align-items: center;

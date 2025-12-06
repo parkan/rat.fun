@@ -2,6 +2,7 @@
   import { onDestroy } from "svelte"
   import { tutorialActive, tutorialStep } from "./store"
   import { TUTORIAL_STEPS } from "./steps"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
 
   let overlayEl: HTMLDivElement | null = null
   let isFirstStep = true
@@ -27,7 +28,10 @@
 
   function getTargetRect() {
     const stepConfig = TUTORIAL_STEPS[$tutorialStep]
-    const targetEl = document.querySelector(stepConfig.target)
+    const isMobile = $isPhone
+    const target =
+      isMobile && stepConfig.mobile?.target ? stepConfig.mobile.target : stepConfig.target
+    const targetEl = document.querySelector(target)
     if (!targetEl) return null
     return targetEl.getBoundingClientRect()
   }

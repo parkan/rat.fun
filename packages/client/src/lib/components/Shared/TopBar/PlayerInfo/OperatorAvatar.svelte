@@ -1,0 +1,39 @@
+<script lang="ts">
+  import { Tooltip } from "$lib/components/Shared"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
+</script>
+
+<div class="operator-avatar">
+  <Tooltip content={UI_STRINGS.youIndication}>
+    <div class="avatar">
+      <img src="/images/pfp.png" alt={UI_STRINGS.you} draggable={false} />
+    </div>
+  </Tooltip>
+</div>
+
+<style lang="scss">
+  .operator-avatar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+
+    @media (max-width: 800px) {
+      display: none;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--color-value);
+      border-radius: 50%;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+  }
+</style>

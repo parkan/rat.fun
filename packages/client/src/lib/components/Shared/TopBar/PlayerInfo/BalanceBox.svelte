@@ -82,65 +82,54 @@
 </script>
 
 <!-- BALANCE -->
-<div class="stat-item balance" bind:this={containerElement}>
-  <div class="inner-wrapper">
-    <Tooltip content={UI_STRINGS.tokensAvailable}>
-      <div class="balance-value">
-        <!-- <span class="label">{UI_STRINGS.tokensAvailableLabel}</span>
-        <span class="content">
-          <span class="value" bind:this={balanceElement}></span>
-          <span class="currency-symbol">{CURRENCY_SYMBOL}</span>
-        </span> -->
-      </div>
-
-      <div class="value">
-        <span class="content">
-          <span class="value" bind:this={balanceElement}></span>
-          <span class="currency-symbol">{CURRENCY_SYMBOL}</span>
-        </span>
-        <span class="label">
-          {UI_STRINGS.tokensAvailableLabel}
-        </span>
-      </div>
-    </Tooltip>
-  </div>
+<div class="balance-box" bind:this={containerElement}>
+  <Tooltip content={UI_STRINGS.tokensAvailable}>
+    <div class="label">
+      {UI_STRINGS.tokensAvailableLabel}
+    </div>
+    <div class="content">
+      <span class="value" bind:this={balanceElement}></span>
+      <span class="currency-symbol">{CURRENCY_SYMBOL}</span>
+    </div>
+  </Tooltip>
 </div>
 
 <style lang="scss">
-  .stat-item {
-    display: flex;
+  .balance-box {
     height: 100%;
-    line-height: var(--top-bar-height);
-    background: transparent;
     border-right: var(--default-border-style);
-    color: var(--foreground);
     padding: 0;
-    justify-content: center;
-    // background: red;
     min-width: 100px;
-    font-size: var(--font-size-small);
+    background: var(--color-value);
+    color: var(--black);
 
-    &.balance {
-      padding-top: 4px;
-      background: var(--color-value);
-      color: var(--black);
-      font-size: var(--font-size-normal);
+    :global(> *) {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    .value {
+    .label {
+      font-size: var(--font-size-small);
       display: flex;
-      flex-flow: column;
-      gap: 0;
+      align-items: center;
+      justify-content: center;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      width: 100%;
+      border-bottom: var(--default-border-style);
+    }
 
-      .content {
-        height: 18px;
-        font-size: var(--font-size-normal);
-        display: inline-flex;
-      }
+    .content {
+      flex: 1;
+      font-size: var(--font-size-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
 
-      .label {
-        opacity: 0.5;
-        font-size: var(--font-size-small);
+      .currency-symbol {
+        margin-left: 4px;
       }
     }
   }

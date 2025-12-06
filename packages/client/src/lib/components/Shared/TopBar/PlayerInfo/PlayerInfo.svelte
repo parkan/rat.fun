@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { player, playerAddress } from "$lib/modules/state/stores"
   import { playSound } from "$lib/modules/sound"
-  import { Tooltip } from "$lib/components/Shared"
-  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
   import AccountDropdown from "./AccountDropdown.svelte"
+  import OperatorAvatar from "./OperatorAvatar.svelte"
+  import OperatorName from "./OperatorName.svelte"
   import BalanceBox from "./BalanceBox.svelte"
 
   let showAccountDropdown = $state(false)
@@ -51,33 +50,14 @@
 </script>
 
 <div class="player-info">
-  <!-- PLAYER STATS -->
   <button
     class="player-stats"
     bind:this={playerStatsElement}
     {onmousedown}
     onmouseup={toggleAccountStats}
   >
-    <!-- NAME -->
-    <div class="stat-item name">
-      <!-- AVATAR -->
-      <Tooltip content={UI_STRINGS.youIndication($playerAddress)}>
-        <div class="inner-wrapper player">
-          <div class="avatar">
-            <img src="/images/pfp.png" alt={UI_STRINGS.you} draggable={false} />
-          </div>
-          <div class="value">
-            <span class="content">
-              {$player?.name ?? ""}
-            </span>
-            <span class="label">
-              {UI_STRINGS.operator}
-            </span>
-          </div>
-        </div>
-      </Tooltip>
-    </div>
-    <!-- BALANCE -->
+    <OperatorAvatar />
+    <OperatorName />
     <BalanceBox />
   </button>
 </div>
@@ -97,7 +77,6 @@
 
     .player-stats {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       height: 100%;
       width: 100%;
@@ -106,61 +85,6 @@
       outline: 0;
       background: transparent;
       padding: 0;
-
-      .stat-item {
-        display: flex;
-        height: 100%;
-        line-height: var(--top-bar-height);
-        border: 0;
-        background: transparent;
-        color: var(--foreground);
-        padding: 8px;
-
-        &.name {
-          font-size: var(--font-size-small);
-        }
-
-        .inner-wrapper {
-          display: inline-flex;
-          padding-right: 10px;
-          align-items: center;
-          width: 100%;
-
-          &.player {
-            color: var(--foreground);
-          }
-        }
-      }
-    }
-
-    .value {
-      display: flex;
-      flex-flow: column;
-      gap: 0;
-      padding-top: 4px;
-
-      .content {
-        height: 18px;
-        font-size: var(--font-size-normal);
-      }
-
-      .label {
-        opacity: 0.5;
-      }
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--color-value);
-      border-radius: 50%;
-      margin-right: 10px;
-      overflow: hidden;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
     }
   }
 </style>
