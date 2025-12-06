@@ -120,6 +120,13 @@
   --z-debug: 66666;
 }
 
+@media (max-width: 800px) {
+  :root {
+    --game-window-width: calc(100vw - 15px);
+    --game-window-height: calc(100vh - 15px);
+  }
+}
+
 * {
   box-sizing: border-box;
   border-color: var(--foreground);

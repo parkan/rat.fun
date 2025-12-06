@@ -311,8 +311,20 @@
 
   @media (max-width: 800px) {
     .bubble {
+      position: fixed;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: calc(100dvw - 60px);
+      max-width: calc(100dvw - 60px);
       padding: 12px 16px;
       border-width: 2px;
+      font-size: 18px;
+
+      &.isGameMascot {
+        top: 100px;
+        right: auto;
+      }
     }
   }
 </style>
