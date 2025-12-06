@@ -347,6 +347,7 @@
       cursor: pointer;
       font-family: var(--typewriter-font-stack);
       padding: 10px 6px;
+      border-radius: 0;
 
       option {
         background: #1a1a1a;

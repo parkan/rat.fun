@@ -260,6 +260,10 @@
     font-size: var(--font-size-normal);
     line-height: 1.2;
     color: white;
+
+    @media (max-width: 768px) {
+      font-size: var(--font-size-small);
+    }
   }
 
   .button-container {

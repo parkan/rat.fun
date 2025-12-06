@@ -95,13 +95,15 @@
 
 {#if swapState.data.auctionParams}
   <div class="remaining-allowance">
-    <span class="label">Remaining Allowance ({currencySymbol})</span>
-    <span class="amount">
-      {currencyPrefix}{formatValue(remaining)}
-    </span>
-    <span class="total">
-      of {currencyPrefix}{formatValue(total)} total
-    </span>
+    <div class="label">Remaining spend limit ({currencySymbol})</div>
+    <div class="value-row">
+      <span class="amount">
+        {currencyPrefix}{formatValue(remaining)}
+      </span>
+      <span class="total">
+        of {currencyPrefix}{formatValue(total)} total
+      </span>
+    </div>
   </div>
 {/if}
 
@@ -110,25 +112,33 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 16px;
+    padding: 8px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-  }
 
-  .label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
-  }
+    .label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
 
-  .amount {
-    font-size: 24px;
-    color: white;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
+    .value-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 6px;
+      padding-top: 10px;
 
-  .total {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+      .amount {
+        font-size: 24px;
+        color: white;
+      }
+
+      .total {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.5);
+        position: relative;
+        top: -2px;
+      }
+    }
   }
 </style>

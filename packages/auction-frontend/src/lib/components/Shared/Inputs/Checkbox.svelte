@@ -65,5 +65,15 @@
     &:hover:not(.disabled) {
       border-color: var(--color-up);
     }
+
+    @media (max-width: 768px) {
+      width: 30px;
+      height: 30px;
+
+      .dot {
+        width: 15px;
+        height: 15px;
+      }
+    }
   }
 </style>
