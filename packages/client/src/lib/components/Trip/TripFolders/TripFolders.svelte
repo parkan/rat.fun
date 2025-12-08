@@ -7,17 +7,20 @@
     foldersCounts,
     onselect,
     showCounts = true,
-    disabled = false
+    disabled = false,
+    children
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
     onselect: (str: string) => void
     showCounts?: boolean
     disabled?: boolean
+    children
   } = $props()
 </script>
 
 <div class="tiles">
+  {@render children?.()}
   {#each folders as folder, i}
     <TripFolderItem
       listingIndex={i}
@@ -43,7 +46,6 @@
     justify-items: stretch;
     align-items: stretch;
     align-content: start;
-    padding: 10px;
     gap: 10px;
     overflow-x: hidden;
   }

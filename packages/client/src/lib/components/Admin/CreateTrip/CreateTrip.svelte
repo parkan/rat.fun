@@ -2,7 +2,7 @@
   import { gameConfig } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
   import { getTripMaxValuePerWin, getTripMinRatValueToEnter } from "$lib/modules/state/utils"
-  import { CharacterCounter, BigButton } from "$lib/components/Shared"
+  import { CharacterCounter, BigButton, ResizableText } from "$lib/components/Shared"
   import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
   import { openAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
@@ -35,6 +35,8 @@
   let textareaElement: HTMLTextAreaElement | null = $state(null)
   let selectedFolderId: string = $state(savedFolderId ?? "")
   let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
+  let sliderStep = $derived(Number($playerERC20Balance) > 1000 ? 50 : 10)
+  let sliderMax = $derived(Math.floor($playerERC20Balance / sliderStep) * sliderStep)
 
   // Get available folders: all non-restricted, plus restricted if user is whitelisted
   let availableFolders = $derived(
@@ -163,10 +165,8 @@
         {#if currentStep === "folder"}
           <!-- STEP 1: FOLDER SELECTION -->
           <div class="folder-selection">
-            <div class="form-group">
-              <div>
-                <span class="highlight">{UI_STRINGS.selectFolder}</span>
-              </div>
+            <div class="instructions">
+              <span class="highlight">Trip Category</span>
             </div>
             <TripFolders
               onselect={folderId => {
@@ -176,23 +176,9 @@
               folders={availableFolders}
               {foldersCounts}
               showCounts={false}
-            />
+            ></TripFolders>
           </div>
         {:else}
-          <!-- STEP 2: TRIP DETAILS -->
-          <div class="trip-header">
-            <div class="header-text">
-              {UI_STRINGS.creatingTripIn}: <span class="folder-name">{selectedFolderTitle}</span>
-            </div>
-            <button
-              class="back-link"
-              onclick={() => {
-                currentStep = "folder"
-              }}
-            >
-              {UI_STRINGS.back}
-            </button>
-          </div>
           <div class="controls">
             <!-- TRIP DESCRIPTION -->
             <div class="form-group">
@@ -212,12 +198,29 @@
                 bind:value={tripDescription}
                 bind:this={textareaElement}
               ></textarea>
+
+              <div class="folder-select">
+                <label>
+                  <span class="highlight">Trip Category</span>
+                </label>
+                <div>
+                  <button
+                    onclick={() => {
+                      currentStep = "folder"
+                    }}
+                    class="select-folder-button"
+                    >{selectedFolderTitle} <span class="big">×</span></button
+                  >
+                </div>
+              </div>
             </div>
 
             <!-- TRIP CREATION COST SLIDER -->
             <div class="slider-group">
-              <label for="trip-creation-cost-slider">
-                <span class="highlight">TRIP CREATION COST</span>
+              <div class="slider-header">
+                <label for="trip-creation-cost-slider">
+                  <span class="highlight">Trip Creation Cost</span>
+                </label>
                 <input
                   class="cost-display"
                   onblur={e => {
@@ -232,26 +235,25 @@
                   bind:value={tripCreationCost}
                   type="number"
                 />
-              </label>
+              </div>
               <div class="slider-container">
+                <div class="slider-label">
+                  <span class="slider-min">
+                    {Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
+                  </span>
+                </div>
                 <input
                   type="range"
                   id="trip-creation-cost-slider"
                   class="cost-slider"
-                  step={Math.floor($playerERC20Balance / 40)}
+                  step={sliderStep}
                   min={Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
-                  max={$playerERC20Balance}
-                  oninput={e => {
-                    // playSample(Number(e.target.value) / Number($playerERC20Balance))
-                  }}
+                  max={sliderMax}
+                  oninput={typeHit}
                   bind:value={tripCreationCost}
                 />
-                <div class="slider-labels">
-                  <span class="slider-min">
-                    {Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
-                    {CURRENCY_SYMBOL}
-                  </span>
-                  <span class="slider-max">{$playerERC20Balance}{CURRENCY_SYMBOL}</span>
+                <div class="slider-label">
+                  <span class="slider-max">{sliderMax}</span>
                 </div>
               </div>
             </div>
@@ -259,12 +261,16 @@
             <!-- CALCULATED VALUES -->
             <div class="calculated-values">
               <div class="value-box">
-                <div class="value-label">{UI_STRINGS.minRatValueToTrip.toUpperCase()}</div>
-                <div class="value-amount">{$minRatValueToEnter} {CURRENCY_SYMBOL}</div>
+                <div class="value-label">MIN RISK</div>
+                <div class="value-amount">
+                  <span>{$minRatValueToEnter} {CURRENCY_SYMBOL}</span>
+                </div>
               </div>
               <div class="value-box">
-                <div class="value-label">{UI_STRINGS.maxValuePerWin.toUpperCase()}</div>
-                <div class="value-amount">{$maxValuePerWin} {CURRENCY_SYMBOL}</div>
+                <div class="value-label">MAX WIN</div>
+                <div class="value-amount">
+                  <span>{$maxValuePerWin} {CURRENCY_SYMBOL}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -298,7 +304,7 @@
         <textarea
           disabled={busy.CreateTrip.current !== 0}
           id="trip-description"
-          rows={$isPhone ? 3 : 10}
+          rows={$isPhone ? 3 : 6}
           {placeholder}
           oninput={typeHit}
           bind:value={tripDescription}
@@ -308,8 +314,10 @@
 
       <!-- TRIP CREATION COST SLIDER -->
       <div class="slider-group">
-        <label for="trip-creation-cost-slider">
-          <span class="highlight">{UI_STRINGS.tripCreationCostLabel}</span>
+        <div class="slider-header">
+          <label for="trip-creation-cost-slider">
+            <span class="highlight">{UI_STRINGS.tripCreationCostLabel}</span>
+          </label>
           <input
             class="cost-display"
             onblur={e => {
@@ -324,23 +332,25 @@
             bind:value={tripCreationCost}
             type="number"
           />
-        </label>
+        </div>
         <div class="slider-container">
+          <div class="slider-label">
+            <span class="slider-min"
+              >{Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)} {CURRENCY_SYMBOL}
+            </span>
+          </div>
           <input
             type="range"
             id="trip-creation-cost-slider"
             class="cost-slider"
-            step={Math.floor($playerERC20Balance / 40)}
+            step={sliderStep}
             min={Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)}
-            max={$playerERC20Balance}
+            max={sliderMax}
+            oninput={typeHit}
             bind:value={tripCreationCost}
           />
-          <div class="slider-labels">
-            <span class="slider-min"
-              >{Math.min($playerERC20Balance, MIN_TRIP_CREATION_COST)} {CURRENCY_SYMBOL}
-            </span>
-
-            <span class="slider-max">{$playerERC20Balance} {CURRENCY_SYMBOL}</span>
+          <div class="slider-label">
+            <span class="slider-max">{sliderMax} {CURRENCY_SYMBOL}</span>
           </div>
         </div>
       </div>
@@ -348,12 +358,16 @@
       <!-- CALCULATED VALUES -->
       <div class="calculated-values">
         <div class="value-box">
-          <div class="value-label">MIN RAT VALUE TO TRIP</div>
-          <div class="value-amount">{$minRatValueToEnter} {CURRENCY_SYMBOL}</div>
+          <div class="value-label">MIN RISK</div>
+          <div class="value-amount">
+            <span>{$minRatValueToEnter} {CURRENCY_SYMBOL}</span>
+          </div>
         </div>
         <div class="value-box">
-          <div class="value-label">MAX VALUE PER WIN</div>
-          <div class="value-amount">{$maxValuePerWin} {CURRENCY_SYMBOL}</div>
+          <div class="value-label">MAX WIN</div>
+          <div class="value-amount">
+            <span>{$maxValuePerWin} {CURRENCY_SYMBOL}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -384,6 +398,21 @@
     -moz-appearance: textfield; /* Firefox */
   }
 
+  .folder-select {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 8px;
+  }
+
+  .instructions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: var(--typewriter-font-stack);
+    font-size: var(--font-size-normal);
+  }
+
   .modal-content {
     height: 700px;
     max-height: 90dvh;
@@ -395,12 +424,30 @@
     }
   }
 
+  .select-folder-button {
+    font-size: var(--font-size-medium);
+    white-space: nowrap;
+    font-family: var(--special-font-stack);
+    line-height: 32px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
+    .big {
+      font-size: var(--font-size-mascot);
+      line-height: 20px;
+      display: block;
+      transform: translateY(-2px);
+    }
+  }
+
   .create-trip {
     height: 100%;
     width: 600px;
     max-width: 100%;
     display: flex;
     flex-flow: column nowrap;
+    gap: 12px;
     background-image: url("/images/texture-3.png");
     background-size: 200px;
     justify-content: space-between;
@@ -417,6 +464,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      font-size: var(--font-size-medium);
+      font-family: var(--special-font-stack);
 
       > :global(.tiles) {
         flex: 1;
@@ -432,46 +481,31 @@
       margin-bottom: 8px;
       font-family: var(--typewriter-font-stack);
       font-size: var(--font-size-normal);
-
-      .back-link {
-        background: none;
-        border: none;
-        color: var(--foreground);
-        text-decoration: underline;
-        cursor: pointer;
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-normal);
-        padding: 0;
-
-        &:hover {
-          opacity: 0.7;
-        }
-      }
     }
 
     .controls {
       display: flex;
       justify-self: start;
-      gap: 8px;
+      gap: 12px;
       flex-flow: column nowrap;
+      flex: 1;
+    }
+
+    .highlight {
+      background: var(--color-grey-mid);
+      padding: 5px;
+      color: var(--background);
     }
 
     .form-group {
-      display: block;
-      width: 100%;
+      display: flex;
+      flex-flow: column nowrap;
+      gap: 8px;
 
       label {
-        display: block;
-        margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        .highlight {
-          background: var(--color-grey-mid);
-          padding: 5px;
-          color: var(--background);
-        }
       }
 
       textarea {
@@ -479,8 +513,8 @@
         padding: 5px;
         border: none;
         background: var(--foreground);
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-normal);
+        font-family: var(--special-font-stack);
+        font-size: var(--font-size-medium);
         border-radius: 0;
         resize: none;
         outline-color: var(--color-grey-light);
@@ -489,18 +523,25 @@
     }
 
     .slider-group {
-      display: block;
+      display: flex;
+      flex-flow: column nowrap;
+      gap: 8px;
       width: 100%;
+
+      .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
       .cost-display {
         background: var(--foreground);
-        padding: 5px;
         color: var(--background);
-        font-family: var(--typewriter-font-stack);
+        font-family: var(--special-font-stack);
+        font-size: var(--font-size-large);
         border: none;
-        width: 60px;
-        text-align: right;
-        border: none;
+        width: 100px;
+        text-align: center;
         outline: none;
         &:focus {
           border: none;
@@ -510,11 +551,14 @@
     }
 
     .slider-container {
-      width: 100%;
-      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
 
       .cost-slider {
-        width: 100%;
+        width: 400px;
         height: 8px;
         background: var(--background);
         border: 1px solid var(--foreground);
@@ -527,7 +571,7 @@
           -webkit-appearance: none;
           appearance: none;
           width: 20px;
-          height: 20px;
+          height: 50px;
           background: var(--color-grey-mid);
           border: 2px solid var(--background);
           cursor: pointer;
@@ -535,7 +579,7 @@
 
         &::-moz-range-thumb {
           width: 20px;
-          height: 20px;
+          height: 50px;
           background: var(--foreground);
           border: 2px solid var(--background);
           cursor: pointer;
@@ -554,12 +598,11 @@
         }
       }
 
-      .slider-labels {
+      .slider-label {
         display: flex;
         justify-content: space-between;
-        margin-top: 5px;
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-small);
+        font-family: var(--special-font-stack);
+        font-size: var(--font-size-large);
         color: var(--foreground);
       }
     }
@@ -567,25 +610,39 @@
     .calculated-values {
       display: flex;
       gap: 0;
-      margin-bottom: 1rem;
+      flex: 1;
 
       .value-box {
         flex: 1;
         padding: 10px;
         border: 1px solid var(--color-border);
         background: var(--background);
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: stretch;
+        position: relative;
 
         .value-label {
           font-family: var(--typewriter-font-stack);
           font-size: var(--font-size-small);
           color: var(--color-grey-light);
-          margin-bottom: 5px;
+          position: absolute;
+          top: 8px;
+          left: 8px;
         }
 
         .value-amount {
-          font-family: var(--typewriter-font-stack);
-          font-size: var(--font-size-normal);
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-large);
           color: var(--foreground);
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          @media screen and (min-width: 800px) {
+            font-size: 42px;
+          }
         }
       }
     }
