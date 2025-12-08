@@ -1,22 +1,27 @@
 import type { TerminalOutputUnit } from "$lib/modules/terminal-typer/types"
+import { playSound, randomPitch } from "$lib/modules/sound"
+
+function onType() {
+  playSound({ category: "ratfunUI", id: "chirp", pitch: randomPitch() })
+}
 
 export const spawnMascotText: TerminalOutputUnit[] = [
   {
     type: "text",
-    content: "welcome operator",
-    color: "black",
-    backgroundColor: "transparent"
+    content: "Welcome back operator!",
+    color: "var(--foreground)",
+    typeMode: "word",
+    typeSpeed: 100,
+    backgroundColor: "transparent",
+    onType
   },
   {
     type: "text",
-    content: "enter your name",
-    color: "black",
-    backgroundColor: "transparent"
-  },
-  {
-    type: "text",
-    content: "sign to receive member card",
-    color: "black",
-    backgroundColor: "transparent"
+    content: "Sign here to get your Slop Machine pass.",
+    color: "var(--foreground)",
+    typeMode: "word",
+    typeSpeed: 100,
+    backgroundColor: "transparent",
+    onType
   }
 ]

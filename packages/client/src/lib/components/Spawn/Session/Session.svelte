@@ -34,7 +34,7 @@
 <div class="outer-container">
   <div class="inner-container">
     <div class="mascot-container" bind:this={mascotElement}>
-      <Mascot text={sessionMascotText} finishTextOnClick={true} />
+      <Mascot headBobOn={true} text={sessionMascotText} finishTextOnClick={true} />
     </div>
     <div class="button-container" bind:this={buttonElement}>
       <BigButton text={UI_STRINGS.setupSession} onclick={handleSetupSession} />

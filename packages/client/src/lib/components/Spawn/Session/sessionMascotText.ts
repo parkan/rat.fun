@@ -9,14 +9,18 @@ export const sessionMascotText: TerminalOutputUnit[] = [
   {
     type: "text",
     content: "Welcome back operator!",
-    color: "black",
+    color: "var(--foreground)",
+    typeMode: "word",
+    typeSpeed: 100,
     backgroundColor: "transparent",
     onType
   },
   {
     type: "text",
     content: "Retrieve your account below",
-    color: "black",
+    color: "var(--foreground)",
+    typeMode: "word",
+    typeSpeed: 100,
     backgroundColor: "transparent",
     onType
   }
