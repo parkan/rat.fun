@@ -18,7 +18,8 @@
   const timeline = gsap.timeline({ delay })
 
   // Element refs
-  let labelElement = $state<HTMLDivElement | null>(null)
+  let labelElement1 = $state<HTMLDivElement | null>(null)
+  let labelElement2 = $state<HTMLDivElement | null>(null)
   let itemElements = $state<HTMLDivElement[]>([])
   let emptyElement = $state<HTMLDivElement | null>(null)
 
@@ -39,8 +40,15 @@
   onMount(() => {
     if (onTimeline) {
       // Animate label first
-      if (labelElement) {
-        timeline.to(labelElement, {
+      if (labelElement1) {
+        timeline.to(labelElement1, {
+          opacity: 1,
+          duration: 0.15,
+          ease: "power2.out"
+        })
+      }
+      if (labelElement2) {
+        timeline.to(labelElement2, {
           opacity: 1,
           duration: 0.15,
           ease: "power2.out"
@@ -71,16 +79,19 @@
 
 <div class="log-inventory">
   <div class="inventory-content">
-    <div class="label" bind:this={labelElement}>Rat enters with:</div>
-    {#if hasItems}
-      {#each inventoryItems as item, i}
-        <div class="item" bind:this={itemElements[i]}>
-          {getItemName(item)}
-        </div>
-      {/each}
-    {:else}
-      <div class="empty" bind:this={emptyElement}>{UI_STRINGS.itemsNone}</div>
-    {/if}
+    <div class="group">
+      <div class="label" bind:this={labelElement1}>Subject: {frozenRat?.name}</div>
+      <div class="label" bind:this={labelElement2}>Inventory:</div>
+      {#if hasItems}
+        {#each inventoryItems as item, i}
+          <div class="item" bind:this={itemElements[i]}>
+            {getItemName(item)}
+          </div>
+        {/each}
+      {:else}
+        <div class="empty" bind:this={emptyElement}>{UI_STRINGS.itemsNone}</div>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -119,5 +130,10 @@
         background: var(--color-grey-light);
       }
     }
+  }
+
+  .group {
+    display: flex;
+    flex-flow: column nowrap;
   }
 </style>

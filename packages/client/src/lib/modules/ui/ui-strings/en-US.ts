@@ -247,8 +247,8 @@ export const enUS = {
   tripSetupDosed: "= Rat dosed with 44mg of Slopamine",
   tripSetupInitiated: "= Trip initiated: ",
   // Trip report
-  tripReportStart: "TRIP REPORT // START",
-  tripReportEnd: "TRIP REPORT // END",
+  tripReportStart: "REMOTE VIEWING SESSION: ACTIVE",
+  tripReportEnd: "REMOTE VIEWING SESSION: TERMINATED",
   balanceLabel: "Balance",
   dead: "DEAD",
   // Spawn error messages
