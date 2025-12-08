@@ -12,7 +12,7 @@
   .country-blocked {
     text-align: center;
     padding: 40px 20px;
-    background: red;
+    background: var(--color-bad);
     color: black;
 
     .content {

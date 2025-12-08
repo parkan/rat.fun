@@ -237,7 +237,7 @@
     top: 0;
     right: 0;
     right: 0;
-    background: red;
+    background: var(--color-bad);
     color: white;
     text-align: center;
     padding: 8px;
