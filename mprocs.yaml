@@ -1,7 +1,7 @@
 procs:
-  client:
-    cwd: packages/client
-    shell: pnpm run dev
+  # client:
+  #   cwd: packages/client
+  #   shell: pnpm run dev
   # dashboard:
   #   cwd: packages/dashboard
   #   shell: pnpm run dev
@@ -14,15 +14,15 @@ procs:
   auction-frontend:
     cwd: packages/auction-frontend
     shell: pnpm dev
-  webgl:
-    cwd: packages/webgl
-    shell: pnpm dev
-  contracts:
-    cwd: packages/contracts
-    shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
-  server:
-    cwd: packages/server
-    shell: pnpm dev
+  # webgl:
+  #   cwd: packages/webgl
+  #   shell: pnpm dev
+  # contracts:
+  #   cwd: packages/contracts
+  #   shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
+  # server:
+  #   cwd: packages/server
+  #   shell: pnpm dev
   # common:
   #   cwd: packages/common
   #   shell: pnpm dev
