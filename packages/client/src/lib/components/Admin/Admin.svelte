@@ -438,11 +438,13 @@
             <ProfitLossHistoryGraph {graphData} height={clientHeight} />
           </div>
         {:else}
-          <AdminEventLog
-            graphData={logData}
-            {keyboardNavigating}
-            onSelectionChange={handleEventLogSelection}
-          />
+          <div class="phone-view-log">
+            <AdminEventLog
+              graphData={logData}
+              {keyboardNavigating}
+              onSelectionChange={handleEventLogSelection}
+            />
+          </div>
         {/if}
       </div>
     {/if}
@@ -744,6 +746,12 @@
   .phone-view-profit-loss-graph {
     height: 100%;
     background: var(--color-grey-darker);
+  }
+
+  .phone-view-log {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .toggle-divider {
