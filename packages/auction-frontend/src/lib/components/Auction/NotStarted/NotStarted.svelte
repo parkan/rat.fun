@@ -11,9 +11,9 @@
   const mascotText: TerminalOutputUnit[] = [
     {
       type: "text",
-      content: "BUY $RAT",
-      typeSpeed: 40,
-      typeMode: "char",
+      content: "STARTING SOON",
+      typeSpeed: 200,
+      typeMode: "word",
       color: "var(--foreground)",
       backgroundColor: "transparent",
       onType
