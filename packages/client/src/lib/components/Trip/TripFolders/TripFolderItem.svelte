@@ -101,6 +101,8 @@
         transform: scale(0.95);
       }
 
+      background: var(--color-grey-lighter);
+
       &.restricted {
         background: var(--color-restricted-trip-folder);
       }
