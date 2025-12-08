@@ -107,7 +107,6 @@
     outline: none;
     border: none;
     border-bottom: var(--default-border-style);
-    padding: var(--trip-item-padding);
     cursor: pointer;
     width: 100%;
     color: var(--foreground);
@@ -124,6 +123,9 @@
       flex-direction: column;
       padding: 0;
       margin-bottom: 10px;
+    }
+    @media (min-width: 800px) {
+      padding: var(--trip-item-padding);
     }
 
     &.disabled {
@@ -233,8 +235,7 @@
             width: 100%;
             height: 100%;
             max-height: 200px;
-            padding-top: 5px;
-            padding-bottom: 40px;
+            padding-bottom: 5px;
             word-break: break-word;
             overflow-wrap: anywhere;
             font-family: var(--special-font-stack);
@@ -243,10 +244,13 @@
             line-height: 0.9em;
 
             @media (max-width: 800px) {
-              padding: 10px;
+              // padding: 10px;
               order: 2;
               overflow: visible;
               text-overflow: unset;
+            }
+            @media (min-width: 800px) {
+              padding-bottom: 40px;
             }
 
             &.short {

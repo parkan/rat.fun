@@ -32,7 +32,7 @@ if (typeof window !== "undefined") {
 export const phoneActiveGameView = writable<"ratbox" | "triplisting">("ratbox")
 
 // Phone admin view state - tracks which main view is active on mobile admin/trips-lab
-export const phoneActiveAdminView = writable<"home" | "trips" | "profit">("home")
+export const phoneActiveAdminView = writable<"home" | "trips" | "profit" | "events">("home")
 
 // Phone admin sub-view state - tracks sub-navigation within trips and profit views
 export const adminTripsSubView = writable<"active" | "past">("active")

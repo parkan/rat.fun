@@ -42,9 +42,6 @@
     YOU CREATED TRIP #{point.meta?.index}
     <!-- {point.meta.tripCreationCost} -->
   </span>
-  <div class:focus class:selected class="event-valuechange">
-    <SignedNumber neutralColor="var(--color-neutral);" hideZero value={point.valueChange} />
-  </div>
 {:else if point.eventType === "trip_death"}
   <span class:selected class:focus class="event-message">
     <span class="handle">@{point.meta?.playerName}</span> RAT DIED, #{point.meta?.tripIndex}
@@ -66,12 +63,31 @@
   .event-valuechange {
     min-width: 5ch;
     text-align: right;
+    display: inline-flex;
+    align-self: center;
+    height: 100%;
+    padding: 4px;
+
+    @media screen and (min-width: 800px) {
+      display: inline-block;
+      padding: 0px;
+      align-self: flex-end;
+      justify-self: flex-end;
+    }
 
     &.selected {
       background: var(--background);
     }
     &.focus {
       background: var(--background);
+    }
+  }
+
+  .event-message {
+    padding: 4px 2px;
+
+    @media screen and (min-width: 800px) {
+      padding: 0px 0px;
     }
   }
 </style>

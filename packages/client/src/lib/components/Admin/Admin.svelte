@@ -302,11 +302,6 @@
 
   const handleEventLogSelection = (index: number, tripId: string) => {
     $selectedEvent = index
-    // If user is viewing a trip detail page and clicks on the event log,
-    // navigate back to main trips lab
-    if (page.route?.id?.includes("/trips-lab/[tripId]")) {
-      goto("/trips-lab")
-    }
   }
 
   $effect(() => {
@@ -382,9 +377,10 @@
         { value: "home", label: UI_STRINGS.home.toUpperCase() },
         { value: "trips", label: UI_STRINGS.trips.toUpperCase() },
         { value: "profit", label: UI_STRINGS.profit.toUpperCase() }
+        // { value: "events", label: UI_STRINGS.events.toUpperCase() }
       ]}
       value={$phoneActiveAdminView}
-      onchange={v => phoneActiveAdminView.set(v as "home" | "trips" | "profit")}
+      onchange={v => phoneActiveAdminView.set(v as "home" | "trips" | "profit" | "events")}
     />
 
     <!-- Phone Views -->
@@ -445,6 +441,37 @@
               onSelectionChange={handleEventLogSelection}
             />
           </div>
+        {/if}
+      </div>
+    {:else if $phoneActiveAdminView === "events"}
+      <div class="phone-view phone-view-events">
+        {#if effectiveEvent && (effectiveEvent.eventType === "trip_visit" || effectiveEvent.eventType === "trip_death")}
+          {#key effectiveEvent?.meta?._id}
+            <AdminTripEventTicker
+              next={() => next(true, false)}
+              nextEnabled={$selectedEvent > 0}
+              previous={() => previous(true, false)}
+              previousEnabled={$selectedEvent < graphData.length - 1}
+              event={effectiveEvent}
+            />
+
+            <div class="phone-introspection-scroll">
+              {#key effectiveEvent?.meta?._id}
+                <AdminTripEventIntrospection event={effectiveEvent} />
+              {/key}
+            </div>
+
+            <div class="phone-event-button-container">
+              <SmallButton
+                text={UI_STRINGS.toTrip.toUpperCase() + effectiveEvent.meta.tripIndex}
+                onclick={() => {
+                  go()
+                }}
+              />
+            </div>
+          {/key}
+        {:else}
+          <p class="empty-message">{isLoadingInitialEvent ? "LOADING..." : "NO EVENTS"}</p>
         {/if}
       </div>
     {/if}
@@ -752,6 +779,29 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+
+  .phone-view-events {
+    display: grid;
+    grid-template-rows: 40px 1fr 60px;
+    gap: 0;
+
+    &:has(.empty-message) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  .phone-introspection-scroll {
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .phone-event-button-container {
+    max-height: 80px;
+    height: 100%;
+    padding: 10px;
   }
 
   .toggle-divider {

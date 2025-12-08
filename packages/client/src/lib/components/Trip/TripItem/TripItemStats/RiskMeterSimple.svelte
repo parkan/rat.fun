@@ -56,28 +56,41 @@
   }
 </script>
 
-<div class="meta">SURVIVAL RATE</div>
-<div class="meta-data-item survival-meter {survivalData.category}">
-  <!-- <Tooltip content={`SURVIVAL`}> -->
-  <div class="inner">{displayText}</div>
-  <!-- </Tooltip> -->
+<div class="group">
+  <div class="meta">SURVIVAL RATE</div>
+  <div class="meta-data-item survival-meter {survivalData.category}">
+    <!-- <Tooltip content={`SURVIVAL`}> -->
+    <div class="inner">{displayText}</div>
+    <!-- </Tooltip> -->
+  </div>
 </div>
 
-<div class="meta">MAX REWARD</div>
-<div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
-  <!-- <Tooltip content="MAX WIN"> -->
-  <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
-  <!-- </Tooltip> -->
+<div class="group">
+  <div class="meta">MAX REWARD</div>
+  <div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
+    <!-- <Tooltip content="MAX WIN"> -->
+    <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
+    <!-- </Tooltip> -->
+  </div>
 </div>
 
-<div class="meta">MAX RISK</div>
-<div class="meta-data-item max-risk">
-  <!-- <Tooltip content="ENTRY RISK"> -->
-  <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>
-  <!-- </Tooltip> -->
+<div class="group">
+  <div class="meta">MAX RISK</div>
+  <div class="meta-data-item max-risk">
+    <!-- <Tooltip content="ENTRY RISK"> -->
+    <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>
+    <!-- </Tooltip> -->
+  </div>
 </div>
 
 <style lang="scss">
+  .group {
+    width: 40%;
+
+    @media screen and (min-width: 800px) {
+      width: unset;
+    }
+  }
   .meta {
     font-size: var(--font-size-small);
     color: var(--color-grey-mid);

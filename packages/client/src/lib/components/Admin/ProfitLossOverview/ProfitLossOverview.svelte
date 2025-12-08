@@ -46,7 +46,9 @@
     <div class="profit-inner">
       <p>{UI_STRINGS.activeProfit}</p>
       <div class="percentage {$portfolioClass}">
-        ({$plSymbolExplicit}{Math.abs((100 - tweenedActiveProfit.current * 100).toFixed(2))}%)
+        {#if !isNaN(tweenedActiveProfit.current)}
+          ({$plSymbolExplicit}{Math.abs((100 - tweenedActiveProfit.current * 100).toFixed(2))}%)
+        {/if}
       </div>
       <div class="content {$portfolioClass}">
         <Tooltip content={UI_STRINGS.activeProfit}>

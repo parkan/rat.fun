@@ -18,12 +18,14 @@
     width: 100%;
     height: 100%;
     user-select: none;
+    display: flex;
+    padding: 8px 8px 0 8px;
+    gap: 12px;
+    // justify-content: space-between;
 
-    @media (max-width: 800px) {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      padding: 10px;
+    @media (min-width: 800px) {
+      justify-content: flex-start;
+      flex-direction: column;
     }
   }
 </style>

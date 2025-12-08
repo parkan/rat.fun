@@ -15,10 +15,12 @@
 <SEO prependTitle={truncatedTitle} />
 
 {#if trip}
-  <AdminTripPreview
-    sanityTripContent={data.tripContent}
-    liquidating={data.liquidating}
-    tripId={page.params.tripId as Hex}
-    {trip}
-  />
+  {#key data.tripId}
+    <AdminTripPreview
+      sanityTripContent={data.tripContent}
+      liquidating={data.liquidating}
+      tripId={page.params.tripId as Hex}
+      {trip}
+    />
+  {/key}
 {/if}

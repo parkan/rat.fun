@@ -1,5 +1,6 @@
 <script lang="ts">
   import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
   import { makeHref } from "$lib/components/Admin/helpers"
   import { focusEvent, selectedEvent } from "$lib/modules/ui/state.svelte"
   import type { TripEvent } from "$lib/components/Admin/types"
@@ -93,7 +94,9 @@
           ) {
             const href = makeHref(point)
             if (href) {
-              goto(href)
+              if (!$isPhone) {
+                goto(href)
+              }
             }
           }
         }}
