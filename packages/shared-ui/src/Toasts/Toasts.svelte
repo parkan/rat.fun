@@ -1,26 +1,39 @@
 <script lang="ts">
-  import { slide } from "svelte/transition"
-  import { toastManager } from "$lib/modules/ui/toasts.svelte"
+  import { slide, fade } from "svelte/transition"
+
+  export interface Toast {
+    id: string
+    message: string
+    type?: string
+  }
+
+  let {
+    toasts,
+    onRemove
+  }: {
+    toasts: Toast[]
+    onRemove: (id: string) => void
+  } = $props()
 
   const onToastClick = (id: string) => {
-    toastManager.remove(id)
+    onRemove(id)
   }
 </script>
 
-{#if toastManager.toasts.length > 0}
+{#if toasts.length > 0}
   <div class="toasts-container">
-    {#each toastManager.toasts as toast (toast.id)}
+    {#each toasts as toast (toast.id)}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        transition:slide|global
+        in:slide|global={{ duration: 200 }}
+        out:fade|global={{ duration: 200 }}
         class="toast toast-{toast.type}"
         onclick={() => onToastClick(toast.id)}
       >
         <div class="toast-content">
           {toast.message.length > 160 ? toast.message.substring(0, 160) + "..." : toast.message}
         </div>
-        <div class="toast-close">×</div>
       </div>
     {/each}
   </div>
@@ -42,7 +55,8 @@
     background: var(--background);
     border: var(--default-border-style);
     padding: 12px 16px;
-    width: 400px;
+    max-width: 400px;
+    min-width: 200px;
     font-family: var(--typewriter-font-stack);
     font-size: var(--font-size-small);
     line-height: var(--font-size-small);
@@ -56,28 +70,38 @@
     transition: all 0.2s ease;
     overflow: hidden;
 
+    @media (max-width: 768px) {
+      max-width: 90%;
+    }
+
     &:hover {
       opacity: 0.8;
     }
 
     &.toast-error {
-      border-color: var(--color-grey-light);
-      background: var(--background);
-    }
-
-    &.toast-success {
-      border-color: var(--color-good);
-      background: var(--background);
+      border-color: var(--color-toast-error, var(--color-bad));
     }
 
     &.toast-warning {
-      border-color: var(--color-neutral);
-      background: var(--background);
+      border-color: var(--color-toast-warning, var(--color-neutral));
     }
 
     &.toast-info {
-      border-color: var(--color-grey-mid);
-      background: var(--background);
+      border-color: var(--color-toast-info, var(--color-grey-mid));
+    }
+
+    &.toast-success {
+      border-color: var(--color-toast-success, var(--color-good));
+    }
+
+    &.toast-player-notification {
+      font-size: var(--font-size-normal);
+      border-color: var(--color-toast-player-notification);
+    }
+
+    &.toast-trip-notification {
+      font-size: var(--font-size-normal);
+      border-color: var(--color-toast-trip-notification);
     }
   }
 
