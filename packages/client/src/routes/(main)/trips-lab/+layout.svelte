@@ -36,7 +36,7 @@
 
     @media screen and (min-width: 800px) {
       min-width: 600px;
-      max-width: 50vw;
+      max-width: calc(var(--game-window-width) / 2);
       // width: 600px;
     }
     &.open {
