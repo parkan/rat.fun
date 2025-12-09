@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit"
 import { get } from "svelte/store"
-import { player } from "$lib/modules/state/stores"
+import { player, playerHasLiveRat } from "$lib/modules/state/stores"
 
 export const prerender = false
 
@@ -14,8 +14,16 @@ export const load = ({ params, url }: { params: { tripId: string }; url: URL }) 
   // 1. The enter flag is true
   // 2. The rat ID matches the current rat
   // 3. The timestamp is within the last 10 seconds
+  // 4. The rat is alive
   // Otherwise, redirect to the home page
-  if (!(enterFlag && ratId === get(player)?.currentRat && Date.now() - timestamp < 10000)) {
+  if (
+    !(
+      enterFlag &&
+      ratId === get(player)?.currentRat &&
+      Date.now() - timestamp < 10000 &&
+      get(playerHasLiveRat)
+    )
+  ) {
     throw redirect(302, "/")
   }
 
