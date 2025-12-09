@@ -44,7 +44,15 @@
     try {
       const addresses = await waitForAddresses()
 
-      await approveMax(addresses.gamePoolAddress)
+      const result = await approveMax(addresses.gamePoolAddress)
+
+      // Check if approval was rejected or failed (returns false on failure)
+      if (result === false) {
+        console.log("[AllowanceLoading] Approval was rejected or failed")
+        spawnState.state.transitionTo(SPAWN_STATE.ALLOWANCE)
+        return
+      }
+
       console.log("[AllowanceLoading] Approval transaction complete")
 
       // Explicitly update the allowance store since playerAddress may not be set yet
