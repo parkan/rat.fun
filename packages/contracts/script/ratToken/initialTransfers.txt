@@ -1,0 +1,4 @@
+From deployer:
+2_000_000 => To airdrop contract
+200_000 => To Exchange (fake token swap) contract
+27_186 => To new Gamepool to match $FAKERAT balance 
