@@ -108,20 +108,24 @@ export function playSound(config: PlaySoundConfig): Howl | undefined {
   // Set loop state
   sound.loop(loop)
 
-  // Set pitch
-  sound.rate(pitch)
-
   // Play sound - wrapped in try-catch for iOS AudioContext errors
+  let soundId: number | undefined
   try {
-    sound.play()
+    soundId = sound.play() as number
   } catch {
     // Silently fail - audio will work after user interaction
     return undefined
   }
 
-  if (fadeIn) {
+  // Set pitch AFTER play() to avoid Howler.js queue recursion bug
+  // Pass sound ID to target specific instance
+  if (soundId !== undefined && pitch !== 1) {
+    sound.rate(pitch, soundId)
+  }
+
+  if (fadeIn && soundId !== undefined) {
     const FADE_TIME = 2000
-    sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME)
+    sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME, soundId)
   }
 
   return sound

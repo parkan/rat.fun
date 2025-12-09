@@ -80,9 +80,6 @@ class BackgroundMusicManager {
     // Set loop state
     sound.loop(loop)
 
-    // Set pitch
-    sound.rate(pitch)
-
     // Play sound and track the sound ID - wrapped in try-catch for iOS AudioContext errors
     let soundId: number | undefined
     try {
@@ -90,6 +87,12 @@ class BackgroundMusicManager {
     } catch {
       // Silently fail - audio will work after user interaction
       return
+    }
+
+    // Set pitch AFTER play() to avoid Howler.js queue recursion bug
+    // Pass sound ID to target specific instance
+    if (soundId !== undefined && pitch !== 1) {
+      sound.rate(pitch, soundId)
     }
 
     if (fadeIn && soundId !== undefined) {
@@ -193,9 +196,6 @@ class BackgroundMusicManager {
       // Set loop state
       sound.loop(loop)
 
-      // Set pitch
-      sound.rate(pitch)
-
       // Play sound and track the sound ID - wrapped in try-catch for iOS AudioContext errors
       let soundId: number | undefined
       try {
@@ -203,6 +203,12 @@ class BackgroundMusicManager {
       } catch {
         // Silently fail - audio will work after user interaction
         return
+      }
+
+      // Set pitch AFTER play() to avoid Howler.js queue recursion bug
+      // Pass sound ID to target specific instance
+      if (soundId !== undefined && pitch !== 1) {
+        sound.rate(pitch, soundId)
       }
 
       if (fadeIn && soundId !== undefined) {
