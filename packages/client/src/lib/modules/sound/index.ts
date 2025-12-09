@@ -125,7 +125,12 @@ export function playSound(config: PlaySoundConfig): Howl | undefined {
 
   if (fadeIn && soundId !== undefined) {
     const FADE_TIME = 2000
-    sound.fade(0, volume !== undefined ? volume : soundLibrary[category][id].volume, FADE_TIME, soundId)
+    sound.fade(
+      0,
+      volume !== undefined ? volume : soundLibrary[category][id].volume,
+      FADE_TIME,
+      soundId
+    )
   }
 
   return sound

@@ -150,8 +150,9 @@ export function getRatInventory(rat: Rat | null, delay?: number) {
   const itemsStore = get(items)
   // Filter out undefined items (can happen during navigation when store is being updated)
   const result =
-    rat.inventory?.map(item => itemsStore[item]).filter((item): item is Item => item !== undefined) ??
-    ([] as Item[])
+    rat.inventory
+      ?.map(item => itemsStore[item])
+      .filter((item): item is Item => item !== undefined) ?? ([] as Item[])
   return result
 }
 
