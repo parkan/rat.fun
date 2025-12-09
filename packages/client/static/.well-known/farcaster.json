@@ -6,7 +6,7 @@
   },
   "baseBuilder": { "ownerAddress": "0x9Ed924Ec5632DF0C704E368c95c01256Ed7a0e29" },
   "miniapp": {
-    "version": "2",
+    "version": "1",
     "name": "rat.fun",
     "homeUrl": "https://rat.fun",
     "iconUrl": "https://rat.fun/images/product/icon.png",
