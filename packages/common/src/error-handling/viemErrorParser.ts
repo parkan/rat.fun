@@ -1,5 +1,5 @@
 import { BaseError } from "viem"
-import { slice, decodeErrorResult, toHex } from "viem"
+import { slice, decodeErrorResult } from "viem"
 import {
   TransactionError,
   TransactionRevertedError,
@@ -36,7 +36,8 @@ function decodeRevertData(hexData: string) {
   }
 
   // Fallback if no ABI matches
-  return `Unknown error: Selector ${toHex(selector)}, Data: ${toHex(parametersHex)}`
+  // Note: slice() already returns hex strings, no need for toHex()
+  return `Unknown error: Selector ${selector}, Data: ${parametersHex}`
 }
 
 /**
