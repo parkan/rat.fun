@@ -31,7 +31,7 @@
   import Loading from "$lib/components/Loading/Loading.svelte"
   import TouristTrip from "$lib/components/TouristTrip/TouristTrip.svelte"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import { ShaderGlobal, Lightbox, Toasts, ManageAllowanceModal } from "$lib/components/Shared"
+  import { ShaderGlobal, Lightbox, Toasts, ManageAllowanceModal, SEO } from "$lib/components/Shared"
   import { allowanceModalState, closeAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { sdk } from "@farcaster/miniapp-sdk"
 
@@ -140,6 +140,8 @@
 </script>
 
 <svelte:window />
+
+<SEO prependTitle="" />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}
