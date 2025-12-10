@@ -715,10 +715,6 @@
       border-top: 1px solid var(--color-grey-dark);
     }
 
-    .button-placeholder {
-      height: 60px;
-    }
-
     .empty-message {
       filter: drop-shadow(0px 0px 2px var(--foreground));
       opacity: 0.5;

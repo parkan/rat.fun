@@ -246,6 +246,7 @@
           margin: 0;
         }
         -moz-appearance: textfield;
+        appearance: textfield;
       }
 
       .max-button {
