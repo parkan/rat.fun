@@ -27,173 +27,103 @@ The error occurs when the **Farcaster MiniApp wallet** is used. The flow:
 
 ### The Root Cause
 
-The issue is **NOT** with the session client (Drawbridge) - it's with the **raw wagmi connector client** when calling `writeContract` on the Farcaster MiniApp provider.
+The Farcaster MiniApp wallet (backed by Privy's embedded wallet) doesn't support certain RPC methods that viem's `writeContract` calls internally. Even when gas and nonce are pre-fetched via the public client, the `writeContract` call still fails.
 
-Looking at `executeTransaction.ts:33-35`:
+The issue is that the generic `injected()` wagmi connector doesn't properly handle the Farcaster wallet's specific requirements. The official `@farcaster/miniapp-wagmi-connector` is designed to handle these edge cases.
 
-```typescript
-const client: WalletTransactionClient = useConnectorClient
-  ? await prepareConnectorClientForTransaction()  // ← Uses raw wagmi connector
-  : get(walletNetwork).walletClient               // ← Uses Drawbridge session client
+### Evidence from Console Logs
+
+```
+[executeTransaction] Starting approve transaction
+[executeTransaction] Estimating gas via public client...
+[executeTransaction] Gas estimated: 46751
+[executeTransaction] Nonce fetched: 0
+[executeTransaction] Calling writeContract on wallet...
+parseViemError UnsupportedProviderMethodError: The Provider does not support the requested method.
 ```
 
-For `Approve` operations, it uses `useConnectorClient = true`, meaning it goes through the **raw wagmi connector client**, not the Drawbridge session client.
-
-The Farcaster MiniApp wallet provider (exposed via `window.ethereum` or `sdk.wallet.getEthereumProvider()`) has **limited RPC method support**. When viem's `writeContract` is called, it internally tries to:
-
-1. Call `eth_estimateGas` to estimate gas
-2. Call `eth_sendTransaction` to send the transaction
-
-The Farcaster wallet likely doesn't support `eth_estimateGas` (or possibly other preparatory methods like `eth_call`), causing the `UnsupportedProviderMethodError`.
-
-### Evidence
-
-From the Viem documentation:
-
-> Wallet Client doesn't support public actions because wallet providers (Injected window.ethereum, WalletConnect v2, etc.) may not provide a large majority of "node"/"public" RPC methods like eth_call, eth_newFilter, eth_getLogs, etc. This is because these methods are not required for a wallet provider to function properly.
+This shows the error happens **after** gas and nonce are fetched, during the actual `writeContract` call.
 
 ---
 
-## Fix Options
+## Implemented Fixes
 
-### Option 1: Use the Official Farcaster MiniApp Connector (Recommended)
+### Fix 1: Official Farcaster MiniApp Connector (IMPLEMENTED)
 
-**Problem**: Using the generic `injected()` connector which doesn't handle Farcaster-specific quirks.
+Installed `@farcaster/miniapp-wagmi-connector` and updated `getConnectors.ts` to detect Farcaster context and use the official connector.
 
-**Solution**: Install and use `@farcaster/miniapp-wagmi-connector`
+**Detection methods:**
 
-```bash
-pnpm add @farcaster/miniapp-wagmi-connector
-```
+1. Check if SDK wallet provider is available
+2. Check referrer for Farcaster domains (farcaster.xyz, warpcast.com)
+3. Check window.ethereum for Farcaster wallet indicators
 
-Update `packages/client/src/lib/modules/drawbridge/getConnectors.ts`:
+### Fix 2: Public Client for Gas/Nonce Estimation (IMPLEMENTED)
 
-```typescript
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
-import { sdk } from '@farcaster/miniapp-sdk'
+Updated `executeTransaction.ts` to use the public client (RPC transport) for:
 
-export function getConnectors(): CreateConnectorFn[] {
-  const connectors: CreateConnectorFn[] = []
+- Gas estimation via `publicClient.estimateGas()`
+- Nonce fetching via `publicClient.getTransactionCount()`
 
-  // Check if we're in a Farcaster Mini App context
-  const isFarcasterMiniApp = typeof window !== 'undefined' && sdk?.context?.client?.clientFid
+This avoids calling unsupported RPC methods on the wallet provider.
 
-  if (isFarcasterMiniApp) {
-    // Use official Farcaster connector for Mini Apps
-    connectors.push(farcasterMiniApp())
-  } else {
-    // Standard injected connector for other environments
-    connectors.push(injected())
-  }
+### Fix 3: Resilient Chain Switching (IMPLEMENTED)
 
-  // ... rest of connectors
-}
-```
+Updated `connector.ts` to gracefully handle wallets that don't support `wallet_switchEthereumChain` or `wallet_addEthereumChain`.
 
-The official connector may properly handle the limited RPC methods.
+### Fix 4: Replace viem writeContract with wagmi sendTransaction (IMPLEMENTED)
 
----
+Even with the official Farcaster connector, fixes 1-3, viem's `writeContract` still fails because it calls internal RPC methods that the Privy embedded wallet doesn't support.
 
-### Option 2: Configure Gas Manually for Approve Transactions
-
-**Problem**: `writeContract` calls `eth_estimateGas` which isn't supported.
-
-**Solution**: Provide explicit gas limits to bypass gas estimation:
-
-Update `packages/client/src/lib/modules/on-chain-transactions/executeTransaction.ts`:
+**Solution**: Use wagmi's `sendTransaction` with manually encoded function data instead of viem's `writeContract`. This bypasses viem's internal processing that causes the `UnsupportedProviderMethodError`.
 
 ```typescript
-if (systemId === WorldFunctions.Approve) {
-  if (params.length === 2) {
-    tx = await client.writeContract({
-      address: get(externalAddressesConfig).erc20Address,
-      abi: erc20Abi,
-      functionName: "approve",
-      args: params as [`0x${string}`, bigint],
-      gas: 60_000n  // ERC20 approve typically needs ~46k gas, use 60k for safety
-    })
-  }
-}
+// Before (fails with Farcaster wallet)
+tx = await client.writeContract({
+  address: erc20Address,
+  abi: erc20Abi,
+  functionName: "approve",
+  args: approveArgs,
+  gas: gasEstimate,
+  nonce
+})
+
+// After (works with Farcaster wallet)
+const data = encodeFunctionData({
+  abi: erc20Abi,
+  functionName: "approve",
+  args: approveArgs
+})
+const wagmiConfig = getWagmiConfig()
+tx = await sendTransaction(wagmiConfig, {
+  to: erc20Address,
+  data,
+  gas: gasEstimate,
+  nonce
+})
 ```
 
 ---
 
-### Option 3: Use Separate Public Client for Gas Estimation
+## Key Files Modified
 
-**Problem**: The wallet provider can't estimate gas.
-
-**Solution**: Use the public client (with RPC transport) for gas estimation, then only use the wallet for signing:
-
-```typescript
-import { encodeFunctionData } from 'viem'
-
-// In executeTransaction.ts
-if (systemId === WorldFunctions.Approve) {
-  const publicClient = get(publicNetwork).publicClient
-
-  // Estimate gas using public RPC (not wallet provider)
-  const gas = await publicClient.estimateGas({
-    account: client.account.address,
-    to: get(externalAddressesConfig).erc20Address,
-    data: encodeFunctionData({
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: params as [`0x${string}`, bigint]
-    })
-  })
-
-  tx = await client.writeContract({
-    address: get(externalAddressesConfig).erc20Address,
-    abi: erc20Abi,
-    functionName: "approve",
-    args: params as [`0x${string}`, bigint],
-    gas: gas + (gas / 10n)  // Add 10% buffer
-  })
-}
-```
+| File                                                                          | Changes                                                      |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `packages/client/src/lib/modules/drawbridge/getConnectors.ts`                 | Added Farcaster MiniApp detection and official connector     |
+| `packages/client/src/lib/modules/drawbridge/connector.ts`                     | Made chain switching resilient, added `getWagmiConfig()`     |
+| `packages/client/src/lib/modules/on-chain-transactions/executeTransaction.ts` | Use wagmi `sendTransaction` instead of viem `writeContract`  |
 
 ---
 
-### Option 4: Detect Farcaster Wallet and Route Differently
+## Testing Notes
 
-Add detection for the Farcaster wallet and use a different transaction path:
+After deploying, check console logs for:
 
-```typescript
-// In getConnectors.ts, add detection
-export function isFarcasterMiniAppWallet(): boolean {
-  if (typeof window === 'undefined') return false
-  const eth = window.ethereum as any
-  // Farcaster injects as xyz.farcaster.MiniAppWallet
-  return eth?.isFrame || eth?.isFarcaster || navigator.userAgent.includes('Farcaster')
-}
-```
-
-Then in transaction handling, use `wallet_sendCalls` (EIP-5792) which Farcaster explicitly supports:
-
-```typescript
-// Use useSendCalls for Farcaster wallets
-import { useSendCalls } from 'wagmi/experimental'
-```
-
----
-
-## Recommended Implementation Order
-
-1. **Quick Fix (Option 2)**: Add explicit gas limit to approve transactions - lowest risk, immediate fix
-2. **Proper Fix (Option 1)**: Add official `@farcaster/miniapp-wagmi-connector` - better long-term solution
-3. **Enhancement (Option 3/4)**: Add robust wallet detection and use EIP-5792 `wallet_sendCalls` for batch operations
-
----
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `packages/client/src/lib/modules/drawbridge/getConnectors.ts` | Wallet connector configuration |
-| `packages/client/src/lib/modules/drawbridge/connector.ts` | `prepareConnectorClientForTransaction()` |
-| `packages/client/src/lib/modules/on-chain-transactions/executeTransaction.ts` | Transaction execution logic |
-| `packages/client/src/lib/modules/on-chain-transactions/index.ts` | `approveMax()` function |
-| `packages/client/src/lib/components/Spawn/Allowance/Loading/AllowanceLoading.svelte` | UI component that triggers approval |
+1. `[getConnectors] Detected Farcaster MiniApp context, using farcasterMiniApp connector` - confirms official connector is being used
+2. `[executeTransaction] Gas estimated: X` - confirms gas estimation via public client works
+3. `[executeTransaction] Nonce fetched: X` - confirms nonce fetching via public client works
+4. `[executeTransaction] Calling sendTransaction via wagmi...` - confirms using wagmi instead of viem
+5. `[executeTransaction] sendTransaction returned tx: 0x...` - confirms transaction succeeded
 
 ---
 
@@ -203,4 +133,5 @@ import { useSendCalls } from 'wagmi/experimental'
 - [Farcaster MiniApp SDK Changelog](https://miniapps.farcaster.xyz/docs/sdk/changelog)
 - [@farcaster/miniapp-wagmi-connector npm](https://www.npmjs.com/package/@farcaster/miniapp-wagmi-connector)
 - [Viem FAQ on Wallet Client Limitations](https://viem.sh/docs/faq)
-- [Wagmi writeContract](https://wagmi.sh/core/api/actions/writeContract)
+- [Viem writeContract](https://viem.sh/docs/contract/writeContract)
+- [Viem sendTransaction](https://viem.sh/docs/actions/wallet/sendTransaction)
