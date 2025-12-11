@@ -37,6 +37,7 @@
   .mode-switch {
     width: 160px;
     height: 100%;
+    background: var(--color-grey-dark);
 
     @media (max-width: 800px) {
       flex: 1;
