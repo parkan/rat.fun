@@ -3,6 +3,7 @@ import { signTypedData } from "viem/actions"
 import { callWithSignatureTypes } from "@latticexyz/world-module-callwithsignature/internal"
 import { getRecord } from "@latticexyz/store/internal"
 import moduleConfig from "@latticexyz/world-module-callwithsignature/mud.config"
+import moduleConfigAlt from "@dk1a/world-module-callwithsignature-alt/mud.config"
 import { hexToResource } from "@latticexyz/common"
 import { getAction } from "viem/utils"
 import { ConnectedClient } from "../../types"
@@ -13,6 +14,7 @@ export type SignCallOptions<chain extends Chain = Chain> = {
   worldAddress: Address
   systemId: Hex
   callData: Hex
+  altDomain: boolean
 } & OneOf<{ nonce: bigint } | { client: Client<Transport, chain> }>
 
 /**
@@ -29,7 +31,9 @@ export type SignCallOptions<chain extends Chain = Chain> = {
  *    e.g., "world:PlayerSystem" → { namespace: "world", name: "PlayerSystem" }
  *
  * 3. **Sign EIP-712 message** - User signs typed data with:
- *    - Domain: World contract + chain ID
+ *    - Domain: depends on altDomain
+ *    - - if false: verifyingCotract(World contract), salt(chain ID)
+ *    - - if true: name(CallWithSignatureAlt), version(1), chainId, verifyingContract(World contract
  *    - Message: signer, system, callData, nonce
  *
  * The resulting signature can be submitted to World.callWithSignature()
@@ -50,7 +54,8 @@ export async function signCall<chain extends Chain = Chain>({
   systemId,
   callData,
   nonce: initialNonce,
-  client
+  client,
+  altDomain
 }: SignCallOptions<chain>) {
   logger.log("[drawbridge] signCall starting:", {
     userAddress: userClient.account.address,
@@ -71,7 +76,9 @@ export async function signCall<chain extends Chain = Chain>({
       ? (
           await getRecord(client, {
             address: worldAddress,
-            table: moduleConfig.tables.CallWithSignatureNonces,
+            table: altDomain
+              ? moduleConfigAlt.tables.AltCallWithSignatureNonces
+              : moduleConfig.tables.CallWithSignatureNonces,
             key: { signer: userClient.account.address },
             blockTag: "pending"
           })
@@ -86,10 +93,17 @@ export async function signCall<chain extends Chain = Chain>({
   logger.log("[drawbridge] signCall system parsed:", { systemNamespace, systemName })
 
   // Build domain and message for logging
-  const domain = {
-    verifyingContract: worldAddress,
-    salt: toHex(userClient.chain.id, { size: 32 })
-  }
+  const domain = altDomain
+    ? {
+        name: "CallWithSignatureAlt",
+        version: "1",
+        chainId: userClient.chain.id,
+        verifyingContract: worldAddress
+      }
+    : {
+        verifyingContract: worldAddress,
+        salt: toHex(userClient.chain.id, { size: 32 })
+      }
 
   const message = {
     signer: userClient.account.address,
@@ -118,17 +132,21 @@ export async function signCall<chain extends Chain = Chain>({
     JSON.stringify(
       {
         types: {
-          EIP712Domain: [
-            { name: "verifyingContract", type: "address" },
-            { name: "salt", type: "bytes32" }
-          ],
+          EIP712Domain: altDomain
+            ? [
+                { name: "name", type: "string" },
+                { name: "version", type: "string" },
+                { name: "chainId", type: "uint256" },
+                { name: "verifyingContract", type: "address" }
+              ]
+            : [
+                { name: "verifyingContract", type: "address" },
+                { name: "salt", type: "bytes32" }
+              ],
           ...callWithSignatureTypes
         },
         primaryType: "Call",
-        domain: {
-          verifyingContract: worldAddress,
-          salt: toHex(userClient.chain.id, { size: 32 })
-        },
+        domain,
         message: {
           signer: userClient.account.address,
           systemNamespace,
@@ -159,10 +177,17 @@ export async function signCall<chain extends Chain = Chain>({
   // This matches the JSON-RPC format: eth_signTypedData_v4(address, typedData)
   const typedDataForRpc = {
     types: {
-      EIP712Domain: [
-        { name: "verifyingContract", type: "address" },
-        { name: "salt", type: "bytes32" }
-      ],
+      EIP712Domain: altDomain
+        ? [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" }
+          ]
+        : [
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" }
+          ],
       ...callWithSignatureTypes
     },
     primaryType: "Call" as const,
