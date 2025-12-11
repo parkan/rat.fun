@@ -6,6 +6,7 @@ import moduleConfig from "@latticexyz/world-module-callwithsignature/mud.config"
 import { hexToResource } from "@latticexyz/common"
 import { getAction } from "viem/utils"
 import { ConnectedClient } from "../../types"
+import { logger } from "../../logger"
 
 export type SignCallOptions<chain extends Chain = Chain> = {
   userClient: ConnectedClient<chain>
@@ -51,6 +52,17 @@ export async function signCall<chain extends Chain = Chain>({
   nonce: initialNonce,
   client
 }: SignCallOptions<chain>) {
+  logger.log("[drawbridge] signCall starting:", {
+    userAddress: userClient.account.address,
+    worldAddress,
+    systemId,
+    callDataLength: callData.length,
+    chainId: userClient.chain.id,
+    accountType: userClient.account.type,
+    transportType: userClient.transport?.type,
+    transportName: userClient.transport?.name
+  })
+
   // Get nonce for replay protection
   // Either use provided nonce or fetch from World contract
   const nonce =
@@ -66,32 +78,130 @@ export async function signCall<chain extends Chain = Chain>({
         ).nonce
       : 0n)
 
+  logger.log("[drawbridge] signCall nonce fetched:", { nonce: nonce.toString() })
+
   // Parse MUD system ID into namespace and name components
   const { namespace: systemNamespace, name: systemName } = hexToResource(systemId)
 
-  // Sign EIP-712 typed data
-  // User signs this message, session account will submit it
-  return await getAction(
-    userClient,
-    signTypedData,
-    "signTypedData"
-  )({
-    account: userClient.account,
-    // EIP-712 domain bound to World contract and chain
-    domain: {
-      verifyingContract: worldAddress,
-      salt: toHex(userClient.chain.id, { size: 32 })
-    },
-    // MUD's CallWithSignature type definitions
+  logger.log("[drawbridge] signCall system parsed:", { systemNamespace, systemName })
+
+  // Build domain and message for logging
+  const domain = {
+    verifyingContract: worldAddress,
+    salt: toHex(userClient.chain.id, { size: 32 })
+  }
+
+  const message = {
+    signer: userClient.account.address,
+    systemNamespace,
+    systemName,
+    callData,
+    nonce
+  }
+
+  logger.log("[drawbridge] signTypedData params:", {
+    account: userClient.account.address,
+    domain,
     types: callWithSignatureTypes,
     primaryType: "Call",
-    // Message contains all call details + nonce
     message: {
-      signer: userClient.account.address,
-      systemNamespace,
-      systemName,
-      callData,
-      nonce
+      ...message,
+      callData: `${callData.slice(0, 66)}... (${callData.length} chars)`,
+      nonce: nonce.toString()
     }
   })
+
+  // Log the raw EIP-712 structure that will be sent to the wallet
+  // This helps debug wallet compatibility issues
+  logger.log(
+    "[drawbridge] EIP-712 raw structure:",
+    JSON.stringify(
+      {
+        types: {
+          EIP712Domain: [
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" }
+          ],
+          ...callWithSignatureTypes
+        },
+        primaryType: "Call",
+        domain: {
+          verifyingContract: worldAddress,
+          salt: toHex(userClient.chain.id, { size: 32 })
+        },
+        message: {
+          signer: userClient.account.address,
+          systemNamespace,
+          systemName,
+          callData,
+          nonce: nonce.toString()
+        }
+      },
+      null,
+      2
+    )
+  )
+
+  // Sign EIP-712 typed data
+  // User signs this message, session account will submit it
+
+  // Log exact types being passed to viem
+  logger.log("[drawbridge] signTypedData exact values:", {
+    nonceType: typeof nonce,
+    nonceValue: nonce,
+    systemNamespaceLength: systemNamespace.length,
+    systemNamespaceIsEmpty: systemNamespace === "",
+    callDataType: typeof callData,
+    callDataIsHex: callData.startsWith("0x")
+  })
+
+  // Log the exact eth_signTypedData_v4 params that viem will send
+  // This matches the JSON-RPC format: eth_signTypedData_v4(address, typedData)
+  const typedDataForRpc = {
+    types: {
+      EIP712Domain: [
+        { name: "verifyingContract", type: "address" },
+        { name: "salt", type: "bytes32" }
+      ],
+      ...callWithSignatureTypes
+    },
+    primaryType: "Call" as const,
+    domain,
+    message: {
+      ...message,
+      // Convert bigint to hex string for JSON-RPC (how viem serializes uint256)
+      nonce: `0x${nonce.toString(16)}`
+    }
+  }
+  logger.log("[drawbridge] eth_signTypedData_v4 params (JSON-RPC format):", {
+    method: "eth_signTypedData_v4",
+    params: [userClient.account.address, JSON.stringify(typedDataForRpc)]
+  })
+
+  try {
+    const signature = await getAction(
+      userClient,
+      signTypedData,
+      "signTypedData"
+    )({
+      account: userClient.account,
+      // EIP-712 domain bound to World contract and chain
+      domain,
+      // MUD's CallWithSignature type definitions
+      types: callWithSignatureTypes,
+      primaryType: "Call",
+      // Message contains all call details + nonce
+      message
+    })
+
+    logger.log("[drawbridge] signTypedData success:", { signatureLength: signature.length })
+    return signature
+  } catch (error) {
+    logger.error("[drawbridge] signTypedData failed:", {
+      error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorDetails: (error as { details?: string })?.details
+    })
+    throw error
+  }
 }

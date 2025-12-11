@@ -799,43 +799,137 @@ async function signCall({
   nonce: initialNonce,
   client
 }) {
+  logger.log("[drawbridge] signCall starting:", {
+    userAddress: userClient.account.address,
+    worldAddress,
+    systemId,
+    callDataLength: callData.length,
+    chainId: userClient.chain.id,
+    accountType: userClient.account.type,
+    transportType: userClient.transport?.type,
+    transportName: userClient.transport?.name
+  });
   const nonce = initialNonce ?? (client ? (await getRecord(client, {
     address: worldAddress,
     table: moduleConfig.tables.CallWithSignatureNonces,
     key: { signer: userClient.account.address },
     blockTag: "pending"
   })).nonce : 0n);
+  logger.log("[drawbridge] signCall nonce fetched:", { nonce: nonce.toString() });
   const { namespace: systemNamespace, name: systemName } = hexToResource(systemId);
-  return await getAction(
-    userClient,
-    signTypedData,
-    "signTypedData"
-  )({
-    account: userClient.account,
-    // EIP-712 domain bound to World contract and chain
+  logger.log("[drawbridge] signCall system parsed:", { systemNamespace, systemName });
+  const domain = {
+    verifyingContract: worldAddress,
+    salt: toHex(userClient.chain.id, { size: 32 })
+  };
+  const message = {
+    signer: userClient.account.address,
+    systemNamespace,
+    systemName,
+    callData,
+    nonce
+  };
+  logger.log("[drawbridge] signTypedData params:", {
+    account: userClient.account.address,
+    domain,
+    types: callWithSignatureTypes,
+    primaryType: "Call",
+    message: {
+      ...message,
+      callData: `${callData.slice(0, 66)}... (${callData.length} chars)`,
+      nonce: nonce.toString()
+    }
+  });
+  logger.log("[drawbridge] EIP-712 raw structure:", JSON.stringify({
+    types: {
+      EIP712Domain: [
+        { name: "verifyingContract", type: "address" },
+        { name: "salt", type: "bytes32" }
+      ],
+      ...callWithSignatureTypes
+    },
+    primaryType: "Call",
     domain: {
       verifyingContract: worldAddress,
       salt: toHex(userClient.chain.id, { size: 32 })
     },
-    // MUD's CallWithSignature type definitions
-    types: callWithSignatureTypes,
-    primaryType: "Call",
-    // Message contains all call details + nonce
     message: {
       signer: userClient.account.address,
       systemNamespace,
       systemName,
       callData,
-      nonce
+      nonce: nonce.toString()
     }
+  }, null, 2));
+  logger.log("[drawbridge] signTypedData exact values:", {
+    nonceType: typeof nonce,
+    nonceValue: nonce,
+    systemNamespaceLength: systemNamespace.length,
+    systemNamespaceIsEmpty: systemNamespace === "",
+    callDataType: typeof callData,
+    callDataIsHex: callData.startsWith("0x")
   });
+  const typedDataForRpc = {
+    types: {
+      EIP712Domain: [
+        { name: "verifyingContract", type: "address" },
+        { name: "salt", type: "bytes32" }
+      ],
+      ...callWithSignatureTypes
+    },
+    primaryType: "Call",
+    domain,
+    message: {
+      ...message,
+      // Convert bigint to hex string for JSON-RPC (how viem serializes uint256)
+      nonce: `0x${nonce.toString(16)}`
+    }
+  };
+  logger.log("[drawbridge] eth_signTypedData_v4 params (JSON-RPC format):", {
+    method: "eth_signTypedData_v4",
+    params: [userClient.account.address, JSON.stringify(typedDataForRpc)]
+  });
+  try {
+    const signature = await getAction(
+      userClient,
+      signTypedData,
+      "signTypedData"
+    )({
+      account: userClient.account,
+      // EIP-712 domain bound to World contract and chain
+      domain,
+      // MUD's CallWithSignature type definitions
+      types: callWithSignatureTypes,
+      primaryType: "Call",
+      // Message contains all call details + nonce
+      message
+    });
+    logger.log("[drawbridge] signTypedData success:", { signatureLength: signature.length });
+    return signature;
+  } catch (error) {
+    logger.error("[drawbridge] signTypedData failed:", {
+      error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorDetails: error?.details
+    });
+    throw error;
+  }
 }
 async function callWithSignature({
   sessionClient,
   ...opts
 }) {
+  logger.log("[drawbridge] callWithSignature starting:", {
+    userAddress: opts.userClient.account.address,
+    sessionAddress: sessionClient.account.address,
+    worldAddress: opts.worldAddress,
+    systemId: opts.systemId
+  });
+  logger.log("[drawbridge] callWithSignature: requesting user signature...");
   const signature = await signCall(opts);
-  return await getAction(
+  logger.log("[drawbridge] callWithSignature: user signature obtained");
+  logger.log("[drawbridge] callWithSignature: submitting transaction via session account...");
+  const hash = await getAction(
     sessionClient,
     writeContract,
     "writeContract"
@@ -845,6 +939,8 @@ async function callWithSignature({
     functionName: "callWithSignature",
     args: [opts.userClient.account.address, opts.systemId, opts.callData, signature]
   });
+  logger.log("[drawbridge] callWithSignature: transaction submitted:", { hash });
+  return hash;
 }
 
 // src/session/delegation/eoa.ts
