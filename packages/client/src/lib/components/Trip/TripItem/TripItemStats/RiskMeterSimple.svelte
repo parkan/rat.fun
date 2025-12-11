@@ -61,7 +61,9 @@
   <div class="group">
     <div class="meta">RISK</div>
     <div class="meta-data-item max-risk">
-      <Tooltip content="You always risk your whole rat going into a trip">
+      <Tooltip
+        content="WARNING! When you enter a trip you risk your RAT's health and PSYCHO OBJECTS"
+      >
         <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>
       </Tooltip>
     </div>
@@ -70,7 +72,7 @@
   <div class="group">
     <div class="meta">REWARD</div>
     <div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
-      <Tooltip content="This is the max the rat can get from entering">
+      <Tooltip content="Max reward your RAT might get from surviving this TRIP">
         <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
       </Tooltip>
     </div>
@@ -78,7 +80,7 @@
 
   <div class="meta">SURVIVAL</div>
   <div class="meta-data-item survival-meter {survivalData.category}">
-    <Tooltip content="This is how other rats have done so far in this trip">
+    <Tooltip content="How many RATS have survived this trip so far. Results may vary">
       <div class="inner">{displayText}</div>
     </Tooltip>
   </div>
