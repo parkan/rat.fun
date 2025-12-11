@@ -76,7 +76,9 @@ export async function signCall<chain extends Chain = Chain>({
       ? (
           await getRecord(client, {
             address: worldAddress,
-            table: altDomain ? moduleConfigAlt.tables.AltCallWithSignatureNonces : moduleConfig.tables.CallWithSignatureNonces,
+            table: altDomain
+              ? moduleConfigAlt.tables.AltCallWithSignatureNonces
+              : moduleConfig.tables.CallWithSignatureNonces,
             key: { signer: userClient.account.address },
             blockTag: "pending"
           })
@@ -91,15 +93,17 @@ export async function signCall<chain extends Chain = Chain>({
   logger.log("[drawbridge] signCall system parsed:", { systemNamespace, systemName })
 
   // Build domain and message for logging
-  const domain = altDomain ? {
-    name: "CallWithSignatureAlt",
-    version: "1",
-    chainId: userClient.chain.id,
-    verifyingContract: worldAddress
-  } : {
-    verifyingContract: worldAddress,
-    salt: toHex(userClient.chain.id, { size: 32 })
-  }
+  const domain = altDomain
+    ? {
+        name: "CallWithSignatureAlt",
+        version: "1",
+        chainId: userClient.chain.id,
+        verifyingContract: worldAddress
+      }
+    : {
+        verifyingContract: worldAddress,
+        salt: toHex(userClient.chain.id, { size: 32 })
+      }
 
   const message = {
     signer: userClient.account.address,
@@ -128,15 +132,17 @@ export async function signCall<chain extends Chain = Chain>({
     JSON.stringify(
       {
         types: {
-          EIP712Domain: altDomain ? [
-            { name: "name", type: "string" },
-            { name: "version", type: "string" },
-            { name: "chainId", type: "uint256" },
-            { name: "verifyingContract", type: "address" }
-          ] : [
-            { name: "verifyingContract", type: "address" },
-            { name: "salt", type: "bytes32" }
-          ],
+          EIP712Domain: altDomain
+            ? [
+                { name: "name", type: "string" },
+                { name: "version", type: "string" },
+                { name: "chainId", type: "uint256" },
+                { name: "verifyingContract", type: "address" }
+              ]
+            : [
+                { name: "verifyingContract", type: "address" },
+                { name: "salt", type: "bytes32" }
+              ],
           ...callWithSignatureTypes
         },
         primaryType: "Call",
@@ -171,15 +177,17 @@ export async function signCall<chain extends Chain = Chain>({
   // This matches the JSON-RPC format: eth_signTypedData_v4(address, typedData)
   const typedDataForRpc = {
     types: {
-      EIP712Domain: altDomain ? [
-        { name: "name", type: "string" },
-        { name: "version", type: "string" },
-        { name: "chainId", type: "uint256" },
-        { name: "verifyingContract", type: "address" }
-      ] : [
-        { name: "verifyingContract", type: "address" },
-        { name: "salt", type: "bytes32" }
-      ],
+      EIP712Domain: altDomain
+        ? [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" }
+          ]
+        : [
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" }
+          ],
       ...callWithSignatureTypes
     },
     primaryType: "Call" as const,
