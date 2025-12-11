@@ -14,6 +14,11 @@ import {
   handleNewOutcome,
   setPlayerIdStore
 } from "./trip-notifications"
+import {
+  resetNewTripNotifications,
+  markInitialTripsReceived,
+  handleNewTrip
+} from "./new-trip-notifications"
 
 export { setPlayerIdStore }
 
@@ -54,6 +59,7 @@ let outcomesSubscription: { unsubscribe: () => void } | null = null
 export async function initStaticContent(worldAddress: string) {
   // Reset trip notifications state before loading
   resetTripNotifications()
+  resetNewTripNotifications()
 
   const startTime = performance.now()
   const data = (await loadData(queries.staticContent, { worldAddress })) as Omit<
@@ -133,8 +139,16 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
     trips: trips ?? []
   }))
 
+  // Mark initial trips as received so we only notify for new ones
+  markInitialTripsReceived()
+
   // Subscribe to changes to all trips in sanity DB
   tripsSubscription = client.listen(queries.trips, { worldAddress }).subscribe(update => {
+    // Handle new trip notifications
+    if (update.transition === "appear" && update.result) {
+      handleNewTrip(update.result as SanityTrip)
+    }
+
     staticContent.update(content => ({
       ...content,
       trips: handleSanityUpdate<SanityTrip>(update, content.trips, (item, id) => item._id === id)

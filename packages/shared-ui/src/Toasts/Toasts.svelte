@@ -5,6 +5,7 @@
     id: string
     message: string
     type?: string
+    onClick?: () => void
   }
 
   let {
@@ -15,8 +16,12 @@
     onRemove: (id: string) => void
   } = $props()
 
-  const onToastClick = (id: string) => {
-    onRemove(id)
+  const onToastClick = (toast: Toast) => {
+    if (toast.onClick) {
+      toast.onClick()
+    } else {
+      onRemove(toast.id)
+    }
   }
 </script>
 
@@ -29,7 +34,7 @@
         in:slide|global={{ duration: 200 }}
         out:fade|global={{ duration: 200 }}
         class="toast toast-{toast.type}"
-        onclick={() => onToastClick(toast.id)}
+        onclick={() => onToastClick(toast)}
       >
         <div class="toast-content">
           {toast.message.length > 160 ? toast.message.substring(0, 160) + "..." : toast.message}
@@ -106,6 +111,15 @@
     &.toast-trip-notification {
       font-size: var(--font-size-normal);
       border-color: var(--color-toast-trip-notification);
+
+      @media (max-width: 768px) {
+        font-size: var(--font-size-small);
+      }
+    }
+
+    &.toast-new-trip-notification {
+      font-size: var(--font-size-normal);
+      border-color: var(--color-toast-new-trip-notification, var(--color-grey-mid));
 
       @media (max-width: 768px) {
         font-size: var(--font-size-small);
