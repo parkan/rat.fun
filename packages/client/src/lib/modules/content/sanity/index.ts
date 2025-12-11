@@ -12,7 +12,9 @@ export const client = createClient({
   projectId: PUBLIC_SANITY_CMS_ID,
   dataset: "production",
   apiVersion: "2025-06-01",
-  useCdn: false
+  // CDN is used for fetch() calls for better performance.
+  // Listeners (.listen()) automatically bypass CDN and use the live API.
+  useCdn: true
 })
 
 const builder = imageUrlBuilder(client)

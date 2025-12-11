@@ -1,11 +1,8 @@
-import { isBefore } from "date-fns"
-import { writable, derived, get } from "svelte/store"
+import { writable, get } from "svelte/store"
 import { client, loadData } from "./sanity"
-import { blockNumber } from "$lib/modules/network"
 import type {
   Trip as SanityTrip,
   Outcome as SanityOutcome,
-  WorldEvent as SanityWorldEvent,
   RatImages as SanityRatImages,
   TripFolder as SanityTripFolder
 } from "@sanity-types"
@@ -26,7 +23,6 @@ export type StaticContent = {
   ratImages: SanityRatImages
   trips: SanityTrip[]
   outcomes: SanityOutcome[]
-  worldEvents: SanityWorldEvent[]
   tripFolders: SanityTripFolder[]
   tripFolderWhitelist: string[]
 }
@@ -36,7 +32,6 @@ export type StaticContent = {
 export const staticContent = writable<StaticContent>({
   trips: [] as SanityTrip[],
   outcomes: [] as SanityOutcome[],
-  worldEvents: [] as SanityWorldEvent[],
   ratImages: {} as SanityRatImages,
   tripFolders: [] as SanityTripFolder[],
   tripFolderWhitelist: [] as string[]
@@ -44,81 +39,49 @@ export const staticContent = writable<StaticContent>({
 
 export const lastUpdated = writable(performance.now())
 
-export const upcomingWorldEvent = derived(
-  [staticContent, blockNumber],
-  ([$staticContent]: [StaticContent, bigint]) => {
-    const event = $staticContent?.worldEvents?.[0]
-
-    if (event && event?.publicationText !== "") {
-      return event
-    }
-
-    return undefined
-  }
-)
-
 // --- API --------------------------------------------------------------
 
+// Track subscriptions to avoid duplicates
+let tripsSubscription: { unsubscribe: () => void } | null = null
+let outcomesSubscription: { unsubscribe: () => void } | null = null
+
+/**
+ * Initialize static content from CMS (config only - no trips or outcomes).
+ * Trips and outcomes are loaded separately after spawn with player-specific filtering.
+ *
+ * @param worldAddress - The world address to filter content by
+ */
 export async function initStaticContent(worldAddress: string) {
   // Reset trip notifications state before loading
   resetTripNotifications()
 
-  const data = (await loadData(queries.staticContent, { worldAddress })) as StaticContent
+  const startTime = performance.now()
+  const data = (await loadData(queries.staticContent, { worldAddress })) as Omit<
+    StaticContent,
+    "trips" | "outcomes"
+  >
+  const loadTime = performance.now() - startTime
 
-  const processedWorldEvents = data.worldEvents.filter(upcomingWorldEventFilter)
+  // Calculate document counts
+  const counts = {
+    tripFolders: data.tripFolders?.length ?? 0,
+    tripFolderWhitelist: data.tripFolderWhitelist?.length ?? 0,
+    hasRatImages: !!data.ratImages
+  }
+  const totalDocuments = counts.tripFolders + (counts.hasRatImages ? 1 : 0)
+
+  // Log document counts for debugging/optimization
+  console.log(`[CMS] Static content loaded in ${loadTime.toFixed(0)}ms:`, {
+    ...counts,
+    totalDocuments
+  })
 
   staticContent.set({
     ratImages: data.ratImages,
-    trips: data.trips,
-    outcomes: data.outcomes,
-    worldEvents: processedWorldEvents,
+    trips: [], // Trips loaded separately via initTrips()
+    outcomes: [], // Outcomes loaded separately via initPlayerOutcomes()
     tripFolders: data.tripFolders || [],
     tripFolderWhitelist: data.tripFolderWhitelist || []
-  })
-
-  // Mark initial outcomes as received so we only notify for new ones
-  markInitialOutcomesReceived()
-
-  // Subscribe to changes to trips in sanity DB
-  client.listen(queries.trips, { worldAddress }).subscribe(update => {
-    staticContent.update(content => ({
-      ...content,
-      trips: handleSanityUpdate<SanityTrip>(update, content.trips, (item, id) => item._id === id)
-    }))
-  })
-
-  // Subscribe to changes to outcomes in sanity DB
-  client.listen(queries.outcomes, { worldAddress }).subscribe(update => {
-    // Handle new outcome notifications
-    if (update.transition === "appear" && update.result) {
-      const currentContent = get(staticContent)
-      handleNewOutcome(update.result as SanityOutcome, currentContent.trips)
-    }
-
-    staticContent.update(content => ({
-      ...content,
-      outcomes: handleSanityUpdate<SanityOutcome>(
-        update,
-        content.outcomes,
-        (item, id) => item._id === id
-      )
-    }))
-  })
-
-  // Subscribe to changes to world events in sanity DB
-  client.listen(queries.worldEvents, { worldAddress }).subscribe(update => {
-    staticContent.update(content => {
-      const filteredWorldEvents = content.worldEvents.filter(upcomingWorldEventFilter)
-
-      return {
-        ...content,
-        worldEvents: handleSanityUpdate<SanityWorldEvent>(
-          update,
-          filteredWorldEvents,
-          (item, id) => item._id === id
-        )
-      }
-    })
   })
 
   // Subscribe to changes to trip folder list in sanity DB
@@ -134,26 +97,126 @@ export async function initStaticContent(worldAddress: string) {
   })
 }
 
-// --- HELPER FUNCTIONS -------------------------------------------------
+/**
+ * Initialize trips from CMS.
+ * Only fetches trips that are relevant to the player:
+ * - Trips with balance > 0 (active trips visible in game)
+ * - Player's own trips (regardless of balance, for admin/history)
+ *
+ * @param worldAddress - The world address to filter content by
+ * @param tripIds - Array of trip IDs to fetch (active + player's trips)
+ */
+export async function initTrips(worldAddress: string, tripIds: string[]) {
+  // Clean up existing subscription if any
+  if (tripsSubscription) {
+    tripsSubscription.unsubscribe()
+    tripsSubscription = null
+  }
 
-function upcomingWorldEventFilter(e: SanityWorldEvent) {
-  // If no duration is specified, filter out
-  if (!e.duration) return false
+  // If no trips to load, skip
+  if (tripIds.length === 0) {
+    console.log("[CMS] No trips to load")
+    return
+  }
 
-  // Calculate the end timestamp for this one.
-  // Duration is defined in block time ±2s per block
-  const startTimeInMillis = new Date(e?.activationDateTime ?? 0)?.getTime()
-  const blockTimeInMillis = e.duration * 2000
+  const startTime = performance.now()
+  const trips = (await loadData(queries.tripsForIds, {
+    worldAddress,
+    tripIds
+  })) as SanityTrip[]
+  const loadTime = performance.now() - startTime
 
-  // More dates needed for comparison
-  const now = new Date()
-  const endOfBlockWindow = new Date(startTimeInMillis + blockTimeInMillis)
+  console.log(`[CMS] Trips loaded in ${loadTime.toFixed(0)}ms: ${trips?.length ?? 0} trips`)
 
-  const endResult = isBefore(now, endOfBlockWindow)
+  staticContent.update(content => ({
+    ...content,
+    trips: trips ?? []
+  }))
 
-  // If we are after the window of the event itself
-  return endResult
+  // Subscribe to changes to trips in sanity DB
+  // Filter in the handler to only process trips we care about
+  tripsSubscription = client.listen(queries.trips, { worldAddress }).subscribe(update => {
+    // For new trips, only add if it's in our tripIds list
+    // (This handles the case where another player creates a trip)
+    if (update.transition === "appear" && update.result) {
+      if (!tripIds.includes(update.result._id as string)) {
+        return
+      }
+    }
+
+    staticContent.update(content => ({
+      ...content,
+      trips: handleSanityUpdate<SanityTrip>(update, content.trips, (item, id) => item._id === id)
+    }))
+  })
 }
+
+/**
+ * Initialize player-specific outcomes from CMS.
+ * Only fetches outcomes for trips owned by the current player.
+ *
+ * @param worldAddress - The world address to filter content by
+ * @param playerTripIds - Array of Sanity trip document IDs owned by the player
+ */
+export async function initPlayerOutcomes(worldAddress: string, playerTripIds: string[]) {
+  // Clean up existing subscription if any
+  if (outcomesSubscription) {
+    outcomesSubscription.unsubscribe()
+    outcomesSubscription = null
+  }
+
+  // If player has no trips, no outcomes to load
+  if (playerTripIds.length === 0) {
+    console.log("[CMS] No player trips, skipping outcomes load")
+    markInitialOutcomesReceived()
+    return
+  }
+
+  const startTime = performance.now()
+  const outcomes = (await loadData(queries.outcomesForTripIds, {
+    worldAddress,
+    tripIds: playerTripIds
+  })) as SanityOutcome[]
+  const loadTime = performance.now() - startTime
+
+  console.log(
+    `[CMS] Player outcomes loaded in ${loadTime.toFixed(0)}ms: ${outcomes?.length ?? 0} outcomes for ${playerTripIds.length} trips`
+  )
+
+  staticContent.update(content => ({
+    ...content,
+    outcomes: outcomes ?? []
+  }))
+
+  // Mark initial outcomes as received so we only notify for new ones
+  markInitialOutcomesReceived()
+
+  // Subscribe to changes to outcomes for player's trips
+  // We use the full outcomes query but filter in the handler based on tripIds
+  outcomesSubscription = client.listen(queries.outcomes, { worldAddress }).subscribe(update => {
+    // Only process outcomes for player's trips
+    if (update.result && !playerTripIds.includes(update.result.tripId as string)) {
+      return
+    }
+
+    // Handle new outcome notifications
+    if (update.transition === "appear" && update.result) {
+      const currentContent = get(staticContent)
+      handleNewOutcome(update.result as SanityOutcome, currentContent.trips)
+    }
+
+    staticContent.update(content => ({
+      ...content,
+      outcomes: handleSanityUpdate<SanityOutcome>(
+        update,
+        content.outcomes,
+        (item, id) => item._id === id
+      )
+    }))
+  })
+}
+
+// --- HELPER FUNCTIONS -------------------------------------------------
 
 function handleSanityUpdate<T>(
   update: MutationEvent<Record<string, unknown>>,
