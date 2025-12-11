@@ -1,6 +1,7 @@
 <script lang="ts">
   import { rat } from "$lib/modules/state/stores"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import { Tooltip } from "$lib/components/Shared"
 
   let { trip, maxValuePerWin }: { trip: Trip; maxValuePerWin: number } = $props()
 
@@ -57,29 +58,29 @@
 </script>
 
 <div class="group">
-  <div class="meta">SURVIVAL RATE</div>
+  <div class="group">
+    <div class="meta">RISK</div>
+    <div class="meta-data-item max-risk">
+      <Tooltip content="You always risk your whole rat going into a trip">
+        <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>
+      </Tooltip>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="meta">REWARD</div>
+    <div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
+      <Tooltip content="This is the max the rat can get from entering">
+        <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
+      </Tooltip>
+    </div>
+  </div>
+
+  <div class="meta">SURVIVAL</div>
   <div class="meta-data-item survival-meter {survivalData.category}">
-    <!-- <Tooltip content={`SURVIVAL`}> -->
-    <div class="inner">{displayText}</div>
-    <!-- </Tooltip> -->
-  </div>
-</div>
-
-<div class="group">
-  <div class="meta">MAX REWARD</div>
-  <div class="meta-data-item max-win" class:low-balance={isLowBalance(trip, maxValuePerWin)}>
-    <!-- <Tooltip content="MAX WIN"> -->
-    <div class="inner">{maxValuePerWin}{CURRENCY_SYMBOL}</div>
-    <!-- </Tooltip> -->
-  </div>
-</div>
-
-<div class="group">
-  <div class="meta">MAX RISK</div>
-  <div class="meta-data-item max-risk">
-    <!-- <Tooltip content="ENTRY RISK"> -->
-    <div class="inner">{$rat.balance}{CURRENCY_SYMBOL}</div>
-    <!-- </Tooltip> -->
+    <Tooltip content="This is how other rats have done so far in this trip">
+      <div class="inner">{displayText}</div>
+    </Tooltip>
   </div>
 </div>
 
