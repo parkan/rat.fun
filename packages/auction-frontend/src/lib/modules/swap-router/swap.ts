@@ -1,9 +1,13 @@
 import { AuctionParams, getPoolKey, Permit2PermitData } from "doppler"
 import { Hex, maxUint128, zeroAddress } from "viem"
+import { simulateContract } from "viem/actions"
 import { prepareConnectorClientForTransaction } from "../drawbridge/connector"
 import { deltaRouterAddress, wethCurrency, getAerodromePath } from "./currency"
 import { ActionConstants, V4ActionType, V4DeltaActionBuilder } from "./V4DeltaActionBuilder"
 import { deltaRouterAbi } from "./deltaRouterAbi"
+
+// DEBUG: Set to true to simulate swap before sending to wallet
+const DEBUG_SIMULATE_SWAP = true
 
 export async function swapExactIn(
   fromCurrencyAddress: Hex,
@@ -62,12 +66,32 @@ export async function swapExactIn(
     ])
     .addAction(V4ActionType.TAKE_ALL, [auctionParams.token.address, 0n])
 
+  const args = actionBuilder.buildExecuteArgs()
+
+  // DEBUG: Simulate first to get revert reason
+  if (DEBUG_SIMULATE_SWAP) {
+    try {
+      console.log("[swapExactIn] Simulating swap...")
+      await simulateContract(client, {
+        address: deltaRouterAddress,
+        abi: deltaRouterAbi,
+        functionName: "execute",
+        args,
+        value
+      })
+      console.log("[swapExactIn] Simulation successful")
+    } catch (e) {
+      console.error("[swapExactIn] Simulation failed:", e)
+      throw e // Re-throw so the UI shows the error
+    }
+  }
+
   // Execute swap
   return await client.writeContract({
     address: deltaRouterAddress,
     abi: deltaRouterAbi,
     functionName: "execute",
-    args: actionBuilder.buildExecuteArgs(),
+    args,
     value
   })
 }
