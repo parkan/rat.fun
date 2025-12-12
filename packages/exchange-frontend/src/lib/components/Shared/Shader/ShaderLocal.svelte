@@ -3,14 +3,14 @@
   import { fade } from "svelte/transition"
   import { shaders, createShaderManager } from "$lib/modules/webgl/shaders/index.svelte"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { isPhone } from "$lib/modules/ui/state.svelte"
+  import { singleFrameRender } from "$lib/modules/ui/state.svelte"
   import { get } from "svelte/store"
 
   let { shaderKey }: { shaderKey: keyof typeof shaders } = $props()
 
   const localShaderManager = createShaderManager({
     errorHandler,
-    isPhone: () => get(isPhone)
+    singleFrameRender: () => get(singleFrameRender)
   })
 
   let canvasElement = $state<HTMLCanvasElement>()

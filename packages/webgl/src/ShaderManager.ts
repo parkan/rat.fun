@@ -7,8 +7,8 @@ export type ErrorHandler = (error: Error, context?: string) => void
 
 export interface ShaderManagerOptions {
   errorHandler: ErrorHandler
-  /** Function that returns whether the current device is a phone */
-  isPhone: () => boolean
+  /** Function that returns whether to render only a single frame (e.g., on phones or Firefox) */
+  singleFrameRender: () => boolean
 }
 
 export class ShaderManager {
@@ -27,11 +27,11 @@ export class ShaderManager {
   private maxRecoveryAttempts = 10
   private forceContinuousRendering = false
   private errorHandler: ErrorHandler
-  private isPhone: () => boolean
+  private singleFrameRender: () => boolean
 
   constructor(options: ShaderManagerOptions) {
     this.errorHandler = options.errorHandler
-    this.isPhone = options.isPhone
+    this.singleFrameRender = options.singleFrameRender
   }
 
   /**
@@ -155,8 +155,8 @@ export class ShaderManager {
           this._canvas.style.display = "block"
         }
 
-        // On mobile, pause after first frame unless continuous rendering is forced
-        if (this.isPhone() && !this.forceContinuousRendering && this._renderer) {
+        // On mobile/Firefox, pause after first frame unless continuous rendering is forced
+        if (this.singleFrameRender() && !this.forceContinuousRendering && this._renderer) {
           // Wait for first frame to render, then pause
           // Use double requestAnimationFrame to ensure the frame is actually painted
           requestAnimationFrame(() => {
@@ -199,7 +199,7 @@ export class ShaderManager {
    */
   disableContinuousRendering() {
     this.forceContinuousRendering = false
-    if (this.isPhone() && this._renderer) {
+    if (this.singleFrameRender() && this._renderer) {
       this._renderer.pause()
     }
   }
@@ -284,6 +284,10 @@ export class ShaderManager {
     this.resizeTimeout = setTimeout(() => {
       if (this._renderer) {
         this._renderer.resize()
+        // In single-frame mode, render one frame after resize to update the display
+        if (this.singleFrameRender() && !this.forceContinuousRendering) {
+          this._renderer.renderSingleFrame()
+        }
       }
     }, 100)
   }
