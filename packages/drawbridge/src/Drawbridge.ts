@@ -492,7 +492,11 @@ export class Drawbridge {
     this.updateState({ status: DrawbridgeStatus.CONNECTING })
 
     try {
-      await attemptConnectWalletToChain(this.wagmiConfig, connectorId, this.config.publicClient.chain.id)
+      await attemptConnectWalletToChain(
+        this.wagmiConfig,
+        connectorId,
+        this.config.publicClient.chain.id
+      )
     } catch (err) {
       // Reset to DISCONNECTED on error
       this.updateState({ status: DrawbridgeStatus.DISCONNECTED })

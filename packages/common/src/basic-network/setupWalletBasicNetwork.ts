@@ -8,7 +8,13 @@ type WalletClientInput =
   | Client<Transport, Chain, Account>
   | Client<Transport, Chain, SmartAccount>
 
-export type WalletTransactionClient = Client<Transport, Chain, Account | SmartAccount, undefined, Pick<WalletActions<Chain, Account>, "writeContract">>
+export type WalletTransactionClient = Client<
+  Transport,
+  Chain,
+  Account | SmartAccount,
+  undefined,
+  Pick<WalletActions<Chain, Account>, "writeContract">
+>
 
 /**
  * Ensure the provided viem client exposes a `writeContract` helper.

@@ -1,5 +1,13 @@
 import { Address } from "viem"
-import { reconnect, connect, disconnect, getConnectors, getAccount, type Config, switchChain } from "@wagmi/core"
+import {
+  reconnect,
+  connect,
+  disconnect,
+  getConnectors,
+  getAccount,
+  type Config,
+  switchChain
+} from "@wagmi/core"
 import { logger } from "../logger"
 
 /**
@@ -54,10 +62,7 @@ export async function attemptReconnect(wagmiConfig: Config): Promise<ReconnectRe
   }
 }
 
-export async function attemptSwitchChain(
-  wagmiConfig: Config,
-  chainId: number
-): Promise<void> {
+export async function attemptSwitchChain(wagmiConfig: Config, chainId: number): Promise<void> {
   try {
     await switchChain(wagmiConfig, { chainId })
     logger.log("[wallet] Chain switch successful")
