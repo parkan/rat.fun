@@ -835,12 +835,17 @@ async function signCall({
   const domain = altDomain ? {
     name: "CallWithSignatureAlt",
     version: "1",
-    chainId: userClient.chain.id,
+    chainId: BigInt(userClient.chain.id),
     verifyingContract: worldAddress
   } : {
     verifyingContract: worldAddress,
     salt: toHex(userClient.chain.id, { size: 32 })
   };
+  logger.log("[drawbridge] domain constructed:", {
+    altDomain,
+    chainIdType: altDomain ? "bigint" : "N/A",
+    chainIdValue: altDomain ? userClient.chain.id.toString() : "N/A (using salt)"
+  });
   const message = {
     signer: userClient.account.address,
     systemNamespace,
@@ -859,6 +864,7 @@ async function signCall({
       nonce: nonce.toString()
     }
   });
+  const domainForLog = altDomain ? { ...domain, chainId: userClient.chain.id.toString() } : domain;
   logger.log(
     "[drawbridge] EIP-712 raw structure:",
     JSON.stringify(
@@ -876,7 +882,7 @@ async function signCall({
           ...callWithSignatureTypes
         },
         primaryType: "Call",
-        domain,
+        domain: domainForLog,
         message: {
           signer: userClient.account.address,
           systemNamespace,
@@ -911,7 +917,7 @@ async function signCall({
       ...callWithSignatureTypes
     },
     primaryType: "Call",
-    domain,
+    domain: domainForLog,
     message: {
       ...message,
       // Convert bigint to hex string for JSON-RPC (how viem serializes uint256)
@@ -1000,7 +1006,7 @@ async function setupSessionEOA({
       functionName: "registerDelegation",
       args: [sessionAddress, unlimitedDelegationControlId, "0x"]
     }),
-    altDomain: false
+    altDomain: true
   });
   const receipt = await getAction(
     publicClient,
