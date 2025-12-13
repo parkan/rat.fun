@@ -2,7 +2,7 @@ import type { Hex, TransactionReceipt } from "viem"
 import { erc20Abi, encodeFunctionData } from "viem"
 import { sendTransaction, getAccount } from "@wagmi/core"
 import { get } from "svelte/store"
-import type { WalletTransactionClient } from "@ratfun/common/basic-network"
+import { ensureWriteContract, type WalletTransactionClient } from "@ratfun/common/basic-network"
 import { TransactionError } from "@ratfun/common/error-handling"
 
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
@@ -98,7 +98,7 @@ export async function executeTransaction(
     } else {
       // For non-approve transactions, use the prepared wallet client with writeContract
       const client: WalletTransactionClient = useConnectorClient
-        ? await getDrawbridge().getConnectorClient()
+        ? ensureWriteContract(await getDrawbridge().getConnectorClient())
         : get(walletNetwork).walletClient
 
       const worldContract = get(walletNetwork).worldContract

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte"
   import { type AuctionParams, readAuctionParams } from "doppler"
-  import { PUBLIC_TEST_AUCTION } from "$env/static/public"
+  import { PUBLIC_TEST_AUCTION, PUBLIC_WAITING_FOR_EPOCH } from "$env/static/public"
   import testAuctionParams from "../../../../../doppler/_test2-auction-params.json"
   import { dopplerHookAbi } from "@whetstone-research/doppler-sdk"
   import type { PublicClient } from "drawbridge"
@@ -16,6 +16,7 @@
     Swap,
     ConnectWalletForm,
     NotStarted,
+    WaitingForEpoch,
     Ended,
     Error as ErrorComponent,
     CountryBlocked
@@ -26,6 +27,7 @@
   import WalletInfo from "$lib/components/WalletInfo/WalletInfo.svelte"
 
   const isTestAuction = PUBLIC_TEST_AUCTION === "true"
+  const isWaitingForEpoch = PUBLIC_WAITING_FOR_EPOCH === "true"
 
   /**
    * Get country code from user's IP using Cloudflare trace
@@ -147,6 +149,12 @@
     // Reset state to INIT
     auctionState.state.reset()
 
+    // Override: if waiting for epoch flag is set, show waiting for epoch screen
+    if (isWaitingForEpoch) {
+      auctionState.state.transitionTo(AUCTION_STATE.WAITING_FOR_EPOCH)
+      return
+    }
+
     // Check if user's country is blocked (early check)
     const isBlocked = await checkCountryBlocked()
     if (isBlocked) {
@@ -228,6 +236,8 @@
       <Swap {auctionParams} />
     {:else if auctionState.state.current === AUCTION_STATE.NOT_STARTED}
       <NotStarted />
+    {:else if auctionState.state.current === AUCTION_STATE.WAITING_FOR_EPOCH}
+      <WaitingForEpoch />
     {:else if auctionState.state.current === AUCTION_STATE.ENDED}
       <Ended />
     {:else if auctionState.state.current === AUCTION_STATE.ERROR}

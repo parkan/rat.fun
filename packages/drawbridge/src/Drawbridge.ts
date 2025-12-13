@@ -356,7 +356,7 @@ export class Drawbridge {
    * Called when wagmi detects a connected account
    */
   private async handleWalletConnection(): Promise<void> {
-    // Get wallet client from wagmi
+    // Get account state from wagmi directly (more reliable than getConnectorClient during connection)
     const account = getAccount(this.wagmiConfig)
 
     if (!account.isConnected || !account.address || !account.chain) {

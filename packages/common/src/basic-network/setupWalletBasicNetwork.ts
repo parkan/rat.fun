@@ -7,6 +7,11 @@ type WalletClientInput =
   | WalletClient<Transport, Chain, Account>
   | Client<Transport, Chain, Account>
   | Client<Transport, Chain, SmartAccount>
+  // Drawbridge ConnectorClient - extends with writeContract/sendTransaction
+  | (Client<Transport, Chain, Account> & {
+      writeContract: WalletActions<Chain, Account>["writeContract"]
+      sendTransaction: WalletActions<Chain, Account>["sendTransaction"]
+    })
 
 export type WalletTransactionClient = Client<
   Transport,
@@ -19,7 +24,7 @@ export type WalletTransactionClient = Client<
 /**
  * Ensure the provided viem client exposes a `writeContract` helper.
  *
- * - EntryKit session clients already ship with the method, so we return them verbatim.
+ * - Drawbridge session clients already ship with the method, so we return them verbatim.
  * - Burner / wagmi-derived clients need the MUD `transactionQueue` extension to gain it.
  * - As a final fallback we cast, since some typed clients expose the method but miss the narrows.
  */

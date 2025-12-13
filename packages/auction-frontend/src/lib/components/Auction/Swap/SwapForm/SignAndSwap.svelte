@@ -162,6 +162,16 @@
       console.log("[SignAndSwap] Step 3: Executing swap...")
       processingStep = "Confirm transaction"
 
+      // DEBUG: Log the swap parameters before sending
+      console.log("[SignAndSwap] Swap params:", {
+        fromCurrency: fromCurrency.symbol,
+        amountIn: amountIn.toString(),
+        amountOut: amountOut.toString(),
+        isExactOut,
+        permit: swapState.data.permit,
+        permitSignature: swapState.data.permitSignature
+      })
+
       let txHash: Hex
       if (isExactOut) {
         txHash = await swapExactOut(

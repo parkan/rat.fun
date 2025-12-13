@@ -107,6 +107,11 @@ export async function attemptConnectWalletToChain(
   chainId: number
 ): Promise<void> {
   const connectors = getConnectors(wagmiConfig)
+  logger.log(
+    "[wallet] Available connectors:",
+    connectors.map(c => ({ id: c.id, name: c.name }))
+  )
+
   const connector = connectors.find(c => c.id === connectorId)
 
   if (!connector) {
@@ -114,6 +119,7 @@ export async function attemptConnectWalletToChain(
   }
 
   logger.log("[wallet] Connecting to wallet:", connectorId)
+
   try {
     const account = getAccount(wagmiConfig)
 

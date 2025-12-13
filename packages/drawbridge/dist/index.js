@@ -1136,6 +1136,10 @@ async function attemptSwitchChain(wagmiConfig, chainId) {
 }
 async function attemptConnectWalletToChain(wagmiConfig, connectorId, chainId) {
   const connectors = getConnectors(wagmiConfig);
+  logger.log(
+    "[wallet] Available connectors:",
+    connectors.map((c) => ({ id: c.id, name: c.name }))
+  );
   const connector = connectors.find((c) => c.id === connectorId);
   if (!connector) {
     throw new Error(`Connector not found: ${connectorId}`);
@@ -1439,7 +1443,11 @@ var Drawbridge = class {
     logger.log("[drawbridge] Connecting to wallet:", connectorId);
     this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
-      await attemptConnectWalletToChain(this.wagmiConfig, connectorId, this.config.publicClient.chain.id);
+      await attemptConnectWalletToChain(
+        this.wagmiConfig,
+        connectorId,
+        this.config.publicClient.chain.id
+      );
     } catch (err) {
       this.updateState({ status: "disconnected" /* DISCONNECTED */ });
       throw err;
