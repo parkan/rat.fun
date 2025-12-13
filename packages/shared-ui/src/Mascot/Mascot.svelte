@@ -12,6 +12,7 @@
     text = [],
     smallText = false,
     hugeText = false,
+    centerText = false,
     isGameMascot = false,
     closeTextOnClick = false,
     finishTextOnClick = false,
@@ -25,6 +26,7 @@
     text?: TerminalOutputUnit[]
     smallText?: boolean
     hugeText?: boolean
+    centerText?: boolean
     isGameMascot?: boolean
     closeTextOnClick?: boolean
     finishTextOnClick?: boolean
@@ -246,6 +248,7 @@
       class="bubble"
       class:small-text={smallText}
       class:huge-text={hugeText}
+      class:center-text={centerText}
       out:fade={{ duration: 200 }}
       class:isGameMascot
       bind:this={bubbleElement}
@@ -320,11 +323,14 @@
 
     &.huge-text {
       font-size: calc(var(--font-size-ultra) * 0.5);
-      text-align: center;
 
       @media (max-width: 800px) {
         font-size: calc(var(--font-size-ultra) * 0.25);
       }
+    }
+
+    &.center-text {
+      text-align: center;
     }
 
     &.isGameMascot {

@@ -67,7 +67,13 @@
 <div class="outer-container">
   <div class="inner-container">
     <div class="mascot-container">
-      <Mascot headBobOn={true} text={mascotText} hugeText={true} bigDanceOn={true} />
+      <Mascot
+        headBobOn={true}
+        text={mascotText}
+        hugeText={true}
+        centerText={true}
+        bigDanceOn={true}
+      />
     </div>
     <div class="button-container" bind:this={buttonElement}>
       {#if wallet.connecting}
