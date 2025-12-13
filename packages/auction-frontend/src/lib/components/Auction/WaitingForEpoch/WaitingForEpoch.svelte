@@ -11,7 +11,16 @@
   const mascotText: TerminalOutputUnit[] = [
     {
       type: "text",
-      content: "STARTING SOON",
+      content: "SECOND SALE EPOCH",
+      typeSpeed: 200,
+      typeMode: "word",
+      color: "var(--foreground)",
+      backgroundColor: "transparent",
+      onType
+    },
+    {
+      type: "text",
+      content: "STARTS DEC 27",
       typeSpeed: 200,
       typeMode: "word",
       color: "var(--foreground)",
@@ -25,10 +34,10 @@
   }
 </script>
 
-<div class="not-started">
+<div class="waiting-for-epoch">
   <div class="content">
     <div class="mascot-container">
-      <Mascot headBobOn={true} text={mascotText} hugeText={true} centerText={true} />
+      <Mascot smallDanceOn={true} text={mascotText} centerText={true} />
     </div>
     <div class="button-container">
       <BigButton text="Go to telegram" onclick={goToTelegram} />
@@ -37,7 +46,7 @@
 </div>
 
 <style lang="scss">
-  .not-started {
+  .waiting-for-epoch {
     text-align: center;
 
     .mascot-container {

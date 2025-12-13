@@ -1,38 +1,43 @@
 <script lang="ts">
-  import type { ConnectorInfo } from "$lib/modules/drawbridge"
-  import { SmallButton } from "$lib/components/Shared"
+  import { SmallButton } from "../Buttons"
+
+  export type WalletDeeplink = {
+    ios: string
+    android: string
+    name: string
+  }
 
   let {
     show = $bindable(false),
-    connectors,
-    connecting,
-    onSelect
+    deeplinks
   }: {
     show: boolean
-    connectors: ConnectorInfo[]
-    connecting: boolean
-    onSelect: (connectorId: string) => void
+    deeplinks: Record<string, WalletDeeplink>
   } = $props()
+
+  function openWalletDeeplink(walletId: string) {
+    const deeplink = deeplinks[walletId]
+    if (!deeplink) return
+
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    const url = isIOS ? deeplink.ios : deeplink.android
+
+    window.location.href = url
+  }
 </script>
 
 {#if show}
   <div class="wallet-modal">
     <div class="modal-content">
       <button class="close-btn" onclick={() => (show = false)}>×</button>
-      <h2>Connect Wallet</h2>
-      {#if connectors.length > 0}
-        <div class="wallet-options">
-          {#each connectors as connector}
-            <div class="button-container">
-              <SmallButton
-                text={connector.name}
-                onclick={() => onSelect(connector.id)}
-                disabled={connecting}
-              />
-            </div>
-          {/each}
-        </div>
-      {/if}
+      <h2>Open in wallet app</h2>
+      <div class="wallet-options">
+        {#each Object.entries(deeplinks) as [walletId, wallet]}
+          <div class="button-container">
+            <SmallButton text={wallet.name} onclick={() => openWalletDeeplink(walletId)} />
+          </div>
+        {/each}
+      </div>
     </div>
   </div>
 {/if}
