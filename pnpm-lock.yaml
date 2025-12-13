@@ -1075,12 +1075,18 @@ importers:
       svelte:
         specifier: ^5.0.0
         version: 5.45.2
+      svelte-check:
+        specifier: ^4.0.0
+        version: 4.3.4(picomatch@4.0.3)(svelte@5.45.2)(typescript@5.9.3)
       svelte-tippy:
         specifier: ^1.3.2
         version: 1.3.2
       tippy.js:
         specifier: ^6.3.7
         version: 6.3.7
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   packages/webgl:
     dependencies:
