@@ -19,6 +19,7 @@
   import TripConfirmLiquidation from "$lib/components/Admin/AdminTripPreview/TripConfirmLiquidation/TripConfirmLiquidation.svelte"
   import LiquidateTrip from "$lib/components/Admin/AdminTripPreview/LiquidateTrip.svelte"
   import AdminEventLog from "$lib/components/Admin/AdminEventLog/AdminEventLog.svelte"
+  import AddTripBalanceModal from "$lib/components/Admin/AdminTripPreview/AddTripBalanceModal/AddTripBalanceModal.svelte"
 
   import { BackButton, SlideToggle } from "$lib/components/Shared"
 
@@ -42,6 +43,9 @@
 
   // Phone sub-view toggle
   let phoneTripView = $state<"graph" | "log">("graph")
+
+  // Add balance modal state
+  let showAddBalanceModal = $state(false)
 
   // Track keyboard navigation to prevent pointer interference
   let keyboardNavigating = $state(false)
@@ -75,6 +79,10 @@
 
   // Keyboard navigation for this trip's events
   const handleKeypress = (e: KeyboardEvent) => {
+    // Skip if modal is open or not an arrow key
+    if (showAddBalanceModal) return
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return
+
     e.preventDefault()
 
     if (!allVisitsData.length) return
@@ -154,7 +162,11 @@
         <BackButton onclick={onBackButtonClick} />
       </div>
       <div class="full">
-        <AdminTripPreviewHeader {sanityTripContent} {trip} />
+        <AdminTripPreviewHeader
+          {sanityTripContent}
+          {tripId}
+          onAddBalance={() => (showAddBalanceModal = true)}
+        />
       </div>
       <SlideToggle
         options={[
@@ -220,7 +232,11 @@
         <BackButton onclick={onBackButtonClick} />
       </div>
       <div class="full">
-        <AdminTripPreviewHeader {sanityTripContent} {trip} />
+        <AdminTripPreviewHeader
+          {sanityTripContent}
+          {tripId}
+          onAddBalance={() => (showAddBalanceModal = true)}
+        />
       </div>
       <div class="left">
         <TripProfitLossGraph
@@ -284,6 +300,10 @@
   />
 {/if}
 
+{#if showAddBalanceModal}
+  <AddTripBalanceModal {tripId} onclose={() => (showAddBalanceModal = false)} />
+{/if}
+
 <style lang="scss">
   .trip-inner-container {
     overflow-y: hidden;
@@ -296,7 +316,7 @@
     &:not(.phone) {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: 60px 200px calc(var(--game-window-main-height) - 340px) auto;
+      grid-template-rows: 60px 200px calc(var(--game-window-main-height) - 380px) 120px;
       grid-auto-rows: 1fr;
 
       .left {

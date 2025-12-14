@@ -7,6 +7,7 @@ import { get } from "svelte/store"
 export { shaders, ShaderManager, createShaderManager } from "@ratfun/webgl"
 
 // Create the singleton shader manager with app-specific dependencies
+// singleFrameRender = isPhone || isFirefox (both have slow shader rendering)
 export const shaderManager = createShaderManager({
   errorHandler,
   isPhone: () => get(isPhone),

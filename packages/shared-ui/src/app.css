@@ -18,7 +18,7 @@
   --white: #ffffff;
   --green: rgb(51, 195, 99);
   --yellow: rgb(234, 234, 51);
-  --red: rgb(246, 79, 42);
+  --red: rgb(246, 52, 42);
 
   /* Background */
   --background: var(--black);
@@ -129,6 +129,8 @@
   --font-size-extra-large: 48px;
   --font-size-super-large: 64px;
   --font-size-ultra: 228px;
+
+  --font-size-extra-large-phone: 36px;
 
   /* * * * * * * * * * * * * *
   * Layout

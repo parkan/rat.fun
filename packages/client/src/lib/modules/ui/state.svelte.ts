@@ -24,8 +24,15 @@ export const isFirefox = writable(false)
 
 // Initialize isPhone and isFirefox based on window size and user agent (browser only)
 if (typeof window !== "undefined") {
+  // Check if Firefox
+  const firefoxDetected = navigator.userAgent.toLowerCase().includes("firefox")
+  isFirefox.set(firefoxDetected)
+
   const checkPhone = () => {
-    isPhone.set(window.innerWidth <= 800)
+    const phoneDetected = window.innerWidth <= 800
+    isPhone.set(phoneDetected)
+    // Pause shaders on phones OR Firefox
+    singleFrameRender.set(phoneDetected || firefoxDetected)
   }
   checkPhone()
   window.addEventListener("resize", checkPhone)

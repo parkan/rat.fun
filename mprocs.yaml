@@ -11,6 +11,7 @@ procs:
   # claim-frontend:
   #   cwd: packages/claim-frontend
   #   shell: pnpm dev
+<<<<<<< HEAD
   # auction-frontend:
   #   cwd: packages/auction-frontend
   #   shell: pnpm dev
@@ -23,6 +24,20 @@ procs:
   server:
     cwd: packages/server
     shell: pnpm dev
+=======
+  auction-frontend:
+    cwd: packages/auction-frontend
+    shell: pnpm dev
+  # webgl:
+  #   cwd: packages/webgl
+  #   shell: pnpm dev
+  # contracts:
+  #   cwd: packages/contracts
+  #   shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
+  # server:
+  #   cwd: packages/server
+  #   shell: pnpm dev
+>>>>>>> be29b3d0e60f2beb7a610cca55288aea393756be
   # common:
   #   cwd: packages/common
   #   shell: pnpm dev

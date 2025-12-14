@@ -8,7 +8,7 @@
     content,
     props = {},
     svg = false,
-    allowHTML = false,
+    allowHTML = true,
     children
   }: {
     content?: string

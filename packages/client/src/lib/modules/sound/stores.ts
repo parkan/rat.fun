@@ -1,9 +1,24 @@
+import { Howler } from "howler"
 import type { PlaySoundConfig } from "./types"
 import { soundLibrary } from "./sound-library"
 import { LocalStorage } from "$lib/modules/state/local.svelte"
 
 // Store for tracking if music is enabled (persisted to localStorage)
 export const musicEnabled = new LocalStorage<boolean>("musicEnabled", true)
+
+/**
+ * Attempts to resume the Web Audio API AudioContext if it's suspended.
+ * This is required on iOS where AudioContext starts suspended and must be
+ * resumed after a user gesture.
+ */
+function tryResumeAudioContext(): void {
+  const ctx = Howler.ctx
+  if (ctx && ctx.state === "suspended") {
+    ctx.resume().catch(() => {
+      // Silently ignore - context will resume on next user gesture
+    })
+  }
+}
 
 class BackgroundMusicManager {
   private currentHowl: import("howler").Howl | undefined
@@ -49,6 +64,14 @@ class BackgroundMusicManager {
       return
     }
 
+    // Don't play sounds that are still loading to avoid Howler.js recursion bugs
+    if (sound.state() === "loading") {
+      return
+    }
+
+    // Try to resume AudioContext if suspended (iOS requirement)
+    tryResumeAudioContext()
+
     // Set volume
     if (volume !== undefined) {
       sound.volume(volume)
@@ -57,11 +80,20 @@ class BackgroundMusicManager {
     // Set loop state
     sound.loop(loop)
 
-    // Set pitch
-    sound.rate(pitch)
+    // Play sound and track the sound ID - wrapped in try-catch for iOS AudioContext errors
+    let soundId: number | undefined
+    try {
+      soundId = sound.play() as number
+    } catch {
+      // Silently fail - audio will work after user interaction
+      return
+    }
 
-    // Play sound and track the sound ID
-    const soundId = sound.play() as number
+    // Set pitch AFTER play() to avoid Howler.js queue recursion bug
+    // Pass sound ID to target specific instance
+    if (soundId !== undefined && pitch !== 1) {
+      sound.rate(pitch, soundId)
+    }
 
     if (fadeIn && soundId !== undefined) {
       const FADE_TIME = 2000
@@ -103,7 +135,14 @@ class BackgroundMusicManager {
    */
   unpause(): void {
     if (this.currentHowl && this.currentSoundId !== undefined) {
-      this.currentHowl.play(this.currentSoundId)
+      // Try to resume AudioContext if suspended (iOS requirement)
+      tryResumeAudioContext()
+
+      try {
+        this.currentHowl.play(this.currentSoundId)
+      } catch {
+        // Silently fail - audio will work after user interaction
+      }
     }
   }
 
@@ -141,6 +180,14 @@ class BackgroundMusicManager {
         return
       }
 
+      // Don't play sounds that are still loading to avoid Howler.js recursion bugs
+      if (sound.state() === "loading") {
+        return
+      }
+
+      // Try to resume AudioContext if suspended (iOS requirement)
+      tryResumeAudioContext()
+
       // Set volume
       if (volume !== undefined) {
         sound.volume(volume)
@@ -149,11 +196,20 @@ class BackgroundMusicManager {
       // Set loop state
       sound.loop(loop)
 
-      // Set pitch
-      sound.rate(pitch)
+      // Play sound and track the sound ID - wrapped in try-catch for iOS AudioContext errors
+      let soundId: number | undefined
+      try {
+        soundId = sound.play() as number
+      } catch {
+        // Silently fail - audio will work after user interaction
+        return
+      }
 
-      // Play sound and track the sound ID
-      const soundId = sound.play() as number
+      // Set pitch AFTER play() to avoid Howler.js queue recursion bug
+      // Pass sound ID to target specific instance
+      if (soundId !== undefined && pitch !== 1) {
+        sound.rate(pitch, soundId)
+      }
 
       if (fadeIn && soundId !== undefined) {
         const FADE_TIME = 2000

@@ -7,10 +7,15 @@ export type ErrorHandler = (error: Error, context?: string) => void
 
 export interface ShaderManagerOptions {
   errorHandler: ErrorHandler
+<<<<<<< HEAD
   /** Function that returns whether the current device is a phone */
   isPhone: () => boolean
   /** Function that returns whether the current browser is Firefox */
   isFirefox: () => boolean
+=======
+  /** Function that returns whether to render only a single frame (e.g., on phones or Firefox) */
+  singleFrameRender: () => boolean
+>>>>>>> be29b3d0e60f2beb7a610cca55288aea393756be
 }
 
 export class ShaderManager {
@@ -29,6 +34,7 @@ export class ShaderManager {
   private maxRecoveryAttempts = 10
   private forceContinuousRendering = false
   private errorHandler: ErrorHandler
+<<<<<<< HEAD
   private isPhone: () => boolean
   private isFirefox: () => boolean
 
@@ -36,6 +42,13 @@ export class ShaderManager {
     this.errorHandler = options.errorHandler
     this.isPhone = options.isPhone
     this.isFirefox = options.isFirefox
+=======
+  private singleFrameRender: () => boolean
+
+  constructor(options: ShaderManagerOptions) {
+    this.errorHandler = options.errorHandler
+    this.singleFrameRender = options.singleFrameRender
+>>>>>>> be29b3d0e60f2beb7a610cca55288aea393756be
   }
 
   /**
@@ -159,6 +172,7 @@ export class ShaderManager {
           this._canvas.style.display = "block"
         }
 
+<<<<<<< HEAD
         // On mobile or Firefox, pause after first frame unless continuous rendering is forced
         if ((this.isPhone() || this.isFirefox()) && !this.forceContinuousRendering && this._renderer) {
           // Manually render the first frame immediately before pausing
@@ -166,6 +180,19 @@ export class ShaderManager {
           this._renderer.renderSingleFrame()
           // Then pause to stop the animation loop
           this._renderer.pause()
+=======
+        // On mobile/Firefox, pause after first frame unless continuous rendering is forced
+        if (this.singleFrameRender() && !this.forceContinuousRendering && this._renderer) {
+          // Wait for first frame to render, then pause
+          // Use double requestAnimationFrame to ensure the frame is actually painted
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (this._renderer && !this.forceContinuousRendering) {
+                this._renderer.pause()
+              }
+            })
+          })
+>>>>>>> be29b3d0e60f2beb7a610cca55288aea393756be
         }
       } catch (error) {
         // Error already logged to Sentry in initializeRenderer
@@ -199,7 +226,11 @@ export class ShaderManager {
    */
   disableContinuousRendering() {
     this.forceContinuousRendering = false
+<<<<<<< HEAD
     if ((this.isPhone() || this.isFirefox()) && this._renderer) {
+=======
+    if (this.singleFrameRender() && this._renderer) {
+>>>>>>> be29b3d0e60f2beb7a610cca55288aea393756be
       this._renderer.pause()
     }
   }
@@ -284,6 +315,10 @@ export class ShaderManager {
     this.resizeTimeout = setTimeout(() => {
       if (this._renderer) {
         this._renderer.resize()
+        // In single-frame mode, render one frame after resize to update the display
+        if (this.singleFrameRender() && !this.forceContinuousRendering) {
+          this._renderer.renderSingleFrame()
+        }
       }
     }, 100)
   }

@@ -4,7 +4,6 @@
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { BigButton } from "$lib/components/Shared"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { playerTrips } from "$lib/modules/state/stores"
 
   let { trip, onclick }: { trip: Trip; onclick: () => void } = $props()
 
@@ -30,7 +29,7 @@
 
 <style lang="scss">
   .liquidate-trip {
-    height: 80px;
+    height: 120px;
     display: flex;
 
     .action {

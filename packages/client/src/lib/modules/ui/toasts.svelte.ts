@@ -3,7 +3,8 @@ export enum TOAST_TYPE {
   WARNING = "warning",
   INFO = "info",
   PLAYER_NOTIFICATION = "player-notification",
-  TRIP_NOTIFICATION = "trip-notification"
+  TRIP_NOTIFICATION = "trip-notification",
+  NEW_TRIP_NOTIFICATION = "new-trip-notification"
 }
 
 export interface Toast {
@@ -11,6 +12,7 @@ export interface Toast {
   message: string
   type?: TOAST_TYPE
   duration?: number
+  onClick?: () => void
 }
 
 const TOAST_DURATION: Record<TOAST_TYPE, number> = {
@@ -18,7 +20,8 @@ const TOAST_DURATION: Record<TOAST_TYPE, number> = {
   [TOAST_TYPE.WARNING]: 8000,
   [TOAST_TYPE.INFO]: 8000,
   [TOAST_TYPE.PLAYER_NOTIFICATION]: 2000,
-  [TOAST_TYPE.TRIP_NOTIFICATION]: 8000
+  [TOAST_TYPE.TRIP_NOTIFICATION]: 8000,
+  [TOAST_TYPE.NEW_TRIP_NOTIFICATION]: 8000
 }
 
 // Shorten words that are extremely long (addresses, etc.)

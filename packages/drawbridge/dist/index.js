@@ -1,19 +1,24 @@
+import { transactionQueue } from '@latticexyz/common/actions';
 import { resourceToHex, hexToResource } from '@latticexyz/common';
 import { parseAbi, isHex, http, encodeFunctionData, parseEther, formatEther, formatGwei, zeroAddress, toHex } from 'viem';
 import worldConfig, { systemsConfig } from '@latticexyz/world/mud.config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { smartAccountActions } from 'permissionless';
-import { callFrom, sendUserOperationFrom } from '@latticexyz/world/internal';
+import { sendUserOperationFrom, callFrom } from '@latticexyz/world/internal';
 import { createBundlerClient as createBundlerClient$1, sendUserOperation, waitForUserOperationReceipt } from 'viem/account-abstraction';
-import { getRecord } from '@latticexyz/store/internal';
 import { getAction } from 'viem/utils';
-import { waitForTransactionReceipt, getCode, sendTransaction, writeContract, signTypedData } from 'viem/actions';
+import { writeContract, waitForTransactionReceipt, getCode, sendTransaction, signTypedData } from 'viem/actions';
+import { getRecord } from '@latticexyz/store/internal';
 import IBaseWorldAbi from '@latticexyz/world/out/IBaseWorld.sol/IBaseWorld.abi.json';
 import { callWithSignatureTypes } from '@latticexyz/world-module-callwithsignature/internal';
 import moduleConfig from '@latticexyz/world-module-callwithsignature/mud.config';
+import moduleConfigAlt from '@dk1a/world-module-callwithsignature-alt/mud.config';
 import CallWithSignatureAbi from '@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
-import { getConnectorClient, createConfig, createStorage, reconnect, getAccount, watchAccount, getConnectors, connect, disconnect } from '@wagmi/core';
+import CallWithSignatureAltAbi from '@dk1a/world-module-callwithsignature-alt/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json';
+import { getAccount, getConnectorClient, createConfig, createStorage, reconnect, watchAccount, getConnectors, connect, disconnect, switchChain } from '@wagmi/core';
+
+// src/Drawbridge.ts
 
 // src/types/state.ts
 var DrawbridgeStatus = /* @__PURE__ */ ((DrawbridgeStatus2) => {
@@ -517,6 +522,17 @@ function applyFeeCap(userOp, ethPriceUSD) {
     });
   }
 }
+function callFromWithAlt(params) {
+  return (client) => ({
+    async writeContract(writeArgs) {
+      const _writeContract = getAction(client, writeContract, "writeContract");
+      if (writeArgs.functionName === "callWithSignatureAlt") {
+        return _writeContract(writeArgs);
+      }
+      return callFrom(params)(client).writeContract(writeArgs);
+    }
+  });
+}
 
 // src/session/core/client.ts
 async function getSessionClient({
@@ -542,7 +558,7 @@ async function getSessionClient({
     paymaster: paymasterOverride
   });
   const sessionClient = bundlerClient.extend(smartAccountActions).extend(
-    callFrom({
+    callFromWithAlt({
       worldAddress,
       delegatorAddress: userAddress,
       publicClient
@@ -797,54 +813,176 @@ async function signCall({
   systemId,
   callData,
   nonce: initialNonce,
-  client
+  client,
+  altDomain
 }) {
+  logger.log("[drawbridge] signCall starting:", {
+    userAddress: userClient.account.address,
+    worldAddress,
+    systemId,
+    callDataLength: callData.length,
+    chainId: userClient.chain.id,
+    accountType: userClient.account.type,
+    transportType: userClient.transport?.type,
+    transportName: userClient.transport?.name
+  });
   const nonce = initialNonce ?? (client ? (await getRecord(client, {
     address: worldAddress,
-    table: moduleConfig.tables.CallWithSignatureNonces,
+    table: altDomain ? moduleConfigAlt.tables.AltCallWithSignatureNonces : moduleConfig.tables.CallWithSignatureNonces,
     key: { signer: userClient.account.address },
     blockTag: "pending"
   })).nonce : 0n);
+  logger.log("[drawbridge] signCall nonce fetched:", { nonce: nonce.toString() });
   const { namespace: systemNamespace, name: systemName } = hexToResource(systemId);
-  return await getAction(
-    userClient,
-    signTypedData,
-    "signTypedData"
-  )({
-    account: userClient.account,
-    // EIP-712 domain bound to World contract and chain
-    domain: {
-      verifyingContract: worldAddress,
-      salt: toHex(userClient.chain.id, { size: 32 })
-    },
-    // MUD's CallWithSignature type definitions
+  logger.log("[drawbridge] signCall system parsed:", { systemNamespace, systemName });
+  const domain = altDomain ? {
+    name: "CallWithSignatureAlt",
+    version: "1",
+    chainId: userClient.chain.id,
+    verifyingContract: worldAddress
+  } : {
+    verifyingContract: worldAddress,
+    salt: toHex(userClient.chain.id, { size: 32 })
+  };
+  logger.log("[drawbridge] domain constructed:", {
+    altDomain,
+    chainIdType: altDomain ? "number" : "N/A",
+    chainIdValue: altDomain ? userClient.chain.id : "N/A (using salt)"
+  });
+  const message = {
+    signer: userClient.account.address,
+    systemNamespace,
+    systemName,
+    callData,
+    nonce
+  };
+  logger.log("[drawbridge] signTypedData params:", {
+    account: userClient.account.address,
+    domain,
     types: callWithSignatureTypes,
     primaryType: "Call",
-    // Message contains all call details + nonce
     message: {
-      signer: userClient.account.address,
-      systemNamespace,
-      systemName,
-      callData,
-      nonce
+      ...message,
+      callData: `${callData.slice(0, 66)}... (${callData.length} chars)`,
+      nonce: nonce.toString()
     }
   });
+  logger.log(
+    "[drawbridge] EIP-712 raw structure:",
+    JSON.stringify(
+      {
+        types: {
+          EIP712Domain: altDomain ? [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" }
+          ] : [
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" }
+          ],
+          ...callWithSignatureTypes
+        },
+        primaryType: "Call",
+        domain,
+        message: {
+          signer: userClient.account.address,
+          systemNamespace,
+          systemName,
+          callData,
+          nonce: nonce.toString()
+        }
+      },
+      null,
+      2
+    )
+  );
+  logger.log("[drawbridge] signTypedData exact values:", {
+    nonceType: typeof nonce,
+    nonceValue: nonce,
+    systemNamespaceLength: systemNamespace.length,
+    systemNamespaceIsEmpty: systemNamespace === "",
+    callDataType: typeof callData,
+    callDataIsHex: callData.startsWith("0x")
+  });
+  const typedDataForRpc = {
+    types: {
+      EIP712Domain: altDomain ? [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" }
+      ] : [
+        { name: "verifyingContract", type: "address" },
+        { name: "salt", type: "bytes32" }
+      ],
+      ...callWithSignatureTypes
+    },
+    primaryType: "Call",
+    domain,
+    message: {
+      ...message,
+      // Convert bigint to hex string for JSON-RPC (how viem serializes uint256)
+      nonce: `0x${nonce.toString(16)}`
+    }
+  };
+  logger.log("[drawbridge] eth_signTypedData_v4 params (JSON-RPC format):", {
+    method: "eth_signTypedData_v4",
+    params: [userClient.account.address, JSON.stringify(typedDataForRpc)]
+  });
+  try {
+    const signature = await getAction(
+      userClient,
+      signTypedData,
+      "signTypedData"
+    )({
+      account: userClient.account,
+      // EIP-712 domain bound to World contract and chain
+      domain,
+      // MUD's CallWithSignature type definitions
+      types: callWithSignatureTypes,
+      primaryType: "Call",
+      // Message contains all call details + nonce
+      message
+    });
+    logger.log("[drawbridge] signTypedData success:", { signatureLength: signature.length });
+    return signature;
+  } catch (error) {
+    logger.error("[drawbridge] signTypedData failed:", {
+      error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorDetails: error?.details
+    });
+    throw error;
+  }
 }
 async function callWithSignature({
   sessionClient,
   ...opts
 }) {
+  logger.log("[drawbridge] callWithSignature starting:", {
+    userAddress: opts.userClient.account.address,
+    sessionAddress: sessionClient.account.address,
+    worldAddress: opts.worldAddress,
+    systemId: opts.systemId,
+    altDomain: opts.altDomain
+  });
+  logger.log("[drawbridge] callWithSignature: requesting user signature...");
   const signature = await signCall(opts);
-  return await getAction(
+  logger.log("[drawbridge] callWithSignature: user signature obtained");
+  logger.log("[drawbridge] callWithSignature: submitting transaction via session account...");
+  const hash = await getAction(
     sessionClient,
     writeContract,
     "writeContract"
   )({
     address: opts.worldAddress,
-    abi: CallWithSignatureAbi,
-    functionName: "callWithSignature",
+    abi: opts.altDomain ? CallWithSignatureAltAbi : CallWithSignatureAbi,
+    functionName: opts.altDomain ? "callWithSignatureAlt" : "callWithSignature",
     args: [opts.userClient.account.address, opts.systemId, opts.callData, signature]
   });
+  logger.log("[drawbridge] callWithSignature: transaction submitted:", { hash });
+  return hash;
 }
 
 // src/session/delegation/eoa.ts
@@ -869,7 +1007,8 @@ async function setupSessionEOA({
       abi: IBaseWorldAbi,
       functionName: "registerDelegation",
       args: [sessionAddress, unlimitedDelegationControlId, "0x"]
-    })
+    }),
+    altDomain: true
   });
   const receipt = await getAction(
     publicClient,
@@ -978,18 +1117,52 @@ async function attemptReconnect(wagmiConfig) {
     return { reconnected: false };
   }
 }
-async function connectWallet(wagmiConfig, connectorId, chainId) {
+async function attemptSwitchChain(wagmiConfig, chainId) {
+  try {
+    await switchChain(wagmiConfig, { chainId });
+    logger.log("[wallet] Chain switch successful");
+  } catch (switchError) {
+    const isUnsupportedMethod = switchError instanceof Error && (switchError.name === "SwitchChainNotSupportedError" || switchError.name === "UnsupportedProviderMethodError" || switchError.message?.includes("does not support"));
+    if (isUnsupportedMethod) {
+      logger.warn(
+        "[wallet] Chain switch failed - wallet does not support this method:",
+        switchError
+      );
+    } else {
+      logger.error("[wallet] Chain switch error:", switchError);
+      throw switchError;
+    }
+  }
+}
+async function attemptConnectWalletToChain(wagmiConfig, connectorId, chainId) {
   const connectors = getConnectors(wagmiConfig);
+  logger.log(
+    "[wallet] Available connectors:",
+    connectors.map((c) => ({ id: c.id, name: c.name }))
+  );
   const connector = connectors.find((c) => c.id === connectorId);
   if (!connector) {
     throw new Error(`Connector not found: ${connectorId}`);
   }
   logger.log("[wallet] Connecting to wallet:", connectorId);
-  await connect(wagmiConfig, {
-    connector,
-    chainId
-  });
-  logger.log("[wallet] Connection initiated");
+  try {
+    const account = getAccount(wagmiConfig);
+    if (account.isConnected && account.connector?.uid === connector.uid) {
+      const currentChainId = await connector.getChainId();
+      if (currentChainId === chainId) {
+        logger.log("[wallet] Already connected to requested chain");
+        return;
+      }
+      logger.log("[wallet] Switching connector chain to:", chainId);
+      await attemptSwitchChain(wagmiConfig, chainId);
+    } else {
+      await connect(wagmiConfig, { connector, chainId });
+      logger.log("[wallet] Connection initiated");
+    }
+  } catch (err) {
+    logger.error("[wallet] Connect error:", err);
+    throw err;
+  }
 }
 async function disconnectWallet(wagmiConfig) {
   logger.log("[wallet] Disconnecting...");
@@ -1024,7 +1197,6 @@ var Drawbridge = class {
       error: null
     };
     const chain = config.publicClient.chain;
-    this._publicClient = config.publicClient;
     logger.log("[drawbridge] Public client created for chain:", chain.name);
     this.wagmiConfig = createWalletConfig({
       chains: [chain],
@@ -1170,23 +1342,18 @@ var Drawbridge = class {
    * Called when wagmi detects a connected account
    */
   async handleWalletConnection() {
-    let userClient;
-    try {
-      userClient = await getConnectorClient(this.wagmiConfig);
-    } catch (err) {
-      logger.log("[drawbridge] Could not get connector client");
-      return;
-    }
-    if (!userClient.account || !userClient.chain) {
+    const account = getAccount(this.wagmiConfig);
+    if (!account.isConnected || !account.address || !account.chain) {
       logger.log("[drawbridge] Wallet client missing account or chain");
       return;
     }
-    const userAddress = userClient.account.address;
+    const userAddress = account.address;
     logger.log("[drawbridge] Wallet connected:", userAddress);
     const expectedChainId = this.config.publicClient.chain.id;
-    if (userClient.chain.id !== expectedChainId) {
+    const currentChainId = await account.connector?.getChainId();
+    if (currentChainId !== expectedChainId) {
       const error = new Error(
-        `Chain mismatch: wallet on chain ${userClient.chain.id}, expected ${expectedChainId}`
+        `Chain mismatch: wallet on chain ${currentChainId}, expected ${expectedChainId}`
       );
       logger.error("[drawbridge]", error.message);
       throw error;
@@ -1206,19 +1373,19 @@ var Drawbridge = class {
     logger.log("[drawbridge] Setting up session for address:", userAddress);
     const signer = getSessionSigner(userAddress);
     logger.log("[drawbridge] About to create session account with publicClient:", {
-      chainId: this._publicClient.chain?.id,
-      chainName: this._publicClient.chain?.name,
+      chainId: this.config.publicClient.chain?.id,
+      chainName: this.config.publicClient.chain?.name,
       userAddress,
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
-    const { account } = await getSessionAccount({
-      publicClient: this._publicClient,
+    const { account: sessionAccount } = await getSessionAccount({
+      publicClient: this.config.publicClient,
       userAddress
     });
     const sessionClient = await getSessionClient({
-      publicClient: this._publicClient,
+      publicClient: this.config.publicClient,
       userAddress,
-      sessionAccount: account,
+      sessionAccount,
       sessionSigner: signer,
       worldAddress: this.config.worldAddress,
       paymasterOverride: this.config.paymasterClient,
@@ -1227,10 +1394,10 @@ var Drawbridge = class {
     let hasDelegation = false;
     try {
       hasDelegation = await checkDelegation({
-        client: this._publicClient,
+        client: this.config.publicClient,
         worldAddress: this.config.worldAddress,
         userAddress,
-        sessionAddress: account.address
+        sessionAddress: sessionAccount.address
       });
     } catch (err) {
       logger.error("[drawbridge] Failed to check delegation:", err);
@@ -1276,12 +1443,12 @@ var Drawbridge = class {
     logger.log("[drawbridge] Connecting to wallet:", connectorId);
     this.updateState({ status: "connecting" /* CONNECTING */ });
     try {
-      await connectWallet(this.wagmiConfig, connectorId, this._publicClient.chain.id);
+      await attemptConnectWalletToChain(
+        this.wagmiConfig,
+        connectorId,
+        this.config.publicClient.chain.id
+      );
     } catch (err) {
-      if (err instanceof Error && err.name === "ConnectorAlreadyConnectedError") {
-        logger.log("[drawbridge] Already connected");
-        return;
-      }
       this.updateState({ status: "disconnected" /* DISCONNECTED */ });
       throw err;
     }
@@ -1309,6 +1476,22 @@ var Drawbridge = class {
     }
     logger.log("[drawbridge] Disconnect complete");
   }
+  async getConnectorClient() {
+    const account = getAccount(this.wagmiConfig);
+    if (!account.isConnected) {
+      throw new Error("Not connected.");
+    }
+    const expectedChainId = this.config.publicClient.chain.id;
+    const currentChainId = await account.connector?.getChainId();
+    if (currentChainId !== expectedChainId) {
+      console.log(
+        `[drawbridge] Chain mismatch: current=${currentChainId}, expected=${expectedChainId}, attempting switch`
+      );
+      await attemptSwitchChain(this.wagmiConfig, expectedChainId);
+    }
+    const connectorClient = await getConnectorClient(this.wagmiConfig);
+    return connectorClient.extend(transactionQueue({ publicClient: this.config.publicClient }));
+  }
   /**
    * Check if session is ready to use
    *
@@ -1322,7 +1505,7 @@ var Drawbridge = class {
       return { hasDelegation: false, isReady: false };
     }
     const hasDelegation = await checkDelegation({
-      client: this._publicClient,
+      client: this.config.publicClient,
       worldAddress: this.config.worldAddress,
       userAddress: this.state.userAddress,
       sessionAddress: this.state.sessionAddress
@@ -1353,10 +1536,10 @@ var Drawbridge = class {
     }
     logger.log("[drawbridge] Setting up session (registering delegation)...");
     this.updateState({ status: "setting_up_session" /* SETTING_UP_SESSION */ });
-    const userClient = await getConnectorClient(this.wagmiConfig);
+    const userClient = await this.getConnectorClient();
     try {
       await setupSession({
-        publicClient: this._publicClient,
+        publicClient: this.config.publicClient,
         userClient,
         sessionClient: this.state.sessionClient,
         worldAddress: this.config.worldAddress,
@@ -1435,11 +1618,10 @@ var Drawbridge = class {
    * - Waiting for transaction receipts
    * - Any other read-only operations
    *
-   * The client is created once in the constructor with the configured
-   * transport (WebSocket + HTTP fallback) and polling interval.
+   * The client is set once in the constructor from the config.
    */
   getPublicClient() {
-    return this._publicClient;
+    return this.config.publicClient;
   }
 };
 

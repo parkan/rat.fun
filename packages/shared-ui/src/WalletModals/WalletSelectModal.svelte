@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { ConnectorInfo } from "$lib/modules/drawbridge"
-  import { SmallButton } from "$lib/components/Shared"
+  import type { ConnectorInfo } from "drawbridge"
+  import { SmallButton } from "../Buttons"
 
   let {
     show = $bindable(false),

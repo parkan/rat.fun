@@ -21,6 +21,7 @@
     getEurcToEthRate,
     decodeQuoterError
   } from "$lib/modules/swap-router"
+  import { getSoldPercentage } from "$lib/modules/sold-percentage"
 
   import { SwapForm, Agreement, SignAndSwap, SwapComplete } from "./index"
 
@@ -29,6 +30,9 @@
   }: {
     auctionParams: AuctionParams
   } = $props()
+
+  // Sold percentage (calculated once on mount, needs $state for template binding)
+  let soldPercentage = $state<number | null>(null)
 
   /**
    * Select the best default currency based on balances
@@ -79,6 +83,12 @@
     }
 
     // 2. Check country code requirement
+    console.log(
+      "[Swap] determineInitialState - savedCountryCode:",
+      JSON.stringify(swapState.data.savedCountryCode),
+      "truthy:",
+      !!swapState.data.savedCountryCode
+    )
     if (!swapState.data.savedCountryCode) {
       return SWAP_STATE.AGREEMENT
     }
@@ -104,6 +114,11 @@
     }
 
     const adaptedClient = asPublicClient(client)
+
+    // Calculate sold percentage (fire and forget, non-blocking)
+    getSoldPercentage(adaptedClient, auctionParams).then(percentage => {
+      soldPercentage = percentage
+    })
 
     // Initialize quoter
     const quoter = new CustomQuoter(adaptedClient, config.chainId, auctionParams)
@@ -164,6 +179,14 @@
       auctionParams.token.address,
       $userAddress
     )
+    console.log(
+      "[Swap] Country code from contract:",
+      JSON.stringify(countryCode),
+      "length:",
+      countryCode?.length,
+      "for user:",
+      $userAddress
+    )
     swapState.data.setSavedCountryCode(countryCode)
 
     // TODO replace numeraire balance with fromCurrency balance
@@ -192,6 +215,15 @@
   })
 </script>
 
+{#if soldPercentage !== null}
+  <div class="sold-banner">
+    <span class="sold-text">{soldPercentage.toFixed(1)}% of total sold</span>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: {soldPercentage}%"></div>
+    </div>
+  </div>
+{/if}
+
 <div class="swap-container">
   {#if swapState.state.current === SWAP_STATE.AGREEMENT}
     <Agreement />
@@ -206,6 +238,39 @@
 </div>
 
 <style lang="scss">
+  .sold-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    max-width: 90dvw;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    z-index: var(--z-top);
+
+    .sold-text {
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-normal);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 10px;
+      background: var(--color-grey-mid);
+
+      .progress-fill {
+        height: 100%;
+        background: var(--color-good);
+      }
+    }
+  }
+
   .swap-container {
     display: flex;
     flex-flow: column nowrap;

@@ -7,8 +7,7 @@
     permit2AllowMax
   } from "doppler"
   import { BigButton, Checkbox } from "$lib/components/Shared"
-  import { prepareConnectorClientForTransaction } from "$lib/modules/drawbridge/connector"
-  import { userAddress } from "$lib/modules/drawbridge"
+  import { getDrawbridge, userAddress } from "$lib/modules/drawbridge"
   import { publicClient as publicClientStore } from "$lib/network"
   import {
     deltaRouterAddress,
@@ -97,7 +96,7 @@
 
       console.log("[SignAndSwap] Starting swap flow for", fromCurrency.symbol)
 
-      const client = await prepareConnectorClientForTransaction()
+      const client = await getDrawbridge().getConnectorClient()
       const adaptedPublicClient = asPublicClient($publicClientStore!)
 
       // Steps 1 and 2 may be skipped for ETH
@@ -163,6 +162,16 @@
       console.log("[SignAndSwap] Step 3: Executing swap...")
       processingStep = "Confirm transaction"
 
+      // DEBUG: Log the swap parameters before sending
+      console.log("[SignAndSwap] Swap params:", {
+        fromCurrency: fromCurrency.symbol,
+        amountIn: amountIn.toString(),
+        amountOut: amountOut.toString(),
+        isExactOut,
+        permit: swapState.data.permit,
+        permitSignature: swapState.data.permitSignature
+      })
+
       let txHash: Hex
       if (isExactOut) {
         txHash = await swapExactOut(
@@ -227,6 +236,7 @@
 <div class="button-container">
   <BigButton
     disabled={!swapState.data.amountIn ||
+      swapState.data.amountOut === undefined ||
       isProcessing ||
       !waiveWithdrawal ||
       isAmountExceedsBalance() ||

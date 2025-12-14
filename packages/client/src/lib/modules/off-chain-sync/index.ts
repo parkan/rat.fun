@@ -24,6 +24,7 @@ type ClientsUpdateMessage = {
 }
 
 const MAX_RECONNECTION_DELAY = 30000 // Maximum delay of 30 seconds
+const TOAST_RATE_LIMIT_MS = 60000 // Only show one connection toast per user per minute
 
 let socket: WebSocket | null = null
 let reconnectAttempts = 0
@@ -33,6 +34,9 @@ let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
 let currentEnvironment: ENVIRONMENT | null = null
 let currentPlayerId: string | null = null
 let hasReceivedInitialClientList = false
+
+// Track last toast time per player to rate limit notifications
+const lastToastTimeByPlayer = new Map<string, number>()
 
 export async function initOffChainSync(environment: ENVIRONMENT, playerId: string) {
   // Store for reconnection
@@ -110,12 +114,18 @@ export async function initOffChainSync(environment: ENVIRONMENT, playerId: strin
         playerNotificationsEnabled.current &&
         !areNotificationsSuppressed()
       ) {
+        const now = Date.now()
         for (const player of onlinePlayersList) {
           if (!previousIds.has(player.id) && player.id !== currentPlayerId) {
-            toastManager.add({
-              message: `${player.name} joined`,
-              type: TOAST_TYPE.PLAYER_NOTIFICATION
-            })
+            // Rate limit: only show one toast per player per minute
+            const lastToastTime = lastToastTimeByPlayer.get(player.id) ?? 0
+            if (now - lastToastTime >= TOAST_RATE_LIMIT_MS) {
+              lastToastTimeByPlayer.set(player.id, now)
+              toastManager.add({
+                message: `${player.name} joined`,
+                type: TOAST_TYPE.PLAYER_NOTIFICATION
+              })
+            }
           }
         }
       }
@@ -127,11 +137,20 @@ export async function initOffChainSync(environment: ENVIRONMENT, playerId: strin
 
   socket.onclose = event => {
     websocketConnected.set(false)
-    // Only attempt reconnect if not a deliberate close (code 4001 = auth failure)
-    if (event.code !== 4001) {
-      attemptReconnect()
-    } else {
+
+    // Handle different close scenarios
+    if (event.code === 4001) {
+      // Log auth failures to Sentry (no toast - WebSocketError is silent)
       errorHandler(new WebSocketError(`WebSocket authentication failed: ${event.reason}`))
+
+      // Stale timestamp can be retried with fresh signature (common when browser was backgrounded)
+      if (event.reason?.includes("Stale request timestamp")) {
+        attemptReconnect()
+      }
+      // Other auth failures (invalid signature, etc.) - don't retry
+    } else {
+      // Non-auth failures - attempt reconnect
+      attemptReconnect()
     }
   }
 
@@ -176,4 +195,5 @@ export function disconnectOffChainSync() {
 
   websocketConnected.set(false)
   onlinePlayers.set([])
+  lastToastTimeByPlayer.clear()
 }

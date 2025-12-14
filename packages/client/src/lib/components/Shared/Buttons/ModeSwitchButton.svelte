@@ -27,7 +27,7 @@
 </script>
 
 <Tooltip content={tippyText}>
-  <button class:disabled {onmouseup} {onmousedown}>
+  <button class:disabled class:game-mode={!isAdminView} {onmouseup} {onmousedown}>
     {#if isAdminView}
       <div class="button-icon">
         <X />
@@ -42,6 +42,15 @@
 </Tooltip>
 
 <style lang="scss">
+  @keyframes backgroundCycle {
+    0% {
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      filter: hue-rotate(360deg);
+    }
+  }
+
   button {
     width: 100%;
     height: 100%;
@@ -62,7 +71,7 @@
       line-height: 1em;
       z-index: 2;
       position: relative;
-      color: var(--color-grey-dark);
+      color: var(--background);
     }
 
     .button-icon {
@@ -92,6 +101,31 @@
       pointer-events: none;
       opacity: 0.5;
       cursor: default;
+    }
+
+    &.game-mode {
+      background: radial-gradient(
+        circle,
+        rgba(255, 0, 0, 1),
+        rgba(0, 255, 42, 1),
+        rgba(230, 0, 255, 1)
+      );
+      animation: backgroundCycle 12s infinite;
+      filter: hue-rotate(0deg);
+
+      &:hover {
+        filter: hue-rotate(0deg) brightness(2);
+        background: radial-gradient(
+          circle,
+          rgba(255, 0, 0, 0.7),
+          rgba(0, 255, 42, 0.7),
+          rgba(230, 0, 255, 0.7)
+        );
+      }
+
+      &:active {
+        filter: hue-rotate(0deg) brightness(0.9);
+      }
     }
   }
 </style>

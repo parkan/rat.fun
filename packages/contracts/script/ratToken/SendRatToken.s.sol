@@ -5,6 +5,15 @@ import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+ * @title SendRatToken
+ * @notice Send RAT tokens to a recipient
+ *
+ * Usage:
+ * forge script SendRatToken \
+ *   --sig "run(address,uint256)" <TO_ADDRESS> <AMOUNT> \
+ *   --rpc-url $RPC_URL --broadcast
+ */
 contract SendRatToken is Script {
   address constant RAT_TOKEN = 0xf2DD384662411A21259ab17038574289091F2D41;
 

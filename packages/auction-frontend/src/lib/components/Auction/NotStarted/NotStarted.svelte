@@ -28,7 +28,7 @@
 <div class="not-started">
   <div class="content">
     <div class="mascot-container">
-      <Mascot headBobOn={true} text={mascotText} hugeText={true} />
+      <Mascot headBobOn={true} text={mascotText} hugeText={true} centerText={true} />
     </div>
     <div class="button-container">
       <BigButton text="Go to telegram" onclick={goToTelegram} />

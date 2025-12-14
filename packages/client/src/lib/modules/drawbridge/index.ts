@@ -57,11 +57,18 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
     pollingInterval: 2000,
     appName: "RAT.FUN",
     ethPriceUSD: 2800, // $2,800
-    logging: false // Disable drawbridge console logging
+    logging: true // Disable drawbridge console logging
   })
 
   // Initialize (await reconnection, setup account watcher)
-  await drawbridgeInstance.initialize()
+  // This may fail if wallet is locked or has no accounts - that's OK, user can connect manually
+  try {
+    await drawbridgeInstance.initialize()
+  } catch (error) {
+    // Wallet errors during reconnection are non-fatal
+    // Common case: wallet is locked or has no accounts (code 4001)
+    console.warn("[@client/Drawbridge] Initialization warning (non-fatal):", error)
+  }
 
   console.log("[@client/Drawbridge] Instance ready")
 

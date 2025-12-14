@@ -7,7 +7,6 @@
 
 import { writable, derived } from "svelte/store"
 import { addressToId } from "$lib/modules/utils"
-import { blockNumber } from "$lib/modules/network"
 import { staticContent } from "$lib/modules/content"
 import { ENTITY_TYPE } from "contracts/enums"
 import {
@@ -60,35 +59,6 @@ export const worldStats = derived(worldObject, $worldObject => $worldObject.worl
 export const externalAddressesConfig = derived(
   worldObject,
   $worldObject => $worldObject.externalAddressesConfig
-)
-
-// WORLD EVENT
-export const worldEvent = derived(worldObject, $worldObject => $worldObject.worldEvent)
-export const activeWorldEvent = derived(
-  [worldEvent, blockNumber],
-  ([$worldEvent, $blockNumber]) => {
-    if (!$worldEvent) {
-      return undefined
-    }
-    if ($worldEvent.expirationBlock < $blockNumber) {
-      return undefined
-    }
-    return $worldEvent
-  }
-)
-export const activeWorldEventContent = derived(
-  [staticContent, activeWorldEvent],
-  ([$staticContent, $activeWorldEvent]) => {
-    if (!$activeWorldEvent || !$staticContent.worldEvents) return undefined
-
-    const event = $staticContent?.worldEvents.find(e => e._id === $activeWorldEvent.cmsId)
-
-    if (event) {
-      return event
-    }
-
-    return undefined
-  }
 )
 
 // * * * * * * * * * * * * * * * * *

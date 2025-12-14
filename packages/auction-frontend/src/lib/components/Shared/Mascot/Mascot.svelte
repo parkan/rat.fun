@@ -10,6 +10,7 @@
     text = [],
     smallText = false,
     hugeText = false,
+    centerText = false,
     isGameMascot = false,
     closeTextOnClick = false,
     finishTextOnClick = false,
@@ -22,6 +23,7 @@
     text?: TerminalOutputUnit[]
     smallText?: boolean
     hugeText?: boolean
+    centerText?: boolean
     isGameMascot?: boolean
     closeTextOnClick?: boolean
     finishTextOnClick?: boolean
@@ -42,6 +44,7 @@
   {text}
   {smallText}
   {hugeText}
+  {centerText}
   {isGameMascot}
   {closeTextOnClick}
   {finishTextOnClick}

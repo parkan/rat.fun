@@ -7,6 +7,9 @@ const TIMEOUT = 60000
 
 export function initBlockListener() {
   get(publicNetwork).latestBlock$.subscribe(block => {
+    // Guard against undefined block (can happen during RPC issues)
+    if (!block) return
+
     // console.log("block", Number(block.number), block)
     // Show a error message if we haven't received a block in a while
     clearTimeout(blockTimeout)

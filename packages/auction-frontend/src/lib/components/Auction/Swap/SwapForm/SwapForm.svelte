@@ -2,8 +2,16 @@
   import { formatUnits, parseUnits, type Hex } from "viem"
   import { swapState } from "../state.svelte"
   import RemainingAllowance from "./RemainingAllowance.svelte"
-  import { quoteExactIn, availableCurrencies, decodeQuoterError } from "$lib/modules/swap-router"
+  import {
+    quoteExactIn,
+    availableCurrencies,
+    decodeQuoterError,
+    calculateFallbackEstimate
+  } from "$lib/modules/swap-router"
   import { tokenBalances } from "$lib/modules/balances"
+
+  // Track if we're using estimated (fallback) pricing vs real quote
+  let isUsingEstimate = $state(false)
 
   /**
    * Convert a number to decimal string without scientific notation
@@ -158,13 +166,35 @@
 
         swapState.data.setAmountIn(amountIn)
         // Quote the expected output amount
+        isUsingEstimate = false
         quoteExactIn(fromCurrency.address, auctionParams, amountIn)
           .then(result => {
             swapState.data.setAmountOut(result.amountOutFinal)
+            isUsingEstimate = false
           })
           .catch(error => {
             console.error("[SwapForm] Quote failed:", decodeQuoterError(error))
-            swapState.data.setAmountOut(undefined)
+
+            // Try fallback estimation
+            const fallback = calculateFallbackEstimate({
+              amountIn,
+              fromCurrencyAddress: fromCurrency.address,
+              fromCurrencyDecimals: fromCurrency.decimals,
+              tokenDecimals: auctionParams.token.decimals,
+              currentPriceUsdc: swapState.data.currentPriceUsdc,
+              eurcToEthRate: swapState.data.eurcToEthRate,
+              eurcToUsdcRate: swapState.data.eurcToUsdcRate
+            })
+
+            if (fallback) {
+              console.log("[SwapForm] Using fallback estimate:", fallback.amountOut.toString())
+              swapState.data.setAmountOut(fallback.amountOut)
+              isUsingEstimate = true
+            } else {
+              console.warn("[SwapForm] Fallback estimation also failed")
+              swapState.data.setAmountOut(undefined)
+              isUsingEstimate = false
+            }
           })
       } catch (error) {
         // Handle invalid decimal number errors gracefully
@@ -273,21 +303,31 @@
         </div>
       </div>
       <div class="input-group">
-        <div class="input-with-currency" class:error={isBelowMinimum()}>
+        <div
+          class="input-with-currency"
+          class:error={isBelowMinimum()}
+          class:estimate={isUsingEstimate}
+        >
           <span class="currency-label">$RAT</span>
           <input
             id="token-input"
             type="text"
             readonly
             placeholder="0"
-            value={getAmountOut() ?? ""}
+            value={isUsingEstimate && getAmountOut()
+              ? `~${getAmountOut()}`
+              : (getAmountOut() ?? "")}
           />
         </div>
         <div class="output-row">
           <span class="error-text" class:visible={isBelowMinimum()}>
             Minimum purchase is 1 $RAT
           </span>
-          <span class="subtext">minimum guaranteed</span>
+          {#if isUsingEstimate}
+            <span class="estimate-warning">estimated - actual may vary</span>
+          {:else}
+            <span class="subtext">minimum guaranteed</span>
+          {/if}
         </div>
         <div class="rat-subjects-label">
           ≈ <strong>{getInGameRats() ?? 0}</strong> Rat Subjects
@@ -398,6 +438,11 @@
         background: rgba(255, 68, 68, 0.1);
       }
 
+      &.estimate {
+        border-color: orange;
+        background: rgba(255, 165, 0, 0.1);
+      }
+
       .currency-label {
         display: flex;
         align-items: center;
@@ -477,6 +522,11 @@
     .subtext {
       font-size: 12px;
       color: rgba(255, 255, 255, 0.5);
+    }
+
+    .estimate-warning {
+      font-size: 12px;
+      color: orange;
     }
   }
 

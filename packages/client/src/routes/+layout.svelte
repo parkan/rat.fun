@@ -9,7 +9,12 @@
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
   import { onMount, onDestroy } from "svelte"
-  import { initStaticContent, setPlayerIdStore } from "$lib/modules/content"
+  import {
+    initStaticContent,
+    initTrips,
+    initPlayerOutcomes,
+    setPlayerIdStore
+  } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
   import { UI } from "$lib/modules/ui/enums"
@@ -20,24 +25,27 @@
     getDrawbridge,
     isDrawbridgeInitialized
   } from "$lib/modules/drawbridge"
-  import { playerId } from "$lib/modules/state/stores"
+  import {
+    playerId,
+    playerTrips,
+    nonDepletedTrips,
+    externalAddressesConfig
+  } from "$lib/modules/state/stores"
+  import { get } from "svelte/store"
   import { initOffChainSync, disconnectOffChainSync } from "$lib/modules/off-chain-sync"
   import { resetEntitiesInitialization } from "$lib/modules/chain-sync"
   import { initErc20Listener } from "$lib/modules/erc20Listener"
-  import { externalAddressesConfig } from "$lib/modules/state/stores"
 
   // Components
   import Spawn from "$lib/components/Spawn/Spawn.svelte"
   import Loading from "$lib/components/Loading/Loading.svelte"
   import TouristTrip from "$lib/components/TouristTrip/TouristTrip.svelte"
   import { shaderManager } from "$lib/modules/webgl/shaders/index.svelte"
-  import { ShaderGlobal, Lightbox, Toasts, ManageAllowanceModal } from "$lib/components/Shared"
+  import { ShaderGlobal, Lightbox, Toasts, ManageAllowanceModal, SEO } from "$lib/components/Shared"
   import { allowanceModalState, closeAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { sdk } from "@farcaster/miniapp-sdk"
 
   let { children }: LayoutProps = $props()
-
-  $inspect($externalAddressesConfig)
 
   // Called when loading is complete
   const loaded = () => {
@@ -63,6 +71,18 @@
     console.log("[+layout] spawned() called")
     // Initialize ERC20 listener (centralized here for all scenarios)
     initErc20Listener()
+
+    // Get trip IDs from on-chain state
+    const playerTripIds = Object.keys(get(playerTrips)) // Player's own trips
+    const activeTripIds = Object.keys(get(nonDepletedTrips)) // Trips with balance > 0
+
+    // Combine and deduplicate: active trips + player's trips
+    const relevantTripIds = [...new Set([...activeTripIds, ...playerTripIds])]
+
+    // Load trips and outcomes from CMS
+    initTrips($publicNetwork.worldAddress, relevantTripIds)
+    initPlayerOutcomes($publicNetwork.worldAddress, playerTripIds)
+
     UIState.set(UI.READY)
   }
 
@@ -140,6 +160,8 @@
 </script>
 
 <svelte:window />
+
+<SEO prependTitle="" />
 
 <div class="bg">
   {#if $UIState === UI.LOADING}

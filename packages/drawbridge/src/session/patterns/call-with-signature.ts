@@ -3,7 +3,9 @@ import { writeContract as viem_writeContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { SignCallOptions, signCall } from "./eip712-signing"
 import CallWithSignatureAbi from "@latticexyz/world-module-callwithsignature/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json"
+import CallWithSignatureAltAbi from "@dk1a/world-module-callwithsignature-alt/out/CallWithSignatureSystem.sol/CallWithSignatureSystem.abi.json"
 import { ConnectedClient } from "../../types"
+import { logger } from "../../logger"
 
 export type CallWithSignatureOptions<chain extends Chain = Chain> = SignCallOptions<chain> & {
   sessionClient: ConnectedClient
@@ -33,7 +35,17 @@ export async function callWithSignature<chain extends Chain = Chain>({
   sessionClient,
   ...opts
 }: CallWithSignatureOptions<chain>) {
+  logger.log("[drawbridge] callWithSignature starting:", {
+    userAddress: opts.userClient.account.address,
+    sessionAddress: sessionClient.account.address,
+    worldAddress: opts.worldAddress,
+    systemId: opts.systemId,
+    altDomain: opts.altDomain
+  })
+
+  logger.log("[drawbridge] callWithSignature: requesting user signature...")
   const signature = await signCall(opts)
+  logger.log("[drawbridge] callWithSignature: user signature obtained")
 
   // Submit transaction to World
   // TypeScript workaround: viem's writeContract has complex type inference that
@@ -41,14 +53,18 @@ export async function callWithSignature<chain extends Chain = Chain>({
   // The runtime types are correct - we're calling:
   // callWithSignature(address signer, bytes32 systemId, bytes callData, bytes signature)
   // This cast is safe because we're manually constructing the correct args array.
-  return await getAction(
+  logger.log("[drawbridge] callWithSignature: submitting transaction via session account...")
+  const hash = await getAction(
     sessionClient,
     viem_writeContract,
     "writeContract"
   )({
     address: opts.worldAddress,
-    abi: CallWithSignatureAbi,
-    functionName: "callWithSignature",
+    abi: opts.altDomain ? CallWithSignatureAltAbi : CallWithSignatureAbi,
+    functionName: opts.altDomain ? "callWithSignatureAlt" : "callWithSignature",
     args: [opts.userClient.account.address, opts.systemId, opts.callData, signature]
   } as never)
+
+  logger.log("[drawbridge] callWithSignature: transaction submitted:", { hash })
+  return hash
 }

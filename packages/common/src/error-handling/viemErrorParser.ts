@@ -1,5 +1,5 @@
 import { BaseError } from "viem"
-import { slice, decodeErrorResult, toHex } from "viem"
+import { slice, decodeErrorResult } from "viem"
 import {
   TransactionError,
   TransactionRevertedError,
@@ -36,7 +36,8 @@ function decodeRevertData(hexData: string) {
   }
 
   // Fallback if no ABI matches
-  return `Unknown error: Selector ${toHex(selector)}, Data: ${toHex(parametersHex)}`
+  // Note: slice() already returns hex strings, no need for toHex()
+  return `Unknown error: Selector ${selector}, Data: ${parametersHex}`
 }
 
 /**
@@ -86,6 +87,15 @@ export function parseViemError(error: BaseError): ExpectedError {
   // Transaction execution errors (reverts, etc.)
   if (error.name === "TransactionExecutionError" || error.name === "UserOperationExecutionError") {
     const cause = error.cause as any
+
+    // Check if the cause is a user rejection (wrapped in TransactionExecutionError)
+    if (cause?.name === "UserRejectedRequestError") {
+      return new UserRejectedTransactionError(
+        cause.shortMessage || "User rejected the transaction",
+        error
+      )
+    }
+
     let revertReason = cause?.reason || cause?.shortMessage
 
     // Try to decode revert data if present

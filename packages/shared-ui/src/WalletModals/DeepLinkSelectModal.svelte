@@ -1,33 +1,22 @@
 <script lang="ts">
-  import { SmallButton } from "$lib/components/Shared"
+  import { SmallButton } from "../Buttons"
 
-  let { show = $bindable(false) }: { show: boolean } = $props()
-
-  const WALLET_DEEPLINKS: Record<string, { ios: string; android: string; name: string }> = {
-    coinbase: {
-      ios: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
-      android: "https://go.cb-w.com/dapp?cb_url=https%3A%2F%2Frat.fun",
-      name: "BASE"
-    },
-    metamask: {
-      ios: "https://link.metamask.io/dapp/rat.fun",
-      android: "https://link.metamask.io/dapp/rat.fun",
-      name: "MetaMask"
-    },
-    phantom: {
-      ios: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
-      android: "https://phantom.app/ul/browse/https%3A%2F%2Frat.fun",
-      name: "Phantom"
-    },
-    rabby: {
-      ios: "rabby://dapp?url=https%3A%2F%2Frat.fun",
-      android: "rabby://dapp?url=https%3A%2F%2Frat.fun",
-      name: "Rabby"
-    }
+  export type WalletDeeplink = {
+    ios: string
+    android: string
+    name: string
   }
 
+  let {
+    show = $bindable(false),
+    deeplinks
+  }: {
+    show: boolean
+    deeplinks: Record<string, WalletDeeplink>
+  } = $props()
+
   function openWalletDeeplink(walletId: string) {
-    const deeplink = WALLET_DEEPLINKS[walletId]
+    const deeplink = deeplinks[walletId]
     if (!deeplink) return
 
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
@@ -43,7 +32,7 @@
       <button class="close-btn" onclick={() => (show = false)}>×</button>
       <h2>Open in wallet app</h2>
       <div class="wallet-options">
-        {#each Object.entries(WALLET_DEEPLINKS) as [walletId, wallet]}
+        {#each Object.entries(deeplinks) as [walletId, wallet]}
           <div class="button-container">
             <SmallButton text={wallet.name} onclick={() => openWalletDeeplink(walletId)} />
           </div>
