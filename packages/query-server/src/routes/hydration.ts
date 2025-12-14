@@ -1,7 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
 import { query } from "../db.js"
-import { formatEther } from "viem"
 import {
   getSchemaName,
   NAMESPACE,
@@ -61,15 +60,13 @@ function t(tableName: string): string {
 
 // Fetch player data
 async function fetchPlayer(playerId: string): Promise<PlayerResponse | null> {
-  const [name, balance, currentRatBuffer, pastRatsBuffers, creationBlock, masterKey] =
-    await Promise.all([
-      getTableValue<string>("Name", playerId),
-      getTableValue<string>("Balance", playerId),
-      getTableValue<Buffer>("CurrentRat", playerId),
-      getArrayValue("PastRats", playerId),
-      getTableValue<string>("CreationBlock", playerId),
-      getTableValue<boolean>("MasterKey", playerId)
-    ])
+  const [name, currentRatBuffer, pastRats, creationBlock, masterKey] = await Promise.all([
+    getTableValue<string>("Name", playerId),
+    getTableValue<Buffer>("CurrentRat", playerId),
+    getArrayValue("PastRats", playerId),
+    getTableValue<string>("CreationBlock", playerId),
+    getTableValue<boolean>("MasterKey", playerId)
+  ])
 
   if (!name && !creationBlock) {
     return null
@@ -78,9 +75,8 @@ async function fetchPlayer(playerId: string): Promise<PlayerResponse | null> {
   return {
     id: playerId,
     name,
-    balance: formatBalance(balance),
     currentRat: byteaToHex(currentRatBuffer),
-    pastRats: pastRatsBuffers.map(b => byteaToHex(b)!).filter(Boolean),
+    pastRats,
     creationBlock,
     masterKey: masterKey ?? false
   }
@@ -108,7 +104,7 @@ async function fetchRat(ratId: string): Promise<RatResponse | null> {
     balance,
     ownerBuffer,
     dead,
-    inventoryBuffers,
+    inventoryIds,
     creationBlock,
     tripCount,
     liquidated,
@@ -133,19 +129,19 @@ async function fetchRat(ratId: string): Promise<RatResponse | null> {
   }
 
   // Fetch inventory items
-  const inventory = await Promise.all(inventoryBuffers.map(b => fetchItem(byteaToHex(b)!)))
+  const inventory = await Promise.all(inventoryIds.map(itemId => fetchItem(itemId)))
 
-  // Calculate total value
+  // Calculate total value (balance + sum of inventory values)
   const formattedBalance = formatBalance(balance)
   let totalValue = formattedBalance
   try {
-    let total = formattedBalance ? BigInt(Math.floor(parseFloat(formattedBalance) * 1e18)) : 0n
+    let total = formattedBalance ? BigInt(formattedBalance) : 0n
     for (const item of inventory) {
       if (item.value) {
-        total += BigInt(Math.floor(parseFloat(item.value) * 1e18))
+        total += BigInt(item.value)
       }
     }
-    totalValue = formatEther(total)
+    totalValue = total.toString()
   } catch {
     // Keep formattedBalance as totalValue
   }
@@ -188,7 +184,6 @@ async function fetchTrips(playerId: string): Promise<TripResponse[]> {
       result.rows.map(async row => {
         const tripId = byteaToHex(row.id)!
         const [
-          name,
           ownerBuffer,
           index,
           balance,
@@ -202,7 +197,6 @@ async function fetchTrips(playerId: string): Promise<TripResponse[]> {
           liquidationValue,
           liquidationBlock
         ] = await Promise.all([
-          getTableValue<string>("Name", tripId),
           getTableValue<Buffer>("Owner", tripId),
           getTableValue<string>("Index", tripId),
           getTableValue<string>("Balance", tripId),
@@ -219,7 +213,6 @@ async function fetchTrips(playerId: string): Promise<TripResponse[]> {
 
         return {
           id: tripId,
-          name,
           owner: byteaToHex(ownerBuffer),
           index,
           balance: formatBalance(balance),

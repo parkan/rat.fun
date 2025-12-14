@@ -13,7 +13,6 @@ export interface ItemResponse {
 export interface PlayerResponse {
   id: string
   name: string | null
-  balance: string | null
   currentRat: string | null
   pastRats: string[]
   creationBlock: string | null
@@ -40,7 +39,6 @@ export interface RatResponse {
 // Trip response
 export interface TripResponse {
   id: string
-  name: string | null
   owner: string | null
   index: string | null
   balance: string | null

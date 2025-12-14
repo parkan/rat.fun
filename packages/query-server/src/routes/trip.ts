@@ -10,7 +10,6 @@ const getTripSchema = z.object({
 // Response type
 interface TripInfo {
   id: string
-  name: string | null
   owner: string | null
   index: string | null
   balance: string | null
@@ -39,7 +38,6 @@ const trip: FastifyPluginAsync = async fastify => {
 
     // Query all trip-related data in parallel
     const [
-      name,
       ownerBuffer,
       index,
       balance,
@@ -53,7 +51,6 @@ const trip: FastifyPluginAsync = async fastify => {
       liquidationValue,
       liquidationBlock
     ] = await Promise.all([
-      getTableValue<string>("Name", id),
       getTableValue<Buffer>("Owner", id),
       getTableValue<string>("Index", id),
       getTableValue<string>("Balance", id),
@@ -68,8 +65,8 @@ const trip: FastifyPluginAsync = async fastify => {
       getTableValue<string>("LiquidationBlock", id)
     ])
 
-    // Check if this entity exists (has at least a name or creationBlock)
-    if (!name && !creationBlock) {
+    // Check if this entity exists (has at least a prompt or creationBlock)
+    if (!prompt && !creationBlock) {
       return reply.status(404).send({
         error: "Trip not found",
         id
@@ -81,7 +78,6 @@ const trip: FastifyPluginAsync = async fastify => {
 
     const tripInfo: TripInfo = {
       id,
-      name,
       owner,
       index,
       balance: formatBalance(balance),

@@ -1,5 +1,4 @@
 import { query } from "./db.js"
-import { formatEther } from "viem"
 
 export const NAMESPACE = "ratfun"
 
@@ -32,14 +31,10 @@ export function byteaToHex(buffer: Buffer | null): string | null {
   return "0x" + buffer.toString("hex")
 }
 
-// Format balance from wei to ETH string
+// Format balance - return raw value as string (values are stored as full tokens, not wei)
 export function formatBalance(value: string | bigint | null): string | null {
   if (value === null) return null
-  try {
-    return formatEther(BigInt(value))
-  } catch {
-    return null
-  }
+  return String(value)
 }
 
 // Get full table name with schema
@@ -69,22 +64,26 @@ export async function getTableValue<T>(
 }
 
 // Query array value from a MUD table (for Inventory, PastRats, etc.)
-export async function getArrayValue(tableName: string, entityId: string): Promise<Buffer[]> {
+// Returns array of hex strings (0x...)
+export async function getArrayValue(tableName: string, entityId: string): Promise<string[]> {
   const schema = getSchemaName()
   const fullTableName = getFullTableName(tableName)
   const sql = `SELECT "value" FROM "${schema}"."${fullTableName}" WHERE "id" = $1`
 
   try {
-    const result = await query<{ value: Buffer[] | Buffer | string[] | string }>(sql, [
-      hexToByteaParam(entityId)
-    ])
+    const result = await query<{ value: Buffer[] }>(sql, [hexToByteaParam(entityId)])
     if (result.rows.length === 0) return []
     const val = result.rows[0].value
-    if (Array.isArray(val)) {
-      // Convert string hex values to buffers if needed, or return as-is if already buffers
-      return val.map(v => (Buffer.isBuffer(v) ? v : hexToByteaParam(v as string)))
-    }
-    return [Buffer.isBuffer(val) ? val : hexToByteaParam(val as string)]
+    if (!val || !Array.isArray(val)) return []
+    // Convert each buffer to hex string
+    return val
+      .map(buf => {
+        if (Buffer.isBuffer(buf)) {
+          return "0x" + buf.toString("hex")
+        }
+        return null
+      })
+      .filter((hex): hex is string => hex !== null && hex !== "0x")
   } catch (error) {
     console.error(`Error querying ${schema}.${fullTableName}:`, error)
     return []

@@ -1,6 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
 import { query } from "../db.js"
-import { formatEther } from "viem"
 import { getSchemaName, NAMESPACE, byteaToHex, parsePaginationParams } from "../utils.js"
 import type { RatLeaderboardEntry, TripLeaderboardEntry, RatsKilledEntry } from "../types.js"
 
@@ -86,9 +85,9 @@ const leaderboards: FastifyPluginAsync = async fastify => {
         const entries: RatLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
           name: row.name,
-          balance: formatEther(BigInt(row.balance || "0")),
-          inventoryValue: formatEther(BigInt(Math.floor(parseFloat(row.inventory_value || "0")))),
-          totalValue: formatEther(BigInt(Math.floor(parseFloat(row.total_value || "0")))),
+          balance: row.balance || "0",
+          inventoryValue: String(Math.floor(parseFloat(row.inventory_value || "0"))),
+          totalValue: String(Math.floor(parseFloat(row.total_value || "0"))),
           dead: row.dead,
           liquidated: row.liquidated,
           owner: byteaToHex(row.owner)
@@ -175,9 +174,9 @@ const leaderboards: FastifyPluginAsync = async fastify => {
         const entries: RatLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
           name: row.name,
-          balance: formatEther(BigInt(row.balance || "0")),
-          inventoryValue: formatEther(BigInt(Math.floor(parseFloat(row.inventory_value || "0")))),
-          totalValue: formatEther(BigInt(Math.floor(parseFloat(row.total_value || "0")))),
+          balance: row.balance || "0",
+          inventoryValue: String(Math.floor(parseFloat(row.inventory_value || "0"))),
+          totalValue: String(Math.floor(parseFloat(row.total_value || "0"))),
           dead: row.dead,
           liquidated: row.liquidated,
           owner: byteaToHex(row.owner)
@@ -226,7 +225,7 @@ const leaderboards: FastifyPluginAsync = async fastify => {
         const entries: TripLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
           name: row.name,
-          balance: formatEther(BigInt(row.balance || "0")),
+          balance: row.balance || "0",
           owner: byteaToHex(row.owner),
           liquidated: row.liquidated
         }))
@@ -282,7 +281,7 @@ const leaderboards: FastifyPluginAsync = async fastify => {
         const entries: TripLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
           name: row.name,
-          balance: formatEther(BigInt(row.effective_value || "0")),
+          balance: String(Math.floor(parseFloat(row.effective_value || "0"))),
           owner: byteaToHex(row.owner),
           liquidated: row.liquidated
         }))
