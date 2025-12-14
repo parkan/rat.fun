@@ -45,7 +45,7 @@ class InMemoryChatStore implements ChatStore {
   getRecentMessages(limit: number = 20): Omit<ChatBroadcastMessage, "topic">[] {
     const recent = this.messages.slice(-limit)
     // Strip the topic field for history messages
-    return recent.map(({ topic, ...rest }) => rest)
+    return recent.map(({ topic: _topic, ...rest }) => rest)
   }
 
   clear(): void {
