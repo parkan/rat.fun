@@ -1,6 +1,6 @@
 import { createShaderManager } from "@ratfun/webgl"
 import { errorHandler } from "$lib/modules/error-handling"
-import { isPhone, isFirefox } from "$lib/modules/ui/state.svelte"
+import { singleFrameRender } from "$lib/modules/ui/state.svelte"
 import { get } from "svelte/store"
 
 // Re-export shaders and ShaderManager for convenience
@@ -10,6 +10,5 @@ export { shaders, ShaderManager, createShaderManager } from "@ratfun/webgl"
 // singleFrameRender = isPhone || isFirefox (both have slow shader rendering)
 export const shaderManager = createShaderManager({
   errorHandler,
-  isPhone: () => get(isPhone),
-  isFirefox: () => get(isFirefox)
+  singleFrameRender: () => get(singleFrameRender)
 })

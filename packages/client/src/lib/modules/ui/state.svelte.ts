@@ -19,10 +19,14 @@ export const selectedFolderId = writable("")
 // Track if we're on a phone-sized screen (max-width: 800px)
 export const isPhone = writable(false)
 
-// Track if we're on Firefox browser
+// Track if we're on Firefox (has slow shader rendering)
 export const isFirefox = writable(false)
 
-// Initialize isPhone and isFirefox based on window size and user agent (browser only)
+// Combined check for shader performance optimization (pause after first frame)
+// True on phones OR Firefox (both have slow shader rendering)
+export const singleFrameRender = writable(false)
+
+// Initialize browser checks (browser only)
 if (typeof window !== "undefined") {
   // Check if Firefox
   const firefoxDetected = navigator.userAgent.toLowerCase().includes("firefox")
@@ -36,9 +40,6 @@ if (typeof window !== "undefined") {
   }
   checkPhone()
   window.addEventListener("resize", checkPhone)
-
-  // Check if Firefox
-  isFirefox.set(navigator.userAgent.toLowerCase().includes("firefox"))
 }
 
 // Phone view state - tracks which view is active on mobile game view (ratbox or triplisting)
