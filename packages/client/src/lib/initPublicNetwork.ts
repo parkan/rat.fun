@@ -1,11 +1,11 @@
 import type { Hex } from "viem"
+import { StorageAdapterBlock } from "@latticexyz/store-sync"
 import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import {
   getNetworkConfig,
   setupPublicNetwork,
   SetupPublicNetworkResult,
-  IndexerUrlConfig,
-  InitialBlockLogs
+  IndexerUrlConfig
 } from "@ratfun/common/mud"
 import { waitForChainSync, hydrateFromServer, getHydrationUrl } from "$lib/modules/chain-sync"
 import {
@@ -76,7 +76,7 @@ export async function initPublicNetwork(
 ): Promise<InitPublicNetworkResult> {
   const { environment, url, userAddress } = options
 
-  let initialBlockLogs: InitialBlockLogs | undefined
+  let initialBlockLogs: StorageAdapterBlock | undefined
   let serverEntities: Entities | undefined
 
   // Try server hydration if configured and user address provided
