@@ -195,7 +195,7 @@ export class ShaderManager {
   }
 
   /**
-   * Disable continuous rendering (revert to mobile optimization)
+   * Disable continuous rendering (revert to mobile/Firefox optimization)
    */
   disableContinuousRendering() {
     this.forceContinuousRendering = false
