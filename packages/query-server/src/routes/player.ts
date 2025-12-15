@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { getTableValue, getArrayValue, byteaToHex } from "../utils.js"
+import { getTableValue, getArrayValue, byteaToHex, ENTITY_TYPE } from "../utils.js"
 
 // Request schema
 const getPlayerSchema = z.object({
@@ -30,19 +30,30 @@ const player: FastifyPluginAsync = async fastify => {
     const { id } = validation.data
 
     // Query all player-related data in parallel
-    const [name, currentRatBuffer, pastRats, creationBlock, masterKey] = await Promise.all([
-      getTableValue<string>("Name", id),
-      getTableValue<Buffer>("CurrentRat", id),
-      getArrayValue("PastRats", id),
-      getTableValue<string>("CreationBlock", id),
-      getTableValue<boolean>("MasterKey", id)
-    ])
+    const [entityType, name, currentRatBuffer, pastRats, creationBlock, masterKey] =
+      await Promise.all([
+        getTableValue<number>("EntityType", id),
+        getTableValue<string>("Name", id),
+        getTableValue<Buffer>("CurrentRat", id),
+        getArrayValue("PastRats", id),
+        getTableValue<string>("CreationBlock", id),
+        getTableValue<boolean>("MasterKey", id)
+      ])
 
     // Check if this entity exists (has at least a name or creationBlock)
     if (!name && !creationBlock) {
       return reply.status(404).send({
         error: "Player not found",
         id
+      })
+    }
+
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.PLAYER) {
+      return reply.status(400).send({
+        error: "Entity is not a player",
+        id,
+        actualType: entityType
       })
     }
 

@@ -2,6 +2,15 @@ import { query } from "./db.js"
 
 export const NAMESPACE = "ratfun"
 
+// Entity type enum values (from contracts/enums)
+export const ENTITY_TYPE = {
+  NONE: 0,
+  PLAYER: 1,
+  RAT: 2,
+  TRIP: 3,
+  ITEM: 4
+} as const
+
 // Schema is the world address in lowercase
 export function getSchemaName(): string {
   const worldAddress = process.env.WORLD_ADDRESS
@@ -64,6 +73,7 @@ export async function getTableValue<T>(
 }
 
 // Query array value from a MUD table (for Inventory, PastRats, etc.)
+// MUD stores bytes32[] as JSON TEXT using SuperJSON format
 // Returns array of hex strings (0x...)
 export async function getArrayValue(tableName: string, entityId: string): Promise<string[]> {
   const schema = getSchemaName()
@@ -71,19 +81,28 @@ export async function getArrayValue(tableName: string, entityId: string): Promis
   const sql = `SELECT "value" FROM "${schema}"."${fullTableName}" WHERE "id" = $1`
 
   try {
-    const result = await query<{ value: Buffer[] }>(sql, [hexToByteaParam(entityId)])
+    const result = await query<{ value: string }>(sql, [hexToByteaParam(entityId)])
     if (result.rows.length === 0) return []
     const val = result.rows[0].value
-    if (!val || !Array.isArray(val)) return []
-    // Convert each buffer to hex string
-    return val
-      .map(buf => {
-        if (Buffer.isBuffer(buf)) {
-          return "0x" + buf.toString("hex")
-        }
-        return null
-      })
-      .filter((hex): hex is string => hex !== null && hex !== "0x")
+    if (!val) return []
+
+    // Parse SuperJSON format: {"json":[...],"meta":{}} or plain JSON array
+    let parsed: unknown
+    try {
+      const jsonData = JSON.parse(val)
+      // SuperJSON wraps data in {json: ..., meta: ...}
+      parsed = jsonData.json !== undefined ? jsonData.json : jsonData
+    } catch {
+      console.error(`Failed to parse JSON from ${schema}.${fullTableName}:`, val)
+      return []
+    }
+
+    if (!Array.isArray(parsed)) return []
+
+    // Filter out empty/null/zero values
+    return parsed.filter(
+      (hex): hex is string => typeof hex === "string" && hex.length > 2 && !/^0x0*$/.test(hex)
+    )
   } catch (error) {
     console.error(`Error querying ${schema}.${fullTableName}:`, error)
     return []
@@ -121,4 +140,19 @@ export function parsePaginationParams(
   const parsed = typeof limit === "string" ? parseInt(limit, 10) : (limit ?? defaultLimit)
   if (isNaN(parsed) || parsed < 1) return defaultLimit
   return Math.min(parsed, maxLimit)
+}
+
+// Get the current synced block number from the indexer
+// Queries the block_number from the MUD internal config table
+export async function getLastSyncedBlockNumber(): Promise<string> {
+  // MUD stores indexer state in mud.config table
+  const sql = `SELECT "block_number" as block FROM "mud"."config" LIMIT 1`
+
+  try {
+    const result = await query<{ block: string | null }>(sql, [])
+    return result.rows[0]?.block || "0"
+  } catch (error) {
+    console.error("Error fetching last synced block number:", error)
+    return "0"
+  }
 }

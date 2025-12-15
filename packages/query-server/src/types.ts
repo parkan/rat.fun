@@ -78,15 +78,22 @@ export interface RatLeaderboardEntry {
   totalValue: string
   dead: boolean
   liquidated: boolean
+  liquidationValue: string | null
+  liquidationBlock: string | null
   owner: string | null
+  ownerName: string | null
 }
 
 export interface TripLeaderboardEntry {
   id: string
-  name: string | null
+  prompt: string | null
   balance: string
   owner: string | null
+  ownerName: string | null
   liquidated: boolean
+  killCount: string
+  visitCount: string
+  tripCreationCost: string
 }
 
 export interface RatsKilledEntry {

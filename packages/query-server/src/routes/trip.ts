@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { getTableValue, byteaToHex, formatBalance } from "../utils.js"
+import { getTableValue, byteaToHex, formatBalance, ENTITY_TYPE } from "../utils.js"
 
 // Request schema
 const getTripSchema = z.object({
@@ -38,6 +38,7 @@ const trip: FastifyPluginAsync = async fastify => {
 
     // Query all trip-related data in parallel
     const [
+      entityType,
       ownerBuffer,
       index,
       balance,
@@ -51,6 +52,7 @@ const trip: FastifyPluginAsync = async fastify => {
       liquidationValue,
       liquidationBlock
     ] = await Promise.all([
+      getTableValue<number>("EntityType", id),
       getTableValue<Buffer>("Owner", id),
       getTableValue<string>("Index", id),
       getTableValue<string>("Balance", id),
@@ -73,6 +75,15 @@ const trip: FastifyPluginAsync = async fastify => {
       })
     }
 
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.TRIP) {
+      return reply.status(400).send({
+        error: "Entity is not a trip",
+        id,
+        actualType: entityType
+      })
+    }
+
     // Convert owner buffer to hex string
     const owner = byteaToHex(ownerBuffer)
 
@@ -82,8 +93,8 @@ const trip: FastifyPluginAsync = async fastify => {
       index,
       balance: formatBalance(balance),
       prompt,
-      visitCount,
-      killCount,
+      visitCount: visitCount ?? "0",
+      killCount: killCount ?? "0",
       creationBlock,
       lastVisitBlock,
       tripCreationCost: formatBalance(tripCreationCost),

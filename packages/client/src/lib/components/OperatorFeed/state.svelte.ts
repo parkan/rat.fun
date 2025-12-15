@@ -181,9 +181,9 @@ export async function loadRatLeaderboard() {
       const entries: RatLeaderboardEntry[] = response.entries.map((entry, index) => ({
         id: entry.id,
         name: entry.name || "Unnamed Rat",
-        ownerName: entry.owner
+        ownerName: entry.ownerName || (entry.owner
           ? `${entry.owner.slice(0, 6)}...${entry.owner.slice(-4)}`
-          : "Unknown",
+          : "Unknown"),
         value: parseEthValue(entry.totalValue),
         rank: index + 1
       }))
@@ -241,10 +241,10 @@ export async function loadTripLeaderboard() {
     if (response) {
       const entries: TripLeaderboardEntry[] = response.entries.map((entry, index) => ({
         tripId: entry.id,
-        tripTitle: entry.name || "Unnamed Trip",
-        ownerName: entry.owner
+        tripTitle: entry.prompt || "Unnamed Trip",
+        ownerName: entry.ownerName || (entry.owner
           ? `${entry.owner.slice(0, 6)}...${entry.owner.slice(-4)}`
-          : "Unknown",
+          : "Unknown"),
         balance: parseEthValue(entry.balance),
         rank: index + 1
       }))

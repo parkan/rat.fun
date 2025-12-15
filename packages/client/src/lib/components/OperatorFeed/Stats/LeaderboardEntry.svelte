@@ -76,8 +76,8 @@
   }
 
   .subtitle {
-    font-size: var(--font-size-tiny);
-    color: var(--color-grey-light);
+    font-size: var(--font-size-small);
+    color: var(--color-grey-lighter);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

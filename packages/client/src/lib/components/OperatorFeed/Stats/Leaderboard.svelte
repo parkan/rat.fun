@@ -58,7 +58,7 @@
         <LeaderboardEntry
           rank={entry.rank}
           name={entry.name}
-          subtitle={entry.ownerName}
+          subtitle="Owner: {entry.ownerName}"
           value={entry.value}
         />
       {/each}
@@ -97,7 +97,7 @@
         <LeaderboardEntry
           rank={entry.rank}
           name={entry.tripTitle}
-          subtitle={entry.ownerName}
+          subtitle="Owner: {entry.ownerName}"
           value={entry.balance}
         />
       {/each}

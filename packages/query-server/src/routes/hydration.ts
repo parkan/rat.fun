@@ -8,7 +8,9 @@ import {
   getArrayValue,
   hexToByteaParam,
   byteaToHex,
-  formatBalance
+  formatBalance,
+  getLastSyncedBlockNumber,
+  ENTITY_TYPE
 } from "../utils.js"
 import type {
   PlayerResponse,
@@ -19,34 +21,10 @@ import type {
   HydrationResponse
 } from "../types.js"
 
-// Entity type enum values (from contracts/enums)
-const ENTITY_TYPE = {
-  NONE: 0,
-  PLAYER: 1,
-  RAT: 2,
-  TRIP: 3,
-  ITEM: 4
-}
-
 // Request schema
 const hydrationSchema = z.object({
   playerId: z.string().regex(/^0x[a-fA-F0-9]{64}$/, "Invalid bytes32 id format")
 })
-
-// Get the current synced block number from the indexer
-async function getCurrentBlockNumber(): Promise<string> {
-  const schema = getSchemaName()
-  // Query the MUD internal table that tracks the last synced block
-  const sql = `SELECT MAX("__lastUpdatedBlockNumber") as block FROM "${schema}"."__mudStoreTables"`
-
-  try {
-    const result = await query<{ block: string | null }>(sql, [])
-    return result.rows[0]?.block || "0"
-  } catch (error) {
-    console.error("Error fetching current block number:", error)
-    return "0"
-  }
-}
 
 // Helper to get table name
 function t(tableName: string): string {
@@ -155,7 +133,7 @@ async function fetchRat(ratId: string): Promise<RatResponse | null> {
     dead: dead ?? false,
     inventory,
     creationBlock,
-    tripCount,
+    tripCount: tripCount ?? "0",
     liquidated: liquidated ?? false,
     liquidationValue: formatBalance(liquidationValue),
     liquidationBlock,
@@ -217,8 +195,8 @@ async function fetchTrips(playerId: string): Promise<TripResponse[]> {
           index,
           balance: formatBalance(balance),
           prompt,
-          visitCount,
-          killCount,
+          visitCount: visitCount ?? "0",
+          killCount: killCount ?? "0",
           creationBlock,
           lastVisitBlock,
           tripCreationCost: formatBalance(tripCreationCost),
@@ -278,7 +256,7 @@ const hydration: FastifyPluginAsync = async fastify => {
       // Fetch player and block number in parallel
       const [player, blockNumber] = await Promise.all([
         fetchPlayer(playerId),
-        getCurrentBlockNumber()
+        getLastSyncedBlockNumber()
       ])
 
       if (!player) {

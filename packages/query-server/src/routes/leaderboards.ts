@@ -1,16 +1,13 @@
 import { FastifyPluginAsync } from "fastify"
 import { query } from "../db.js"
-import { getSchemaName, NAMESPACE, byteaToHex, parsePaginationParams } from "../utils.js"
+import {
+  getSchemaName,
+  NAMESPACE,
+  byteaToHex,
+  parsePaginationParams,
+  ENTITY_TYPE
+} from "../utils.js"
 import type { RatLeaderboardEntry, TripLeaderboardEntry, RatsKilledEntry } from "../types.js"
-
-// Entity type enum values (from contracts/enums)
-const ENTITY_TYPE = {
-  NONE: 0,
-  PLAYER: 1,
-  RAT: 2,
-  TRIP: 3,
-  ITEM: 4
-}
 
 // Helper to get table name
 function t(tableName: string): string {
@@ -30,7 +27,8 @@ const leaderboards: FastifyPluginAsync = async fastify => {
       const limit = parsePaginationParams(request.query.limit)
 
       // Get all alive (not dead) rats with their balances
-      // Then calculate inventory values
+      // MUD stores Inventory as JSON TEXT (SuperJSON format), so we use jsonb functions
+      // Using LATERAL join to avoid set-returning function in CASE error
       const sql = `
         WITH rat_ids AS (
           SELECT et.id
@@ -43,13 +41,34 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           FROM rat_ids r
           LEFT JOIN ${t("Balance")} b ON b.id = r.id
         ),
-        inventory_values AS (
-          SELECT inv.id as rat_id, COALESCE(SUM(CAST(v.value AS NUMERIC)), 0) as inv_value
+        inventory_json AS (
+          SELECT
+            inv.id as rat_id,
+            -- Extract the array from SuperJSON format or use as-is
+            CASE
+              WHEN inv.value::jsonb ? 'json' THEN (inv.value::jsonb)->'json'
+              ELSE inv.value::jsonb
+            END as items_array
           FROM ${t("Inventory")} inv
-          CROSS JOIN LATERAL unnest(inv.value) AS item_id
-          LEFT JOIN ${t("Value")} v ON v.id = item_id
           WHERE inv.id IN (SELECT id FROM rat_ids)
-          GROUP BY inv.id
+            AND inv.value IS NOT NULL
+            AND inv.value != ''
+            AND inv.value != '[]'
+            AND inv.value != '{"json":[],"meta":{}}'
+        ),
+        inventory_items AS (
+          SELECT ij.rat_id, item_hex.value as item_id_hex
+          FROM inventory_json ij
+          CROSS JOIN LATERAL jsonb_array_elements_text(ij.items_array) as item_hex(value)
+        ),
+        inventory_values AS (
+          SELECT
+            ii.rat_id,
+            COALESCE(SUM(CAST(v.value AS NUMERIC)), 0) as inv_value
+          FROM inventory_items ii
+          LEFT JOIN ${t("Value")} v ON v.id = decode(substring(ii.item_id_hex from 3), 'hex')
+          WHERE ii.item_id_hex IS NOT NULL AND ii.item_id_hex != '' AND ii.item_id_hex != '0x'
+          GROUP BY ii.rat_id
         )
         SELECT
           rb.id,
@@ -59,13 +78,19 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           (CAST(rb.balance AS NUMERIC) + COALESCE(iv.inv_value, 0)) as total_value,
           COALESCE(d.value, false) as dead,
           COALESCE(l.value, false) as liquidated,
-          o.value as owner
+          lv.value as liquidation_value,
+          lb.value as liquidation_block,
+          o.value as owner,
+          owner_name.value as owner_name
         FROM rat_balances rb
         LEFT JOIN ${t("Name")} n ON n.id = rb.id
         LEFT JOIN inventory_values iv ON iv.rat_id = rb.id
         LEFT JOIN ${t("Dead")} d ON d.id = rb.id
         LEFT JOIN ${t("Liquidated")} l ON l.id = rb.id
+        LEFT JOIN ${t("LiquidationValue")} lv ON lv.id = rb.id
+        LEFT JOIN ${t("LiquidationBlock")} lb ON lb.id = rb.id
         LEFT JOIN ${t("Owner")} o ON o.id = rb.id
+        LEFT JOIN ${t("Name")} owner_name ON owner_name.id = o.value
         ORDER BY total_value DESC
         LIMIT $2
       `
@@ -79,7 +104,10 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           total_value: string
           dead: boolean
           liquidated: boolean
+          liquidation_value: string | null
+          liquidation_block: string | null
           owner: Buffer | null
+          owner_name: string | null
         }>(sql, [ENTITY_TYPE.RAT, limit])
 
         const entries: RatLeaderboardEntry[] = result.rows.map(row => ({
@@ -90,7 +118,10 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           totalValue: String(Math.floor(parseFloat(row.total_value || "0"))),
           dead: row.dead,
           liquidated: row.liquidated,
-          owner: byteaToHex(row.owner)
+          liquidationValue: row.liquidation_value,
+          liquidationBlock: row.liquidation_block,
+          owner: byteaToHex(row.owner),
+          ownerName: row.owner_name
         }))
 
         return reply.send({ entries, limit })
@@ -101,12 +132,14 @@ const leaderboards: FastifyPluginAsync = async fastify => {
     }
   )
 
-  // All-time rats by value (uses liquidationValue for liquidated rats)
+  // All-time rats by value (uses liquidationValue for dead rats)
   fastify.get<{ Querystring: { limit?: string } }>(
     "/api/leaderboard/rat-value/all-time",
     async (request, reply) => {
       const limit = parsePaginationParams(request.query.limit)
 
+      // MUD stores Inventory as JSON TEXT (SuperJSON format), so we use jsonb functions
+      // Using LATERAL join to avoid set-returning function in CASE error
       const sql = `
         WITH rat_ids AS (
           SELECT et.id
@@ -118,29 +151,54 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           FROM rat_ids r
           LEFT JOIN ${t("Balance")} b ON b.id = r.id
         ),
-        inventory_values AS (
-          SELECT inv.id as rat_id, COALESCE(SUM(CAST(v.value AS NUMERIC)), 0) as inv_value
+        inventory_json AS (
+          SELECT
+            inv.id as rat_id,
+            -- Extract the array from SuperJSON format or use as-is
+            CASE
+              WHEN inv.value::jsonb ? 'json' THEN (inv.value::jsonb)->'json'
+              ELSE inv.value::jsonb
+            END as items_array
           FROM ${t("Inventory")} inv
-          CROSS JOIN LATERAL unnest(inv.value) AS item_id
-          LEFT JOIN ${t("Value")} v ON v.id = item_id
           WHERE inv.id IN (SELECT id FROM rat_ids)
-          GROUP BY inv.id
+            AND inv.value IS NOT NULL
+            AND inv.value != ''
+            AND inv.value != '[]'
+            AND inv.value != '{"json":[],"meta":{}}'
+        ),
+        inventory_items AS (
+          SELECT ij.rat_id, item_hex.value as item_id_hex
+          FROM inventory_json ij
+          CROSS JOIN LATERAL jsonb_array_elements_text(ij.items_array) as item_hex(value)
+        ),
+        inventory_values AS (
+          SELECT
+            ii.rat_id,
+            COALESCE(SUM(CAST(v.value AS NUMERIC)), 0) as inv_value
+          FROM inventory_items ii
+          LEFT JOIN ${t("Value")} v ON v.id = decode(substring(ii.item_id_hex from 3), 'hex')
+          WHERE ii.item_id_hex IS NOT NULL AND ii.item_id_hex != '' AND ii.item_id_hex != '0x'
+          GROUP BY ii.rat_id
         ),
         effective_values AS (
           SELECT
             rb.id,
             rb.balance,
             COALESCE(iv.inv_value, 0) as inventory_value,
+            COALESCE(d.value, false) as dead,
             COALESCE(l.value, false) as liquidated,
             lv.value as liquidation_value,
+            lb.value as liquidation_block,
             CASE
-              WHEN COALESCE(l.value, false) = true THEN CAST(COALESCE(lv.value, 0) AS NUMERIC)
+              WHEN COALESCE(d.value, false) = true THEN CAST(COALESCE(lv.value, 0) AS NUMERIC)
               ELSE (CAST(rb.balance AS NUMERIC) + COALESCE(iv.inv_value, 0))
             END as effective_value
           FROM rat_balances rb
           LEFT JOIN inventory_values iv ON iv.rat_id = rb.id
+          LEFT JOIN ${t("Dead")} d ON d.id = rb.id
           LEFT JOIN ${t("Liquidated")} l ON l.id = rb.id
           LEFT JOIN ${t("LiquidationValue")} lv ON lv.id = rb.id
+          LEFT JOIN ${t("LiquidationBlock")} lb ON lb.id = rb.id
         )
         SELECT
           ev.id,
@@ -148,13 +206,16 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           ev.balance,
           ev.inventory_value,
           ev.effective_value as total_value,
-          COALESCE(d.value, false) as dead,
+          ev.dead,
           ev.liquidated,
-          o.value as owner
+          ev.liquidation_value,
+          ev.liquidation_block,
+          o.value as owner,
+          owner_name.value as owner_name
         FROM effective_values ev
         LEFT JOIN ${t("Name")} n ON n.id = ev.id
-        LEFT JOIN ${t("Dead")} d ON d.id = ev.id
         LEFT JOIN ${t("Owner")} o ON o.id = ev.id
+        LEFT JOIN ${t("Name")} owner_name ON owner_name.id = o.value
         ORDER BY ev.effective_value DESC
         LIMIT $2
       `
@@ -168,7 +229,10 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           total_value: string
           dead: boolean
           liquidated: boolean
+          liquidation_value: string | null
+          liquidation_block: string | null
           owner: Buffer | null
+          owner_name: string | null
         }>(sql, [ENTITY_TYPE.RAT, limit])
 
         const entries: RatLeaderboardEntry[] = result.rows.map(row => ({
@@ -179,7 +243,10 @@ const leaderboards: FastifyPluginAsync = async fastify => {
           totalValue: String(Math.floor(parseFloat(row.total_value || "0"))),
           dead: row.dead,
           liquidated: row.liquidated,
-          owner: byteaToHex(row.owner)
+          liquidationValue: row.liquidation_value,
+          liquidationBlock: row.liquidation_block,
+          owner: byteaToHex(row.owner),
+          ownerName: row.owner_name
         }))
 
         return reply.send({ entries, limit })
@@ -199,15 +266,23 @@ const leaderboards: FastifyPluginAsync = async fastify => {
       const sql = `
         SELECT
           et.id,
-          n.value as name,
+          p.value as prompt,
           b.value as balance,
           o.value as owner,
-          COALESCE(l.value, false) as liquidated
+          owner_name.value as owner_name,
+          COALESCE(l.value, false) as liquidated,
+          COALESCE(kc.value, 0) as kill_count,
+          COALESCE(vc.value, 0) as visit_count,
+          COALESCE(tcc.value, 0) as trip_creation_cost
         FROM ${t("EntityType")} et
         INNER JOIN ${t("Balance")} b ON b.id = et.id AND CAST(b.value AS NUMERIC) > 0
-        LEFT JOIN ${t("Name")} n ON n.id = et.id
+        LEFT JOIN ${t("Prompt")} p ON p.id = et.id
         LEFT JOIN ${t("Owner")} o ON o.id = et.id
+        LEFT JOIN ${t("Name")} owner_name ON owner_name.id = o.value
         LEFT JOIN ${t("Liquidated")} l ON l.id = et.id
+        LEFT JOIN ${t("KillCount")} kc ON kc.id = et.id
+        LEFT JOIN ${t("VisitCount")} vc ON vc.id = et.id
+        LEFT JOIN ${t("TripCreationCost")} tcc ON tcc.id = et.id
         WHERE et.value = $1
         ORDER BY CAST(b.value AS NUMERIC) DESC
         LIMIT $2
@@ -216,18 +291,26 @@ const leaderboards: FastifyPluginAsync = async fastify => {
       try {
         const result = await query<{
           id: Buffer
-          name: string | null
+          prompt: string | null
           balance: string
           owner: Buffer | null
+          owner_name: string | null
           liquidated: boolean
+          kill_count: string
+          visit_count: string
+          trip_creation_cost: string
         }>(sql, [ENTITY_TYPE.TRIP, limit])
 
         const entries: TripLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
-          name: row.name,
+          prompt: row.prompt,
           balance: row.balance || "0",
           owner: byteaToHex(row.owner),
-          liquidated: row.liquidated
+          ownerName: row.owner_name,
+          liquidated: row.liquidated,
+          killCount: row.kill_count || "0",
+          visitCount: row.visit_count || "0",
+          tripCreationCost: row.trip_creation_cost || "0"
         }))
 
         return reply.send({ entries, limit })
@@ -247,21 +330,29 @@ const leaderboards: FastifyPluginAsync = async fastify => {
       const sql = `
         SELECT
           et.id,
-          n.value as name,
+          p.value as prompt,
           COALESCE(b.value, 0) as balance,
           o.value as owner,
+          owner_name.value as owner_name,
           COALESCE(l.value, false) as liquidated,
           lv.value as liquidation_value,
+          COALESCE(kc.value, 0) as kill_count,
+          COALESCE(vc.value, 0) as visit_count,
+          COALESCE(tcc.value, 0) as trip_creation_cost,
           CASE
             WHEN COALESCE(l.value, false) = true THEN CAST(COALESCE(lv.value, 0) AS NUMERIC)
             ELSE CAST(COALESCE(b.value, 0) AS NUMERIC)
           END as effective_value
         FROM ${t("EntityType")} et
         LEFT JOIN ${t("Balance")} b ON b.id = et.id
-        LEFT JOIN ${t("Name")} n ON n.id = et.id
+        LEFT JOIN ${t("Prompt")} p ON p.id = et.id
         LEFT JOIN ${t("Owner")} o ON o.id = et.id
+        LEFT JOIN ${t("Name")} owner_name ON owner_name.id = o.value
         LEFT JOIN ${t("Liquidated")} l ON l.id = et.id
         LEFT JOIN ${t("LiquidationValue")} lv ON lv.id = et.id
+        LEFT JOIN ${t("KillCount")} kc ON kc.id = et.id
+        LEFT JOIN ${t("VisitCount")} vc ON vc.id = et.id
+        LEFT JOIN ${t("TripCreationCost")} tcc ON tcc.id = et.id
         WHERE et.value = $1
         ORDER BY effective_value DESC
         LIMIT $2
@@ -270,20 +361,28 @@ const leaderboards: FastifyPluginAsync = async fastify => {
       try {
         const result = await query<{
           id: Buffer
-          name: string | null
+          prompt: string | null
           balance: string
           owner: Buffer | null
+          owner_name: string | null
           liquidated: boolean
           liquidation_value: string | null
+          kill_count: string
+          visit_count: string
+          trip_creation_cost: string
           effective_value: string
         }>(sql, [ENTITY_TYPE.TRIP, limit])
 
         const entries: TripLeaderboardEntry[] = result.rows.map(row => ({
           id: byteaToHex(row.id)!,
-          name: row.name,
+          prompt: row.prompt,
           balance: String(Math.floor(parseFloat(row.effective_value || "0"))),
           owner: byteaToHex(row.owner),
-          liquidated: row.liquidated
+          ownerName: row.owner_name,
+          liquidated: row.liquidated,
+          killCount: row.kill_count || "0",
+          visitCount: row.visit_count || "0",
+          tripCreationCost: row.trip_creation_cost || "0"
         }))
 
         return reply.send({ entries, limit })
@@ -300,15 +399,27 @@ const leaderboards: FastifyPluginAsync = async fastify => {
     async (request, reply) => {
       const limit = parsePaginationParams(request.query.limit)
 
+      // MUD stores PastRats as JSON TEXT (SuperJSON format), so we use jsonb functions
       const sql = `
         SELECT
           pr.id,
           n.value as name,
-          array_length(pr.value, 1) as rats_killed
+          -- Get array length from SuperJSON: {"json":[...],"meta":{}} or plain array
+          CASE
+            WHEN pr.value::jsonb ? 'json' THEN jsonb_array_length((pr.value::jsonb)->'json')
+            ELSE jsonb_array_length(pr.value::jsonb)
+          END as rats_killed
         FROM ${t("PastRats")} pr
         LEFT JOIN ${t("Name")} n ON n.id = pr.id
-        WHERE array_length(pr.value, 1) > 0
-        ORDER BY array_length(pr.value, 1) DESC
+        WHERE pr.value IS NOT NULL
+          AND pr.value != ''
+          AND pr.value != '[]'
+          AND pr.value != '{"json":[],"meta":{}}'
+        ORDER BY
+          CASE
+            WHEN pr.value::jsonb ? 'json' THEN jsonb_array_length((pr.value::jsonb)->'json')
+            ELSE jsonb_array_length(pr.value::jsonb)
+          END DESC
         LIMIT $1
       `
 

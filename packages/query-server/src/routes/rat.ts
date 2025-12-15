@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { getTableValue, getArrayValue, byteaToHex, formatBalance } from "../utils.js"
+import { getTableValue, getArrayValue, byteaToHex, formatBalance, ENTITY_TYPE } from "../utils.js"
 import type { ItemResponse, RatResponse } from "../types.js"
 
 // Request schema
@@ -60,6 +60,7 @@ const rat: FastifyPluginAsync = async fastify => {
 
     // Query all rat-related data in parallel
     const [
+      entityType,
       name,
       balance,
       dead,
@@ -72,6 +73,7 @@ const rat: FastifyPluginAsync = async fastify => {
       creationBlock,
       inventoryIds
     ] = await Promise.all([
+      getTableValue<number>("EntityType", id),
       getTableValue<string>("Name", id),
       getTableValue<string>("Balance", id),
       getTableValue<boolean>("Dead", id),
@@ -90,6 +92,15 @@ const rat: FastifyPluginAsync = async fastify => {
       return reply.status(404).send({
         error: "Rat not found",
         id
+      })
+    }
+
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.RAT) {
+      return reply.status(400).send({
+        error: "Entity is not a rat",
+        id,
+        actualType: entityType
       })
     }
 
@@ -114,7 +125,7 @@ const rat: FastifyPluginAsync = async fastify => {
       dead: dead ?? false,
       inventory,
       creationBlock,
-      tripCount,
+      tripCount: tripCount ?? "0",
       liquidated: liquidated ?? false,
       liquidationValue: formatBalance(liquidationValue),
       liquidationBlock,

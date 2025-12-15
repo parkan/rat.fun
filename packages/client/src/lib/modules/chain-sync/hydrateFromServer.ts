@@ -72,7 +72,6 @@ function transformResponse(response: HydrationResponse): Entities {
   entities[response.player.id] = {
     entityType: ENTITY_TYPE.PLAYER,
     name: response.player.name ?? undefined,
-    balance: safeParseEther(response.player.balance),
     currentRat: (response.player.currentRat as Hex) ?? undefined,
     pastRats: (response.player.pastRats as readonly Hex[]) ?? [],
     creationBlock: safeParseBigInt(response.player.creationBlock),
@@ -105,7 +104,6 @@ function transformResponse(response: HydrationResponse): Entities {
   for (const trip of response.trips) {
     entities[trip.id] = {
       entityType: ENTITY_TYPE.TRIP,
-      name: trip.name ?? undefined,
       owner: (trip.owner as Hex) ?? undefined,
       index: safeParseBigInt(trip.index),
       balance: safeParseEther(trip.balance),
