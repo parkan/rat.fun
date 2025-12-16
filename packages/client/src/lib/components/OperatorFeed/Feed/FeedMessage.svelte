@@ -4,7 +4,6 @@
   import ChatMessage from "./ChatMessage.svelte"
   import NewTripMessage from "./NewTripMessage.svelte"
   import NewOutcomeMessage from "./NewOutcomeMessage.svelte"
-  import PlayerJoinedMessage from "./PlayerJoinedMessage.svelte"
 
   let { message }: { message: FeedMessage } = $props()
 
@@ -23,8 +22,6 @@
     <NewTripMessage {message} />
   {:else if message.type === FEED_MESSAGE_TYPE.NEW_OUTCOME}
     <NewOutcomeMessage {message} />
-  {:else if message.type === FEED_MESSAGE_TYPE.PLAYER_JOINED}
-    <PlayerJoinedMessage {message} />
   {/if}
 </div>
 

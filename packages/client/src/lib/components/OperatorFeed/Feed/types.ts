@@ -1,8 +1,7 @@
 export enum FEED_MESSAGE_TYPE {
   CHAT = "chat",
   NEW_TRIP = "new_trip",
-  NEW_OUTCOME = "new_outcome",
-  PLAYER_JOINED = "player_joined"
+  NEW_OUTCOME = "new_outcome"
 }
 
 export type BaseFeedMessage = {
@@ -24,24 +23,33 @@ export type NewTripMessage = BaseFeedMessage & {
   tripIndex: number
   tripPrompt: string
   creatorName: string
+  tripCreationCost: number
+}
+
+// Item info for outcome messages
+export type FeedItem = {
+  id: string
+  name: string
+  value: number
 }
 
 export type NewOutcomeMessage = BaseFeedMessage & {
   type: FEED_MESSAGE_TYPE.NEW_OUTCOME
   tripId: string
   tripIndex: number
+  tripPrompt: string
   ratName: string
   result: "survived" | "died"
   ratOwnerName: string
-  ratOwnerValueChange: number
-  tripCreatorName: string
-  tripCreatorValueChange: number
+  ratValueChange: number
+  // Items the rat brought into the trip
+  itemsOnEntrance: FeedItem[]
+  // Items gained during the trip
+  itemsGained: FeedItem[]
+  // Items lost during the trip (not including death losses)
+  itemsLost: FeedItem[]
+  // Items lost on death (only if rat died)
+  itemsLostOnDeath: FeedItem[]
 }
 
-export type PlayerJoinedMessage = BaseFeedMessage & {
-  type: FEED_MESSAGE_TYPE.PLAYER_JOINED
-  playerId: string
-  playerName: string
-}
-
-export type FeedMessage = ChatMessage | NewTripMessage | NewOutcomeMessage | PlayerJoinedMessage
+export type FeedMessage = ChatMessage | NewTripMessage | NewOutcomeMessage

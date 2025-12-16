@@ -207,19 +207,56 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
       const trip = currentContent.trips.find(t => t._id === outcome.tripId)
 
       // Add to operator feed for ALL outcomes
-      const ratDied = outcome.ratValue === 0
+      const ratDied = outcome.newRatBalance === 0
+
+      // Extract items from outcome
+      const itemsOnEntrance =
+        outcome.inventoryOnEntrance?.map(item => ({
+          id: item.id ?? "",
+          name: item.name ?? "",
+          value: item.value ?? 0
+        })) ?? []
+
+      const itemsGained =
+        outcome.itemChanges
+          ?.filter(item => item.type === "add")
+          .map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+      const itemsLost =
+        outcome.itemChanges
+          ?.filter(item => item.type === "remove")
+          .map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+      const itemsLostOnDeath =
+        outcome.itemsLostOnDeath?.map(item => ({
+          id: item.id ?? "",
+          name: item.name ?? "",
+          value: item.value ?? 0
+        })) ?? []
+
       addFeedMessage({
         id: `outcome-${outcome._id}-${Date.now()}`,
         type: FEED_MESSAGE_TYPE.NEW_OUTCOME,
         timestamp: Date.now(),
         tripId: outcome.tripId ?? "",
         tripIndex: outcome.tripIndex ?? trip?.index ?? 0,
+        tripPrompt: trip?.prompt ?? "",
         ratName: outcome.ratName ?? "Unknown Rat",
         result: ratDied ? "died" : "survived",
         ratOwnerName: outcome.playerName ?? "Unknown Player",
-        ratOwnerValueChange: outcome.ratValueChange ?? 0,
-        tripCreatorName: trip?.ownerName ?? "Unknown Creator",
-        tripCreatorValueChange: outcome.tripValueChange ?? 0
+        ratValueChange: outcome.ratValueChange ?? 0,
+        itemsOnEntrance,
+        itemsGained,
+        itemsLost,
+        itemsLostOnDeath
       })
 
       // Toast notifications only for player's trips

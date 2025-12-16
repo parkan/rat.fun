@@ -79,7 +79,15 @@ async function routes(fastify: FastifyInstance) {
       const resolvedNetwork = await network
       const worldAddress = resolvedNetwork.worldContract?.address ?? "0x0"
       const tripIndex = Number(getTripIndex(tripId))
-      await writeTripToCMS(worldAddress, tripIndex, tripId, tripPrompt, player, folderId)
+      await writeTripToCMS(
+        worldAddress,
+        tripIndex,
+        tripId,
+        tripPrompt,
+        player,
+        folderId,
+        tripCreationCost
+      )
       console.timeEnd("–– CMS text write")
 
       // * * * * * * * * * * * * * * * * * *

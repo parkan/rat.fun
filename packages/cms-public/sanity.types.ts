@@ -235,6 +235,7 @@ export type Trip = {
   owner?: string
   ownerName?: string
   prompt?: string
+  creationCost?: number
   image?: {
     asset?: {
       _ref: string

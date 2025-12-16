@@ -47,6 +47,13 @@ export default {
       validation: (Rule: any) => Rule.required()
     },
     {
+      title: "Creation Cost",
+      description: "The cost paid to create this trip",
+      name: "creationCost",
+      type: "number",
+      readOnly: true
+    },
+    {
       title: "Image",
       name: "image",
       type: "image",

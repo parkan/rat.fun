@@ -17,18 +17,13 @@ export const feedMessages = writable<FeedMessage[]>([])
 // Active filters - when empty, all types are shown
 // When populated, only checked types are shown
 export const activeFilters = writable<Set<FEED_MESSAGE_TYPE>>(
-  new Set([
-    FEED_MESSAGE_TYPE.CHAT,
-    FEED_MESSAGE_TYPE.NEW_TRIP,
-    FEED_MESSAGE_TYPE.NEW_OUTCOME,
-    FEED_MESSAGE_TYPE.PLAYER_JOINED
-  ])
+  new Set([FEED_MESSAGE_TYPE.CHAT, FEED_MESSAGE_TYPE.NEW_TRIP, FEED_MESSAGE_TYPE.NEW_OUTCOME])
 )
 
 // Filtered messages based on active filters
 export const filteredMessages = derived([feedMessages, activeFilters], ([$messages, $filters]) => {
   // If all filters are active, show all
-  if ($filters.size === 4) return $messages
+  if ($filters.size === 3) return $messages
   // If no filters active, show nothing
   if ($filters.size === 0) return []
   // Filter by active types

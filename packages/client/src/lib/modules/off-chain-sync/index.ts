@@ -167,20 +167,11 @@ export async function initOffChainSync(environment: ENVIRONMENT, playerId: strin
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
 
-      // Show toast and feed message for new players joining
+      // Show toast for new players joining
       if (hasReceivedInitialClientList) {
         const now = Date.now()
         for (const player of onlinePlayersList) {
           if (!previousIds.has(player.id) && player.id !== currentPlayerId) {
-            // Add to feed
-            addFeedMessage({
-              id: `player-join-${player.id}-${now}`,
-              type: FEED_MESSAGE_TYPE.PLAYER_JOINED,
-              timestamp: now,
-              playerId: player.id,
-              playerName: player.name
-            })
-
             // Show toast (rate limited)
             if (playerNotificationsEnabled.current && !areNotificationsSuppressed()) {
               const lastToastTime = lastToastTimeByPlayer.get(player.id) ?? 0

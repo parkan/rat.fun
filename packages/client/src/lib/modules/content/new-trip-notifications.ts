@@ -40,7 +40,8 @@ export function handleNewTrip(trip: SanityTrip) {
     tripId: trip._id,
     tripIndex: trip.index ?? 0,
     tripPrompt: trip.prompt ?? "",
-    creatorName: ownerName
+    creatorName: ownerName,
+    tripCreationCost: trip.creationCost ?? 0
   })
 
   // Build the toast notification message

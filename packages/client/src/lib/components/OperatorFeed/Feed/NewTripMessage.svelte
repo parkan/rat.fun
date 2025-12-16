@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { NewTripMessage } from "./types"
   import { goto } from "$app/navigation"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   let { message }: { message: NewTripMessage } = $props()
 
@@ -9,27 +10,25 @@
   }
 </script>
 
-<div class="message-content new-trip">
-  <button class="trip-link" onclick={handleTripClick}>
-    <div class="trip-details">
-      <span class="trip-header">
-        <span class="creator-name">{message.creatorName}</span> created trip #{message.tripIndex}
-      </span>
-      <span class="trip-prompt">"{message.tripPrompt}"</span>
-    </div>
-  </button>
-</div>
+<button class="new-trip" onclick={handleTripClick}>
+  <div class="trip-header">
+    <span class="arrow">&gt;&gt;&gt;&gt;</span>
+    <span class="creator-name">{message.creatorName.toUpperCase()}</span>
+    <span class="action">CREATED TRIP</span>
+    <span class="trip-index">#{message.tripIndex}</span>
+    {#if message.tripCreationCost > 0}
+      <span class="cost">({message.tripCreationCost} {CURRENCY_SYMBOL})</span>
+    {/if}
+  </div>
+  <div class="trip-prompt">"{message.tripPrompt}"</div>
+</button>
 
 <style lang="scss">
   .new-trip {
     flex: 1;
     display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    align-items: baseline;
-  }
-
-  .trip-link {
+    flex-direction: column;
+    gap: 2px;
     background: none;
     border: none;
     padding: 0;
@@ -39,20 +38,39 @@
     text-align: left;
   }
 
-  .trip-details {
+  .trip-header {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: baseline;
   }
 
-  .trip-header {
-    .creator-name {
-      color: var(--color-accent);
-    }
+  .arrow {
+    color: var(--color-good);
+    margin-right: 4px;
+  }
+
+  .creator-name {
+    color: var(--foreground);
+  }
+
+  .action {
+    text-transform: uppercase;
+    color: var(--color-grey-light);
+  }
+
+  .trip-index {
+    font-family: var(--mono-font-stack);
+    color: var(--foreground);
+  }
+
+  .cost {
+    color: var(--color-grey-light);
+    font-family: var(--mono-font-stack);
   }
 
   .trip-prompt {
-    font-style: italic;
-    opacity: 0.9;
+    color: var(--color-grey-light);
+    border-right: 1px solid var(--color-grey-dark);
   }
 </style>

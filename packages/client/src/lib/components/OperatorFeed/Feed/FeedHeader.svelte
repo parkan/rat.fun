@@ -10,8 +10,7 @@
   const filterOptions = [
     { type: FEED_MESSAGE_TYPE.CHAT, label: "Chat" },
     { type: FEED_MESSAGE_TYPE.NEW_TRIP, label: "Trips" },
-    { type: FEED_MESSAGE_TYPE.NEW_OUTCOME, label: "Outcomes" },
-    { type: FEED_MESSAGE_TYPE.PLAYER_JOINED, label: "Players" }
+    { type: FEED_MESSAGE_TYPE.NEW_OUTCOME, label: "Outcomes" }
   ] as const
 
   function handleChange(type: FEED_MESSAGE_TYPE, checked: boolean) {
