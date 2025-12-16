@@ -199,6 +199,12 @@ export type Outcome = {
     id?: string
     _key: string
   }>
+  inventoryOnEntrance?: Array<{
+    name?: string
+    value?: number
+    id?: string
+    _key: string
+  }>
   oldTripValue?: number
   tripValueChange?: number
   tripValue?: number
