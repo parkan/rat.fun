@@ -95,6 +95,8 @@ export async function initPublicNetwork(
   }
 
   // Setup MUD layer (skip indexer if we have server config)
+  // Time the indexer sync when not using server hydration
+  const indexerStartTime = !configResult ? performance.now() : null
   const indexerUrlConfig = getIndexerUrlConfig(environment)
   const networkConfig = getNetworkConfig(environment, url, null, indexerUrlConfig)
   const mudLayer = await setupPublicNetwork(
@@ -125,6 +127,12 @@ export async function initPublicNetwork(
 
   // Wait for chain sync to complete (instant if we skipped indexer)
   await waitForChainSync()
+
+  // Log indexer sync time when using indexer path
+  if (indexerStartTime !== null) {
+    const elapsed = (performance.now() - indexerStartTime).toFixed(0)
+    console.log(`[initPublicNetwork] Indexer sync complete in ${elapsed}ms`)
+  }
 
   // Mark as ready (for any components that need to check sync status)
   ready.set(true)
