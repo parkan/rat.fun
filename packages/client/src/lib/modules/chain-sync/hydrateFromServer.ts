@@ -142,16 +142,16 @@ function transformConfigResponse(config: GlobalConfigsResponse): WorldObject {
       adminAddress: (config.gameConfig.adminAddress as Address) ?? undefined,
       adminId: (config.gameConfig.adminId as Hex) ?? undefined,
       ratCreationCost: safeParseBigInt(config.gameConfig.ratCreationCost),
-      maxInventorySize: config.gameConfig.maxInventorySize ?? 0,
-      maxTripPromptLength: config.gameConfig.maxTripPromptLength ?? 0,
-      cooldownCloseTrip: config.gameConfig.cooldownCloseTrip ?? 0,
-      ratsKilledForAdminAccess: config.gameConfig.ratsKilledForAdminAccess ?? 0
+      maxInventorySize: Number(config.gameConfig.maxInventorySize) || 0,
+      maxTripPromptLength: Number(config.gameConfig.maxTripPromptLength) || 0,
+      cooldownCloseTrip: Number(config.gameConfig.cooldownCloseTrip) || 0,
+      ratsKilledForAdminAccess: Number(config.gameConfig.ratsKilledForAdminAccess) || 0
     },
     gamePercentagesConfig: {
-      maxValuePerWin: config.gamePercentagesConfig.maxValuePerWin ?? 0,
-      minRatValueToEnter: config.gamePercentagesConfig.minRatValueToEnter ?? 0,
-      taxationLiquidateRat: config.gamePercentagesConfig.taxationLiquidateRat ?? 0,
-      taxationCloseTrip: config.gamePercentagesConfig.taxationCloseTrip ?? 0
+      maxValuePerWin: Number(config.gamePercentagesConfig.maxValuePerWin) || 0,
+      minRatValueToEnter: Number(config.gamePercentagesConfig.minRatValueToEnter) || 0,
+      taxationLiquidateRat: Number(config.gamePercentagesConfig.taxationLiquidateRat) || 0,
+      taxationCloseTrip: Number(config.gamePercentagesConfig.taxationCloseTrip) || 0
     },
     worldStats: {
       globalTripIndex: safeParseBigInt(config.worldStats.globalTripIndex),
