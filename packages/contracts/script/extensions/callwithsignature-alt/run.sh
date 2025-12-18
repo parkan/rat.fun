@@ -21,7 +21,7 @@
 # BASE SEPOLIA
 # # # # # # # # # # # #
 
-BASE_SEPOLIA_WORLD_ADDRESS=0x85e4771925b8755f0F9Dd835aAa77303cbe9d684
+BASE_SEPOLIA_WORLD_ADDRESS=0xb559D9fb876F6fC3AC05B21004B33760B3582042
 BASE_SEPOLIA_RPC_URL=https://base-sepolia.g.alchemy.com/v2/-hnbjcqjwXmO7ip5cyHBh
 
 forge script InstallCallWithSignatureAltModule --sig run\(address\) $BASE_SEPOLIA_WORLD_ADDRESS --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast -vvv --batch-size 5
