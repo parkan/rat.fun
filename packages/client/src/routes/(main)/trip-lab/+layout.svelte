@@ -34,6 +34,11 @@
     transition: transform 0.2s ease;
     border: 1px solid var(--color-grey-mid);
 
+    @media screen and (max-width: 800px) {
+      top: calc(var(--top-bar-total-height-phone) - 1px);
+      height: calc(var(--game-window-height) - var(--top-bar-total-height-phone));
+    }
+
     @media screen and (min-width: 800px) {
       min-width: 600px;
       max-width: calc(var(--game-window-width) / 2);
