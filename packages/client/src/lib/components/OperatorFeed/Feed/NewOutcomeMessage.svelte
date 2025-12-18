@@ -81,7 +81,8 @@
             class:gained={message.ratBalanceChange > 0}
             class:lost={message.ratBalanceChange < 0}
           >
-            {HEALTH_SYMBOL} {formatValueChange(message.ratBalanceChange)}
+            {HEALTH_SYMBOL}
+            {formatValueChange(message.ratBalanceChange)}
           </span>
         {/if}
         {#each message.itemsOnEntrance as item (item.id)}

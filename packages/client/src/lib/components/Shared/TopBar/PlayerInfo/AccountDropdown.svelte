@@ -27,7 +27,7 @@
 <style lang="scss">
   .account-dropdown {
     position: fixed;
-    top: 58px;
+    top: 110px;
     left: 0;
     background-color: var(--background-dark-transparent);
     color: var(--foreground);

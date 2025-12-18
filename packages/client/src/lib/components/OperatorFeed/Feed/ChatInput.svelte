@@ -3,6 +3,7 @@
   import { SmallButton } from "$lib/components/Shared"
   import { sendChatMessage } from "$lib/modules/off-chain-sync/chat"
   import { playSound } from "$lib/modules/sound"
+  import { isPhone } from "$lib/modules/ui/state.svelte"
 
   const MAX_LENGTH = 280
 
@@ -13,7 +14,9 @@
   const isOverLimit = $derived(message.length > MAX_LENGTH)
 
   onMount(() => {
-    inputElement?.focus()
+    if (!$isPhone) {
+      inputElement?.focus()
+    }
   })
 
   async function handleSend() {
