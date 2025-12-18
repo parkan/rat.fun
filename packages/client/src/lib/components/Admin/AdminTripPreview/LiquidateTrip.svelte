@@ -8,8 +8,10 @@
   let { trip, onclick }: { trip: Trip; onclick: () => void } = $props()
 
   // Cooldown until trip can be liquidated
+  // Note: Explicit Number() on cooldownCloseTrip to prevent string concatenation
+  // (server hydration may return it as a string from the database)
   let blockUntilUnlock = $derived(
-    Number(trip.creationBlock) + $gameConfig.cooldownCloseTrip - Number($blockNumber)
+    Number(trip.creationBlock) + Number($gameConfig.cooldownCloseTrip) - Number($blockNumber)
   )
 </script>
 

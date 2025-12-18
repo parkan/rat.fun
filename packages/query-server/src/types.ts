@@ -13,7 +13,6 @@ export interface ItemResponse {
 export interface PlayerResponse {
   id: string
   name: string | null
-  balance: string | null
   currentRat: string | null
   pastRats: string[]
   creationBlock: string | null
@@ -40,7 +39,6 @@ export interface RatResponse {
 // Trip response
 export interface TripResponse {
   id: string
-  name: string | null
   owner: string | null
   index: string | null
   balance: string | null
@@ -61,14 +59,70 @@ export interface OtherPlayer {
   name: string | null
 }
 
-// Hydration response (filtered data for a specific player)
+// Hydration response (core player data only - trips and players fetched separately)
 export interface HydrationResponse {
   blockNumber: string
   player: PlayerResponse
   currentRat: RatResponse | null
-  trips: TripResponse[]
   items: ItemResponse[]
-  otherPlayers: OtherPlayer[]
+}
+
+// Players endpoint response
+export interface PlayersEndpointResponse {
+  blockNumber: string
+  players: OtherPlayer[]
+}
+
+// Trips endpoint response
+export interface TripsEndpointResponse {
+  blockNumber: string
+  trips: TripResponse[]
+}
+
+// Global config types (singleton tables - stored at key 0x0...0)
+export interface GameConfigResponse {
+  adminAddress: string | null
+  adminId: string | null
+  ratCreationCost: string | null
+  maxInventorySize: number | null
+  maxTripPromptLength: number | null
+  cooldownCloseTrip: number | null
+  ratsKilledForAdminAccess: number | null
+}
+
+export interface GamePercentagesConfigResponse {
+  maxValuePerWin: number | null
+  minRatValueToEnter: number | null
+  taxationLiquidateRat: number | null
+  taxationCloseTrip: number | null
+}
+
+export interface WorldStatsResponse {
+  globalTripIndex: string | null
+  globalRatIndex: string | null
+  globalRatKillCount: string | null
+  lastKilledRatBlock: string | null
+}
+
+// Standalone world-stats endpoint response
+export interface WorldStatsEndpointResponse extends WorldStatsResponse {
+  blockNumber: string
+}
+
+export interface ExternalAddressesConfigResponse {
+  erc20Address: string | null
+  gamePoolAddress: string | null
+  mainSaleAddress: string | null
+  serviceAddress: string | null
+  feeAddress: string | null
+}
+
+// Combined global configs for hydration (static config only, worldStats is separate)
+export interface GlobalConfigsResponse {
+  blockNumber: string
+  gameConfig: GameConfigResponse
+  gamePercentagesConfig: GamePercentagesConfigResponse
+  externalAddressesConfig: ExternalAddressesConfigResponse
 }
 
 // Leaderboard entry types
@@ -80,15 +134,22 @@ export interface RatLeaderboardEntry {
   totalValue: string
   dead: boolean
   liquidated: boolean
+  liquidationValue: string | null
+  liquidationBlock: string | null
   owner: string | null
+  ownerName: string | null
 }
 
 export interface TripLeaderboardEntry {
   id: string
-  name: string | null
+  prompt: string | null
   balance: string
   owner: string | null
+  ownerName: string | null
   liquidated: boolean
+  killCount: string
+  visitCount: string
+  tripCreationCost: string
 }
 
 export interface RatsKilledEntry {

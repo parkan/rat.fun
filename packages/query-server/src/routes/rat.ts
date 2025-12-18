@@ -1,7 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { formatEther } from "viem"
-import { getTableValue, getArrayValue, byteaToHex, formatBalance } from "../utils.js"
+import { getTableValue, getArrayValue, byteaToHex, formatBalance, ENTITY_TYPE } from "../utils.js"
 import type { ItemResponse, RatResponse } from "../types.js"
 
 // Request schema
@@ -9,13 +8,12 @@ const getRatSchema = z.object({
   id: z.string().regex(/^0x[a-fA-F0-9]{64}$/, "Invalid bytes32 id format")
 })
 
-// Fetch item details for a list of item IDs
-async function fetchInventoryItems(itemIds: Buffer[]): Promise<ItemResponse[]> {
+// Fetch item details for a list of item IDs (hex strings)
+async function fetchInventoryItems(itemIds: string[]): Promise<ItemResponse[]> {
   if (itemIds.length === 0) return []
 
   const items = await Promise.all(
-    itemIds.map(async itemBuffer => {
-      const itemId = byteaToHex(itemBuffer)!
+    itemIds.map(async itemId => {
       const [name, value] = await Promise.all([
         getTableValue<string>("Name", itemId),
         getTableValue<string>("Value", itemId)
@@ -34,15 +32,15 @@ async function fetchInventoryItems(itemIds: Buffer[]): Promise<ItemResponse[]> {
 // Calculate total value (balance + sum of inventory values)
 function calculateTotalValue(balance: string | null, inventory: ItemResponse[]): string | null {
   try {
-    let total = balance ? BigInt(Math.floor(parseFloat(balance) * 1e18)) : 0n
+    let total = balance ? BigInt(balance) : 0n
 
     for (const item of inventory) {
       if (item.value) {
-        total += BigInt(Math.floor(parseFloat(item.value) * 1e18))
+        total += BigInt(item.value)
       }
     }
 
-    return formatEther(total)
+    return total.toString()
   } catch {
     return balance
   }
@@ -62,6 +60,7 @@ const rat: FastifyPluginAsync = async fastify => {
 
     // Query all rat-related data in parallel
     const [
+      entityType,
       name,
       balance,
       dead,
@@ -72,8 +71,9 @@ const rat: FastifyPluginAsync = async fastify => {
       index,
       tripCount,
       creationBlock,
-      inventoryBuffers
+      inventoryIds
     ] = await Promise.all([
+      getTableValue<number>("EntityType", id),
       getTableValue<string>("Name", id),
       getTableValue<string>("Balance", id),
       getTableValue<boolean>("Dead", id),
@@ -95,11 +95,20 @@ const rat: FastifyPluginAsync = async fastify => {
       })
     }
 
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.RAT) {
+      return reply.status(400).send({
+        error: "Entity is not a rat",
+        id,
+        actualType: entityType
+      })
+    }
+
     // Convert owner buffer to hex string
     const owner = byteaToHex(ownerBuffer)
 
     // Fetch expanded inventory items
-    const inventory = await fetchInventoryItems(inventoryBuffers)
+    const inventory = await fetchInventoryItems(inventoryIds)
 
     // Format balance
     const formattedBalance = formatBalance(balance)
@@ -116,7 +125,7 @@ const rat: FastifyPluginAsync = async fastify => {
       dead: dead ?? false,
       inventory,
       creationBlock,
-      tripCount,
+      tripCount: tripCount ?? "0",
       liquidated: liquidated ?? false,
       liquidationValue: formatBalance(liquidationValue),
       liquidationBlock,

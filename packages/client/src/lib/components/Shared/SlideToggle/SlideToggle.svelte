@@ -7,13 +7,15 @@
     value,
     onchange,
     disabled = false,
-    height = 60
+    height = 60,
+    compact = false
   }: {
     options: SlideToggleOption[]
     value: string
     onchange: (value: string) => void
     disabled?: boolean
     height?: number
+    compact?: boolean
   } = $props()
 
   function handleSelect() {

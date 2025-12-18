@@ -133,6 +133,23 @@ export default {
       ]
     },
     {
+      title: "Inventory on entrance",
+      description: "The rat's inventory when entering the trip",
+      name: "inventoryOnEntrance",
+      type: "array",
+      readOnly: true,
+      of: [
+        {
+          type: "object",
+          fields: [
+            { type: "string", name: "name" },
+            { type: "number", name: "value" },
+            { type: "string", name: "id" }
+          ]
+        }
+      ]
+    },
+    {
       title: "Trip value (old)",
       description: "The value of the trip before the visit",
       name: "oldTripValue",

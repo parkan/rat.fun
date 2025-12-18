@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { getTableValue, formatBalance } from "../utils.js"
+import { getTableValue, formatBalance, ENTITY_TYPE } from "../utils.js"
 
 // Request schema
 const getItemSchema = z.object({
@@ -27,7 +27,8 @@ const item: FastifyPluginAsync = async fastify => {
     const { id } = validation.data
 
     // Query item data in parallel
-    const [name, value] = await Promise.all([
+    const [entityType, name, value] = await Promise.all([
+      getTableValue<number>("EntityType", id),
       getTableValue<string>("Name", id),
       getTableValue<string>("Value", id)
     ])
@@ -37,6 +38,15 @@ const item: FastifyPluginAsync = async fastify => {
       return reply.status(404).send({
         error: "Item not found",
         id
+      })
+    }
+
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.ITEM) {
+      return reply.status(400).send({
+        error: "Entity is not an item",
+        id,
+        actualType: entityType
       })
     }
 

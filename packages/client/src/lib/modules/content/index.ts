@@ -1,4 +1,5 @@
 import { writable, get } from "svelte/store"
+import { tick } from "svelte"
 import { client, loadData } from "./sanity"
 import type {
   Trip as SanityTrip,
@@ -19,6 +20,9 @@ import {
   markInitialTripsReceived,
   handleNewTrip
 } from "./new-trip-notifications"
+import { addFeedMessage, addFeedMessages } from "$lib/components/OperatorFeed/state.svelte"
+import { FEED_MESSAGE_TYPE } from "$lib/components/OperatorFeed/Feed/types"
+import type { FeedMessage, FeedItem } from "$lib/components/OperatorFeed/Feed/types"
 
 export { setPlayerIdStore }
 
@@ -82,13 +86,19 @@ export async function initStaticContent(worldAddress: string) {
     totalDocuments
   })
 
-  staticContent.set({
+  // Use update instead of set to preserve any trips/outcomes that may have
+  // already been loaded (race condition: initTrips can complete before this)
+  staticContent.update(current => ({
+    ...current,
     ratImages: data.ratImages,
-    trips: [], // Trips loaded separately via initTrips()
-    outcomes: [], // Outcomes loaded separately via initPlayerOutcomes()
     tripFolders: data.tripFolders || [],
     tripFolderWhitelist: data.tripFolderWhitelist || []
-  })
+    // Don't touch trips/outcomes - they're loaded separately via initTrips()/initPlayerOutcomes()
+  }))
+
+  // Force Svelte to flush reactivity before continuing
+  await tick()
+  console.log("[CMS] Tick completed after static content update")
 
   // Subscribe to changes to trip folder list in sanity DB
   client.listen(queries.tripFolderList, {}).subscribe(update => {
@@ -134,25 +144,55 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
 
   console.log(`[CMS] Trips loaded in ${loadTime.toFixed(0)}ms: ${trips?.length ?? 0} trips`)
 
-  staticContent.update(content => ({
-    ...content,
-    trips: trips ?? []
-  }))
+  staticContent.update(content => {
+    console.log("[CMS] Updating staticContent.trips:", {
+      before: content.trips.length,
+      after: trips?.length ?? 0
+    })
+    return {
+      ...content,
+      trips: trips ?? []
+    }
+  })
+
+  // Force Svelte to flush reactivity before continuing
+  // This fixes a race condition where $derived values don't see store updates
+  await tick()
+  console.log("[CMS] Tick completed after trips update")
 
   // Mark initial trips as received so we only notify for new ones
   markInitialTripsReceived()
 
   // Subscribe to changes to all trips in sanity DB
+  console.log("[CMS] Setting up Sanity trips listener...")
   tripsSubscription = client.listen(queries.trips, { worldAddress }).subscribe(update => {
+    console.log("[CMS] Sanity trips listener event:", {
+      transition: update.transition,
+      hasResult: !!update.result,
+      resultId: update.result?._id
+    })
+
     // Handle new trip notifications
     if (update.transition === "appear" && update.result) {
       handleNewTrip(update.result as SanityTrip)
     }
 
-    staticContent.update(content => ({
-      ...content,
-      trips: handleSanityUpdate<SanityTrip>(update, content.trips, (item, id) => item._id === id)
-    }))
+    staticContent.update(content => {
+      const newTrips = handleSanityUpdate<SanityTrip>(
+        update,
+        content.trips,
+        (item, id) => item._id === id
+      )
+      console.log("[CMS] Sanity listener updating trips:", {
+        before: content.trips.length,
+        after: newTrips.length,
+        transition: update.transition
+      })
+      return {
+        ...content,
+        trips: newTrips
+      }
+    })
   })
 }
 
@@ -188,32 +228,113 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
     `[CMS] Player outcomes loaded in ${loadTime.toFixed(0)}ms: ${outcomes?.length ?? 0} outcomes for ${playerTripIds.length} trips`
   )
 
-  staticContent.update(content => ({
-    ...content,
-    outcomes: outcomes ?? []
-  }))
+  staticContent.update(content => {
+    console.log("[CMS] Updating staticContent.outcomes:", {
+      before: content.outcomes.length,
+      after: outcomes?.length ?? 0
+    })
+    return {
+      ...content,
+      outcomes: outcomes ?? []
+    }
+  })
+
+  // Force Svelte to flush reactivity before continuing
+  await tick()
+  console.log("[CMS] Tick completed after outcomes update")
 
   // Mark initial outcomes as received so we only notify for new ones
   markInitialOutcomesReceived()
 
   // Subscribe to changes to all outcomes
+  console.log("[CMS] Setting up Sanity outcomes listener...")
   outcomesSubscription = client.listen(queries.outcomes, { worldAddress }).subscribe(update => {
-    // Handle new outcome notifications (only for player's trips)
+    console.log("[CMS] Sanity outcomes listener event:", {
+      transition: update.transition,
+      hasResult: !!update.result,
+      resultId: update.result?._id
+    })
+    // Handle new outcome
     if (update.transition === "appear" && update.result) {
-      if (playerTripIds.includes(update.result.tripId as string)) {
-        const currentContent = get(staticContent)
-        handleNewOutcome(update.result as SanityOutcome, currentContent.trips)
+      const outcome = update.result as SanityOutcome
+      const currentContent = get(staticContent)
+      const trip = currentContent.trips.find(t => t._id === outcome.tripId)
+
+      // Add to operator feed for ALL outcomes
+      const ratDied = outcome.newRatBalance === 0
+
+      // Extract items from outcome
+      const itemsOnEntrance =
+        outcome.inventoryOnEntrance?.map(item => ({
+          id: item.id ?? "",
+          name: item.name ?? "",
+          value: item.value ?? 0
+        })) ?? []
+
+      const itemsGained =
+        outcome.itemChanges
+          ?.filter(item => item.type === "add")
+          .map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+      const itemsLost =
+        outcome.itemChanges
+          ?.filter(item => item.type === "remove")
+          .map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+      const itemsLostOnDeath =
+        outcome.itemsLostOnDeath?.map(item => ({
+          id: item.id ?? "",
+          name: item.name ?? "",
+          value: item.value ?? 0
+        })) ?? []
+
+      addFeedMessage({
+        id: `outcome-${outcome._id}-${Date.now()}`,
+        type: FEED_MESSAGE_TYPE.NEW_OUTCOME,
+        timestamp: Date.now(),
+        tripId: outcome.tripId ?? "",
+        tripIndex: outcome.tripIndex ?? trip?.index ?? 0,
+        tripPrompt: trip?.prompt ?? "",
+        ratName: outcome.ratName ?? "Unknown Rat",
+        result: ratDied ? "died" : "survived",
+        ratOwnerName: outcome.playerName ?? "Unknown Player",
+        ratValueChange: outcome.ratValueChange ?? 0,
+        itemsOnEntrance,
+        itemsGained,
+        itemsLost,
+        itemsLostOnDeath
+      })
+
+      // Toast notifications only for player's trips
+      if (playerTripIds.includes(outcome.tripId as string)) {
+        handleNewOutcome(outcome, currentContent.trips)
       }
     }
 
-    staticContent.update(content => ({
-      ...content,
-      outcomes: handleSanityUpdate<SanityOutcome>(
+    staticContent.update(content => {
+      const newOutcomes = handleSanityUpdate<SanityOutcome>(
         update,
         content.outcomes,
         (item, id) => item._id === id
       )
-    }))
+      console.log("[CMS] Sanity listener updating outcomes:", {
+        before: content.outcomes.length,
+        after: newOutcomes.length,
+        transition: update.transition
+      })
+      return {
+        ...content,
+        outcomes: newOutcomes
+      }
+    })
   })
 }
 
@@ -250,5 +371,137 @@ function handleSanityUpdate<T>(
 
     default:
       return contentArray
+  }
+}
+
+// --- FEED HISTORY TYPES ------------------------------------------------
+
+type RecentTripForFeed = {
+  _id: string
+  _createdAt: string
+  index: number
+  prompt: string
+  ownerName: string
+  creationCost: number
+}
+
+type RecentOutcomeForFeed = {
+  _id: string
+  _createdAt: string
+  tripId: string
+  tripIndex: number
+  ratName: string
+  playerName: string
+  ratValueChange: number
+  newRatBalance: number
+  inventoryOnEntrance?: Array<{ id?: string; name?: string; value?: number }>
+  itemChanges?: Array<{ id?: string; name?: string; value?: number; type?: string }>
+  itemsLostOnDeath?: Array<{ id?: string; name?: string; value?: number }>
+  tripPrompt: string
+}
+
+// --- FEED HISTORY FUNCTIONS --------------------------------------------
+
+/**
+ * Load recent trips and outcomes from CMS and add them to the operator feed.
+ * This populates the feed with the last 5 trips and last 5 outcomes on load.
+ *
+ * @param worldAddress - The world address to filter content by
+ */
+export async function loadFeedHistory(worldAddress: string) {
+  const startTime = performance.now()
+
+  try {
+    // Fetch recent trips and outcomes in parallel
+    const [recentTrips, recentOutcomes] = await Promise.all([
+      loadData(queries.recentTripsForFeed, { worldAddress }) as Promise<RecentTripForFeed[]>,
+      loadData(queries.recentOutcomesForFeed, { worldAddress }) as Promise<RecentOutcomeForFeed[]>
+    ])
+
+    const feedMessages: FeedMessage[] = []
+
+    // Convert trips to feed messages
+    if (recentTrips) {
+      for (const trip of recentTrips) {
+        feedMessages.push({
+          id: `trip-history-${trip._id}`,
+          type: FEED_MESSAGE_TYPE.NEW_TRIP,
+          timestamp: new Date(trip._createdAt).getTime(),
+          tripId: trip._id,
+          tripIndex: trip.index ?? 0,
+          tripPrompt: trip.prompt ?? "",
+          creatorName: trip.ownerName ?? "Unknown",
+          tripCreationCost: trip.creationCost ?? 0
+        })
+      }
+    }
+
+    // Convert outcomes to feed messages
+    if (recentOutcomes) {
+      for (const outcome of recentOutcomes) {
+        const ratDied = outcome.newRatBalance === 0
+
+        const itemsOnEntrance: FeedItem[] =
+          outcome.inventoryOnEntrance?.map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+        const itemsGained: FeedItem[] =
+          outcome.itemChanges
+            ?.filter(item => item.type === "add")
+            .map(item => ({
+              id: item.id ?? "",
+              name: item.name ?? "",
+              value: item.value ?? 0
+            })) ?? []
+
+        const itemsLost: FeedItem[] =
+          outcome.itemChanges
+            ?.filter(item => item.type === "remove")
+            .map(item => ({
+              id: item.id ?? "",
+              name: item.name ?? "",
+              value: item.value ?? 0
+            })) ?? []
+
+        const itemsLostOnDeath: FeedItem[] =
+          outcome.itemsLostOnDeath?.map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+        feedMessages.push({
+          id: `outcome-history-${outcome._id}`,
+          type: FEED_MESSAGE_TYPE.NEW_OUTCOME,
+          timestamp: new Date(outcome._createdAt).getTime(),
+          tripId: outcome.tripId ?? "",
+          tripIndex: outcome.tripIndex ?? 0,
+          tripPrompt: outcome.tripPrompt ?? "",
+          ratName: outcome.ratName ?? "Unknown Rat",
+          result: ratDied ? "died" : "survived",
+          ratOwnerName: outcome.playerName ?? "Unknown Player",
+          ratValueChange: outcome.ratValueChange ?? 0,
+          itemsOnEntrance,
+          itemsGained,
+          itemsLost,
+          itemsLostOnDeath
+        })
+      }
+    }
+
+    // Add all messages at once (sorted by timestamp in addFeedMessages)
+    if (feedMessages.length > 0) {
+      addFeedMessages(feedMessages)
+    }
+
+    const loadTime = performance.now() - startTime
+    console.log(
+      `[CMS] Feed history loaded in ${loadTime.toFixed(0)}ms: ${recentTrips?.length ?? 0} trips, ${recentOutcomes?.length ?? 0} outcomes`
+    )
+  } catch (error) {
+    console.error("[CMS] Error loading feed history:", error)
   }
 }

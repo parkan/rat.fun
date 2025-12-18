@@ -60,6 +60,18 @@ export function createItemsLostOnDeath(
 }
 
 /**
+ * Helper function to create inventory on entrance entries
+ */
+export function createInventoryOnEntrance(inventory: Rat["inventory"]) {
+  return inventory.map(item => ({
+    _key: uuidv4(),
+    name: item.name,
+    value: item.value,
+    id: item.id
+  }))
+}
+
+/**
  * Create a base outcome document structure with all common fields (public-safe, no sensitive data)
  */
 export function createBaseOutcomeDocument(
@@ -120,6 +132,11 @@ export function createBaseOutcomeDocument(
 
   if (outcome.itemsLostOnDeath && outcome.itemsLostOnDeath.length > 0) {
     baseDoc.itemsLostOnDeath = createItemsLostOnDeath(outcome.itemsLostOnDeath)
+  }
+
+  // Always include inventory on entrance (can be empty array)
+  if (rat.inventory && rat.inventory.length > 0) {
+    baseDoc.inventoryOnEntrance = createInventoryOnEntrance(rat.inventory)
   }
 
   return baseDoc

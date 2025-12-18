@@ -84,6 +84,7 @@ export const validateTripFolder = async (
  * @param prompt - The prompt for the trip
  * @param player - The player who created the trip
  * @param folderId - The ID of the trip folder category
+ * @param creationCost - The cost paid to create the trip
  * @returns The trip document
  */
 export async function writeTripToCMS(
@@ -92,7 +93,8 @@ export async function writeTripToCMS(
   tripID: string,
   prompt: string,
   player: Player,
-  folderId: string
+  folderId: string,
+  creationCost: number
 ): Promise<TripDoc> {
   try {
     // Create the trip document without image reference
@@ -105,6 +107,7 @@ export async function writeTripToCMS(
       owner: player.id,
       ownerName: player.name,
       prompt,
+      creationCost,
       slug: {
         _type: "slug",
         current: tripID

@@ -32,8 +32,8 @@ type recsSyncResult = SyncToRecsResult<typeof mudConfig, {}>
  */
 async function getSnapshotWithFallback(
   baseConfig: {
-    storeAddress: Hex,
-    chainId: number,
+    storeAddress: Hex
+    chainId: number
     startBlock: bigint
   },
   primaryIndexerUrl?: string,
@@ -43,7 +43,10 @@ async function getSnapshotWithFallback(
   // Try primary indexer if available
   if (primaryIndexerUrl) {
     try {
-      console.log("[Chain Sync] Attempting to get snapshot with primary indexer:", primaryIndexerUrl)
+      console.log(
+        "[Chain Sync] Attempting to get snapshot with primary indexer:",
+        primaryIndexerUrl
+      )
       const { initialBlockLogs } = await getSnapshot({
         ...baseConfig,
         indexerUrl: primaryIndexerUrl
@@ -57,7 +60,10 @@ async function getSnapshotWithFallback(
   // Try fallback indexer if available
   if (fallbackIndexerUrl) {
     try {
-      console.log("[Chain Sync] Attempting to get snapshot with fallback indexer:", fallbackIndexerUrl)
+      console.log(
+        "[Chain Sync] Attempting to get snapshot with fallback indexer:",
+        fallbackIndexerUrl
+      )
       const { initialBlockLogs } = await getSnapshot({
         ...baseConfig,
         indexerUrl: fallbackIndexerUrl
@@ -71,7 +77,10 @@ async function getSnapshotWithFallback(
   // Try default chain indexer if available
   if (defaultChainIndexerUrl) {
     try {
-      console.log("[Chain Sync] Attempting to get snapshot with default chain indexer:", defaultChainIndexerUrl)
+      console.log(
+        "[Chain Sync] Attempting to get snapshot with default chain indexer:",
+        defaultChainIndexerUrl
+      )
       const { initialBlockLogs } = await getSnapshot({
         ...baseConfig,
         indexerUrl: defaultChainIndexerUrl
@@ -131,6 +140,8 @@ export async function setupPublicNetwork(
     )
   } else {
     // Skip indexer - use server-provided data instead
+    // Note: indexerUrl must be `false` (not undefined) to prevent MUD from
+    // falling back to chain.indexerUrl for live subscriptions
     console.log(
       "[Chain Sync] Skipping indexer, using server hydration from block:",
       initialBlockLogs.blockNumber.toString()
@@ -148,7 +159,9 @@ export async function setupPublicNetwork(
     publicClient,
     initialBlockLogs,
     indexerUrl: false,
-    startBlock: initialBlockLogs ? initialBlockLogs.blockNumber : BigInt(networkConfig.initialBlockNumber)
+    startBlock: initialBlockLogs
+      ? initialBlockLogs.blockNumber
+      : BigInt(networkConfig.initialBlockNumber)
   })
 
   // Allows us to to only listen to the game specific tables

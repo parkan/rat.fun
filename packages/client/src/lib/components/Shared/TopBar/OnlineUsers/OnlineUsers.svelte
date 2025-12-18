@@ -1,10 +1,25 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
+  import { goto } from "$app/navigation"
+  import { page } from "$app/stores"
+  import { FEATURES } from "$lib/config/features"
   import { onlinePlayers, websocketConnected } from "$lib/modules/off-chain-sync/stores"
   import { playSound } from "$lib/modules/sound"
-  import { Tooltip } from "$lib/components/Shared"
+  import { Tooltip, OperatorFeedButton } from "$lib/components/Shared"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
+  // Operator Feed mode
+  const isOnOperatorFeed = $derived($page.url.pathname === "/operator-feed")
+
+  function handleOperatorFeedClick() {
+    if (isOnOperatorFeed) {
+      goto("/")
+    } else {
+      goto("/operator-feed")
+    }
+  }
+
+  // Online Players mode
   let showDropdown = $state(false)
   let dropdownElement = $state<HTMLElement | undefined>(undefined)
   let buttonElement = $state<HTMLElement | undefined>(undefined)
@@ -49,37 +64,56 @@
   })
 </script>
 
-<div class="online-users">
-  <Tooltip content={$websocketConnected ? UI_STRINGS.onlinePlayers : UI_STRINGS.connecting}>
-    <button
-      class="online-button"
-      class:connected={$websocketConnected}
-      bind:this={buttonElement}
-      {onmousedown}
-      onmouseup={toggleDropdown}
-    >
-      <span class="indicator" class:connected={$websocketConnected}></span>
-      <span class="count">{onlineCount}</span>
-    </button>
-  </Tooltip>
-</div>
-
-{#if showDropdown}
-  <div class="online-dropdown" bind:this={dropdownElement} out:fade={{ duration: 200 }}>
-    <div class="header">{UI_STRINGS.onlinePlayersCount(onlineCount)}</div>
-    {#if $onlinePlayers.length === 0}
-      <div class="empty">{UI_STRINGS.noPlayersOnline}</div>
-    {:else}
-      <ul class="player-list">
-        {#each $onlinePlayers as player (player.id)}
-          <li class="player-item">{player.name}</li>
-        {/each}
-      </ul>
-    {/if}
+{#if FEATURES.ENABLE_OPERATOR_FEED}
+  <div class="operator-feed-button">
+    <OperatorFeedButton
+      isActive={isOnOperatorFeed}
+      tippyText={isOnOperatorFeed ? "Back to game" : "Operator Feed"}
+      onclick={handleOperatorFeedClick}
+    />
   </div>
+{:else}
+  <div class="online-users">
+    <Tooltip content={$websocketConnected ? UI_STRINGS.onlinePlayers : UI_STRINGS.connecting}>
+      <button
+        class="online-button"
+        class:connected={$websocketConnected}
+        bind:this={buttonElement}
+        {onmousedown}
+        onmouseup={toggleDropdown}
+      >
+        <span class="indicator" class:connected={$websocketConnected}></span>
+        <span class="count">ONLINE</span>
+      </button>
+    </Tooltip>
+  </div>
+
+  {#if showDropdown}
+    <div class="online-dropdown" bind:this={dropdownElement} out:fade={{ duration: 200 }}>
+      <div class="header">{UI_STRINGS.onlinePlayersCount(onlineCount)}</div>
+      {#if $onlinePlayers.length === 0}
+        <div class="empty">{UI_STRINGS.noPlayersOnline}</div>
+      {:else}
+        <ul class="player-list">
+          {#each $onlinePlayers as player (player.id)}
+            <li class="player-item">{player.name}</li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+  {/if}
 {/if}
 
 <style lang="scss">
+  .operator-feed-button {
+    width: 160px;
+    height: 100%;
+
+    @media (max-width: 800px) {
+      display: none;
+    }
+  }
+
   .online-users {
     display: flex;
     align-items: center;

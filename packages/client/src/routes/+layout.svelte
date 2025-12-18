@@ -13,7 +13,8 @@
     initStaticContent,
     initTrips,
     initPlayerOutcomes,
-    setPlayerIdStore
+    setPlayerIdStore,
+    loadFeedHistory
   } from "$lib/modules/content"
   import { publicNetwork } from "$lib/modules/network"
   import { UIState, lightboxState } from "$lib/modules/ui/state.svelte"
@@ -29,7 +30,8 @@
     playerId,
     playerTrips,
     nonDepletedTrips,
-    externalAddressesConfig
+    externalAddressesConfig,
+    trips
   } from "$lib/modules/state/stores"
   import { get } from "svelte/store"
   import { initOffChainSync, disconnectOffChainSync } from "$lib/modules/off-chain-sync"
@@ -79,9 +81,20 @@
     // Combine and deduplicate: active trips + player's trips
     const relevantTripIds = [...new Set([...activeTripIds, ...playerTripIds])]
 
+    // DEBUG: Log trip counts to diagnose race condition
+    console.log("[+layout] Trip IDs for CMS query:", {
+      playerTripIds: playerTripIds.length,
+      activeTripIds: activeTripIds.length,
+      relevantTripIds: relevantTripIds.length,
+      tripsInStore: Object.keys(get(trips)).length
+    })
+
     // Load trips and outcomes from CMS
     initTrips($publicNetwork.worldAddress, relevantTripIds)
     initPlayerOutcomes($publicNetwork.worldAddress, playerTripIds)
+
+    // Load recent trips/outcomes for operator feed history (non-blocking)
+    loadFeedHistory($publicNetwork.worldAddress)
 
     UIState.set(UI.READY)
   }

@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import { z } from "zod"
-import { getTableValue, getArrayValue, byteaToHex, formatBalance } from "../utils.js"
+import { getTableValue, getArrayValue, byteaToHex, ENTITY_TYPE } from "../utils.js"
 
 // Request schema
 const getPlayerSchema = z.object({
@@ -11,7 +11,6 @@ const getPlayerSchema = z.object({
 interface PlayerInfo {
   id: string
   name: string | null
-  balance: string | null
   currentRat: string | null
   pastRats: string[]
   creationBlock: string | null
@@ -31,10 +30,10 @@ const player: FastifyPluginAsync = async fastify => {
     const { id } = validation.data
 
     // Query all player-related data in parallel
-    const [name, balance, currentRatBuffer, pastRatsBuffers, creationBlock, masterKey] =
+    const [entityType, name, currentRatBuffer, pastRats, creationBlock, masterKey] =
       await Promise.all([
+        getTableValue<number>("EntityType", id),
         getTableValue<string>("Name", id),
-        getTableValue<string>("Balance", id),
         getTableValue<Buffer>("CurrentRat", id),
         getArrayValue("PastRats", id),
         getTableValue<string>("CreationBlock", id),
@@ -49,14 +48,21 @@ const player: FastifyPluginAsync = async fastify => {
       })
     }
 
-    // Convert buffers to hex strings
+    // Check if entity type matches expected type
+    if (entityType !== null && entityType !== ENTITY_TYPE.PLAYER) {
+      return reply.status(400).send({
+        error: "Entity is not a player",
+        id,
+        actualType: entityType
+      })
+    }
+
+    // Convert buffer to hex string
     const currentRat = byteaToHex(currentRatBuffer)
-    const pastRats = pastRatsBuffers.map(b => byteaToHex(b)!).filter(Boolean)
 
     const playerInfo: PlayerInfo = {
       id,
       name,
-      balance: formatBalance(balance),
       currentRat,
       pastRats,
       creationBlock,
