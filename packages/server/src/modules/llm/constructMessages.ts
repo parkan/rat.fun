@@ -21,7 +21,9 @@ export async function constructEventMessages(
   messages.push({ role: "user", content: `TripDescription: ${trip.prompt}` })
 
   // Is challenge
-  messages.push({ role: "user", content: `IsChallengeTrip: ${trip.challengeTrip}` })
+  if (trip.challengeTrip) {
+    messages.push({ role: "user", content: "IsChallengeTrip: true" })
+  }
 
   // Max value per win
   const maxValuePerWin = getTripMaxValuePerWin(
