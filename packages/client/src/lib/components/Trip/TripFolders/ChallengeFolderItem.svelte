@@ -153,10 +153,6 @@
         .count {
           font-size: var(--font-size-normal);
 
-          .countdown-label {
-            font-size: var(--font-size-small);
-          }
-
           .countdown-time {
             font-size: var(--font-size-extra-large);
           }

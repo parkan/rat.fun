@@ -136,7 +136,7 @@ const singleOutcome = `*[_type == "outcome" && _id == $id][0] {
  * Params: $worldAddress
  * Used for: Populating operator feed with recent trip creations on load
  */
-const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress] | order(_createdAt desc) [0...5] {
+const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress] | order(_createdAt desc) [0...20] {
   _id,
   _createdAt,
   index,
@@ -150,7 +150,7 @@ const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress] 
  * Params: $worldAddress
  * Used for: Populating operator feed with recent outcomes on load
  */
-const recentOutcomesForFeed = `*[_type == "outcome" && worldAddress == $worldAddress] | order(_createdAt desc) [0...5] {
+const recentOutcomesForFeed = `*[_type == "outcome" && worldAddress == $worldAddress] | order(_createdAt desc) [0...20] {
   _id,
   _createdAt,
   tripId,
