@@ -186,7 +186,8 @@
         {restrictedFolder}
         challengeTripId={challengeTripData?.tripId}
         challengeTripAttempts={challengeTripData?.visitCount}
-        nextChallenge={$staticContent.nextChallenge}
+        dailyChallengeTime={$staticContent.dailyChallengeTime}
+        challengeTitle={$staticContent.challengeTitle}
       />
     {:else}
       <div class="loading-container">

@@ -38,10 +38,11 @@ const tripFolderList =
  * Challenge configuration document
  * Contains:
  *   - whitelist: array of addresses allowed to create challenge trips
- *   - nextChallenge: datetime of the next challenge trip
+ *   - dailyChallengeTime: time in CET when daily challenge becomes available (e.g. "14:00")
+ *   - challengeTitle: optional title for the current/upcoming challenge
  * Used for: Challenge trip access control and countdown display
  */
-const challenge = '*[_id == "challenge"][0]{ whitelist, nextChallenge }'
+const challenge = '*[_id == "challenge"][0]{ whitelist, dailyChallengeTime, challengeTitle }'
 
 // =============================================================================
 // COLLECTION QUERIES (filtered by worldAddress)
@@ -180,7 +181,8 @@ const recentOutcomesForFeed = `*[_type == "outcome" && worldAddress == $worldAdd
  *   - ratImages: singleton config for rat artwork
  *   - tripFolders: folder organization config
  *   - tripFolderWhitelist: addresses with folder access (from Challenge doc)
- *   - nextChallenge: datetime of next challenge trip
+ *   - dailyChallengeTime: time in CET when daily challenge becomes available
+ *   - challengeTitle: optional title for the current/upcoming challenge
  *
  * NOTE: Trips are loaded separately via initTrips() after spawn,
  * filtered to only active trips (balance > 0) + player's trips.
@@ -191,7 +193,8 @@ const staticContent = `{
   "ratImages": ${ratImages},
   "tripFolders": ${tripFolderList}.folders,
   "tripFolderWhitelist": ${challenge}.whitelist,
-  "nextChallenge": ${challenge}.nextChallenge
+  "dailyChallengeTime": ${challenge}.dailyChallengeTime,
+  "challengeTitle": ${challenge}.challengeTitle
 }`
 
 /**
@@ -206,7 +209,8 @@ const staticContentFull = `{
   "outcomes": ${outcomes},
   "tripFolders": ${tripFolderList}.folders,
   "tripFolderWhitelist": ${challenge}.whitelist,
-  "nextChallenge": ${challenge}.nextChallenge
+  "dailyChallengeTime": ${challenge}.dailyChallengeTime,
+  "challengeTitle": ${challenge}.challengeTitle
 }`
 
 // =============================================================================

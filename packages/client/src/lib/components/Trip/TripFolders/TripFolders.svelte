@@ -14,7 +14,8 @@
     restrictedFolder,
     challengeTripId,
     challengeTripAttempts,
-    nextChallenge
+    dailyChallengeTime,
+    challengeTitle
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
@@ -25,7 +26,8 @@
     restrictedFolder?: TripFolder
     challengeTripId?: string
     challengeTripAttempts?: number
-    nextChallenge?: string | null
+    dailyChallengeTime?: string | null
+    challengeTitle?: string | null
   } = $props()
 </script>
 
@@ -37,7 +39,8 @@
       folder={restrictedFolder}
       {challengeTripId}
       attemptCount={challengeTripAttempts}
-      {nextChallenge}
+      {dailyChallengeTime}
+      {challengeTitle}
     />
   {/if}
   {#each folders as folder, i}

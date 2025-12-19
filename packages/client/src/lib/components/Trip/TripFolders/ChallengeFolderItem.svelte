@@ -9,31 +9,105 @@
     folder,
     challengeTripId,
     attemptCount,
-    nextChallenge
+    dailyChallengeTime,
+    challengeTitle
   }: {
     listingIndex: number
     folder: TripFolder
     challengeTripId?: string
     attemptCount?: number
-    nextChallenge?: string | null
+    dailyChallengeTime?: string | null
+    challengeTitle?: string | null
   } = $props()
 
-  // Show countdown when no active challenge trip but has nextChallenge date
-  let showCountdown = $derived(!challengeTripId && !!nextChallenge)
+  // Show countdown when no active challenge trip but has dailyChallengeTime set
+  let showCountdown = $derived(!challengeTripId && !!dailyChallengeTime)
   let hasActiveChallenge = $derived(!!challengeTripId)
 
   // Countdown state
   let countdownText = $state("")
   let countdownInterval: ReturnType<typeof setInterval> | null = null
 
+  /**
+   * Calculate the next occurrence of a CET time.
+   * If that time has already passed today, returns tomorrow's occurrence.
+   * @param timeStr - Time in "HH:MM" format (CET)
+   * @returns Date object representing the next occurrence in user's local timezone
+   */
+  function getNextCETTime(timeStr: string): Date {
+    // Create a date in CET timezone for today
+    // CET is UTC+1, CEST (summer) is UTC+2
+    const now = new Date()
+
+    // Format current date as YYYY-MM-DD in CET
+    const cetFormatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Berlin",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    })
+    const cetDateStr = cetFormatter.format(now)
+
+    // Create the target time in CET
+    // We construct an ISO string and use the Europe/Berlin timezone offset
+    const targetDateStr = `${cetDateStr}T${timeStr.padStart(5, "0")}:00`
+
+    // Parse this as a CET time by creating a formatter that can tell us the offset
+    const cetDate = new Date(targetDateStr)
+
+    // Get the CET offset for the target date
+    const cetOffset = getCETOffset(cetDate)
+
+    // Create UTC time from CET time
+    const utcMs = cetDate.getTime() - cetOffset * 60 * 1000
+
+    // If this time has already passed, add 24 hours
+    if (utcMs <= now.getTime()) {
+      return new Date(utcMs + 24 * 60 * 60 * 1000)
+    }
+
+    return new Date(utcMs)
+  }
+
+  /**
+   * Get the CET/CEST offset in minutes for a given date
+   * CET = UTC+1 (60 minutes), CEST = UTC+2 (120 minutes)
+   */
+  function getCETOffset(date: Date): number {
+    // Create a date string in CET and parse the offset
+    const cetStr = date.toLocaleString("en-US", {
+      timeZone: "Europe/Berlin",
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+    const utcStr = date.toLocaleString("en-US", {
+      timeZone: "UTC",
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+
+    const [cetHour, cetMin] = cetStr.split(":").map(Number)
+    const [utcHour, utcMin] = utcStr.split(":").map(Number)
+
+    let diffMinutes = (cetHour - utcHour) * 60 + (cetMin - utcMin)
+
+    // Handle day boundary crossing
+    if (diffMinutes < -12 * 60) diffMinutes += 24 * 60
+    if (diffMinutes > 12 * 60) diffMinutes -= 24 * 60
+
+    return diffMinutes
+  }
+
   function updateCountdown() {
-    if (!nextChallenge) {
+    if (!dailyChallengeTime) {
       countdownText = ""
       return
     }
 
     const now = new Date().getTime()
-    const target = new Date(nextChallenge).getTime()
+    const target = getNextCETTime(dailyChallengeTime).getTime()
     const diff = target - now
 
     if (diff <= 0) {
@@ -76,7 +150,8 @@
   // Disabled when showing countdown (no challenge to navigate to)
   let disabled = $derived(showCountdown)
 
-  let title = "TRIP OR TRAP?"
+  // Use challengeTitle if set, otherwise default
+  let superTitle = "TRIP OR TRAP?"
 
   const handleClick = () => {
     if (challengeTripId) {
@@ -102,16 +177,17 @@
     {onmousedown}
   >
     <div class="title">
-      {title}
-      <span class="count">
+      <div class="super-title">{superTitle}</div>
+      {#if challengeTitle}
+        <div class="challenge-title">{challengeTitle}</div>
+      {/if}
+      <div class="count">
         {#if showCountdown}
-          <br />
           <span class="countdown-time">{countdownText}</span>
         {:else if hasActiveChallenge}
-          <br />
           {attemptCount ?? 0} attempt{attemptCount === 1 ? "" : "s"}
         {/if}
-      </span>
+      </div>
     </div>
   </button>
 </div>
@@ -149,6 +225,14 @@
 
       .title {
         position: relative;
+
+        .super-title {
+          font-size: var(--font-size-normal);
+        }
+
+        .challenge-title {
+          font-size: var(--font-size-large);
+        }
 
         .count {
           font-size: var(--font-size-normal);

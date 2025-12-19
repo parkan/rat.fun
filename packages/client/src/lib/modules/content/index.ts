@@ -34,7 +34,8 @@ export type StaticContent = {
   outcomes: SanityOutcome[]
   tripFolders: SanityTripFolder[]
   tripFolderWhitelist: string[]
-  nextChallenge: string | null
+  dailyChallengeTime: string | null // Time in CET format (e.g. "14:00")
+  challengeTitle: string | null // Optional title for the current/upcoming challenge
 }
 
 // --- STORES -----------------------------------------------------------
@@ -45,7 +46,8 @@ export const staticContent = writable<StaticContent>({
   ratImages: {} as SanityRatImages,
   tripFolders: [] as SanityTripFolder[],
   tripFolderWhitelist: [] as string[],
-  nextChallenge: null
+  dailyChallengeTime: null,
+  challengeTitle: null
 })
 
 export const lastUpdated = writable(performance.now())
@@ -95,7 +97,8 @@ export async function initStaticContent(worldAddress: string) {
     ratImages: data.ratImages,
     tripFolders: data.tripFolders || [],
     tripFolderWhitelist: data.tripFolderWhitelist || [],
-    nextChallenge: data.nextChallenge || null
+    dailyChallengeTime: data.dailyChallengeTime || null,
+    challengeTitle: data.challengeTitle || null
     // Don't touch trips/outcomes - they're loaded separately via initTrips()/initPlayerOutcomes()
   }))
 
@@ -121,7 +124,8 @@ export async function initStaticContent(worldAddress: string) {
       staticContent.update(content => ({
         ...content,
         tripFolderWhitelist: (result.whitelist as string[]) || [],
-        nextChallenge: (result.nextChallenge as string) || null
+        dailyChallengeTime: (result.dailyChallengeTime as string) || null,
+        challengeTitle: (result.challengeTitle as string) || null
       }))
     }
   })

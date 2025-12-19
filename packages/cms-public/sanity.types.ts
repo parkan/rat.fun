@@ -21,7 +21,8 @@ export type Challenge = {
   _rev: string
   title: string
   whitelist?: Array<string>
-  nextChallenge?: string
+  dailyChallengeTime?: string
+  challengeTitle?: string
 }
 
 export type TripFolderList = {

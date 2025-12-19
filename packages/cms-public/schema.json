@@ -51,7 +51,14 @@
         },
         "optional": true
       },
-      "nextChallenge": {
+      "dailyChallengeTime": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "challengeTitle": {
         "type": "objectAttribute",
         "value": {
           "type": "string"

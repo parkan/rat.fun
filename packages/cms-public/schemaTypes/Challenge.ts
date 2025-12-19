@@ -17,10 +17,19 @@ export default {
       description: "Ethereum addresses allowed to create challenge trips"
     },
     {
-      title: "Next Challenge",
-      name: "nextChallenge",
-      type: "datetime",
-      description: "Date and time of the next challenge trip"
+      title: "Daily Challenge Time (CET)",
+      name: "dailyChallengeTime",
+      type: "string",
+      description:
+        "Time when the daily challenge becomes available, in CET timezone (e.g. '14:00'). Leave empty to disable countdown.",
+      validation: (Rule: any) =>
+        Rule.regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).error("Must be in HH:MM format (e.g. 14:00)")
+    },
+    {
+      title: "Challenge Title",
+      name: "challengeTitle",
+      type: "string",
+      description: "Optional title for the current/upcoming challenge (shown on folder item)"
     }
   ]
 }
