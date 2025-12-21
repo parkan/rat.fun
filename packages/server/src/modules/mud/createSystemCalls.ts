@@ -30,7 +30,7 @@ function extractRevertReason(error: unknown): string {
       const errorName = revertError.data?.errorName
       const args = revertError.data?.args
       if (errorName) {
-        return `${errorName}${args ? `(${JSON.stringify(args)})` : ""}`
+        return `${errorName}${args ? `(${JSON.stringify(args, (_, v) => (typeof v === "bigint" ? v.toString() : v))})` : ""}`
       }
       // Try to get the reason from the error message
       if (revertError.reason) {
@@ -125,8 +125,12 @@ export function createSystemCalls(network: SetupNetworkResult) {
       logger.log(`__   ratId: ${args[0]}`)
       logger.log(`__   tripId: ${args[1]}`)
       logger.log(`__   balanceTransfer: ${args[2]}`)
-      logger.log(`__   itemsToRemove: ${JSON.stringify(args[3])}`)
-      logger.log(`__   itemsToAdd: ${JSON.stringify(args[4])}`)
+      logger.log(
+        `__   itemsToRemove: ${JSON.stringify(args[3], (_, v) => (typeof v === "bigint" ? v.toString() : v))}`
+      )
+      logger.log(
+        `__   itemsToAdd: ${JSON.stringify(args[4], (_, v) => (typeof v === "bigint" ? v.toString() : v))}`
+      )
       logger.log(`__   rat.totalValue: ${rat.totalValue}`)
       logger.log(`__   trip.challengeTrip: ${trip.challengeTrip}`)
       logger.log(`__   trip.fixedMinValueToEnter: ${trip.fixedMinValueToEnter}`)
