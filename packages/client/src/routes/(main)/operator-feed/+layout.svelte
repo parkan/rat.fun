@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
+  import { cubicOut } from "svelte/easing"
   import {
     CenterBar,
     SlideToggle,
@@ -18,7 +19,6 @@
   import { fly } from "svelte/transition"
   import { loadData } from "$lib/modules/content/sanity"
   import { queries } from "$lib/modules/content/sanity/groq"
-  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { goto } from "$app/navigation"
 
   onMount(() => {
@@ -43,8 +43,6 @@
       $operatorFeedPreviewOutcome = ""
     }
   }
-
-  $inspect($operatorFeedPreviewOutcome)
 
   // Get the selected outcome from staticContent
   let selectedOutcomePromise = $derived(
@@ -92,7 +90,7 @@
 {/if}
 
 {#if $operatorFeedPreviewOutcome !== ""}
-  <div transition:fly={{ x: 400, opacity: 1 }} class="overlay">
+  <div in:fly={{ x: 400, opacity: 1, duration: 300, easing: cubicOut }} class="overlay">
     <div class="back-container">
       <BackButton
         onclick={() => {
