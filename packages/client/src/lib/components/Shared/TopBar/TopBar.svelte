@@ -47,7 +47,7 @@
       <button
         class="phone-menu-toggle"
         data-tutorial="phone-menu-button"
-        onclick={(e) => {
+        onclick={e => {
           e.stopPropagation()
           console.log("click")
           $phoneShowMenu = true
@@ -58,7 +58,7 @@
     {:else}
       <BackButton
         small={true}
-        onclick={(e) => {
+        onclick={e => {
           e.stopPropagation()
           console.log("click back")
           $phoneShowMenu = false
@@ -136,7 +136,7 @@
     background: black;
     grid-column: 1 / span 3;
     grid-row: 2 / span 1000;
-    z-index: 99;
+    z-index: 99999;
     display: grid;
     grid-template-rows: repeat(3, 33.33%);
 
