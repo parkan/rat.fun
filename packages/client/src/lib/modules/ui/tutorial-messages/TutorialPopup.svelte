@@ -79,4 +79,4 @@
   onDestroy(cleanup)
 </script>
 
-<TutorialOverlay />
+<TutorialOverlay onclick={nextStep} />

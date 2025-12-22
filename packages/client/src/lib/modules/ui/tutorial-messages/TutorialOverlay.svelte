@@ -4,6 +4,8 @@
   import { TUTORIAL_STEPS } from "./steps"
   import { isPhone } from "$lib/modules/ui/state.svelte"
 
+  let { onclick } = $props()
+
   let overlayEl: HTMLDivElement | null = null
   let isFirstStep = true
 
@@ -58,6 +60,7 @@
   }
 
   function createOverlay() {
+    document.body.addEventListener("click", onclick)
     overlayEl = document.createElement("div")
     overlayEl.className = "tutorial-overlay-portal"
     overlayEl.style.cssText = `
@@ -114,6 +117,7 @@
 
   onDestroy(() => {
     destroyOverlay()
+    document.body.removeEventListener("click", onclick)
     document.body.style.overflow = ""
   })
 </script>

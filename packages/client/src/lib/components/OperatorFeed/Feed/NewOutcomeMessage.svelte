@@ -6,7 +6,8 @@
   let { message }: { message: NewOutcomeMessage } = $props()
 
   function handleTripClick() {
-    goto(`/${message.tripId}`)
+    console.log(message)
+    // goto(`/${message.tripId}`)
   }
 
   function formatValueChange(value: number): string {
