@@ -12,11 +12,10 @@
     LogOutcomeItemStatic
   } from "$lib/components/GameRun"
 
-  let { result }: { result: Outcome } = $props()
+  let { outcome }: { outcome: Outcome } = $props()
   let timeline = $state(gsap.timeline())
 
-  // ???
-  let mergedLog: MergedLogEntry[] = $derived(mergeLog(result as unknown as EnterTripReturnValue))
+  let mergedLog: MergedLogEntry[] = $derived(mergeLog(outcome as unknown as EnterTripReturnValue))
   let logEntryElements: HTMLDivElement[] = $state([])
 
   onMount(() => {
@@ -45,8 +44,7 @@
   })
 </script>
 
-<div class="rat-trip-log">
-  <!-- Right Panel: Event Log -->
+<div class="outcome-log">
   <div class="log-panel">
     <div class="log-container">
       {#if mergedLog}
@@ -80,13 +78,12 @@
 </div>
 
 <style lang="scss">
-  .rat-trip-log {
+  .outcome-log {
     display: flex;
     height: 100%;
     gap: 0;
   }
 
-  // Right Panel: Log
   .log-panel {
     flex: 1;
     display: flex;

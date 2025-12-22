@@ -65,3 +65,6 @@ export { Checkbox } from "@ratfun/shared-ui/Checkbox"
 
 /* Modals */
 export { default as ManageAllowanceModal } from "./ManageAllowanceModal/ManageAllowanceModal.svelte"
+
+/* Outcome Log */
+export { default as OutcomeLog } from "./OutcomeLog/OutcomeLog.svelte"

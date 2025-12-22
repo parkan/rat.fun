@@ -83,6 +83,7 @@ export const loadData = async (query: string, params: any) => {
     // Sanitize the data to ensure it's serializable for SvelteKit
     return sanitizeSanityData(res)
   } catch (err) {
+    console.error(err)
     return Promise.reject(new CMSError("Failed to load content from CMS", err))
   }
 }

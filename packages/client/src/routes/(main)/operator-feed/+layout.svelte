@@ -1,12 +1,24 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
-  import { CenterBar, SlideToggle } from "$lib/components/Shared"
-  import { isPhone } from "$lib/modules/ui/state.svelte"
+  import {
+    CenterBar,
+    SlideToggle,
+    BackButton,
+    OutcomeLog,
+    SmallButton
+  } from "$lib/components/Shared"
+  import { SmallSpinner } from "@ratfun/shared-ui/Loaders"
+  import { isPhone, operatorFeedPreviewOutcome } from "$lib/modules/ui/state.svelte"
   import { FEATURES } from "$lib/config/features"
   import { Feed } from "$lib/components/OperatorFeed/Feed"
   import { Stats } from "$lib/components/OperatorFeed/Stats"
   import { phoneActiveFeedView } from "$lib/components/OperatorFeed/state.svelte"
   import { backgroundMusic } from "$lib/modules/sound/stores"
+  import { fly } from "svelte/transition"
+  import { loadData } from "$lib/modules/content/sanity"
+  import { queries } from "$lib/modules/content/sanity/groq"
+  import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
+  import { goto } from "$app/navigation"
 
   onMount(() => {
     backgroundMusic.play({ category: "ratfunMusic", id: "main", loop: true })
@@ -24,7 +36,20 @@
   function handleSlideChange(value: string) {
     phoneActiveFeedView.set(value as "feed" | "stats")
   }
+
+  const onkeydown = e => {
+    if (e.key === "Escape") {
+      $operatorFeedPreviewOutcome = ""
+    }
+  }
+
+  // Get the selected outcome from staticContent
+  let selectedOutcomePromise = $derived(
+    loadData(queries.singleOutcome, { id: $operatorFeedPreviewOutcome })
+  )
 </script>
+
+<svelte:window {onkeydown} />
 
 {#if $isPhone}
   <!-- Phone Layout: single column with toggle on top -->
@@ -63,7 +88,72 @@
   {/if}
 {/if}
 
+{#if $operatorFeedPreviewOutcome !== ""}
+  <div transition:fly={{ x: 400, opacity: 1 }} class="overlay">
+    <div class="back-container">
+      <BackButton
+        onclick={() => {
+          $operatorFeedPreviewOutcome = ""
+        }}
+      />
+    </div>
+    <div class="content">
+      {#key $operatorFeedPreviewOutcome}
+        {#await selectedOutcomePromise}
+          <SmallSpinner />
+        {:then selectedOutcome}
+          <div class="outcome-view">
+            <OutcomeLog outcome={selectedOutcome} />
+            <SmallButton
+              text={UI_STRINGS.toTrip.toUpperCase() + selectedOutcome.tripIndex}
+              onclick={() => {
+                goto(`/${selectedOutcome.tripId}`)
+              }}
+            />
+          </div>
+        {:catch error}
+          {console.error(error)}
+        {/await}
+      {/key}
+    </div>
+  </div>
+{/if}
+
 <style lang="scss">
+  .overlay {
+    width: 33.33%;
+    min-width: 400px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: black;
+    z-index: 999;
+    border-left: var(--default-border-style);
+    display: grid;
+    flex-direction: column;
+    grid-template-rows: 60px 1fr;
+
+    .back-container {
+      height: 60px;
+      flex-shrink: 0;
+    }
+
+    .content {
+      height: 100%;
+      overflow-y: scroll;
+
+      .outcome-view {
+        height: 100%;
+        display: grid;
+        grid-template-rows: 1fr 60px;
+      }
+    }
+
+    .more {
+      height: 60px;
+    }
+  }
   .phone-feed-container {
     display: flex;
     flex-direction: column;
@@ -88,6 +178,11 @@
     height: var(--phone-slide-toggle-height);
     flex-shrink: 0;
     background: var(--background);
+  }
+
+  .outcome-view {
+    display: flex;
+    flex-flow: column nowrap;
   }
 
   .feed-container {

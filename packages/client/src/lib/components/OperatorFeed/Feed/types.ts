@@ -36,6 +36,7 @@ export type FeedItem = {
 
 export type NewOutcomeMessage = BaseFeedMessage & {
   type: FEED_MESSAGE_TYPE.NEW_OUTCOME
+  outcomeId: string // Sanity outcome document ID
   tripId: string
   tripIndex: number
   tripPrompt: string
