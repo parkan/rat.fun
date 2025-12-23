@@ -42,13 +42,12 @@
     <button class:disabled class:restricted {onclick} {onmouseup} {onmousedown}>
       <div class="title">
         {title}
-        {#if showCounts}
-          <span class="count">
-            <br />
-            {count ?? 0} trip{count === 1 ? "" : "s"}
-          </span>
-        {/if}
       </div>
+      {#if showCounts}
+        <div class="count">
+          {count ?? 0} trip{count === 1 ? "" : "s"}
+        </div>
+      {/if}
     </button>
   </Tooltip>
 </div>
@@ -61,6 +60,7 @@
     text-align: center;
 
     button {
+      position: relative;
       width: 100%;
       height: 100%;
       font-family: var(--special-font-stack);
@@ -68,7 +68,7 @@
 
       border-style: outset;
       border-width: 10px;
-      border-color: var(--background-light-transparent);
+      border-color: var(--background-semi-transparent);
       color: var(--background);
 
       display: flex;
@@ -76,22 +76,46 @@
       justify-content: center;
       align-items: center;
 
+      background: var(--color-grey-light);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("/images/spiral4.png");
+        background-repeat: no-repeat;
+        background-size: 200% 200%;
+        background-position: center;
+        opacity: 0.2;
+        z-index: 0;
+      }
+
       @media (max-width: 768px) {
         font-size: var(--font-size-normal);
       }
 
       .title {
         position: relative;
-
-        .count {
-          font-size: var(--font-size-normal);
-        }
+        z-index: 1;
+        background: var(--color-grey-light);
+        padding: 4px;
+        border-radius: 4px;
       }
+
+      .count {
+        font-size: var(--font-size-normal);
+        background: var(--color-grey-light);
+        padding: 2px;
+        border-radius: 4px;
+        z-index: 1;
+        margin-top: 10px;
+      }
+
       transition: transform 0.1s ease-in-out;
 
       @media (min-width: 800px) {
         &:hover {
-          border-color: var(--background-light-transparent);
+          border-color: var(--background-semi-transparent);
           transform: scale(0.97);
         }
       }
@@ -101,14 +125,12 @@
         transform: scale(0.95);
       }
 
-      background: var(--color-grey-lighter);
-
       &.restricted {
         background: var(--color-restricted-trip-folder);
       }
 
       &.disabled {
-        opacity: 0.5;
+        opacity: 0.7;
         pointer-events: none;
       }
     }

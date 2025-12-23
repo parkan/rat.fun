@@ -7,9 +7,7 @@
   import ModeSwitch from "./ModeSwitch.svelte"
   import OnlineUsers from "./OnlineUsers/OnlineUsers.svelte"
   import MobileMenu from "./MobileMenu.svelte"
-  import PhoneMenuButton from "./PhoneMenuButton.svelte"
-
-  import { Marquee, BackButton } from "$lib/components/Shared"
+  import { Marquee, BackButton, PhoneMenuButton } from "$lib/components/Shared"
 
   const isAdminView = $derived(page.route?.id?.includes("/(main)/trip-lab") ?? false)
 </script>

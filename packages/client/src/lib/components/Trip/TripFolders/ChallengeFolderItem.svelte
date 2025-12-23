@@ -121,13 +121,13 @@
     const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
     if (days > 0) {
-      countdownText = `${days}d ${hours}h ${minutes}m`
+      countdownText = `${days}d ${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`
     } else if (hours > 0) {
-      countdownText = `${hours}h ${minutes}m ${seconds}s`
+      countdownText = `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
     } else if (minutes > 0) {
-      countdownText = `${minutes}m ${seconds}s`
+      countdownText = `${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
     } else {
-      countdownText = `${seconds}s`
+      countdownText = `${seconds.toString().padStart(2, "0")}s`
     }
   }
 
@@ -149,9 +149,6 @@
 
   // Disabled when showing countdown (no challenge to navigate to)
   let disabled = $derived(showCountdown)
-
-  // Use challengeTitle if set, otherwise default
-  let superTitle = "TRIP OR TRAP?"
 
   const handleClick = () => {
     if (challengeTripId) {
@@ -177,7 +174,6 @@
     {onmousedown}
   >
     <div class="title">
-      <div class="super-title">{superTitle}</div>
       {#if challengeTitle}
         <div class="challenge-title">{challengeTitle}</div>
       {/if}
@@ -201,9 +197,15 @@
 
     &.wide {
       grid-column: span 2;
+
+      @media (max-width: 800px) {
+        grid-column: span 1;
+        grid-row: span 2;
+      }
     }
 
     button {
+      position: relative;
       width: 100%;
       height: 100%;
       font-family: var(--special-font-stack);
@@ -219,26 +221,39 @@
       justify-content: center;
       align-items: center;
 
+      background-color: var(--color-restricted-trip-folder);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("/images/tot2.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        opacity: 0.5;
+        z-index: 0;
+      }
+
       @media (max-width: 768px) {
         font-size: var(--font-size-normal);
       }
 
       .title {
         position: relative;
-
-        .super-title {
-          font-size: var(--font-size-normal);
-        }
+        z-index: 1;
 
         .challenge-title {
-          font-size: var(--font-size-large);
+          font-size: var(--font-size-extra-large);
+          line-height: 0.8em;
         }
 
         .count {
           font-size: var(--font-size-normal);
+          font-family: var(--typewriter-font-stack);
+          margin-top: 10px;
 
           .countdown-time {
-            font-size: var(--font-size-extra-large);
+            font-size: var(--font-size-large);
           }
         }
       }
@@ -256,10 +271,8 @@
         transform: scale(0.95);
       }
 
-      background: var(--color-restricted-trip-folder);
-
       &.disabled {
-        opacity: 0.5;
+        opacity: 0.7;
         pointer-events: none;
       }
     }

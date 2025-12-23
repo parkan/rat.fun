@@ -5,7 +5,7 @@
 </script>
 
 <div class="leaderboard-section">
-  <div class="section-title">Challenge Winners</div>
+  <div class="section-title">Trip or Trap? Hall of Fame</div>
   {#if entries.length === 0}
     <div class="empty">No winners yet</div>
   {:else}

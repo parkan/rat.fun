@@ -1,5 +1,6 @@
 export { default as EnterTripButton } from "./TripPreview/EnterTripButton.svelte"
 export { default as GameTripPreview } from "./TripPreview/GameTripPreview.svelte"
+export { default as GameChallengePreview } from "./TripPreview/GameChallengePreview.svelte"
 export { default as NoRatWarning } from "./TripPreview/NoRatWarning.svelte"
 export { default as TripFilters } from "./TripListing/TripFilters.svelte"
 export { default as TripItem } from "./TripItem/TripItem.svelte"

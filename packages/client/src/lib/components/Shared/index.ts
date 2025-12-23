@@ -3,6 +3,7 @@ export { default as BigButton } from "./Buttons/BigButton.svelte"
 export { default as SmallButton } from "./Buttons/SmallButton.svelte"
 export { default as LockButton } from "./Buttons/LockButton.svelte"
 export { default as BackButton } from "./Buttons/BackButton.svelte"
+export { default as PhoneMenuButton } from "./Buttons/PhoneMenuButton.svelte"
 
 /* Graphics */
 export { X } from "@ratfun/shared-ui/Graphics"

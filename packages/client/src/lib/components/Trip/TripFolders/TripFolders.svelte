@@ -88,10 +88,8 @@
     gap: 10px;
     overflow-x: hidden;
     margin: 10px;
-  }
 
-  @media (max-width: 480px) {
-    .tiles {
+    @media (max-width: 800px) {
       grid-template-columns: 1fr;
       grid-auto-rows: 100px;
       height: auto;

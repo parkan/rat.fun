@@ -42,7 +42,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--color-grey-lighter);
+      background: #a5e7ca;
     }
 
     &:active {
