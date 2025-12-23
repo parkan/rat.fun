@@ -64,7 +64,7 @@ function extractRevertReason(error: unknown): string {
 const GAS_CONFIG = {
   MAX_FEE_GWEI: 5, // Cap at 5 gwei to prevent excessive costs during spikes
   PRIORITY_BOOST: 1.5, // 50% boost for faster inclusion (reduced from 2x)
-  GAS_LIMIT: 600_000n // Conservative limit (reduced from 2M)
+  GAS_LIMIT: 2_000_000n // 2M to handle createTrip + ERC20 transfers
 } as const
 
 export function createSystemCalls(network: SetupNetworkResult) {
