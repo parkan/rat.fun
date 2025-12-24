@@ -4,11 +4,12 @@
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
   import { nonDepletedTrips, ratTotalValue, playerHasLiveRat } from "$lib/modules/state/stores"
+  import { fetchLastCompletedChallenge } from "$lib/modules/query-server"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { selectedFolderId } from "$lib/modules/ui/state.svelte"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
-  import { blockNumber } from "$lib/modules/network"
+  import { blockNumber, environment } from "$lib/modules/network"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { staticContent } from "$lib/modules/content"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
@@ -26,6 +27,46 @@
   let sortFunction = $state(entriesChronologically)
   let lastChecked = $state<number>(Number(get(blockNumber)))
   let scrollContainer = $state<HTMLDivElement | null>(null)
+
+  // Last completed challenge winner state
+  let lastWinnerName = $state<string | null>(null)
+  let lastWinTimestamp = $state<number | null>(null)
+
+  // Base block time in ms (approximately 2 seconds per block)
+  const BASE_BLOCK_TIME_MS = 2000
+
+  // Fetch last completed challenge and calculate winner timestamp
+  async function fetchLastWinner() {
+    const response = await fetchLastCompletedChallenge(get(environment))
+    if (!response?.found || !response.challenge) {
+      lastWinnerName = null
+      lastWinTimestamp = null
+      return
+    }
+
+    const challenge = response.challenge
+    if (!challenge.winner || !challenge.liquidationBlock) {
+      lastWinnerName = null
+      lastWinTimestamp = null
+      return
+    }
+
+    // Calculate approximate timestamp from block number
+    const currentBlock = Number(get(blockNumber))
+    const liquidationBlock = Number(challenge.liquidationBlock)
+    const blocksDiff = currentBlock - liquidationBlock
+    const estimatedTimestamp = Date.now() - blocksDiff * BASE_BLOCK_TIME_MS
+
+    lastWinnerName = challenge.winner.name || "Unknown"
+    lastWinTimestamp = estimatedTimestamp
+  }
+
+  // Fetch last winner on mount and periodically
+  $effect(() => {
+    fetchLastWinner()
+    const interval = setInterval(fetchLastWinner, 30000) // Poll every 30 seconds
+    return () => clearInterval(interval)
+  })
 
   // Build trip folder map from staticContent
   let tripFolderMap = $derived(
@@ -196,6 +237,8 @@
         challengeTripAttempts={challengeTripData?.visitCount}
         dailyChallengeTime={$staticContent.dailyChallengeTime}
         challengeTitle={$staticContent.challengeTitle}
+        {lastWinnerName}
+        {lastWinTimestamp}
       />
     {:else}
       <div class="loading-container">

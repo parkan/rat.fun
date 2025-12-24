@@ -181,6 +181,45 @@ const challenges: FastifyPluginAsync = async fastify => {
     }
   })
 
+  // GET /api/last-completed-challenge - Get the most recently completed (liquidated) challenge trip
+  fastify.get("/api/last-completed-challenge", async (_request, reply) => {
+    // Find the most recently liquidated challenge trip (has winner and liquidationBlock)
+    const sql = `
+      SELECT et.id
+      FROM ${t("EntityType")} et
+      INNER JOIN ${t("ChallengeTrip")} ct ON ct.id = et.id AND ct.value = true
+      INNER JOIN ${t("ChallengeWinner")} cw ON cw.id = et.id
+      INNER JOIN ${t("LiquidationBlock")} lb ON lb.id = et.id
+      WHERE et.value = $1
+        AND cw.value IS NOT NULL
+        AND lb.value IS NOT NULL
+      ORDER BY CAST(lb.value AS NUMERIC) DESC
+      LIMIT 1
+    `
+
+    try {
+      const result = await query<{ id: Buffer }>(sql, [ENTITY_TYPE.TRIP])
+
+      if (result.rows.length === 0) {
+        return reply.send({
+          found: false,
+          challenge: null
+        })
+      }
+
+      const tripId = byteaToHex(result.rows[0].id)!
+      const challenge = await fetchChallengeTrip(tripId)
+
+      return reply.send({
+        found: true,
+        challenge
+      })
+    } catch (error) {
+      console.error("Error fetching last completed challenge:", error)
+      return reply.status(500).send({ error: "Failed to fetch last completed challenge" })
+    }
+  })
+
   // GET /api/leaderboard/challenge-winners - Get players who have won at least one challenge
   // ChallengeWinner stores the player ID directly
   fastify.get("/api/leaderboard/challenge-winners", async (_request, reply) => {

@@ -17,7 +17,9 @@
     challengeTripId,
     challengeTripAttempts,
     dailyChallengeTime,
-    challengeTitle
+    challengeTitle,
+    lastWinnerName,
+    lastWinTimestamp
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
@@ -31,6 +33,8 @@
     challengeTripAttempts?: number
     dailyChallengeTime?: string | null
     challengeTitle?: string | null
+    lastWinnerName?: string | null
+    lastWinTimestamp?: number | null
   } = $props()
 </script>
 
@@ -45,6 +49,8 @@
         attemptCount={challengeTripAttempts}
         {dailyChallengeTime}
         {challengeTitle}
+        {lastWinnerName}
+        {lastWinTimestamp}
       />
     {:else}
       <TripFolderItem

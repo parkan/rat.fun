@@ -4,13 +4,18 @@
   import type { TripFolder } from "@sanity-types"
   import { playSound } from "$lib/modules/sound"
 
+  const GRACE_PERIOD_MS = 30 * 60 * 1000 // 30 minutes
+  const WINNER_DISPLAY_DURATION_MS = 60 * 60 * 1000 // 1 hour
+
   let {
     listingIndex,
     folder,
     challengeTripId,
     attemptCount,
     dailyChallengeTime,
-    challengeTitle
+    challengeTitle,
+    lastWinnerName,
+    lastWinTimestamp
   }: {
     listingIndex: number
     folder: TripFolder
@@ -18,15 +23,48 @@
     attemptCount?: number
     dailyChallengeTime?: string | null
     challengeTitle?: string | null
+    lastWinnerName?: string | null
+    lastWinTimestamp?: number | null // Unix timestamp in ms
   } = $props()
 
-  // Show countdown when no active challenge trip but has dailyChallengeTime set
-  let showCountdown = $derived(!challengeTripId && !!dailyChallengeTime)
   let hasActiveChallenge = $derived(!!challengeTripId)
 
   // Countdown state
   let countdownText = $state("")
   let countdownInterval: ReturnType<typeof setInterval> | null = null
+
+  // Display state - determines what to show
+  let displayState = $state<"countdown" | "grace" | "winner" | "active">("countdown")
+
+  /**
+   * Calculate today's CET time (not rolling to next day).
+   * @param timeStr - Time in "HH:MM" format (CET)
+   * @returns Date object representing today's target time in user's local timezone
+   */
+  function getTodayCETTime(timeStr: string): Date {
+    const now = new Date()
+
+    // Format current date as YYYY-MM-DD in CET
+    const cetFormatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Berlin",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    })
+    const cetDateStr = cetFormatter.format(now)
+
+    // Create the target time in CET
+    const targetDateStr = `${cetDateStr}T${timeStr.padStart(5, "0")}:00`
+    const cetDate = new Date(targetDateStr)
+
+    // Get the CET offset for the target date
+    const cetOffset = getCETOffset(cetDate)
+
+    // Create UTC time from CET time
+    const utcMs = cetDate.getTime() - cetOffset * 60 * 1000
+
+    return new Date(utcMs)
+  }
 
   /**
    * Calculate the next occurrence of a CET time.
@@ -101,12 +139,49 @@
   }
 
   function updateCountdown() {
-    if (!dailyChallengeTime) {
+    const now = Date.now()
+
+    // Priority 1: Active challenge - show attempts
+    if (hasActiveChallenge) {
+      displayState = "active"
       countdownText = ""
       return
     }
 
-    const now = new Date().getTime()
+    // Priority 2: Recent winner - show "Won by X" for 1 hour
+    if (lastWinnerName && lastWinTimestamp) {
+      const timeSinceWin = now - lastWinTimestamp
+      if (timeSinceWin < WINNER_DISPLAY_DURATION_MS) {
+        displayState = "winner"
+        countdownText = ""
+        return
+      }
+    }
+
+    // Priority 3: No dailyChallengeTime - nothing to show
+    if (!dailyChallengeTime) {
+      displayState = "countdown"
+      countdownText = ""
+      return
+    }
+
+    // Priority 4: Check if we're in grace period or countdown
+    const todayTarget = getTodayCETTime(dailyChallengeTime).getTime()
+    const timeSinceTarget = now - todayTarget
+
+    // If target time has passed today
+    if (timeSinceTarget >= 0) {
+      // Within grace period - show "Starting soon..."
+      if (timeSinceTarget < GRACE_PERIOD_MS) {
+        displayState = "grace"
+        countdownText = "Starting soon..."
+        return
+      }
+      // Grace period expired - show countdown to next day
+    }
+
+    // Show countdown to next occurrence
+    displayState = "countdown"
     const target = getNextCETTime(dailyChallengeTime).getTime()
     const diff = target - now
 
@@ -132,13 +207,9 @@
   }
 
   $effect(() => {
-    if (showCountdown) {
-      updateCountdown()
-      countdownInterval = setInterval(updateCountdown, 1000)
-    } else if (countdownInterval) {
-      clearInterval(countdownInterval)
-      countdownInterval = null
-    }
+    // Always run the update to determine display state
+    updateCountdown()
+    countdownInterval = setInterval(updateCountdown, 1000)
 
     return () => {
       if (countdownInterval) {
@@ -147,8 +218,8 @@
     }
   })
 
-  // Disabled when showing countdown (no challenge to navigate to)
-  let disabled = $derived(showCountdown)
+  // Disabled when not showing active challenge (nothing to navigate to)
+  let disabled = $derived(!hasActiveChallenge)
 
   const handleClick = () => {
     if (challengeTripId) {
@@ -168,7 +239,8 @@
 <div class="tile wide" in:fade|global={{ duration: 100, delay: listingIndex * 30 }}>
   <button
     class:disabled
-    class:countdown={showCountdown}
+    class:countdown={displayState === "countdown" || displayState === "grace"}
+    class:winner={displayState === "winner"}
     onclick={handleClick}
     {onmouseup}
     {onmousedown}
@@ -178,10 +250,14 @@
         <div class="challenge-title">{challengeTitle}</div>
       {/if}
       <div class="count">
-        {#if showCountdown}
-          <span class="countdown-time">{countdownText}</span>
-        {:else if hasActiveChallenge}
+        {#if displayState === "active"}
           {attemptCount ?? 0} attempt{attemptCount === 1 ? "" : "s"}
+        {:else if displayState === "winner"}
+          <span class="winner-text">Won by {lastWinnerName}</span>
+        {:else if displayState === "grace"}
+          <span class="countdown-time">{countdownText}</span>
+        {:else}
+          <span class="countdown-time">{countdownText}</span>
         {/if}
       </div>
     </div>
@@ -254,6 +330,10 @@
 
           .countdown-time {
             font-size: var(--font-size-large);
+          }
+
+          .winner-text {
+            font-size: var(--font-size-normal);
           }
         }
       }

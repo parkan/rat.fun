@@ -197,3 +197,36 @@ export async function fetchActiveChallenge(
     return null
   }
 }
+
+// Last completed challenge response type
+export type LastCompletedChallengeResponse = {
+  found: boolean
+  challenge: ChallengeResponse | null
+}
+
+/**
+ * Fetch last completed (won) challenge trip
+ */
+export async function fetchLastCompletedChallenge(
+  environment: ENVIRONMENT
+): Promise<LastCompletedChallengeResponse | null> {
+  const baseUrl = getQueryServerUrl(environment)
+  if (!baseUrl) return null
+
+  try {
+    const url = new URL("/api/last-completed-challenge", baseUrl)
+
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(10000)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.warn("[fetchLastCompletedChallenge] Failed:", error)
+    return null
+  }
+}
