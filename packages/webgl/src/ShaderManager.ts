@@ -28,6 +28,7 @@ export class ShaderManager {
   private forceContinuousRendering = false
   private errorHandler: ErrorHandler
   private singleFrameRender: () => boolean
+  private singleFramePauseRafId: number | null = null
 
   constructor(options: ShaderManagerOptions) {
     this.errorHandler = options.errorHandler
@@ -157,10 +158,16 @@ export class ShaderManager {
 
         // On mobile/Firefox, pause after first frame unless continuous rendering is forced
         if (this.singleFrameRender() && !this.forceContinuousRendering && this._renderer) {
+          // Cancel any pending pause RAF from previous shader
+          if (this.singleFramePauseRafId !== null) {
+            cancelAnimationFrame(this.singleFramePauseRafId)
+            this.singleFramePauseRafId = null
+          }
           // Wait for first frame to render, then pause
           // Use double requestAnimationFrame to ensure the frame is actually painted
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
+          this.singleFramePauseRafId = requestAnimationFrame(() => {
+            this.singleFramePauseRafId = requestAnimationFrame(() => {
+              this.singleFramePauseRafId = null
               if (this._renderer && !this.forceContinuousRendering) {
                 this._renderer.pause()
               }
@@ -244,7 +251,8 @@ export class ShaderManager {
 
       this._renderer.render()
 
-      // Set up resize handling
+      // Set up resize handling - remove first to avoid accumulating listeners
+      window.removeEventListener("resize", this.handleResize)
       window.addEventListener("resize", this.handleResize)
     } catch (error) {
       console.error("Failed to initialize WebGL renderer:", error)
@@ -356,6 +364,14 @@ export class ShaderManager {
       clearTimeout(this.recoveryTimeout)
       this.recoveryTimeout = null
     }
+
+    // Cancel any pending single-frame pause RAF
+    if (this.singleFramePauseRafId !== null) {
+      cancelAnimationFrame(this.singleFramePauseRafId)
+      this.singleFramePauseRafId = null
+    }
+
+    this._canvas = null
   }
 }
 

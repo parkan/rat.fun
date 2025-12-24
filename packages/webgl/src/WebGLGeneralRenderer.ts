@@ -388,6 +388,8 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
 
     // Clear and draw
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+    this.gl.clearColor(0, 0, 0, 1)
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4)
 
     // Calculate FPS every 60 frames
@@ -469,6 +471,8 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
 
     // Clear and draw
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
+    this.gl.clearColor(0, 0, 0, 1)
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4)
   }
 
