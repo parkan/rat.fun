@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from "svelte"
+  import { tick, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
   import { visibleMessages, hasMoreMessages, loadMoreMessages } from "../state.svelte"
   import FeedMessage from "./FeedMessage.svelte"
@@ -102,6 +102,10 @@
       })
     }
   }
+
+  onDestroy(() => {
+    console.log("[FeedMessages] onDestroy called")
+  })
 </script>
 
 <div class="feed-messages" bind:this={scrollContainer} onscroll={handleScroll}>
@@ -110,7 +114,7 @@
       <span>No messages yet</span>
     </div>
   {:else}
-    <div class="messages-list" in:fade|global={{ duration: 300 }}>
+    <div class="messages-list" in:fade={{ duration: 300 }}>
       {#if $hasMoreMessages}
         <div class="load-more-indicator">
           {#if isLoadingMore}

@@ -6,7 +6,7 @@
 </script>
 
 <div
-  in:transitions.scale|global={{ duration: 1500, opacity: 1 }}
+  in:transitions.scale={{ duration: 1500, opacity: 1 }}
   out:transitions.fade={{ duration: 300 }}
   class="popup"
 >

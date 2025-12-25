@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
   import {
     playerHasTokens,
     tokenAllowanceApproved,
@@ -95,6 +95,10 @@
     ) {
       ratState.state.transitionTo(RAT_BOX_STATE.NO_RAT)
     }
+  })
+
+  onDestroy(() => {
+    console.log("[RatBox] onDestroy called")
   })
 </script>
 

@@ -37,7 +37,7 @@
   }
 </script>
 
-<div class="tile" in:fade|global={{ duration: 100, delay: listingIndex * 30 }}>
+<div class="tile" in:fade={{ duration: 100, delay: listingIndex * 30 }}>
   <Tooltip content={tooltip ? UI_STRINGS.egoDeathExplanation : ""}>
     <button class:disabled class:restricted {onclick} {onmouseup} {onmousedown}>
       <div class="title">

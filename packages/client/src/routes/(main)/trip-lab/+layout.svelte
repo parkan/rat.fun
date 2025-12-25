@@ -15,7 +15,7 @@
 <Admin />
 
 {#if page.route.id !== "/(main)/trip-lab"}
-  <div in:fly|global={{ x: -800, opacity: 1, duration: 200 }} class="sidebar open">
+  <div in:fly={{ x: -800, opacity: 1, duration: 200 }} class="sidebar open">
     {@render children?.()}
   </div>
 {/if}

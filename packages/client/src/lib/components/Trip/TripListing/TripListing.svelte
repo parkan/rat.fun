@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Hex } from "viem"
+  import { onDestroy } from "svelte"
   import { get } from "svelte/store"
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
@@ -218,6 +219,10 @@
       scrollContainer.scrollTop = 0
     }
   })
+
+  onDestroy(() => {
+    console.log("[TripListing] onDestroy called")
+  })
 </script>
 
 <div class="content" bind:this={scrollContainer} data-tutorial="trip-list">
@@ -259,7 +264,7 @@
         hasBackButton={true}
       />
     {/if}
-    <div class:animated={false} class="trip-listing" in:fade|global={{ duration: 300 }}>
+    <div class:animated={false} class="trip-listing" in:fade={{ duration: 300 }}>
       {#if activeList.length > 0}
         {#if activeList.length < tripList.length}
           {#key tripList.length}

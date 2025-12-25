@@ -236,7 +236,7 @@
   }
 </script>
 
-<div class="tile wide" in:fade|global={{ duration: 100, delay: listingIndex * 30 }}>
+<div class="tile wide" in:fade={{ duration: 100, delay: listingIndex * 30 }}>
   <button
     class:disabled
     class:countdown={displayState === "countdown" || displayState === "grace"}
