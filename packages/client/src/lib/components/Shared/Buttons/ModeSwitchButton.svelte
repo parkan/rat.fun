@@ -109,7 +109,7 @@
         rgba(0, 255, 42, 1),
         rgba(230, 0, 255, 1)
       );
-      animation: backgroundCycle 12s infinite;
+      animation: backgroundCycle 6s infinite;
       filter: hue-rotate(0deg);
 
       &:hover {

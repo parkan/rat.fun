@@ -20,11 +20,18 @@
     height: 100%;
     padding: 0;
     width: 100%;
+    max-width: 260px;
+    overflow: hidden;
     color: var(--white);
     border-right: var(--default-border-style);
     display: flex;
     flex-direction: column;
     min-width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    @media (max-width: 800px) {
+      max-width: 160px;
+    }
 
     :global(> *) {
       height: 100%;
@@ -52,6 +59,10 @@
       justify-content: center;
       width: 100%;
       padding-inline: 10px;
+
+      @media (max-width: 800px) {
+        font-size: var(--font-size-small);
+      }
     }
   }
 </style>

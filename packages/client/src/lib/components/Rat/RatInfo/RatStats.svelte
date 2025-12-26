@@ -153,6 +153,11 @@
           @media (max-width: 800px) {
             display: none;
           }
+
+          @media (max-height: 700px) {
+            display: none;
+          }
+
           .index {
             padding-inline: 10px;
             color: var(--foreground);
@@ -174,6 +179,10 @@
           pointer-events: none;
 
           @media (max-width: 800px) {
+            display: none;
+          }
+
+          @media (max-height: 700px) {
             display: none;
           }
         }

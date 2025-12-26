@@ -69,6 +69,7 @@
   }
 
   .home-button {
+    position: relative;
     width: 100%;
     height: 100%;
     background: var(--color-grey-light);
@@ -77,9 +78,20 @@
     border-style: outset;
     border-width: 30px;
     border-color: var(--background-light-transparent);
-    font-size: var(--font-size-large);
+    font-size: var(--font-size-extra-large);
     font-family: var(--special-font-stack);
     cursor: pointer;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("/images/head-bg.png");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      opacity: 0.2;
+      z-index: 0;
+    }
 
     &:hover {
       background: var(--color-grey-lighter);

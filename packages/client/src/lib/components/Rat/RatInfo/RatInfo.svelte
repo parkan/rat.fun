@@ -143,6 +143,9 @@
         height: 160px;
         order: 1;
       }
+      @media (max-height: 700px) {
+        height: 110px;
+      }
     }
 
     .rat-inventory-container {

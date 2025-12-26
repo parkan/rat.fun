@@ -48,7 +48,7 @@
 
     @media (max-width: 800px) {
       width: 100%;
-      top: 110px;
+      top: 55px;
     }
 
     .debug-button {

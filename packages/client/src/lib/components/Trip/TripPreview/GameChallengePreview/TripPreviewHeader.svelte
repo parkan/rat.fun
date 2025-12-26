@@ -163,6 +163,11 @@
         font-size: var(--font-size-normal);
         color: var(--background);
 
+        @media screen and (max-width: 800px) {
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+
         &:last-child {
           border-bottom: none;
         }
