@@ -24,12 +24,12 @@
     padding: 0 12px;
     border-bottom: var(--default-border-style);
     padding-bottom: 12px;
+    min-height: 200px;
   }
 
   .section-title {
     padding: 12px 0 6px;
-    font-size: var(--font-size-small);
-    color: var(--color-grey-light);
+    font-size: var(--font-size-normal);
     text-transform: uppercase;
     letter-spacing: 0.03em;
     border-bottom: 1px solid var(--color-grey-dark);
@@ -38,7 +38,6 @@
 
   .empty {
     padding: 12px;
-    color: var(--color-grey-light);
     font-size: var(--font-size-small);
   }
 

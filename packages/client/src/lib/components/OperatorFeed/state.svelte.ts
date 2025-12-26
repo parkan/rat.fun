@@ -3,9 +3,7 @@ import type { FeedMessage, NewTripMessage, NewOutcomeMessage } from "./Feed/type
 import { FEED_MESSAGE_TYPE } from "./Feed/types"
 import { environment } from "$lib/modules/network"
 import {
-  fetchActiveRatsLeaderboard,
   fetchCashedOutRatsLeaderboard,
-  fetchActiveTripsLeaderboard,
   fetchCashedOutTripsLeaderboard,
   fetchChallengeWinners
 } from "$lib/modules/query-server"
@@ -190,9 +188,7 @@ function parseEthValue(ethString: string): number {
 }
 
 // Leaderboard stores for each category
-export const activeRatsLeaderboard = writable<LeaderboardEntry[]>([])
 export const cashedOutRatsLeaderboard = writable<LeaderboardEntry[]>([])
-export const activeTripsLeaderboard = writable<LeaderboardEntry[]>([])
 export const cashedOutTripsLeaderboard = writable<LeaderboardEntry[]>([])
 export const challengeWinnersLeaderboard = writable<ChallengeWinnerDisplayEntry[]>([])
 
@@ -237,7 +233,7 @@ function challengeEntriesEqual(
  * Update store only if data has changed
  */
 function updateIfChanged(
-  store: typeof activeRatsLeaderboard,
+  store: typeof cashedOutRatsLeaderboard,
   newEntries: LeaderboardEntry[]
 ): void {
   const current = get(store)
@@ -283,27 +279,11 @@ export async function loadAllLeaderboards() {
   }
 
   try {
-    const [activeRats, cashedOutRats, activeTrips, cashedOutTrips, challengeWinners] =
-      await Promise.all([
-        fetchActiveRatsLeaderboard(env),
-        fetchCashedOutRatsLeaderboard(env),
-        fetchActiveTripsLeaderboard(env),
-        fetchCashedOutTripsLeaderboard(env),
-        fetchChallengeWinners(env)
-      ])
-
-    if (activeRats) {
-      const entries = activeRats.entries.map((entry, index) => ({
-        id: entry.id,
-        name: entry.name || "Unnamed Rat",
-        ownerName:
-          entry.ownerName ||
-          (entry.owner ? `${entry.owner.slice(0, 6)}...${entry.owner.slice(-4)}` : "Unknown"),
-        value: parseEthValue(entry.totalValue),
-        rank: index + 1
-      }))
-      updateIfChanged(activeRatsLeaderboard, entries)
-    }
+    const [cashedOutRats, cashedOutTrips, challengeWinners] = await Promise.all([
+      fetchCashedOutRatsLeaderboard(env),
+      fetchCashedOutTripsLeaderboard(env),
+      fetchChallengeWinners(env)
+    ])
 
     if (cashedOutRats) {
       const entries = cashedOutRats.entries.map((entry, index) => ({
@@ -316,19 +296,6 @@ export async function loadAllLeaderboards() {
         rank: index + 1
       }))
       updateIfChanged(cashedOutRatsLeaderboard, entries)
-    }
-
-    if (activeTrips) {
-      const entries = activeTrips.entries.map((entry, index) => ({
-        id: entry.id,
-        name: entry.prompt || "Unnamed Trip",
-        ownerName:
-          entry.ownerName ||
-          (entry.owner ? `${entry.owner.slice(0, 6)}...${entry.owner.slice(-4)}` : "Unknown"),
-        value: parseEthValue(entry.balance),
-        rank: index + 1
-      }))
-      updateIfChanged(activeTripsLeaderboard, entries)
     }
 
     if (cashedOutTrips) {

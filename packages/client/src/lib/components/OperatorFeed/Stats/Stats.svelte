@@ -4,9 +4,7 @@
   import { blockNumber } from "$lib/modules/network"
   import { FEATURES } from "$lib/config/features"
   import {
-    activeRatsLeaderboard,
     cashedOutRatsLeaderboard,
-    activeTripsLeaderboard,
     cashedOutTripsLeaderboard,
     challengeWinnersLeaderboard,
     leaderboardsLoading,
@@ -72,8 +70,6 @@
       {#if FEATURES.ENABLE_CHALLENGE_TRIPS}
         <ChallengeWinnersSection entries={$challengeWinnersLeaderboard} />
       {/if}
-      <LeaderboardSection title="Active Rats" entries={$activeRatsLeaderboard} />
-      <LeaderboardSection title="Active Trips" entries={$activeTripsLeaderboard} />
       <LeaderboardSection
         title="Cashed Out Rats"
         entries={$cashedOutRatsLeaderboard}
