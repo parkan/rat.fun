@@ -222,3 +222,34 @@ export const realisedProfitLoss = derived(
   [realisedBalance, realisedInvestment],
   ([$rb, $i]) => $rb - $i
 )
+
+// * * * * * * * * * * * * * * * * *
+// CHALLENGE WINNER
+// * * * * * * * * * * * * * * * * *
+
+/**
+ * Returns the last challenge winner based on real-time MUD state.
+ * Finds challenge trips with winners and returns the most recently won.
+ */
+export const lastChallengeWinner = derived([trips, players], ([$trips, $players]) => {
+  // Find challenge trips with winners
+  const completedChallenges = Object.entries($trips)
+    .filter(([_, trip]) => trip.challengeTrip && trip.challengeWinner)
+    .sort((a, b) => {
+      // Sort by lastVisitBlock descending (most recent first)
+      const aBlock = Number(a[1].lastVisitBlock ?? 0)
+      const bBlock = Number(b[1].lastVisitBlock ?? 0)
+      return bBlock - aBlock
+    })
+
+  if (completedChallenges.length === 0) return null
+
+  const [tripId, trip] = completedChallenges[0]
+  const winnerPlayer = $players[trip.challengeWinner as string]
+
+  return {
+    odId: trip.challengeWinner as string,
+    tripId,
+    winnerName: winnerPlayer?.name || "Unknown"
+  }
+})

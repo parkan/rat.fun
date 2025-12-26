@@ -92,7 +92,6 @@
     align-items: stretch;
     align-content: start;
     gap: 10px;
-    overflow-x: hidden;
     margin: 10px;
 
     @media (max-width: 800px) {

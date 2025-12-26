@@ -626,6 +626,123 @@ function divideIntoFourParts(hexString: Hex): [number, number, number, number] {
   return [part1, part2, part3, part4]
 }
 
+// ========================================
+// CET Timezone Countdown Utilities
+// ========================================
+
+/**
+ * Get the CET/CEST offset in minutes for a given date
+ * CET = UTC+1 (60 minutes), CEST = UTC+2 (120 minutes)
+ */
+export function getCETOffset(date: Date): number {
+  const cetStr = date.toLocaleString("en-US", {
+    timeZone: "Europe/Berlin",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+  const utcStr = date.toLocaleString("en-US", {
+    timeZone: "UTC",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+
+  const [cetHour, cetMin] = cetStr.split(":").map(Number)
+  const [utcHour, utcMin] = utcStr.split(":").map(Number)
+
+  let diffMinutes = (cetHour - utcHour) * 60 + (cetMin - utcMin)
+
+  // Handle day boundary crossing
+  if (diffMinutes < -12 * 60) diffMinutes += 24 * 60
+  if (diffMinutes > 12 * 60) diffMinutes -= 24 * 60
+
+  return diffMinutes
+}
+
+/**
+ * Calculate today's CET time (not rolling to next day).
+ * @param timeStr - Time in "HH:MM" format (CET)
+ * @returns Date object representing today's target time in user's local timezone
+ */
+export function getTodayCETTime(timeStr: string): Date {
+  const now = new Date()
+
+  const cetFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  })
+  const cetDateStr = cetFormatter.format(now)
+
+  // Parse as UTC (with 'Z') to get a consistent baseline regardless of user's timezone
+  const targetDateStr = `${cetDateStr}T${timeStr.padStart(5, "0")}:00Z`
+  const asUtc = new Date(targetDateStr)
+
+  // Convert from "this time in CET" to actual UTC by subtracting CET offset
+  const cetOffset = getCETOffset(now)
+  const utcMs = asUtc.getTime() - cetOffset * 60 * 1000
+
+  return new Date(utcMs)
+}
+
+/**
+ * Calculate the next occurrence of a CET time.
+ * If that time has already passed today, returns tomorrow's occurrence.
+ * @param timeStr - Time in "HH:MM" format (CET)
+ * @returns Date object representing the next occurrence in user's local timezone
+ */
+export function getNextCETTime(timeStr: string): Date {
+  const now = new Date()
+
+  const cetFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  })
+  const cetDateStr = cetFormatter.format(now)
+
+  // Parse as UTC (with 'Z') to get a consistent baseline regardless of user's timezone
+  const targetDateStr = `${cetDateStr}T${timeStr.padStart(5, "0")}:00Z`
+  const asUtc = new Date(targetDateStr)
+
+  // Convert from "this time in CET" to actual UTC by subtracting CET offset
+  const cetOffset = getCETOffset(now)
+  const utcMs = asUtc.getTime() - cetOffset * 60 * 1000
+
+  if (utcMs <= now.getTime()) {
+    return new Date(utcMs + 24 * 60 * 60 * 1000)
+  }
+
+  return new Date(utcMs)
+}
+
+/**
+ * Format a countdown diff (in ms) to a human-readable string
+ * @param diff - Time difference in milliseconds
+ * @returns Formatted countdown string (e.g., "02h 30m 15s")
+ */
+export function formatCountdown(diff: number): string {
+  if (diff <= 0) return ""
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+  if (days > 0) {
+    return `${days}d ${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`
+  } else if (hours > 0) {
+    return `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
+  } else if (minutes > 0) {
+    return `${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`
+  } else {
+    return `${seconds.toString().padStart(2, "0")}s`
+  }
+}
+
 /**
  * Tries to detect if the current browser supports extensions (ie. crypto wallets)
  * @returns true if the browser seems to support extensions (desktop browsers), false otherwise (mobile browsers)

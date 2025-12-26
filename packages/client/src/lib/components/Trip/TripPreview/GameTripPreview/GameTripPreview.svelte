@@ -15,12 +15,10 @@
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
-  import {
-    TripPreviewHeader,
-    TripPreviewPrompt,
-    EnterTripButton,
-    NoRatWarning
-  } from "$lib/components/Trip"
+  import TripPreviewHeader from "./TripPreviewHeader.svelte"
+  import TripPreviewPrompt from "./TripPreviewPrompt.svelte"
+  import EnterTripButton from "./EnterTripButton.svelte"
+  import NoRatWarning from "../NoRatWarning.svelte"
 
   import { BackButton, NoImage } from "$lib/components/Shared"
 
@@ -205,7 +203,7 @@
     }
 
     .trip-prompt {
-      flex: 1; /* Take remaining space */
+      flex: 1;
       width: 100%;
       overflow-y: auto;
       overflow-x: hidden;
@@ -234,7 +232,6 @@
     z-index: 10;
   }
 
-  // Fallback header styles (when chain data not available)
   .trip-preview-header-fallback {
     border-bottom: var(--default-border-style);
     display: flex;
@@ -335,7 +332,6 @@
     }
   }
 
-  // Fallback prompt styles (when chain data not available)
   .trip-preview-prompt-fallback {
     word-break: break-word;
     overflow-wrap: anywhere;

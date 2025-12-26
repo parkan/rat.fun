@@ -1,6 +1,6 @@
 <script lang="ts">
   let { children, options = {} } = $props()
-  const DEFAULTS = { maxFontPixels: 40 }
+  const DEFAULTS = { maxFontPixels: 72 }
   import { resizeTextAttachment } from "$lib/modules/ui"
 </script>
 

@@ -4,13 +4,17 @@
   import { get } from "svelte/store"
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
-  import { nonDepletedTrips, ratTotalValue, playerHasLiveRat } from "$lib/modules/state/stores"
-  import { fetchLastCompletedChallenge } from "$lib/modules/query-server"
+  import {
+    nonDepletedTrips,
+    ratTotalValue,
+    playerHasLiveRat,
+    lastChallengeWinner
+  } from "$lib/modules/state/stores"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { selectedFolderId } from "$lib/modules/ui/state.svelte"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
-  import { blockNumber, environment } from "$lib/modules/network"
+  import { blockNumber } from "$lib/modules/network"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { staticContent } from "$lib/modules/content"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
@@ -33,40 +37,54 @@
   let lastWinnerName = $state<string | null>(null)
   let lastWinTimestamp = $state<number | null>(null)
 
-  // Base block time in ms (approximately 2 seconds per block)
-  const BASE_BLOCK_TIME_MS = 2000
+  // LocalStorage key for tracking winner
+  const WINNER_STORAGE_KEY = "lastChallengeWinner"
 
-  // Fetch last completed challenge and calculate winner timestamp
-  async function fetchLastWinner() {
-    const response = await fetchLastCompletedChallenge(get(environment))
-    if (!response?.found || !response.challenge) {
-      lastWinnerName = null
-      lastWinTimestamp = null
-      return
+  // Load stored winner data from localStorage
+  function loadStoredWinner(): { odId: string; timestamp: number } | null {
+    try {
+      const stored = localStorage.getItem(WINNER_STORAGE_KEY)
+      if (stored) {
+        return JSON.parse(stored)
+      }
+    } catch {
+      // Ignore localStorage errors
     }
-
-    const challenge = response.challenge
-    if (!challenge.winner || !challenge.liquidationBlock) {
-      lastWinnerName = null
-      lastWinTimestamp = null
-      return
-    }
-
-    // Calculate approximate timestamp from block number
-    const currentBlock = Number(get(blockNumber))
-    const liquidationBlock = Number(challenge.liquidationBlock)
-    const blocksDiff = currentBlock - liquidationBlock
-    const estimatedTimestamp = Date.now() - blocksDiff * BASE_BLOCK_TIME_MS
-
-    lastWinnerName = challenge.winner.name || "Unknown"
-    lastWinTimestamp = estimatedTimestamp
+    return null
   }
 
-  // Fetch last winner on mount and periodically
+  // Save winner data to localStorage
+  function saveWinner(winnerId: string, timestamp: number) {
+    try {
+      localStorage.setItem(WINNER_STORAGE_KEY, JSON.stringify({ odId: winnerId, timestamp }))
+    } catch {
+      // Ignore localStorage errors
+    }
+  }
+
+  // Track winner changes reactively from MUD state
   $effect(() => {
-    fetchLastWinner()
-    const interval = setInterval(fetchLastWinner, 30000) // Poll every 30 seconds
-    return () => clearInterval(interval)
+    const winner = $lastChallengeWinner
+    if (!winner) {
+      lastWinnerName = null
+      lastWinTimestamp = null
+      return
+    }
+
+    // Check if this is a new winner or the same one we've seen before
+    const stored = loadStoredWinner()
+
+    if (stored && stored.odId === winner.odId) {
+      // Same winner - use stored timestamp
+      lastWinnerName = winner.winnerName
+      lastWinTimestamp = stored.timestamp
+    } else {
+      // New winner - use current time and store it
+      const now = Date.now()
+      lastWinnerName = winner.winnerName
+      lastWinTimestamp = now
+      saveWinner(winner.odId, now)
+    }
   })
 
   // Build trip folder map from staticContent

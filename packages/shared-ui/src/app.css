@@ -76,6 +76,7 @@
   /* Color: Special */
   --color-total-value: gold;
   --color-restricted-trip-folder: gold;
+  --color-restricted-trip-folder-transparent: rgba(255, 215, 0, 0.8);
 
   /* Color: Popular Alert */
   --color-popular-alert: rgb(255, 215, 0);
