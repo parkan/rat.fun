@@ -2,7 +2,7 @@
   import { playerERC20Balance, airdropRatBalance } from "$lib/modules/erc20Listener/stores"
   import { getDrawbridge, userAddress } from "$lib/modules/drawbridge"
   import { addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
-  import { shortenAddress } from "$lib/modules/utils"
+  import { shortenAddress } from "@ratfun/shared-utils"
   import { SmallButton } from "$lib/components/Shared"
 
   let showDropdown = $state(false)

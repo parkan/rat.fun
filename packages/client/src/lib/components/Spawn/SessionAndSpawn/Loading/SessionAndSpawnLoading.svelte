@@ -15,7 +15,7 @@
   import { initWalletNetwork } from "$lib/initWalletNetwork"
   import { WALLET_TYPE } from "@ratfun/common/basic-network"
   import { initEntities, isEntitiesInitialized } from "$lib/modules/chain-sync"
-  import { addressToId } from "$lib/modules/utils"
+  import { addressToId } from "@ratfun/shared-utils"
 
   let error = $state<string | null>(null)
   let isUserRejection = $state(false)

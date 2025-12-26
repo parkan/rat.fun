@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
+  import { sha256, type Hex } from "viem"
   import { player } from "$lib/modules/state/stores"
-  import { addressToRatParts } from "$lib/modules/utils"
+  import { hashToIndices } from "@ratfun/shared-utils"
   import { staticContent } from "$lib/modules/content"
+  import { urlFor } from "$lib/modules/content/sanity"
   import { playSound } from "$lib/modules/sound"
   import { NoImage } from "$lib/components/Shared"
   import gsap from "gsap"
@@ -21,7 +23,37 @@
     width?: number
   } = $props()
 
-  let images = $derived(addressToRatParts($player?.currentRat, $staticContent?.ratImages))
+  // Build rat part URLs from address hash and image arrays
+  function getRatPartImages(
+    ratAddress: Hex | undefined,
+    ratImages: typeof $staticContent.ratImages
+  ) {
+    if (!ratImages || !ratAddress) return undefined
+    const { ratEars, ratHeads, ratArms, ratBodies } = ratImages
+    if (!ratEars || !ratHeads || !ratArms || !ratBodies) return undefined
+
+    const indices = hashToIndices(sha256(ratAddress), [
+      ratBodies.length,
+      ratArms.length,
+      ratHeads.length,
+      ratEars.length
+    ])
+
+    const getImageUrl = (asset: { _ref: string } | undefined) => {
+      if (!asset) return ""
+      const builder = urlFor(asset)
+      return builder ? builder.width(360).url() : ""
+    }
+
+    return [
+      getImageUrl(ratBodies[indices[0]].asset),
+      getImageUrl(ratArms[indices[1]].asset),
+      getImageUrl(ratHeads[indices[2]].asset),
+      getImageUrl(ratEars[indices[3]].asset)
+    ]
+  }
+
+  let images = $derived(getRatPartImages($player?.currentRat, $staticContent?.ratImages))
 
   // Element references for GSAP
   let bodyElement: HTMLDivElement | null = $state(null)

@@ -5,7 +5,7 @@ import { WALLET_TYPE } from "@ratfun/common/basic-network"
 import { SetupWalletNetworkResult } from "@ratfun/common/mud"
 import { walletNetwork, walletType } from "$lib/modules/network"
 import { playerAddress, entities } from "$lib/modules/state/stores"
-import { addressToId } from "$lib/modules/utils"
+import { addressToId } from "@ratfun/shared-utils"
 
 /**
  * Initialize the wallet network - sets up stores.

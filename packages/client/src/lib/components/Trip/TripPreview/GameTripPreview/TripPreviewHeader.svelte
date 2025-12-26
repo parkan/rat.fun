@@ -9,7 +9,7 @@
   import { urlFor } from "$lib/modules/content/sanity"
   import { NoImage } from "$lib/components/Shared"
   import { lightboxState, isPhone } from "$lib/modules/ui/state.svelte"
-  import { blocksToReadableTime } from "$lib/modules/utils"
+  import { blocksToReadableTime } from "@ratfun/shared-utils"
   import { blockNumber } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"

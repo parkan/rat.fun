@@ -1,4 +1,4 @@
-import { getRandomElement, getRandomNumber } from "$lib/modules/utils"
+import { getRandomElement, getRandomNumber } from "@ratfun/shared-utils"
 
 export const firstNameFragments = [
   "Lil",

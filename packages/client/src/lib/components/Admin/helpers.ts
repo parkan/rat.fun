@@ -8,8 +8,9 @@ import type {
   TripEvent
 } from "$lib/components/Admin/types"
 import { TRIP_EVENT_TYPE } from "$lib/components/Admin/enums"
-
-import { blockNumberToTimestamp } from "$lib/modules/utils"
+import { get } from "svelte/store"
+import { blockNumber } from "$lib/modules/network"
+import { blockNumberToTimestamp } from "@ratfun/shared-utils"
 
 export function calculateProfitLossForTrip(
   trip: Trip,
@@ -97,7 +98,10 @@ export function calculateProfitLossForTrip(
    * ADD LIQUIDATION EVENT
    **************************/
   if (trip.liquidationBlock && trip.liquidationValue !== undefined) {
-    const liquidationTime = blockNumberToTimestamp(Number(trip.liquidationBlock))
+    const liquidationTime = blockNumberToTimestamp(
+      Number(trip.liquidationBlock),
+      Number(get(blockNumber) ?? 0)
+    )
     const liquidationValueChange = Number(trip.tripCreationCost) - Number(trip.liquidationValue)
 
     // Liquidation: you get back the trip value (before tax) and close the position

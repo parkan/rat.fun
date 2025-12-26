@@ -9,7 +9,7 @@
   import { playSound } from "$lib/modules/sound"
   import { publicNetwork, environment as envStore } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
-  import { addressToId } from "$lib/modules/utils"
+  import { addressToId } from "@ratfun/shared-utils"
   import { entities } from "$lib/modules/state/stores"
 
   import { gsap } from "gsap"

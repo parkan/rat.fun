@@ -5,7 +5,7 @@
     exchangeRatBalance
   } from "$lib/modules/erc20Listener/stores"
   import { getDrawbridge, userAddress } from "$lib/modules/drawbridge"
-  import { shortenAddress } from "$lib/modules/utils"
+  import { shortenAddress } from "@ratfun/shared-utils"
   import { addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
   import { SmallButton } from "$lib/components/Shared"
 

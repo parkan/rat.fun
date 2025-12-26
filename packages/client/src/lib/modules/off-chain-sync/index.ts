@@ -9,7 +9,7 @@ import {
 } from "$env/static/public"
 import { errorHandler, WebSocketError } from "$lib/modules/error-handling"
 import { players } from "$lib/modules/state/stores"
-import { shortenAddress } from "$lib/modules/utils"
+import { shortenAddress } from "@ratfun/shared-utils"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
 import {
   playerNotificationsEnabled,

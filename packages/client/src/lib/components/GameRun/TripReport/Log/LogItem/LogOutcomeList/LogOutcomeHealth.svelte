@@ -5,7 +5,7 @@
   import { processingRat } from "$lib/components/GameRun/state.svelte"
   import { HEALTH_SYMBOL } from "$lib/modules/ui/constants"
   import { backgroundMusic } from "$lib/modules/sound/stores"
-  import { addEasedCountAnimation } from "$lib/modules/utils/animations"
+  import { addEasedCountAnimation } from "$lib/modules/animations"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
   let {

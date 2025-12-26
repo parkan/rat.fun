@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation"
   import type { TripFolder } from "@sanity-types"
   import { playSound } from "$lib/modules/sound"
-  import { getTodayCETTime, getNextCETTime, formatCountdown } from "$lib/modules/utils"
+  import { getTodayCETTime, getNextCETTime, formatCountdown } from "@ratfun/shared-utils"
 
   const GRACE_PERIOD_MS = 30 * 60 * 1000 // 30 minutes
   const WINNER_DISPLAY_DURATION_MS = 10 * 60 * 1000 // 10 minutes

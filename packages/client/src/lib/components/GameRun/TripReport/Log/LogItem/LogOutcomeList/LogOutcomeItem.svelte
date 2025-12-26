@@ -3,7 +3,7 @@
   import { updateProcessingState } from "$lib/components/GameRun/state.svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { playSound } from "$lib/modules/sound"
-  import { addEasedCountAnimation } from "$lib/modules/utils/animations"
+  import { addEasedCountAnimation } from "$lib/modules/animations"
 
   let {
     id,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getDrawbridge, userAddress } from "$lib/modules/drawbridge"
   import { addRatTokenToWallet } from "$lib/modules/drawbridge/connector"
-  import { shortenAddress } from "$lib/modules/utils"
+  import { shortenAddress } from "@ratfun/shared-utils"
   import { SmallButton } from "$lib/components/Shared"
   import { tokenBalances, balanceListeners } from "$lib/modules/balances"
   import { swapState } from "$lib/components/Auction/Swap/state.svelte"

@@ -10,7 +10,7 @@
 
 import { get } from "svelte/store"
 import { publicNetwork } from "$lib/modules/network"
-import { filterObjectByKey, toCamelCase, removePrivateKeys } from "$lib/modules/utils"
+import { filterObjectByKey, toCamelCase, removePrivateKeys } from "@ratfun/shared-utils"
 import { entities } from "$lib/modules/state/stores"
 import { createComponentSystem } from "$lib/modules/chain-sync"
 

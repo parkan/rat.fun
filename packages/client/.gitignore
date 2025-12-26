@@ -26,3 +26,6 @@ vite.config.ts.timestamp-*
 
 # Sentry
 .env.sentry-build-plugin
+
+# Bundle analyzer
+bundle-stats.html

@@ -11,7 +11,7 @@
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { urlFor } from "$lib/modules/content/sanity"
-  import { renderSafeString } from "$lib/modules/utils"
+  import { renderSafeString } from "@ratfun/shared-utils"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { playSound } from "$lib/modules/sound"

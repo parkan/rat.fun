@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Outcome } from "@sanity-types"
-  import { timeSince } from "$lib/modules/utils"
+  import { timeSince } from "@ratfun/shared-utils"
 
   let { trip }: { trip: Outcome } = $props()
 </script>

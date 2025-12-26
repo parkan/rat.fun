@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ResizableText } from "$lib/components/Shared"
-  import { renderSafeString } from "$lib/modules/utils"
+  import { renderSafeString } from "@ratfun/shared-utils"
   const { trip }: { trip: Trip } = $props()
 </script>
 

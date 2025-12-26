@@ -19,7 +19,7 @@
     shouldHydrateFromServer
   } from "$lib/modules/chain-sync"
   import { entities } from "$lib/modules/state/stores"
-  import { addressToId } from "$lib/modules/utils"
+  import { addressToId } from "@ratfun/shared-utils"
   import { connectWalletFormMascotText } from "./connectWalletFormMascotText"
   import {
     NoWalletsModal,
@@ -79,15 +79,19 @@
             }))
             console.log("[ConnectWalletForm] Player hydration from server succeeded")
 
-            // Fetch trips in background (non-blocking)
-            fetchTrips(playerId, $environment).then(tripsResult => {
-              if (tripsResult) {
-                entities.update(current => ({
-                  ...current,
-                  ...tripsResult.entities
-                }))
-              }
-            })
+            // CRITICAL: Must await fetchTrips before proceeding to spawned()
+            // Otherwise trip stores will be empty when spawned() reads them
+            const tripsResult = await fetchTrips(playerId, $environment)
+            if (tripsResult) {
+              entities.update(current => ({
+                ...current,
+                ...tripsResult.entities
+              }))
+              console.log(
+                "[ConnectWalletForm] Trips loaded:",
+                Object.keys(tripsResult.entities).length
+              )
+            }
           }
         }
 

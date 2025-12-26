@@ -8,7 +8,7 @@
   import { initSound, cleanupSound } from "$lib/modules/sound"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
-  import { onMount, onDestroy } from "svelte"
+  import { onMount, onDestroy, tick } from "svelte"
   import {
     initStaticContent,
     initTrips,
@@ -69,10 +69,16 @@
     UIState.set(UI.TOURIST)
   }
 
-  const spawned = () => {
+  const spawned = async () => {
     console.log("[+layout] spawned() called")
     // Initialize ERC20 listener (centralized here for all scenarios)
     initErc20Listener()
+
+    // CRITICAL: Wait for Svelte reactivity to propagate before reading derived stores.
+    // The entities store may have been updated, but derived stores (trips, playerTrips,
+    // nonDepletedTrips) need a tick to recompute. Without this, we may read stale/empty
+    // values and make CMS queries with no trip IDs.
+    await tick()
 
     // Get trip IDs from on-chain state
     const playerTripIds = Object.keys(get(playerTrips)) // Player's own trips
@@ -81,12 +87,38 @@
     // Combine and deduplicate: active trips + player's trips
     const relevantTripIds = [...new Set([...activeTripIds, ...playerTripIds])]
 
+    // Validation: Check for potential race condition
+    const tripsInStore = Object.keys(get(trips)).length
+    if (tripsInStore > 0 && relevantTripIds.length === 0) {
+      console.warn(
+        "[+layout] RACE CONDITION DETECTED: trips store has data but derived stores are empty"
+      )
+      // Wait another tick and retry
+      await tick()
+      const retryPlayerTripIds = Object.keys(get(playerTrips))
+      const retryActiveTripIds = Object.keys(get(nonDepletedTrips))
+      const retryRelevantTripIds = [...new Set([...retryActiveTripIds, ...retryPlayerTripIds])]
+      console.log("[+layout] After retry:", {
+        playerTripIds: retryPlayerTripIds.length,
+        activeTripIds: retryActiveTripIds.length,
+        relevantTripIds: retryRelevantTripIds.length
+      })
+      // Use retried values if they're better
+      if (retryRelevantTripIds.length > 0) {
+        initTrips($publicNetwork.worldAddress, retryRelevantTripIds)
+        initPlayerOutcomes($publicNetwork.worldAddress, retryPlayerTripIds)
+        loadFeedHistory($publicNetwork.worldAddress)
+        UIState.set(UI.READY)
+        return
+      }
+    }
+
     // DEBUG: Log trip counts to diagnose race condition
     console.log("[+layout] Trip IDs for CMS query:", {
       playerTripIds: playerTripIds.length,
       activeTripIds: activeTripIds.length,
       relevantTripIds: relevantTripIds.length,
-      tripsInStore: Object.keys(get(trips)).length
+      tripsInStore
     })
 
     // Load trips and outcomes from CMS

@@ -3,7 +3,7 @@
   import type { Trip as SanityTrip } from "@sanity-types"
   import { getTripOwnerName } from "$lib/modules/state/utils"
   import { urlFor } from "$lib/modules/content/sanity"
-  import { renderSafeString } from "$lib/modules/utils"
+  import { renderSafeString } from "@ratfun/shared-utils"
   import { staticContent } from "$lib/modules/content"
   import { playSound } from "$lib/modules/sound"
   import { NoImage, ResizableText } from "$lib/components/Shared"

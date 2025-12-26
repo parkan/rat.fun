@@ -6,7 +6,7 @@
  */
 
 import { writable, derived } from "svelte/store"
-import { addressToId } from "$lib/modules/utils"
+import { addressToId, addressToNumber } from "@ratfun/shared-utils"
 import { staticContent } from "$lib/modules/content"
 import { ENTITY_TYPE } from "contracts/enums"
 import {
@@ -19,7 +19,6 @@ import {
   convertBigIntsToNumbers,
   getRatTotalValue
 } from "./utils"
-import { addressToNumber } from "$lib/modules/utils"
 import { urlFor } from "$lib/modules/content/sanity"
 import { playerERC20Balance, playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
 import { WORLD_OBJECT_ID } from "./constants"

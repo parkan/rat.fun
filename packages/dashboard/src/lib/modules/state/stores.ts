@@ -12,7 +12,7 @@ import { filterByEntitytype, filterDepleted, filterNonDepleted } from "./utils"
 import { staticContent } from "$lib/modules/content"
 import { WORLD_OBJECT_ID } from "./constants"
 import { readMultipleERC20Balances } from "$lib/modules/erc20"
-import { idToAddress } from "$lib/modules/utils"
+import { idToAddress } from "@ratfun/shared-utils"
 import { Hex } from "viem"
 
 // * * * * * * * * * * * * * * * * *

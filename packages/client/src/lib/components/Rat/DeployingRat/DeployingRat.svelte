@@ -8,7 +8,7 @@
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
   import { PropertyChangeTimeoutError, RatError } from "@ratfun/common/error-handling"
   import { errorHandler } from "$lib/modules/error-handling"
-  import { getRandomNumber, getRandomElement } from "$lib/modules/utils"
+  import { getRandomNumber, getRandomElement } from "@ratfun/shared-utils"
   import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
   import { refetchBalance } from "$lib/modules/erc20Listener"
   import { playSound } from "$lib/modules/sound"

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "NODE_OPTIONS=--max-old-space-size=4096 pnpm recursive run build",
-    "build:libs": "pnpm --filter 'doppler' --filter '@ratfun/webgl' --filter 'drawbridge' --filter 'common' run build",
+    "build:libs": "pnpm --filter 'doppler' --filter '@ratfun/webgl' --filter '@ratfun/shared-utils' --filter 'drawbridge' --filter 'common' run build",
     "build:client": "NODE_OPTIONS=--max-old-space-size=4096 pnpm --filter 'client' run build",
     "check": "pnpm --filter '@ratfun/shared-ui' --filter 'client' --filter 'claim-frontend' --filter 'exchange-frontend' --filter 'auction-frontend' --filter 'server' --filter 'websocket-server' --filter 'query-server' run check",
     "lint": "pnpm --filter 'client' --filter 'claim-frontend' --filter 'exchange-frontend' --filter 'auction-frontend' --filter 'server' --filter 'websocket-server' --filter 'query-server' run lint",

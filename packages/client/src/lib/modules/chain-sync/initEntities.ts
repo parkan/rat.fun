@@ -9,8 +9,9 @@
  */
 
 import { get } from "svelte/store"
+import { tick } from "svelte"
 import { publicNetwork } from "$lib/modules/network"
-import { filterObjectByKey, toCamelCase, removePrivateKeys } from "$lib/modules/utils"
+import { filterObjectByKey, toCamelCase, removePrivateKeys } from "@ratfun/shared-utils"
 import { entities } from "$lib/modules/state/stores"
 import { createComponentSystem } from "$lib/modules/chain-sync"
 import { logHydrationStats, trackComponentHydration } from "./tempDebugLogger"
@@ -340,6 +341,11 @@ export async function initEntities(options: InitEntitiesOptions = {}) {
 
   // Single write to store
   entities.set(finalEntities)
+
+  // Flush Svelte reactivity so derived stores (trips, playerTrips, etc.) update
+  // before this function returns. This prevents race conditions where callers
+  // read from derived stores before they've recomputed.
+  await tick()
 
   // Create systems to listen to changes to game specific tables
   for (const componentKey of get(publicNetwork).tableKeys) {

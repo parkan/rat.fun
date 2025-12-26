@@ -9,7 +9,7 @@
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { getNextCETTime, formatCountdown } from "$lib/modules/utils"
+  import { getNextCETTime, formatCountdown } from "@ratfun/shared-utils"
 
   let { trip, tripId }: { trip: Trip; tripId?: Hex } = $props()
 

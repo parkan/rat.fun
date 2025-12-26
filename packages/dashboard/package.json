@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@ratfun/common": "workspace:*",
+    "@ratfun/shared-utils": "workspace:*",
     "@latticexyz/recs": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/store-sync": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@sanity/client": "^7.12.0",
