@@ -104,6 +104,80 @@ export class LLMSchemaError extends LLMError {
   }
 }
 
+export class LLMRefusalError extends LLMError {
+  constructor(
+    message: string,
+    public model: string,
+    public contentBlockTypes: string[]
+  ) {
+    super("LLM_REFUSAL_ERROR", "LLM refused to respond", message)
+  }
+}
+
+export class LLMToolUseError extends LLMError {
+  constructor(
+    message: string,
+    public model: string,
+    public toolNames: string[]
+  ) {
+    super("LLM_TOOL_USE_ERROR", "LLM attempted tool use", message)
+  }
+}
+
+export class LLMPausedError extends LLMError {
+  constructor(
+    message: string,
+    public model: string
+  ) {
+    super("LLM_PAUSED_ERROR", "LLM response paused", message)
+  }
+}
+
+export class LLMRateLimitError extends LLMError {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
+    super("LLM_RATE_LIMIT_ERROR", "LLM rate limit exceeded", message)
+  }
+}
+
+export class LLMAuthenticationError extends LLMError {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
+    super("LLM_AUTHENTICATION_ERROR", "LLM authentication failed", message)
+  }
+}
+
+export class LLMPermissionError extends LLMError {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
+    super("LLM_PERMISSION_ERROR", "LLM permission denied", message)
+  }
+}
+
+export class LLMRequestTooLargeError extends LLMError {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
+    super("LLM_REQUEST_TOO_LARGE_ERROR", "LLM request too large", message)
+  }
+}
+
+export class LLMInvalidRequestError extends LLMError {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
+    super("LLM_INVALID_REQUEST_ERROR", "LLM invalid request", message)
+  }
+}
+
 // ============================================================================
 // Onchain Data Errors
 // ============================================================================
