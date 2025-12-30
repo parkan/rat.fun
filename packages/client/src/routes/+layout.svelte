@@ -26,13 +26,7 @@
     getDrawbridge,
     isDrawbridgeInitialized
   } from "$lib/modules/drawbridge"
-  import {
-    playerId,
-    playerTrips,
-    nonDepletedTrips,
-    externalAddressesConfig,
-    trips
-  } from "$lib/modules/state/stores"
+  import { playerId, playerTrips, nonDepletedTrips, trips } from "$lib/modules/state/stores"
   import { get } from "svelte/store"
   import { initOffChainSync, disconnectOffChainSync } from "$lib/modules/off-chain-sync"
   import { resetEntitiesInitialization } from "$lib/modules/chain-sync"

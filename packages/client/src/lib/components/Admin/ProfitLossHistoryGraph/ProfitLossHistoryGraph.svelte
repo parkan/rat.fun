@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { TripEvent } from "$lib/components/Admin/types"
   import { focusEvent, selectedEvent, focusTrip } from "$lib/modules/ui/state.svelte"
-  import { goto } from "$app/navigation"
   import { scaleTime, scaleLinear } from "d3-scale"
-  import { page } from "$app/state"
   import { max, min } from "d3-array"
   import { line } from "d3-shape"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"

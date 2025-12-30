@@ -1,6 +1,5 @@
 <script lang="ts">
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
-  import { SignedNumber } from "$lib/components/Shared"
   import type {
     TripEventCreation,
     TripEventLiquidation,
@@ -8,7 +7,6 @@
     TripEventVisit,
     PendingTrip
   } from "$lib/components/Admin/types"
-  import { profitLoss } from "$lib/modules/state/stores"
   import { focusEvent, focusTrip } from "$lib/modules/ui/state.svelte"
 
   import AdminActiveTripTableItem from "./AdminActiveTripTableItem.svelte"

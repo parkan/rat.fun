@@ -1,8 +1,6 @@
 <script lang="ts">
   import * as sortFunctions from "$lib/components/Trip/TripListing/sortFunctions"
-  import { realisedProfitLoss } from "$lib/modules/state/stores"
   import { focusTrip, focusEvent } from "$lib/modules/ui/state.svelte"
-  import { SignedNumber } from "$lib/components/Shared"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
   import AdminPastTripTableItem from "../AdminPastTripTable/AdminPastTripTableItem.svelte"

@@ -9,12 +9,11 @@
   import { staticContent } from "$lib/modules/content"
   import { page } from "$app/state"
   import { goto } from "$app/navigation"
-  import { selectedEvent, focusEvent, focusTrip, isPhone } from "$lib/modules/ui/state.svelte"
+  import { selectedEvent, focusEvent, isPhone } from "$lib/modules/ui/state.svelte"
   import { playerTrips } from "$lib/modules/state/stores"
   import { mapLocalIndexToGlobal } from "$lib/components/Admin/helpers"
 
   import AdminTripPreviewHeader from "$lib/components/Admin/AdminTripPreview/AdminTripPreviewHeader.svelte"
-  import AdminTripEventIntrospection from "$lib/components/Admin/AdminTripEventIntrospection/AdminTripEventIntrospection.svelte"
   import TripProfitLossGraph from "$lib/components/Admin/AdminTripPreview/TripProfitLossGraph/TripProfitLossGraph.svelte"
   import TripConfirmLiquidation from "$lib/components/Admin/AdminTripPreview/TripConfirmLiquidation/TripConfirmLiquidation.svelte"
   import LiquidateTrip from "$lib/components/Admin/AdminTripPreview/LiquidateTrip.svelte"

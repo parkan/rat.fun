@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { slide } from "svelte/transition"
-  import { goto } from "$app/navigation"
   import { operatorFeedPreviewOutcome } from "$lib/modules/ui/state.svelte"
   import type { NewOutcomeMessage, FeedItem } from "./types"
   import { HEALTH_SYMBOL } from "$lib/modules/ui/constants"
