@@ -185,19 +185,19 @@
 
             if (blocksBehind > 60n) {
               // Data is too stale - fallback to normal indexer sync
-              console.warn(
+              logger.warn(
                 `Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock}) - falling back to indexer sync`
               )
               useServerHydration = false
             } else if (blocksBehind > 10n) {
-              console.warn(
+              logger.warn(
                 `Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock})`
               )
             } else {
               logger.log(`Hydration data is fresh (${blocksBehind} blocks behind)`)
             }
           } catch (error) {
-            console.warn("Could not check hydration staleness:", error)
+            logger.warn("Could not check hydration staleness:", error)
           }
 
           if (useServerHydration) {
