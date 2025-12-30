@@ -11,6 +11,7 @@
 
   let { tripId, trip, disabled }: { tripId: Hex; trip: Trip; disabled: boolean } = $props()
 
+  // svelte-ignore state_referenced_locally
   let minRatValueToEnter = getTripMinRatValueToEnter(
     trip.tripCreationCost,
     trip.challengeTrip,

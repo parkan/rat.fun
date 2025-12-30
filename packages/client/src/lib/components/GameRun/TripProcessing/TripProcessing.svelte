@@ -23,6 +23,7 @@
   const MINIMUM_DURATION = 8000
 
   $inspect("isChallengeTrip", isChallengeTrip)
+  // svelte-ignore state_referenced_locally
   const musicId = isChallengeTrip ? "triportrapProcessing" : "tripProcessing"
 
   // Timer state

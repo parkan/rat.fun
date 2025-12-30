@@ -32,6 +32,7 @@
   let result = $state<EnterTripReturnValue | null>(null)
 
   // Calculate trip hash and seeds for visual consistency
+  // svelte-ignore state_referenced_locally
   const tripHash = sha256(tripId)
   const seed1Hex = tripHash.slice(2, 10) // Skip '0x' and take 8 chars
   const seed2Hex = tripHash.slice(10, 18) // Take next 8 chars

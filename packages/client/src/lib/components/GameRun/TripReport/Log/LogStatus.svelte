@@ -19,6 +19,7 @@
   // Elements
   let element = $state<HTMLDivElement | null>(null)
   // Timeline
+  // svelte-ignore state_referenced_locally
   const timeline = gsap.timeline({ delay })
 
   const statusText = $derived(

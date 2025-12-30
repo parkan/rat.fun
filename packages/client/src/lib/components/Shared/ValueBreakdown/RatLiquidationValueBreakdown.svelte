@@ -12,7 +12,9 @@
   } = $props()
 
   // Calculate tax and payout amounts for rat liquidation
+  // svelte-ignore state_referenced_locally
   const taxAmount = Math.floor((originalValue * $gamePercentagesConfig.taxationLiquidateRat) / 100)
+  // svelte-ignore state_referenced_locally
   const payoutAmount = Math.floor(
     (originalValue * (100 - $gamePercentagesConfig.taxationLiquidateRat)) / 100
   )

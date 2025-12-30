@@ -21,6 +21,7 @@
   let valueElement = $state<HTMLSpanElement | null>(null)
   let heartElement = $state<HTMLSpanElement | null>(null)
 
+  // svelte-ignore state_referenced_locally
   let negative = $state(value < 0)
 
   // Timeline

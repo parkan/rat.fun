@@ -40,7 +40,9 @@
     }
   }
 
+  // svelte-ignore state_referenced_locally
   const newBalance = calculateNewBalance(initialBalance, result)
+  // svelte-ignore state_referenced_locally
   const healthChange = newBalance - initialBalance
   const displayHealthChange = getDisplayHealthChange(healthChange)
 
@@ -52,6 +54,7 @@
   }
 
   // No animation if the balance is the same
+  // svelte-ignore state_referenced_locally
   const duration = newBalance === initialBalance ? 0 : 2
 
   const main = () => {

@@ -9,7 +9,9 @@
     class?: string
   } = $props()
 
+  // svelte-ignore state_referenced_locally
   const negative = value < 0
+  // svelte-ignore state_referenced_locally
   const displayValue = value > 0 ? `+${value}` : `${value}`
 </script>
 

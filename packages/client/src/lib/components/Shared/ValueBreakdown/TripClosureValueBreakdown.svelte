@@ -14,7 +14,9 @@
   } = $props()
 
   // Calculate tax and payout amounts for trip closure
+  // svelte-ignore state_referenced_locally
   const taxAmount = Math.floor((originalValue * $gamePercentagesConfig.taxationCloseTrip) / 100)
+  // svelte-ignore state_referenced_locally
   const payoutAmount = Math.floor(
     (originalValue * (100 - $gamePercentagesConfig.taxationCloseTrip)) / 100
   )

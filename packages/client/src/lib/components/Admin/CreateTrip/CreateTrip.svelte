@@ -29,9 +29,12 @@
     savedFolderId?: string
   } = $props()
 
+  // svelte-ignore state_referenced_locally
   let tripDescription: string = $state(savedTripDescription ?? "")
   let textareaElement: HTMLTextAreaElement | null = $state(null)
+  // svelte-ignore state_referenced_locally
   let selectedFolderId: string = $state(savedFolderId ?? "")
+  // svelte-ignore state_referenced_locally
   let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
   let tripCreationCost = $state(DEFAULT_SUGGESTED_TRIP_CREATION_COST)
 

@@ -5,6 +5,7 @@
 
   let { trip }: { trip: Trip } = $props()
 
+  // svelte-ignore state_referenced_locally
   const maxValuePerWin = getTripMaxValuePerWin(
     trip.tripCreationCost,
     trip.balance,

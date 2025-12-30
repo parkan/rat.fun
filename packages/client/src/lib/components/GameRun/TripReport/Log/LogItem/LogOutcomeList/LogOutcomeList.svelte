@@ -19,6 +19,7 @@
   let outcomeTimelines: ReturnType<typeof gsap.timeline>[] = []
 
   // Calculate expected number of outcomes
+  // svelte-ignore state_referenced_locally
   const expectedOutcomes = (logEntry.balanceTransfer ? 1 : 0) + (logEntry?.itemChanges?.length || 0)
   let receivedOutcomes = 0
 
@@ -47,6 +48,7 @@
   }
 
   // Handle case where there are no outcomes
+  // svelte-ignore state_referenced_locally
   if (expectedOutcomes === 0) {
     // No outcomes expected, immediately pass empty timeline
     if (onTimeline) {

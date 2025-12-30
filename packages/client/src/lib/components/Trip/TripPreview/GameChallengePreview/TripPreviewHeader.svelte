@@ -13,12 +13,14 @@
 
   let { trip, tripId }: { trip: Trip; tripId?: Hex } = $props()
 
+  // svelte-ignore state_referenced_locally
   const maxValuePerWin = getTripMaxValuePerWin(
     trip.tripCreationCost,
     trip.balance,
     trip.challengeTrip,
     trip.overrideMaxValuePerWinPercentage
   )
+  // svelte-ignore state_referenced_locally
   const minRatValueToEnter = getTripMinRatValueToEnter(
     trip.tripCreationCost,
     trip.challengeTrip,

@@ -25,6 +25,7 @@
 
   let disabled = $derived(disabledProp || (showCounts && count === 0))
 
+  // svelte-ignore state_referenced_locally
   let title = folder?.title ?? ""
   let tooltip = $derived(folder?.title?.includes("EGO"))
 

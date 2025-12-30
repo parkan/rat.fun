@@ -41,7 +41,9 @@
     return initialTotalValue + itemChangesValue + balanceTransfersValue
   }
 
+  // svelte-ignore state_referenced_locally
   const newTotalValue = ratDead ? 0 : calculateTotalRatValue(initialTotalValue, result)
+  // svelte-ignore state_referenced_locally
   const valueChange = ratDead ? -initialTotalValue : newTotalValue - initialTotalValue
 </script>
 

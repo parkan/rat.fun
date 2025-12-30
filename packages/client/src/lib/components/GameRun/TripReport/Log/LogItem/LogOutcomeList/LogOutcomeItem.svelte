@@ -27,9 +27,11 @@
   // Timeline
   const timeline = gsap.timeline()
 
+  // svelte-ignore state_referenced_locally
   let negative = action === "remove"
 
   // Calculate final text for width measurement
+  // svelte-ignore state_referenced_locally
   const finalText = `${name} (${negative ? "-" : ""}${value} ${CURRENCY_SYMBOL})`
 
   // Stage 1: Prepare the animation

@@ -13,7 +13,9 @@
     class?: string
   } = $props()
 
+  // svelte-ignore state_referenced_locally
   const negative = action === "remove"
+  // svelte-ignore state_referenced_locally
   const displayValue = `${name} (${negative ? "-" : ""}${value} ${CURRENCY_SYMBOL})`
 </script>
 

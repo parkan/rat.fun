@@ -30,6 +30,7 @@
   let fillElement = $state<HTMLDivElement | null>(null)
   let initialized = $state(false)
 
+  // svelte-ignore state_referenced_locally
   const hasChanges = oldHealth !== newHealth
 
   $effect(() => {

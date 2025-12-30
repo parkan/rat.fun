@@ -15,6 +15,7 @@
   } = $props()
 
   // Timeline
+  // svelte-ignore state_referenced_locally
   const timeline = gsap.timeline({ delay })
 
   // Element refs

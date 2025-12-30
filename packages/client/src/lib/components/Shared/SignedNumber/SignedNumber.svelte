@@ -19,6 +19,7 @@
 
   let sign = $derived(value == 0 ? "" : value > 0 ? "+" : "-")
   let colorClass = $derived(value == 0 ? "neutral" : value > 0 ? "up" : "down")
+  // svelte-ignore state_referenced_locally
   let tweenedValue = new Tween(value, { duration: withTween ? 1000 : 0 })
 
   $effect(() => {
