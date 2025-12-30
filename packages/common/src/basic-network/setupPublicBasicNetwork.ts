@@ -17,6 +17,13 @@ const HTTP_RETRY_CONFIG = {
   retryDelay: 1000 // Base delay in ms, viem uses exponential backoff
 } as const
 
+// WebSocket retry configuration (more conservative to prevent loops)
+const WEBSOCKET_CONFIG = {
+  retryCount: 3,    // Fewer retries than HTTP to fail fast
+  retryDelay: 2000, // Longer delay between retries (2s vs 1s)
+  timeout: 10_000   // 10 second connection timeout
+} as const
+
 export type SetupPublicBasicNetworkResult = {
   config: BasicNetworkConfig
   transport: Transport
@@ -56,14 +63,15 @@ function chainTransport(rpcUrls: ChainRpcUrls, devMode: boolean): Transport {
 
   console.log("  WebSocket RPC:", webSocketUrl || "not configured")
   console.log("  HTTP retry config:", HTTP_RETRY_CONFIG)
+  console.log("  WebSocket retry config:", WEBSOCKET_CONFIG)
 
   // Add WebSocket transport if WebSocket URL is available
   if (webSocketUrl) {
     if (devMode) {
       console.log("  WebSocket disabled in development mode")
     } else {
-      transports.push(webSocket(webSocketUrl))
-      console.log("  WebSocket transport added (primary)")
+      transports.push(webSocket(webSocketUrl, WEBSOCKET_CONFIG))
+      console.log("  WebSocket transport added (primary) with retry limits")
     }
   } else {
     console.log("  No WebSocket URL configured, using HTTP only")
@@ -80,5 +88,11 @@ function chainTransport(rpcUrls: ChainRpcUrls, devMode: boolean): Transport {
     `  📡 Final transport stack: ${transports.length > httpUrls.length ? "WebSocket → HTTP fallback" : "HTTP only"}`
   )
 
-  return fallback(transports)
+  // Configure fallback with rank:false to prevent rapid switching between transports
+  // Once it falls back to HTTP, it stays there (prevents WebSocket reconnection loops)
+  return fallback(transports, {
+    rank: false,     // Disable automatic ranking/failback to prevent loops
+    retryCount: 0,   // Don't retry at fallback level (transports handle their own retries)
+    retryDelay: 150  // Default viem delay
+  })
 }
