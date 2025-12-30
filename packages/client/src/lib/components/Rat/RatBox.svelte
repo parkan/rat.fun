@@ -96,10 +96,6 @@
       ratState.state.transitionTo(RAT_BOX_STATE.NO_RAT)
     }
   })
-
-  onDestroy(() => {
-    console.log("[RatBox] onDestroy called")
-  })
 </script>
 
 <div class="rat-box">

@@ -16,6 +16,9 @@ import { entities } from "$lib/modules/state/stores"
 import { createComponentSystem } from "$lib/modules/chain-sync"
 import { logHydrationStats, trackComponentHydration } from "./tempDebugLogger"
 import { ENTITY_TYPE } from "contracts/enums"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[InitEntities]")
 
 // ============================================================================
 // UI YIELD UTILITIES
@@ -232,13 +235,13 @@ export async function initEntities(options: InitEntitiesOptions = {}) {
 
     // Mark as initialized for this player
     initializedForPlayer = activePlayerId
-    console.log("[initEntities] Live systems ready for player:", activePlayerId)
+    logger.log("Live systems ready for player:", activePlayerId)
 
     // CRITICAL: Flush reactivity so derived stores (trips, playerTrips, nonDepletedTrips)
     // update before spawned() reads from them
-    console.log("[initEntities] Calling tick() to flush derived stores (server hydration path)")
+    logger.log("Calling tick() to flush derived stores (server hydration path)")
     await tick()
-    console.log("[initEntities] tick() completed (server hydration path)")
+    logger.log("tick() completed (server hydration path)")
     return
   }
 
@@ -361,5 +364,5 @@ export async function initEntities(options: InitEntitiesOptions = {}) {
 
   // Mark as initialized for this player
   initializedForPlayer = activePlayerId
-  console.log("[initEntities] Initialization complete for player:", activePlayerId)
+  logger.log("Initialization complete for player:", activePlayerId)
 }

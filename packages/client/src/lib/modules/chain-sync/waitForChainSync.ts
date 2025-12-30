@@ -1,6 +1,9 @@
 import { get } from "svelte/store"
 import { publicNetwork, loadingMessage, loadingPercentage } from "$lib/modules/network"
 import { SyncStep } from "@latticexyz/store-sync"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("waitForChainSync")
 
 /**
  * Waits for MUD chain sync to complete.
@@ -13,7 +16,7 @@ export function waitForChainSync(): Promise<void> {
       const currentValue = update.value[0]
 
       if (!currentValue) {
-        console.error("[Chain Sync] Sync error - no value")
+        logger.error("Sync error - no value")
         reject(new Error("Sync error"))
         subscription.unsubscribe()
         return
@@ -24,7 +27,7 @@ export function waitForChainSync(): Promise<void> {
 
       // Sync complete - resolve and clean up
       if (currentValue.step === SyncStep.LIVE) {
-        console.log("[Chain Sync] Sync complete")
+        logger.log("Sync complete")
         subscription.unsubscribe()
         resolve()
       }

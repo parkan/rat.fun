@@ -14,6 +14,9 @@ import { getDrawbridge, isDrawbridgeInitialized } from "$lib/modules/drawbridge"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
 import { readPlayerERC20Allowance } from "$lib/modules/erc20Listener"
 import { checkIsSpawned } from "$lib/initWalletNetwork"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[FlowContext]")
 
 const ALLOWANCE_THRESHOLD = 100
 
@@ -24,7 +27,7 @@ const ALLOWANCE_THRESHOLD = 100
 export async function checkHasAllowance(walletAddress: string): Promise<boolean> {
   const addresses = get(externalAddressesConfig)
   if (!addresses?.erc20Address || !addresses?.gamePoolAddress) {
-    console.log("[FlowContext] Cannot check allowance: external addresses not configured")
+    logger.log("Cannot check allowance: external addresses not configured")
     return false
   }
 
@@ -35,10 +38,10 @@ export async function checkHasAllowance(walletAddress: string): Promise<boolean>
       addresses.gamePoolAddress,
       addresses.erc20Address
     )
-    console.log("[FlowContext] Current allowance:", allowance)
+    logger.log("Current allowance:", allowance)
     return allowance > ALLOWANCE_THRESHOLD
   } catch (err) {
-    console.error("[FlowContext] Failed to check allowance:", err)
+    logger.error("Failed to check allowance:", err)
     return false
   }
 }
@@ -54,7 +57,7 @@ export async function checkHasAllowance(walletAddress: string): Promise<boolean>
  */
 export async function buildFlowContext(): Promise<FlowContext> {
   if (!isDrawbridgeInitialized()) {
-    console.log("[FlowContext] Drawbridge not initialized")
+    logger.log("Drawbridge not initialized")
     return {
       walletConnected: false,
       sessionReady: false,
@@ -68,14 +71,14 @@ export async function buildFlowContext(): Promise<FlowContext> {
   const sessionReady = state.isReady
   const walletAddress = state.userAddress
 
-  console.log("[FlowContext] Drawbridge raw values:", {
+  logger.log("Drawbridge raw values:", {
     walletConnected,
     sessionReady,
     walletAddress
   })
 
   if (!walletConnected || !walletAddress) {
-    console.log("[FlowContext] Drawbridge: No wallet connected")
+    logger.log("Drawbridge: No wallet connected")
     return {
       walletConnected: false,
       sessionReady: false,
@@ -87,11 +90,11 @@ export async function buildFlowContext(): Promise<FlowContext> {
   const hasAllowance = await checkHasAllowance(walletAddress)
 
   // Debug: check isSpawned with detailed logging
-  console.log("[FlowContext] Checking isSpawned for:", walletAddress)
+  logger.log("Checking isSpawned for:", walletAddress)
   const isSpawned = checkIsSpawned(walletAddress as `0x${string}`)
-  console.log("[FlowContext] isSpawned result:", isSpawned)
+  logger.log("isSpawned result:", isSpawned)
 
-  console.log("[FlowContext] Drawbridge context:", {
+  logger.log("Drawbridge context:", {
     walletConnected: true,
     sessionReady,
     hasAllowance,

@@ -6,6 +6,7 @@
 
 import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import { getQueryServerUrl } from "$lib/modules/chain-sync/hydrateFromServer"
+import { createLogger } from "$lib/modules/logger"
 import type {
   RatLeaderboardEntry,
   TripLeaderboardEntry,
@@ -13,6 +14,8 @@ import type {
   ChallengeWinnerEntry,
   ChallengeResponse
 } from "query-server/types"
+
+const logger = createLogger("queryServer")
 
 // Re-export types for convenience
 export type {
@@ -52,7 +55,7 @@ export async function fetchActiveRatsLeaderboard(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchActiveRatsLeaderboard] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -79,7 +82,7 @@ export async function fetchCashedOutRatsLeaderboard(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchCashedOutRatsLeaderboard] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -106,7 +109,7 @@ export async function fetchActiveTripsLeaderboard(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchActiveTripsLeaderboard] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -133,7 +136,7 @@ export async function fetchCashedOutTripsLeaderboard(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchCashedOutTripsLeaderboard] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -160,7 +163,7 @@ export async function fetchChallengeWinners(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchChallengeWinners] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -193,7 +196,7 @@ export async function fetchActiveChallenge(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchActiveChallenge] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -226,7 +229,7 @@ export async function fetchLastCompletedChallenge(
 
     return await response.json()
   } catch (error) {
-    console.warn("[fetchLastCompletedChallenge] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }

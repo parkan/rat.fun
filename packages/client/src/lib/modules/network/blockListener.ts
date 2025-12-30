@@ -1,6 +1,9 @@
 import { get } from "svelte/store"
 import { publicNetwork, blockNumber } from "./index"
 import { errorHandler, BlockTimeoutError } from "$lib/modules/error-handling"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("blockListener")
 
 let blockTimeout: number
 let blockSubscription: { unsubscribe: () => void } | null = null
@@ -27,7 +30,7 @@ export function initBlockListener() {
     error: err => {
       // Log and recover from errors in the MUD observable pipeline
       // This can happen when RPC returns undefined blocks during rate limiting
-      console.warn("[BlockListener] Error in block observable:", err)
+      logger.warn("Error in block observable:", err)
     }
   })
 }

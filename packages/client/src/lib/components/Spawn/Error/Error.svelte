@@ -4,6 +4,9 @@
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Error]")
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let messageElement = $state<HTMLDivElement | null>(null)
@@ -12,13 +15,13 @@
   const timeline = gsap.timeline()
 
   function handleRetry() {
-    console.log("[Error] Retry button clicked")
+    logger.log("Retry button clicked")
     // Reset and start over
     spawnState.state.transitionTo(SPAWN_STATE.CONNECT_WALLET)
   }
 
   onMount(() => {
-    console.log("[Error] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !messageElement || !buttonElement) {
       return

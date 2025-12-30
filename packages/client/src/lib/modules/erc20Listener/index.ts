@@ -5,6 +5,9 @@ import { publicNetwork } from "$lib/modules/network"
 import { externalAddressesConfig, playerAddress } from "$lib/modules/state/stores"
 import { playerERC20Allowance, playerERC20Balance } from "$lib/modules/erc20Listener/stores"
 import { erc20BalanceListenerActive } from "$lib/modules/erc20Listener/stores"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[@client/erc20Listener]")
 
 let balanceInterval: NodeJS.Timeout | null = null
 const BALANCE_INTERVAL = 10_000 // 10 seconds
@@ -58,7 +61,7 @@ async function updateBalance(
       playerERC20Balance.set(balance)
     }
   } catch (error) {
-    console.error("Failed to update ERC20 balance:", error)
+    logger.error("Failed to update ERC20 balance:", error)
   }
 }
 
@@ -82,7 +85,7 @@ async function updateAllowance(
     )
     playerERC20Allowance.set(allowance)
   } catch (error) {
-    console.error("Failed to update ERC20 allowance:", error)
+    logger.error("Failed to update ERC20 allowance:", error)
   }
 }
 
@@ -90,7 +93,7 @@ async function updateAllowance(
  * Initialize the ERC20 listener
  */
 export function initErc20Listener() {
-  console.log("[@client/erc20Listener] Initializing ERC20 listener")
+  logger.log("Initializing ERC20 listener")
   // Clear old intervals (on network change, wallet change, etc...)
   stopErc20Listener()
 
@@ -98,9 +101,9 @@ export function initErc20Listener() {
   const currentPlayerAddress = get(playerAddress) as Hex
   const currentExternalAddresses = get(externalAddressesConfig)
 
-  console.log("[@client/erc20Listener] Current network:", currentNetwork)
-  console.log("[@client/erc20Listener] Current player address:", currentPlayerAddress)
-  console.log("[@client/erc20Listener] Current external addresses:", currentExternalAddresses)
+  logger.log("Current network:", currentNetwork)
+  logger.log("Current player address:", currentPlayerAddress)
+  logger.log("Current external addresses:", currentExternalAddresses)
 
   if (!currentNetwork || !currentPlayerAddress || !currentExternalAddresses) {
     return

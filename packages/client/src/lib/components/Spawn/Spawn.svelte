@@ -25,6 +25,9 @@
   } from "$lib/components/Spawn"
   import { spawnState, SPAWN_STATE, determineNextState } from "$lib/components/Spawn/state.svelte"
   import { buildFlowContext } from "$lib/components/Spawn/flowContext"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Spawn]")
 
   const { spawned = () => {} } = $props<{
     spawned: () => void
@@ -38,16 +41,16 @@
   async function determineInitialState(): Promise<SPAWN_STATE> {
     const context = await buildFlowContext()
 
-    console.log("[Spawn] Flow context:", context)
+    logger.log("[Spawn] Flow context:", context)
 
     const nextState = determineNextState(context)
-    console.log("[Spawn] Initial state:", nextState)
+    logger.log("[Spawn] Initial state:", nextState)
 
     return nextState
   }
 
   onMount(async () => {
-    console.log("[Spawn] Component mounted")
+    logger.log("[Spawn] Component mounted")
 
     // Register the exit flow callback
     spawnState.state.setOnExitFlow(spawned)
@@ -58,7 +61,7 @@
     // Determine initial state and transition
     // Drawbridge is guaranteed to be initialized by Loading component
     const initialState = await determineInitialState()
-    console.log("[Spawn] Initial state determined:", initialState)
+    logger.log("[Spawn] Initial state determined:", initialState)
     spawnState.state.transitionTo(initialState)
 
     // Start background music after a delay

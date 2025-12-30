@@ -10,6 +10,9 @@
     isNewPlayerShown,
     setNewPlayerShown
   } from "$lib/modules/ui/mascot-messages"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Done]")
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let buttonElement = $state<HTMLDivElement | null>(null)
@@ -20,7 +23,7 @@
   const buttonText = "I WILL ENJOY THIS GAME"
 
   function handleEnjoy() {
-    console.log("[Done] Enjoy button clicked, transitioning to EXIT_FLOW")
+    logger.log("Enjoy button clicked, transitioning to EXIT_FLOW")
 
     // Set pending mascot message for new player
     if (!isNewPlayerShown()) {
@@ -32,7 +35,7 @@
   }
 
   onMount(() => {
-    console.log("[Done] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !buttonElement) {
       return

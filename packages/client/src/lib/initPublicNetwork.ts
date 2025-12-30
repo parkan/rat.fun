@@ -17,6 +17,9 @@ import { publicNetwork, ready, initBlockListener } from "$lib/modules/network"
 import { entities } from "$lib/modules/state/stores"
 import { WORLD_OBJECT_ID } from "$lib/modules/state/constants"
 import { env } from "$env/dynamic/public"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[PublicNetwork]")
 
 interface InitPublicNetworkOptions {
   environment: ENVIRONMENT
@@ -78,13 +81,13 @@ export async function initPublicNetwork(
   // Fetch global config from server (if enabled)
   // This gives us ExternalAddressesConfig needed for allowance checks
   // and a blockNumber to skip the indexer sync
-  console.log("[initPublicNetwork] Fetching global config...")
+  logger.log("Fetching global config...")
   const configResult = await fetchConfig(environment)
 
   let initialBlockLogs: StorageAdapterBlock | undefined
 
   if (configResult) {
-    console.log("[initPublicNetwork] Config fetched from server, will skip indexer")
+    logger.log("Config fetched from server, will skip indexer")
     // Set the WorldObject in entities store
     entities.update(current => ({
       ...current,
@@ -125,7 +128,7 @@ export async function initPublicNetwork(
       }
     })
   } else {
-    console.log("[initPublicNetwork] No server config, will sync from indexer")
+    logger.log("No server config, will sync from indexer")
   }
 
   // Setup MUD layer (skip indexer if we have server config)
@@ -147,7 +150,7 @@ export async function initPublicNetwork(
   // Log indexer sync time when using indexer path
   if (indexerStartTime !== null) {
     const elapsed = (performance.now() - indexerStartTime).toFixed(0)
-    console.log(`[initPublicNetwork] Indexer sync complete in ${elapsed}ms`)
+    logger.log(`Indexer sync complete in ${elapsed}ms`)
   }
 
   // Mark as ready (for any components that need to check sync status)

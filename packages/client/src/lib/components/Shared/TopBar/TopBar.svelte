@@ -32,7 +32,6 @@
         small={true}
         onclick={e => {
           e.stopPropagation()
-          console.log("click back")
           $phoneShowMenu = false
         }}
       />

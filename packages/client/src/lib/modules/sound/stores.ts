@@ -2,6 +2,9 @@ import { Howl, Howler } from "howler"
 import type { PlaySoundConfig } from "./types"
 import { soundLibrary } from "./sound-library"
 import { LocalStorage } from "$lib/modules/state/local.svelte"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("sound")
 
 // Store for tracking if music is enabled (persisted to localStorage)
 export const musicEnabled = new LocalStorage<boolean>("musicEnabled", true)
@@ -35,7 +38,7 @@ class BackgroundMusicManager {
     const libraryItem = soundLibrary[category]?.[id]
 
     if (!libraryItem) {
-      console.warn(`Music "${id}" not found in category "${category}"`)
+      logger.warn(`Music "${id}" not found in category "${category}"`)
       return undefined
     }
 
@@ -90,13 +93,13 @@ class BackgroundMusicManager {
 
     // Check if category exists
     if (!soundLibrary[category]) {
-      console.warn(`Sound category "${category}" not found in sound library`)
+      logger.warn(`Sound category "${category}" not found in sound library`)
       return
     }
 
     // Check if sound ID exists in category
     if (!soundLibrary[category][id]) {
-      console.warn(`Sound "${id}" not found in category "${category}"`)
+      logger.warn(`Sound "${id}" not found in category "${category}"`)
       return
     }
 
@@ -219,13 +222,13 @@ class BackgroundMusicManager {
 
       // Check if category exists
       if (!soundLibrary[category]) {
-        console.warn(`Sound category "${category}" not found in sound library`)
+        logger.warn(`Sound category "${category}" not found in sound library`)
         return
       }
 
       // Check if sound ID exists in category
       if (!soundLibrary[category][id]) {
-        console.warn(`Sound "${id}" not found in category "${category}"`)
+        logger.warn(`Sound "${id}" not found in category "${category}"`)
         return
       }
 

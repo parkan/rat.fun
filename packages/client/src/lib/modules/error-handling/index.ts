@@ -13,6 +13,9 @@ import {
 } from "@ratfun/common/error-handling"
 import { toastManager, TOAST_TYPE } from "$lib/modules/ui/toasts.svelte"
 import { BaseError } from "viem"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("errorHandler")
 
 export * from "@ratfun/common/error-handling"
 
@@ -51,7 +54,7 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
     try {
       processedError = parseViemError(error)
     } catch (parseError) {
-      console.warn("Failed to parse potential viem error:", parseError)
+      logger.warn("Failed to parse potential viem error:", parseError)
     }
   }
 
@@ -124,7 +127,7 @@ export function errorHandler(error: ExpectedError | unknown, message = "") {
   captureMessage(errorMessage, severity, sentryContext)
 
   // Log the error to the console
-  console.error(processedError)
+  logger.error(processedError)
 }
 
 /**
@@ -137,7 +140,7 @@ export function initializeSentry(): void {
   const profilesSampleRate = parseFloat(import.meta.env.SENTRY_PROFILES_SAMPLE_RATE || "0.1")
 
   if (!dsn) {
-    console.warn("SENTRY_DSN not provided, Sentry will not be initialized")
+    logger.warn("SENTRY_DSN not provided, Sentry will not be initialized")
     return
   }
 

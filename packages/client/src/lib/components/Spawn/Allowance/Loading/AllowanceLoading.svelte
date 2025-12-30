@@ -14,7 +14,10 @@
   import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { isUserRejectionError } from "$lib/modules/error-handling/utils"
+  import { createLogger } from "$lib/modules/logger"
   import type { Hex } from "viem"
+
+  const logger = createLogger("[AllowanceLoading]")
 
   let error = $state<string | null>(null)
   let isUserRejection = $state(false)
@@ -42,7 +45,7 @@
   }
 
   async function executeApproval() {
-    console.log("[AllowanceLoading] Starting max allowance approval")
+    logger.log("Starting max allowance approval")
 
     try {
       const addresses = await waitForAddresses()
@@ -51,12 +54,12 @@
 
       // Check if approval was rejected or failed (returns false on failure)
       if (result === false) {
-        console.log("[AllowanceLoading] Approval was rejected or failed")
+        logger.log("Approval was rejected or failed")
         spawnState.state.transitionTo(SPAWN_STATE.ALLOWANCE)
         return
       }
 
-      console.log("[AllowanceLoading] Approval transaction complete")
+      logger.log("Approval transaction complete")
 
       // Explicitly update the allowance store since playerAddress may not be set yet
       // during the spawn flow (refetchAllowance in executeTransaction may have failed silently)
@@ -70,9 +73,9 @@
             addresses.erc20Address as Hex
           )
           playerERC20Allowance.set(allowance)
-          console.log("[AllowanceLoading] Updated allowance store:", allowance)
+          logger.log("Updated allowance store:", allowance)
         } catch (e) {
-          console.warn("[AllowanceLoading] Failed to update allowance store:", e)
+          logger.warn("Failed to update allowance store:", e)
         }
       }
 
@@ -80,12 +83,12 @@
       const context = buildFlowContextSync(true) // hasAllowance = true after approval
       const nextState = determineNextState(context)
 
-      console.log("[AllowanceLoading] Flow context:", context)
-      console.log("[AllowanceLoading] Next state:", nextState)
+      logger.log("Flow context:", context)
+      logger.log("Next state:", nextState)
 
       spawnState.state.transitionTo(nextState)
     } catch (err) {
-      console.error("[AllowanceLoading] Approval failed:", err)
+      logger.error("Approval failed:", err)
 
       // Check if user rejected the transaction
       if (isUserRejectionError(err)) {
@@ -107,7 +110,7 @@
   }
 
   onMount(() => {
-    console.log("[AllowanceLoading] Component mounted")
+    logger.log("Component mounted")
     executeApproval()
   })
 </script>

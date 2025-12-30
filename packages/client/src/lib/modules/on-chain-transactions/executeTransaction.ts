@@ -4,6 +4,7 @@ import { sendTransaction, getAccount } from "@wagmi/core"
 import { get } from "svelte/store"
 import { ensureWriteContract, type WalletTransactionClient } from "@ratfun/common/basic-network"
 import { TransactionError } from "@ratfun/common/error-handling"
+import { createLogger } from "$lib/modules/logger"
 
 import { publicNetwork, walletNetwork } from "$lib/modules/network"
 import { externalAddressesConfig } from "$lib/modules/state/stores"
@@ -12,6 +13,8 @@ import { errorHandler } from "$lib/modules/error-handling"
 import { isUserRejectionError } from "$lib/modules/error-handling/utils"
 import { refetchAllowance } from "$lib/modules/erc20Listener"
 import { WorldFunctions } from "./index"
+
+const logger = createLogger("[executeTransaction]")
 
 type ExecuteTransactionOptions = {
   useConnectorClient?: boolean
@@ -47,7 +50,7 @@ export async function executeTransaction(
         const erc20Address = get(externalAddressesConfig).erc20Address
         const approveArgs = params as [`0x${string}`, bigint]
 
-        console.log("[executeTransaction] Starting approve transaction", {
+        logger.log("[executeTransaction] Starting approve transaction", {
           erc20Address,
           spender: approveArgs[0],
           accountAddress: account.address
@@ -63,7 +66,7 @@ export async function executeTransaction(
         // Estimate gas using public client (RPC transport) instead of wallet provider.
         // Some wallet providers (e.g. Farcaster MiniApp) don't support eth_estimateGas.
         const publicClient = get(publicNetwork).publicClient
-        console.log("[executeTransaction] Estimating gas via public client...")
+        logger.log("[executeTransaction] Estimating gas via public client...")
 
         const gasEstimate = await publicClient.estimateGas({
           account: account.address,
@@ -71,17 +74,17 @@ export async function executeTransaction(
           data
         })
 
-        console.log("[executeTransaction] Gas estimated:", gasEstimate.toString())
+        logger.log("[executeTransaction] Gas estimated:", gasEstimate.toString())
 
         // Get nonce via public client to avoid wallet provider calling eth_getTransactionCount
         const nonce = await publicClient.getTransactionCount({
           address: account.address
         })
-        console.log("[executeTransaction] Nonce fetched:", nonce)
+        logger.log("[executeTransaction] Nonce fetched:", nonce)
 
         // Get expected chain ID to ensure transaction goes to correct chain
         const expectedChainId = get(publicNetwork).config.chain.id
-        console.log("[executeTransaction] Calling sendTransaction via wagmi...")
+        logger.log("[executeTransaction] Calling sendTransaction via wagmi...")
 
         tx = await sendTransaction(wagmiConfig, {
           to: erc20Address,
@@ -91,7 +94,7 @@ export async function executeTransaction(
           chainId: expectedChainId
         })
 
-        console.log("[executeTransaction] sendTransaction returned tx:", tx)
+        logger.log("[executeTransaction] sendTransaction returned tx:", tx)
       } else {
         throw new TransactionError(`Invalid arguments: ${params.join(":")}`)
       }

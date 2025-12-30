@@ -29,6 +29,9 @@ export const singleFrameRender = writable(false)
 // Phone show full menu
 export const phoneShowMenu = writable(false)
 
+// Keep reference to cleanup function for potential teardown
+let resizeCleanup: (() => void) | null = null
+
 // Initialize browser checks (browser only)
 if (typeof window !== "undefined") {
   // Check if Firefox
@@ -43,6 +46,22 @@ if (typeof window !== "undefined") {
   }
   checkPhone()
   window.addEventListener("resize", checkPhone)
+
+  // Store cleanup function
+  resizeCleanup = () => {
+    window.removeEventListener("resize", checkPhone)
+  }
+}
+
+/**
+ * Cleanup function for UI state module.
+ * Call this when tearing down the application to prevent memory leaks.
+ */
+export function cleanupUIState(): void {
+  if (resizeCleanup) {
+    resizeCleanup()
+    resizeCleanup = null
+  }
 }
 
 // Phone view state - tracks which view is active on mobile game view (ratbox or triplisting)

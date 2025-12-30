@@ -8,6 +8,9 @@
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { spawnMascotText } from "./spawnMascotText"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Spawn]")
 
   let name = $state("")
 
@@ -21,11 +24,11 @@
   const timeline = gsap.timeline()
 
   function submitForm() {
-    console.log("[SpawnForm] Submit form with name:", name)
+    logger.log("Submit form with name:", name)
 
     // Validate name before transitioning
     if (!name || name.trim() === "") {
-      console.warn("[SpawnForm] Name cannot be empty")
+      logger.warn("Name cannot be empty")
       return
     }
 
@@ -34,14 +37,14 @@
 
     // Store name in state machine
     spawnState.data.setPlayerName(finalName)
-    console.log("[SpawnForm] Name stored, transitioning to SPAWNING")
+    logger.log("Name stored, transitioning to SPAWNING")
 
     // Transition to spawning state
     spawnState.state.transitionTo(SPAWN_STATE.SPAWN__LOADING)
   }
 
   onMount(() => {
-    console.log("[SpawnForm] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !inputElement || !buttonElement) {
       return

@@ -5,6 +5,7 @@
   import "tippy.js/dist/backdrop.css"
   import "tippy.js/animations/shift-away.css"
 
+  import { createLogger } from "$lib/modules/logger"
   import { initSound, cleanupSound } from "$lib/modules/sound"
   import { initializeSentry } from "$lib/modules/error-handling"
   import { browser } from "$app/environment"
@@ -41,6 +42,8 @@
   import { allowanceModalState, closeAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { sdk } from "@farcaster/miniapp-sdk"
 
+  const logger = createLogger("[Layout]")
+
   let { children }: LayoutProps = $props()
 
   // Called when loading is complete
@@ -56,7 +59,7 @@
 
   // Called when loading completes on a trip page without full auth (tourist mode)
   const loadedAsTourist = async () => {
-    console.log("[+layout] loadedAsTourist() called")
+    logger.log("loadedAsTourist() called")
     // Get content from CMS (needed for trip data)
     initStaticContent($publicNetwork.worldAddress)
     // Skip spawn flow, go directly to tourist view
@@ -64,7 +67,7 @@
   }
 
   const spawned = async () => {
-    console.log("[+layout] spawned() called")
+    logger.log("spawned() called")
     // Initialize ERC20 listener (centralized here for all scenarios)
     initErc20Listener()
 
@@ -104,7 +107,7 @@
       const nonDepletedTripsCount = Object.keys(currentNonDepletedTrips).length
       const isPlayerIdValid = currentPlayerId !== ZERO_PLAYER_ID
 
-      console.log(`[+layout] Store readiness check (attempt ${attempt}/${MAX_RETRIES}):`, {
+      logger.log(`Store readiness check (attempt ${attempt}/${MAX_RETRIES}):`, {
         playerId: currentPlayerId.slice(0, 10) + "...",
         isPlayerIdValid,
         tripsCount,
@@ -121,7 +124,7 @@
       // 2. trips has data but playerTrips is empty when it shouldn't be
 
       if (!isPlayerIdValid) {
-        console.warn(`[+layout] playerId not ready (attempt ${attempt}), waiting...`)
+        logger.warn(`playerId not ready (attempt ${attempt}), waiting...`)
         if (attempt < MAX_RETRIES) {
           await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
           continue
@@ -131,8 +134,8 @@
       // playerId is valid - now check if derived stores have caught up
       // If we have trips but playerTrips is empty, the derived store may not have recomputed
       if (tripsCount > 0 && playerTripsCount === 0 && nonDepletedTripsCount === 0) {
-        console.warn(
-          `[+layout] Potential race: trips=${tripsCount} but derived stores empty (attempt ${attempt})`
+        logger.warn(
+          `Potential race: trips=${tripsCount} but derived stores empty (attempt ${attempt})`
         )
         if (attempt < MAX_RETRIES) {
           await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
@@ -146,7 +149,7 @@
       finalRelevantTripIds = [...new Set([...finalActiveTripIds, ...finalPlayerTripIds])]
       storesReady = true
 
-      console.log(`[+layout] Stores ready after ${attempt} attempt(s):`, {
+      logger.log(`Stores ready after ${attempt} attempt(s):`, {
         playerTripIds: finalPlayerTripIds.length,
         activeTripIds: finalActiveTripIds.length,
         relevantTripIds: finalRelevantTripIds.length
@@ -155,8 +158,8 @@
     }
 
     if (!storesReady) {
-      console.error(
-        "[+layout] CRITICAL: Stores not ready after max retries. Proceeding with current values."
+      logger.error(
+        "CRITICAL: Stores not ready after max retries. Proceeding with current values."
       )
       // Use whatever we have
       finalPlayerTripIds = Object.keys(get(playerTrips))
@@ -165,7 +168,7 @@
     }
 
     // Final validation log
-    console.log("[+layout] Final trip IDs for CMS query:", {
+    logger.log("Final trip IDs for CMS query:", {
       playerTripIds: finalPlayerTripIds.length,
       activeTripIds: finalActiveTripIds.length,
       relevantTripIds: finalRelevantTripIds.length,
@@ -196,12 +199,12 @@
         const state = getDrawbridge().getState()
         if (state.userAddress !== null) {
           // Store says null but drawbridge says connected - it's a store sync delay, ignore
-          console.log("[+layout] Store shows null but drawbridge has address, ignoring")
+          logger.log("Store shows null but drawbridge has address, ignoring")
           return
         }
       }
 
-      console.log("[+layout] Wallet disconnected externally, navigating back to spawn")
+      logger.log("Wallet disconnected externally, navigating back to spawn")
       // Reset entities initialization so it will reinitialize for the new wallet
       resetEntitiesInitialization()
       UIState.set(UI.SPAWNING)
@@ -220,14 +223,14 @@
       currentPlayerId &&
       currentPlayerId !== "0x0000000000000000000000000000000000000000000000000000000000000000"
     ) {
-      // console.log("[+layout] Initializing off-chain sync for player:", currentPlayerId)
+      // logger.log("Initializing off-chain sync for player:", currentPlayerId)
       initOffChainSync(environment, currentPlayerId)
     }
 
     // Disconnect when leaving ready state
     return () => {
       if (isReady) {
-        // console.log("[+layout] Disconnecting off-chain sync")
+        // logger.log("Disconnecting off-chain sync")
         disconnectOffChainSync()
       }
     }

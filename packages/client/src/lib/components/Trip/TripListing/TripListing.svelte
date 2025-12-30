@@ -22,6 +22,9 @@
   import { TripItem, TripFolders, NoRatListing } from "$lib/components/Trip"
   import { BackButton, SmallSpinner } from "$lib/components/Shared"
   import TripHeader from "./TripHeader.svelte"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[TripListing]")
 
   // Show NoRatListing when player has no rat OR when rat is being deployed
   // The DEPLOYING_RAT check ensures we don't hide the no-rat UI until deployment is truly finished
@@ -95,7 +98,7 @@
   // Show ALL folders in their original order (for backward compat, keep this for counts)
   let sortedFolders = $derived.by(() => {
     const folders = $staticContent.tripFolders
-    console.log("[TripListing] Deriving sortedFolders:", { count: folders?.length ?? 0 })
+    logger.log("Deriving sortedFolders:", { count: folders?.length ?? 0 })
     return folders
   })
 
@@ -117,7 +120,7 @@
   let tripList = $derived.by(() => {
     let entries = Object.entries($nonDepletedTrips)
     // DEBUG: Log trip counts to diagnose rendering issue
-    console.log("[TripListing] Deriving tripList:", {
+    logger.log("Deriving tripList:", {
       nonDepletedTripsCount: entries.length,
       selectedFolder: $selectedFolderId,
       staticContentTripsCount: $staticContent.trips.length,
@@ -207,7 +210,7 @@
   })
 
   onDestroy(() => {
-    console.log("[TripListing] onDestroy called")
+    logger.log("onDestroy called")
   })
 </script>
 

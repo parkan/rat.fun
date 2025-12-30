@@ -16,6 +16,9 @@
   import { WALLET_TYPE } from "@ratfun/common/basic-network"
   import { initEntities, isEntitiesInitialized } from "$lib/modules/chain-sync"
   import { addressToId } from "@ratfun/shared-utils"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[SessionAndSpawnLoading]")
 
   let error = $state<string | null>(null)
   let isUserRejection = $state(false)
@@ -23,11 +26,11 @@
 
   async function executeSessionAndSpawn() {
     const name = spawnState.data.playerName
-    console.log("[SessionAndSpawnLoading] Starting session setup and spawn with name:", name)
+    logger.log("Starting session setup and spawn with name:", name)
 
     // Defensive check - should never happen due to state machine guarantees
     if (!name) {
-      console.error("[SessionAndSpawnLoading] No name found in state - this should not happen")
+      logger.error("No name found in state - this should not happen")
       spawnState.state.transitionTo(SPAWN_STATE.SESSION_AND_SPAWN)
       return
     }
@@ -37,19 +40,19 @@
        * Step 1: Set up session
        * - - - - - - - - - - - - - */
 
-      console.log("[SessionAndSpawnLoading] Step 1: Setting up slop machine")
+      logger.log("Step 1: Setting up slop machine")
       status = "Setting up Slop Machine"
 
       const drawbridge = getDrawbridge()
       await drawbridge.setupSession()
 
-      console.log("[SessionAndSpawnLoading] Session setup complete, waiting for ready state")
+      logger.log("Session setup complete, waiting for ready state")
 
       // Wait for session to be ready
       await new Promise<void>((resolve, reject) => {
         const checkInterval = setInterval(() => {
           if ($isSessionReady) {
-            console.log("[SessionAndSpawnLoading] Session is ready")
+            logger.log("Session is ready")
             clearInterval(checkInterval)
             resolve()
           }
@@ -67,14 +70,14 @@
       // Initialize wallet network now that session is ready
       const state = drawbridge.getState()
       if (state.sessionClient && state.userAddress) {
-        console.log("[SessionAndSpawnLoading] Initializing wallet network")
+        logger.log("Initializing wallet network")
         const wallet = setupWalletNetwork($publicNetwork, state.sessionClient)
         initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
 
         // Initialize entities (Scenario C without session)
         if (!isEntitiesInitialized()) {
           const playerId = addressToId(state.userAddress)
-          console.log("[SessionAndSpawnLoading] Initializing entities for player:", playerId)
+          logger.log("Initializing entities for player:", playerId)
           await initEntities({ activePlayerId: playerId })
         }
       }
@@ -83,22 +86,20 @@
        * Step 2: Spawn
        * - - - - - - - - - - - - - */
 
-      console.log("[SessionAndSpawnLoading] Step 2: Spawning")
+      logger.log("Step 2: Spawning")
       status = "Issuing operator pass"
 
       await sendSpawn(name)
-      console.log(
-        "[SessionAndSpawnLoading] Spawn transaction sent, waiting for player name to update"
-      )
+      logger.log("Spawn transaction sent, waiting for player name to update")
 
       // Wait for player name to be set
       await waitForPropertyChangeFrom(player, "name", undefined, 10000)
 
-      console.log("[SessionAndSpawnLoading] Player name updated successfully")
+      logger.log("Player name updated successfully")
       // Success! Transition to DONE
       spawnState.state.transitionTo(SPAWN_STATE.DONE)
     } catch (err) {
-      console.error("[SessionAndSpawnLoading] Failed:", err)
+      logger.error("Failed:", err)
 
       // Check if user rejected the transaction
       if (isUserRejectionError(err)) {
@@ -120,7 +121,7 @@
   }
 
   onMount(() => {
-    console.log("[SessionAndSpawnLoading] Component mounted")
+    logger.log("Component mounted")
     executeSessionAndSpawn()
   })
 </script>

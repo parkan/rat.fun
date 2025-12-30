@@ -6,6 +6,9 @@ import { errorHandler, CMSError } from "$lib/modules/error-handling"
 import { getWorldAddress } from "@ratfun/common/mud"
 import { environment as environmentStore } from "$lib/modules/network"
 import { get } from "svelte/store"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[TripPage]")
 
 export const load: PageLoad = async ({ params }) => {
   try {
@@ -21,7 +24,7 @@ export const load: PageLoad = async ({ params }) => {
       tripContent: tripContent
     }
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     errorHandler(new CMSError("Could not load data"))
     redirect(302, "/")
   }

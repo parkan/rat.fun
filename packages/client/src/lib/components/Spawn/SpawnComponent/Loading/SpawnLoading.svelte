@@ -9,6 +9,9 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { isUserRejectionError } from "$lib/modules/error-handling/utils"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[SpawnLoading]")
 
   let error = $state<string | null>(null)
   let isUserRejection = $state(false)
@@ -17,30 +20,30 @@
 
   async function executeSpawn() {
     const name = spawnState.data.playerName
-    console.log("[Spawning] Starting spawn with name:", name)
+    logger.log("Starting spawn with name:", name)
 
     // Defensive check - should never happen due to state machine guarantees
     if (!name) {
-      console.error("[Spawning] No name found in state - this should not happen")
+      logger.error("No name found in state - this should not happen")
       spawnState.state.transitionTo(SPAWN_STATE.SPAWN)
       return
     }
 
     try {
       // Execute spawn transaction
-      console.log("[Spawning] Executing spawn transaction")
+      logger.log("Executing spawn transaction")
       await sendSpawn(name)
-      console.log("[Spawning] Spawn transaction sent, waiting for player name to update")
+      logger.log("Spawn transaction sent, waiting for player name to update")
 
       // Wait for player name to be set
       await waitForPropertyChangeFrom(player, "name", undefined, 10000)
 
-      console.log("[Spawning] Player name updated successfully")
+      logger.log("Player name updated successfully")
       // Success! Transition to DONE
       spawning = false
       spawnState.state.transitionTo(SPAWN_STATE.DONE)
     } catch (err) {
-      console.error("[Spawning] Spawn failed:", err)
+      logger.error("Spawn failed:", err)
       spawning = false
 
       // Check if user rejected the transaction
@@ -63,7 +66,7 @@
   }
 
   onMount(() => {
-    console.log("[Spawning] Component mounted")
+    logger.log("Component mounted")
     executeSpawn()
   })
 </script>

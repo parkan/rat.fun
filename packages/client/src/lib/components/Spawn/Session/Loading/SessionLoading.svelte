@@ -14,38 +14,41 @@
   import { WALLET_TYPE } from "@ratfun/common/basic-network"
   import { initEntities, isEntitiesInitialized } from "$lib/modules/chain-sync"
   import { addressToId } from "@ratfun/shared-utils"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[SessionLoading]")
 
   let error = $state<string | null>(null)
   let isUserRejection = $state(false)
   let loadingText = $state<string>("Setting up session")
 
   async function executeSessionSetup() {
-    console.log("[SessionLoading] Starting session setup")
+    logger.log("Starting session setup")
 
     try {
       const drawbridge = getDrawbridge()
       await drawbridge.setupSession()
 
-      console.log("[SessionLoading] Session setup transaction complete, waiting for ready state")
+      logger.log("Session setup transaction complete, waiting for ready state")
 
       // Wait for session to be ready before transitioning
       const checkInterval = setInterval(async () => {
         if ($isSessionReady) {
-          console.log("[SessionLoading] Session is ready")
+          logger.log("Session is ready")
           clearInterval(checkInterval)
 
           // Initialize wallet network now that session is ready
           const drawbridge = getDrawbridge()
           const state = drawbridge.getState()
           if (state.sessionClient && state.userAddress) {
-            console.log("[SessionLoading] Initializing wallet network")
+            logger.log("Initializing wallet network")
             const wallet = setupWalletNetwork($publicNetwork, state.sessionClient)
             initWalletNetwork(wallet, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
 
             // Initialize entities if not already done (Scenario B)
             if (!isEntitiesInitialized()) {
               const playerId = addressToId(state.userAddress)
-              console.log("[SessionLoading] Initializing entities for player:", playerId)
+              logger.log("Initializing entities for player:", playerId)
               await initEntities({ activePlayerId: playerId })
             }
           }
@@ -57,8 +60,8 @@
           const context = buildFlowContextSync(hasAllowance)
           const nextState = determineNextState(context)
 
-          console.log("[SessionLoading] Flow context:", context)
-          console.log("[SessionLoading] Next state:", nextState)
+          logger.log("Flow context:", context)
+          logger.log("Next state:", nextState)
 
           spawnState.state.transitionTo(nextState)
         }
@@ -68,7 +71,7 @@
       setTimeout(() => {
         clearInterval(checkInterval)
         if (!$isSessionReady) {
-          console.error("[SessionLoading] Session setup timed out")
+          logger.error("Session setup timed out")
           error = "Session setup timed out"
           setTimeout(() => {
             spawnState.state.transitionTo(SPAWN_STATE.SESSION)
@@ -76,7 +79,7 @@
         }
       }, 10000)
     } catch (err) {
-      console.error("[SessionLoading] Session setup failed:", err)
+      logger.error("Session setup failed:", err)
 
       // Check if user rejected the transaction
       if (isUserRejectionError(err)) {
@@ -98,7 +101,7 @@
   }
 
   onMount(() => {
-    console.log("[SessionLoading] Component mounted")
+    logger.log("Component mounted")
     executeSessionSetup()
   })
 </script>

@@ -6,7 +6,6 @@
   let { message }: { message: NewTripMessage } = $props()
 
   function handleTripClick() {
-    console.log(message)
     goto(`/${message.tripId}`)
   }
 </script>

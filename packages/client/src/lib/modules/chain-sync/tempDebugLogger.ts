@@ -1,3 +1,5 @@
+import { createLogger } from "$lib/modules/logger"
+const logger = createLogger("[Chain Sync]")
 /**
  * Temporary Debug Logger for Chain Sync
  *
@@ -110,27 +112,25 @@ export function logHydrationStats(
   const sizeReduction =
     preFilterSizeBytes > 0 ? ((1 - postFilterSizeBytes / preFilterSizeBytes) * 100).toFixed(1) : "0"
 
-  console.group("🔄 [Chain Sync] Hydration Stats")
+  logger.log("📥 From Indexer:")
+  logger.log(`   Entities: ${preFilterCount}`)
+  logger.log(`   Component values: ${preFilterComponentValues}`)
+  logger.log(`   Size: ${(preFilterSizeBytes / 1024).toFixed(2)} KB`)
 
-  console.log("📥 From Indexer:")
-  console.log(`   Entities: ${preFilterCount}`)
-  console.log(`   Component values: ${preFilterComponentValues}`)
-  console.log(`   Size: ${(preFilterSizeBytes / 1024).toFixed(2)} KB`)
+  logger.log("")
+  logger.log("📦 After Filtering:")
+  logger.log(`   Entities: ${postFilterCount} (-${entityReduction}%)`)
+  logger.log(`   Size: ${(postFilterSizeBytes / 1024).toFixed(2)} KB (-${sizeReduction}%)`)
+  logger.log(`   Filtered out: ${filteringStats.filteredOutCount} entities`)
+  logger.log(`   Partial sync: ${filteringStats.partialSyncCount} entities`)
 
-  console.log("")
-  console.log("📦 After Filtering:")
-  console.log(`   Entities: ${postFilterCount} (-${entityReduction}%)`)
-  console.log(`   Size: ${(postFilterSizeBytes / 1024).toFixed(2)} KB (-${sizeReduction}%)`)
-  console.log(`   Filtered out: ${filteringStats.filteredOutCount} entities`)
-  console.log(`   Partial sync: ${filteringStats.partialSyncCount} entities`)
-
-  console.log("")
-  console.log("Component breakdown (from indexer):")
+  logger.log("")
+  logger.log("Component breakdown (from indexer):")
   const sortedComponents = Object.entries(componentBreakdown).sort(
     (a, b) => b[1].entityCount - a[1].entityCount
   )
   for (const [key, stats] of sortedComponents) {
-    console.log(`   ${key}: ${stats.entityCount} entities, ${stats.totalValues} values`)
+    logger.log(`   ${key}: ${stats.entityCount} entities, ${stats.totalValues} values`)
   }
   console.groupEnd()
 }
@@ -174,7 +174,7 @@ export function logLiveUpdate(
 
   // Log individual updates (can be noisy, adjust as needed)
   const prefix = skipped ? "⏭️" : operation === "set" ? "✅" : "🗑️"
-  console.log(
+  logger.log(
     `${prefix} [Live Update] ${componentKey} | ${entityId.slice(0, 10)}... | ${operation}${skipped ? " (skipped)" : ""}`
   )
 }
@@ -188,7 +188,7 @@ export function printLiveUpdateSummary(sinceLast = false) {
   const relevantLogs = liveUpdateLog.filter(l => l.timestamp > cutoff)
 
   if (relevantLogs.length === 0) {
-    console.log("📊 [Live Update Summary] No updates recorded")
+    logger.log("📊 [Live Update Summary] No updates recorded")
     return
   }
 
@@ -211,15 +211,15 @@ export function printLiveUpdateSummary(sinceLast = false) {
   const totalBytes = relevantLogs.reduce((acc, l) => acc + l.valueSizeBytes, 0)
 
   console.group("📊 [Live Update Summary]")
-  console.log(
+  logger.log(
     `Total updates: ${relevantLogs.length} (${totalApplied} applied, ${totalSkipped} skipped)`
   )
-  console.log(`Total data: ${(totalBytes / 1024).toFixed(2)} KB`)
-  console.log("")
-  console.log("By component:")
+  logger.log(`Total data: ${(totalBytes / 1024).toFixed(2)} KB`)
+  logger.log("")
+  logger.log("By component:")
   const sortedComponents = Object.entries(byComponent).sort((a, b) => b[1].applied - a[1].applied)
   for (const [key, stats] of sortedComponents) {
-    console.log(
+    logger.log(
       `  ${key}: ${stats.applied} applied, ${stats.skipped} skipped, ${(stats.bytes / 1024).toFixed(2)} KB`
     )
   }

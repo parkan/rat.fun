@@ -5,6 +5,9 @@
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { sessionMascotText } from "./sessionMascotText"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Session]")
 
   let mascotElement: HTMLDivElement | null = $state(null)
   let buttonElement: HTMLDivElement | null = $state(null)
@@ -12,12 +15,12 @@
   const timeline = gsap.timeline()
 
   function handleSetupSession() {
-    console.log("[SessionSetup] Setup session button clicked")
+    logger.log("Setup session button clicked")
     spawnState.state.transitionTo(SPAWN_STATE.SESSION__LOADING)
   }
 
   onMount(() => {
-    console.log("[SessionSetup] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !buttonElement) {
       return

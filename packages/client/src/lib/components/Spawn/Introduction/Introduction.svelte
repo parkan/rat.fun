@@ -4,6 +4,9 @@
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { introductionMascotText } from "./introductionMascotText"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Introduction]")
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let buttonElement = $state<HTMLDivElement | null>(null)
@@ -15,7 +18,7 @@
   }
 
   onMount(() => {
-    console.log("[Introduction] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !buttonElement) {
       return

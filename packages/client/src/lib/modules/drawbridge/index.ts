@@ -9,6 +9,9 @@ import { readable, derived } from "svelte/store"
 import type { Hex, Transport } from "viem"
 import { paymasters } from "./paymasters"
 import { getConnectors } from "./getConnectors"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[Drawbridge]")
 
 // Re-export types from package
 export type { ConnectorInfo, SessionClient, PublicClient } from "drawbridge"
@@ -41,7 +44,7 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
     return
   }
 
-  console.log("[Drawbridge] Creating instance with network:", config.publicClient.chain.id)
+  logger.log("Creating instance with network:", config.publicClient.chain.id)
 
   // Get connectors for this environment
   const connectors = getConnectors()
@@ -67,18 +70,10 @@ export async function initializeDrawbridge(config: DrawbridgeInitConfig): Promis
   } catch (error) {
     // Wallet errors during reconnection are non-fatal
     // Common case: wallet is locked or has no accounts (code 4001)
-    console.warn("[@client/Drawbridge] Initialization warning (non-fatal):", error)
+    logger.warn("Initialization warning (non-fatal):", error)
   }
 
-  console.log("[@client/Drawbridge] Instance ready")
-
-  // Log available connectors for debugging
-  // const availableConnectors = drawbridgeInstance.getAvailableConnectors()
-  // console.log(
-  //   "[@client/Drawbridge] Available connectors after init:",
-  //   availableConnectors.length,
-  //   availableConnectors
-  // )
+  logger.log("Instance ready")
 }
 
 /**

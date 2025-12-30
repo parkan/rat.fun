@@ -357,7 +357,6 @@
   })
 
   onDestroy(() => {
-    console.log("[Admin] onDestroy called")
     // Clear any pending timers
     if (keyboardNavTimeout) clearTimeout(keyboardNavTimeout)
     if (initSelectionInterval) clearInterval(initSelectionInterval)

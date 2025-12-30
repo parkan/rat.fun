@@ -2,6 +2,9 @@ import { Howl, Howler } from "howler"
 import { soundLibrary } from "$lib/modules/sound/sound-library"
 import type { SoundAssets, PlaySoundConfig } from "./types"
 import { backgroundMusic } from "$lib/modules/sound/stores"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[Sound]")
 
 export type { PlaySoundConfig }
 
@@ -307,7 +310,7 @@ export const typeHit = () => {
 
 export function handleVisibilityChange() {
   if (document.hidden) {
-    console.log("hidden")
+    logger.log("Document hidden, pausing music")
     backgroundMusic.pause()
   } else {
     backgroundMusic.unpause()

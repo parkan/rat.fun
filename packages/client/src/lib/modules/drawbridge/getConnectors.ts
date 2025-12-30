@@ -2,6 +2,8 @@ import { CreateConnectorFn } from "@wagmi/core"
 import { injected } from "wagmi/connectors"
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector"
 import { sdk } from "@farcaster/miniapp-sdk"
+import { createLogger } from "$lib/modules/logger"
+const logger = createLogger("")
 
 /**
  * WALLET CONNECTION SCENARIOS
@@ -94,7 +96,7 @@ function isWarpcastContext(): boolean {
     referrer.includes("warpcast.com") ||
     referrer.includes("far.quest")
   ) {
-    console.log("[isWarpcastContext] Detected via referrer:", referrer)
+    logger.log("[isWarpcastContext] Detected via referrer:", referrer)
     return true
   }
 
@@ -102,7 +104,7 @@ function isWarpcastContext(): boolean {
   if (window.ethereum) {
     const eth = window.ethereum as any
     if (eth.isFarcaster === true || eth.isWarpcast === true || eth._isFarcasterWallet === true) {
-      console.log("[isWarpcastContext] Detected via ethereum flags")
+      logger.log("[isWarpcastContext] Detected via ethereum flags")
       return true
     }
   }
@@ -115,7 +117,7 @@ function isWarpcastContext(): boolean {
     try {
       const provider = sdk?.wallet?.getEthereumProvider?.()
       if (provider !== undefined && provider !== null) {
-        console.log("[isWarpcastContext] Detected via SDK in iframe")
+        logger.log("[isWarpcastContext] Detected via SDK in iframe")
         return true
       }
     } catch {
@@ -124,7 +126,7 @@ function isWarpcastContext(): boolean {
   }
 
   // Do NOT trust SDK alone in ReactNativeWebView - too many false positives
-  console.log("[isWarpcastContext] Not detected as Warpcast")
+  logger.log("[isWarpcastContext] Not detected as Warpcast")
   return false
 }
 
@@ -163,28 +165,28 @@ export function getConnectors(): CreateConnectorFn[] {
   // Important: Check BEFORE isCoinbase because Warpcast detection excludes Coinbase
   const isWarpcast = !isCoinbase && isWarpcastContext()
 
-  console.log("[getConnectors] Detection:", { isWarpcast, isCoinbase, isMobile, hasInjectedWallet })
+  logger.log("[getConnectors] Detection:", { isWarpcast, isCoinbase, isMobile, hasInjectedWallet })
 
   if (isWarpcast) {
     // SCENARIO 1: Warpcast - needs farcasterMiniApp connector
-    console.log("[getConnectors] Detected: Warpcast")
+    logger.log("[getConnectors] Detected: Warpcast")
     connectors.push(farcasterMiniApp())
   } else if (hasInjectedWallet) {
     // SCENARIOS 2-5: Any environment with injected wallet
     if (isCoinbase && isMobile) {
-      console.log("[getConnectors] Detected: Coinbase mobile (Base App)")
+      logger.log("[getConnectors] Detected: Coinbase mobile (Base App)")
     } else if (isMobile) {
-      console.log("[getConnectors] Detected: Mobile wallet browser")
+      logger.log("[getConnectors] Detected: Mobile wallet browser")
     } else {
-      console.log("[getConnectors] Detected: Desktop browser extension")
+      logger.log("[getConnectors] Detected: Desktop browser extension")
     }
     connectors.push(injected())
   } else if (isMobile) {
     // SCENARIO 6: Mobile browser without wallet - not supported
-    console.log("[getConnectors] Detected: Mobile browser without wallet (not supported)")
+    logger.log("[getConnectors] Detected: Mobile browser without wallet (not supported)")
   } else {
     // Desktop without wallet - try injected anyway (might prompt to install)
-    console.log("[getConnectors] Detected: No wallet detected")
+    logger.log("[getConnectors] Detected: No wallet detected")
     connectors.push(injected())
   }
 

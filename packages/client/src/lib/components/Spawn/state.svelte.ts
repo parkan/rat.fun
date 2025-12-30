@@ -117,7 +117,6 @@ const transitionTo = (newState: SPAWN_STATE) => {
     errorHandler(err)
     return
   }
-  console.log(`[Spawn State] ${spawnStateValue} → ${newState}`)
   setSpawnState(newState)
 
   // Trigger callback when exiting the flow

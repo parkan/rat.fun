@@ -23,6 +23,9 @@ import {
 import { addFeedMessage, addFeedMessages } from "$lib/components/OperatorFeed/state.svelte"
 import { FEED_MESSAGE_TYPE } from "$lib/components/OperatorFeed/Feed/types"
 import type { FeedMessage, FeedItem } from "$lib/components/OperatorFeed/Feed/types"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[CMS]")
 
 export { setPlayerIdStore }
 
@@ -87,7 +90,7 @@ export async function initStaticContent(worldAddress: string) {
   const totalDocuments = counts.tripFolders + (counts.hasRatImages ? 1 : 0)
 
   // Log document counts for debugging/optimization
-  console.log(`[CMS] Static content loaded in ${loadTime.toFixed(0)}ms:`, {
+  logger.log(`Static content loaded in ${loadTime.toFixed(0)}ms:`, {
     ...counts,
     totalDocuments
   })
@@ -106,7 +109,7 @@ export async function initStaticContent(worldAddress: string) {
 
   // Force Svelte to flush reactivity before continuing
   await tick()
-  console.log("[CMS] Tick completed after static content update")
+  logger.log("Tick completed after static content update")
 
   // Clean up existing subscriptions before creating new ones
   if (tripFolderListSubscription) {
@@ -161,7 +164,7 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
 
   // If no trips to load, skip
   if (tripIds.length === 0) {
-    console.log("[CMS] No trips to load")
+    logger.log("No trips to load")
     return
   }
 
@@ -172,10 +175,10 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
   })) as SanityTrip[]
   const loadTime = performance.now() - startTime
 
-  console.log(`[CMS] Trips loaded in ${loadTime.toFixed(0)}ms: ${trips?.length ?? 0} trips`)
+  logger.log(`Trips loaded in ${loadTime.toFixed(0)}ms: ${trips?.length ?? 0} trips`)
 
   staticContent.update(content => {
-    console.log("[CMS] Updating staticContent.trips:", {
+    logger.log("Updating staticContent.trips:", {
       before: content.trips.length,
       after: trips?.length ?? 0
     })
@@ -188,15 +191,15 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
   // Force Svelte to flush reactivity before continuing
   // This fixes a race condition where $derived values don't see store updates
   await tick()
-  console.log("[CMS] Tick completed after trips update")
+  logger.log("Tick completed after trips update")
 
   // Mark initial trips as received so we only notify for new ones
   markInitialTripsReceived()
 
   // Subscribe to changes to all trips in sanity DB
-  console.log("[CMS] Setting up Sanity trips listener...")
+  logger.log("Setting up Sanity trips listener...")
   tripsSubscription = client.listen(queries.trips, { worldAddress }).subscribe(update => {
-    console.log("[CMS] Sanity trips listener event:", {
+    logger.log("Sanity trips listener event:", {
       transition: update.transition,
       hasResult: !!update.result,
       resultId: update.result?._id
@@ -213,7 +216,7 @@ export async function initTrips(worldAddress: string, tripIds: string[]) {
         content.trips,
         (item, id) => item._id === id
       )
-      console.log("[CMS] Sanity listener updating trips:", {
+      logger.log("Sanity listener updating trips:", {
         before: content.trips.length,
         after: newTrips.length,
         transition: update.transition
@@ -242,7 +245,7 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
 
   // If player has no trips, no outcomes to load
   if (playerTripIds.length === 0) {
-    console.log("[CMS] No player trips, skipping outcomes load")
+    logger.log("No player trips, skipping outcomes load")
     markInitialOutcomesReceived()
     return
   }
@@ -254,12 +257,12 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
   })) as SanityOutcome[]
   const loadTime = performance.now() - startTime
 
-  console.log(
-    `[CMS] Player outcomes loaded in ${loadTime.toFixed(0)}ms: ${outcomes?.length ?? 0} outcomes for ${playerTripIds.length} trips`
+  logger.log(
+    `Player outcomes loaded in ${loadTime.toFixed(0)}ms: ${outcomes?.length ?? 0} outcomes for ${playerTripIds.length} trips`
   )
 
   staticContent.update(content => {
-    console.log("[CMS] Updating staticContent.outcomes:", {
+    logger.log("Updating staticContent.outcomes:", {
       before: content.outcomes.length,
       after: outcomes?.length ?? 0
     })
@@ -271,15 +274,15 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
 
   // Force Svelte to flush reactivity before continuing
   await tick()
-  console.log("[CMS] Tick completed after outcomes update")
+  logger.log("Tick completed after outcomes update")
 
   // Mark initial outcomes as received so we only notify for new ones
   markInitialOutcomesReceived()
 
   // Subscribe to changes to all outcomes
-  console.log("[CMS] Setting up Sanity outcomes listener...")
+  logger.log("Setting up Sanity outcomes listener...")
   outcomesSubscription = client.listen(queries.outcomes, { worldAddress }).subscribe(update => {
-    console.log("[CMS] Sanity outcomes listener event:", {
+    logger.log("Sanity outcomes listener event:", {
       transition: update.transition,
       hasResult: !!update.result,
       resultId: update.result?._id
@@ -358,7 +361,7 @@ export async function initPlayerOutcomes(worldAddress: string, playerTripIds: st
         content.outcomes,
         (item, id) => item._id === id
       )
-      console.log("[CMS] Sanity listener updating outcomes:", {
+      logger.log("Sanity listener updating outcomes:", {
         before: content.outcomes.length,
         after: newOutcomes.length,
         transition: update.transition
@@ -538,10 +541,10 @@ export async function loadFeedHistory(worldAddress: string) {
     }
 
     const loadTime = performance.now() - startTime
-    console.log(
-      `[CMS] Feed history loaded in ${loadTime.toFixed(0)}ms: ${recentTrips?.length ?? 0} trips, ${recentOutcomes?.length ?? 0} outcomes`
+    logger.log(
+      `Feed history loaded in ${loadTime.toFixed(0)}ms: ${recentTrips?.length ?? 0} trips, ${recentOutcomes?.length ?? 0} outcomes`
     )
   } catch (error) {
-    console.error("[CMS] Error loading feed history:", error)
+    logger.error("Error loading feed history:", error)
   }
 }

@@ -4,6 +4,9 @@
   import { visibleMessages, hasMoreMessages, loadMoreMessages } from "../state.svelte"
   import FeedMessage from "./FeedMessage.svelte"
   import type { FeedMessage as FeedMessageType } from "./types"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[FeedMessages]")
 
   let scrollContainer = $state<HTMLDivElement | null>(null)
   let isAtBottom = $state(true)
@@ -89,7 +92,7 @@
   })
 
   const onClickMessage = (message: FeedMessageType) => {
-    console.log("msg, ", message)
+    logger.log("msg, ", message)
   }
 
   function scrollToBottom() {
@@ -104,7 +107,7 @@
   }
 
   onDestroy(() => {
-    console.log("[FeedMessages] onDestroy called")
+    logger.log("onDestroy called")
   })
 </script>
 

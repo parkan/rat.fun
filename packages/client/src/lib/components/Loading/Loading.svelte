@@ -19,6 +19,9 @@
   import { ENVIRONMENT, WALLET_TYPE } from "@ratfun/common/basic-network"
   import { initializeDrawbridge, getDrawbridge } from "$lib/modules/drawbridge"
   import { initWalletNetwork } from "$lib/initWalletNetwork"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[Loader]")
 
   const {
     environment,
@@ -107,7 +110,7 @@
     // Sets up MUD layer and fetches global config from server (if enabled).
     // Global config populates entities["0x"] with ExternalAddressesConfig, etc.
     // Returns publicClient and transport for reuse by drawbridge.
-    console.log("[Loading] Initializing public network...")
+    logger.log("Initializing public network...")
     const { publicClient, transport, worldAddress, configFromServer } = await initPublicNetwork({
       environment,
       url: page.url
@@ -119,7 +122,7 @@
     // Drawbridge manages wallet connection and session keys.
     // It internally reads wagmi localStorage to restore previous connections.
     // Reuses the publicClient from MUD to avoid duplicate RPC polling.
-    console.log("[Loading] Initializing drawbridge...")
+    logger.log("Initializing drawbridge...")
     await initializeDrawbridge({
       publicClient,
       transport,
@@ -153,17 +156,17 @@
       // SCENARIO A: Wallet + Session ready
       // -----------------------------------------------------------------------
       // Returning user with full session. Initialize everything.
-      console.log("[Loading] Scenario A: Wallet + session ready")
-      console.log("[Loading] Address:", drawbridgeState.userAddress)
+      logger.log("Scenario A: Wallet + session ready")
+      logger.log("Address:", drawbridgeState.userAddress)
 
       // Initialize wallet network (sets walletNetwork, playerAddress stores)
       const wallet = setupWalletNetwork(network, drawbridgeState.sessionClient)
       initWalletNetwork(wallet, drawbridgeState.userAddress, WALLET_TYPE.DRAWBRIDGE)
 
       // CRITICAL: Flush reactivity so playerId derived store updates
-      console.log("[Loading] initWalletNetwork complete, calling tick() to flush playerId")
+      logger.log("initWalletNetwork complete, calling tick() to flush playerId")
       await tick()
-      console.log("[Loading] tick() after initWalletNetwork complete")
+      logger.log("tick() after initWalletNetwork complete")
 
       // Try server hydration for player-specific data
       const playerId = addressToId(drawbridgeState.userAddress)
@@ -183,18 +186,18 @@
             if (blocksBehind > 60n) {
               // Data is too stale - fallback to normal indexer sync
               console.warn(
-                `[Loading] Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock}) - falling back to indexer sync`
+                `Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock}) - falling back to indexer sync`
               )
               useServerHydration = false
             } else if (blocksBehind > 10n) {
               console.warn(
-                `[Loading] Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock})`
+                `Hydration data is ${blocksBehind} blocks behind (hydration: ${hydrationBlock}, current: ${currentBlock})`
               )
             } else {
-              console.log(`[Loading] Hydration data is fresh (${blocksBehind} blocks behind)`)
+              logger.log(`Hydration data is fresh (${blocksBehind} blocks behind)`)
             }
           } catch (error) {
-            console.warn("[Loading] Could not check hydration staleness:", error)
+            console.warn("Could not check hydration staleness:", error)
           }
 
           if (useServerHydration) {
@@ -203,13 +206,13 @@
               ...current,
               ...hydrationResult.entities
             }))
-            console.log("[Loading] Player hydration succeeded")
+            logger.log("Player hydration succeeded")
 
             // Fetch trips - must complete before spawned() runs so trip IDs are available for CMS queries
             const tripsResult = await fetchTrips(playerId, env)
             if (tripsResult) {
-              console.log(
-                "[Loading] fetchTrips completed, updating entities store with",
+              logger.log(
+                "fetchTrips completed, updating entities store with",
                 Object.keys(tripsResult.entities).length,
                 "trips"
               )
@@ -219,9 +222,9 @@
               }))
               // Flush reactivity so derived stores (trips, nonDepletedTrips, playerTrips) update
               await tick()
-              console.log("[Loading] Entities store updated with trips, tick completed")
+              logger.log("Entities store updated with trips, tick completed")
             } else {
-              console.log("[Loading] fetchTrips completed but returned null")
+              logger.log("fetchTrips completed but returned null")
             }
           }
         }
@@ -241,14 +244,14 @@
       // session setup in Spawn.
       //
       // EXCEPTION: If on trip page, show tourist view instead of Spawn.
-      console.log("[Loading] Scenario B: Wallet connected, no session")
-      console.log("[Loading] Address:", drawbridgeState.userAddress)
+      logger.log("Scenario B: Wallet connected, no session")
+      logger.log("Address:", drawbridgeState.userAddress)
 
       const playerId = addressToId(drawbridgeState.userAddress)
       await initEntities({ activePlayerId: playerId })
 
       if (isOnTripPage()) {
-        console.log("[Loading] On trip page → tourist mode")
+        logger.log("On trip page → tourist mode")
         if (typer?.stop) typer.stop()
         await animateOut()
         loadedAsTourist()
@@ -263,10 +266,10 @@
       //
       // EXCEPTION: If on trip page, show tourist view instead of Spawn.
       // Initialize entities without player filtering so all trips are visible.
-      console.log("[Loading] Scenario C: No wallet connected")
+      logger.log("Scenario C: No wallet connected")
 
       if (isOnTripPage()) {
-        console.log("[Loading] On trip page → tourist mode")
+        logger.log("On trip page → tourist mode")
         // Initialize entities without player ID - syncs ALL entities (no filtering)
         // This should be optimized...
         await initEntities()

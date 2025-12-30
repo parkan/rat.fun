@@ -11,6 +11,9 @@ import {
 } from "$env/static/public"
 import { errorHandler } from "$lib/modules/error-handling"
 import { APIError, TripError } from "@ratfun/common/error-handling"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("sendEnterTrip")
 
 const DEFAULT_TIMING = 4000
 
@@ -80,13 +83,13 @@ export async function sendEnterTrip(tripId: string, ratId: string) {
     // Better error handling to distinguish between timeout and other errors
     if (err instanceof Error) {
       if (err.name === "AbortError") {
-        console.error("Request timed out after 45 seconds")
+        logger.error("Request timed out after 45 seconds")
         throw new TripError(`Request timed out - trip entry took too long`, tripId)
       } else if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
-        console.error("Network error occurred:", err.message)
+        logger.error("Network error occurred:", err.message)
         throw new TripError(`Network error - please check your connection`, tripId)
       } else if (err.message.includes("Unexpected end of JSON input")) {
-        console.error("Incomplete response received:", err.message)
+        logger.error("Incomplete response received:", err.message)
         throw new TripError(`Incomplete response - server may have disconnected`, tripId)
       }
     }

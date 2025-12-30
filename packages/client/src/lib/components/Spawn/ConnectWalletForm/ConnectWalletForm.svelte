@@ -28,6 +28,9 @@
     generateWalletDeeplinks,
     FARCASTER_DEEPLINK
   } from "@ratfun/shared-ui/WalletModals"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[ConnectWalletForm]")
 
   const WALLET_DEEPLINKS = {
     ...generateWalletDeeplinks("rat.fun"),
@@ -56,7 +59,7 @@
       // Initialize wallet network if session is ready
       // (returning user with existing session in localStorage)
       if (state.sessionClient && state.userAddress) {
-        console.log("[ConnectWalletForm] Session ready, initializing wallet network")
+        logger.log("Session ready, initializing wallet network")
         const walletNetwork = setupWalletNetwork($publicNetwork, state.sessionClient)
         initWalletNetwork(walletNetwork, state.userAddress, WALLET_TYPE.DRAWBRIDGE)
       }
@@ -66,7 +69,7 @@
       // Must run even without session so isSpawned check works correctly
       if (state.userAddress && !isEntitiesInitialized()) {
         const playerId = addressToId(state.userAddress)
-        console.log("[ConnectWalletForm] Initializing entities for player:", playerId)
+        logger.log("Initializing entities for player:", playerId)
 
         // If server hydration is enabled, fetch player data from server first
         // (mirrors Loading.svelte Scenario A logic)
@@ -77,7 +80,7 @@
               ...current,
               ...hydrationResult.entities
             }))
-            console.log("[ConnectWalletForm] Player hydration from server succeeded")
+            logger.log("Player hydration from server succeeded")
 
             // CRITICAL: Must await fetchTrips before proceeding to spawned()
             // Otherwise trip stores will be empty when spawned() reads them
@@ -87,10 +90,7 @@
                 ...current,
                 ...tripsResult.entities
               }))
-              console.log(
-                "[ConnectWalletForm] Trips loaded:",
-                Object.keys(tripsResult.entities).length
-              )
+              logger.log("Trips loaded:", Object.keys(tripsResult.entities).length)
             }
           }
         }
@@ -102,8 +102,8 @@
       const context = await buildFlowContext()
       const nextState = determineNextState(context)
 
-      console.log("[ConnectWalletForm] Flow context:", context)
-      console.log("[ConnectWalletForm] Next state:", nextState)
+      logger.log("Flow context:", context)
+      logger.log("Next state:", nextState)
 
       spawnState.state.transitionTo(nextState)
     },
@@ -113,13 +113,13 @@
   // Watch for async errors from drawbridge (e.g., from account watcher)
   $effect(() => {
     if ($drawbridgeError) {
-      console.error("[ConnectWalletForm] Drawbridge error:", $drawbridgeError)
+      logger.error("Drawbridge error:", $drawbridgeError)
       errorHandler($drawbridgeError, "Wallet connection error")
     }
   })
 
   onMount(() => {
-    console.log("[ConnectWalletForm] Component mounted")
+    logger.log("Component mounted")
 
     wallet.prepareConnectors()
 

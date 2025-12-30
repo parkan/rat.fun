@@ -9,12 +9,15 @@ import { env } from "$env/dynamic/public"
 import { ENVIRONMENT } from "@ratfun/common/basic-network"
 import { ENTITY_TYPE } from "contracts/enums"
 import { type Hex, type Address } from "viem"
+import { createLogger } from "$lib/modules/logger"
 import type {
   HydrationResponse,
   GlobalConfigsResponse,
   PlayersEndpointResponse,
   TripsEndpointResponse
 } from "query-server/types"
+
+const logger = createLogger("hydrateFromServer")
 
 // Client result type
 export interface ServerHydrationResult {
@@ -177,13 +180,13 @@ function transformConfigResponse(config: GlobalConfigsResponse): WorldObject {
  */
 export async function fetchConfig(environment: ENVIRONMENT): Promise<ConfigResult | null> {
   if (!shouldHydrateFromServer()) {
-    console.log("[fetchConfig] Server hydration is disabled")
+    logger.log("Server hydration is disabled")
     return null
   }
 
   const queryServerUrl = getQueryServerUrl(environment)
   if (!queryServerUrl) {
-    console.log("[fetchConfig] No query server URL configured")
+    logger.log("No query server URL configured")
     return null
   }
 
@@ -191,7 +194,7 @@ export async function fetchConfig(environment: ENVIRONMENT): Promise<ConfigResul
 
   try {
     const url = `${queryServerUrl}/api/config`
-    console.log("[fetchConfig] Fetching from:", url)
+    logger.log("Fetching from:", url)
     const response = await fetch(url, {
       signal: AbortSignal.timeout(10000)
     })
@@ -205,11 +208,11 @@ export async function fetchConfig(environment: ENVIRONMENT): Promise<ConfigResul
     const blockNumber = safeParseBigInt(data.blockNumber)
     const elapsed = (performance.now() - startTime).toFixed(0)
 
-    console.log(`[fetchConfig] Success in ${elapsed}ms, block: ${blockNumber}`)
+    logger.log(`Success in ${elapsed}ms, block: ${blockNumber}`)
     return { blockNumber, worldObject }
   } catch (error) {
     const elapsed = (performance.now() - startTime).toFixed(0)
-    console.warn(`[fetchConfig] Failed after ${elapsed}ms:`, error)
+    logger.warn(`Failed after ${elapsed}ms:`, error)
     return null
   }
 }
@@ -223,13 +226,13 @@ export async function hydrateFromServer(
   environment: ENVIRONMENT
 ): Promise<ServerHydrationResult | null> {
   if (!shouldHydrateFromServer()) {
-    console.log("[hydrateFromServer] Server hydration is disabled")
+    logger.log("Server hydration is disabled")
     return null
   }
 
   const queryServerUrl = getQueryServerUrl(environment)
   if (!queryServerUrl) {
-    console.log("[hydrateFromServer] No query server URL configured")
+    logger.log("No query server URL configured")
     return null
   }
 
@@ -237,7 +240,7 @@ export async function hydrateFromServer(
 
   try {
     const url = `${queryServerUrl}/api/hydration/${playerId}?_=${Date.now()}`
-    console.log("[hydrateFromServer] Fetching from:", url)
+    logger.log("Fetching from:", url)
     const response = await fetch(url, {
       signal: AbortSignal.timeout(10000),
       cache: "no-store"
@@ -252,8 +255,8 @@ export async function hydrateFromServer(
     const blockNumber = safeParseBigInt(data.blockNumber)
     const elapsed = (performance.now() - startTime).toFixed(0)
 
-    console.log(
-      `[hydrateFromServer] Success in ${elapsed}ms, loaded`,
+    logger.log(
+      `Success in ${elapsed}ms, loaded`,
       Object.keys(entities).length,
       "entities at block",
       blockNumber.toString()
@@ -261,7 +264,7 @@ export async function hydrateFromServer(
     return { blockNumber, entities }
   } catch (error) {
     const elapsed = (performance.now() - startTime).toFixed(0)
-    console.warn(`[hydrateFromServer] Failed after ${elapsed}ms:`, error)
+    logger.warn(`Failed after ${elapsed}ms:`, error)
     return null
   }
 }
@@ -301,10 +304,10 @@ export async function fetchWorldStats(environment: ENVIRONMENT): Promise<WorldSt
     }
     const blockNumber = safeParseBigInt(data.blockNumber)
 
-    console.log(`[fetchWorldStats] Success, block: ${blockNumber}`)
+    logger.log(`Success, block: ${blockNumber}`)
     return { blockNumber, worldStats }
   } catch (error) {
-    console.warn("[fetchWorldStats] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -352,12 +355,12 @@ export async function fetchPlayers(environment: ENVIRONMENT): Promise<PlayersRes
     }
 
     const blockNumber = safeParseBigInt(data.blockNumber)
-    console.log(
-      `[fetchPlayers] Success, loaded ${data.players.length} players at block ${blockNumber}`
+    logger.log(
+      `Success, loaded ${data.players.length} players at block ${blockNumber}`
     )
     return { blockNumber, entities }
   } catch (error) {
-    console.warn("[fetchPlayers] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }
@@ -432,10 +435,10 @@ export async function fetchTrips(
     }
 
     const blockNumber = safeParseBigInt(data.blockNumber)
-    console.log(`[fetchTrips] Success, loaded ${data.trips.length} trips at block ${blockNumber}`)
+    logger.log(`Success, loaded ${data.trips.length} trips at block ${blockNumber}`)
     return { blockNumber, entities }
   } catch (error) {
-    console.warn("[fetchTrips] Failed:", error)
+    logger.warn("Failed:", error)
     return null
   }
 }

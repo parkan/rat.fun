@@ -6,6 +6,9 @@ import { SetupWalletNetworkResult } from "@ratfun/common/mud"
 import { walletNetwork, walletType } from "$lib/modules/network"
 import { playerAddress, entities } from "$lib/modules/state/stores"
 import { addressToId } from "@ratfun/shared-utils"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("[WalletNetwork]")
 
 /**
  * Initialize the wallet network - sets up stores.
@@ -33,10 +36,12 @@ export function checkIsSpawned(address: Hex): boolean {
   const playerEntity = allEntities[playerId]
   const isSpawned = playerEntity?.entityType === ENTITY_TYPE.PLAYER
 
-  console.log("[checkIsSpawned] playerId:", playerId)
-  console.log("[checkIsSpawned] entityCount:", Object.keys(allEntities).length)
-  console.log("[checkIsSpawned] playerEntity:", playerEntity)
-  console.log("[checkIsSpawned] result:", isSpawned)
+  logger.log("checkIsSpawned:", {
+    playerId,
+    entityCount: Object.keys(allEntities).length,
+    hasPlayerEntity: !!playerEntity,
+    isSpawned
+  })
 
   return isSpawned
 }

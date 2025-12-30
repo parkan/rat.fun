@@ -7,6 +7,9 @@ import { createClient } from "@sanity/client"
 import imageUrlBuilder from "@sanity/image-url"
 import { PUBLIC_SANITY_CMS_ID } from "$env/static/public"
 import { CMSError } from "@ratfun/common/error-handling"
+import { createLogger } from "$lib/modules/logger"
+
+const logger = createLogger("sanity")
 
 export const client = createClient({
   projectId: PUBLIC_SANITY_CMS_ID,
@@ -83,7 +86,7 @@ export const loadData = async (query: string, params: any) => {
     // Sanitize the data to ensure it's serializable for SvelteKit
     return sanitizeSanityData(res)
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     return Promise.reject(new CMSError("Failed to load content from CMS", err))
   }
 }

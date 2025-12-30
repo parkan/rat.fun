@@ -4,6 +4,9 @@
   import { BigButton, Mascot } from "$lib/components/Shared"
   import { spawnState, SPAWN_STATE } from "$lib/components/Spawn/state.svelte"
   import { ruleOverviewMascotText } from "./ruleOverviewMascotText"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[RuleOverview]")
 
   let mascotElement = $state<HTMLDivElement | null>(null)
   let buttonElement = $state<HTMLDivElement | null>(null)
@@ -15,7 +18,7 @@
   }
 
   onMount(() => {
-    console.log("[RuleOverview] Component mounted")
+    logger.log("Component mounted")
 
     if (!mascotElement || !buttonElement) {
       return

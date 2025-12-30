@@ -20,6 +20,9 @@
   import { loadData } from "$lib/modules/content/sanity"
   import { queries } from "$lib/modules/content/sanity/groq"
   import { goto } from "$app/navigation"
+  import { createLogger } from "$lib/modules/logger"
+
+  const logger = createLogger("[OperatorFeed]")
 
   onMount(() => {
     backgroundMusic.play({ category: "ratfunMusic", id: "main", loop: true })
@@ -122,7 +125,7 @@
             />
           </div>
         {:catch error}
-          {console.error(error)}
+          {logger.error(error)}
         {/await}
       {/key}
     </div>

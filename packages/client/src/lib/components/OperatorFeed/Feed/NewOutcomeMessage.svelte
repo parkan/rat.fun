@@ -6,7 +6,6 @@
   let { message }: { message: NewOutcomeMessage } = $props()
 
   function handleTripClick() {
-    console.log(message.outcomeId)
     $operatorFeedPreviewOutcome = message.outcomeId
   }
 
