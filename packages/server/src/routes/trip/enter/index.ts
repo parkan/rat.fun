@@ -113,7 +113,8 @@ async function routes(fastify: FastifyInstance) {
           rat,
           trip,
           gamePercentagesConfig,
-          worldEvent
+          worldEvent,
+          logger
         )
         logger.log(
           `✓ Event messages constructed (${Math.round(performance.now() - constructStart)}ms)`

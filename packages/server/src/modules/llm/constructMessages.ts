@@ -1,14 +1,17 @@
 import { MessageParam } from "@anthropic-ai/sdk/resources"
+import { randomInt } from "crypto"
 import { GamePercentagesConfig, Rat, Trip, WorldEvent } from "@modules/types"
 import { LogEntry, OutcomeReturnValue } from "@modules/types"
 import { getLatestBlockNumber } from "@modules/mud/getOnchainData"
 import { getTripMaxValuePerWin } from "@modules/mud/value"
+import { TripLogger } from "@modules/logging"
 
 export async function constructEventMessages(
   rat: Rat,
   trip: Trip,
   gamePercentagesConfig: GamePercentagesConfig,
-  worldEvent: WorldEvent | undefined
+  worldEvent: WorldEvent | undefined,
+  logger: TripLogger
 ): Promise<MessageParam[]> {
   const messages: MessageParam[] = []
   // World event
@@ -41,8 +44,9 @@ export async function constructEventMessages(
   messages.push({ role: "user", content: `RatInventory: ${JSON.stringify(rat.inventory)}` })
   messages.push({ role: "user", content: `RatSlopamineBalance: ${rat.balance}` })
 
-  // Random seed: 0.00 - 1.00
-  const randomSeed = Math.floor(Math.random() * 101) / 100
+  // Random seed: 0.00 - 0.99 (cryptographically secure)
+  const randomSeed = randomInt(0, 100) / 100
+  logger.log(`Random seed generated: ${randomSeed}`)
   messages.push({ role: "user", content: `randomSeed: ${randomSeed}` })
 
   return messages
