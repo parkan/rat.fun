@@ -5,8 +5,8 @@
   import { playSound } from "$lib/modules/sound"
   import { getTodayCETTime, getNextCETTime, formatCountdown } from "@ratfun/shared-utils"
 
-  const GRACE_PERIOD_MS = 30 * 60 * 1000 // 30 minutes
-  const WINNER_DISPLAY_DURATION_MS = 10 * 60 * 1000 // 10 minutes
+  const GRACE_PERIOD_MS = 10 * 60 * 1000 // 10 minutes
+  const WINNER_DISPLAY_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
   let {
     listingIndex,
