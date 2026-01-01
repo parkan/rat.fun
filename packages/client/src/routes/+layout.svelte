@@ -158,9 +158,7 @@
     }
 
     if (!storesReady) {
-      logger.error(
-        "CRITICAL: Stores not ready after max retries. Proceeding with current values."
-      )
+      logger.error("CRITICAL: Stores not ready after max retries. Proceeding with current values.")
       // Use whatever we have
       finalPlayerTripIds = Object.keys(get(playerTrips))
       finalActiveTripIds = Object.keys(get(nonDepletedTrips))

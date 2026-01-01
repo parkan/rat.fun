@@ -355,9 +355,7 @@ export async function fetchPlayers(environment: ENVIRONMENT): Promise<PlayersRes
     }
 
     const blockNumber = safeParseBigInt(data.blockNumber)
-    logger.log(
-      `Success, loaded ${data.players.length} players at block ${blockNumber}`
-    )
+    logger.log(`Success, loaded ${data.players.length} players at block ${blockNumber}`)
     return { blockNumber, entities }
   } catch (error) {
     logger.warn("Failed:", error)

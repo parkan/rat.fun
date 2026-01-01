@@ -24,7 +24,7 @@ import { createLogger } from "$lib/modules/logger"
 const logger = createLogger("[MyModule]")
 ```
 
-#### 2. Use logger methods instead of console.*
+#### 2. Use logger methods instead of console.\*
 
 ```typescript
 // ❌ DON'T DO THIS - causes memory leaks
@@ -50,6 +50,7 @@ logger.error(...)  // Errors (ALWAYS logged, even in production)
 ### Best Practices
 
 1. **Avoid logging entire objects** - Log counts, IDs, or summaries instead
+
    ```typescript
    // ❌ Bad - logs entire entity collection
    logger.log("Entities:", allEntities)
@@ -62,13 +63,15 @@ logger.error(...)  // Errors (ALWAYS logged, even in production)
    ```
 
 2. **Use descriptive namespaces** - Makes filtering logs easier
+
    ```typescript
-   const logger = createLogger("[CMS]")           // Content Management
-   const logger = createLogger("[ChainSync]")     // Blockchain sync
+   const logger = createLogger("[CMS]") // Content Management
+   const logger = createLogger("[ChainSync]") // Blockchain sync
    const logger = createLogger("[WalletNetwork]") // Wallet operations
    ```
 
 3. **Errors should always be logged** - Use `logger.error()` for exceptions
+
    ```typescript
    try {
      await riskyOperation()
@@ -78,6 +81,7 @@ logger.error(...)  // Errors (ALWAYS logged, even in production)
    ```
 
 4. **Toggle logging at runtime** - For debugging
+
    ```typescript
    import { setLoggingEnabled } from "$lib/modules/logger"
 

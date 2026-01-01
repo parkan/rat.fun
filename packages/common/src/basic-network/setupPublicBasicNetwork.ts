@@ -19,9 +19,9 @@ const HTTP_RETRY_CONFIG = {
 
 // WebSocket retry configuration (more conservative to prevent loops)
 const WEBSOCKET_CONFIG = {
-  retryCount: 3,    // Fewer retries than HTTP to fail fast
+  retryCount: 3, // Fewer retries than HTTP to fail fast
   retryDelay: 2000, // Longer delay between retries (2s vs 1s)
-  timeout: 10_000   // 10 second connection timeout
+  timeout: 10_000 // 10 second connection timeout
 } as const
 
 export type SetupPublicBasicNetworkResult = {
@@ -91,8 +91,8 @@ function chainTransport(rpcUrls: ChainRpcUrls, devMode: boolean): Transport {
   // Configure fallback with rank:false to prevent rapid switching between transports
   // Once it falls back to HTTP, it stays there (prevents WebSocket reconnection loops)
   return fallback(transports, {
-    rank: false,     // Disable automatic ranking/failback to prevent loops
-    retryCount: 0,   // Don't retry at fallback level (transports handle their own retries)
-    retryDelay: 150  // Default viem delay
+    rank: false, // Disable automatic ranking/failback to prevent loops
+    retryCount: 0, // Don't retry at fallback level (transports handle their own retries)
+    retryDelay: 150 // Default viem delay
   })
 }

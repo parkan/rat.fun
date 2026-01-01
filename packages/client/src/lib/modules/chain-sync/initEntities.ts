@@ -223,9 +223,7 @@ export async function initEntities(options: InitEntitiesOptions = {}) {
   // In this case, skip MUD component processing and just set up live update systems
   const existingEntities = get(entities)
   if (Object.keys(existingEntities).length > 0) {
-    logger.log(
-      "Entities already populated (server hydration), setting up live systems only"
-    )
+    logger.log("Entities already populated (server hydration), setting up live systems only")
 
     // Create systems to listen to changes on game-specific tables
     for (const componentKey of tableKeys) {
