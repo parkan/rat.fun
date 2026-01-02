@@ -28,6 +28,8 @@ export interface WebGLRendererOptions {
   targetFPS?: number
   /** Optional error handler callback for reporting errors */
   onError?: (error: Error, context?: string) => void
+  /** Preserve drawing buffer for canvas capture (enables toDataURL) - impacts performance */
+  preserveDrawingBuffer?: boolean
 }
 
 export type UniformType = "float" | "vec2" | "vec3" | "vec4" | "int" | "bool"

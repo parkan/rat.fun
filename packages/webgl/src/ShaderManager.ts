@@ -9,6 +9,8 @@ export interface ShaderManagerOptions {
   errorHandler: ErrorHandler
   /** Function that returns whether to render only a single frame (e.g., on phones or Firefox) */
   singleFrameRender: () => boolean
+  /** Preserve drawing buffer for canvas capture (enables toDataURL) - impacts performance */
+  preserveDrawingBuffer?: boolean
 }
 
 export class ShaderManager {
@@ -29,10 +31,12 @@ export class ShaderManager {
   private errorHandler: ErrorHandler
   private singleFrameRender: () => boolean
   private singleFramePauseRafId: number | null = null
+  private preserveDrawingBuffer: boolean
 
   constructor(options: ShaderManagerOptions) {
     this.errorHandler = options.errorHandler
     this.singleFrameRender = options.singleFrameRender
+    this.preserveDrawingBuffer = options.preserveDrawingBuffer ?? false
   }
 
   /**
@@ -246,7 +250,8 @@ export class ShaderManager {
       this._renderer = new WebGLGeneralRenderer(canvas, {
         shader: shaderSource,
         uniforms: initialUniforms,
-        onError: this.errorHandler
+        onError: this.errorHandler,
+        preserveDrawingBuffer: this.preserveDrawingBuffer
       })
 
       this._renderer.render()

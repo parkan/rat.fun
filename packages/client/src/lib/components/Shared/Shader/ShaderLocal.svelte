@@ -39,7 +39,11 @@
 </script>
 
 <div class="shader-container" in:fade={{ duration: 300 }}>
-  <canvas bind:this={canvasElement} class="shader-canvas"></canvas>
+  {#if !initFailed}
+    <canvas bind:this={canvasElement} class="shader-canvas"></canvas>
+  {:else}
+    <img src="/images/shaders/{shaderKey}.png" alt="shader fallback" />
+  {/if}
 </div>
 
 <style lang="scss">

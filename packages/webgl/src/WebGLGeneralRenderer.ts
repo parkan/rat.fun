@@ -41,6 +41,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
   private contextLost: boolean = false
   private isPaused: boolean = false
   private onError?: (error: Error, context?: string) => void
+  private preserveDrawingBuffer: boolean
 
   /**
    * Creates a new WebGL renderer instance.
@@ -55,6 +56,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
     this.frameInterval = 1000 / 60
     this.shaderSource = options.shader
     this.onError = options.onError
+    this.preserveDrawingBuffer = options.preserveDrawingBuffer ?? false
 
     this.initWebGL(options.shader)
     this.setupContextLossHandlers()
@@ -146,7 +148,9 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
    */
   private initWebGL(shader: ShaderSource): void {
     // Check if canvas already has a context (reusing same canvas)
-    const gl = this.canvas.getContext("webgl")
+    const gl = this.canvas.getContext("webgl", {
+      preserveDrawingBuffer: this.preserveDrawingBuffer
+    })
 
     // If context is null or lost, try to get a fresh one
     if (!gl || gl.isContextLost()) {
