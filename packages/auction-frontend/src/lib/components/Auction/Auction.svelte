@@ -83,11 +83,12 @@
   // Check if early exit
   // It occurs if the auction is fully bought out before the ending time
   async function checkEarlyExit(client: PublicClient) {
-    return client.readContract({
-      address: auctionParams.hookAddress,
-      abi: dopplerHookAbi,
-      functionName: "earlyExit"
-    })
+    return true
+    // return client.readContract({
+    //   address: auctionParams.hookAddress,
+    //   abi: dopplerHookAbi,
+    //   functionName: "earlyExit"
+    // })
   }
 
   function checkSaleNotStarted() {
