@@ -9,6 +9,8 @@ export interface ShaderManagerOptions {
   errorHandler: ErrorHandler
   /** Function that returns whether to render only a single frame (e.g., on phones or Firefox) */
   singleFrameRender: () => boolean
+  /** Preserve drawing buffer for canvas capture (enables toDataURL) - impacts performance */
+  preserveDrawingBuffer?: boolean
 }
 
 export class ShaderManager {
@@ -16,7 +18,6 @@ export class ShaderManager {
   private _canvas: HTMLCanvasElement | null = null
   private resizeTimeout: ReturnType<typeof setTimeout> | null = null
   private _invert: boolean = false
-  private currentShaderKey: string | null = null
   private customUniforms: Record<
     string,
     { type: UniformType; value: number | boolean | number[] }
@@ -29,10 +30,14 @@ export class ShaderManager {
   private errorHandler: ErrorHandler
   private singleFrameRender: () => boolean
   private singleFramePauseRafId: number | null = null
+  private preserveDrawingBuffer: boolean
+  currentShaderKey: string | null = null
+  private shaderChangeListeners: Array<(shaderKey: string | null) => void> = []
 
   constructor(options: ShaderManagerOptions) {
     this.errorHandler = options.errorHandler
     this.singleFrameRender = options.singleFrameRender
+    this.preserveDrawingBuffer = options.preserveDrawingBuffer ?? false
   }
 
   /**
@@ -89,6 +94,30 @@ export class ShaderManager {
   }
 
   /**
+   * Subscribe to shader changes
+   * @returns Unsubscribe function
+   */
+  onShaderChange(callback: (shaderKey: string | null) => void): () => void {
+    this.shaderChangeListeners.push(callback)
+    // Immediately call with current value
+    callback(this.currentShaderKey)
+    // Return unsubscribe function
+    return () => {
+      const index = this.shaderChangeListeners.indexOf(callback)
+      if (index > -1) {
+        this.shaderChangeListeners.splice(index, 1)
+      }
+    }
+  }
+
+  /**
+   * Notify all listeners of shader change
+   */
+  private notifyShaderChange() {
+    this.shaderChangeListeners.forEach(listener => listener(this.currentShaderKey))
+  }
+
+  /**
    * Toggle invert state
    */
   toggleInvert() {
@@ -139,6 +168,7 @@ export class ShaderManager {
     // Set invert state
     this._invert = inverted
     this.currentShaderKey = shaderKey
+    this.notifyShaderChange()
 
     // Destroy current renderer
     if (this._renderer) {
@@ -246,7 +276,8 @@ export class ShaderManager {
       this._renderer = new WebGLGeneralRenderer(canvas, {
         shader: shaderSource,
         uniforms: initialUniforms,
-        onError: this.errorHandler
+        onError: this.errorHandler,
+        preserveDrawingBuffer: this.preserveDrawingBuffer
       })
 
       this._renderer.render()
@@ -370,6 +401,9 @@ export class ShaderManager {
       cancelAnimationFrame(this.singleFramePauseRafId)
       this.singleFramePauseRafId = null
     }
+
+    // Clear all shader change listeners
+    this.shaderChangeListeners = []
 
     this._canvas = null
   }
