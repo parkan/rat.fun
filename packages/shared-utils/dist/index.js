@@ -303,6 +303,12 @@ function getTargetCETTime(timeStr, daysFromToday) {
   targetInBerlin.setHours(hours, minutes, 0, 0);
   return fromZonedTime(targetInBerlin, BERLIN_TZ);
 }
+function getTargetCETDate(timeStr, dateStr) {
+  const [hours, minutes] = timeStr.padStart(5, "0").split(":").map(Number);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const targetInBerlin = new Date(year, month - 1, day, hours, minutes, 0, 0);
+  return fromZonedTime(targetInBerlin, BERLIN_TZ);
+}
 function formatCountdown(diff) {
   if (diff <= 0) return "";
   const days = Math.floor(diff / (1e3 * 60 * 60 * 24));
@@ -362,6 +368,7 @@ export {
   getRandomNumber,
   getRandomUint256,
   getRandomUint32,
+  getTargetCETDate,
   getTargetCETTime,
   getTodayCETTime,
   getUniqueValues,

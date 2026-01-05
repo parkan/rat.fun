@@ -38,7 +38,7 @@ export type StaticContent = {
   tripFolders: SanityTripFolder[]
   tripFolderWhitelist: string[]
   dailyChallengeTime: string | null // Time in CET format (e.g. "14:00")
-  nextChallengeDay: number | null // Days from today when next challenge occurs (1 = tomorrow)
+  nextChallengeDay: string | null // Date in YYYY-MM-DD format (e.g. "2025-01-15"), or null for tomorrow
   challengeTitle: string | null // Optional title for the current/upcoming challenge
 }
 
@@ -143,7 +143,7 @@ export async function initStaticContent(worldAddress: string) {
         ...content,
         tripFolderWhitelist: (result.whitelist as string[]) || [],
         dailyChallengeTime: (result.dailyChallengeTime as string) || null,
-        nextChallengeDay: (result.nextChallengeDay as number) ?? null,
+        nextChallengeDay: (result.nextChallengeDay as string) || null,
         challengeTitle: (result.challengeTitle as string) || null
       }))
     }

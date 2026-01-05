@@ -22,7 +22,7 @@ export type Challenge = {
   title: string
   whitelist?: Array<string>
   dailyChallengeTime?: string
-  nextChallengeDay?: number
+  nextChallengeDay?: string
   challengeTitle?: string
 }
 

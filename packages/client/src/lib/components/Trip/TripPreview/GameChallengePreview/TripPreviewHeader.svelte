@@ -9,7 +9,7 @@
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { getTargetCETTime, formatCountdown } from "@ratfun/shared-utils"
+  import { getNextCETTime, getTargetCETDate, formatCountdown } from "@ratfun/shared-utils"
 
   let { trip, tripId }: { trip: Trip; tripId?: Hex } = $props()
 
@@ -42,9 +42,14 @@
     }
 
     const now = Date.now()
-    // Use nextChallengeDay if set and > 1, otherwise default to 1 (tomorrow)
-    const targetDays = nextChallengeDay && nextChallengeDay > 1 ? nextChallengeDay : 1
-    const target = getTargetCETTime(dailyChallengeTime, targetDays).getTime()
+    // Use nextChallengeDay if set (a valid date string), otherwise target next occurrence of dailyChallengeTime
+    const isValidDate =
+      nextChallengeDay &&
+      typeof nextChallengeDay === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(nextChallengeDay)
+    const target = isValidDate
+      ? getTargetCETDate(dailyChallengeTime, nextChallengeDay).getTime()
+      : getNextCETTime(dailyChallengeTime).getTime()
     const diff = target - now
 
     if (diff <= 0) {

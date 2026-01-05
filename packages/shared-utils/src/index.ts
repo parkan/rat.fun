@@ -633,6 +633,28 @@ export function getTargetCETTime(timeStr: string, daysFromToday: number): Date {
 }
 
 /**
+ * Calculate a specific CET/CEST time for a given date.
+ * Used for scheduling events on a specific calendar date.
+ * Correctly handles DST transitions using date-fns-tz.
+ * @param timeStr Time in HH:MM format (e.g., "16:00")
+ * @param dateStr Date in YYYY-MM-DD format (e.g., "2025-01-15")
+ * @returns Date object representing that time in Berlin timezone on the target date
+ */
+export function getTargetCETDate(timeStr: string, dateStr: string): Date {
+  // Parse the time string
+  const [hours, minutes] = timeStr.padStart(5, "0").split(":").map(Number)
+
+  // Parse the date string
+  const [year, month, day] = dateStr.split("-").map(Number)
+
+  // Create target date in Berlin timezone
+  const targetInBerlin = new Date(year, month - 1, day, hours, minutes, 0, 0)
+
+  // Convert from Berlin time to UTC - this handles DST correctly
+  return fromZonedTime(targetInBerlin, BERLIN_TZ)
+}
+
+/**
  * Format a countdown diff (in ms) to a human-readable string
  */
 export function formatCountdown(diff: number): string {

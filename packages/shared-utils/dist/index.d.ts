@@ -192,6 +192,15 @@ declare function getNextCETTime(timeStr: string): Date;
  */
 declare function getTargetCETTime(timeStr: string, daysFromToday: number): Date;
 /**
+ * Calculate a specific CET/CEST time for a given date.
+ * Used for scheduling events on a specific calendar date.
+ * Correctly handles DST transitions using date-fns-tz.
+ * @param timeStr Time in HH:MM format (e.g., "16:00")
+ * @param dateStr Date in YYYY-MM-DD format (e.g., "2025-01-15")
+ * @returns Date object representing that time in Berlin timezone on the target date
+ */
+declare function getTargetCETDate(timeStr: string, dateStr: string): Date;
+/**
  * Format a countdown diff (in ms) to a human-readable string
  */
 declare function formatCountdown(diff: number): string;
@@ -219,4 +228,4 @@ declare function hexToFourParts(hexString: string): [number, number, number, num
  */
 declare function hashToIndices(addressHash: string, lengths: [number, number, number, number]): [number, number, number, number];
 
-export { JSONParseError, addressToColor, addressToId, addressToNumber, blockNumberToTimestamp, blocksToReadableTime, blocksToSeconds, clamp, clickToCopy, filterObjectByKey, formatCountdown, formatDate, getNextCETTime, getRandomElement, getRandomInt, getRandomNumber, getRandomUint256, getRandomUint32, getTargetCETTime, getTodayCETTime, getUniqueValues, hasExtensionSupport, hashToIndices, hexToFourParts, hexToString, idToAddress, invlerp, lerp, millisUntil, mod, padToUint256, padWithZero, parseJSONFromContent, pickByIndex, range, removePrivateKeys, renderSafeString, shortenAddress, sleep, stepsEasing, stringToHex, timeSince, timeUntil, toCamelCase, truncateString };
+export { JSONParseError, addressToColor, addressToId, addressToNumber, blockNumberToTimestamp, blocksToReadableTime, blocksToSeconds, clamp, clickToCopy, filterObjectByKey, formatCountdown, formatDate, getNextCETTime, getRandomElement, getRandomInt, getRandomNumber, getRandomUint256, getRandomUint32, getTargetCETDate, getTargetCETTime, getTodayCETTime, getUniqueValues, hasExtensionSupport, hashToIndices, hexToFourParts, hexToString, idToAddress, invlerp, lerp, millisUntil, mod, padToUint256, padWithZero, parseJSONFromContent, pickByIndex, range, removePrivateKeys, renderSafeString, shortenAddress, sleep, stepsEasing, stringToHex, timeSince, timeUntil, toCamelCase, truncateString };
