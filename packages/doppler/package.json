@@ -20,7 +20,8 @@
     "quote": "tsx ./script/quote.ts",
     "swap": "tsx ./script/swap.ts",
     "swapScheduled": "tsx ./script/swapScheduled.ts",
-    "burnTestNumeraire": "tsx ./script/burnTestNumeraire.ts"
+    "burnTestNumeraire": "tsx ./script/burnTestNumeraire.ts",
+    "updateTokenURI": "tsx ./script/updateTokenURI.ts"
   },
   "dependencies": {
     "@whetstone-research/doppler-sdk": "npm:@dk1a/doppler-sdk-fork@0.0.1-alpha.62",
