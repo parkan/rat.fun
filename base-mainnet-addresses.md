@@ -48,7 +48,7 @@
 
 ### Treasury wallet
 
-0x0
+0x046a3102818F18b156aeC362f171c51c8358b86e
 
 ---
 
