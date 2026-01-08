@@ -1,10 +1,20 @@
 <script lang="ts">
   import { tick, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
-  import { visibleMessages, hasMoreMessages, loadMoreMessages } from "../state.svelte"
+  import { publicNetwork } from "$lib/modules/network"
+  import {
+    visibleMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    oldestMessage,
+    isPaginationLoading,
+    hasReachedHistoryLimit
+  } from "../state.svelte"
   import FeedMessage from "./FeedMessage.svelte"
   import type { FeedMessage as FeedMessageType } from "./types"
   import { createLogger } from "$lib/modules/logger"
+  import { loadMoreFeedHistory } from "$lib/modules/content"
+  import { environment } from "$lib/modules/network"
 
   const logger = createLogger("[FeedMessages]")
 
@@ -39,20 +49,61 @@
     }
 
     // Load more messages when scrolling near the top
-    if (isNearTop() && $hasMoreMessages && !isLoadingMore) {
+    if (isNearTop() && !isLoadingMore && !$isPaginationLoading && !$hasReachedHistoryLimit) {
       isLoadingMore = true
-      // Save current scroll position
-      const previousScrollHeight = scrollContainer?.scrollHeight || 0
 
-      // Load more messages
-      loadMoreMessages()
+      // Check if we need to fetch from Sanity or just increase display count
+      const needsMoreData = !$hasMoreMessages
+      const hasOldestData = $oldestMessage !== null
 
-      // Wait for DOM to update, then restore scroll position
-      await tick()
-      if (scrollContainer) {
-        const newScrollHeight = scrollContainer.scrollHeight
-        const heightDifference = newScrollHeight - previousScrollHeight
-        scrollContainer.scrollTop += heightDifference
+      if (needsMoreData && hasOldestData) {
+        // Fetch older messages from Sanity
+        isPaginationLoading.set(true)
+
+        // Save current scroll position
+        const previousScrollHeight = scrollContainer?.scrollHeight || 0
+
+        try {
+          const loadedCount = await loadMoreFeedHistory(
+            $publicNetwork.worldAddress,
+            $oldestMessage!.timestamp,
+            $oldestMessage!.id
+          )
+
+          if (loadedCount === 0) {
+            // No more history available
+            logger.log("No more feed history available")
+          } else {
+            logger.log(`Loaded ${loadedCount} older messages from Sanity`)
+            // Increase display count to show the new messages
+            loadMoreMessages()
+          }
+        } catch (error) {
+          logger.error("Error fetching older messages:", error)
+        } finally {
+          isPaginationLoading.set(false)
+
+          // Wait for DOM to update, then restore scroll position
+          await tick()
+          if (scrollContainer) {
+            const newScrollHeight = scrollContainer.scrollHeight
+            const heightDifference = newScrollHeight - previousScrollHeight
+            scrollContainer.scrollTop += heightDifference
+          }
+        }
+      } else if ($hasMoreMessages) {
+        // Just show more of what we already have loaded
+        const previousScrollHeight = scrollContainer?.scrollHeight || 0
+
+        loadMoreMessages()
+
+        // Wait for DOM to update, then restore scroll position
+        await tick()
+        if (scrollContainer) {
+          const newScrollHeight = scrollContainer.scrollHeight
+          const heightDifference = newScrollHeight - previousScrollHeight
+          scrollContainer.scrollTop += heightDifference
+        }
       }
 
       isLoadingMore = false
@@ -118,10 +169,12 @@
     </div>
   {:else}
     <div class="messages-list" in:fade={{ duration: 300 }}>
-      {#if $hasMoreMessages}
+      {#if $hasMoreMessages || (!$hasReachedHistoryLimit && $oldestMessage)}
         <div class="load-more-indicator">
-          {#if isLoadingMore}
-            <span>Loading...</span>
+          {#if $isPaginationLoading || isLoadingMore}
+            <span>Loading older messages...</span>
+          {:else if $hasReachedHistoryLimit}
+            <span>Reached 1 week history limit</span>
           {:else}
             <span>Scroll up to load more</span>
           {/if}

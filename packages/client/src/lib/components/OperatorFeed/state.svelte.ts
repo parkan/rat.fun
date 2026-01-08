@@ -9,15 +9,30 @@ import {
 } from "$lib/modules/query-server"
 import { FEATURES } from "$lib/config/features"
 
-const MAX_MESSAGES = 200
+// One week in milliseconds
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+// Increased to handle one week of feed history
+// With ~200 messages per day, 1500 should be sufficient for a week
+const MAX_MESSAGES = 1500
 const INITIAL_MESSAGES_TO_DISPLAY = 10
-const LOAD_MORE_BATCH_SIZE = 20
+// Increased batch size for smoother pagination experience
+const LOAD_MORE_BATCH_SIZE = 50
 
 // Feed messages store
 export const feedMessages = writable<FeedMessage[]>([])
 
 // Number of messages to display (for lazy loading)
 export const displayedMessageCount = writable<number>(INITIAL_MESSAGES_TO_DISPLAY)
+
+// Pagination state - tracks the oldest message for timestamp-based pagination
+export const oldestMessage = writable<{ timestamp: string; id: string } | null>(null)
+
+// Loading state for pagination requests
+export const isPaginationLoading = writable<boolean>(false)
+
+// Flag to indicate we've reached the one week history limit
+export const hasReachedHistoryLimit = writable<boolean>(false)
 
 // Active filters - when empty, all types are shown
 // When populated, only checked types are shown
@@ -70,6 +85,30 @@ export const hasMoreMessages = derived(
 )
 
 /**
+ * Update the oldest message tracker based on current messages
+ */
+function updateOldestMessageTracker(messages: FeedMessage[]) {
+  if (messages.length === 0) {
+    oldestMessage.set(null)
+    hasReachedHistoryLimit.set(false)
+    return
+  }
+
+  // Find the oldest message (messages are sorted, so first one is oldest)
+  const oldest = messages[0]
+  oldestMessage.set({
+    timestamp: new Date(oldest.timestamp).toISOString(),
+    id: oldest.id
+  })
+
+  // Check if oldest message is older than one week
+  const oneWeekAgo = Date.now() - ONE_WEEK_MS
+  if (oldest.timestamp <= oneWeekAgo) {
+    hasReachedHistoryLimit.set(true)
+  }
+}
+
+/**
  * Add a message to the feed
  */
 export function addFeedMessage(message: FeedMessage) {
@@ -82,10 +121,13 @@ export function addFeedMessage(message: FeedMessage) {
     const updated = [...messages, message]
     // Sort by timestamp
     updated.sort((a, b) => a.timestamp - b.timestamp)
-    // Trim to max messages
+    // Trim to max messages (remove oldest if needed)
     if (updated.length > MAX_MESSAGES) {
-      return updated.slice(-MAX_MESSAGES)
+      const trimmed = updated.slice(-MAX_MESSAGES)
+      updateOldestMessageTracker(trimmed)
+      return trimmed
     }
+    updateOldestMessageTracker(updated)
     return updated
   })
 }
@@ -100,10 +142,13 @@ export function addFeedMessages(messages: FeedMessage[]) {
     const updated = [...existing, ...newMessages]
     // Sort by timestamp
     updated.sort((a, b) => a.timestamp - b.timestamp)
-    // Trim to max messages
+    // Trim to max messages (remove oldest if needed)
     if (updated.length > MAX_MESSAGES) {
-      return updated.slice(-MAX_MESSAGES)
+      const trimmed = updated.slice(-MAX_MESSAGES)
+      updateOldestMessageTracker(trimmed)
+      return trimmed
     }
+    updateOldestMessageTracker(updated)
     return updated
   })
 }
@@ -143,6 +188,9 @@ export function setFilter(type: FEED_MESSAGE_TYPE, enabled: boolean) {
  */
 export function clearFeedMessages() {
   feedMessages.set([])
+  oldestMessage.set(null)
+  hasReachedHistoryLimit.set(false)
+  isPaginationLoading.set(false)
 }
 
 /**

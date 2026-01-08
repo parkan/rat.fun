@@ -443,7 +443,7 @@ type RecentOutcomeForFeed = {
 
 /**
  * Load recent trips and outcomes from CMS and add them to the operator feed.
- * This populates the feed with the last 5 trips and last 5 outcomes on load.
+ * This populates the feed with the last 100 trips and outcomes from the past week on load.
  *
  * @param worldAddress - The world address to filter content by
  */
@@ -451,10 +451,17 @@ export async function loadFeedHistory(worldAddress: string) {
   const startTime = performance.now()
 
   try {
+    // Calculate one week ago timestamp
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
     // Fetch recent trips and outcomes in parallel
     const [recentTrips, recentOutcomes] = await Promise.all([
-      loadData(queries.recentTripsForFeed, { worldAddress }) as Promise<RecentTripForFeed[]>,
-      loadData(queries.recentOutcomesForFeed, { worldAddress }) as Promise<RecentOutcomeForFeed[]>
+      loadData(queries.recentTripsForFeed, { worldAddress, oneWeekAgo }) as Promise<
+        RecentTripForFeed[]
+      >,
+      loadData(queries.recentOutcomesForFeed, { worldAddress, oneWeekAgo }) as Promise<
+        RecentOutcomeForFeed[]
+      >
     ])
 
     const feedMessages: FeedMessage[] = []
@@ -546,5 +553,143 @@ export async function loadFeedHistory(worldAddress: string) {
     )
   } catch (error) {
     logger.error("Error loading feed history:", error)
+  }
+}
+
+/**
+ * Load more (older) feed history when scrolling back.
+ * Fetches messages older than the given timestamp, up to one week old.
+ *
+ * @param worldAddress - The world address to filter content by
+ * @param beforeTimestamp - ISO timestamp to fetch messages before (exclusive)
+ * @param beforeId - Document ID for tiebreaker when timestamps are equal
+ * @returns Number of messages loaded (0 if no more history available)
+ */
+export async function loadMoreFeedHistory(
+  worldAddress: string,
+  beforeTimestamp: string,
+  beforeId: string
+): Promise<number> {
+  const startTime = performance.now()
+  console.log("world address, ", worldAddress)
+
+  try {
+    // Calculate one week ago timestamp
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    // Check if we've already reached the one week limit
+    if (beforeTimestamp <= oneWeekAgo) {
+      logger.log("Reached one week history limit, no more messages to load")
+      return 0
+    }
+
+    // Fetch older trips and outcomes in parallel
+    const [olderTrips, olderOutcomes] = await Promise.all([
+      loadData(queries.paginatedTripsForFeed, {
+        worldAddress,
+        beforeTimestamp,
+        beforeId,
+        oneWeekAgo
+      }) as Promise<RecentTripForFeed[]>,
+      loadData(queries.paginatedOutcomesForFeed, {
+        worldAddress,
+        beforeTimestamp,
+        beforeId,
+        oneWeekAgo
+      }) as Promise<RecentOutcomeForFeed[]>
+    ])
+
+    const feedMessages: FeedMessage[] = []
+
+    // Convert trips to feed messages
+    if (olderTrips) {
+      for (const trip of olderTrips) {
+        feedMessages.push({
+          id: `trip-paginated-${trip._id}`,
+          type: FEED_MESSAGE_TYPE.NEW_TRIP,
+          timestamp: new Date(trip._createdAt).getTime(),
+          tripId: trip._id,
+          tripIndex: trip.index ?? 0,
+          tripPrompt: trip.prompt ?? "",
+          creatorName: trip.ownerName ?? "Unknown",
+          tripCreationCost: trip.creationCost ?? 0,
+          isChallenge: trip.challenge === true
+        })
+      }
+    }
+
+    // Convert outcomes to feed messages
+    if (olderOutcomes) {
+      for (const outcome of olderOutcomes) {
+        const ratDied = outcome.newRatBalance === 0
+
+        const itemsOnEntrance: FeedItem[] =
+          outcome.inventoryOnEntrance?.map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+        const itemsGained: FeedItem[] =
+          outcome.itemChanges
+            ?.filter(item => item.type === "add")
+            .map(item => ({
+              id: item.id ?? "",
+              name: item.name ?? "",
+              value: item.value ?? 0
+            })) ?? []
+
+        const itemsLost: FeedItem[] =
+          outcome.itemChanges
+            ?.filter(item => item.type === "remove")
+            .map(item => ({
+              id: item.id ?? "",
+              name: item.name ?? "",
+              value: item.value ?? 0
+            })) ?? []
+
+        const itemsLostOnDeath: FeedItem[] =
+          outcome.itemsLostOnDeath?.map(item => ({
+            id: item.id ?? "",
+            name: item.name ?? "",
+            value: item.value ?? 0
+          })) ?? []
+
+        feedMessages.push({
+          id: `outcome-paginated-${outcome._id}`,
+          type: FEED_MESSAGE_TYPE.NEW_OUTCOME,
+          timestamp: new Date(outcome._createdAt).getTime(),
+          outcomeId: outcome._id ?? "",
+          tripId: outcome.tripId ?? "",
+          tripIndex: outcome.tripIndex ?? 0,
+          tripPrompt: outcome.tripPrompt ?? "",
+          ratName: outcome.ratName ?? "Unknown Rat",
+          result: ratDied ? "died" : "survived",
+          ratOwnerName: outcome.playerName ?? "Unknown Player",
+          ratValueChange: outcome.ratValueChange ?? 0,
+          ratBalanceChange: (outcome.newRatBalance ?? 0) - (outcome.oldRatBalance ?? 0),
+          itemsOnEntrance,
+          itemsGained,
+          itemsLost,
+          itemsLostOnDeath,
+          isChallenge: outcome.challenge === true
+        })
+      }
+    }
+
+    // Add all messages at once (sorted by timestamp in addFeedMessages)
+    if (feedMessages.length > 0) {
+      addFeedMessages(feedMessages)
+    }
+
+    const loadTime = performance.now() - startTime
+    logger.log(
+      `Loaded ${feedMessages.length} older messages in ${loadTime.toFixed(0)}ms: ${olderTrips?.length ?? 0} trips, ${olderOutcomes?.length ?? 0} outcomes`
+    )
+
+    return feedMessages.length
+  } catch (error) {
+    logger.error("Error loading more feed history:", error)
+    return 0
   }
 }

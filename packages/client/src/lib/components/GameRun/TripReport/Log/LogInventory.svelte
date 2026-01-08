@@ -24,16 +24,24 @@
   let itemElements = $state<HTMLDivElement[]>([])
   let emptyElement = $state<HTMLDivElement | null>(null)
 
-  // Get inventory items from frozen rat
-  let inventoryItems = $derived(frozenRat?.inventory ?? [])
+  // Get inventory items from frozen rat, filtering out zero address (invalid items)
+  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000000000000000000000000000"
+  let inventoryItems = $derived(
+    (frozenRat?.inventory ?? []).filter(item => {
+      if (typeof item === "string") {
+        return item.toLowerCase() !== ZERO_ADDRESS.toLowerCase()
+      }
+      return true
+    })
+  )
   let hasItems = $derived(inventoryItems.length > 0)
 
   // Helper to get item name - handles both string (item ID) and TempItem types
   function getItemName(item: string | TempItem): string {
     if (typeof item === "string") {
-      // It's an item ID, look up name from items store
-      const itemData = $items[item]
-      return itemData?.name ?? "Unknown"
+      // Normalize to lowercase to match how items are keyed in the store
+      const itemData = $items[item.toLowerCase()]
+      return itemData?.name ?? `Unknown (${item.slice(0, 10)}...)`
     }
     return item.name
   }

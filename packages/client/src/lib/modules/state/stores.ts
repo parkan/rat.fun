@@ -161,7 +161,9 @@ export const rat = derived([player, rats], ([$player, $rats]) => $rats[$player?.
 export const playerHasLiveRat = derived([rat], ([$rat]) => !!($rat && !$rat.dead))
 
 export const ratInventory = derived([rat, items], ([$rat, $items]) =>
-  convertBigIntsToNumbers($rat?.inventory?.map(item => $items[item]) ?? ([] as Item[]))
+  convertBigIntsToNumbers(
+    $rat?.inventory?.map(item => $items[item.toLowerCase()]) ?? ([] as Item[])
+  )
 )
 
 export const ratTotalValue = derived([rat, ratInventory], ([$rat]) => getRatTotalValue($rat))

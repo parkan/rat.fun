@@ -177,6 +177,7 @@
     initTrips($publicNetwork.worldAddress, finalRelevantTripIds)
     initPlayerOutcomes($publicNetwork.worldAddress, finalPlayerTripIds)
 
+    console.log("loading history", $publicNetwork.worldAddress)
     // Load recent trips/outcomes for operator feed history (non-blocking)
     loadFeedHistory($publicNetwork.worldAddress)
 

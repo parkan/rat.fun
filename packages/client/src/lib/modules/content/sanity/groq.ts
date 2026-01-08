@@ -134,11 +134,11 @@ const singleOutcome = `*[_type == "outcome" && _id == $id][0] {
   }`
 
 /**
- * Recent trips for feed history (last N trips ordered by creation time)
- * Params: $worldAddress
+ * Recent trips for feed history (initial load - last 100 items within 7 days)
+ * Params: $worldAddress, $oneWeekAgo (ISO timestamp)
  * Used for: Populating operator feed with recent trip creations on load
  */
-const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress] | order(_createdAt desc) [0...20] {
+const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress && _createdAt >= $oneWeekAgo] | order(_createdAt desc) [0...100] {
   _id,
   _createdAt,
   index,
@@ -149,11 +149,58 @@ const recentTripsForFeed = `*[_type == "trip" && worldAddress == $worldAddress] 
 }`
 
 /**
- * Recent outcomes for feed history (last N outcomes ordered by creation time)
- * Params: $worldAddress
+ * Recent outcomes for feed history (initial load - last 100 items within 7 days)
+ * Params: $worldAddress, $oneWeekAgo (ISO timestamp)
  * Used for: Populating operator feed with recent outcomes on load
  */
-const recentOutcomesForFeed = `*[_type == "outcome" && worldAddress == $worldAddress] | order(_createdAt desc) [0...20] {
+const recentOutcomesForFeed = `*[_type == "outcome" && worldAddress == $worldAddress && _createdAt >= $oneWeekAgo] | order(_createdAt desc) [0...100] {
+  _id,
+  _createdAt,
+  tripId,
+  tripIndex,
+  ratName,
+  playerName,
+  ratValueChange,
+  oldRatBalance,
+  newRatBalance,
+  inventoryOnEntrance,
+  itemChanges,
+  itemsLostOnDeath,
+  "tripPrompt": *[_type == "trip" && _id == ^.tripId][0].prompt,
+  challenge
+}`
+
+/**
+ * Paginated trips for feed (fetch older messages when scrolling up)
+ * Uses efficient timestamp-based filtering with tiebreaker pattern
+ * Params: $worldAddress, $beforeTimestamp (ISO), $beforeId, $oneWeekAgo (ISO)
+ * Returns: Up to 50 trips older than the given timestamp, but not older than one week
+ */
+const paginatedTripsForFeed = `*[_type == "trip"
+  && worldAddress == $worldAddress
+  && _createdAt >= $oneWeekAgo
+  && (_createdAt < $beforeTimestamp || (_createdAt == $beforeTimestamp && _id < $beforeId))
+] | order(_createdAt desc) [0...50] {
+  _id,
+  _createdAt,
+  index,
+  prompt,
+  ownerName,
+  creationCost,
+  challenge
+}`
+
+/**
+ * Paginated outcomes for feed (fetch older messages when scrolling up)
+ * Uses efficient timestamp-based filtering with tiebreaker pattern
+ * Params: $worldAddress, $beforeTimestamp (ISO), $beforeId, $oneWeekAgo (ISO)
+ * Returns: Up to 50 outcomes older than the given timestamp, but not older than one week
+ */
+const paginatedOutcomesForFeed = `*[_type == "outcome"
+  && worldAddress == $worldAddress
+  && _createdAt >= $oneWeekAgo
+  && (_createdAt < $beforeTimestamp || (_createdAt == $beforeTimestamp && _id < $beforeId))
+] | order(_createdAt desc) [0...50] {
   _id,
   _createdAt,
   tripId,
@@ -241,6 +288,8 @@ export const queries = {
   // Feed history queries
   recentTripsForFeed,
   recentOutcomesForFeed,
+  paginatedTripsForFeed,
+  paginatedOutcomesForFeed,
 
   // Composite queries
   staticContent,
