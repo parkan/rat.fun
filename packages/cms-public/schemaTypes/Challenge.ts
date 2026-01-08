@@ -26,6 +26,16 @@ export default {
         Rule.regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).error("Must be in HH:MM format (e.g. 14:00)")
     },
     {
+      title: "Next Challenge Date",
+      name: "nextChallengeDay",
+      type: "date",
+      description:
+        "The date when the next challenge occurs (combined with Daily Challenge Time in CET). Leave empty to countdown to tomorrow.",
+      options: {
+        dateFormat: "YYYY-MM-DD"
+      }
+    },
+    {
       title: "Challenge Title",
       name: "challengeTitle",
       type: "string",

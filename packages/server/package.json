@@ -25,30 +25,30 @@
     "@latticexyz/store-sync": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/utils": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@latticexyz/world": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
-    "@sanity/client": "^7.13.2",
+    "@sanity/client": "^7.14.0",
     "@sentry/node": "^10.32.1",
     "contracts": "workspace:*",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
-    "redis": "^5.9.0",
+    "redis": "^5.10.0",
     "replicate": "^1.4.0",
     "rxjs": "^7.8.2",
     "sharp": "^0.34.5",
     "uuid": "^13.0.0",
     "viem": "2.39.0",
-    "zod": "^4.2.1"
+    "zod": "^4.3.5"
   },
   "engines": {
     "node": "^20"
   },
   "type": "module",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "eslint": "^9.39.1",
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^16.2.0",
+    "globals": "^17.0.0",
     "tsup": "^8.5.1",
-    "tsx": "4.20.6",
-    "typescript-eslint": "^8.48.0"
+    "tsx": "4.21.0",
+    "typescript-eslint": "^8.52.0"
   }
 }

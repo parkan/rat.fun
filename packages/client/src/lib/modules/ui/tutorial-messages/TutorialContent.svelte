@@ -51,8 +51,7 @@
   <div class="tutorial-box">
     <p>
       {#if $isPhone}
-        Here, you can unlock access to the <span class="highlight">TRIP LAB</span> and experiment by
-        making
+        Here, you can unlock access to the <span class="highlight">TRIP LAB</span> and experiment by making
       {:else}
         You can unlock access to the <span class="highlight">TRIP LAB</span> and experiment by making
       {/if}

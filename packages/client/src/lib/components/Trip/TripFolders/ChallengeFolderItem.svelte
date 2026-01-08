@@ -3,7 +3,12 @@
   import { goto } from "$app/navigation"
   import type { TripFolder } from "@sanity-types"
   import { playSound } from "$lib/modules/sound"
-  import { getTodayCETTime, getNextCETTime, formatCountdown } from "@ratfun/shared-utils"
+  import {
+    getTodayCETTime,
+    getNextCETTime,
+    getTargetCETDate,
+    formatCountdown
+  } from "@ratfun/shared-utils"
 
   const GRACE_PERIOD_MS = 10 * 60 * 1000 // 10 minutes
   const WINNER_DISPLAY_DURATION_MS = 15 * 60 * 1000 // 15 minutes
@@ -14,6 +19,7 @@
     challengeTripId,
     attemptCount,
     dailyChallengeTime,
+    nextChallengeDay,
     challengeTitle,
     lastWinnerName,
     lastWinTimestamp
@@ -23,6 +29,7 @@
     challengeTripId?: string
     attemptCount?: number
     dailyChallengeTime?: string | null
+    nextChallengeDay?: string | null // Date in YYYY-MM-DD format, or null for tomorrow
     challengeTitle?: string | null
     lastWinnerName?: string | null
     lastWinTimestamp?: number | null // Unix timestamp in ms
@@ -64,22 +71,40 @@
       return
     }
 
-    // Priority 4: Check if we're in grace period or countdown
-    const todayTarget = getTodayCETTime(dailyChallengeTime).getTime()
-    const timeSinceTarget = now - todayTarget
+    // If nextChallengeDay is set (a date string like "2025-01-15"), show countdown to that specific date
+    // Validate it's a proper date string (YYYY-MM-DD format)
+    if (
+      nextChallengeDay &&
+      typeof nextChallengeDay === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(nextChallengeDay)
+    ) {
+      // Fixed target date - just show countdown
+      displayState = "countdown"
+      const target = getTargetCETDate(dailyChallengeTime, nextChallengeDay).getTime()
+      const diff = target - now
 
-    // If target time has passed today
-    if (timeSinceTarget >= 0) {
-      // Within grace period - show "Starting soon..."
-      if (timeSinceTarget < GRACE_PERIOD_MS) {
-        displayState = "grace"
+      if (diff <= 0) {
         countdownText = "Starting soon..."
         return
       }
-      // Grace period expired - show countdown to next day
+
+      countdownText = formatCountdown(diff)
+      return
     }
 
-    // Show countdown to next occurrence
+    // Default behavior: countdown to next occurrence of dailyChallengeTime
+    // Check if we're in grace period (just after target time)
+    const todayTarget = getTodayCETTime(dailyChallengeTime).getTime()
+    const timeSinceTarget = now - todayTarget
+
+    if (timeSinceTarget >= 0 && timeSinceTarget < GRACE_PERIOD_MS) {
+      // Within grace period - show "Starting soon..."
+      displayState = "grace"
+      countdownText = "Starting soon..."
+      return
+    }
+
+    // Show countdown to next occurrence of dailyChallengeTime
     displayState = "countdown"
     const target = getNextCETTime(dailyChallengeTime).getTime()
     const diff = target - now
@@ -93,6 +118,10 @@
   }
 
   $effect(() => {
+    // Access reactive props to establish tracking
+    const _time = dailyChallengeTime
+    const _day = nextChallengeDay
+
     // Always run the update to determine display state
     updateCountdown()
     countdownInterval = setInterval(updateCountdown, 1000)

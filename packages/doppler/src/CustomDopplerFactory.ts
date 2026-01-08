@@ -48,8 +48,9 @@ export interface CustomTokenConfig extends StandardTokenConfig {
   spendLimitAmount: bigint
 }
 
-export interface CustomCreateDynamicAuctionParams<C extends SupportedChainId = SupportedChainId>
-  extends CreateDynamicAuctionParams<C> {
+export interface CustomCreateDynamicAuctionParams<
+  C extends SupportedChainId = SupportedChainId
+> extends CreateDynamicAuctionParams<C> {
   token: CustomTokenConfig
 }
 

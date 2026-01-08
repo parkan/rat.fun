@@ -17,6 +17,7 @@
     challengeTripId,
     challengeTripAttempts,
     dailyChallengeTime,
+    nextChallengeDay,
     challengeTitle,
     lastWinnerName,
     lastWinTimestamp
@@ -32,6 +33,7 @@
     challengeTripId?: string
     challengeTripAttempts?: number
     dailyChallengeTime?: string | null
+    nextChallengeDay?: string | null // Date in YYYY-MM-DD format, or null for tomorrow
     challengeTitle?: string | null
     lastWinnerName?: string | null
     lastWinTimestamp?: number | null
@@ -48,6 +50,7 @@
         {challengeTripId}
         attemptCount={challengeTripAttempts}
         {dailyChallengeTime}
+        {nextChallengeDay}
         {challengeTitle}
         {lastWinnerName}
         {lastWinTimestamp}
