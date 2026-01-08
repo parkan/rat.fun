@@ -47,6 +47,21 @@
 <div class="outcome-log">
   <div class="log-panel">
     <div class="log-container">
+      {#if outcome.inventoryOnEntrance && outcome.inventoryOnEntrance.length > 0}
+        <div class="inventory-section">
+          <div class="inventory-label">Started with:</div>
+          <div class="inventory-items">
+            {#each outcome.inventoryOnEntrance as item (item.id)}
+              <LogOutcomeItemStatic
+                name={item.name ?? "Unknown"}
+                value={item.value ?? 0}
+                action="add"
+              />
+            {/each}
+          </div>
+        </div>
+      {/if}
+
       {#if mergedLog}
         {#each mergedLog as entry, i}
           <div class="log-item" bind:this={logEntryElements[i]}>
@@ -126,5 +141,25 @@
     flex-wrap: wrap;
     // Height matches LogTextStatic: font-size-normal * line-height(1.4) + padding(10px)
     height: calc(var(--font-size-normal) * 1.4 + 10px);
+  }
+
+  .inventory-section {
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid var(--color-grey-dark);
+  }
+
+  .inventory-label {
+    font-size: var(--font-size-normal);
+    color: var(--color-grey-light);
+    margin-bottom: 0.5em;
+    font-weight: bold;
+  }
+
+  .inventory-items {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    flex-wrap: wrap;
   }
 </style>
