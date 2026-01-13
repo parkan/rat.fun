@@ -65,6 +65,17 @@ contract BaseTest is MudTest, GasReporter {
     }
   }
 
+  // Give more tokens for challenge trip tests (5000 minimum required)
+  function setChallengeBalance(address _player) internal returns (uint256 initialBalance) {
+    initialBalance = LibWorld.erc20().balanceOf(_player);
+    // Give player enough balance for challenge trips (2000 per call, need 5+ calls for 10000)
+    for (uint256 i = 0; i < 5; i++) {
+      vm.prank(_player);
+      world.ratfun__giveCallerTokens();
+    }
+    initialBalance = LibWorld.erc20().balanceOf(_player);
+  }
+
   function approveGamePool(uint256 _amount) internal {
     LibWorld.erc20().approve(address(LibWorld.gamePool()), _amount);
   }

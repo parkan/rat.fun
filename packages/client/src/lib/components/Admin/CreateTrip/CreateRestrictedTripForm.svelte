@@ -5,15 +5,17 @@
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { MIN_TRIP_CREATION_COST, DEFAULT_SUGGESTED_TRIP_CREATION_COST } from "@server/config"
   import { isPhone } from "$lib/modules/ui/state.svelte"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
+  // Challenge trip fixed parameters
+  const CHALLENGE_MIN_CREATION_COST = 5000
+  const CHALLENGE_FIXED_MIN_VALUE_TO_ENTER = 100
+  const CHALLENGE_MAX_WIN_PERCENTAGE = 100
+
   let {
     tripDescription = $bindable(""),
-    tripCreationCost = $bindable(DEFAULT_SUGGESTED_TRIP_CREATION_COST),
-    fixedMinValueToEnter = $bindable(100),
-    overrideMaxValuePerWinPercentage = $bindable(100),
+    tripCreationCost = $bindable(CHALLENGE_MIN_CREATION_COST),
     textareaElement = $bindable<HTMLTextAreaElement | null>(null),
     selectedFolderTitle,
     onFolderSelect,
@@ -22,8 +24,6 @@
   }: {
     tripDescription: string
     tripCreationCost: number
-    fixedMinValueToEnter: number
-    overrideMaxValuePerWinPercentage: number
     textareaElement: HTMLTextAreaElement | null
     selectedFolderTitle?: string
     onFolderSelect?: () => void
@@ -33,22 +33,15 @@
 
   // Floor values to ensure they're integers
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
-  let flooredMinValueToEnter = $derived(Math.floor(fixedMinValueToEnter))
 
-  // Calculate max win amount based on percentage and creation cost
+  // Calculate max win amount based on fixed percentage and creation cost
   let maxWinAmount = $derived(
-    Math.floor((flooredTripCreationCost * overrideMaxValuePerWinPercentage) / 100)
+    Math.floor((flooredTripCreationCost * CHALLENGE_MAX_WIN_PERCENTAGE) / 100)
   )
 
   // Prompt has to be between 1 and MAX_TRIP_PROMPT_LENGTH characters
   let invalidTripDescriptionLength = $derived(
     tripDescription.length < 1 || tripDescription.length > $gameConfig.maxTripPromptLength
-  )
-
-  // Validation for challenge trip parameters
-  let invalidMinValueToEnter = $derived(flooredMinValueToEnter <= 0)
-  let invalidMaxWinPercentage = $derived(
-    overrideMaxValuePerWinPercentage <= 0 || overrideMaxValuePerWinPercentage > 100
   )
 
   // Disabled if:
@@ -57,16 +50,12 @@
   // - Trip creation cost is less than minimum
   // - Player has insufficient balance
   // - No folder is selected (when folder selection is enabled)
-  // - Min value to enter is invalid
-  // - Max win percentage is invalid
   const disabled = $derived(
     invalidTripDescriptionLength ||
       busy.CreateTrip.current !== 0 ||
-      flooredTripCreationCost < MIN_TRIP_CREATION_COST ||
+      flooredTripCreationCost < CHALLENGE_MIN_CREATION_COST ||
       $playerERC20Balance < flooredTripCreationCost ||
-      (onFolderSelect && !selectedFolderTitle) ||
-      invalidMinValueToEnter ||
-      invalidMaxWinPercentage
+      (onFolderSelect && !selectedFolderTitle)
   )
 </script>
 
@@ -109,23 +98,23 @@
     </div>
 
     <div class="param-grid">
-      <!-- TRIP CREATION COST -->
+      <!-- TRIP CREATION COST (editable) -->
       <div class="param-group">
         <label for="creation-cost">
-          <span class="param-label">Creation Cost</span>
+          <span class="param-label">Pool Size (min {CHALLENGE_MIN_CREATION_COST})</span>
         </label>
         <div class="param-input-wrapper">
           <input
             id="creation-cost"
             type="number"
             class="param-input"
-            min={MIN_TRIP_CREATION_COST}
+            min={CHALLENGE_MIN_CREATION_COST}
             max={$playerERC20Balance}
             oninput={typeHit}
             onblur={e => {
               const value = Number((e.target as HTMLInputElement).value)
-              if (value < MIN_TRIP_CREATION_COST) {
-                tripCreationCost = MIN_TRIP_CREATION_COST
+              if (value < CHALLENGE_MIN_CREATION_COST) {
+                tripCreationCost = CHALLENGE_MIN_CREATION_COST
               } else if (value > $playerERC20Balance) {
                 tripCreationCost = $playerERC20Balance
               }
@@ -136,58 +125,29 @@
         </div>
       </div>
 
-      <!-- MIN RAT VALUE TO ENTER -->
+      <!-- MIN RAT VALUE TO ENTER (fixed) -->
       <div class="param-group">
-        <label for="min-value">
-          <span class="param-label">Min Rat Value</span>
-        </label>
-        <div class="param-input-wrapper">
-          <input
-            id="min-value"
-            type="number"
-            class="param-input"
-            class:invalid={invalidMinValueToEnter}
-            min={1}
-            oninput={typeHit}
-            onblur={e => {
-              const value = Number((e.target as HTMLInputElement).value)
-              if (value < 1) {
-                fixedMinValueToEnter = 1
-              }
-            }}
-            bind:value={fixedMinValueToEnter}
-          />
+        <span class="param-label">Min Rat Value</span>
+        <div class="param-fixed-value">
+          <span class="fixed-value">{CHALLENGE_FIXED_MIN_VALUE_TO_ENTER}</span>
           <span class="param-unit">{CURRENCY_SYMBOL}</span>
         </div>
       </div>
 
-      <!-- MAX WIN PERCENTAGE -->
+      <!-- MAX WIN PERCENTAGE (fixed) -->
       <div class="param-group">
-        <label for="max-win-pct">
-          <span class="param-label">Max Win %</span>
-        </label>
-        <div class="param-input-wrapper">
-          <input
-            id="max-win-pct"
-            type="number"
-            class="param-input"
-            class:invalid={invalidMaxWinPercentage}
-            min={1}
-            max={100}
-            oninput={typeHit}
-            onblur={e => {
-              const value = Number((e.target as HTMLInputElement).value)
-              if (value < 1) {
-                overrideMaxValuePerWinPercentage = 1
-              } else if (value > 100) {
-                overrideMaxValuePerWinPercentage = 100
-              }
-            }}
-            bind:value={overrideMaxValuePerWinPercentage}
-          />
+        <span class="param-label">Max Win</span>
+        <div class="param-fixed-value">
+          <span class="fixed-value">{CHALLENGE_MAX_WIN_PERCENTAGE}</span>
           <span class="param-unit">%</span>
         </div>
       </div>
+    </div>
+
+    <!-- INFO: Active period -->
+    <div class="challenge-info">
+      Challenge trips are active for 24 hours. After this period, no new entries are allowed and the
+      pool can be liquidated.
     </div>
   </div>
 
@@ -196,7 +156,7 @@
     <div class="value-box">
       <div class="value-label">MIN RISK</div>
       <div class="value-amount">
-        <span>{flooredMinValueToEnter} {CURRENCY_SYMBOL}</span>
+        <span>{CHALLENGE_FIXED_MIN_VALUE_TO_ENTER} {CURRENCY_SYMBOL}</span>
       </div>
     </div>
     <div class="value-box">
@@ -343,10 +303,6 @@
           text-align: left;
           outline: none;
 
-          &.invalid {
-            color: var(--color-bad);
-          }
-
           &:focus {
             border: none;
             outline: none;
@@ -360,6 +316,37 @@
           opacity: 0.7;
         }
       }
+
+      .param-fixed-value {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--color-grey-mid);
+        padding: 4px 8px;
+
+        .fixed-value {
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-large);
+          color: var(--background);
+        }
+
+        .param-unit {
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-normal);
+          color: var(--background);
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .challenge-info {
+      font-family: var(--typewriter-font-stack);
+      font-size: var(--font-size-small);
+      color: var(--color-grey-light);
+      padding: 8px;
+      background: var(--background);
+      border: 1px solid var(--color-border);
+      line-height: 1.4;
     }
   }
 

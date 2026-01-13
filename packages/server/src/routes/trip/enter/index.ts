@@ -92,7 +92,9 @@ async function routes(fastify: FastifyInstance) {
         // Validate data
         // * * * * * * * * * * * * * * * * * *
 
-        validateInputData(player, rat, trip, gamePercentagesConfig)
+        // Get current block number for challenge trip expiry check
+        const currentBlockNumber = await network.publicClient.getBlockNumber()
+        validateInputData(player, rat, trip, gamePercentagesConfig, currentBlockNumber)
 
         // * * * * * * * * * * * * * * * * * *
         // Get system prompts from CMS

@@ -3,85 +3,85 @@
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddItem",
     "name": "Apply outcome (add item)",
-    "gasUsed": 470070
+    "gasUsed": 473356
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeAddItemTooExpensive",
     "name": "Apply outcome (add item: too expensive)",
-    "gasUsed": 222733
+    "gasUsed": 226016
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeEmpty",
     "name": "Apply outcome (empty)",
-    "gasUsed": 218165
+    "gasUsed": 221448
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeOverTransferToRat",
     "name": "Apply outcome (over transfer to rat)",
-    "gasUsed": 256034
+    "gasUsed": 259319
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeOverTransferToTrip",
     "name": "Apply outcome (over transfer to trip)",
-    "gasUsed": 397569
+    "gasUsed": 400860
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItem",
     "name": "Apply outcome (remove item)",
-    "gasUsed": 147046
+    "gasUsed": 150330
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeRemoveItemsFromDifferentArrayPositions",
     "name": "Apply outcome (remove item from middle of full inventory)",
-    "gasUsed": 173518
+    "gasUsed": 176803
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeTransferToRat",
     "name": "Apply outcome (transfer to rat)",
-    "gasUsed": 257953
+    "gasUsed": 261238
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeTransferToTrip",
     "name": "Apply outcome (transfer to trip)",
-    "gasUsed": 135601
+    "gasUsed": 138886
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testApplyOutcomeValueTransferOnDeath",
     "name": "Apply outcome (value transfer on death)",
-    "gasUsed": 412986
+    "gasUsed": 416278
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testChallengeTripWinnerTakesAllWithItemRemoval",
     "name": "Apply outcome (challenge trip winner takes all with item)",
-    "gasUsed": 222653
+    "gasUsed": 242896
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testItemRemovalValueAvailableForBalanceTransfer",
     "name": "Apply outcome (item removal contributes to budget)",
-    "gasUsed": 182070
+    "gasUsed": 185356
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testTripBudgetLimitedByBalance",
     "name": "Apply outcome (trip balance limit)",
-    "gasUsed": 243164
+    "gasUsed": 246449
   },
   {
     "file": "test/systems/ManagerSystem.t.sol:ManagerSystemTest",
     "test": "testTripCannotExceedMaxValuePerWin",
     "name": "Apply outcome (trip budget limit)",
-    "gasUsed": 247944
+    "gasUsed": 251229
   },
   {
     "file": "test/systems/PlayerSystem.t.sol:PlayerSystemTest",
@@ -105,25 +105,25 @@
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testAddTripBalance",
     "name": "Add trip balance",
-    "gasUsed": 53571
+    "gasUsed": 53643
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testCloseTrip",
     "name": "Close trip",
-    "gasUsed": 240255
+    "gasUsed": 248793
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testCreateTrip",
     "name": "Create trip",
-    "gasUsed": 449295
+    "gasUsed": 449293
   },
   {
     "file": "test/systems/TripSystem.t.sol:TripSystemTest",
     "test": "testLongTripPrompt",
     "name": "Create trip: long prompt",
-    "gasUsed": 585787
+    "gasUsed": 585785
   },
   {
     "file": "test/systems/UnlockAdminSystem.t.sol:UnlockAdminSystemTest",

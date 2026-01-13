@@ -15,7 +15,10 @@ import {
   MasterKey,
   ChallengeTrip,
   ChallengeWinner,
-  Owner
+  Owner,
+  ChallengeConfig,
+  ActiveChallenge,
+  CreationBlock
 } from "../codegen/index.sol";
 import { LibManager, LibRat, LibTrip } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
@@ -56,6 +59,14 @@ contract ManagerSystem is System {
     require(Dead.get(_ratId) == false, "rat is dead");
     require(EntityType.get(_tripId) == ENTITY_TYPE.TRIP, "not trip");
     require(LibRat.getTotalRatValue(_ratId) >= LibTrip.getMinRatValueToEnter(_tripId), "rat value too low");
+
+    // Challenge trips can only be entered during active period
+    if (ChallengeTrip.get(_tripId)) {
+      require(
+        block.number <= CreationBlock.get(_tripId) + ChallengeConfig.getActivePeriodBlocks(),
+        "challenge trip expired"
+      );
+    }
 
     // Check that trip is not depleted
     uint256 tripBalance = Balance.get(_tripId);
@@ -105,9 +116,12 @@ contract ManagerSystem is System {
     // As items always have positive value, this will always decrease the trip balance
     tripBudget = LibManager.addItemsToRat(tripBudget, _ratId, _tripId, _itemsToAddToRat);
 
-    // If the trip is a challenge trip and the trip balance is 0, set the winner (player ID)
+    // If the trip is a challenge trip and the trip balance is 0, set the winner and clear global active challenge
     if (ChallengeTrip.get(_tripId) && Balance.get(_tripId) == 0) {
-      ChallengeWinner.set(_tripId, Owner.get(_ratId));
+      bytes32 winnerId = Owner.get(_ratId);
+      ChallengeWinner.set(_tripId, winnerId);
+      // Clear global active challenge (a new challenge can now be created)
+      ActiveChallenge.setTripId(bytes32(0));
     }
   }
 

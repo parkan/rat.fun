@@ -9,7 +9,6 @@
   import { staticContent } from "$lib/modules/content"
   import { TripFolders } from "$lib/components/Trip"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
-  import { playerIsWhitelisted } from "$lib/modules/state/stores"
   import { FEATURES } from "$lib/config/features"
   import { nope } from "$lib/modules/moderation"
   import CreateTripForm from "./CreateTripForm.svelte"
@@ -38,17 +37,13 @@
   let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
   let tripCreationCost = $state(DEFAULT_SUGGESTED_TRIP_CREATION_COST)
 
-  // Challenge trip parameters (for restricted folders)
-  let fixedMinValueToEnter = $state(100)
-  let overrideMaxValuePerWinPercentage = $state(100)
-
   // Floor the trip creation cost to ensure it's an integer
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
 
-  // Get available folders: all non-restricted, plus restricted if user is whitelisted AND challenge trips are enabled
+  // Get available folders: all non-restricted, plus restricted if challenge trips are enabled (no whitelist needed)
   let availableFolders = $derived(
     $staticContent.tripFolders.filter(
-      folder => !folder.restricted || ($playerIsWhitelisted && FEATURES.ENABLE_CHALLENGE_TRIPS)
+      folder => !folder.restricted || FEATURES.ENABLE_CHALLENGE_TRIPS
     )
   )
 
@@ -120,8 +115,8 @@
           flooredTripCreationCost,
           selectedFolderId,
           true, // isChallengeTrip
-          Math.floor(fixedMinValueToEnter),
-          Math.floor(overrideMaxValuePerWinPercentage)
+          100, // Fixed min value to enter
+          100 // Fixed max win percentage
         )
       } else {
         await sendCreateTrip(tripDescription, flooredTripCreationCost, selectedFolderId)
@@ -185,8 +180,6 @@
           <CreateRestrictedTripForm
             bind:tripDescription
             bind:tripCreationCost
-            bind:fixedMinValueToEnter
-            bind:overrideMaxValuePerWinPercentage
             bind:textareaElement
             {selectedFolderTitle}
             onFolderSelect={() => {
@@ -217,8 +210,6 @@
       <CreateRestrictedTripForm
         bind:tripDescription
         bind:tripCreationCost
-        bind:fixedMinValueToEnter
-        bind:overrideMaxValuePerWinPercentage
         bind:textareaElement
         onSubmit={onClick}
         {placeholder}

@@ -15,3 +15,9 @@ uint32 constant MAX_VALUE_PER_WIN_PERCENTAGE = 25; // 25%
 uint32 constant MIN_RAT_VALUE_TO_ENTER_PERCENTAGE = 10; // 10%
 uint32 constant TAXATION_LIQUIDATE_RAT_PERCENTAGE = 5; // 5%
 uint32 constant TAXATION_CLOSE_TRIP_PERCENTAGE = 5; // 5%
+
+// Challenge trip constants
+uint256 constant CHALLENGE_MIN_CREATION_COST = 5000;
+uint32 constant CHALLENGE_ACTIVE_PERIOD_BLOCKS = 43200; // 24h at 2s/block on Base
+uint256 constant CHALLENGE_FIXED_MIN_VALUE_TO_ENTER = 100;
+uint32 constant CHALLENGE_MAX_WIN_PERCENTAGE = 100;

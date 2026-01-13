@@ -37,64 +37,33 @@ export function validateInputData(
   }
 }
 
+// Challenge trip fixed parameters
+export const CHALLENGE_FIXED_MIN_VALUE_TO_ENTER = 100
+export const CHALLENGE_MAX_WIN_PERCENTAGE = 100
+
 /**
  * Validate challenge trip parameters
  * @param isChallengeTrip - Whether this is a challenge trip
- * @param fixedMinValueToEnter - Fixed minimum rat value to enter
- * @param overrideMaxValuePerWinPercentage - Override max value per win percentage
- * @param isWhitelisted - Whether the user is whitelisted for challenge trips
+ * @param tripCreationCost - The trip creation cost
+ * @param minChallengeCreationCost - Minimum cost to create a challenge trip (read from chain)
  */
 export function validateChallengeTripParams(
   isChallengeTrip: boolean | undefined,
-  fixedMinValueToEnter: number | undefined,
-  overrideMaxValuePerWinPercentage: number | undefined,
-  isWhitelisted: boolean
+  tripCreationCost: number,
+  minChallengeCreationCost: number
 ) {
   if (!isChallengeTrip) {
-    // If not a challenge trip, these values must not be set
-    if (fixedMinValueToEnter && fixedMinValueToEnter > 0) {
-      throw new ValidationError(
-        "CHALLENGE_TRIP_PARAM_ERROR",
-        "Validation failed",
-        "fixedMinValueToEnter can only be set for challenge trips"
-      )
-    }
-    if (overrideMaxValuePerWinPercentage && overrideMaxValuePerWinPercentage > 0) {
-      throw new ValidationError(
-        "CHALLENGE_TRIP_PARAM_ERROR",
-        "Validation failed",
-        "overrideMaxValuePerWinPercentage can only be set for challenge trips"
-      )
-    }
     return
   }
 
-  // Challenge trip validation
-  if (!isWhitelisted) {
-    throw new AuthorizationError("Not whitelisted to create challenge trips")
-  }
-
-  if (!fixedMinValueToEnter || fixedMinValueToEnter <= 0) {
+  // Enforce minimum challenge trip creation cost
+  if (tripCreationCost < minChallengeCreationCost) {
     throw new ValidationError(
       "CHALLENGE_TRIP_PARAM_ERROR",
       "Validation failed",
-      "fixedMinValueToEnter must be greater than 0 for challenge trips"
+      `Challenge trip creation cost must be at least ${minChallengeCreationCost}`
     )
   }
-
-  if (!overrideMaxValuePerWinPercentage || overrideMaxValuePerWinPercentage <= 0) {
-    throw new ValidationError(
-      "CHALLENGE_TRIP_PARAM_ERROR",
-      "Validation failed",
-      "overrideMaxValuePerWinPercentage must be greater than 0 for challenge trips"
-    )
-  }
-
-  if (overrideMaxValuePerWinPercentage > 100) {
-    throw new ValidationError(
-      "CHALLENGE_TRIP_PARAM_ERROR",
-      "Validation failed",
-      "overrideMaxValuePerWinPercentage must be at most 100"
-    )
-  }
+  // Note: fixedMinValueToEnter and overrideMaxValuePerWinPercentage are now fixed at 100
+  // and enforced by the contract
 }

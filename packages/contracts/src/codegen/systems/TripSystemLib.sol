@@ -67,6 +67,10 @@ library TripSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).closeTrip(_tripId);
   }
 
+  function setChallengeConfig(TripSystemType self, uint256 _minCreationCost, uint32 _activePeriodBlocks) internal {
+    return CallWrapper(self.toResourceId(), address(0)).setChallengeConfig(_minCreationCost, _activePeriodBlocks);
+  }
+
   function createTrip(
     CallWrapper memory self,
     bytes32 _playerId,
@@ -122,6 +126,19 @@ library TripSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
+  function setChallengeConfig(CallWrapper memory self, uint256 _minCreationCost, uint32 _activePeriodBlocks) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert TripSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _setChallengeConfig_uint256_uint32.setChallengeConfig,
+      (_minCreationCost, _activePeriodBlocks)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
   function createTrip(
     RootCallWrapper memory self,
     bytes32 _playerId,
@@ -159,6 +176,18 @@ library TripSystemLib {
 
   function closeTrip(RootCallWrapper memory self, bytes32 _tripId) internal {
     bytes memory systemCall = abi.encodeCall(_closeTrip_bytes32.closeTrip, (_tripId));
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function setChallengeConfig(
+    RootCallWrapper memory self,
+    uint256 _minCreationCost,
+    uint32 _activePeriodBlocks
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setChallengeConfig_uint256_uint32.setChallengeConfig,
+      (_minCreationCost, _activePeriodBlocks)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -218,6 +247,10 @@ interface _addTripBalance_bytes32_uint256 {
 
 interface _closeTrip_bytes32 {
   function closeTrip(bytes32 _tripId) external;
+}
+
+interface _setChallengeConfig_uint256_uint32 {
+  function setChallengeConfig(uint256 _minCreationCost, uint32 _activePeriodBlocks) external;
 }
 
 using TripSystemLib for TripSystemType global;

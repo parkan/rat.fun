@@ -399,6 +399,12 @@ export class TripBalanceError extends ValidationError {
   }
 }
 
+export class ChallengeTripExpiredError extends ValidationError {
+  constructor(message: string = "Challenge trip active period has expired.") {
+    super("CHALLENGE_TRIP_EXPIRED_ERROR", "Challenge trip expired", message)
+  }
+}
+
 // ============================================================================
 // Signature Errors
 // ============================================================================

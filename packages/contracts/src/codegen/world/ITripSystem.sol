@@ -22,4 +22,6 @@ interface ITripSystem {
   function ratfun__addTripBalance(bytes32 _tripId, uint256 _amount) external;
 
   function ratfun__closeTrip(bytes32 _tripId) external;
+
+  function ratfun__setChallengeConfig(uint256 _minCreationCost, uint32 _activePeriodBlocks) external;
 }

@@ -10,7 +10,8 @@ import {
   ExternalAddressesConfigData,
   Name,
   WorldEvent,
-  WorldEventData
+  WorldEventData,
+  ChallengeConfig
 } from "../codegen/index.sol";
 import {
   RAT_CREATION_COST,
@@ -22,7 +23,9 @@ import {
   MIN_RAT_VALUE_TO_ENTER_PERCENTAGE,
   TAXATION_LIQUIDATE_RAT_PERCENTAGE,
   TAXATION_CLOSE_TRIP_PERCENTAGE,
-  RATS_KILLED_FOR_ADMIN_ACCESS
+  RATS_KILLED_FOR_ADMIN_ACCESS,
+  CHALLENGE_MIN_CREATION_COST,
+  CHALLENGE_ACTIVE_PERIOD_BLOCKS
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
 import { GamePool } from "../external/GamePool.sol";
@@ -76,6 +79,9 @@ library LibWorld {
         feeAddress: feeAddress
       })
     );
+
+    // Set challenge config
+    ChallengeConfig.set(CHALLENGE_MIN_CREATION_COST, CHALLENGE_ACTIVE_PERIOD_BLOCKS);
 
     // Set admin name
     Name.set(adminId, "RATKING");

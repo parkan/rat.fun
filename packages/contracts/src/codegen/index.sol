@@ -34,3 +34,5 @@ import { ChallengeTrip } from "./tables/ChallengeTrip.sol";
 import { FixedMinValueToEnter } from "./tables/FixedMinValueToEnter.sol";
 import { OverrideMaxValuePerWinPercentage } from "./tables/OverrideMaxValuePerWinPercentage.sol";
 import { ChallengeWinner } from "./tables/ChallengeWinner.sol";
+import { ChallengeConfig, ChallengeConfigData } from "./tables/ChallengeConfig.sol";
+import { ActiveChallenge } from "./tables/ActiveChallenge.sol";
