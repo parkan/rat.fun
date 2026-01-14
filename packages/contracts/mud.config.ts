@@ -59,6 +59,12 @@ export default defineWorld({
         dataStruct: true
       }
     },
+    ItemNftConfig: {
+      key: [],
+      schema: {
+        itemNftAddress: "address"
+      }
+    },
     WorldEvent: {
       key: [],
       schema: {

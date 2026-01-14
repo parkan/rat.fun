@@ -170,6 +170,12 @@ function transformConfigResponse(config: GlobalConfigsResponse): WorldObject {
       cmsId: "",
       title: "",
       prompt: ""
+    },
+    // ItemNftConfig
+    itemNftConfig: {
+      itemNftAddress:
+        (config.itemNftConfig?.itemNftAddress as Address) ??
+        ("0x0000000000000000000000000000000000000000" as Address)
     }
   }
 }

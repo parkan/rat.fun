@@ -19,7 +19,8 @@ const config = {
       "@server/*": "../server/src/*",
       "@websocket-server/*": "../websocket-server/src/*",
       "@sanity-types": "../cms-public/sanity.types",
-      "@modules/*": "../server/src/modules/*"
+      "@modules/*": "../server/src/modules/*",
+      "query-server/types": "../query-server/src/types.ts"
     }
   }
 }

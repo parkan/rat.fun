@@ -1,27 +1,61 @@
 <script lang="ts">
-  import { getRatInventory } from "$lib/modules/state/utils"
+  import { getRatInventory, type ItemWithId } from "$lib/modules/state/utils"
   import { gsap } from "gsap"
   import { playSound } from "$lib/modules/sound"
+  import { exportItemToNFT } from "$lib/modules/on-chain-transactions"
+  import { errorHandler } from "$lib/modules/error-handling"
+  import { createLogger } from "$lib/modules/logger"
 
   import InventoryHeader from "$lib/components/Rat/RatInfo/RatInventory/InventoryHeader.svelte"
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
 
+  const logger = createLogger("[RatInventory]")
+
   let {
     displayRat,
     oldRat,
     newRat,
-    onTimeline
+    onTimeline,
+    enableExport = false,
+    ratId,
+    onExportComplete
   }: {
     displayRat: Rat | null
     oldRat: Rat | null
     newRat: Rat | null
     onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
+    enableExport?: boolean
+    ratId?: string
+    onExportComplete?: () => void
   } = $props()
 
+  let exportingItemId = $state<string | null>(null)
+
   // Calculate old and new inventories for change detection
-  let oldInventory = $derived<Item[]>(oldRat ? getRatInventory(oldRat) : [])
-  let newInventory = $derived<Item[]>(newRat ? getRatInventory(newRat) : [])
+  let oldInventory = $derived<ItemWithId[]>(oldRat ? getRatInventory(oldRat) : [])
+  let newInventory = $derived<ItemWithId[]>(newRat ? getRatInventory(newRat) : [])
+
+  // Handle export item to NFT
+  const handleExportItem = async (itemId: string) => {
+    if (!displayRat || !ratId || exportingItemId) return
+
+    exportingItemId = itemId
+    try {
+      logger.log("Exporting item to NFT:", { itemId, ratId })
+      const result = await exportItemToNFT(ratId, itemId)
+      if (result) {
+        logger.log("Item exported successfully")
+        playSound({ category: "ratfunUI", id: "itemPositive" })
+        // Notify parent to refresh NFT inventory
+        onExportComplete?.()
+      }
+    } catch (e) {
+      errorHandler(e)
+    } finally {
+      exportingItemId = null
+    }
+  }
 
   // Detect changes
   const addedItems = $derived(
@@ -42,7 +76,7 @@
   // During changes: show old items + new items (will animate out/in)
   // During normal entry: show new items only
   type SlotItem = {
-    item: Item | null
+    item: ItemWithId | null
     type: "removed" | "added" | "unchanged" | "empty"
     originalIndex: number // Position in final grid
   }
@@ -268,7 +302,13 @@
           <!-- Render item on top if present -->
           {#if slot.item}
             <div class="slot-item">
-              <InteractiveItem item={slot.item} index={slot.originalIndex} />
+              <InteractiveItem
+                item={slot.item}
+                index={slot.originalIndex}
+                itemId={slot.item.id}
+                onExport={enableExport ? handleExportItem : undefined}
+                isExporting={exportingItemId === slot.item.id}
+              />
             </div>
           {/if}
         </div>

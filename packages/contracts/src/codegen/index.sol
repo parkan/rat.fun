@@ -7,6 +7,7 @@ import { GameConfig, GameConfigData } from "./tables/GameConfig.sol";
 import { GamePercentagesConfig, GamePercentagesConfigData } from "./tables/GamePercentagesConfig.sol";
 import { WorldStats, WorldStatsData } from "./tables/WorldStats.sol";
 import { ExternalAddressesConfig, ExternalAddressesConfigData } from "./tables/ExternalAddressesConfig.sol";
+import { ItemNftConfig } from "./tables/ItemNftConfig.sol";
 import { WorldEvent, WorldEventData } from "./tables/WorldEvent.sol";
 import { Name } from "./tables/Name.sol";
 import { EntityType } from "./tables/EntityType.sol";

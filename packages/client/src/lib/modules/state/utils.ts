@@ -154,21 +154,32 @@ export function getTripMinRatValueToEnter(
 }
 
 /**
+ * Item with ID included
+ */
+export type ItemWithId = Item & { id: string }
+
+/**
  * Gets the inventory of a rat
  * @param rat The rat to get the inventory of
- * @returns The inventory of the rat
+ * @returns The inventory of the rat with IDs included
  */
-export function getRatInventory(rat: Rat | null, delay?: number) {
+export function getRatInventory(rat: Rat | null, delay?: number): ItemWithId[] {
   if (!rat) {
-    return [] as Item[]
+    return [] as ItemWithId[]
   }
   const itemsStore = get(items)
   // Filter out undefined items (can happen during navigation when store is being updated)
   const result =
     rat.inventory
       // Normalize item IDs to lowercase to match store keys
-      ?.map(item => itemsStore[item.toLowerCase()])
-      .filter((item): item is Item => item !== undefined) ?? ([] as Item[])
+      ?.map(itemId => {
+        const item = itemsStore[itemId.toLowerCase()]
+        if (item) {
+          return { ...item, id: itemId.toLowerCase() } as ItemWithId
+        }
+        return undefined
+      })
+      .filter((item): item is ItemWithId => item !== undefined) ?? ([] as ItemWithId[])
   return result
 }
 
