@@ -29,9 +29,11 @@ set -e
 # # # # # # # # # # # #
 
 TESTNET_WORLD_ADDRESS=0xb559D9fb876F6fC3AC05B21004B33760B3582042
-TESTNET_RPC_URL=https://sepolia.base.org
+TESTNET_RPC_URL=https://base-sepolia.g.alchemy.com/v2/xEQqRE27u_VVjfn5HlN2J
 
-forge script ./DeployOpenTripOrTrap.s.sol --sig run\(address\) $TESTNET_WORLD_ADDRESS --rpc-url $TESTNET_RPC_URL -vvv
+# forge script ./DeployOpenTripOrTrap.s.sol --sig run\(address\) $TESTNET_WORLD_ADDRESS --rpc-url $TESTNET_RPC_URL -vvv --broadcast
+forge script ./VerifyDeployment.s.sol --sig 'run(address)' $TESTNET_WORLD_ADDRESS --rpc-url $TESTNET_RPC_URL -vvv
+
 
 # # # # # # # # # # # #
 # MAINNET (Base Mainnet)
