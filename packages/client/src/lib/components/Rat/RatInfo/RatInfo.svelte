@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
-  import { rat } from "$lib/modules/state/stores"
+  import { rat, player } from "$lib/modules/state/stores"
   import { frozenRat, resetFrozenState } from "$lib/components/GameRun/state.svelte"
-  import { RatStats, RatInventory, LiquidateRat } from "$lib/components/Rat"
+  import { RatStats, RatInventory, LiquidateRat, NFTInventory } from "$lib/components/Rat"
   import { gsap } from "gsap"
 
   // Always use current rat state for displayRat
@@ -13,6 +13,17 @@
   // Initialize immediately - will be updated in onMount if frozenRat exists
   let oldRat = $state<Rat | null>(frozenRat ?? $rat)
   let newRat = $state<Rat | null>($rat)
+
+  // Get current rat ID for NFT export
+  let currentRatId = $derived($player?.currentRat as string | undefined)
+
+  // Reference to NFTInventory for refreshing after export
+  let nftInventoryRef: { refresh: () => void } | undefined = $state()
+
+  // Callback when item is exported - refresh NFT inventory
+  const handleExportComplete = () => {
+    nftInventoryRef?.refresh()
+  }
 
   // ** Root Timeline Management **
   const rootTimeline = gsap.timeline()
@@ -115,7 +126,19 @@
   </div>
   <!-- Inventory -->
   <div class="rat-inventory-container" data-tutorial="inventory">
-    <RatInventory {displayRat} {oldRat} {newRat} onTimeline={addInventoryTimeline} />
+    <RatInventory
+      {displayRat}
+      {oldRat}
+      {newRat}
+      onTimeline={addInventoryTimeline}
+      ratId={currentRatId}
+      enableExport={true}
+      onExportComplete={handleExportComplete}
+    />
+  </div>
+  <!-- NFT Inventory -->
+  <div class="nft-inventory-container">
+    <NFTInventory bind:this={nftInventoryRef} ratId={currentRatId} />
   </div>
   <!-- Liquidate -->
   <div class="rat-liquidate-container" data-tutorial="cash-out">
@@ -159,6 +182,18 @@
       }
     }
 
+    .nft-inventory-container {
+      width: 100%;
+      border-bottom: var(--default-border-style);
+      max-height: 200px;
+      overflow-y: auto;
+      flex-shrink: 0;
+
+      @media (max-width: 800px) {
+        order: 4;
+      }
+    }
+
     .rat-liquidate-container {
       height: 140px;
       width: 100%;
@@ -167,7 +202,7 @@
       overflow: visible; // Allow total value to overflow during scale animation
 
       @media (max-width: 800px) {
-        order: 3;
+        order: 5;
       }
     }
   }

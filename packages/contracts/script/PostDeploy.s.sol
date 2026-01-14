@@ -20,6 +20,7 @@ import { LibWorld, LibTrip } from "../src/libraries/Libraries.sol";
 import { FakeRatERC20 } from "../src/external/FakeRatERC20.sol";
 import { GamePool } from "../src/external/GamePool.sol";
 import { SalePlaceholder } from "../src/external/SalePlaceholder.sol";
+import { ItemNFT } from "../src/external/ItemNFT.sol";
 
 contract PostDeploy is Script {
   function run(address worldAddress) external {
@@ -77,9 +78,15 @@ contract PostDeploy is Script {
     FakeRatERC20 erc20 = new FakeRatERC20(address(serviceAddress));
     // Deploy GamePool
     GamePool gamePool = new GamePool(world, erc20);
+    // Deploy ItemNFT
+    ItemNFT itemNft = new ItemNFT(world);
 
     // Root namespace owner is admin
     LibWorld.init(NamespaceOwner.get(ROOT_NAMESPACE_ID), address(erc20), address(gamePool), serviceAddress, feeAddress);
+
+    // Set ItemNFT address in separate table (for upgrade compatibility)
+    LibWorld.setItemNftAddress(address(itemNft));
+
     vm.stopBroadcast();
   }
 }

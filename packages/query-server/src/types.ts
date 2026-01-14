@@ -122,12 +122,17 @@ export interface ExternalAddressesConfigResponse {
   feeAddress: string | null
 }
 
+export interface ItemNftConfigResponse {
+  itemNftAddress: string | null
+}
+
 // Combined global configs for hydration (static config only, worldStats is separate)
 export interface GlobalConfigsResponse {
   blockNumber: string
   gameConfig: GameConfigResponse
   gamePercentagesConfig: GamePercentagesConfigResponse
   externalAddressesConfig: ExternalAddressesConfigResponse
+  itemNftConfig: ItemNftConfigResponse
 }
 
 // Leaderboard entry types

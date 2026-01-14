@@ -8,6 +8,7 @@ import {
   GameConfigData,
   ExternalAddressesConfig,
   ExternalAddressesConfigData,
+  ItemNftConfig,
   Name,
   WorldEvent,
   WorldEventData,
@@ -29,6 +30,7 @@ import {
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
 import { GamePool } from "../external/GamePool.sol";
+import { ItemNFT } from "../external/ItemNFT.sol";
 
 library LibWorld {
   /**
@@ -90,6 +92,14 @@ library LibWorld {
   }
 
   /**
+   * @notice Set the item NFT contract address
+   * @param itemNftAddress The address of the item NFT contract
+   */
+  function setItemNftAddress(address itemNftAddress) internal {
+    ItemNftConfig.setItemNftAddress(itemNftAddress);
+  }
+
+  /**
    * @notice Set a world event
    * @param _cmsId The id of the world event in the CMS
    * @param _title The title of the world event
@@ -132,5 +142,12 @@ library LibWorld {
    */
   function gamePool() internal view returns (GamePool) {
     return GamePool(ExternalAddressesConfig.getGamePoolAddress());
+  }
+
+  /**
+   * @notice Get the item NFT contract used by the world
+   */
+  function itemNFT() internal view returns (ItemNFT) {
+    return ItemNFT(ItemNftConfig.getItemNftAddress());
   }
 }

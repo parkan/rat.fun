@@ -5,6 +5,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { IDevSystem } from "./IDevSystem.sol";
+import { IItemNFTSystem } from "./IItemNFTSystem.sol";
 import { IManagerSystem } from "./IManagerSystem.sol";
 import { IPlayerSystem } from "./IPlayerSystem.sol";
 import { IRatSystem } from "./IRatSystem.sol";
@@ -21,6 +22,7 @@ import { IUnlockAdminSystem } from "./IUnlockAdminSystem.sol";
 interface IWorld is
   IBaseWorld,
   IDevSystem,
+  IItemNFTSystem,
   IManagerSystem,
   IPlayerSystem,
   IRatSystem,

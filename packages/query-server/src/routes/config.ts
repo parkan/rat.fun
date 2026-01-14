@@ -4,7 +4,8 @@ import type {
   GlobalConfigsResponse,
   GameConfigResponse,
   GamePercentagesConfigResponse,
-  ExternalAddressesConfigResponse
+  ExternalAddressesConfigResponse,
+  ItemNftConfigResponse
 } from "../types.js"
 
 // Raw DB row types (columns are snake_case)
@@ -34,22 +35,29 @@ type ExternalAddressesRow = {
   fee_address: Buffer | null
 }
 
+type ItemNftConfigRow = {
+  item_nft_address: Buffer | null
+}
+
 // Fetch all global configs (singleton tables)
 // Note: Some table names are truncated in the MUD indexer database
 // WorldStats is fetched separately via /api/world-stats (not cached)
 async function fetchGlobalConfigs(): Promise<Omit<GlobalConfigsResponse, "blockNumber">> {
-  const [gameConfigRow, gamePercentagesRow, externalAddressesRow] = await Promise.all([
-    getSingletonTableRow<GameConfigRow>("GameConfig"),
-    // Truncated table name: game_percentages_c instead of game_percentages_config
-    getSingletonTableRow<GamePercentagesRow>("GamePercentagesC", "game_percentages_c"),
-    // Truncated table name: external_addresse instead of external_addresses_config
-    getSingletonTableRow<ExternalAddressesRow>("ExternalAddresse", "external_addresse")
-  ])
+  const [gameConfigRow, gamePercentagesRow, externalAddressesRow, itemNftConfigRow] =
+    await Promise.all([
+      getSingletonTableRow<GameConfigRow>("GameConfig"),
+      // Truncated table name: game_percentages_c instead of game_percentages_config
+      getSingletonTableRow<GamePercentagesRow>("GamePercentagesC", "game_percentages_c"),
+      // Truncated table name: external_addresse instead of external_addresses_config
+      getSingletonTableRow<ExternalAddressesRow>("ExternalAddresse", "external_addresse"),
+      getSingletonTableRow<ItemNftConfigRow>("ItemNftConfig")
+    ])
 
   // Debug logging
   console.log("[config] GameConfig row:", gameConfigRow)
   console.log("[config] GamePercentagesConfig row:", gamePercentagesRow)
   console.log("[config] ExternalAddressesConfig row:", externalAddressesRow)
+  console.log("[config] ItemNftConfig row:", itemNftConfigRow)
 
   // Transform to response format (camelCase, hex addresses)
   const gameConfig: GameConfigResponse = {
@@ -91,10 +99,17 @@ async function fetchGlobalConfigs(): Promise<Omit<GlobalConfigsResponse, "blockN
       : null
   }
 
+  const itemNftConfig: ItemNftConfigResponse = {
+    itemNftAddress: itemNftConfigRow?.item_nft_address
+      ? "0x" + itemNftConfigRow.item_nft_address.toString("hex")
+      : null
+  }
+
   return {
     gameConfig,
     gamePercentagesConfig,
-    externalAddressesConfig
+    externalAddressesConfig,
+    itemNftConfig
   }
 }
 

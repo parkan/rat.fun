@@ -6,13 +6,25 @@
 
   let {
     item,
-    index
+    index,
+    itemId,
+    onExport,
+    isExporting = false
   }: {
     item: Item
     index: number
+    itemId?: string
+    onExport?: (itemId: string) => void
+    isExporting?: boolean
   } = $props()
 
-  let busy = $state(false)
+  const handleExport = (e: MouseEvent) => {
+    e.stopPropagation()
+    if (onExport && itemId) {
+      playSound({ category: "ratfunUI", id: "click" })
+      onExport(itemId)
+    }
+  }
 
   // Determine rarity class based on value
   const getRarityClass = (value: bigint | number) => {
@@ -30,7 +42,7 @@
 
 <div
   class="inventory-item-wrapper {getRarityClass(item.value)} index-{index}"
-  class:disabled={busy}
+  class:disabled={isExporting}
   role="button"
   tabindex="0"
   onmouseenter={onMouseEnter}
@@ -47,6 +59,11 @@
     </div>
     <div class="item-back">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
+      {#if onExport && itemId}
+        <button class="export-button" onclick={handleExport} disabled={isExporting}>
+          {isExporting ? "Exporting..." : "Export NFT"}
+        </button>
+      {/if}
     </div>
   </div>
 </div>
@@ -86,6 +103,7 @@
     height: 100%;
     backface-visibility: hidden;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: var(--color-inventory-item-background);
@@ -109,5 +127,27 @@
   .name,
   .value {
     text-align: center;
+  }
+
+  .export-button {
+    margin-top: 8px;
+    padding: 4px 8px;
+    font-size: var(--font-size-small);
+    font-family: var(--special-font-stack);
+    background: var(--background);
+    color: var(--foreground);
+    border: 2px solid var(--foreground);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--foreground);
+      color: var(--background);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 </style>
