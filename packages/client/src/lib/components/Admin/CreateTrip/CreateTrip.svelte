@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameConfig } from "$lib/modules/state/stores"
+  import { gameConfig, challengeInfo } from "$lib/modules/state/stores"
   import { playerERC20Allowance } from "$lib/modules/erc20Listener/stores"
   import { openAllowanceModal } from "$lib/modules/ui/allowance-modal.svelte"
   import { busy, sendCreateTrip } from "$lib/modules/action-manager/index.svelte"
@@ -7,10 +7,12 @@
   import { CharacterLimitError, InputValidationError } from "@ratfun/common/error-handling"
   import { DEFAULT_SUGGESTED_TRIP_CREATION_COST } from "@server/config"
   import { staticContent } from "$lib/modules/content"
-  import { TripFolders } from "$lib/components/Trip"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
   import { FEATURES } from "$lib/config/features"
   import { nope } from "$lib/modules/moderation"
+  import { playSound } from "$lib/modules/sound"
+  import { formatCountdown } from "@ratfun/shared-utils"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import CreateTripForm from "./CreateTripForm.svelte"
   import CreateRestrictedTripForm from "./CreateRestrictedTripForm.svelte"
 
@@ -18,47 +20,31 @@
     ondone,
     onsubmit,
     onclose,
-    savedTripDescription,
-    savedFolderId
+    savedTripDescription
   }: {
     ondone: () => void
     onsubmit?: (data: { prompt: string; cost: number }) => void
-    onclose?: (currentDescription: string, currentFolderId: string) => void
+    onclose?: (currentDescription: string) => void
     savedTripDescription?: string
-    savedFolderId?: string
   } = $props()
+
+  // Trip type selection: "challenge" | "regular" | null
+  let tripType = $state<"challenge" | "regular" | null>(null)
 
   // svelte-ignore state_referenced_locally
   let tripDescription: string = $state(savedTripDescription ?? "")
   let textareaElement: HTMLTextAreaElement | null = $state(null)
-  // svelte-ignore state_referenced_locally
-  let selectedFolderId: string = $state(savedFolderId ?? "")
-  // svelte-ignore state_referenced_locally
-  let currentStep: "folder" | "details" = $state(savedFolderId ? "details" : "folder")
   let tripCreationCost = $state(DEFAULT_SUGGESTED_TRIP_CREATION_COST)
 
   // Floor the trip creation cost to ensure it's an integer
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
 
-  // Get available folders: all non-restricted, plus restricted if challenge trips are enabled (no whitelist needed)
-  let availableFolders = $derived(
-    $staticContent.tripFolders.filter(
-      folder => !folder.restricted || FEATURES.ENABLE_CHALLENGE_TRIPS
-    )
+  // Get default folder IDs (use first available folder for each type)
+  let regularFolderId = $derived(
+    $staticContent.tripFolders.find(f => !f.restricted)?._id ?? ""
   )
-
-  // Check if selected folder is restricted (challenge trip)
-  let selectedFolder = $derived(availableFolders.find(f => f._id === selectedFolderId))
-  let isRestrictedFolder = $derived(selectedFolder?.restricted ?? false)
-
-  // Calculate folder counts (all non-depleted trips for display)
-  let foldersCounts = $derived(
-    availableFolders.map(() => 0) // Empty counts since this is for creation, not browsing
-  )
-
-  // Get selected folder title for header
-  let selectedFolderTitle = $derived(
-    availableFolders.find(f => f._id === selectedFolderId)?.title ?? ""
+  let challengeFolderId = $derived(
+    $staticContent.tripFolders.find(f => f.restricted)?._id ?? ""
   )
 
   // Check for foul language
@@ -66,9 +52,22 @@
     nope.some(term => tripDescription.toLowerCase().includes(term))
   )
 
+  // Challenge availability
+  let canCreateChallenge = $derived($challengeInfo.canCreateNewChallenge)
+  let challengeExpiryText = $derived(
+    $challengeInfo.isActive ? formatCountdown($challengeInfo.timeRemainingMs) : null
+  )
+
   const placeholder = `Describe the TRIP and what awaits the RAT. Death traps, shopping dungeons and unadulterated gambling are just a few ideas on how to squeeze value out of other RATS. Think beyond silicon.\n\nYou can use TRIPS to generate PSYCHO OBJECTS for your own RAT. But remember: other OPERATORS are watching.`
 
+  const selectTripType = (type: "challenge" | "regular") => {
+    playSound({ category: "ratfunUI", id: "click" })
+    tripType = type
+  }
+
   async function onClick() {
+    const folderId = tripType === "challenge" ? challengeFolderId : regularFolderId
+
     // Check allowance before proceeding
     if ($playerERC20Allowance < flooredTripCreationCost) {
       openAllowanceModal(UI_STRINGS.insufficientAllowance)
@@ -91,13 +90,6 @@
           "trip description"
         )
       }
-      if (!selectedFolderId) {
-        throw new InputValidationError(
-          "Please select a category for your trip",
-          "selectedFolderId",
-          selectedFolderId
-        )
-      }
       if (tripDescriptionIncludesFoulLanguage) {
         throw new InputValidationError(
           "Trip description contains inappropriate language",
@@ -108,27 +100,25 @@
       // Notify parent before sending
       onsubmit?.({ prompt: tripDescription, cost: flooredTripCreationCost })
 
-      // Pass challenge trip parameters if this is a restricted folder
-      if (isRestrictedFolder) {
+      // Pass challenge trip parameters if this is a challenge
+      if (tripType === "challenge") {
         await sendCreateTrip(
           tripDescription,
           flooredTripCreationCost,
-          selectedFolderId,
+          folderId,
           true, // isChallengeTrip
           100, // Fixed min value to enter
           100 // Fixed max win percentage
         )
       } else {
-        await sendCreateTrip(tripDescription, flooredTripCreationCost, selectedFolderId)
+        await sendCreateTrip(tripDescription, flooredTripCreationCost, folderId)
       }
       ondone()
     } catch (error) {
       errorHandler(error)
       tripDescription = ""
-      selectedFolderId = ""
     }
     tripDescription = ""
-    selectedFolderId = ""
   }
 
   $effect(() => {
@@ -140,7 +130,7 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
-      onclose?.(tripDescription, selectedFolderId)
+      onclose?.(tripDescription)
     }
   }
 </script>
@@ -154,37 +144,67 @@
     class="modal-backdrop"
     onclick={e => {
       if (e.target === e.currentTarget) {
-        onclose?.(tripDescription, selectedFolderId)
+        onclose?.(tripDescription)
       }
     }}
   >
     <div class="modal-content">
       <div class="create-trip">
-        {#if currentStep === "folder"}
-          <!-- STEP 1: FOLDER SELECTION -->
-          <div class="folder-selection">
+        {#if tripType === null}
+          <!-- STEP 1: TYPE SELECTION -->
+          <div class="type-selection">
             <div class="instructions">
-              <span class="highlight">Trip Category</span>
+              <span class="highlight">Create</span>
             </div>
-            <TripFolders
-              onselect={folderId => {
-                selectedFolderId = folderId
-                currentStep = "details"
-              }}
-              folders={availableFolders}
-              {foldersCounts}
-              showCounts={false}
-            ></TripFolders>
+            <div class="type-buttons">
+              <!-- CHALLENGE BUTTON -->
+              <button
+                class="type-button challenge"
+                class:disabled={!canCreateChallenge || !FEATURES.ENABLE_CHALLENGE_TRIPS}
+                onclick={() => canCreateChallenge && FEATURES.ENABLE_CHALLENGE_TRIPS && selectTripType("challenge")}
+              >
+                <div class="type-title">CHALLENGE</div>
+                <div class="type-details">
+                  <div class="detail-row">
+                    <span class="label">Min Pool:</span>
+                    <span class="value">5000 {CURRENCY_SYMBOL}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Max Win:</span>
+                    <span class="value">100%</span>
+                  </div>
+                </div>
+                {#if !canCreateChallenge && FEATURES.ENABLE_CHALLENGE_TRIPS}
+                  <div class="unavailable-notice">
+                    Active challenge expires in {challengeExpiryText}
+                  </div>
+                {/if}
+                {#if !FEATURES.ENABLE_CHALLENGE_TRIPS}
+                  <div class="unavailable-notice">Challenges coming soon</div>
+                {/if}
+              </button>
+
+              <!-- REGULAR TRIP BUTTON -->
+              <button class="type-button regular" onclick={() => selectTripType("regular")}>
+                <div class="type-title">TRIP</div>
+                <div class="type-details">
+                  <div class="detail-row">
+                    <span class="label">Min Pool:</span>
+                    <span class="value">Adjustable</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Max Win:</span>
+                    <span class="value">25%</span>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
-        {:else if isRestrictedFolder}
+        {:else if tripType === "challenge"}
           <CreateRestrictedTripForm
             bind:tripDescription
             bind:tripCreationCost
             bind:textareaElement
-            {selectedFolderTitle}
-            onFolderSelect={() => {
-              currentStep = "folder"
-            }}
             onSubmit={onClick}
             {placeholder}
           />
@@ -193,10 +213,6 @@
             bind:tripDescription
             bind:tripCreationCost
             bind:textareaElement
-            {selectedFolderTitle}
-            onFolderSelect={() => {
-              currentStep = "folder"
-            }}
             onSubmit={onClick}
             {placeholder}
           />
@@ -206,7 +222,7 @@
   </div>
 {:else}
   <div class="create-trip">
-    {#if isRestrictedFolder}
+    {#if tripType === "challenge"}
       <CreateRestrictedTripForm
         bind:tripDescription
         bind:tripCreationCost
@@ -273,7 +289,7 @@
       min-height: 100%;
     }
 
-    .folder-selection {
+    .type-selection {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -281,15 +297,120 @@
       font-size: var(--font-size-medium);
       font-family: var(--special-font-stack);
 
-      @media (max-width: 800px) {
-        overflow-y: auto;
-      }
-
-      > :global(.tiles) {
+      .type-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
         flex: 1;
 
         @media (max-width: 800px) {
-          flex: 0 1 auto;
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+      }
+
+      .type-button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+        border: 4px solid var(--color-grey-mid);
+        background: var(--background);
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover:not(.disabled) {
+          transform: scale(0.98);
+          border-color: var(--foreground);
+        }
+
+        &:active:not(.disabled) {
+          transform: scale(0.95);
+        }
+
+        &.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        &.challenge {
+          background-color: var(--color-restricted-trip-folder);
+          color: var(--background);
+          border-color: var(--background);
+
+          .type-title {
+            color: var(--background);
+          }
+
+          .type-details {
+            .label {
+              color: var(--background);
+              opacity: 0.8;
+            }
+
+            .value {
+              color: var(--background);
+            }
+          }
+
+          .unavailable-notice {
+            font-family: var(--typewriter-font-stack);
+            font-size: var(--font-size-small);
+            color: var(--background);
+            opacity: 0.9;
+            text-align: center;
+            padding: 8px;
+            background: var(--background-semi-transparent);
+          }
+        }
+
+        &.regular {
+          background: var(--background);
+
+          .type-title {
+            color: var(--foreground);
+          }
+
+          .type-details {
+            .label {
+              color: var(--foreground);
+              opacity: 0.7;
+            }
+
+            .value {
+              color: var(--foreground);
+            }
+          }
+        }
+
+        .type-title {
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-super-large);
+        }
+
+        .type-details {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          width: 100%;
+
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--typewriter-font-stack);
+            font-size: var(--font-size-small);
+
+            .label {
+              opacity: 0.7;
+            }
+
+            .value {
+              font-family: var(--special-font-stack);
+              font-size: var(--font-size-medium);
+            }
+          }
         }
       }
     }

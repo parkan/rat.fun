@@ -1,9 +1,16 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte"
-  import { rat, player } from "$lib/modules/state/stores"
+  import { get } from "svelte/store"
+  import { rat, player, itemNftConfig, playerAddress } from "$lib/modules/state/stores"
   import { frozenRat, resetFrozenState } from "$lib/components/GameRun/state.svelte"
-  import { RatStats, RatInventory, LiquidateRat, NFTInventory } from "$lib/components/Rat"
+  import { RatStats, RatInventory, LiquidateRat } from "$lib/components/Rat"
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { publicNetwork } from "$lib/modules/network"
+  import { playSound } from "$lib/modules/sound"
+  import { createLogger } from "$lib/modules/logger"
   import { gsap } from "gsap"
+
+  const logger = createLogger("[RatInfo]")
 
   // Always use current rat state for displayRat
   // GSAP will handle visual transitions from old to new
@@ -14,15 +21,65 @@
   let oldRat = $state<Rat | null>(frozenRat ?? $rat)
   let newRat = $state<Rat | null>($rat)
 
+  // Keep displayRat and newRat in sync with $rat store changes
+  // This ensures inventory updates (like after NFT export) are reflected
+  $effect(() => {
+    const currentRat = $rat
+    // Only update if we have a rat and it's changed
+    if (currentRat && !frozenRat) {
+      displayRat = currentRat
+      newRat = currentRat
+    }
+  })
+
   // Get current rat ID for NFT export
   let currentRatId = $derived($player?.currentRat as string | undefined)
 
-  // Reference to NFTInventory for refreshing after export
-  let nftInventoryRef: { refresh: () => void } | undefined = $state()
+  // NFT count state
+  let nftCount = $state(0)
 
-  // Callback when item is exported - refresh NFT inventory
-  const handleExportComplete = () => {
-    nftInventoryRef?.refresh()
+  // Minimal ABI for balance check
+  const BALANCE_ABI = [
+    {
+      inputs: [{ name: "owner", type: "address" }],
+      name: "balanceOf",
+      outputs: [{ name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function"
+    }
+  ] as const
+
+  async function checkNFTBalance() {
+    const config = get(itemNftConfig)
+    if (
+      !config?.itemNftAddress ||
+      config.itemNftAddress === "0x0000000000000000000000000000000000000000"
+    ) {
+      return
+    }
+
+    const account = get(playerAddress)
+    if (!account) return
+
+    try {
+      const publicClient = get(publicNetwork).publicClient
+      const balance = (await publicClient.readContract({
+        address: config.itemNftAddress as `0x${string}`,
+        abi: BALANCE_ABI,
+        functionName: "balanceOf",
+        args: [account as `0x${string}`]
+      })) as bigint
+
+      nftCount = Number(balance)
+      logger.log("NFT balance checked:", { count: nftCount })
+    } catch (e) {
+      logger.error("Error checking NFT balance:", e)
+    }
+  }
+
+  const handleImportClick = () => {
+    playSound({ category: "ratfunUI", id: "click" })
+    ratState.state.transitionTo(RAT_BOX_STATE.IMPORTING_OBJECTS_FROM_NFT)
   }
 
   // ** Root Timeline Management **
@@ -110,6 +167,9 @@
       oldRat = $rat
       newRat = $rat
     }
+
+    // Check NFT balance
+    checkNFTBalance()
   })
 
   onDestroy(() => {
@@ -133,12 +193,9 @@
       onTimeline={addInventoryTimeline}
       ratId={currentRatId}
       enableExport={true}
-      onExportComplete={handleExportComplete}
+      {nftCount}
+      onImportClick={handleImportClick}
     />
-  </div>
-  <!-- NFT Inventory -->
-  <div class="nft-inventory-container">
-    <NFTInventory bind:this={nftInventoryRef} ratId={currentRatId} />
   </div>
   <!-- Liquidate -->
   <div class="rat-liquidate-container" data-tutorial="cash-out">
@@ -179,18 +236,6 @@
 
       @media (max-width: 800px) {
         order: 3;
-      }
-    }
-
-    .nft-inventory-container {
-      width: 100%;
-      border-bottom: var(--default-border-style);
-      max-height: 200px;
-      overflow-y: auto;
-      flex-shrink: 0;
-
-      @media (max-width: 800px) {
-        order: 4;
       }
     }
 

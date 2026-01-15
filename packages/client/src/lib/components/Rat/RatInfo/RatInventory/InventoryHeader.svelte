@@ -6,12 +6,18 @@
   let {
     filledSlots,
     totalSlots,
-    totalValue
+    totalValue,
+    nftCount = 0,
+    onImportClick
   }: {
     filledSlots: number
     totalSlots: number
     totalValue: number
+    nftCount?: number
+    onImportClick?: () => void
   } = $props()
+
+  let hasNFTs = $derived(nftCount > 0 && onImportClick !== undefined)
 </script>
 
 <div class="inventory-header-wrapper">
@@ -21,7 +27,11 @@
         {UI_STRINGS.inventoryName}
         <span class="inventory-header-count">{filledSlots}/{totalSlots}</span>
       </div>
-      <div class="inventory-header-total-value">{totalValue} {CURRENCY_SYMBOL}</div>
+      {#if hasNFTs}
+        <button class="import-nfts-button" onclick={onImportClick}> IMPORT NFT </button>
+      {:else}
+        <div class="inventory-header-total-value">{totalValue} {CURRENCY_SYMBOL}</div>
+      {/if}
     </div>
   </Tooltip>
 </div>
@@ -67,6 +77,25 @@
         width: calc(100% / 3);
         font-size: var(--font-size-small);
         text-align: right;
+      }
+
+      .import-nfts-button {
+        // font-family: var(--special-font-stack);
+        font-size: var(--font-size-small);
+        padding: 4px 12px;
+        background: var(--color-restricted-trip-folder);
+        color: var(--background);
+        border: 2px solid var(--background);
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
       }
     }
   }

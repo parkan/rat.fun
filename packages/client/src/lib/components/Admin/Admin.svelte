@@ -52,7 +52,6 @@
 
   let showCreateTripModal = $state(false)
   let savedTripDescription = $state<string>("")
-  let savedFolderId = $state<string>("")
   let pendingTrip = $state<PendingTrip>(null)
   let clientHeight = $state(0)
   let shouldLoadGraphData = $state(false)
@@ -612,16 +611,13 @@
 {#if showCreateTripModal}
   <CreateTrip
     {savedTripDescription}
-    {savedFolderId}
-    onclose={(currentDescription: string, currentFolderId: string) => {
+    onclose={(currentDescription: string) => {
       showCreateTripModal = false
       savedTripDescription = currentDescription
-      savedFolderId = currentFolderId
     }}
     onsubmit={(data: PendingTrip) => {
       showCreateTripModal = false
       savedTripDescription = ""
-      savedFolderId = ""
       pendingTrip = data
     }}
     ondone={() => {

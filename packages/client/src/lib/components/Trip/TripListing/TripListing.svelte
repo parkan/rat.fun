@@ -8,26 +8,27 @@
     nonDepletedTrips,
     ratTotalValue,
     playerHasLiveRat,
-    lastChallengeWinner
+    lastChallengeWinner,
+    players
   } from "$lib/modules/state/stores"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
-  import { selectedFolderId } from "$lib/modules/ui/state.svelte"
   import { getTripMinRatValueToEnter } from "$lib/modules/state/utils"
   import { entriesChronologically } from "./sortFunctions"
   import { blockNumber } from "$lib/modules/network"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { staticContent } from "$lib/modules/content"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
+  import { FEATURES } from "$lib/config/features"
 
-  import { TripItem, TripFolders, NoRatListing } from "$lib/components/Trip"
-  import { BackButton, SmallSpinner } from "$lib/components/Shared"
+  import { TripItem, NoRatListing } from "$lib/components/Trip"
+  import ChallengeCard from "$lib/components/Trip/TripFolders/ChallengeCard.svelte"
+  import { SmallSpinner } from "$lib/components/Shared"
   import TripHeader from "./TripHeader.svelte"
   import { createLogger } from "$lib/modules/logger"
 
   const logger = createLogger("[TripListing]")
 
   // Show NoRatListing when player has no rat OR when rat is being deployed
-  // The DEPLOYING_RAT check ensures we don't hide the no-rat UI until deployment is truly finished
   let showNoRatListing = $derived(
     !$playerHasLiveRat || ratState.state.current === RAT_BOX_STATE.DEPLOYING_RAT
   )
@@ -37,12 +38,10 @@
   let scrollContainer = $state<HTMLDivElement | null>(null)
 
   // Last completed challenge winner state
-  // Calculate win timestamp from block difference (Base block time ~2 seconds)
   const BLOCK_TIME_MS = 2000
 
   let lastWinnerName = $derived($lastChallengeWinner?.winnerName ?? null)
 
-  // Calculate approximate win timestamp from block number difference
   let lastWinTimestamp = $derived.by(() => {
     const winner = $lastChallengeWinner
     if (!winner || !winner.lastVisitBlock) return null
@@ -50,98 +49,43 @@
     const currentBlock = Number($blockNumber)
     if (!currentBlock) return null
 
-    // Calculate how long ago the win happened based on block difference
     const blocksSinceWin = currentBlock - winner.lastVisitBlock
     const msSinceWin = blocksSinceWin * BLOCK_TIME_MS
 
-    // Return the approximate timestamp when the challenge was won
     return Date.now() - msSinceWin
   })
 
-  // Build trip folder map from staticContent
-  let tripFolderMap = $derived(
-    new Map(
-      $staticContent.trips
-        .filter(trip => trip.folder)
-        .map(trip => [trip._id, trip.folder?._ref || ""])
-    )
-  )
-
-  // Separate restricted folders from regular folders
-  // Only show the first restricted folder at the top
-  let restrictedFolder = $derived.by(() => {
-    const folders = $staticContent.tripFolders
-    return folders.find(f => f.restricted)
-  })
-
-  // Regular folders (non-restricted)
-  let regularFolders = $derived.by(() => {
-    const folders = $staticContent.tripFolders
-    return folders.filter(f => !f.restricted)
-  })
-
-  // Find any active challenge trip (has challengeTrip flag and balance > 0)
+  // Find any active challenge trip
   let challengeTripData = $derived.by(() => {
-    if (!restrictedFolder) return null
-
-    // Find the first trip with challengeTrip flag from all non-depleted trips
     const allTrips = Object.entries($nonDepletedTrips)
     const challengeTrip = allTrips.find(([_, trip]) => trip.challengeTrip)
     if (!challengeTrip) return null
 
+    const creatorId = challengeTrip[1].creatorId as string | undefined
+    const creator = creatorId ? $players[creatorId] : undefined
+
     return {
       tripId: challengeTrip[0],
       visitCount: Number(challengeTrip[1].visitCount ?? 0),
-      creationBlock: Number(challengeTrip[1].creationBlock ?? 0)
+      creationBlock: Number(challengeTrip[1].creationBlock ?? 0),
+      creatorName: creator?.name ?? null,
+      maxReward: Number(challengeTrip[1].balance ?? 0)
     }
-  })
-
-  // Show ALL folders in their original order (for backward compat, keep this for counts)
-  let sortedFolders = $derived.by(() => {
-    const folders = $staticContent.tripFolders
-    logger.log("Deriving sortedFolders:", { count: folders?.length ?? 0 })
-    return folders
   })
 
   const updateTrips = () => {
     lastChecked = Number(get(blockNumber))
   }
 
-  // Filter trips by folder
-  const filterByFolder = (entries: [string, Trip][], id: string) => {
-    if (id === "") return entries
-    return entries.filter(([tripId, _]) => {
-      const tripFolderId = tripFolderMap.get(tripId)
-      return tripFolderId === id
-    })
-  }
-
-  // Here we add once there are a couple of updates
-  // ???
+  // Get ALL non-depleted trips (flat list, no folder filtering)
+  // Exclude challenge trips from the main list since they're shown separately
   let tripList = $derived.by(() => {
     let entries = Object.entries($nonDepletedTrips)
-    // DEBUG: Log trip counts to diagnose rendering issue
-    logger.log("Deriving tripList:", {
-      nonDepletedTripsCount: entries.length,
-      selectedFolder: $selectedFolderId,
-      staticContentTripsCount: $staticContent.trips.length,
-      tripFolderMapSize: tripFolderMap.size
-    })
-    entries = filterByFolder(entries, $selectedFolderId)
+    // Filter out challenge trips - they're shown in the pinned ChallengeCard
+    entries = entries.filter(([_, trip]) => !trip.challengeTrip)
+    logger.log("Deriving tripList:", { count: entries.length })
     return entries.sort(sortFunction)
   })
-
-  // Count trips per regular folder (not restricted)
-  let foldersCounts = $derived(
-    regularFolders.map(fldr => filterByFolder(tripList, fldr._id).length)
-  )
-
-  // Count trips in restricted folder (for when challenge trips feature is disabled)
-  let restrictedFolderCount = $derived(
-    restrictedFolder
-      ? filterByFolder(Object.entries($nonDepletedTrips), restrictedFolder._id).length
-      : 0
-  )
 
   let activeList = $derived.by(() => {
     if (lastChecked > 0) {
@@ -156,7 +100,6 @@
 
   let tripsWithEligibility = $derived.by((): TripWithEligibility[] => {
     return activeList.map(([tripId, trip]) => {
-      // Check if rat value is high enough
       const minRatValue = get(
         getTripMinRatValueToEnter(
           trip.tripCreationCost,
@@ -174,26 +117,22 @@
         ]
       }
 
-      // Trip is eligible
       return [tripId, trip, true, "", 0]
     })
   })
 
-  // Count eligible trips
   let eligibleCount = $derived(tripsWithEligibility.filter(t => t[2]).length)
 
   // Scroll position preservation
   const SCROLL_KEY = "trip-listing-scroll-position"
 
   beforeNavigate(navigation => {
-    // Save scroll position before navigating away
     if (scrollContainer && navigation.to?.route.id !== "/(main)/(game)") {
       sessionStorage.setItem(SCROLL_KEY, scrollContainer.scrollTop.toString())
     }
   })
 
   afterNavigate(navigation => {
-    // Restore scroll position when coming back
     if (scrollContainer && navigation.from?.route.id?.includes("[tripId]")) {
       const savedPosition = sessionStorage.getItem(SCROLL_KEY)
       if (savedPosition) {
@@ -202,60 +141,42 @@
     }
   })
 
-  // Scroll to top when folder selection changes
-  $effect(() => {
-    $selectedFolderId // Track dependency
-    if (scrollContainer) {
-      scrollContainer.scrollTop = 0
-    }
-  })
-
   onDestroy(() => {
     logger.log("onDestroy called")
   })
 </script>
 
-<div class="content" bind:this={scrollContainer} data-tutorial="trip-list">
+<div class="content" data-tutorial="trip-list">
   {#if showNoRatListing}
     <TripHeader title={UI_STRINGS.tripHeaderNoRat} />
     <NoRatListing />
-  {:else if $selectedFolderId === ""}
-    <TripHeader title={UI_STRINGS.tripHeader} />
-    {#if (regularFolders?.length ?? 0) > 0 || restrictedFolder}
-      <TripFolders
-        onselect={(folderId: string) => ($selectedFolderId = folderId)}
-        folders={regularFolders}
-        {foldersCounts}
-        {restrictedFolder}
-        {restrictedFolderCount}
-        challengeTripId={challengeTripData?.tripId}
-        challengeTripAttempts={challengeTripData?.visitCount}
-        challengeCreationBlock={challengeTripData?.creationBlock}
-        currentBlockNumber={Number($blockNumber)}
-        challengeTitle={$staticContent.challengeTitle}
-        {lastWinnerName}
-        {lastWinTimestamp}
-      />
-    {:else}
-      <div class="loading-container">
-        <span>Loading trips <SmallSpinner /></span>
+  {:else}
+    <!-- Challenge Card - Pinned at top, not scrollable -->
+    {#if FEATURES.ENABLE_CHALLENGE_TRIPS}
+      <div class="challenge-section">
+        <ChallengeCard
+          challengeTripId={challengeTripData?.tripId}
+          attemptCount={challengeTripData?.visitCount}
+          challengeCreationBlock={challengeTripData?.creationBlock}
+          currentBlockNumber={Number($blockNumber)}
+          challengeTitle={$staticContent.challengeTitle}
+          {lastWinnerName}
+          {lastWinTimestamp}
+          creatorName={challengeTripData?.creatorName}
+          maxReward={challengeTripData?.maxReward}
+        />
       </div>
     {/if}
-  {:else}
-    <div class="back-button-container">
-      <BackButton onclick={() => ($selectedFolderId = "")} />
-    </div>
-    {#if $selectedFolderId !== ""}
-      {@const folderTitle =
-        $staticContent.tripFolders.find(({ _id }) => _id == $selectedFolderId)?.title ?? ""}
-      <TripHeader
-        title={folderTitle}
-        {eligibleCount}
-        totalCount={tripsWithEligibility.length}
-        hasBackButton={true}
-      />
-    {/if}
-    <div class:animated={false} class="trip-listing" in:fade={{ duration: 300 }}>
+
+    <!-- Trip Header -->
+    <TripHeader
+      title={UI_STRINGS.tripHeader}
+      {eligibleCount}
+      totalCount={tripsWithEligibility.length}
+    />
+
+    <!-- Scrollable Trip List -->
+    <div class="trip-list-container" bind:this={scrollContainer}>
       {#if activeList.length > 0}
         {#if activeList.length < tripList.length}
           {#key tripList.length}
@@ -270,14 +191,20 @@
             </button>
           {/key}
         {/if}
-        {#each tripsWithEligibility as tripEntry (tripEntry[0])}
-          <TripItem
-            tripId={tripEntry[0] as Hex}
-            trip={tripEntry[1]}
-            disabled={!tripEntry[2]}
-            overlayText={tripEntry[3]}
-          />
-        {/each}
+        <div class="trip-listing" in:fade={{ duration: 300 }}>
+          {#each tripsWithEligibility as tripEntry (tripEntry[0])}
+            <TripItem
+              tripId={tripEntry[0] as Hex}
+              trip={tripEntry[1]}
+              disabled={!tripEntry[2]}
+              overlayText={tripEntry[3]}
+            />
+          {/each}
+        </div>
+      {:else if Object.keys($nonDepletedTrips).length === 0}
+        <div class="loading-container">
+          <span>Loading trips <SmallSpinner /></span>
+        </div>
       {:else}
         <div class="empty-listing">
           <div>NO TRIPS</div>
@@ -290,8 +217,8 @@
 <style lang="scss">
   .content {
     position: relative;
-    overflow-y: scroll;
-    height: var(--game-window-main-height);
+    display: flex;
+    flex-direction: column;
     height: var(--game-window-height);
     max-height: 100%;
 
@@ -299,6 +226,19 @@
       flex: 1;
       height: auto;
     }
+  }
+
+  .challenge-section {
+    flex-shrink: 0;
+    padding: 10px;
+    border-bottom: var(--default-border-style);
+    background: var(--background);
+  }
+
+  .trip-list-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
 
   .new-trips-button {
@@ -310,35 +250,12 @@
     outline: none;
   }
 
-  .back-button-container {
-    display: block;
-    border-bottom: 1px solid var(--color-grey-mid);
-    position: sticky;
-    height: 60px;
-    top: 0;
-    z-index: var(--z-high);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--background);
-  }
-
   .trip-listing {
-    flex-basis: 100%;
-    flex-shrink: 0;
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-    inset: 0;
     width: 100%;
-
-    &.animated {
-      transition: transform 0.2s ease 0.1s;
-    }
   }
 
   .empty-listing {
-    height: calc(100% - 60px);
+    height: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -351,7 +268,7 @@
   }
 
   .loading-container {
-    height: calc(100% - 60px);
+    height: 200px;
     display: flex;
     justify-content: center;
     align-items: center;

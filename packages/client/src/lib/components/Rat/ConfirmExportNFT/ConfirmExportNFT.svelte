@@ -1,0 +1,241 @@
+<script lang="ts">
+  import { player } from "$lib/modules/state/stores"
+  import { playSound } from "$lib/modules/sound"
+  import { BigButton } from "$lib/components/Shared"
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import { exportItemToNFT } from "$lib/modules/on-chain-transactions"
+  import { errorHandler } from "$lib/modules/error-handling"
+  import { createLogger } from "$lib/modules/logger"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+
+  const logger = createLogger("[ConfirmExportNFT]")
+
+  // Get item data from ratState
+  let itemId = $derived(ratState.exportItem.itemId)
+  let itemName = $derived(ratState.exportItem.itemName)
+  let itemValue = $derived(ratState.exportItem.itemValue)
+
+  // Get current rat ID
+  let ratId = $derived($player?.currentRat as string | undefined)
+
+  // Determine rarity color based on value
+  let rarityColor = $derived.by(() => {
+    if (!itemValue) return "#b45309" // Brown (default)
+    if (itemValue >= 100) return "#9333ea" // Purple
+    if (itemValue >= 50) return "#eab308" // Yellow
+    if (itemValue >= 20) return "#9ca3af" // Gray
+    return "#b45309" // Brown
+  })
+
+  // Determine rarity color based on value
+  let rarityTextColor = $derived.by(() => {
+    if (!itemValue) return "white" // Brown (default)
+    if (itemValue >= 100) return "white" // Purple
+    if (itemValue >= 50) return "black" // Yellow
+    if (itemValue >= 20) return "black" // Gray
+    return "black" // Brown
+  })
+
+  let rarityLabel = $derived.by(() => {
+    if (!itemValue) return "Common"
+    if (itemValue >= 100) return "Legendary"
+    if (itemValue >= 50) return "Rare"
+    if (itemValue >= 20) return "Uncommon"
+    return "Common"
+  })
+
+  let isExporting = $state(false)
+
+  const onClickConfirm = async () => {
+    if (!itemId || !ratId) return
+
+    isExporting = true
+    try {
+      logger.log("Exporting item to NFT:", { itemId, ratId })
+      const result = await exportItemToNFT(ratId, itemId)
+      if (result) {
+        logger.log("Item exported successfully")
+        playSound({ category: "ratfunUI", id: "itemPositive" })
+        ratState.exportItem.clear()
+        ratState.state.transitionTo(RAT_BOX_STATE.HAS_RAT)
+      }
+    } catch (e) {
+      errorHandler(e)
+    } finally {
+      isExporting = false
+    }
+  }
+
+  const onClickAbort = () => {
+    playSound({ category: "ratfunUI", id: "smallButtonUp" })
+    ratState.exportItem.clear()
+    ratState.state.transitionTo(RAT_BOX_STATE.HAS_RAT)
+  }
+</script>
+
+<div class="confirm-export">
+  <div class="confirm-export-content">
+    <!-- <div class="header">EXPORT TO NFT</div> -->
+
+    <div class="item-preview" style="background-color: {rarityColor}">
+      <div class="rarity-label" style="color: {rarityTextColor}">
+        {rarityLabel}
+      </div>
+      <div class="item-name">{itemName ?? "Unknown Item"}</div>
+      <div class="item-value">{itemValue ?? 0} {CURRENCY_SYMBOL}</div>
+    </div>
+
+    <div class="warning-text">
+      This will remove the item from your RAT's inventory and mint it as an NFT to your wallet.
+    </div>
+
+    <div class="button-container">
+      <div class="abort-button-container">
+        <BigButton text="Cancel" type="abort" onclick={onClickAbort} disabled={isExporting} />
+      </div>
+      <div class="confirm-button-container">
+        <BigButton text="Export" type="confirm" onclick={onClickConfirm} disabled={isExporting} />
+      </div>
+    </div>
+  </div>
+</div>
+
+<style lang="scss">
+  .confirm-export {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background-image: url("/images/texture-2.png");
+    background-size: 200px;
+
+    .confirm-export-content {
+      width: calc(100% - 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .header {
+        font-family: var(--special-font-stack);
+        font-size: var(--font-size-extra-large);
+        color: var(--background);
+      }
+
+      .item-preview {
+        padding: 20px;
+        background: var(--foreground-semi-transparent);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        .rarity-label {
+          position: absolute;
+          top: 0;
+          right: 0;
+        }
+
+        .rarity-indicator {
+          padding: 4px 12px;
+          color: white;
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-small);
+          text-transform: uppercase;
+        }
+
+        .item-name {
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-large);
+          color: var(--background);
+        }
+
+        .item-value {
+          font-family: var(--typewriter-font-stack);
+          font-size: var(--font-size-medium);
+          color: var(--background);
+          opacity: 0.8;
+        }
+      }
+
+      .warning-text {
+        padding: 10px;
+        background: var(--foreground-semi-transparent);
+        color: var(--background);
+        font-family: var(--typewriter-font-stack);
+        font-size: var(--font-size-small);
+      }
+
+      .rarity-info {
+        padding: 10px;
+        background: var(--background-semi-transparent);
+
+        .rarity-title {
+          font-family: var(--special-font-stack);
+          font-size: var(--font-size-small);
+          margin-bottom: 8px;
+          color: var(--foreground);
+        }
+
+        .rarity-list {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 8px;
+
+          .rarity-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: var(--font-size-xsmall);
+            color: var(--foreground);
+
+            .rarity-dot {
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+            }
+          }
+        }
+      }
+
+      .button-container {
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+        height: 80px;
+
+        @media (max-width: 800px) {
+          width: 100%;
+          flex-direction: column;
+          height: auto;
+        }
+
+        .abort-button-container {
+          width: 100%;
+          height: 100%;
+
+          @media (max-width: 800px) {
+            order: 3;
+          }
+        }
+
+        .confirm-button-container {
+          width: 100%;
+          height: 100%;
+
+          @media (max-width: 800px) {
+            order: 1;
+          }
+        }
+      }
+    }
+  }
+</style>

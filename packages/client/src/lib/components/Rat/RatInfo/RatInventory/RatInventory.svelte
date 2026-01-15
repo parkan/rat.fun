@@ -2,15 +2,11 @@
   import { getRatInventory, type ItemWithId } from "$lib/modules/state/utils"
   import { gsap } from "gsap"
   import { playSound } from "$lib/modules/sound"
-  import { exportItemToNFT } from "$lib/modules/on-chain-transactions"
-  import { errorHandler } from "$lib/modules/error-handling"
-  import { createLogger } from "$lib/modules/logger"
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
 
   import InventoryHeader from "$lib/components/Rat/RatInfo/RatInventory/InventoryHeader.svelte"
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
   import EmptySlot from "$lib/components/Rat/RatInfo/RatInventory/EmptySlot.svelte"
-
-  const logger = createLogger("[RatInventory]")
 
   let {
     displayRat,
@@ -19,7 +15,9 @@
     onTimeline,
     enableExport = false,
     ratId,
-    onExportComplete
+    onExportComplete,
+    nftCount = 0,
+    onImportClick
   }: {
     displayRat: Rat | null
     oldRat: Rat | null
@@ -28,33 +26,25 @@
     enableExport?: boolean
     ratId?: string
     onExportComplete?: () => void
+    nftCount?: number
+    onImportClick?: () => void
   } = $props()
-
-  let exportingItemId = $state<string | null>(null)
 
   // Calculate old and new inventories for change detection
   let oldInventory = $derived<ItemWithId[]>(oldRat ? getRatInventory(oldRat) : [])
   let newInventory = $derived<ItemWithId[]>(newRat ? getRatInventory(newRat) : [])
 
-  // Handle export item to NFT
-  const handleExportItem = async (itemId: string) => {
-    if (!displayRat || !ratId || exportingItemId) return
+  // Handle export item to NFT - transition to confirmation state
+  const handleExportItem = (itemId: string) => {
+    if (!displayRat) return
 
-    exportingItemId = itemId
-    try {
-      logger.log("Exporting item to NFT:", { itemId, ratId })
-      const result = await exportItemToNFT(ratId, itemId)
-      if (result) {
-        logger.log("Item exported successfully")
-        playSound({ category: "ratfunUI", id: "itemPositive" })
-        // Notify parent to refresh NFT inventory
-        onExportComplete?.()
-      }
-    } catch (e) {
-      errorHandler(e)
-    } finally {
-      exportingItemId = null
-    }
+    // Find the item to get its details
+    const item = newInventory.find(i => i.id === itemId)
+    if (!item) return
+
+    playSound({ category: "ratfunUI", id: "click" })
+    ratState.exportItem.set(itemId, item.name, Number(item.value))
+    ratState.state.transitionTo(RAT_BOX_STATE.CONFIRM_EXPORT_NFT)
   }
 
   // Detect changes
@@ -289,7 +279,7 @@
 </script>
 
 <div class="inventory">
-  <InventoryHeader {filledSlots} totalSlots={MAX_INVENTORY_SIZE} {totalValue} />
+  <InventoryHeader {filledSlots} totalSlots={MAX_INVENTORY_SIZE} {totalValue} {nftCount} {onImportClick} />
   {#if displayRat}
     <div class="inventory-container" bind:this={inventoryContainer}>
       <!-- INVENTORY GRID -->
@@ -307,7 +297,6 @@
                 index={slot.originalIndex}
                 itemId={slot.item.id}
                 onExport={enableExport ? handleExportItem : undefined}
-                isExporting={exportingItemId === slot.item.id}
               />
             </div>
           {/if}
