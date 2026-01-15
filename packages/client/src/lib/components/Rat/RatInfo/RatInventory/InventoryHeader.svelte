@@ -1,18 +1,15 @@
 <script lang="ts">
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import { Tooltip } from "$lib/components/Shared"
 
   let {
     filledSlots,
     totalSlots,
-    totalValue,
     nftCount = 0,
     onImportClick
   }: {
     filledSlots: number
     totalSlots: number
-    totalValue: number
     nftCount?: number
     onImportClick?: () => void
   } = $props()
@@ -29,8 +26,6 @@
       </div>
       {#if hasNFTs}
         <button class="import-nfts-button" onclick={onImportClick}>INJECT PSYCHO OBJECT</button>
-      {:else}
-        <div class="inventory-header-total-value">{totalValue} {CURRENCY_SYMBOL}</div>
       {/if}
     </div>
   </Tooltip>
@@ -71,12 +66,6 @@
           opacity: 0.7;
           text-align: center;
         }
-      }
-
-      .inventory-header-total-value {
-        width: calc(100% / 3);
-        font-size: var(--font-size-small);
-        text-align: right;
       }
 
       .import-nfts-button {
