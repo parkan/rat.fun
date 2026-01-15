@@ -2,7 +2,7 @@
   import type { TripFolder } from "@sanity-types"
   import type { Snippet } from "svelte"
   import TripFolderItem from "./TripFolderItem.svelte"
-  import ChallengeFolderItem from "./ChallengeFolderItem.svelte"
+  import ChallengeCard from "./ChallengeCard.svelte"
   import { FEATURES } from "$lib/config/features"
 
   let {
@@ -20,7 +20,9 @@
     currentBlockNumber,
     challengeTitle,
     lastWinnerName,
-    lastWinTimestamp
+    lastWinTimestamp,
+    creatorName,
+    maxReward
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
@@ -37,6 +39,8 @@
     challengeTitle?: string | null
     lastWinnerName?: string | null
     lastWinTimestamp?: number | null
+    creatorName?: string | null
+    maxReward?: number | null
   } = $props()
 </script>
 
@@ -44,9 +48,8 @@
   {@render children?.()}
   {#if restrictedFolder}
     {#if FEATURES.ENABLE_CHALLENGE_TRIPS}
-      <ChallengeFolderItem
+      <ChallengeCard
         listingIndex={0}
-        folder={restrictedFolder}
         {challengeTripId}
         attemptCount={challengeTripAttempts}
         {challengeCreationBlock}
@@ -54,6 +57,8 @@
         {challengeTitle}
         {lastWinnerName}
         {lastWinTimestamp}
+        {creatorName}
+        {maxReward}
       />
     {:else}
       <TripFolderItem

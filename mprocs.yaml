@@ -17,9 +17,9 @@ procs:
   # webgl:
   #   cwd: packages/webgl
   #   shell: pnpm dev
-  # contracts:
-  #   cwd: packages/contracts
-  #   shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
+  contracts:
+    cwd: packages/contracts
+    shell: pnpm mud dev-contracts --rpc http://127.0.0.1:8545
   server:
     cwd: packages/server
     shell: pnpm dev

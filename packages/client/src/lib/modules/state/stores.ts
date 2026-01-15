@@ -270,6 +270,94 @@ export const realisedProfitLoss = derived(
 )
 
 // * * * * * * * * * * * * * * * * *
+// CURRENT BLOCK NUMBER
+// * * * * * * * * * * * * * * * * *
+
+import { blockNumber } from "$lib/modules/network"
+
+export const currentBlockNumber = derived(blockNumber, $blockNumber => Number($blockNumber))
+
+// * * * * * * * * * * * * * * * * *
+// CHALLENGE INFO
+// * * * * * * * * * * * * * * * * *
+
+import { CHALLENGE_ACTIVE_PERIOD_BLOCKS } from "./constants"
+
+export const BLOCK_TIME_MS = 2000 // Base L2 block time
+
+export interface ChallengeInfo {
+  tripId: string | null
+  isActive: boolean
+  creationBlock: number | null
+  expirationBlock: number | null
+  blocksRemaining: number
+  timeRemainingMs: number
+  creatorName: string | null
+  creatorAddress: string | null
+  maxReward: number | null
+  attemptCount: number
+  canCreateNewChallenge: boolean
+}
+
+/**
+ * Derived store providing complete challenge information.
+ * Useful for determining if a new challenge can be created and challenge status.
+ */
+export const challengeInfo = derived(
+  [trips, players, currentBlockNumber],
+  ([$trips, $players, $currentBlock]): ChallengeInfo => {
+    // Find active challenge trip (challengeTrip flag, balance > 0, not depleted)
+    const challengeTrips = Object.entries($trips).filter(
+      ([_, trip]) => trip.challengeTrip && Number(trip.balance) > 0
+    )
+
+    if (challengeTrips.length === 0) {
+      return {
+        tripId: null,
+        isActive: false,
+        creationBlock: null,
+        expirationBlock: null,
+        blocksRemaining: 0,
+        timeRemainingMs: 0,
+        creatorName: null,
+        creatorAddress: null,
+        maxReward: null,
+        attemptCount: 0,
+        canCreateNewChallenge: true
+      }
+    }
+
+    // Get the most recent challenge trip
+    const [tripId, trip] = challengeTrips.sort(
+      (a, b) => Number(b[1].creationBlock ?? 0) - Number(a[1].creationBlock ?? 0)
+    )[0]
+
+    const creationBlock = Number(trip.creationBlock ?? 0)
+    const expirationBlock = creationBlock + CHALLENGE_ACTIVE_PERIOD_BLOCKS
+    const blocksRemaining = Math.max(0, expirationBlock - $currentBlock)
+    const isActive = blocksRemaining > 0
+
+    // Get creator info
+    const creatorId = trip.creatorId as string | undefined
+    const creator = creatorId ? $players[creatorId] : undefined
+
+    return {
+      tripId,
+      isActive,
+      creationBlock,
+      expirationBlock,
+      blocksRemaining,
+      timeRemainingMs: blocksRemaining * BLOCK_TIME_MS,
+      creatorName: creator?.name ?? null,
+      creatorAddress: creatorId ?? null,
+      maxReward: Number(trip.balance ?? 0),
+      attemptCount: Number(trip.visitCount ?? 0),
+      canCreateNewChallenge: !isActive
+    }
+  }
+)
+
+// * * * * * * * * * * * * * * * * *
 // CHALLENGE WINNER
 // * * * * * * * * * * * * * * * * *
 

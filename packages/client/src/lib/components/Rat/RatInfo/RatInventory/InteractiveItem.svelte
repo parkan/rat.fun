@@ -8,14 +8,12 @@
     item,
     index,
     itemId,
-    onExport,
-    isExporting = false
+    onExport
   }: {
     item: Item
     index: number
     itemId?: string
     onExport?: (itemId: string) => void
-    isExporting?: boolean
   } = $props()
 
   const handleExport = (e: MouseEvent) => {
@@ -42,7 +40,6 @@
 
 <div
   class="inventory-item-wrapper {getRarityClass(item.value)} index-{index}"
-  class:disabled={isExporting}
   role="button"
   tabindex="0"
   onmouseenter={onMouseEnter}
@@ -60,8 +57,8 @@
     <div class="item-back">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
       {#if onExport && itemId}
-        <button class="export-button" onclick={handleExport} disabled={isExporting}>
-          {isExporting ? "Exporting..." : "Export NFT"}
+        <button class="export-button" onclick={handleExport}>
+          Export NFT
         </button>
       {/if}
     </div>
@@ -77,11 +74,6 @@
     position: relative;
     perspective: 1000px;
     user-select: none;
-
-    &.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   .inventory-item {

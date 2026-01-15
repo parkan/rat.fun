@@ -1,9 +1,9 @@
 <script lang="ts">
   import { fade } from "svelte/transition"
   import { goto } from "$app/navigation"
-  import type { TripFolder } from "@sanity-types"
   import { playSound } from "$lib/modules/sound"
   import { formatCountdown } from "@ratfun/shared-utils"
+  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
 
   // Challenge active period in blocks (24h at 2s/block on Base)
   const CHALLENGE_ACTIVE_PERIOD_BLOCKS = 43200
@@ -13,25 +13,27 @@
   const WINNER_DISPLAY_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
   let {
-    listingIndex,
-    folder,
+    listingIndex = 0,
     challengeTripId,
     attemptCount,
     challengeCreationBlock,
     currentBlockNumber,
     challengeTitle,
     lastWinnerName,
-    lastWinTimestamp
+    lastWinTimestamp,
+    creatorName,
+    maxReward
   }: {
-    listingIndex: number
-    folder: TripFolder
+    listingIndex?: number
     challengeTripId?: string
     attemptCount?: number
     challengeCreationBlock?: number
     currentBlockNumber?: number
     challengeTitle?: string | null
     lastWinnerName?: string | null
-    lastWinTimestamp?: number | null // Unix timestamp in ms
+    lastWinTimestamp?: number | null
+    creatorName?: string | null
+    maxReward?: number | null
   } = $props()
 
   let hasActiveChallenge = $derived(!!challengeTripId)
@@ -95,7 +97,7 @@
   }
 </script>
 
-<div class="tile wide" in:fade={{ duration: 100, delay: listingIndex * 30 }}>
+<div class="challenge-card" in:fade={{ duration: 100, delay: listingIndex * 30 }}>
   <button
     class:disabled
     class:countdown={displayState === "countdown"}
@@ -104,12 +106,30 @@
     {onmouseup}
     {onmousedown}
   >
-    <div class="title">
+    <div class="content">
       {#if displayState === "winner"}
         <div class="challenge-title winner">Won by {lastWinnerName}</div>
       {:else}
         <div class="challenge-title">{challengeTitle ?? "TRIP OR TRAP?"}</div>
       {/if}
+
+      {#if displayState === "active"}
+        <div class="challenge-meta">
+          {#if creatorName}
+            <div class="meta-row creator">
+              <span class="label">CREATED BY</span>
+              <span class="value">{creatorName}</span>
+            </div>
+          {/if}
+          {#if maxReward}
+            <div class="meta-row reward">
+              <span class="label">MAX REWARD</span>
+              <span class="value">{maxReward} {CURRENCY_SYMBOL}</span>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <div class="count">
         {#if displayState === "active"}
           <span class="countdown-time">{countdownText}</span>
@@ -123,26 +143,18 @@
 </div>
 
 <style lang="scss">
-  .tile {
+  .challenge-card {
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     overflow: visible;
-
-    &.wide {
-      grid-column: span 2;
-
-      @media (max-width: 800px) {
-        grid-column: span 1;
-        grid-row: span 2;
-      }
-    }
+    width: 100%;
 
     button {
       position: relative;
       width: 100%;
-      height: 100%;
+      min-height: 180px;
       font-family: var(--special-font-stack);
       font-size: var(--font-size-large);
       box-shadow: 0 0px 10px 0px var(--color-restricted-trip-folder-transparent);
@@ -156,6 +168,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 16px;
 
       background-color: var(--color-restricted-trip-folder);
 
@@ -172,26 +185,62 @@
 
       @media (max-width: 768px) {
         font-size: var(--font-size-normal);
+        min-height: 160px;
       }
 
-      .title {
+      .content {
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
 
         .challenge-title {
           font-size: var(--font-size-extra-large);
-          line-height: 0.8em;
+          line-height: 1em;
 
           &.winner {
             font-size: var(--font-size-super-large);
-            line-height: 0.8em;
+            line-height: 1em;
+          }
+        }
+
+        .challenge-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          background: var(--background-semi-transparent);
+          padding: 8px 12px;
+
+          .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+
+            .label {
+              font-family: var(--typewriter-font-stack);
+              font-size: var(--font-size-xsmall);
+              opacity: 0.8;
+              color: var(--foreground);
+            }
+
+            .value {
+              font-family: var(--special-font-stack);
+              font-size: var(--font-size-medium);
+              color: var(--foreground);
+            }
+
+            &.reward .value {
+              font-size: var(--font-size-large);
+            }
           }
         }
 
         .count {
           font-size: var(--font-size-normal);
           font-family: var(--typewriter-font-stack);
-          margin-top: 10px;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -206,6 +255,7 @@
           }
         }
       }
+
       transition: transform 0.1s ease-in-out;
 
       @media (min-width: 800px) {

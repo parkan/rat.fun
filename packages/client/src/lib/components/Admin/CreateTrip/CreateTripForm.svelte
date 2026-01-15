@@ -14,16 +14,12 @@
     tripDescription = $bindable(""),
     tripCreationCost = $bindable(DEFAULT_SUGGESTED_TRIP_CREATION_COST),
     textareaElement = $bindable<HTMLTextAreaElement | null>(null),
-    selectedFolderTitle,
-    onFolderSelect,
     onSubmit,
     placeholder
   }: {
     tripDescription: string
     tripCreationCost: number
     textareaElement: HTMLTextAreaElement | null
-    selectedFolderTitle?: string
-    onFolderSelect?: () => void
     onSubmit: () => void
     placeholder: string
   } = $props()
@@ -53,15 +49,13 @@
   // - Min rat value to enter is not set
   // - Trip creation cost is less than minimum
   // - Player has insufficient balance
-  // - No folder is selected (when folder selection is enabled)
   const disabled = $derived(
     invalidTripDescriptionLength ||
       busy.CreateTrip.current !== 0 ||
       !$maxValuePerWin ||
       !$minRatValueToEnter ||
       flooredTripCreationCost < MIN_TRIP_CREATION_COST ||
-      $playerERC20Balance < flooredTripCreationCost ||
-      (onFolderSelect && !selectedFolderTitle)
+      $playerERC20Balance < flooredTripCreationCost
   )
 </script>
 
@@ -84,17 +78,6 @@
       bind:value={tripDescription}
       bind:this={textareaElement}
     ></textarea>
-
-    {#if selectedFolderTitle && onFolderSelect}
-      <div class="folder-select">
-        <span class="highlight">Trip Category</span>
-        <div>
-          <button onclick={onFolderSelect} class="select-folder-button">
-            {selectedFolderTitle} <span class="big">×</span>
-          </button>
-        </div>
-      </div>
-    {/if}
   </div>
 
   <!-- TRIP CREATION COST SLIDER -->
@@ -179,29 +162,6 @@
   input[type="number"] {
     appearance: textfield;
     -moz-appearance: textfield;
-  }
-
-  .folder-select {
-    display: flex;
-    flex-flow: column nowrap;
-    gap: 8px;
-  }
-
-  .select-folder-button {
-    font-size: var(--font-size-medium);
-    white-space: nowrap;
-    font-family: var(--special-font-stack);
-    line-height: 32px;
-    display: flex;
-    gap: 4px;
-    align-items: center;
-
-    .big {
-      font-size: var(--font-size-mascot);
-      line-height: 20px;
-      display: block;
-      transform: translateY(-2px);
-    }
   }
 
   .controls {
