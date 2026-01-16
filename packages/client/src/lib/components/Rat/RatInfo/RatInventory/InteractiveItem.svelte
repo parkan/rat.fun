@@ -55,7 +55,7 @@
         <div class="name">{item.name}</div>
       {/if}
     </div>
-    <div class="item-back" style="background-color: {getRarityColor(item.value)}">
+    <div class="item-back" style="background-color: {getRarityColor(Number(item.value))}">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
       {#if onExport && itemId}
         <button class="export-button" onclick={handleExport}> Export NFT </button>
