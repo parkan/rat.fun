@@ -63,6 +63,9 @@ export const externalAddressesConfig = derived(
 // ITEM NFT CONFIG
 export const itemNftConfig = derived(worldObject, $worldObject => $worldObject.itemNftConfig)
 
+// CHALLENGE CONFIG
+export const challengeConfig = derived(worldObject, $worldObject => $worldObject.challengeConfig)
+
 // * * * * * * * * * * * * * * * * *
 // GAME ELEMENT STORES
 // * * * * * * * * * * * * * * * * *

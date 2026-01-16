@@ -83,9 +83,9 @@
     <div class="param-grid">
       <!-- TRIP CREATION COST (editable) -->
       <div class="param-group">
-        <label for="creation-cost">
-          <span class="param-label">Pool Size (min {CHALLENGE_MIN_CREATION_COST})</span>
-        </label>
+        <span class="param-label">Pool Size (min {CHALLENGE_MIN_CREATION_COST})</span>
+        <!-- <label for="creation-cost">
+        </label> -->
         <div class="param-input-wrapper">
           <input
             id="creation-cost"
@@ -243,6 +243,7 @@
         font-family: var(--typewriter-font-stack);
         font-size: var(--font-size-small);
         color: var(--color-grey-light);
+        margin-bottom: 4px;
       }
 
       .param-input-wrapper {
@@ -250,7 +251,8 @@
         align-items: center;
         gap: 4px;
         background: var(--foreground);
-        padding: 4px 8px;
+        padding: 8px 12px;
+        height: 48px;
 
         .param-input {
           flex: 1;
@@ -282,7 +284,8 @@
         align-items: center;
         gap: 4px;
         background: var(--color-grey-mid);
-        padding: 4px 8px;
+        padding: 8px 12px;
+        height: 48px;
 
         .fixed-value {
           font-family: var(--special-font-stack);

@@ -56,9 +56,15 @@
 
   const placeholder = `Describe the TRIP and what awaits the RAT. Death traps, shopping dungeons and unadulterated gambling are just a few ideas on how to squeeze value out of other RATS. Think beyond silicon.\n\nYou can use TRIPS to generate PSYCHO OBJECTS for your own RAT. But remember: other OPERATORS are watching.`
 
+  const CHALLENGE_MIN_CREATION_COST = 5000
+
   const selectTripType = (type: "challenge" | "regular") => {
     playSound({ category: "ratfunUI", id: "click" })
     tripType = type
+    // Set appropriate default cost based on trip type
+    if (type === "challenge") {
+      tripCreationCost = Math.max(CHALLENGE_MIN_CREATION_COST, tripCreationCost)
+    }
   }
 
   async function onClick() {

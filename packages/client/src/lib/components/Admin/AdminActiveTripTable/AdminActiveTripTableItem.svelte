@@ -10,7 +10,7 @@
   import { goto } from "$app/navigation"
   import { playSound } from "$lib/modules/sound"
   import { focusTrip } from "$lib/modules/ui/state.svelte"
-  import { gameConfig } from "$lib/modules/state/stores"
+  import { gameConfig, challengeConfig } from "$lib/modules/state/stores"
   import { blockNumber } from "$lib/modules/network"
   import { UI_STRINGS } from "$lib/modules/ui/ui-strings/index.svelte"
 
@@ -43,8 +43,12 @@
   }
 
   // Cooldown until trip can be liquidated
+  // Challenge trips use activePeriodBlocks from challengeConfig, regular trips use cooldownCloseTrip from gameConfig
+  let cooldownBlocks = $derived(
+    trip.challengeTrip ? Number($challengeConfig?.activePeriodBlocks ?? 0) : $gameConfig.cooldownCloseTrip
+  )
   let blockUntilUnlock = $derived(
-    Number(trip.creationBlock) + $gameConfig.cooldownCloseTrip - Number($blockNumber)
+    Number(trip.creationBlock) + cooldownBlocks - Number($blockNumber)
   )
 </script>
 
