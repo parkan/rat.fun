@@ -176,6 +176,11 @@ function transformConfigResponse(config: GlobalConfigsResponse): WorldObject {
       itemNftAddress:
         (config.itemNftConfig?.itemNftAddress as Address) ??
         ("0x0000000000000000000000000000000000000000" as Address)
+    },
+    // ChallengeConfig
+    challengeConfig: {
+      minCreationCost: safeParseBigInt(config.challengeConfig?.minCreationCost),
+      activePeriodBlocks: Number(config.challengeConfig?.activePeriodBlocks) || 0
     }
   }
 }

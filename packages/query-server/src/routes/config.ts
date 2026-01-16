@@ -5,7 +5,8 @@ import type {
   GameConfigResponse,
   GamePercentagesConfigResponse,
   ExternalAddressesConfigResponse,
-  ItemNftConfigResponse
+  ItemNftConfigResponse,
+  ChallengeConfigResponse
 } from "../types.js"
 
 // Raw DB row types (columns are snake_case)
@@ -39,18 +40,24 @@ type ItemNftConfigRow = {
   item_nft_address: Buffer | null
 }
 
+type ChallengeConfigRow = {
+  min_creation_cost: string | null
+  active_period_blocks: number | null
+}
+
 // Fetch all global configs (singleton tables)
 // Note: Some table names are truncated in the MUD indexer database
 // WorldStats is fetched separately via /api/world-stats (not cached)
 async function fetchGlobalConfigs(): Promise<Omit<GlobalConfigsResponse, "blockNumber">> {
-  const [gameConfigRow, gamePercentagesRow, externalAddressesRow, itemNftConfigRow] =
+  const [gameConfigRow, gamePercentagesRow, externalAddressesRow, itemNftConfigRow, challengeConfigRow] =
     await Promise.all([
       getSingletonTableRow<GameConfigRow>("GameConfig"),
       // Truncated table name: game_percentages_c instead of game_percentages_config
       getSingletonTableRow<GamePercentagesRow>("GamePercentagesC", "game_percentages_c"),
       // Truncated table name: external_addresse instead of external_addresses_config
       getSingletonTableRow<ExternalAddressesRow>("ExternalAddresse", "external_addresse"),
-      getSingletonTableRow<ItemNftConfigRow>("ItemNftConfig")
+      getSingletonTableRow<ItemNftConfigRow>("ItemNftConfig"),
+      getSingletonTableRow<ChallengeConfigRow>("ChallengeConfig")
     ])
 
   // Debug logging
@@ -58,6 +65,7 @@ async function fetchGlobalConfigs(): Promise<Omit<GlobalConfigsResponse, "blockN
   console.log("[config] GamePercentagesConfig row:", gamePercentagesRow)
   console.log("[config] ExternalAddressesConfig row:", externalAddressesRow)
   console.log("[config] ItemNftConfig row:", itemNftConfigRow)
+  console.log("[config] ChallengeConfig row:", challengeConfigRow)
 
   // Transform to response format (camelCase, hex addresses)
   const gameConfig: GameConfigResponse = {
@@ -105,11 +113,19 @@ async function fetchGlobalConfigs(): Promise<Omit<GlobalConfigsResponse, "blockN
       : null
   }
 
+  const challengeConfig: ChallengeConfigResponse = {
+    minCreationCost: challengeConfigRow?.min_creation_cost
+      ? formatBalance(challengeConfigRow.min_creation_cost)
+      : null,
+    activePeriodBlocks: challengeConfigRow?.active_period_blocks ?? null
+  }
+
   return {
     gameConfig,
     gamePercentagesConfig,
     externalAddressesConfig,
-    itemNftConfig
+    itemNftConfig,
+    challengeConfig
   }
 }
 

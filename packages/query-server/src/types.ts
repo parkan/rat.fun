@@ -126,6 +126,11 @@ export interface ItemNftConfigResponse {
   itemNftAddress: string | null
 }
 
+export interface ChallengeConfigResponse {
+  minCreationCost: string | null
+  activePeriodBlocks: number | null
+}
+
 // Combined global configs for hydration (static config only, worldStats is separate)
 export interface GlobalConfigsResponse {
   blockNumber: string
@@ -133,6 +138,7 @@ export interface GlobalConfigsResponse {
   gamePercentagesConfig: GamePercentagesConfigResponse
   externalAddressesConfig: ExternalAddressesConfigResponse
   itemNftConfig: ItemNftConfigResponse
+  challengeConfig: ChallengeConfigResponse
 }
 
 // Leaderboard entry types
