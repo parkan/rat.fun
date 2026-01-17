@@ -20,6 +20,14 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
+      - name: Setup env files
+        run: |
+          for pkg in packages/*/; do
+            if [ -f "$pkg.env.example" ]; then
+              cp "$pkg.env.example" "$pkg.env"
+            fi
+          done
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -30,5 +38,4 @@ jobs:
         run: pnpm build:libs
 
       - name: TypeScript check
-        # TODO: re-enable claim-frontend and exchange-frontend once env vars are configured for CI
-        run: pnpm --filter '@ratfun/shared-ui' --filter 'client' --filter 'auction-frontend' --filter 'server' --filter 'websocket-server' --filter 'query-server' run check
+        run: pnpm check
