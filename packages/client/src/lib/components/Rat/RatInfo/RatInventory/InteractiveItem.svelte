@@ -48,7 +48,7 @@
     <div class="item-back">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
       {#if onExport && itemId}
-        <button class="export-button" onclick={handleExport}> Extract NFT </button>
+        <button class="export-button" onclick={handleExport}>EXTRACT</button>
       {/if}
     </div>
   </div>
@@ -113,14 +113,14 @@
 
   .export-button {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    bottom: 5px;
+    left: 10%;
+    width: 80%;
     height: 40px;
     margin-top: 8px;
     padding: 4px 8px;
     font-size: var(--font-size-small);
-    font-family: var(--special-font-stack);
+    font-family: var(--typewriter-font-stack);
     background: var(--color-grey-light);
     color: var(--background);
     border: none;
