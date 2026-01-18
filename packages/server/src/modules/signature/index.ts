@@ -40,7 +40,7 @@ export async function verifyRequest<T>(
 
   // Check delegation and substitute playerAddress if necessary
   if (signedRequest.info.calledFrom) {
-    if (!hasDelegation(signedRequest.info.calledFrom, recoveredAddress)) {
+    if (!(await hasDelegation(signedRequest.info.calledFrom, recoveredAddress))) {
       throw new DelegationNotFoundError()
     }
     callerAddress = signedRequest.info.calledFrom
