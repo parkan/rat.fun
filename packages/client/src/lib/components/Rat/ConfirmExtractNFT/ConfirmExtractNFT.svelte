@@ -1,12 +1,14 @@
 <script lang="ts">
-  import { player } from "$lib/modules/state/stores"
+  import { get } from "svelte/store"
+  import { player, rat } from "$lib/modules/state/stores"
   import { playSound } from "$lib/modules/sound"
-  import { BigButton, ResizableText } from "$lib/components/Shared"
+  import { BigButton } from "$lib/components/Shared"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
+  import NFTItem from "$lib/components/Rat/NFTItem/NFTItem.svelte"
   import { exportItemToNFT } from "$lib/modules/on-chain-transactions"
   import { errorHandler } from "$lib/modules/error-handling"
   import { createLogger } from "$lib/modules/logger"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
+  import { waitForInventoryChange } from "$lib/modules/state/utils"
 
   const logger = createLogger("[ConfirmExtractNFT]")
 
@@ -24,18 +26,22 @@
     if (!itemId || !ratId) return
 
     isExtracting = true
+    // Get current inventory length before export
+    const currentInventoryLength = get(rat)?.inventory?.length ?? 0
+
     try {
       logger.log("Exporting item to NFT:", { itemId, ratId })
-      const result = await exportItemToNFT(ratId, itemId)
-      if (result) {
-        logger.log("Item exported successfully")
-        playSound({ category: "ratfunUI", id: "itemPositive" })
-      }
+      await exportItemToNFT(ratId, itemId)
+      logger.log("Item exported, waiting for inventory update...")
+
+      // Wait for the inventory to actually update in the store
+      await waitForInventoryChange(rat, currentInventoryLength)
+      logger.log("Inventory updated")
+      playSound({ category: "ratfunUI", id: "itemPositive" })
     } catch (e) {
       errorHandler(e)
     } finally {
       isExtracting = false
-      // Always transition back to inventory after export attempt (success or failure)
       ratState.exportItem.clear()
       ratState.state.transitionTo(RAT_BOX_STATE.HAS_RAT)
     }
@@ -52,19 +58,12 @@
   <div class="confirm-export-content">
     <!-- <div class="header">EXPORT TO NFT</div> -->
 
-    <div class="item-preview">
-      <div class="item-name">
-        <ResizableText>
-          {itemName ?? "Unknown Item"}
-        </ResizableText>
-      </div>
-      <div class="flexy-row">
-        <div class="item-value">{itemValue ?? 0} {CURRENCY_SYMBOL}</div>
-      </div>
-    </div>
-
     <div class="warning-text">
       This will remove the item from your RAT's inventory and mint it as an NFT to your wallet.
+    </div>
+
+    <div class="item-preview">
+      <NFTItem name={itemName ?? "Unknown Item"} value={itemValue ?? 0} />
     </div>
 
     <div class="button-container">
@@ -99,55 +98,16 @@
 
       .item-preview {
         width: 200px;
-        height: 240px;
         margin: 0 auto;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        position: relative;
-        background-color: var(--color-inventory-item-background);
-        color: var(--background);
-        padding: 5px;
-        border: 8px ridge var(--background-semi-transparent);
-        outline: none;
-        box-shadow: 0 4px 8px var(--background-light-transparent);
-
-        .flexy-row {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .item-name {
-          height: 300px;
-          width: 200px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 24px;
-          // line-height: 200px;
-          font-family: var(--special-font-stack);
-          // font-size: var(--font-size-large);
-          color: var(--background);
-        }
-
-        .item-value {
-          font-family: var(--typewriter-font-stack);
-          font-size: var(--font-size-medium);
-          color: var(--background);
-          opacity: 0.8;
-        }
       }
 
       .warning-text {
         padding: 10px;
         background: var(--foreground-semi-transparent);
         color: var(--background);
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-small);
+        font-family: var(--special-font-stack);
+        font-size: var(--font-size-large);
+        margin-bottom: 20px;
       }
 
       .button-container {
@@ -159,6 +119,7 @@
         flex-direction: row;
         gap: 10px;
         height: 80px;
+        margin-top: 20px;
 
         @media (max-width: 800px) {
           width: 100%;

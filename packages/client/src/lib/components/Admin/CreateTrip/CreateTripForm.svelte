@@ -60,6 +60,11 @@
 </script>
 
 <div class="controls">
+  <!-- HEADER -->
+  <div class="form-header regular">
+    <span class="header-title">TRIP</span>
+  </div>
+
   <!-- TRIP DESCRIPTION -->
   <div class="form-group">
     <label for="trip-description">
@@ -84,7 +89,7 @@
   <div class="slider-group">
     <div class="slider-header">
       <label for="trip-creation-cost-slider">
-        <span class="highlight">{UI_STRINGS.tripCreationCostLabel}</span>
+        <span class="highlight">Trip cost</span>
       </label>
       <input
         class="cost-display"
@@ -178,19 +183,56 @@
     color: var(--background);
   }
 
+  .form-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 4px;
+
+    .header-title {
+      position: relative;
+      z-index: 1;
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-large);
+    }
+
+    &.regular {
+      background: var(--color-grey-light);
+      color: var(--background);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("/images/spiral4.png");
+        background-repeat: no-repeat;
+        background-size: 400% 400%;
+        background-position: center;
+        opacity: 0.2;
+        z-index: 0;
+      }
+    }
+  }
+
   .form-group {
     display: flex;
     flex-flow: column nowrap;
     gap: 8px;
+    flex: 1;
+    min-height: 0;
 
     label {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     textarea {
       width: 100%;
+      height: 100%;
+      flex: 1;
       padding: 5px;
       border: none;
       background: var(--foreground);
@@ -291,39 +333,33 @@
   .calculated-values {
     display: flex;
     gap: 0;
-    flex: 1;
+    border: 1px solid var(--color-border);
 
     .value-box {
       flex: 1;
       padding: 10px;
-      border: 1px solid var(--color-border);
       background: var(--background);
       display: flex;
       flex-flow: column nowrap;
-      justify-content: stretch;
+      justify-content: center;
       position: relative;
+
+      &:first-child {
+        border-right: 1px solid var(--color-border);
+      }
 
       .value-label {
         font-family: var(--typewriter-font-stack);
         font-size: var(--font-size-small);
         color: var(--color-grey-light);
-        position: absolute;
-        top: 8px;
-        left: 8px;
       }
 
       .value-amount {
         font-family: var(--special-font-stack);
         font-size: var(--font-size-large);
         color: var(--foreground);
-        height: 100%;
         display: flex;
-        justify-content: center;
         align-items: center;
-
-        @media screen and (min-width: 800px) {
-          font-size: 42px;
-        }
       }
     }
   }

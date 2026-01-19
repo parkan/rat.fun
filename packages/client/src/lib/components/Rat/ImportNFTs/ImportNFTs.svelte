@@ -8,10 +8,10 @@
   import { errorHandler } from "$lib/modules/error-handling"
   import { playSound } from "$lib/modules/sound"
   import { createLogger } from "$lib/modules/logger"
-  import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
-  import { SmallButton, BackButton, ResizableText } from "$lib/components/Shared"
+  import { BackButton } from "$lib/components/Shared"
   import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
-  import { getRatInventory } from "$lib/modules/state/utils"
+  import { getRatInventory, waitForInventoryChange } from "$lib/modules/state/utils"
+  import NFTItem from "$lib/components/Rat/NFTItem/NFTItem.svelte"
 
   const logger = createLogger("[ImportNFTs]")
 
@@ -125,15 +125,21 @@
     if (!ratId || inventoryFull) return
 
     importing = tokenId
+    // Get current inventory length before import
+    const currentInventoryLength = get(rat)?.inventory?.length ?? 0
+
     try {
       logger.log("Importing NFT:", { tokenId: tokenId.toString(), ratId })
-      const result = await importNFTToItem(ratId, tokenId)
-      if (result) {
-        logger.log("NFT imported successfully")
-        playSound({ category: "ratfunUI", id: "itemPositive" })
-        // Reload NFTs
-        await loadOwnedNFTs()
-      }
+      await importNFTToItem(ratId, tokenId)
+      logger.log("NFT imported, waiting for inventory update...")
+
+      // Wait for the inventory to actually update in the store
+      await waitForInventoryChange(rat, currentInventoryLength)
+      logger.log("Inventory updated")
+      playSound({ category: "ratfunUI", id: "itemPositive" })
+
+      // Reload NFTs (the imported one should now be gone)
+      await loadOwnedNFTs()
     } catch (e) {
       errorHandler(e)
     } finally {
@@ -171,25 +177,16 @@
     {:else if ownedNFTs.length === 0}
       <div class="empty">No Item NFTs owned</div>
     {:else}
-      <div class="nft-list">
-        {#each ownedNFTs as nft (nft.tokenId.toString())}
-          <div class="nft-item">
-            <div class="nft-left">
-              <div class="nft-details">
-                <ResizableText>
-                  {nft.name} ({nft.value}
-                  {CURRENCY_SYMBOL})
-                </ResizableText>
-              </div>
-            </div>
-            <div class="nft-actions">
-              <SmallButton
-                text={importing === nft.tokenId ? "Injecting..." : "Inject"}
-                extraClass="text-large"
-                disabled={importing !== null || !ratId || inventoryFull}
-                onclick={() => handleImport(nft.tokenId)}
-              />
-            </div>
+      <div class="nft-grid">
+        {#each ownedNFTs as nft, index (nft.tokenId.toString())}
+          <div class="nft-item-wrapper" style="animation-delay: {index * 50}ms">
+            <NFTItem
+              name={nft.name}
+              value={nft.value}
+              actionText={importing === nft.tokenId ? "Injecting..." : "Inject"}
+              actionDisabled={importing !== null || !ratId || inventoryFull}
+              onAction={() => handleImport(nft.tokenId)}
+            />
           </div>
         {/each}
       </div>
@@ -205,10 +202,6 @@
     width: 100%;
     background-image: url("/images/texture-2.png");
     background-size: 200px;
-  }
-
-  :global(.text-large) {
-    font-size: var(--font-large);
   }
 
   .header {
@@ -227,16 +220,9 @@
     background: var(--background-semi-transparent);
     user-select: none;
     text-align: right;
-    color: var(--color-grey-light);
-    font-size: var(--font-size-small);
-    font-family: var(--typewriter-font-stack);
-
-    // .title {
-    //   font-family: var(--special-font-stack);
-    //   font-size: var(--font-size-extra-large);
-    //   color: var(--foreground);
-    //   margin-bottom: 8px;
-    // }
+    color: var(--foreground);
+    font-size: var(--font-size-normal);
+    font-family: var(--special-font-stack);
 
     .inventory-status {
       font-family: var(--typewriter-font-stack);
@@ -266,49 +252,25 @@
     opacity: 0.7;
   }
 
-  .nft-list {
-    display: flex;
-    flex-direction: column;
+  .nft-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
 
-  .nft-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100px;
-    // padding: 12px;
-    background: var(--background-semi-transparent);
-    // border: 2px solid var(--foreground);
+  .nft-item-wrapper {
+    animation: scaleIn 0.2s ease-out both;
   }
 
-  .nft-left {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-  }
-
-  .nft-details {
-    height: 100%;
-    width: 100%;
-    display: block;
-    font-family: var(--special-font-stack);
-    border-style: outset;
-    border-width: 4px;
-    border-color: var(--background-light-transparent);
-    background-color: var(--color-inventory-item-background);
-    color: var(--background);
-    padding: 5px;
-    border: 8px ridge var(--background-semi-transparent);
-    outline: none;
-    box-shadow: 0 4px 8px var(--background-light-transparent);
-  }
-
-  .nft-actions {
-    flex-shrink: 0;
-    height: 100%;
-    width: 200px;
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .back-button-container {

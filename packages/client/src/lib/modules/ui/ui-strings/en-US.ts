@@ -198,7 +198,7 @@ export const enUS = {
   traumwertSteuerExplanation: (percentage: number): string => `${percentage}% corporate tax`,
   trip: "Trip",
   tripBalance: "Trip balance",
-  tripCreationCostLabel: "Trip creation investment",
+  tripCreationCostLabel: "Trip creation settings",
   tripDescription: "Expected symptoms",
   tripGotDepleted: (index: number): string => `Trip #${index} got depleted`,
   tripLogs: "TRIP LOGS",

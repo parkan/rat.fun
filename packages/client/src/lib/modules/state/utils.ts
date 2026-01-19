@@ -240,6 +240,70 @@ export function waitForPropertyChangeFrom<T, K extends keyof T>(
   })
 }
 
+/**
+ * Waits for the rat's inventory to change and all items to be resolvable
+ * @param ratStore The rat store to watch
+ * @param itemsStore The items store to check for item availability
+ * @param oldLength The inventory length to wait for to change from
+ * @param timeoutMs Optional timeout in milliseconds (default: 15000)
+ * @returns Promise that resolves when inventory changes AND all items are available
+ */
+export function waitForInventoryChange(
+  ratStore: { subscribe: (callback: (value: Rat | undefined) => void) => () => void },
+  oldLength: number,
+  timeoutMs: number = 15000
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let ratUnsubscribe: (() => void) | null = null
+    let itemsUnsubscribe: (() => void) | null = null
+    let currentRat: Rat | undefined = undefined
+    let resolved = false
+
+    const cleanup = () => {
+      if (ratUnsubscribe) ratUnsubscribe()
+      if (itemsUnsubscribe) itemsUnsubscribe()
+    }
+
+    const timeoutId = setTimeout(() => {
+      cleanup()
+      reject(new PropertyChangeTimeoutError("inventory", timeoutMs))
+    }, timeoutMs)
+
+    const checkComplete = () => {
+      if (resolved) return
+
+      // Check if inventory length changed
+      const currentLength = currentRat?.inventory?.length ?? 0
+      if (currentLength === oldLength) return
+
+      // Check if all items in inventory are available in items store
+      const itemsStore = get(items)
+      const allItemsAvailable =
+        currentRat?.inventory?.every(itemId => {
+          return itemsStore[itemId.toLowerCase()] !== undefined
+        }) ?? true
+
+      if (allItemsAvailable) {
+        resolved = true
+        clearTimeout(timeoutId)
+        cleanup()
+        resolve()
+      }
+    }
+
+    // Subscribe to rat store
+    ratUnsubscribe = ratStore.subscribe((rat: Rat | undefined) => {
+      currentRat = rat
+      checkComplete()
+    })
+
+    // Also subscribe to items store to catch when new items become available
+    itemsUnsubscribe = items.subscribe(() => {
+      checkComplete()
+    })
+  })
+}
+
 // Stringify an object with BigInts (all crypto things have this)
 export function stringifyWithBigInt(obj: unknown): string {
   return JSON.stringify(obj, (key, value) => {

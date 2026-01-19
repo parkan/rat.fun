@@ -37,13 +37,7 @@
 >
   <div class="inventory-item">
     <div class="item-front">
-      {#if $isPhone}
-        <ResizableText>
-          {item.name}
-        </ResizableText>
-      {:else}
-        <div class="name">{item.name}</div>
-      {/if}
+      <div class="name">{item.name}</div>
     </div>
     <div class="item-back">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
@@ -109,6 +103,12 @@
   .name,
   .value {
     text-align: center;
+  }
+
+  .name {
+    @media (max-width: 800px) {
+      font-size: var(--font-size-medium);
+    }
   }
 
   .export-button {

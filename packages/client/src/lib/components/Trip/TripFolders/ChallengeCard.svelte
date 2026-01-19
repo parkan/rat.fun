@@ -131,7 +131,7 @@
         {#if displayState === "active"}
           <span class="countdown-time">{countdownText}</span>
         {:else}
-          <span class="countdown-time">No active challenge</span>
+          <span class="countdown-time">No active trip</span>
         {/if}
       </div>
     </div>

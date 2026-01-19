@@ -168,7 +168,7 @@
                   FEATURES.ENABLE_CHALLENGE_TRIPS &&
                   selectTripType("challenge")}
               >
-                <div class="type-title">CHALLENGE</div>
+                <div class="type-title">TRAP?</div>
                 {#if !canCreateChallenge && FEATURES.ENABLE_CHALLENGE_TRIPS}
                   <div class="unavailable-notice">
                     Active challenge expires in {challengeExpiryText}
@@ -292,7 +292,7 @@
         transition: all 0.15s ease;
         border: none;
         border-style: outset;
-        border-width: 4px;
+        border-width: 20px;
         border-color: var(--background-light-transparent);
 
         &:active:not(.disabled) {
@@ -307,21 +307,37 @@
         cursor: pointer;
 
         &.challenge {
+          position: relative;
           background-color: var(--color-restricted-trip-folder);
           border: none;
           border-style: outset;
-          border-width: 4px;
+          border-width: 20px;
           border-color: var(--background-light-transparent);
+
+          &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("/images/tot2.png");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            opacity: 0.5;
+            z-index: 0;
+          }
 
           &:hover:not(.disabled) {
             background-color: var(--color-inventory-item-reverse-side);
           }
 
           .type-title {
+            position: relative;
+            z-index: 1;
             color: var(--background);
           }
 
           .unavailable-notice {
+            position: relative;
+            z-index: 1;
             font-family: var(--typewriter-font-stack);
             font-size: var(--font-size-small);
             color: var(--background);

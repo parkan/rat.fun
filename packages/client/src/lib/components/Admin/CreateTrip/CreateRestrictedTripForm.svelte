@@ -27,6 +27,9 @@
     placeholder: string
   } = $props()
 
+  let sliderStep = $derived(Number($playerERC20Balance) > 10000 ? 500 : 100)
+  let sliderMax = $derived(Math.floor($playerERC20Balance / sliderStep) * sliderStep)
+
   // Floor values to ensure they're integers
   let flooredTripCreationCost = $derived(Math.floor(tripCreationCost))
 
@@ -54,6 +57,17 @@
 </script>
 
 <div class="controls">
+  <!-- HEADER -->
+  <div class="form-header challenge">
+    <span class="header-title">TRAP?</span>
+  </div>
+
+  <!-- INFO: Active period -->
+  <div class="challenge-info">
+    A TRAP is active for 24 hours. After this period it is closed and can be cashed out. TRAPs are
+    winner-take-all.
+  </div>
+
   <!-- TRIP DESCRIPTION -->
   <div class="form-group">
     <label for="trip-description">
@@ -74,63 +88,47 @@
     ></textarea>
   </div>
 
-  <!-- CHALLENGE TRIP PARAMETERS -->
-  <div class="challenge-params">
-    <div class="challenge-header">
-      <span class="highlight">Challenge Trip Settings</span>
+  <!-- TRIP CREATION COST SLIDER -->
+  <div class="slider-group">
+    <div class="slider-header">
+      <label for="trip-creation-cost-slider">
+        <span class="highlight">Trip cost</span>
+      </label>
+      <input
+        class="cost-display"
+        onblur={e => {
+          const value = Number((e.target as HTMLInputElement).value)
+          if (value < CHALLENGE_MIN_CREATION_COST || value > $playerERC20Balance) {
+            tripCreationCost = Math.min(
+              $playerERC20Balance,
+              Math.max(CHALLENGE_MIN_CREATION_COST, value)
+            )
+          }
+        }}
+        bind:value={tripCreationCost}
+        type="number"
+      />
     </div>
-
-    <div class="param-grid">
-      <!-- TRIP CREATION COST (editable) -->
-      <div class="param-group">
-        <span class="param-label">Pool Size (min {CHALLENGE_MIN_CREATION_COST})</span>
-        <!-- <label for="creation-cost">
-        </label> -->
-        <div class="param-input-wrapper">
-          <input
-            id="creation-cost"
-            type="number"
-            class="param-input"
-            min={CHALLENGE_MIN_CREATION_COST}
-            max={$playerERC20Balance}
-            oninput={typeHit}
-            onblur={e => {
-              const value = Number((e.target as HTMLInputElement).value)
-              if (value < CHALLENGE_MIN_CREATION_COST) {
-                tripCreationCost = CHALLENGE_MIN_CREATION_COST
-              } else if (value > $playerERC20Balance) {
-                tripCreationCost = $playerERC20Balance
-              }
-            }}
-            bind:value={tripCreationCost}
-          />
-          <span class="param-unit">{CURRENCY_SYMBOL}</span>
-        </div>
+    <div class="slider-container">
+      <div class="slider-label">
+        <span class="slider-min">
+          {Math.min($playerERC20Balance, CHALLENGE_MIN_CREATION_COST)}
+          {CURRENCY_SYMBOL}
+        </span>
       </div>
-
-      <!-- MIN RAT VALUE TO ENTER (fixed) -->
-      <div class="param-group">
-        <span class="param-label">Min Rat Value</span>
-        <div class="param-fixed-value">
-          <span class="fixed-value">{CHALLENGE_FIXED_MIN_VALUE_TO_ENTER}</span>
-          <span class="param-unit">{CURRENCY_SYMBOL}</span>
-        </div>
+      <input
+        type="range"
+        id="trip-creation-cost-slider"
+        class="cost-slider"
+        step={sliderStep}
+        min={Math.min($playerERC20Balance, CHALLENGE_MIN_CREATION_COST)}
+        max={sliderMax}
+        oninput={typeHit}
+        bind:value={tripCreationCost}
+      />
+      <div class="slider-label">
+        <span class="slider-max">{sliderMax} {CURRENCY_SYMBOL}</span>
       </div>
-
-      <!-- MAX WIN PERCENTAGE (fixed) -->
-      <div class="param-group">
-        <span class="param-label">Max Win</span>
-        <div class="param-fixed-value">
-          <span class="fixed-value">{CHALLENGE_MAX_WIN_PERCENTAGE}</span>
-          <span class="param-unit">%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- INFO: Active period -->
-    <div class="challenge-info">
-      Challenge trips are active for 24 hours. After this period, no new entries are allowed and the
-      pool can be liquidated.
     </div>
   </div>
 
@@ -182,6 +180,47 @@
     flex: 1;
   }
 
+  .form-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 4px;
+
+    .header-title {
+      position: relative;
+      z-index: 1;
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-large);
+    }
+
+    &.challenge {
+      background-color: var(--color-restricted-trip-folder);
+      color: var(--background);
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("/images/tot2.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        opacity: 0.5;
+        z-index: 0;
+      }
+    }
+  }
+
+  .challenge-info {
+    font-family: var(--typewriter-font-stack);
+    font-size: var(--font-size-normal);
+    color: var(--color-grey-light);
+    padding: 8px;
+    background: var(--background);
+    border: 1px solid var(--color-border);
+    line-height: 1.4;
+  }
+
   .highlight {
     background: var(--color-grey-mid);
     padding: 5px;
@@ -192,15 +231,20 @@
     display: flex;
     flex-flow: column nowrap;
     gap: 8px;
+    flex: 1;
+    min-height: 0;
 
     label {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     textarea {
       width: 100%;
+      height: 100%;
+      flex: 1;
       padding: 5px;
       border: none;
       background: var(--foreground);
@@ -213,142 +257,121 @@
     }
   }
 
-  .challenge-params {
+  .slider-group {
     display: flex;
     flex-flow: column nowrap;
-    gap: 12px;
+    gap: 8px;
+    width: 100%;
 
-    .challenge-header {
+    .slider-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
     }
 
-    .param-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-
-      @media (max-width: 800px) {
-        grid-template-columns: 1fr;
-        gap: 8px;
+    .cost-display {
+      background: var(--foreground);
+      color: var(--background);
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-large);
+      border: none;
+      width: 100px;
+      text-align: center;
+      outline: none;
+      &:focus {
+        border: none;
+        outline: none;
       }
     }
+  }
 
-    .param-group {
-      display: flex;
-      flex-flow: column nowrap;
-      gap: 4px;
+  .slider-container {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
 
-      .param-label {
-        font-family: var(--typewriter-font-stack);
-        font-size: var(--font-size-small);
-        color: var(--color-grey-light);
-        margin-bottom: 4px;
-      }
-
-      .param-input-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        background: var(--foreground);
-        padding: 8px 12px;
-        height: 48px;
-
-        .param-input {
-          flex: 1;
-          background: transparent;
-          color: var(--background);
-          font-family: var(--special-font-stack);
-          font-size: var(--font-size-large);
-          border: none;
-          width: 100%;
-          text-align: left;
-          outline: none;
-
-          &:focus {
-            border: none;
-            outline: none;
-          }
-        }
-
-        .param-unit {
-          font-family: var(--special-font-stack);
-          font-size: var(--font-size-normal);
-          color: var(--background);
-          opacity: 0.7;
-        }
-      }
-
-      .param-fixed-value {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        background: var(--color-grey-mid);
-        padding: 8px 12px;
-        height: 48px;
-
-        .fixed-value {
-          font-family: var(--special-font-stack);
-          font-size: var(--font-size-large);
-          color: var(--background);
-        }
-
-        .param-unit {
-          font-family: var(--special-font-stack);
-          font-size: var(--font-size-normal);
-          color: var(--background);
-          opacity: 0.7;
-        }
-      }
-    }
-
-    .challenge-info {
-      font-family: var(--typewriter-font-stack);
-      font-size: var(--font-size-small);
-      color: var(--color-grey-light);
-      padding: 8px;
+    .cost-slider {
+      width: 400px;
+      height: 8px;
       background: var(--background);
-      border: 1px solid var(--color-border);
-      line-height: 1.4;
+      border: 1px solid var(--foreground);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 50px;
+        background: var(--color-grey-mid);
+        border: 2px solid var(--background);
+        cursor: pointer;
+      }
+
+      &::-moz-range-thumb {
+        width: 20px;
+        height: 50px;
+        background: var(--foreground);
+        border: 2px solid var(--background);
+        cursor: pointer;
+        border-radius: 0;
+      }
+
+      &::-webkit-slider-track {
+        background: var(--background);
+        height: 8px;
+      }
+
+      &::-moz-range-track {
+        background: var(--background);
+        height: 8px;
+        border: none;
+      }
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--special-font-stack);
+      font-size: var(--font-size-large);
+      color: var(--foreground);
     }
   }
 
   .calculated-values {
     display: flex;
     gap: 0;
-    flex: 1;
+    border: 1px solid var(--color-border);
 
     .value-box {
       flex: 1;
       padding: 10px;
-      border: 1px solid var(--color-border);
       background: var(--background);
       display: flex;
       flex-flow: column nowrap;
-      justify-content: stretch;
+      justify-content: center;
       position: relative;
+
+      &:first-child {
+        border-right: 1px solid var(--color-border);
+      }
 
       .value-label {
         font-family: var(--typewriter-font-stack);
         font-size: var(--font-size-small);
         color: var(--color-grey-light);
-        position: absolute;
-        top: 8px;
-        left: 8px;
       }
 
       .value-amount {
         font-family: var(--special-font-stack);
         font-size: var(--font-size-large);
         color: var(--foreground);
-        height: 100%;
         display: flex;
-        justify-content: center;
         align-items: center;
-
-        @media screen and (min-width: 800px) {
-          font-size: 42px;
-        }
       }
     }
   }
