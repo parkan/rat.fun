@@ -1,7 +1,7 @@
 import { Hex, recoverMessageAddress } from "viem"
 import { SignedRequest } from "@modules/types"
 import { hasDelegation } from "@modules/mud/getOnchainData/hasDelegation"
-import { hasNonce, storeNonce } from "@modules/signature/db"
+import { storeNonceIfNew } from "@modules/signature/db"
 import { addressToId } from "@modules/utils"
 import { stringifyRequestForSignature } from "@modules/signature/stringifyRequestForSignature"
 import { deriveSessionAccount } from "@modules/signature/deriveSessionAccount"
@@ -33,11 +33,13 @@ export async function verifyRequest<T>(
     throw new StaleRequestError()
   }
 
-  // Check nonce, and store it to prevent replay attacks during the timeout window
-  if (await hasNonce(signedRequest.info.nonce)) {
+  // Atomically check and store nonce to prevent replay attacks.
+  // This prevents race conditions where concurrent requests with the same nonce
+  // could both pass a non-atomic check-then-store.
+  const nonceIsNew = await storeNonceIfNew(signedRequest.info.nonce)
+  if (!nonceIsNew) {
     throw new NonceUsedError()
   }
-  await storeNonce(signedRequest.info.nonce)
 
   // Check delegation and substitute playerAddress if necessary
   if (signedRequest.info.calledFrom) {

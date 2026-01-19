@@ -10,6 +10,27 @@ class InMemoryStore {
   private nonces: Map<number, number> = new Map() // Map<nonce, expirationTimestamp>
   private readonly NONCE_TTL_MS = 60000 // 60 seconds
 
+  /**
+   * Atomically check if nonce exists and store it if not.
+   * Returns true if nonce was newly stored (didn't exist), false if it already existed.
+   * This prevents race conditions where two requests with the same nonce could both pass.
+   */
+  async storeNonceIfNew(nonce: number): Promise<boolean> {
+    // Clean up expired nonces first
+    this.cleanupExpiredNonces()
+
+    const existingExpiration = this.nonces.get(nonce)
+    if (existingExpiration && Date.now() <= existingExpiration) {
+      // Nonce exists and hasn't expired
+      return false
+    }
+
+    // Nonce doesn't exist or has expired - store it
+    const expirationTime = Date.now() + this.NONCE_TTL_MS
+    this.nonces.set(nonce, expirationTime)
+    return true
+  }
+
   async storeNonce(nonce: number): Promise<void> {
     const expirationTime = Date.now() + this.NONCE_TTL_MS
     this.nonces.set(nonce, expirationTime)
@@ -82,6 +103,29 @@ class RedisStore {
     } catch (error) {
       throw new RedisConnectionError(
         `Failed to disconnect from Redis: ${error instanceof Error ? error.message : String(error)}`,
+        error
+      )
+    }
+  }
+
+  /**
+   * Atomically check if nonce exists and store it if not.
+   * Returns true if nonce was newly stored (didn't exist), false if it already existed.
+   * Uses Redis SET with NX (Not eXists) option for atomic check-and-set.
+   */
+  async storeNonceIfNew(nonce: number): Promise<boolean> {
+    try {
+      await this.connect()
+      // SET with NX only sets if key doesn't exist, returns "OK" if set, null if key existed
+      const result = await this.client.set(`nonce:${nonce}`, "true", { NX: true, EX: 60 })
+      return result === "OK"
+    } catch (error) {
+      if (error instanceof RedisError) {
+        throw error
+      }
+      throw new RedisOperationError(
+        `Failed to store nonce atomically in Redis: ${error instanceof Error ? error.message : String(error)}`,
+        "storeNonceIfNew",
         error
       )
     }
