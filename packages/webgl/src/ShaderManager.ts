@@ -2,6 +2,7 @@ import { WebGLGeneralRenderer } from "./WebGLGeneralRenderer"
 import { shaders } from "./shaders"
 import { ShaderInitializationError } from "@ratfun/common/error-handling"
 import type { UniformType, UniformDefinition } from "./types"
+import { logger } from "./logger"
 
 export type ErrorHandler = (error: Error, context?: string) => void
 
@@ -239,7 +240,7 @@ export class ShaderManager {
             }
           } catch (error) {
             // Error already logged to Sentry in initializeRenderer
-            console.error(`Failed to initialize shader "${pendingKey}":`, error)
+            logger.error(`shader init failed: ${pendingKey}`)
 
             // Mark context as exhausted and hide canvas to show CSS fallback
             this._contextExhausted = true
@@ -321,7 +322,7 @@ export class ShaderManager {
       window.removeEventListener("resize", this.handleResize)
       window.addEventListener("resize", this.handleResize)
     } catch (error) {
-      console.error("Failed to initialize WebGL renderer:", error)
+      logger.error("renderer init failed")
       this._renderer = null
 
       // Report to Sentry
@@ -398,7 +399,7 @@ export class ShaderManager {
             }
           } catch (error) {
             // Still failing, try again
-            console.warn(`Recovery attempt ${this.recoveryAttempts} failed, will retry...`)
+            logger.warn(`recovery attempt ${this.recoveryAttempts} failed, retrying`)
             this.scheduleContextRecovery(shaderKey)
           }
         }
