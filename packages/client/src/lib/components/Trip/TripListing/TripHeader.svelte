@@ -40,8 +40,8 @@
     text-align: right;
 
     @media screen and (max-width: 800px) {
-      height: var(--top-bar-height-phone);
-      line-height: var(--top-bar-height-phone);
+      height: 40px;
+      line-height: 40px;
     }
 
     &.with-back-button {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { gameConfig } from "$lib/modules/state/stores"
   import { playerERC20Balance } from "$lib/modules/erc20Listener/stores"
-  import { CharacterCounter, BigButton } from "$lib/components/Shared"
+  import { CharacterCounter, BigButton, BackButton } from "$lib/components/Shared"
   import { busy } from "$lib/modules/action-manager/index.svelte"
   import { typeHit } from "$lib/modules/sound"
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
@@ -18,12 +18,16 @@
     tripCreationCost = $bindable(CHALLENGE_MIN_CREATION_COST),
     textareaElement = $bindable<HTMLTextAreaElement | null>(null),
     onSubmit,
+    onBack,
+    onClose,
     placeholder
   }: {
     tripDescription: string
     tripCreationCost: number
     textareaElement: HTMLTextAreaElement | null
     onSubmit: () => void
+    onBack: () => void
+    onClose: () => void
     placeholder: string
   } = $props()
 
@@ -57,8 +61,15 @@
 </script>
 
 <div class="controls">
+  <!-- CLOSE BUTTON (phone only) -->
+  <div class="close-button">
+    <BackButton onclick={onClose} />
+  </div>
+
   <!-- HEADER -->
-  <div class="form-header challenge">
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="form-header challenge" onclick={onBack}>
     <span class="header-title">TRAP?</span>
   </div>
 
@@ -180,12 +191,35 @@
     flex: 1;
   }
 
+  .close-button {
+    display: none;
+    height: 50px;
+    flex-shrink: 0;
+
+    @media (max-width: 800px) {
+      display: block;
+    }
+  }
+
   .form-header {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    padding: 4px;
+    padding: 12px;
+    cursor: pointer;
+    border-width: 4px;
+    border-color: var(--background-light-transparent);
+    border-style: outset;
+    user-select: none;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
 
     .header-title {
       position: relative;

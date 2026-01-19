@@ -66,12 +66,22 @@
     align-items: center;
     text-align: center;
     gap: 8px;
+    width: 100%;
+    overflow: hidden;
   }
 
   .name {
     font-family: var(--special-font-stack);
     font-size: var(--font-size-large);
     color: var(--background);
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
   }
 
   .value {
@@ -79,6 +89,7 @@
     font-size: var(--font-size-medium);
     color: var(--background);
     opacity: 0.8;
+    white-space: nowrap;
   }
 
   .action-button {

@@ -256,6 +256,10 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+
+    @media (max-width: 800px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .nft-item-wrapper {

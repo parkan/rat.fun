@@ -87,6 +87,7 @@
     border: 8px ridge var(--background-semi-transparent);
     outline: none;
     box-shadow: 0 4px 8px var(--background-light-transparent);
+    overflow: hidden;
   }
 
   .item-front {
@@ -103,9 +104,25 @@
   .name,
   .value {
     text-align: center;
+    width: 100%;
   }
 
   .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+
+  .value {
+    white-space: nowrap;
+  }
+
+  .name,
+  .value {
     @media (max-width: 800px) {
       font-size: var(--font-size-medium);
     }

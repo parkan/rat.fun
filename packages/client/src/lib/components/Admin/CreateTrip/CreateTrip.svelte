@@ -15,6 +15,7 @@
   import { CURRENCY_SYMBOL } from "$lib/modules/ui/constants"
   import CreateTripForm from "./CreateTripForm.svelte"
   import CreateRestrictedTripForm from "./CreateRestrictedTripForm.svelte"
+  import { BackButton } from "$lib/components/Shared"
 
   let {
     ondone,
@@ -65,6 +66,11 @@
     if (type === "challenge") {
       tripCreationCost = Math.max(CHALLENGE_MIN_CREATION_COST, tripCreationCost)
     }
+  }
+
+  const goBackToTypeSelector = () => {
+    playSound({ category: "ratfunUI", id: "click" })
+    tripType = null
   }
 
   async function onClick() {
@@ -155,9 +161,9 @@
         {#if tripType === null}
           <!-- STEP 1: TYPE SELECTION -->
           <div class="type-selection">
-            <!-- <div class="instructions">
-              <span class="highlight">Create</span>
-            </div> -->
+            <div class="close-button">
+              <BackButton onclick={() => onclose?.(tripDescription)} />
+            </div>
             <div class="type-buttons">
               <!-- CHALLENGE BUTTON -->
               <button
@@ -191,6 +197,8 @@
             bind:tripCreationCost
             bind:textareaElement
             onSubmit={onClick}
+            onBack={goBackToTypeSelector}
+            onClose={() => onclose?.(tripDescription)}
             {placeholder}
           />
         {:else}
@@ -199,6 +207,8 @@
             bind:tripCreationCost
             bind:textareaElement
             onSubmit={onClick}
+            onBack={goBackToTypeSelector}
+            onClose={() => onclose?.(tripDescription)}
             {placeholder}
           />
         {/if}
@@ -213,6 +223,8 @@
         bind:tripCreationCost
         bind:textareaElement
         onSubmit={onClick}
+        onBack={goBackToTypeSelector}
+        onClose={() => onclose?.(tripDescription)}
         {placeholder}
       />
     {:else}
@@ -221,6 +233,8 @@
         bind:tripCreationCost
         bind:textareaElement
         onSubmit={onClick}
+        onBack={goBackToTypeSelector}
+        onClose={() => onclose?.(tripDescription)}
         {placeholder}
       />
     {/if}
@@ -266,6 +280,17 @@
       overflow: hidden;
       font-size: var(--font-size-medium);
       font-family: var(--special-font-stack);
+      gap: 4px;
+
+      .close-button {
+        display: none;
+        height: 50px;
+        flex-shrink: 0;
+
+        @media (max-width: 800px) {
+          display: block;
+        }
+      }
 
       .type-buttons {
         display: flex;
@@ -281,7 +306,7 @@
 
       .type-button {
         display: flex;
-        height: 50%;
+        flex: 1;
         flex-direction: column;
         justify-content: center;
         align-items: center;
@@ -414,6 +439,7 @@
     @media (max-width: 800px) {
       overflow-y: auto;
       max-height: 100dvh;
+      height: 100%;
     }
   }
 </style>

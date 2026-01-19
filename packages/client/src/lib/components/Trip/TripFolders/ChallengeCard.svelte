@@ -181,7 +181,8 @@
 
       @media (max-width: 768px) {
         font-size: var(--font-size-normal);
-        min-height: 160px;
+        min-height: 140px;
+        height: 140px;
       }
 
       .content {
