@@ -54,7 +54,7 @@ export class WebGLGeneralRenderer implements WebGLRenderer {
     this.startTime = performance.now()
     this.uniforms = options.uniforms || {}
     this.autoRender = options.autoRender ?? true
-    this.frameInterval = 1000 / 60
+    this.frameInterval = 1000 / (options.targetFPS ?? 60)
     this.shaderSource = options.shader
     this.onError = options.onError
     this.preserveDrawingBuffer = options.preserveDrawingBuffer ?? false

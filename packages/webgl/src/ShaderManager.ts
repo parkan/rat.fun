@@ -12,6 +12,8 @@ export interface ShaderManagerOptions {
   singleFrameRender: () => boolean
   /** Preserve drawing buffer for canvas capture (enables toDataURL) - impacts performance */
   preserveDrawingBuffer?: boolean
+  /** Target FPS (default: 60 desktop, 30 mobile) */
+  targetFPS?: number
 }
 
 export class ShaderManager {
@@ -32,6 +34,7 @@ export class ShaderManager {
   private singleFrameRender: () => boolean
   private singleFramePauseRafId: number | null = null
   private preserveDrawingBuffer: boolean
+  private targetFPS: number
   currentShaderKey: string | null = null
   private shaderChangeListeners: Array<(shaderKey: string | null) => void> = []
   private shaderChangeTimeout: ReturnType<typeof setTimeout> | null = null
@@ -45,6 +48,8 @@ export class ShaderManager {
     this.errorHandler = options.errorHandler
     this.singleFrameRender = options.singleFrameRender
     this.preserveDrawingBuffer = options.preserveDrawingBuffer ?? false
+    // 30fps on mobile, 60fps on desktop
+    this.targetFPS = options.targetFPS ?? (options.singleFrameRender() ? 30 : 60)
   }
 
   /**
@@ -313,7 +318,8 @@ export class ShaderManager {
         shader: shaderSource,
         uniforms: initialUniforms,
         onError: this.errorHandler,
-        preserveDrawingBuffer: this.preserveDrawingBuffer
+        preserveDrawingBuffer: this.preserveDrawingBuffer,
+        targetFPS: this.targetFPS
       })
 
       this._renderer.render()
