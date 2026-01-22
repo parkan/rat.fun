@@ -163,7 +163,7 @@
   </div>
 
   <div class="header">
-    <div class="title">PsychoObjects Vault</div>
+    <div class="title">PSYCHO OBJECT VAULT</div>
     <div class="inventory-status">
       {#if inventoryFull}
         <span class="full-warning">(Full)</span>
