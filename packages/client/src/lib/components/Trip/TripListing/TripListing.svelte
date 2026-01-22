@@ -290,6 +290,9 @@
     flex: 1;
     overflow-y: auto;
     min-height: 0;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .new-trips-button {
