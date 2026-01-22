@@ -5,6 +5,7 @@
   import { fade } from "svelte/transition"
   import { beforeNavigate, afterNavigate } from "$app/navigation"
   import {
+    trips as allTripsStore,
     nonDepletedTrips,
     ratTotalValue,
     playerHasLiveRat,
@@ -34,8 +35,27 @@
   )
 
   let sortFunction = $state(entriesChronologically)
+  let textFilter = $state("")
+  let showDepleted = $state(false)
   let lastChecked = $state<number>(Number(get(blockNumber)))
   let scrollContainer = $state<HTMLDivElement | null>(null)
+
+  // Filter handlers
+  const handleSort = (fn: (a: [string, any], b: [string, any]) => number) => {
+    sortFunction = fn
+  }
+
+  const handleTextFilterChange = (value: string) => {
+    textFilter = value
+  }
+
+  const handleTextFilterClear = () => {
+    textFilter = ""
+  }
+
+  const handleToggleDepleted = () => {
+    showDepleted = !showDepleted
+  }
 
   // Last completed challenge winner state
   const BLOCK_TIME_MS = 2000
@@ -77,12 +97,37 @@
     lastChecked = Number(get(blockNumber))
   }
 
-  // Get ALL non-depleted trips (flat list, no folder filtering)
+  // Get trips based on depleted filter
   // Exclude challenge trips from the main list since they're shown separately
   let tripList = $derived.by(() => {
-    let entries = Object.entries($nonDepletedTrips)
+    let entries: [string, Trip][]
+
+    if (showDepleted) {
+      // Show only depleted trips (in allTripsStore but not in nonDepletedTrips)
+      const nonDepletedIds = new Set(Object.keys($nonDepletedTrips))
+      entries = Object.entries($allTripsStore).filter(
+        ([tripId, _]) => !nonDepletedIds.has(tripId)
+      ) as [string, Trip][]
+    } else {
+      entries = Object.entries($nonDepletedTrips)
+    }
+
     // Filter out challenge trips - they're shown in the pinned ChallengeCard
     entries = entries.filter(([_, trip]) => !trip.challengeTrip)
+
+    // Apply text filter (search by prompt, creator name, or trip ID)
+    if (textFilter.trim()) {
+      const filter = textFilter.toLowerCase().trim()
+      entries = entries.filter(([tripId, trip]) => {
+        const prompt = (trip.prompt as string | undefined)?.toLowerCase() ?? ""
+        const creatorId = trip.owner as string | undefined
+        const creator = creatorId ? $players[creatorId] : undefined
+        const creatorName = creator?.name?.toLowerCase() ?? ""
+        const tripIdLower = tripId.toLowerCase()
+        return prompt.includes(filter) || creatorName.includes(filter) || tripIdLower.includes(filter)
+      })
+    }
+
     logger.log("Deriving tripList:", { count: entries.length })
     return entries.sort(sortFunction)
   })
@@ -169,7 +214,17 @@
     {/if}
 
     <!-- Trip Header -->
-    <TripHeader hasBackButton {eligibleCount} totalCount={tripsWithEligibility.length} />
+    <TripHeader
+      hasBackButton
+      totalCount={tripsWithEligibility.length}
+      {sortFunction}
+      {textFilter}
+      {showDepleted}
+      onSort={handleSort}
+      onTextFilterChange={handleTextFilterChange}
+      onTextFilterClear={handleTextFilterClear}
+      onToggleDepleted={handleToggleDepleted}
+    />
 
     <!-- Scrollable Trip List -->
     <div class="trip-list-container" bind:this={scrollContainer}>
