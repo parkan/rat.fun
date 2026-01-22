@@ -14,7 +14,7 @@
 </script>
 
 <div class="account-dropdown" out:fade={{ duration: 200 }}>
-  {#if window.location.hostname === "testing-rat-fun.netlify.app" || $environment === ENVIRONMENT.BASE_SEPOLIA}
+  {#if window.location.hostname === "testing-rat-fun.netlify.app" || window.location.hostname === "localhost" || $environment === ENVIRONMENT.BASE_SEPOLIA}
     <div class="debug-button">
       <button onclick={toggleDebug}>{UI_STRINGS.debug}</button>
     </div>

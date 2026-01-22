@@ -1,9 +1,10 @@
 import { Hex, recoverMessageAddress } from "viem"
 import { SignedRequest } from "@modules/types"
 import { hasDelegation } from "@modules/mud/getOnchainData/hasDelegation"
-import { hasNonce, storeNonce } from "@modules/signature/db"
+import { storeNonceIfNew } from "@modules/signature/db"
 import { addressToId } from "@modules/utils"
 import { stringifyRequestForSignature } from "@modules/signature/stringifyRequestForSignature"
+import { deriveSessionAccount } from "@modules/signature/deriveSessionAccount"
 import { REQUEST_SIGNATURE_TIMEOUT_MS } from "@config"
 import {
   StaleRequestError,
@@ -32,15 +33,21 @@ export async function verifyRequest<T>(
     throw new StaleRequestError()
   }
 
-  // Check nonce, and store it to prevent replay attacks during the timeout window
-  if (await hasNonce(signedRequest.info.nonce)) {
+  // Atomically check and store nonce to prevent replay attacks.
+  // This prevents race conditions where concurrent requests with the same nonce
+  // could both pass a non-atomic check-then-store.
+  const nonceIsNew = await storeNonceIfNew(signedRequest.info.nonce)
+  if (!nonceIsNew) {
     throw new NonceUsedError()
   }
-  await storeNonce(signedRequest.info.nonce)
 
   // Check delegation and substitute playerAddress if necessary
   if (signedRequest.info.calledFrom) {
-    if (!hasDelegation(signedRequest.info.calledFrom, recoveredAddress)) {
+    // The recovered address is the signer (EOA), but delegation is registered
+    // for the session smart account. Derive the smart account from the signer.
+    const sessionAccount = await deriveSessionAccount(recoveredAddress)
+
+    if (!(await hasDelegation(signedRequest.info.calledFrom, sessionAccount))) {
       throw new DelegationNotFoundError()
     }
     callerAddress = signedRequest.info.calledFrom

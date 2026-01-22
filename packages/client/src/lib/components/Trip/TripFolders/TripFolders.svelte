@@ -2,7 +2,7 @@
   import type { TripFolder } from "@sanity-types"
   import type { Snippet } from "svelte"
   import TripFolderItem from "./TripFolderItem.svelte"
-  import ChallengeFolderItem from "./ChallengeFolderItem.svelte"
+  import ChallengeCard from "./ChallengeCard.svelte"
   import { FEATURES } from "$lib/config/features"
 
   let {
@@ -16,11 +16,13 @@
     restrictedFolderCount,
     challengeTripId,
     challengeTripAttempts,
-    dailyChallengeTime,
-    nextChallengeDay,
+    challengeCreationBlock,
+    currentBlockNumber,
     challengeTitle,
     lastWinnerName,
-    lastWinTimestamp
+    lastWinTimestamp,
+    creatorName,
+    maxReward
   }: {
     folders: TripFolder[]
     foldersCounts: number[]
@@ -32,11 +34,13 @@
     restrictedFolderCount?: number
     challengeTripId?: string
     challengeTripAttempts?: number
-    dailyChallengeTime?: string | null
-    nextChallengeDay?: string | null // Date in YYYY-MM-DD format, or null for tomorrow
+    challengeCreationBlock?: number
+    currentBlockNumber?: number
     challengeTitle?: string | null
     lastWinnerName?: string | null
     lastWinTimestamp?: number | null
+    creatorName?: string | null
+    maxReward?: number | null
   } = $props()
 </script>
 
@@ -44,16 +48,17 @@
   {@render children?.()}
   {#if restrictedFolder}
     {#if FEATURES.ENABLE_CHALLENGE_TRIPS}
-      <ChallengeFolderItem
+      <ChallengeCard
         listingIndex={0}
-        folder={restrictedFolder}
         {challengeTripId}
         attemptCount={challengeTripAttempts}
-        {dailyChallengeTime}
-        {nextChallengeDay}
+        {challengeCreationBlock}
+        {currentBlockNumber}
         {challengeTitle}
         {lastWinnerName}
         {lastWinTimestamp}
+        {creatorName}
+        {maxReward}
       />
     {:else}
       <TripFolderItem

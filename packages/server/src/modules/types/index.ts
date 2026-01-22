@@ -15,6 +15,7 @@ export type Trip = {
   prompt: string
   balance: number
   tripCreationCost: number
+  creationBlock?: number
   // Challenge trip fields
   challengeTrip?: boolean
   fixedMinValueToEnter?: number

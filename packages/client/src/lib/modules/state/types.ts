@@ -28,6 +28,8 @@ declare global {
   type WorldEventObject = mudSchemas["WorldEvent"]
   type WorldStatsObject = mudSchemas["WorldStats"]
   type ExternalAddressesConfigObject = mudSchemas["ExternalAddressesConfig"]
+  type ItemNftConfigObject = mudSchemas["ItemNftConfig"]
+  type ChallengeConfigObject = mudSchemas["ChallengeConfig"]
 
   type WorldObject = {
     gameConfig: GameConfigObject
@@ -35,6 +37,8 @@ declare global {
     worldStats: WorldStatsObject
     externalAddressesConfig: ExternalAddressesConfigObject
     worldEvent: WorldEventObject
+    itemNftConfig: ItemNftConfigObject
+    challengeConfig: ChallengeConfigObject
   }
 
   // * * * * * * * * * * * * * * * * *
@@ -59,6 +63,8 @@ declare global {
       | ExternalAddressesConfigObject
       | WorldEventObject
       | WorldStatsObject
+      | ItemNftConfigObject
+      | ChallengeConfigObject
       | undefined
     entityType?: ENTITY_TYPE
     name?: mudComponents["Name"]
@@ -88,6 +94,8 @@ declare global {
     externalAddressesConfig?: ExternalAddressesConfigObject
     worldEvent?: WorldEventObject
     worldStats?: WorldStatsObject
+    itemNftConfig?: ItemNftConfigObject
+    challengeConfig?: ChallengeConfigObject
   }
 
   type Player = {
@@ -177,5 +185,16 @@ declare global {
 
   type Items = {
     [index: string]: Item
+  }
+
+  // * * * * * * * * * * * * * * * * *
+  // ITEM NFT TYPE
+  // * * * * * * * * * * * * * * * * *
+
+  type ItemNFT = {
+    tokenId: bigint
+    itemId: string
+    name: string
+    value: bigint
   }
 }

@@ -59,6 +59,12 @@ export default defineWorld({
         dataStruct: true
       }
     },
+    ItemNftConfig: {
+      key: [],
+      schema: {
+        itemNftAddress: "address"
+      }
+    },
     WorldEvent: {
       key: [],
       schema: {
@@ -104,7 +110,24 @@ export default defineWorld({
     ChallengeTrip: "bool", // Mark trip as a challenge trip
     FixedMinValueToEnter: "uint256", // Fixed minimum value to enter the trip
     OverrideMaxValuePerWinPercentage: "uint256", // Override maximum value per win percentage
-    ChallengeWinner: "bytes32" // Winner of the challenge trip
+    ChallengeWinner: "bytes32", // Winner of the challenge trip
+    // = = = = = = = = = =
+    // Challenge config (singleton)
+    // = = = = = = = = = =
+    ChallengeConfig: {
+      key: [],
+      schema: {
+        minCreationCost: "uint256", // Minimum cost to create a challenge trip (5000)
+        activePeriodBlocks: "uint32" // Blocks challenge is active (43200 = 24h at 2s/block)
+      }
+    },
+    // Global active challenge - only one challenge trip can be active at a time
+    ActiveChallenge: {
+      key: [],
+      schema: {
+        tripId: "bytes32"
+      }
+    }
   },
   systems: {
     // DevSystem is conditionally deployed for local/test chains in PostDeploy

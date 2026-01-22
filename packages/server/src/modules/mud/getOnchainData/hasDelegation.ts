@@ -23,5 +23,6 @@ export async function hasDelegation(delegator: Hex, delegatee: Hex): Promise<boo
       delegatee
     }
   })
+
   return result.delegationControlId === unlimitedDelegationControlId
 }

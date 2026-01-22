@@ -22,6 +22,12 @@
 
 ---
 
+### Psycho Object NFT
+
+0xecFDE589B504121c63394aa32f2450c43Ee63d71
+
+---
+
 ### Exchange (ERC20EquivalentExchange.sol)
 
 0x752c792eb9BF02A2d64558c331ec8333cf40d5d0

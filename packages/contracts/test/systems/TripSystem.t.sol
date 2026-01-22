@@ -556,111 +556,111 @@ contract TripSystemTest is BaseTest {
   // = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
   function testCreateChallengeTrip() public {
-    uint256 initialBalance = setInitialBalance(alice);
+    uint256 initialBalance = setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 playerId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
     vm.stopPrank();
 
-    // As admin - create challenge trip
+    // As admin - create challenge trip with fixed params (100/100)
     prankAdmin();
     bytes32 tripId = world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      50, // fixedMinValueToEnter
-      50, // overrideMaxValuePerWinPercentage (50%)
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100%)
       "A challenge trip"
     );
     vm.stopPrank();
 
     // Check player balance
-    assertEq(LibWorld.erc20().balanceOf(alice), initialBalance - 1000 * 10 ** LibWorld.erc20().decimals());
+    assertEq(LibWorld.erc20().balanceOf(alice), initialBalance - 5000 * 10 ** LibWorld.erc20().decimals());
 
     // Check trip
     assertEq(uint8(EntityType.get(tripId)), uint8(ENTITY_TYPE.TRIP));
     assertEq(Prompt.get(tripId), "A challenge trip");
-    assertEq(Balance.get(tripId), 1000);
+    assertEq(Balance.get(tripId), 5000);
     assertEq(Owner.get(tripId), playerId);
     assertEq(ChallengeTrip.get(tripId), true);
-    assertEq(FixedMinValueToEnter.get(tripId), 50);
-    assertEq(OverrideMaxValuePerWinPercentage.get(tripId), 50);
+    assertEq(FixedMinValueToEnter.get(tripId), 100);
+    assertEq(OverrideMaxValuePerWinPercentage.get(tripId), 100);
     assertEq(ChallengeWinner.get(tripId), bytes32(0));
   }
 
   function testChallengeTripFixedMinValueToEnter() public {
-    setInitialBalance(alice);
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 playerId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
     vm.stopPrank();
 
-    // As admin - create challenge trip with fixed min value of 200
+    // As admin - create challenge trip with fixed min value of 100
     prankAdmin();
     bytes32 tripId = world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      200, // fixedMinValueToEnter
-      50, // overrideMaxValuePerWinPercentage
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100%)
       "A challenge trip"
     );
 
     // Verify fixed min value is used instead of percentage-based calculation
-    // Normal trip would be 10% of 1000 = 100, but challenge uses fixed 200
-    assertEq(LibTrip.getMinRatValueToEnter(tripId), 200);
+    // Normal trip would be 10% of 5000 = 500, but challenge uses fixed 100
+    assertEq(LibTrip.getMinRatValueToEnter(tripId), 100);
 
     vm.stopPrank();
   }
 
   function testChallengeTripOverrideMaxValuePerWin() public {
-    setInitialBalance(alice);
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 playerId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
     vm.stopPrank();
 
-    // As admin - create challenge trip with 75% max value per win
+    // As admin - create challenge trip with 100% max value per win (fixed)
     prankAdmin();
     bytes32 tripId = world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      50, // fixedMinValueToEnter
-      75, // overrideMaxValuePerWinPercentage (75%)
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100%)
       "A challenge trip"
     );
 
     // Verify override percentage is used
-    // 75% of 1000 = 750
-    assertEq(LibTrip.getMaxValuePerWin(tripId), 750);
+    // 100% of 5000 = 5000 (can win entire pool in one go)
+    assertEq(LibTrip.getMaxValuePerWin(tripId), 5000);
 
     // Compare with normal trip which would use global config (25%)
     bytes32 normalTripId = world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost
       false, // isChallengeTrip
       0,
       0,
       "A normal trip"
     );
 
-    // Normal trip uses global config (25% of 1000 = 250)
+    // Normal trip uses global config (25% of 5000 = 1250)
     GamePercentagesConfig.setMaxValuePerWin(25);
-    assertEq(LibTrip.getMaxValuePerWin(normalTripId), 250);
+    assertEq(LibTrip.getMaxValuePerWin(normalTripId), 1250);
 
-    // Challenge trip still uses override
-    assertEq(LibTrip.getMaxValuePerWin(tripId), 750);
+    // Challenge trip still uses 100% override
+    assertEq(LibTrip.getMaxValuePerWin(tripId), 5000);
 
     vm.stopPrank();
   }
 
   function testChallengeTripWinnerSet() public {
-    setInitialBalance(alice);
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 aliceId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
@@ -672,10 +672,10 @@ contract TripSystemTest is BaseTest {
     bytes32 tripId = world.ratfun__createTrip(
       aliceId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      50, // fixedMinValueToEnter
-      100, // overrideMaxValuePerWinPercentage (100% - can win all in one go)
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100% - can win all in one go)
       "A challenge trip"
     );
 
@@ -683,7 +683,7 @@ contract TripSystemTest is BaseTest {
     assertEq(ChallengeWinner.get(tripId), bytes32(0));
 
     // Drain the trip completely (100% max value per win)
-    world.ratfun__applyOutcome(ratId, tripId, 1000, new bytes32[](0), new Item[](0));
+    world.ratfun__applyOutcome(ratId, tripId, 5000, new bytes32[](0), new Item[](0));
     vm.stopPrank();
 
     // Verify trip balance is 0
@@ -694,7 +694,7 @@ contract TripSystemTest is BaseTest {
   }
 
   function testChallengeTripCannotBeReopened() public {
-    setInitialBalance(alice);
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 aliceId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
@@ -706,15 +706,15 @@ contract TripSystemTest is BaseTest {
     bytes32 tripId = world.ratfun__createTrip(
       aliceId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      50, // fixedMinValueToEnter
-      100, // overrideMaxValuePerWinPercentage
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100%)
       "A challenge trip"
     );
 
     // Rat drains the trip completely
-    world.ratfun__applyOutcome(ratId, tripId, 1000, new bytes32[](0), new Item[](0));
+    world.ratfun__applyOutcome(ratId, tripId, 5000, new bytes32[](0), new Item[](0));
     vm.stopPrank();
 
     // Verify winner is set to player ID (owner of rat) and balance is 0
@@ -731,64 +731,45 @@ contract TripSystemTest is BaseTest {
     assertEq(ChallengeWinner.get(tripId), aliceId);
   }
 
-  function testRevertCreateChallengeTripWithZeroFixedMinValue() public {
-    setInitialBalance(alice);
+  function testRevertCreateChallengeTripWithWrongFixedMinValue() public {
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 playerId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
     vm.stopPrank();
 
     prankAdmin();
-    vm.expectRevert("fixed min value to enter must be greater than 0");
+    // Now challenge trips must have exactly 100 for fixedMinValueToEnter
+    vm.expectRevert("invalid fixed min value");
     world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000,
+      5000,
       true, // isChallengeTrip
-      0, // invalid: fixedMinValueToEnter is 0
-      50,
+      50, // invalid: should be 100
+      100,
       "A challenge trip"
     );
     vm.stopPrank();
   }
 
-  function testRevertCreateChallengeTripWithZeroOverrideMaxValue() public {
-    setInitialBalance(alice);
+  function testRevertCreateChallengeTripWithWrongMaxWinPercentage() public {
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 playerId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
     vm.stopPrank();
 
     prankAdmin();
-    vm.expectRevert("override max value per win percentage must be greater than 0");
+    // Now challenge trips must have exactly 100 for maxWinPercentage
+    vm.expectRevert("invalid max win percentage");
     world.ratfun__createTrip(
       playerId,
       bytes32(0),
-      1000,
+      5000,
       true, // isChallengeTrip
-      50,
-      0, // invalid: overrideMaxValuePerWinPercentage is 0
-      "A challenge trip"
-    );
-    vm.stopPrank();
-  }
-
-  function testRevertCreateChallengeTripWithOverrideMaxValueOver100() public {
-    setInitialBalance(alice);
-    vm.startPrank(alice);
-    bytes32 playerId = world.ratfun__spawn("alice");
-    approveGamePool(type(uint256).max);
-    vm.stopPrank();
-
-    prankAdmin();
-    vm.expectRevert("override max value per win percentage must be at most 100");
-    world.ratfun__createTrip(
-      playerId,
-      bytes32(0),
-      1000,
-      true, // isChallengeTrip
-      50,
-      101, // invalid: overrideMaxValuePerWinPercentage > 100
+      100,
+      50, // invalid: should be 100
       "A challenge trip"
     );
     vm.stopPrank();
@@ -837,7 +818,7 @@ contract TripSystemTest is BaseTest {
   }
 
   function testChallengeTripWinnerNotSetIfBalanceNotZero() public {
-    setInitialBalance(alice);
+    setChallengeBalance(alice);
     vm.startPrank(alice);
     bytes32 aliceId = world.ratfun__spawn("alice");
     approveGamePool(type(uint256).max);
@@ -849,21 +830,246 @@ contract TripSystemTest is BaseTest {
     bytes32 tripId = world.ratfun__createTrip(
       aliceId,
       bytes32(0),
-      1000, // tripCreationCost
+      5000, // tripCreationCost (minimum for challenge trips)
       true, // isChallengeTrip
-      50, // fixedMinValueToEnter
-      25, // overrideMaxValuePerWinPercentage (25%)
+      100, // fixedMinValueToEnter (fixed at 100)
+      100, // overrideMaxValuePerWinPercentage (fixed at 100%)
       "A challenge trip"
     );
 
-    // Partially drain the trip (25% = 250)
-    world.ratfun__applyOutcome(ratId, tripId, 250, new bytes32[](0), new Item[](0));
+    // Partially drain the trip (not all 5000)
+    world.ratfun__applyOutcome(ratId, tripId, 2500, new bytes32[](0), new Item[](0));
     vm.stopPrank();
 
     // Verify trip balance is not 0
-    assertEq(Balance.get(tripId), 750);
+    assertEq(Balance.get(tripId), 2500);
 
     // Verify no winner is set yet
     assertEq(ChallengeWinner.get(tripId), bytes32(0));
+  }
+
+  // ============================================
+  // NEW CHALLENGE TRIP TESTS
+  // ============================================
+
+  function testChallengeTripMinCreationCost() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 playerId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    // As admin - try to create challenge trip with less than min cost
+    prankAdmin();
+    vm.expectRevert("challenge cost too low");
+    world.ratfun__createTrip(
+      playerId,
+      bytes32(0),
+      4999, // Below minimum (5000)
+      true, // isChallengeTrip
+      100, // fixedMinValueToEnter
+      100, // overrideMaxValuePerWinPercentage
+      "A challenge trip"
+    );
+
+    // Creating with exactly 5000 should succeed
+    bytes32 tripId = world.ratfun__createTrip(
+      playerId,
+      bytes32(0),
+      5000, // Exactly minimum
+      true, // isChallengeTrip
+      100, // fixedMinValueToEnter
+      100, // overrideMaxValuePerWinPercentage
+      "A challenge trip"
+    );
+    assertEq(Balance.get(tripId), 5000);
+    vm.stopPrank();
+  }
+
+  function testChallengeTripFixedParams() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 playerId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    // As admin - try to create challenge trip with wrong fixed params
+    prankAdmin();
+
+    // Wrong fixedMinValueToEnter (should be 100)
+    vm.expectRevert("invalid fixed min value");
+    world.ratfun__createTrip(
+      playerId,
+      bytes32(0),
+      5000,
+      true, // isChallengeTrip
+      200, // Wrong - should be 100
+      100,
+      "A challenge trip"
+    );
+
+    // Wrong maxWinPercentage (should be 100)
+    vm.expectRevert("invalid max win percentage");
+    world.ratfun__createTrip(
+      playerId,
+      bytes32(0),
+      5000,
+      true, // isChallengeTrip
+      100,
+      50, // Wrong - should be 100
+      "A challenge trip"
+    );
+
+    vm.stopPrank();
+  }
+
+  function testChallengeTripOneActiveGlobal() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 playerId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    // As admin - create first challenge trip
+    prankAdmin();
+    bytes32 tripId1 = world.ratfun__createTrip(playerId, bytes32(0), 5000, true, 100, 100, "Challenge 1");
+
+    // Verify ActiveChallenge is set globally
+    assertEq(ActiveChallenge.getTripId(), tripId1);
+
+    // Try to create second challenge - should fail (global limit)
+    vm.expectRevert("active challenge exists");
+    world.ratfun__createTrip(playerId, bytes32(0), 5000, true, 100, 100, "Challenge 2");
+
+    vm.stopPrank();
+  }
+
+  function testChallengeTripEntryBlockedAfterExpiry() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    bytes32 ratId = world.ratfun__createRat("roger");
+    vm.stopPrank();
+
+    // As admin - create challenge trip
+    prankAdmin();
+    bytes32 tripId = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge trip");
+
+    // Entry should work before expiry
+    world.ratfun__applyOutcome(ratId, tripId, 100, new bytes32[](0), new Item[](0));
+    assertEq(Balance.get(tripId), 4900);
+
+    // Roll forward past active period (43200 blocks = 24h)
+    vm.roll(block.number + 43201);
+
+    // Entry should fail after expiry
+    vm.expectRevert("challenge trip expired");
+    world.ratfun__applyOutcome(ratId, tripId, 100, new bytes32[](0), new Item[](0));
+
+    vm.stopPrank();
+  }
+
+  function testChallengeTripLiquidationOnlyAfterExpiry() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    // As admin - create challenge trip
+    prankAdmin();
+    bytes32 tripId = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge trip");
+    vm.stopPrank();
+
+    // As alice - try to liquidate before expiry
+    vm.startPrank(alice);
+    vm.expectRevert("challenge still active");
+    world.ratfun__closeTrip(tripId);
+
+    // Roll forward past active period
+    vm.roll(block.number + 43201);
+
+    // Now liquidation should work
+    world.ratfun__closeTrip(tripId);
+    assertEq(Balance.get(tripId), 0);
+    assertTrue(Liquidated.get(tripId));
+
+    vm.stopPrank();
+  }
+
+  function testChallengeTripActiveChallengeCleared() public {
+    // Give extra tokens for 2 challenge trips
+    setChallengeBalance(alice);
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    bytes32 ratId = world.ratfun__createRat("roger");
+    vm.stopPrank();
+
+    // As admin - create challenge trip
+    prankAdmin();
+    bytes32 tripId = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge trip");
+
+    // Verify ActiveChallenge is set globally
+    assertEq(ActiveChallenge.getTripId(), tripId);
+
+    // Drain trip completely to trigger winner
+    world.ratfun__applyOutcome(ratId, tripId, 5000, new bytes32[](0), new Item[](0));
+
+    // Verify ActiveChallenge is cleared globally (winner was set)
+    assertEq(ActiveChallenge.getTripId(), bytes32(0));
+    assertEq(ChallengeWinner.get(tripId), aliceId);
+
+    // Now a new challenge can be created
+    bytes32 tripId2 = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge 2");
+    assertEq(ActiveChallenge.getTripId(), tripId2);
+
+    vm.stopPrank();
+  }
+
+  function testChallengeTripActiveChallengeAfterLiquidation() public {
+    setChallengeBalance(alice);
+    vm.startPrank(alice);
+    bytes32 aliceId = world.ratfun__spawn("alice");
+    approveGamePool(type(uint256).max);
+    vm.stopPrank();
+
+    // As admin - create challenge trip
+    prankAdmin();
+    bytes32 tripId = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge trip");
+    vm.stopPrank();
+
+    // Verify ActiveChallenge is set globally
+    assertEq(ActiveChallenge.getTripId(), tripId);
+
+    // Roll forward past active period
+    vm.roll(block.number + 43201);
+
+    // Liquidate as alice
+    vm.startPrank(alice);
+    world.ratfun__closeTrip(tripId);
+    vm.stopPrank();
+
+    // Verify ActiveChallenge is cleared globally after liquidation
+    assertEq(ActiveChallenge.getTripId(), bytes32(0));
+
+    // Now a new challenge can be created
+    prankAdmin();
+    bytes32 tripId2 = world.ratfun__createTrip(aliceId, bytes32(0), 5000, true, 100, 100, "Challenge 2");
+    assertEq(ActiveChallenge.getTripId(), tripId2);
+    vm.stopPrank();
+  }
+
+  function testSetChallengeConfig() public {
+    prankAdmin();
+    // Set new challenge config
+    world.ratfun__setChallengeConfig(10000, 86400);
+
+    // Verify config was updated
+    assertEq(ChallengeConfig.getMinCreationCost(), 10000);
+    assertEq(ChallengeConfig.getActivePeriodBlocks(), 86400);
+    vm.stopPrank();
   }
 }

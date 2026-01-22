@@ -6,21 +6,22 @@
 
   let {
     item,
-    index
+    index,
+    itemId,
+    onExport
   }: {
     item: Item
     index: number
+    itemId?: string
+    onExport?: (itemId: string) => void
   } = $props()
 
-  let busy = $state(false)
-
-  // Determine rarity class based on value
-  const getRarityClass = (value: bigint | number) => {
-    const numValue = typeof value === "bigint" ? Number(value) : value
-    if (numValue >= 100) return "holographic"
-    if (numValue >= 50) return "gold"
-    if (numValue >= 20) return "silver"
-    return "copper"
+  const handleExport = (e: MouseEvent) => {
+    e.stopPropagation()
+    if (onExport && itemId) {
+      playSound({ category: "ratfunUI", id: "click" })
+      onExport(itemId)
+    }
   }
 
   const onMouseEnter = () => {
@@ -29,24 +30,20 @@
 </script>
 
 <div
-  class="inventory-item-wrapper {getRarityClass(item.value)} index-{index}"
-  class:disabled={busy}
+  class="inventory-item-wrapper index-{index}"
   role="button"
   tabindex="0"
   onmouseenter={onMouseEnter}
 >
   <div class="inventory-item">
     <div class="item-front">
-      {#if $isPhone}
-        <ResizableText>
-          {item.name}
-        </ResizableText>
-      {:else}
-        <div class="name">{item.name}</div>
-      {/if}
+      <div class="name">{item.name}</div>
     </div>
     <div class="item-back">
       <div class="value">{Number(item.value)} {CURRENCY_SYMBOL}</div>
+      {#if onExport && itemId}
+        <button class="export-button" onclick={handleExport}>EXTRACT</button>
+      {/if}
     </div>
   </div>
 </div>
@@ -60,11 +57,6 @@
     position: relative;
     perspective: 1000px;
     user-select: none;
-
-    &.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   .inventory-item {
@@ -86,14 +78,16 @@
     height: 100%;
     backface-visibility: hidden;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: var(--color-inventory-item-background);
+    background-color: var(--color-inventory-item-background);
     color: var(--background);
     padding: 5px;
-    border: 8px inset var(--background-semi-transparent);
+    border: 8px ridge var(--background-semi-transparent);
     outline: none;
-    box-shadow: 0 2px 8px var(--background-light-transparent);
+    box-shadow: 0 4px 8px var(--background-light-transparent);
+    overflow: hidden;
   }
 
   .item-front {
@@ -103,11 +97,63 @@
 
   .item-back {
     transform: rotateY(180deg);
+    position: relative;
     background: var(--color-inventory-item-reverse-side);
   }
 
   .name,
   .value {
     text-align: center;
+    width: 100%;
+  }
+
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+
+  .value {
+    white-space: nowrap;
+  }
+
+  .name,
+  .value {
+    @media (max-width: 800px) {
+      font-size: var(--font-size-medium);
+    }
+  }
+
+  .export-button {
+    position: absolute;
+    bottom: 5px;
+    left: 10%;
+    width: 80%;
+    height: 40px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    font-size: var(--font-size-small);
+    font-family: var(--typewriter-font-stack);
+    background: var(--color-grey-light);
+    color: var(--background);
+    border: none;
+    border-style: outset;
+    border-width: 4px;
+    border-color: var(--background-light-transparent);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--color-grey-lighter);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 </style>

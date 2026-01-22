@@ -8,9 +8,11 @@ import {
   GameConfigData,
   ExternalAddressesConfig,
   ExternalAddressesConfigData,
+  ItemNftConfig,
   Name,
   WorldEvent,
-  WorldEventData
+  WorldEventData,
+  ChallengeConfig
 } from "../codegen/index.sol";
 import {
   RAT_CREATION_COST,
@@ -22,10 +24,13 @@ import {
   MIN_RAT_VALUE_TO_ENTER_PERCENTAGE,
   TAXATION_LIQUIDATE_RAT_PERCENTAGE,
   TAXATION_CLOSE_TRIP_PERCENTAGE,
-  RATS_KILLED_FOR_ADMIN_ACCESS
+  RATS_KILLED_FOR_ADMIN_ACCESS,
+  CHALLENGE_MIN_CREATION_COST,
+  CHALLENGE_ACTIVE_PERIOD_BLOCKS
 } from "../constants.sol";
 import { LibUtils } from "./LibUtils.sol";
 import { GamePool } from "../external/GamePool.sol";
+import { ItemNFT } from "../external/ItemNFT.sol";
 
 library LibWorld {
   /**
@@ -77,10 +82,21 @@ library LibWorld {
       })
     );
 
+    // Set challenge config
+    ChallengeConfig.set(CHALLENGE_MIN_CREATION_COST, CHALLENGE_ACTIVE_PERIOD_BLOCKS);
+
     // Set admin name
     Name.set(adminId, "RATKING");
     // Approve game pool to spend admin's tokens
     erc20().approve(address(gamePool()), type(uint256).max);
+  }
+
+  /**
+   * @notice Set the item NFT contract address
+   * @param itemNftAddress The address of the item NFT contract
+   */
+  function setItemNftAddress(address itemNftAddress) internal {
+    ItemNftConfig.setItemNftAddress(itemNftAddress);
   }
 
   /**
@@ -126,5 +142,12 @@ library LibWorld {
    */
   function gamePool() internal view returns (GamePool) {
     return GamePool(ExternalAddressesConfig.getGamePoolAddress());
+  }
+
+  /**
+   * @notice Get the item NFT contract used by the world
+   */
+  function itemNFT() internal view returns (ItemNFT) {
+    return ItemNFT(ItemNftConfig.getItemNftAddress());
   }
 }

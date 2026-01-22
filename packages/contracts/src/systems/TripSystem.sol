@@ -15,8 +15,16 @@ import {
   ChallengeTrip,
   FixedMinValueToEnter,
   OverrideMaxValuePerWinPercentage,
-  ExternalAddressesConfig
+  ExternalAddressesConfig,
+  ChallengeConfig,
+  ActiveChallenge
 } from "../codegen/index.sol";
+import {
+  CHALLENGE_MIN_CREATION_COST,
+  CHALLENGE_ACTIVE_PERIOD_BLOCKS,
+  CHALLENGE_FIXED_MIN_VALUE_TO_ENTER,
+  CHALLENGE_MAX_WIN_PERCENTAGE
+} from "../constants.sol";
 import { LibTrip, LibUtils, LibWorld } from "../libraries/Libraries.sol";
 import { ENTITY_TYPE } from "../codegen/common.sol";
 
@@ -56,14 +64,25 @@ contract TripSystem is System {
     require(_tripId == bytes32(0) || EntityType.get(_tripId) == ENTITY_TYPE.NONE, "trip id already in use");
 
     if (_isChallengeTrip) {
-      require(_fixedMinValueToEnter > 0, "fixed min value to enter must be greater than 0");
-      require(_overrideMaxValuePerWinPercentage > 0, "override max value per win percentage must be greater than 0");
-      require(_overrideMaxValuePerWinPercentage <= 100, "override max value per win percentage must be at most 100");
+      // Enforce minimum creation cost for challenge trips
+      require(_tripCreationCost >= ChallengeConfig.getMinCreationCost(), "challenge cost too low");
+      // Enforce fixed parameters for challenge trips
+      require(_fixedMinValueToEnter == CHALLENGE_FIXED_MIN_VALUE_TO_ENTER, "invalid fixed min value");
+      require(_overrideMaxValuePerWinPercentage == CHALLENGE_MAX_WIN_PERCENTAGE, "invalid max win percentage");
+      // Check there's no active challenge globally (or it's expired)
+      bytes32 existingChallenge = ActiveChallenge.getTripId();
+      if (existingChallenge != bytes32(0)) {
+        // Check if existing challenge is expired (depleted challenges are already cleared in ManagerSystem)
+        bool isExpired = block.number > CreationBlock.get(existingChallenge) + ChallengeConfig.getActivePeriodBlocks();
+        require(isExpired, "active challenge exists");
+      }
       newTripId = LibTrip.createTrip(_playerId, _tripId, _tripCreationCost, _prompt);
       // Set challenge trip extensions
       ChallengeTrip.set(newTripId, true);
       FixedMinValueToEnter.set(newTripId, _fixedMinValueToEnter);
       OverrideMaxValuePerWinPercentage.set(newTripId, _overrideMaxValuePerWinPercentage);
+      // Track this as the global active challenge
+      ActiveChallenge.setTripId(newTripId);
     } else {
       require(_fixedMinValueToEnter == 0, "fixed min value only for challenge trips");
       require(_overrideMaxValuePerWinPercentage == 0, "override max value only for challenge trips");
@@ -103,7 +122,16 @@ contract TripSystem is System {
   function closeTrip(bytes32 _tripId) public {
     bytes32 playerId = LibUtils.addressToEntityKey(_msgSender());
     require(Owner.get(_tripId) == playerId, "not owner");
-    require(block.number > (CreationBlock.get(_tripId) + GameConfig.getCooldownCloseTrip()), "in cooldown");
+
+    // For challenge trips, enforce 24h active period before liquidation
+    if (ChallengeTrip.get(_tripId)) {
+      require(
+        block.number > CreationBlock.get(_tripId) + ChallengeConfig.getActivePeriodBlocks(),
+        "challenge still active"
+      );
+    } else {
+      require(block.number > (CreationBlock.get(_tripId) + GameConfig.getCooldownCloseTrip()), "in cooldown");
+    }
 
     uint256 valueToPlayer = Balance.get(_tripId);
     require(valueToPlayer > 0, "trip depleted or already closed");
@@ -126,6 +154,11 @@ contract TripSystem is System {
     Liquidated.set(_tripId, true);
     LiquidationBlock.set(_tripId, block.number);
 
+    // Clear global active challenge if this is a challenge trip
+    if (ChallengeTrip.get(_tripId)) {
+      ActiveChallenge.setTripId(bytes32(0));
+    }
+
     // Withdraw tokens equal to trip value from pool to player
     // ERC-20 will check that pool has sufficient balance
     if (valueToPlayer > 0) {
@@ -139,5 +172,17 @@ contract TripSystem is System {
         tax * 10 ** LibWorld.erc20().decimals()
       );
     }
+  }
+
+  /**
+   * @notice Set challenge config values
+   * @dev Only admin can call this function
+   * @param _minCreationCost Minimum cost to create a challenge trip
+   * @param _activePeriodBlocks Number of blocks a challenge is active
+   */
+  function setChallengeConfig(uint256 _minCreationCost, uint32 _activePeriodBlocks) public onlyAdmin {
+    require(_minCreationCost > 0, "min creation cost must be positive");
+    require(_activePeriodBlocks > 0, "active period must be positive");
+    ChallengeConfig.set(_minCreationCost, _activePeriodBlocks);
   }
 }

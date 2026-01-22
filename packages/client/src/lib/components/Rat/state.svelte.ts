@@ -30,6 +30,8 @@ export enum RAT_BOX_STATE {
   HAS_RAT = "HAS_RAT",
   CONFIRM_LIQUIDATION = "CONFIRM_LIQUIDATION",
   LIQUIDATING_RAT = "LIQUIDATING_RAT",
+  CONFIRM_EXPORT_NFT = "CONFIRM_EXPORT_NFT",
+  IMPORTING_OBJECTS_FROM_NFT = "IMPORTING_OBJECTS_FROM_NFT",
   PAST_TRIP_LIST = "PAST_TRIP_LIST",
   PAST_TRIP_ENTRY = "PAST_TRIP_ENTRY",
   ERROR = "ERROR"
@@ -37,6 +39,11 @@ export enum RAT_BOX_STATE {
 
 // Local state
 let ratBoxState = $state<RAT_BOX_STATE>(RAT_BOX_STATE.INIT)
+
+// Export item state for NFT export confirmation
+let exportItemId = $state<string | null>(null)
+let exportItemName = $state<string | null>(null)
+let exportItemValue = $state<number | null>(null)
 
 /**
  * Defines valid state transitions between rat box states
@@ -67,6 +74,8 @@ const VALID_TRANSITIONS: Record<RAT_BOX_STATE, RAT_BOX_STATE[]> = {
   [RAT_BOX_STATE.HAS_RAT]: [
     RAT_BOX_STATE.NO_RAT,
     RAT_BOX_STATE.CONFIRM_LIQUIDATION,
+    RAT_BOX_STATE.CONFIRM_EXPORT_NFT,
+    RAT_BOX_STATE.IMPORTING_OBJECTS_FROM_NFT,
     RAT_BOX_STATE.PAST_TRIP_LIST,
     RAT_BOX_STATE.ERROR
   ],
@@ -82,6 +91,8 @@ const VALID_TRANSITIONS: Record<RAT_BOX_STATE, RAT_BOX_STATE[]> = {
     RAT_BOX_STATE.ERROR
   ],
   [RAT_BOX_STATE.LIQUIDATING_RAT]: [RAT_BOX_STATE.NO_RAT, RAT_BOX_STATE.ERROR],
+  [RAT_BOX_STATE.CONFIRM_EXPORT_NFT]: [RAT_BOX_STATE.HAS_RAT, RAT_BOX_STATE.ERROR],
+  [RAT_BOX_STATE.IMPORTING_OBJECTS_FROM_NFT]: [RAT_BOX_STATE.HAS_RAT, RAT_BOX_STATE.ERROR],
   [RAT_BOX_STATE.ERROR]: []
 }
 
@@ -108,6 +119,19 @@ const transitionTo = (newState: RAT_BOX_STATE) => {
   setRatBoxState(newState)
 }
 
+// Export item management
+const setExportItem = (itemId: string, itemName: string, itemValue: number) => {
+  exportItemId = itemId
+  exportItemName = itemName
+  exportItemValue = itemValue
+}
+
+const clearExportItem = () => {
+  exportItemId = null
+  exportItemName = null
+  exportItemValue = null
+}
+
 // Export singleton instance instead of factory function
 export const ratState = {
   state: {
@@ -116,6 +140,19 @@ export const ratState = {
     transitionTo,
     get current() {
       return ratBoxState
+    }
+  },
+  exportItem: {
+    set: setExportItem,
+    clear: clearExportItem,
+    get itemId() {
+      return exportItemId
+    },
+    get itemName() {
+      return exportItemName
+    },
+    get itemValue() {
+      return exportItemValue
     }
   }
 }

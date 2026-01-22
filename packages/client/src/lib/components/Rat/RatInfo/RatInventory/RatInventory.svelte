@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { getRatInventory } from "$lib/modules/state/utils"
+  import { getRatInventory, type ItemWithId } from "$lib/modules/state/utils"
   import { gsap } from "gsap"
   import { playSound } from "$lib/modules/sound"
+  import { ratState, RAT_BOX_STATE } from "$lib/components/Rat/state.svelte"
 
   import InventoryHeader from "$lib/components/Rat/RatInfo/RatInventory/InventoryHeader.svelte"
   import InteractiveItem from "$lib/components/Rat/RatInfo/RatInventory/InteractiveItem.svelte"
@@ -11,17 +12,40 @@
     displayRat,
     oldRat,
     newRat,
-    onTimeline
+    onTimeline,
+    enableExport = false,
+    ratId,
+    onExportComplete,
+    nftCount = 0,
+    onImportClick
   }: {
     displayRat: Rat | null
     oldRat: Rat | null
     newRat: Rat | null
     onTimeline?: (timeline: ReturnType<typeof gsap.timeline>) => void
+    enableExport?: boolean
+    ratId?: string
+    onExportComplete?: () => void
+    nftCount?: number
+    onImportClick?: () => void
   } = $props()
 
   // Calculate old and new inventories for change detection
-  let oldInventory = $derived<Item[]>(oldRat ? getRatInventory(oldRat) : [])
-  let newInventory = $derived<Item[]>(newRat ? getRatInventory(newRat) : [])
+  let oldInventory = $derived<ItemWithId[]>(oldRat ? getRatInventory(oldRat) : [])
+  let newInventory = $derived<ItemWithId[]>(newRat ? getRatInventory(newRat) : [])
+
+  // Handle export item to NFT - transition to confirmation state
+  const handleExportItem = (itemId: string) => {
+    if (!displayRat) return
+
+    // Find the item to get its details
+    const item = newInventory.find(i => i.id === itemId)
+    if (!item) return
+
+    playSound({ category: "ratfunUI", id: "click" })
+    ratState.exportItem.set(itemId, item.name, Number(item.value))
+    ratState.state.transitionTo(RAT_BOX_STATE.CONFIRM_EXPORT_NFT)
+  }
 
   // Detect changes
   const addedItems = $derived(
@@ -36,13 +60,12 @@
 
   // Header values
   let filledSlots = $derived(newInventory.length)
-  let totalValue = $derived(newInventory.reduce((sum, item) => sum + Number(item.value ?? 0), 0))
 
   // Build combined slot list for animation
   // During changes: show old items + new items (will animate out/in)
   // During normal entry: show new items only
   type SlotItem = {
-    item: Item | null
+    item: ItemWithId | null
     type: "removed" | "added" | "unchanged" | "empty"
     originalIndex: number // Position in final grid
   }
@@ -255,7 +278,7 @@
 </script>
 
 <div class="inventory">
-  <InventoryHeader {filledSlots} totalSlots={MAX_INVENTORY_SIZE} {totalValue} />
+  <InventoryHeader {filledSlots} totalSlots={MAX_INVENTORY_SIZE} {nftCount} {onImportClick} />
   {#if displayRat}
     <div class="inventory-container" bind:this={inventoryContainer}>
       <!-- INVENTORY GRID -->
@@ -268,7 +291,12 @@
           <!-- Render item on top if present -->
           {#if slot.item}
             <div class="slot-item">
-              <InteractiveItem item={slot.item} index={slot.originalIndex} />
+              <InteractiveItem
+                item={slot.item}
+                index={slot.originalIndex}
+                itemId={slot.item.id}
+                onExport={enableExport ? handleExportItem : undefined}
+              />
             </div>
           {/if}
         </div>

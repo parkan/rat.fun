@@ -15,7 +15,9 @@ export enum WorldFunctions {
   Approve = "ERC20-approve",
   BuyWithEth = "buyWithEth",
   GiveCallerTokens = NAMESPACE + "giveCallerTokens",
-  UnlockAdmin = NAMESPACE + "unlockAdmin"
+  UnlockAdmin = NAMESPACE + "unlockAdmin",
+  ExportItemToNFT = NAMESPACE + "exportItemToNFT",
+  ImportNFTToItem = NAMESPACE + "importNFTToItem"
 }
 
 // --- API --------------------------------------------------------------
@@ -80,4 +82,12 @@ export async function giveCallerTokens() {
 
 export async function unlockAdmin() {
   return await executeTransaction(WorldFunctions.UnlockAdmin, [])
+}
+
+export async function exportItemToNFT(ratId: string, itemId: string) {
+  return await executeTransaction(WorldFunctions.ExportItemToNFT, [ratId, itemId])
+}
+
+export async function importNFTToItem(ratId: string, tokenId: bigint) {
+  return await executeTransaction(WorldFunctions.ImportNFTToItem, [ratId, tokenId])
 }

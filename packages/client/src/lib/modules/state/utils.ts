@@ -154,21 +154,32 @@ export function getTripMinRatValueToEnter(
 }
 
 /**
+ * Item with ID included
+ */
+export type ItemWithId = Item & { id: string }
+
+/**
  * Gets the inventory of a rat
  * @param rat The rat to get the inventory of
- * @returns The inventory of the rat
+ * @returns The inventory of the rat with IDs included
  */
-export function getRatInventory(rat: Rat | null, delay?: number) {
+export function getRatInventory(rat: Rat | null, delay?: number): ItemWithId[] {
   if (!rat) {
-    return [] as Item[]
+    return [] as ItemWithId[]
   }
   const itemsStore = get(items)
   // Filter out undefined items (can happen during navigation when store is being updated)
   const result =
     rat.inventory
       // Normalize item IDs to lowercase to match store keys
-      ?.map(item => itemsStore[item.toLowerCase()])
-      .filter((item): item is Item => item !== undefined) ?? ([] as Item[])
+      ?.map(itemId => {
+        const item = itemsStore[itemId.toLowerCase()]
+        if (item) {
+          return { ...item, id: itemId.toLowerCase() } as ItemWithId
+        }
+        return undefined
+      })
+      .filter((item): item is ItemWithId => item !== undefined) ?? ([] as ItemWithId[])
   return result
 }
 
@@ -225,6 +236,70 @@ export function waitForPropertyChangeFrom<T, K extends keyof T>(
         }
         resolve(currentValue)
       }
+    })
+  })
+}
+
+/**
+ * Waits for the rat's inventory to change and all items to be resolvable
+ * @param ratStore The rat store to watch
+ * @param itemsStore The items store to check for item availability
+ * @param oldLength The inventory length to wait for to change from
+ * @param timeoutMs Optional timeout in milliseconds (default: 15000)
+ * @returns Promise that resolves when inventory changes AND all items are available
+ */
+export function waitForInventoryChange(
+  ratStore: { subscribe: (callback: (value: Rat | undefined) => void) => () => void },
+  oldLength: number,
+  timeoutMs: number = 15000
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let ratUnsubscribe: (() => void) | null = null
+    let itemsUnsubscribe: (() => void) | null = null
+    let currentRat: Rat | undefined = undefined
+    let resolved = false
+
+    const cleanup = () => {
+      if (ratUnsubscribe) ratUnsubscribe()
+      if (itemsUnsubscribe) itemsUnsubscribe()
+    }
+
+    const timeoutId = setTimeout(() => {
+      cleanup()
+      reject(new PropertyChangeTimeoutError("inventory", timeoutMs))
+    }, timeoutMs)
+
+    const checkComplete = () => {
+      if (resolved) return
+
+      // Check if inventory length changed
+      const currentLength = currentRat?.inventory?.length ?? 0
+      if (currentLength === oldLength) return
+
+      // Check if all items in inventory are available in items store
+      const itemsStore = get(items)
+      const allItemsAvailable =
+        currentRat?.inventory?.every(itemId => {
+          return itemsStore[itemId.toLowerCase()] !== undefined
+        }) ?? true
+
+      if (allItemsAvailable) {
+        resolved = true
+        clearTimeout(timeoutId)
+        cleanup()
+        resolve()
+      }
+    }
+
+    // Subscribe to rat store
+    ratUnsubscribe = ratStore.subscribe((rat: Rat | undefined) => {
+      currentRat = rat
+      checkComplete()
+    })
+
+    // Also subscribe to items store to catch when new items become available
+    itemsUnsubscribe = items.subscribe(() => {
+      checkComplete()
     })
   })
 }
